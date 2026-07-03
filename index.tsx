@@ -17,7 +17,7 @@ root.render(
     <ErrorBoundary>
       <ToastProvider>
         <AppRouter />
-        <DebugPanel />
+        {import.meta.env.DEV && <DebugPanel />}
       </ToastProvider>
     </ErrorBoundary>
   </React.StrictMode>
