@@ -39,3 +39,8 @@ docs
 plans
 SUPABASE-DATABASE-SCHEME.md
 FIX_PLAN.md
+
+# Local agent/tool working directories (may contain secrets)
+.kilocode/
+.kimchi/
+.orchids/
