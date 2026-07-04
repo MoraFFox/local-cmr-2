@@ -20,6 +20,7 @@ import {
 import { StarIcon as StarIconSolid, StarIcon } from "@heroicons/react/24/solid";
 import { StarIcon as StarIconOutline } from "@heroicons/react/24/outline";
 import Avatar from "./Avatar";
+import EmptyState from "./EmptyState";
 import {
   aggregateBaristaData,
   normalize,
@@ -463,14 +464,12 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
           ))}
         </div>
       ) : (
-        <div className='text-center py-12 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700'>
-          <UserIcon className='w-12 h-12 text-slate-300 mx-auto mb-3' />
-          <h3 className='text-lg font-medium text-slate-900 dark:text-white'>
-            No Baristas Found
-          </h3>
-          <p className='text-slate-500 dark:text-slate-400 mt-1'>
-            Try adjusting your search or add baristas to companies.
-          </p>
+        <div className="mt-8">
+          <EmptyState 
+            icon={<UserIcon className="w-8 h-8" />} 
+            title="لا يوجد باريستا" 
+            message="لم يتم العثور على باريستا يطابق بحثك." 
+          />
         </div>
       )}
 

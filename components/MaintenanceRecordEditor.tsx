@@ -29,6 +29,7 @@ import { supabase } from '../supabaseClient';
 import { useToast } from './ToastContext';
 import { compressImage, validateImageFile } from '../utils/imageCompression';
 import { logger } from '../utils/logger';
+import { ConfirmDialog } from './ui/ConfirmDialog';
 
 interface MaintenanceRecordEditorProps {
   record: MaintenanceRecord;
@@ -72,6 +73,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
+  const [confirmPhotoDelete, setConfirmPhotoDelete] = useState<{isOpen: boolean; url: string; category: string} | null>(null);
 
   // Sync state when record prop changes (e.g., when navigating between records)
   useEffect(() => {
@@ -923,7 +925,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       className="w-full h-full object-cover rounded-lg border border-slate-200 dark:border-slate-600" 
                     />
                     <button 
-                      onClick={() => handlePhotoRemove(photo)} 
+                      onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: "before" })} 
                       className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                       title="إزالة الصورة"
                     >
@@ -972,7 +974,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       className="w-full h-full object-cover rounded-lg border border-slate-200 dark:border-slate-600" 
                     />
                     <button 
-                      onClick={() => handlePhotoRemove(photo)} 
+                      onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: "after" })} 
                       className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                       title="إزالة الصورة"
                     >
@@ -1007,7 +1009,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                         className="w-full h-full object-cover rounded-lg border border-slate-200 dark:border-slate-600" 
                       />
                       <button 
-                        onClick={() => handlePhotoRemove(photo)} 
+                        onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: "legacy" })} 
                         className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                         title="إزالة الصورة"
                       >
@@ -1053,6 +1055,20 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       </div>
       {/* Spacer for fixed action bar */}
       <div className="h-24"></div>
+
+      <ConfirmDialog
+        isOpen={!!confirmPhotoDelete?.isOpen}
+        onClose={() => setConfirmPhotoDelete(null)}
+        onConfirm={() => {
+          if (confirmPhotoDelete) {
+            handlePhotoRemove({ url: confirmPhotoDelete.url, type: confirmPhotoDelete.category as any });
+          }
+          setConfirmPhotoDelete(null);
+        }}
+        title="إزالة الصورة"
+        message="هل أنت متأكد من رغبتك في إزالة هذه الصورة؟ لا يمكن التراجع عن هذا الإجراء."
+        confirmLabel="نعم، إزالة"
+      />
     </div>
   );
 };

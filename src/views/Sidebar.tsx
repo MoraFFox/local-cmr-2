@@ -1,5 +1,5 @@
 import { initialFormData } from "../../App";
-import React from "react";
+import React, { useState } from "react";
 import { FormData } from "../../types";
 import {
   HomeIcon,
@@ -13,6 +13,7 @@ import {
   ArrowLeftOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import ThemeToggle from "../../components/ThemeToggle";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { logger } from "../../utils/logger";
 
 interface Draft {
@@ -60,6 +61,8 @@ const SidebarContent = React.memo(({
   setCurrentStep,
   setView,
 }: SidebarContentProps) => {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
   return (
     <>
       <div
@@ -189,17 +192,7 @@ const SidebarContent = React.memo(({
         <button
           onClick={() => {
             if (currentDraftId && view === "form") {
-              // If we are currently editing a draft, confirm starting fresh
-              if (
-                window.confirm(
-                  "بدء نموذج جديد؟ سيتم حفظ عملك الحالي كمسودة.",
-                )
-              ) {
-                setCurrentDraftId(null);
-                setFormData(initialFormData);
-                setCurrentStep(1);
-                setView("form");
-              }
+              setConfirmOpen(true);
             } else {
               handleAddNew();
             }
@@ -224,6 +217,20 @@ const SidebarContent = React.memo(({
           {isSidebarExpanded && <span className="ms-2 truncate">طي</span>}
         </button>
       </div>
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={() => {
+          setConfirmOpen(false);
+          setCurrentDraftId(null);
+          setFormData(initialFormData);
+          setCurrentStep(1);
+          setView("form");
+        }}
+        title="بدء نموذج جديد؟"
+        message="سيتم حفظ عملك الحالي كمسودة."
+        confirmLabel="نعم، ابدأ"
+      />
     </>
   );
 });

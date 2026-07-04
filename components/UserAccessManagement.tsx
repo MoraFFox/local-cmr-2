@@ -20,6 +20,7 @@ import {
   ArrowRightIcon,
 } from '@heroicons/react/24/outline';
 import type { InvitationRecord, AdminUserInfo, InviteRole, InvitationStatus, LegacyMatchBucket, LegacyManualAssignResponse, LegacyTransferResponse, LegacyRecordRef } from '../types';
+import { ConfirmDialog } from "./ui/ConfirmDialog";
 
 // Arabic-only translations (English dictionary removed)
 const translations = {
@@ -140,6 +141,7 @@ const UserAccessManagement: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [createdLink, setCreatedLink] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{isOpen: boolean; action: (() => void) | null; title: string; message: string}>({ isOpen: false, action: null, title: "", message: "" });
 
   // Legacy Records State
   const [legacyBuckets, setLegacyBuckets] = useState<LegacyMatchBucket[]>([]);
@@ -433,9 +435,7 @@ const UserAccessManagement: React.FC = () => {
     showToast(t.linkCopied, 'success');
   };
 
-  const handleRevoke = async (invitationId: string) => {
-    if (!window.confirm(t.revokeConfirm)) return;
-
+  const executeRevoke = async (invitationId: string) => {
     try {
       const { error } = await supabase
         .from('invitations')
@@ -451,9 +451,16 @@ const UserAccessManagement: React.FC = () => {
     }
   };
 
-  const handleDelete = async (invitationId: string) => {
-    if (!window.confirm(t.deleteConfirm)) return;
+  const handleRevoke = (invitationId: string) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: "تأكيد",
+      message: t.revokeConfirm,
+      action: () => executeRevoke(invitationId)
+    });
+  };
 
+  const executeDelete = async (invitationId: string) => {
     try {
       const { error } = await supabase
         .from('invitations')
@@ -467,6 +474,15 @@ const UserAccessManagement: React.FC = () => {
       logger.error('Error deleting invitation', error, 'admin');
       showToast(t.errorDeleting, 'error');
     }
+  };
+
+  const handleDelete = (invitationId: string) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: "تأكيد",
+      message: t.deleteConfirm,
+      action: () => executeDelete(invitationId)
+    });
   };
 
   const getStatusBadge = (status: InvitationStatus) => {
@@ -1383,6 +1399,18 @@ const UserAccessManagement: React.FC = () => {
           )}
         </>
       )}
+
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+        onConfirm={() => {
+          if (confirmDialog.action) confirmDialog.action();
+          setConfirmDialog({ ...confirmDialog, isOpen: false });
+        }}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        confirmLabel="نعم، تأكيد"
+      />
     </div>
   );
 };

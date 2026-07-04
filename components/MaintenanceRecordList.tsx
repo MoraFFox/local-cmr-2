@@ -11,10 +11,12 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ExclamationCircleIcon,
-  WrenchIcon
+  WrenchIcon,
+  WrenchScrewdriverIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import QuickActionsMenu from './QuickActionsMenu';
+import EmptyState from './EmptyState';
 
 interface MaintenanceRecordListProps {
   records: MaintenanceRecord[];
@@ -276,20 +278,32 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-            {/* Fix 4.5: Use memoized MaintenanceRecordRow component */}
-            {paginatedRecords.map((record, index) => {
-              const actualIndex = startIndex + index;
-              return (
-                <MaintenanceRecordRow
-                  key={record.id}
-                  record={record}
-                  actualIndex={actualIndex}
-                  onEdit={onEdit}
-                  onQuickUpdate={onQuickUpdate}
-                  onDelete={onDelete}
-                />
-              );
-            })}
+            {paginatedRecords.length === 0 ? (
+              <tr className="border-b border-slate-100 dark:border-slate-700/50">
+                <td colSpan={7} className="py-8">
+                  <EmptyState 
+                    icon={<WrenchScrewdriverIcon className="w-8 h-8" />} 
+                    title="لا يوجد سجل صيانة" 
+                    message="لم يتم العثور على سجلات صيانة." 
+                  />
+                </td>
+              </tr>
+            ) : (
+              /* Fix 4.5: Use memoized MaintenanceRecordRow component */
+              paginatedRecords.map((record, index) => {
+                const actualIndex = startIndex + index;
+                return (
+                  <MaintenanceRecordRow
+                    key={record.id}
+                    record={record}
+                    actualIndex={actualIndex}
+                    onEdit={onEdit}
+                    onQuickUpdate={onQuickUpdate}
+                    onDelete={onDelete}
+                  />
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>

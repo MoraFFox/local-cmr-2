@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { FormData, MaintenanceRecord } from '../types';
-import { PencilIcon, TrashIcon, ArrowDownTrayIcon, MagnifyingGlassIcon, PrinterIcon, CloudIcon, EyeIcon, FunnelIcon, XMarkIcon, CalendarIcon, ExclamationTriangleIcon, BuildingOfficeIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon, ArrowDownTrayIcon, MagnifyingGlassIcon, PrinterIcon, CloudIcon, EyeIcon, FunnelIcon, XMarkIcon, CalendarIcon, ExclamationTriangleIcon, BuildingOfficeIcon, WrenchScrewdriverIcon, DocumentIcon } from '@heroicons/react/24/outline';
 import CompanyEditModal from './CompanyEditModal';
+import EmptyState from './EmptyState';
 
 interface HistoryPageProps {
     submissions: (FormData & { created_at: string })[];
@@ -281,15 +282,22 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
             </div>
             
             {submissions.length === 0 ? (
-                <div className="text-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-12 rounded-2xl shadow-xl border border-black/5 dark:border-white/5">
-                    <h2 className="text-xl font-semibold text-slate-700 dark:text-slate-200">لا توجد إرسالات حتى الآن.</h2>
-                    <p className="text-slate-500 dark:text-slate-400 mt-2">اضغط "إضافة جديدة" للبدء.</p>
+                <div className="mt-8">
+                    <EmptyState 
+                        icon={<DocumentIcon className="w-8 h-8" />} 
+                        title="لا توجد سجلات بعد." 
+                        message="اضغط 'إضافة جديدة' للبدء." 
+                    />
                 </div>
             ) : filteredSubmissions.length === 0 ? (
-                <div className="text-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-12 rounded-2xl shadow-xl border border-black/5 dark:border-white/5">
-                    <h2 className="text-xl font-semibold text-slate-700 dark:text-slate-200">لا توجد نتائج مطابقة</h2>
-                    <p className="text-slate-500 dark:text-slate-400 mt-2">لا توجد إرسالات تطابق الفلاتر الحالية.</p>
-                    <button onClick={clearFilters} className="mt-4 text-teal-600 dark:text-teal-400 font-semibold hover:underline">مسح جميع الفلاتر</button>
+                <div className="mt-8">
+                    <EmptyState 
+                        icon={<MagnifyingGlassIcon className="w-8 h-8" />} 
+                        title="لم يتم العثور على نتائج." 
+                        message="لا توجد إرسالات تطابق الفلاتر الحالية." 
+                    >
+                        <button onClick={clearFilters} className="mt-2 text-teal-600 dark:text-teal-400 font-semibold hover:underline">مسح جميع الفلاتر</button>
+                    </EmptyState>
                 </div>
             ) : (
                 <div className="space-y-4">

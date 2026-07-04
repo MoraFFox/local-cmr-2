@@ -51,6 +51,7 @@ import ConfirmationModal from "./components/ConfirmationModal";
 import ThemeToggle from "./components/ThemeToggle";
 import CollapsibleCard from "./components/CollapsibleCard";
 import EmptyState from "./components/EmptyState";
+import { ConfirmDialog } from "./components/ui/ConfirmDialog";
 import {
   HomeIcon,
   DocumentTextIcon,
@@ -1192,7 +1193,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
             </main>
 
           </div>
-          <ConfirmationModal
+          <ConfirmDialog
             isOpen={deleteCandidateId !== null}
             onClose={cancelDelete}
             onConfirm={confirmDelete}
