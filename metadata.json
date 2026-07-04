@@ -1,5 +1,5 @@
 {
-  "name": "Dynamic Company Form Builder",
+  "name": "ميدوز — نظام إدارة الصيانة",
   "description": "A flexible custom form builder app to create and manage multi-step data entry for companies with optional branches. Features include custom fields, multi-step flows, conditional logic for branches, and data review.",
   "requestFramePermissions": []
 }

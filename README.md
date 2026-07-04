@@ -10,11 +10,11 @@ View your app in AI Studio: https://ai.studio/apps/drive/15iyeweQX5v5LduezJYuyal
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
+**Prerequisites:** Node.js, Bun (optional but recommended)
 
 
 1. Install dependencies:
-   `npm install`
+   `bun install` (or `npm install`)
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+3. Run the app (now builds Tailwind locally):
+   `bun run dev`
