@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FormData, MaintenanceRecord, Part, Service, PartRecord, ServiceRecord } from '../types';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import CollapsibleSection from './CollapsibleSection';
@@ -90,16 +90,24 @@ const CostDetail: React.FC<{ label: React.ReactNode; value: string | number; isS
 );
 
 const CostBreakdownModal: React.FC<CostBreakdownModalProps> = ({ isOpen, onClose, formData, partsList, servicesList }) => {
+    useEffect(() => {
+        if (isOpen) document.body.style.overflow = 'hidden';
+        else document.body.style.overflow = 'unset';
+        return () => { document.body.style.overflow = 'unset'; };
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     const aggregatedData = aggregateCosts(formData, partsList, servicesList);
 
     return (
         <div 
-            className="fixed inset-0 bg-black bg-opacity-60 dark:bg-opacity-80 z-50 flex justify-center items-center transition-opacity duration-300"
+            className="fixed inset-0 bg-black bg-opacity-60 dark:bg-opacity-80 z-50 flex justify-center items-center transition-opacity duration-300 p-2 sm:p-4 pt-safe"
             onClick={onClose}
         >
             <div 
+                role="dialog"
+                aria-modal="true"
                 className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-2xl m-4 transform transition-all duration-300 scale-95 opacity-0 animate-fade-in-scale max-h-[90vh] flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
@@ -162,7 +170,7 @@ const CostBreakdownModal: React.FC<CostBreakdownModalProps> = ({ isOpen, onClose
                         </div>
                     )}
                 </div>
-                <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                <div className="mt-6 pt-4 pb-safe border-t border-slate-200 dark:border-slate-700 flex justify-between items-center">
                     <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Grand Total:</span>
                     <span className="text-xl font-bold text-teal-800 dark:text-teal-300">{formatCurrency(aggregatedData.grandTotal)}</span>
                 </div>

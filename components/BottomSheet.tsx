@@ -83,7 +83,9 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
 
             {/* Sheet Content */}
             <div 
-                className={`relative w-full bg-slate-900 dark:bg-slate-900 rounded-t-3xl shadow-2xl transition-transform duration-300 ease-out transform ${
+                role="dialog"
+                aria-modal="true"
+                className={`relative w-full bg-slate-900 dark:bg-slate-900 rounded-t-3xl shadow-2xl transition-transform duration-300 ease-out transform pb-safe ${
                     isVisible ? 'translate-y-0' : 'translate-y-full'
                 }`}
                 style={{ 
@@ -97,7 +99,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
             >
                 {/* Drag Handle */}
                 {showHandle && (
-                    <div className="flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing w-full"
+                    <div className="flex justify-center pt-3 pb-1 pt-safe cursor-grab active:cursor-grabbing w-full"
                          onMouseDown={(e) => {
                              // Add mouse support for drag handle if needed, or keep it touch only
                          }}
@@ -114,6 +116,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                         </h3>
                         <button
                             onClick={onClose}
+                            aria-label="إغلاق"
                             className="p-2 -mr-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                         >
                             <XMarkIcon className="w-6 h-6" />

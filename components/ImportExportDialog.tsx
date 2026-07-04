@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
     ArrowUpTrayIcon, 
     ArrowDownTrayIcon, 
@@ -34,6 +34,12 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
     companies,
     onImportCompany
 }) => {
+    useEffect(() => {
+        if (isOpen) document.body.style.overflow = 'hidden';
+        else document.body.style.overflow = 'unset';
+        return () => { document.body.style.overflow = 'unset'; };
+    }, [isOpen]);
+
     const [activeTab, setActiveTab] = useState<'export' | 'import'>('export');
     const [importStatus, setImportStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [importMessage, setImportMessage] = useState('');
@@ -147,8 +153,12 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col animate-scale-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 pt-safe bg-black/50 backdrop-blur-sm animate-fade-in overflow-y-auto">
+            <div 
+                role="dialog"
+                aria-modal="true"
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col animate-scale-in"
+            >
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
                     <h2 className="text-xl font-bold text-slate-900 dark:text-white">
@@ -349,21 +359,21 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
 
                 {/* Footer */}
                 {activeTab === 'import' && importedData.some((item: any) => item.validation.isValid) && (
-                    <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+                    <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-6 py-4 pb-safe border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
                         <button
                             onClick={() => {
                                 setImportedData([]);
                                 setImportStatus('idle');
                                 setImportMessage('');
                             }}
-                            className="px-4 py-2 text-slate-700 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                            className="w-full sm:w-auto px-4 py-2 text-slate-700 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                         >
                             Clear
                         </button>
                         
                         <button
                             onClick={handleImport}
-                            className="px-6 py-2 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition-colors"
+                            className="w-full sm:w-auto px-6 py-2 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition-colors"
                         >
                             Import {importedData.filter((item: any) => item.validation.isValid).length} Companies
                         </button>

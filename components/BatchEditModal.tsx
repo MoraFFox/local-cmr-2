@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MaintenanceRecord, Barista } from '../types';
 
 import { 
@@ -35,6 +35,12 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
     onUpdateRecords,
     baristas
 }) => {
+    useEffect(() => {
+        if (isOpen) document.body.style.overflow = 'hidden';
+        else document.body.style.overflow = 'unset';
+        return () => { document.body.style.overflow = 'unset'; };
+    }, [isOpen]);
+
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
     const [operation, setOperation] = useState<BatchEditOperation | null>(null);
     const [isConfirming, setIsConfirming] = useState(false);
@@ -118,8 +124,12 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-scale-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 pt-safe bg-black/50 backdrop-blur-sm animate-fade-in overflow-y-auto">
+            <div 
+                role="dialog"
+                aria-modal="true"
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-scale-in"
+            >
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
                     <div>
@@ -326,8 +336,8 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
-                    <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 pb-safe border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 gap-4">
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
                         {operation && selectedIds.size > 0 && (
                             <>
                                 <ExclamationTriangleIcon className={`w-5 h-5 ${operation.field === 'delete' ? 'text-red-500' : 'text-amber-500'}`} />
@@ -338,10 +348,10 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                         )}
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col-reverse sm:flex-row items-center gap-3 w-full sm:w-auto">
                         <button
                             onClick={onClose}
-                            className="px-4 py-2 text-slate-700 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                            className="w-full sm:w-auto px-4 py-2 text-slate-700 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                         >
                             Cancel
                         </button>
@@ -349,7 +359,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                         <button
                             onClick={handleApplyOperation}
                             disabled={!operation || selectedIds.size === 0}
-                            className={`px-6 py-2 font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                            className={`w-full sm:w-auto px-6 py-2 font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                                 operation?.field === 'delete'
                                     ? 'bg-red-600 text-white hover:bg-red-700'
                                     : 'bg-teal-600 text-white hover:bg-teal-700'
