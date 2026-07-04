@@ -44,3 +44,8 @@ FIX_PLAN.md
 .kilocode/
 .kimchi/
 .orchids/
+.vercel
+
+# Playwright MCP scratch output (local verification only)
+.playwright-mcp/
+*-screenshot.png

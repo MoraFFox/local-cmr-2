@@ -1,5 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+// Tailwind + fonts + animations entry. Imported first so build output
+// is a single purged CSS file (replaces the former CDN tailwind script).
+import './index.css';
 // FIX: Explicitly import with .tsx extension to resolve module error.
 import AppRouter from './components/AppRouter.tsx';
 import { ToastProvider } from './components/ToastContext.tsx';

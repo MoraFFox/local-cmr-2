@@ -1,0 +1,47 @@
+@import '@fontsource/tajawal/400.css';
+@import '@fontsource/tajawal/500.css';
+@import '@fontsource/tajawal/700.css';
+@import '@fontsource/cairo/400.css';
+@import '@fontsource/cairo/600.css';
+
+@import './styles/animations.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  .dark {
+    color-scheme: dark;
+  }
+
+  /* Safe-area helpers (Tailwind's pt-safe/pb-safe would need a plugin;
+     expose as utilities here for clarity). */
+  .pt-safe { padding-top: env(safe-area-inset-top); }
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+  .pl-safe { padding-left: env(safe-area-inset-left); }
+  .pr-safe { padding-right: env(safe-area-inset-right); }
+
+  /* RTL: default Latin numerals/inputs read fine; cash chars already bi-di handled per-field. */
+
+  /* Keyboard focus rings — visible only for keyboard, not mouse clicks. */
+  :focus-visible {
+    outline: 2px solid theme('colors.midoe.500');
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  /* Horizontal scrollbar that doesn't steal vertical scroll space. */
+  .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: theme('colors.slate.300');
+    border-radius: 4px;
+  }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: theme('colors.slate.600');
+  }
+}

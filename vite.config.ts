@@ -2,6 +2,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
@@ -12,6 +13,53 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [
         react(),
+        VitePWA({
+          registerType: 'autoUpdate',
+          includeAssets: ['logo.png', 'logo.svg', 'manifest.webmanifest'],
+          manifest: {
+            name: 'ميدوز - نظام إدارة الصيانة',
+            short_name: 'ميدوز',
+            lang: 'ar',
+            dir: 'rtl',
+            description: 'نظام إدارة صيانة القهوة لميدوز',
+            start_url: '/',
+            scope: '/',
+            display: 'standalone',
+            background_color: '#0f766e',
+            theme_color: '#0d9488',
+            orientation: 'portrait-primary',
+            icons: [
+              // ponytail:logo.png is 1392x768, not 192/512 maskable. Add sized
+              // square raster icons when provided; until then `purpose: any` works.
+              { src: '/logo.png', sizes: '1392x768', type: 'image/png', purpose: 'any' },
+              { src: '/logo.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+            ],
+          },
+          workbox: {
+            globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+            runtimeCaching: [
+              {
+                // Supabase REST + auth endpoints.
+                urlPattern: /^https:\/\/.*\.supabase\.co\//,
+                handler: 'NetworkFirst',
+                options: {
+                  cacheName: 'supabase-api',
+                  networkTimeoutSeconds: 8,
+                  expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 },
+                },
+              },
+              {
+                // Google Fonts static assets.
+                urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\//,
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'google-fonts',
+                  expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 },
+                },
+              },
+            ],
+          },
+        }),
         {
           name: 'spa-fallback',
           configureServer(server) {
@@ -20,7 +68,7 @@ export default defineConfig(({ mode }) => {
               // Handle /technician and all /technician/* routes
               // Handle /admin/invite, /technician/invite, /admin/recovery/* routes
               // Handle /reset-password route
-              if (req.url?.startsWith('/technician') || 
+              if (req.url?.startsWith('/technician') ||
                   req.url === '/admin/invite' ||
                   req.url?.startsWith('/admin/recovery') ||
                   req.url?.match(/^\/admin\/invite(\?.*)?$/) ||

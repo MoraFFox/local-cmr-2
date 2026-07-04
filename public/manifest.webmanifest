@@ -1,0 +1,17 @@
+{
+  "name": "ميدوز - نظام إدارة الصيانة",
+  "short_name": "ميدوز",
+  "lang": "ar",
+  "dir": "rtl",
+  "description": "نظام إدارة صيانة القهوة لميدوز",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f766e",
+  "theme_color": "#0d9488",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/logo.png", "sizes": "1392x768", "type": "image/png", "purpose": "any" },
+    { "src": "/logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
