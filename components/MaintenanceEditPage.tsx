@@ -366,7 +366,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                 <button
                   onClick={handleAddNewRecord}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-400 hover:to-teal-500 text-white transition-all backdrop-blur-sm shadow-lg"
-                  title="Add new maintenance record for this branch"
+                  title="إضافة سجل صيانة جديد لهذا الفرع"
                 >
                   <PlusIcon className="w-5 h-5" />
                   <span className="hidden sm:inline font-medium">Add Record</span>

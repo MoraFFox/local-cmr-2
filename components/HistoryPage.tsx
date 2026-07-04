@@ -163,8 +163,8 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
         <div className="w-full max-w-6xl mx-auto">
              <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                  <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50">Submission History</h1>
-                    <p className="text-slate-600 dark:text-slate-400 mt-1 sm:mt-2">View, edit, or delete past submissions.</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50">سجل الإرسالات</h1>
+                    <p className="text-slate-600 dark:text-slate-400 mt-1 sm:mt-2">عرض أو تعديل أو حذف الإرسالات السابقة.</p>
                  </div>
                  <div className="flex items-center gap-x-2 sm:gap-x-4">
                     <button 
@@ -172,20 +172,20 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                         className="bg-white text-slate-700 font-bold py-2 px-4 sm:px-6 rounded-lg hover:bg-slate-50 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 transition-colors text-sm sm:text-base transform active:scale-95 flex items-center gap-2"
                     >
                         <PrinterIcon className="w-5 h-5" />
-                        Print Form
+                        طباعة النموذج
                     </button>
                      <button 
                         onClick={handleDownloadAll}
                         disabled={submissions.length === 0}
                         className="bg-slate-600 text-white font-bold py-2 px-4 sm:px-6 rounded-lg hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base transform active:scale-95"
                     >
-                        Download All
+                        تنزيل الكل
                     </button>
                     <button 
                         onClick={onAddNew}
                         className="bg-teal-600 text-white font-bold py-2 px-4 sm:px-6 rounded-lg hover:bg-teal-700 transition-colors text-sm sm:text-base transform active:scale-95"
                     >
-                        Add New
+                        إضافة جديدة
                     </button>
                  </div>
             </header>
@@ -195,7 +195,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                 <div className="flex flex-col lg:flex-row gap-4">
                     {/* Text Search */}
                     <div className="flex-1">
-                        <label htmlFor="submission-search" className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">Text Search</label>
+                        <label htmlFor="submission-search" className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">بحث نصي</label>
                         <div className="relative rounded-md shadow-sm">
                             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                 <MagnifyingGlassIcon className="h-5 w-5 text-slate-400" aria-hidden="true" />
@@ -206,7 +206,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="block w-full rounded-lg border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 py-2.5 pl-10 pr-3 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
-                                placeholder="Company, Branch, Barista..."
+                                placeholder="شركة، فرع، باريستا..."
                             />
                         </div>
                     </div>
@@ -218,7 +218,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                             className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-semibold w-full justify-center transition-colors ${showFilters || activeFiltersCount > 0 ? 'bg-teal-50 border-teal-200 text-teal-700 dark:bg-teal-900/30 dark:border-teal-700 dark:text-teal-300' : 'bg-white border-slate-300 text-slate-700 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-300'}`}
                         >
                             <FunnelIcon className="w-5 h-5" />
-                            {showFilters ? 'Hide Filters' : 'Advanced Filters'}
+                            {showFilters ? 'إخفاء الفلاتر' : 'فلاتر متقدمة'}
                             {activeFiltersCount > 0 && <span className="bg-teal-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center ml-1">{activeFiltersCount}</span>}
                         </button>
                     </div>
@@ -228,7 +228,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                         {/* Date Range */}
                         <div className="flex gap-2">
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">From Date</label>
+                                <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">من تاريخ</label>
                                 <div className="relative">
                                     <input 
                                         type="date" 
@@ -239,7 +239,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">To Date</label>
+                                <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">إلى تاريخ</label>
                                 <div className="relative">
                                     <input 
                                         type="date" 
@@ -261,7 +261,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                     className="hidden"
                                 />
                                 <ExclamationTriangleIcon className="w-5 h-5" />
-                                <span className="text-sm font-medium">Has Issues</span>
+                                <span className="text-sm font-medium">به مشاكل</span>
                             </label>
                         </div>
 
@@ -272,7 +272,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                     onClick={clearFilters}
                                     className="flex items-center gap-1 px-3 py-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors text-sm font-medium"
                                 >
-                                    <XMarkIcon className="w-4 h-4" /> Clear
+                                    <XMarkIcon className="w-4 h-4" /> مسح
                                 </button>
                             </div>
                         )}
@@ -282,14 +282,14 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
             
             {submissions.length === 0 ? (
                 <div className="text-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-12 rounded-2xl shadow-xl border border-black/5 dark:border-white/5">
-                    <h2 className="text-xl font-semibold text-slate-700 dark:text-slate-200">No submissions yet.</h2>
-                    <p className="text-slate-500 dark:text-slate-400 mt-2">Click "Add New" to get started.</p>
+                    <h2 className="text-xl font-semibold text-slate-700 dark:text-slate-200">لا توجد إرسالات حتى الآن.</h2>
+                    <p className="text-slate-500 dark:text-slate-400 mt-2">اضغط "إضافة جديدة" للبدء.</p>
                 </div>
             ) : filteredSubmissions.length === 0 ? (
                 <div className="text-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-12 rounded-2xl shadow-xl border border-black/5 dark:border-white/5">
-                    <h2 className="text-xl font-semibold text-slate-700 dark:text-slate-200">No Results Found</h2>
-                    <p className="text-slate-500 dark:text-slate-400 mt-2">No submissions match your current filters.</p>
-                    <button onClick={clearFilters} className="mt-4 text-teal-600 dark:text-teal-400 font-semibold hover:underline">Clear all filters</button>
+                    <h2 className="text-xl font-semibold text-slate-700 dark:text-slate-200">لا توجد نتائج مطابقة</h2>
+                    <p className="text-slate-500 dark:text-slate-400 mt-2">لا توجد إرسالات تطابق الفلاتر الحالية.</p>
+                    <button onClick={clearFilters} className="mt-4 text-teal-600 dark:text-teal-400 font-semibold hover:underline">مسح جميع الفلاتر</button>
                 </div>
             ) : (
                 <div className="space-y-4">
@@ -297,26 +297,26 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                         <div key={sub.id} className={`bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg rounded-lg p-4 sm:p-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between transition-all hover:shadow-xl dark:hover:bg-slate-700/80 border ${sub.pendingSync ? 'border-amber-300 dark:border-amber-700/50 bg-amber-50 dark:bg-amber-900/10' : 'border-black/5 dark:border-white/5'}`}>
                             <div>
                                 <div className="flex items-center gap-2">
-                                    <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">{sub.companyName || 'Unnamed Company'}</h3>
+                                    <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">{sub.companyName || 'شركة بدون اسم'}</h3>
                                     {sub.pendingSync && (
                                         <span className="inline-flex items-center rounded-md bg-amber-100 dark:bg-amber-900/50 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-400 ring-1 ring-inset ring-amber-600/20">
                                             <CloudIcon className="w-3.5 h-3.5 mr-1" />
-                                            Pending Sync
+                                            بانتظار المزامنة
                                         </span>
                                     )}
                                 </div>
                                 <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                    <span>Submitted: {new Date(sub.created_at).toLocaleDateString()}</span>
+                                    <span>أُرسلت: {new Date(sub.created_at).toLocaleDateString()}</span>
                                     <span>•</span>
-                                    <span>{sub.hasBranches ? `${sub.branches.length} Branches` : 'No Branches'}</span>
+                                    <span>{sub.hasBranches ? `${sub.branches.length} فروع` : 'لا فروع'}</span>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 sm:gap-4 self-end sm:self-center">
                                  <button 
                                     onClick={() => onViewDetails(sub)} 
                                     className="p-2 text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 rounded-full hover:bg-teal-50 dark:hover:bg-teal-500/10 transition-colors transform active:scale-95" 
-                                    aria-label={`View details for ${sub.companyName}`}
-                                    title="View & Export Details"
+                                    aria-label={`عرض التفاصيل لـ ${sub.companyName}`}
+                                    title="عرض وتصدير التفاصيل"
                                 >
                                     <EyeIcon className="h-5 w-5" />
                                 </button>
@@ -324,24 +324,24 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                     onClick={() => handleDownloadSingle(sub)} 
                                     disabled={!!sub.pendingSync}
                                     className="p-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-full hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors transform active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed" 
-                                    aria-label={`Download ${sub.companyName}`}
-                                    title={sub.pendingSync ? "Cannot download while pending sync" : "Download JSON"}
+                                    aria-label={`تنزيل ${sub.companyName}`}
+                                    title={sub.pendingSync ? "لا يمكن التنزيل أثناء انتظار المزامنة" : "تنزيل JSON"}
                                 >
                                     <ArrowDownTrayIcon className="h-5 w-5" />
                                 </button>
                                 <button 
                                     onClick={() => handleQuickEditCompany(sub)} 
                                     className="p-2 text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 rounded-full hover:bg-slate-100 dark:hover:bg-slate-600/50 transition-colors transform active:scale-95" 
-                                    aria-label={`Quick edit ${sub.companyName}`}
-                                    title="Quick Edit Company Info"
+                                    aria-label={`تعديل سريع ${sub.companyName}`}
+                                    title="تعديل سريع لمعلومات الشركة"
                                 >
                                     <BuildingOfficeIcon className="h-5 w-5" />
                                 </button>
                                 <button 
                                     onClick={() => onEdit(sub)} 
                                     className="p-2 text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 rounded-full hover:bg-slate-100 dark:hover:bg-slate-600/50 transition-colors transform active:scale-95" 
-                                    aria-label={`Full edit ${sub.companyName}`}
-                                    title="Full Edit (Wizard)"
+                                    aria-label={`تعديل كامل ${sub.companyName}`}
+                                    title="تعديل كامل (المعالج)"
                                 >
                                     <PencilIcon className="h-5 w-5" />
                                 </button>
@@ -349,13 +349,13 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                     <button 
                                         onClick={() => onEditMaintenance(sub)} 
                                         className="p-2 text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 rounded-full hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors transform active:scale-95" 
-                                        aria-label={`Edit maintenance records for ${sub.companyName}`}
-                                        title="Edit Maintenance Records"
+                                        aria-label={`تعديل سجلات الصيانة لـ ${sub.companyName}`}
+                                        title="تعديل سجلات الصيانة"
                                     >
                                         <WrenchScrewdriverIcon className="h-5 w-5" />
                                     </button>
                                 )}
-                                <button onClick={() => onDelete(sub.id!)} className="p-2 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-500 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors transform active:scale-95" aria-label={`Delete ${sub.companyName}`}>
+                                <button onClick={() => onDelete(sub.id!)} className="p-2 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-500 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors transform active:scale-95" aria-label={`حذف ${sub.companyName}`}>
                                     <TrashIcon className="h-5 w-5" />
                                 </button>
                             </div>

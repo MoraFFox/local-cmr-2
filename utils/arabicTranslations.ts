@@ -264,6 +264,157 @@ export const ar = {
     clientSupervisorPhone: 'رقم هاتف المشرف',
     tapToCapture: 'اضغط للالتقاط',
   },
+
+  // Admin panel (mobile-first Arabic CRM for Midoe's)
+  admin: {
+    appName: 'ميدوز',
+    appTagline: 'نظام إدارة الصيانة',
+    // Sidebar
+    sidebar: {
+      history: 'السجل',
+      maintenance: 'الفنيون',
+      access: 'إدارة المستخدمين',
+      formBuilder: 'بناء النموذج',
+      drafts: 'المسودات',
+      addNewCompany: 'إضافة شركة جديدة',
+      collapse: 'طي',
+      collapseSidebar: 'طي الشريط الجانبي',
+      expandSidebar: 'فتح الشريط الجانبي',
+      logout: 'تسجيل الخروج',
+      deleteDraft: 'حذف المسودة',
+      untitledCompany: 'شركة بدون اسم',
+      startNewConfirm: 'بدء نموذج جديد؟ سيتم حفظ عملك الحالي كمسودة.',
+    },
+    // Wizard step names (overlap with `steps` for portal, but admin has 6 diff steps)
+    stepNames: {
+      companyInfo: 'معلومات الشركة',
+      branches: 'الفروع',
+      warehouse: 'المخزن',
+      team: 'الفريق',
+      clientBaristas: 'باريستا العميل',
+      maintenance: 'الصيانة',
+      review: 'المراجعة',
+    },
+    // Common field labels reused across the wizard
+    fields: {
+      companyName: 'اسم الشركة',
+      email: 'البريد الإلكتروني',
+      taxNumber: 'الرقم الضريبي',
+      location: 'الموقع',
+      name: 'الاسم',
+      phone: 'رقم الهاتف',
+      position: 'المسمى الوظيفي',
+      customPosition: 'مسمى وظيفي مخصص',
+      notes: 'ملاحظات',
+      branchName: 'اسم الفرع',
+      machineName: 'اسم/رقم الماكينة',
+      qty: 'الكمية',
+      leaseValue: 'قيمة الإيجار اليومي (ج.م)',
+      // Placeholders
+      companyNamePh: 'مثال: شركة كافيه ميدوز',
+      emailPh: 'مثال: manager@midoes.com',
+      taxPh: 'مثال: 12-3456789',
+      locationPh: 'مثال: شارع التحرير، القاهرة',
+      branchNamePh: 'مثال: المعادي (الاسم الكامل = اسم الشركة + اسم الفرع)',
+      phonePh: 'مثال: 0100-123-4567',
+      leasePh: '0.00',
+      // Section headings inside cards
+      contacts: 'جهات الاتصال',
+      warehouseContacts: 'جهات اتصال المخزن',
+      baristas: 'الباريستا',
+      clientBaristas: 'باريستا العميل',
+      maintenanceHistory: 'سجل الصيانة',
+      maintenanceRecords: 'سجلات الصيانة',
+      phoneNumbers: 'أرقام الهواتف',
+      // Radio groups
+      hasBranches: 'هل لدى الشركة عدة فروع؟',
+      usesOurMachines: 'هل يستخدمون ماكيناتنا؟',
+      machineAcquired: 'كيف تم الحصول على الماكينة؟',
+      acquired: { bought: 'شراء', leased: 'إيجار' },
+      yes: 'نعم',
+      no: 'لا',
+      // Add buttons
+      addContact: 'إضافة جهة اتصال',
+      addBranch: 'إضافة فرع',
+      addBarista: 'إضافة باريستا',
+      addClientBarista: 'إضافة باريستا عميل',
+      addRecord: 'إضافة سجل',
+      addPhone: 'إضافة رقم هاتف',
+      addMachine: 'إضافة ماكينة',
+      // Card titles
+      cardCompanyInfo: 'معلومات الشركة',
+      cardBranchDetails: 'تفاصيل الفرع',
+      cardWarehouse: 'معلومات المخزن',
+      cardTeamMain: 'الفريق / الباريستا (المكتب الرئيسي)',
+      cardClientBaristasMain: 'باريستا العميل (المكتب الرئيسي)',
+      cardMaintenanceMain: 'سجل الصيانة (المكتب الرئيسي)',
+      // Default labels in card headers when value is empty
+      newBranch: 'فرع جديد',
+      newBarista: 'باريستا جديد',
+      newClientBarista: 'باريستا عميل جديد',
+      newContact: 'جهة اتصال جديدة',
+      defaultCompany: 'الشركة',
+      baristaCount_one: 'باريستا',
+      baristaCount_other: 'باريستا',
+      // AI suggestion
+      aiSuggesting: 'جاري الإنشاء...',
+      aiSuggest: '✨ اقتراح بالذكاء الاصطناعي',
+      aiOffline: '⚠ الذكاء الاصطناعي غير متاح دون اتصال',
+    },
+    // Empty states
+    empty: {
+      noContacts: 'لا توجد جهات اتصال',
+      noContactsMsg: 'أضف الأفراد الرئيسيين لهذا الموقع.',
+      noBaristas: 'لا يوجد باريستا',
+      noBaristasBranch: 'أضف الباريستا الذين يعملون في هذا الفرع.',
+      noBaristasMain: 'أضف الباريستا الذين يعملون في المكتب الرئيسي.',
+      noClientBaristas: 'لا يوجد باريستا للعميل',
+      noClientBaristasBranch: 'أضف باريستا شركة العميل الذين يعملون في هذا الفرع.',
+      noClientBaristasMain: 'أضف باريستا شركة العميل الذين يعملون مع ماكيناتنا.',
+      noMaintenance: 'لا يوجد سجل صيانة',
+      noMaintenanceBranch: 'أضف سجلات الصيانة لهذا الفرع.',
+      noMaintenanceMain: 'أضف سجلات الصيانة للمكتب الرئيسي.',
+      noBranches: 'لم تتم إضافة فروع',
+      noBranchesMsg: 'اضغط الزر أعلاه لإضافة أول فرع.',
+    },
+    // Confirmation modal (defaults used by ui/ConfirmDialog in P4)
+    confirm: {
+      title: 'تأكيد الحذف',
+      message: 'هل أنت متأكد من حذف هذا السجل؟ لا يمكن التراجع عن هذا الإجراء.',
+      confirmDelete: 'نعم، حذف',
+    },
+    // Toasts / inline status text
+    toast: {
+      loadingHistory: 'جاري تحميل السجل...',
+    },
+    // Loading screen labels
+    loading: {
+      submissions: 'جاري تحميل السجل...',
+      checkingAccess: 'جاري التحقق من الصلاحية...',
+      redirecting: 'جاري إعادة التوجيه...',
+      loadingApp: 'جاري التحميل...',
+    },
+    // Mobile header / generic titles (mobileTitle in App.tsx)
+    titles: {
+      print: 'طباعة أمر العمل',
+      details: 'تفاصيل السجل',
+      baristaPerformance: 'أداء الباريستا',
+      accessMgmt: 'إدارة المستخدمين',
+      history: 'سجل عمليات الإرسال',
+      form: 'النموذج',
+    },
+    // Live preview pane
+    preview: {
+      show: 'معاينة حية',
+      hide: 'إخفاء المعاينة',
+      previewTitle: 'معاينة حية',
+    },
+    // Offline banner (existing English-Arabic paired strings now Arabic-only)
+    offline: {
+      banner: 'أنت غير متصل حالياً. سيتم حفظ التغييرات محلياً ومزامنتها عند عودة الاتصال.',
+      syncing: 'جاري مزامنة التغييرات دون اتصال...',
+    },
+  },
 } as const;
 
 export type Translations = typeof ar;

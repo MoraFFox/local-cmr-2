@@ -474,7 +474,7 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
       <BottomSheet
         isOpen={isTemplateSelectorOpen}
         onClose={() => setIsTemplateSelectorOpen(false)}
-        title="Choose Template"
+        title="اختر القالب"
       >
         <div className="p-4 space-y-3">
           {maintenanceTemplates.map((template) => (

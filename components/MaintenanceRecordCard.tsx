@@ -432,14 +432,14 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <TextInput
-              label="Date"
+              label="التاريخ"
               type="date"
               name="maintenanceDate"
               value={record.maintenanceDate}
               onChange={handleFieldChange}
             />
             <TextInput
-              label="Next Visit"
+              label="الزيارة القادمة"
               type="date"
               name="nextVisitDate"
               value={record.nextVisitDate || ""}
@@ -473,7 +473,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                       value={record.baristaName}
                       onChange={handleFieldChange}
                       className={`w-full ${selectClasses} ${typoSuggestion ? "ring-2 ring-amber-400 border-amber-400" : ""}`}
-                      placeholder="Staff Name"
+                      placeholder="اسم الموظف"
                     />
                     {typoSuggestion && (
                       <div
@@ -497,7 +497,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                     type="button"
                     onClick={handleQuickAddBarista}
                     className="px-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors flex items-center justify-center shadow-sm active:scale-95"
-                    title="Add new staff member"
+                    title="إضافة موظف جديد"
                   >
                     <UserPlusIcon className="w-5 h-5" />
                   </button>
@@ -557,7 +557,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                     value={record.clientBaristaName || ""}
                     onChange={handleFieldChange}
                     className={`flex-1 ${selectClasses}`}
-                    placeholder="Client Barista Name"
+                    placeholder="اسم باريستا العميل"
                   />
                 )}
                 {onAddClientBarista && (
@@ -568,7 +568,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                       if (name && onAddClientBarista) onAddClientBarista(name);
                     }}
                     className="px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors flex items-center justify-center shadow-sm active:scale-95"
-                    title="Add new client barista"
+                    title="إضافة باريستا عميل جديد"
                   >
                     <UserPlusIcon className="w-5 h-5" />
                   </button>
@@ -603,7 +603,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                   value={record.clientBaristaName || ""}
                   onChange={handleFieldChange}
                   className={`flex-1 ${selectClasses}`}
-                  placeholder="Client Barista Name"
+                  placeholder="اسم باريستا العميل"
                 />
               )}
               {onAddClientBarista && (
@@ -614,7 +614,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                     if (name && onAddClientBarista) onAddClientBarista(name);
                   }}
                   className="px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors flex items-center justify-center shadow-sm active:scale-95"
-                  title="Add new client barista"
+                  title="إضافة باريستا عميل جديد"
                 >
                   <UserPlusIcon className="w-5 h-5" />
                 </button>
@@ -676,7 +676,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
 
           {record.hadProblem && (
             <div className="space-y-4">
-              <CollapsibleSection title="Identified Problems">
+              <CollapsibleSection title="المشاكل المكتشفة">
                 <CheckboxGroup
                   categories={props.problemCategories}
                   selectedValues={record.problems || []}
@@ -720,7 +720,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
 
               {record.partsWereReplaced && (
                 <div className="pl-6 space-y-4">
-                  <CollapsibleSection title="Parts Changed">
+                  <CollapsibleSection title="القطع المستبدلة">
                     <PartsSelector
                       options={props.partsList}
                       selectedValues={record.partsReplaced || []}
@@ -802,7 +802,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t dark:border-slate-700">
           <RadioGroup
             name={`type-${record.id}`}
-            label="Type"
+            label="النوع"
             value={record.type}
             onChange={(val) =>
               handleFieldChange({ target: { name: "type", value: val } } as any)
@@ -814,7 +814,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
           />
           <RadioGroup
             name={`paidBy-${record.id}`}
-            label="Paid By"
+            label="الدفع بواسطة"
             value={record.paidBy}
             onChange={(val) =>
               handleFieldChange({
@@ -823,11 +823,11 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
             }
             options={[
               { label: "Mido's", value: "company" },
-              { label: "Company", value: "client" },
+              { label: "الشركة", value: "client" },
             ]}
           />
           <TextInput
-            label="Daily Lease Cost (EGP)"
+            label="تكلفة الإيجار اليومي (ج.م)"
             type="number"
             name="dailyLeaseCost"
             value={record.dailyLeaseCost || ""}
@@ -838,13 +838,13 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
 
         {/* Machines Section */}
         <div className="pt-4 border-t dark:border-slate-700">
-          <CollapsibleSection title="Machines Maintained">
+          <CollapsibleSection title="الماكينات التي تمت صيانتها">
             <div className="space-y-3">
               {(record.machines || []).map((machine, index) => (
                 <div key={machine.id} className="flex items-start gap-2">
                   <div className="grid grid-cols-4 gap-2 w-full">
                     <TextInput
-                      placeholder="Machine Name/ID"
+                      placeholder="اسم/رقم الماكينة"
                       value={machine.name}
                       onChange={(e) =>
                         handleMachineChange(index, "name", e.target.value)
@@ -854,7 +854,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                     <TextInput
                       type="number"
                       min="1"
-                      placeholder="Qty"
+                      placeholder="الكمية"
                       value={machine.count}
                       onChange={(e) =>
                         handleMachineChange(
@@ -869,7 +869,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                   <button
                     onClick={() => handleRemoveMachine(index)}
                     className="mt-3 p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors transform active:scale-95"
-                    aria-label="Remove machine"
+                    aria-label="إزالة الماكينة"
                   >
                     <TrashIcon className="w-5 h-5" />
                   </button>
@@ -888,7 +888,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
 
         {/* Supervisors Section */}
         <div className="pt-4 border-t dark:border-slate-700">
-          <CollapsibleSection title="Supervisor Details">
+          <CollapsibleSection title="بيانات المشرف">
             <div className="space-y-4">
               {(record.supervisors || []).map((supervisor, index) => (
                 <div
@@ -897,14 +897,14 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <TextInput
-                      label="Supervisor Name"
+                      label="اسم المشرف"
                       value={supervisor.name}
                       onChange={(e) =>
                         handleSupervisorChange(index, "name", e.target.value)
                       }
                     />
                     <TextInput
-                      label="Supervisor Phone"
+                      label="رقم هاتف المشرف"
                       value={supervisor.phone}
                       onChange={(e) =>
                         handleSupervisorChange(index, "phone", e.target.value)
@@ -914,7 +914,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                   <button
                     onClick={() => handleRemoveSupervisor(index)}
                     className="absolute top-2 right-2 p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors transform active:scale-95"
-                    aria-label="Remove supervisor"
+                    aria-label="إزالة المشرف"
                   >
                     <TrashIcon className="w-5 h-5" />
                   </button>

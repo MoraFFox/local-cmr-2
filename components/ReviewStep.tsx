@@ -31,7 +31,7 @@ const Detail: React.FC<{ label: string; value: React.ReactNode }> = ({
   label,
   value,
 }) =>
-  value || value === 0 || value === "No" || value === "Yes" ? (
+  value || value === 0 || value === "لا" || value === "نعم" ? (
     <div className="py-2 sm:grid sm:grid-cols-3 sm:gap-4">
       <dt className="text-sm font-medium text-slate-500 dark:text-slate-400">
         {label}
@@ -90,7 +90,7 @@ const getMachineOwnershipStatus = (entity: {
     return "Not specified";
   }
   if (entity.usesOurMachines === false) {
-    return "No";
+    return "لا";
   }
   if (entity.usesOurMachines === true) {
     if (entity.machineOwnershipType) {
@@ -209,8 +209,8 @@ const MaintenanceRecordReview: React.FC<{
         )}
       </div>
       <dl className="mt-2 text-xs divide-y divide-slate-200 dark:divide-slate-700">
-        <Detail label="Staff" value={record.baristaName} />
-        <Detail label="Type" value={record.type} />
+        <Detail label="الموظفون" value={record.baristaName} />
+        <Detail label="النوع" value={record.type} />
         <Detail
           label="Daily Lease Cost"
           value={
@@ -221,17 +221,17 @@ const MaintenanceRecordReview: React.FC<{
         />
         <Detail
           label="Problem Reported"
-          value={record.hadProblem ? "Yes" : "No"}
+          value={record.hadProblem ? "نعم" : "لا"}
         />
         {record.hadProblem && (
           <>
             <Detail
-              label="Problem Solved"
-              value={record.problemSolved ? "Yes" : "No"}
+              label="تم حل المشكلة"
+              value={record.problemSolved ? "نعم" : "لا"}
             />
             <Detail
               label="Parts Replaced"
-              value={record.partsWereReplaced ? "Yes" : "No"}
+              value={record.partsWereReplaced ? "نعم" : "لا"}
             />
           </>
         )}
@@ -250,8 +250,8 @@ const MaintenanceRecordReview: React.FC<{
         <Detail label="Recommendations" value={record.recommendations} />
         <Detail label="Notes" value={record.notes} />
         <Detail
-          label="Paid By"
-          value={record.paidBy === "company" ? "Mido's" : "Company"}
+          label="الدفع بواسطة"
+          value={record.paidBy === "company" ? "Mido's" : "الشركة"}
         />
 
         {record.machines && record.machines.length > 0 && (
@@ -469,14 +469,14 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           Company Details
         </h3>
         <dl className="divide-y divide-slate-200 dark:divide-slate-700">
-          <Detail label="Company Name" value={formData.companyName} />
+          <Detail label="اسم الشركة" value={formData.companyName} />
           <Detail label="Email" value={formData.email} />
-          <Detail label="Tax Number" value={formData.taxNumber} />
-          <Detail label="Location" value={formData.location} />
+          <Detail label="الرقم الضريبي" value={formData.taxNumber} />
+          <Detail label="الموقع" value={formData.location} />
           <ContactReview contacts={formData.contacts} />
           <Detail
             label="Has Branches"
-            value={formData.hasBranches ? "Yes" : "No"}
+            value={formData.hasBranches ? "نعم" : "لا"}
           />
           {formData.hasBranches === false && (
             <Detail
@@ -511,8 +511,8 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                     value={branch.branchName || "N/A"}
                   />
                   <Detail label="Email" value={branch.email} />
-                  <Detail label="Tax Number" value={branch.taxNumber} />
-                  <Detail label="Location" value={branch.location} />
+                  <Detail label="الرقم الضريبي" value={branch.taxNumber} />
+                  <Detail label="الموقع" value={branch.location} />
                   <ContactReview contacts={branch.contacts} />
                   <Detail
                     label="Using Our Machines"
@@ -570,7 +570,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
         </h3>
         <dl className="divide-y divide-slate-200 dark:divide-slate-700">
           <Detail
-            label="Location"
+            label="الموقع"
             value={formData.warehouse.location || "Not specified"}
           />
           <ContactReview contacts={formData.warehouse.contacts} />

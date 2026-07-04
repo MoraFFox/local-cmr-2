@@ -67,19 +67,19 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
     setError("");
 
     if (!newPassword.trim()) {
-      setError("Please enter a new password. / يرجى إدخال كلمة مرور جديدة.");
+      setError("يرجى إدخال كلمة مرور جديدة.");
       return;
     }
 
     if (!validatePassword(newPassword)) {
       setError(
-        "Password must be at least 8 characters. / يجب أن تكون كلمة المرور 8 أحرف على الأقل."
+        "يجب أن تكون كلمة المرور 8 أحرف على الأقل."
       );
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match. / كلمات المرور غير متطابقة.");
+      setError("كلمات المرور غير متطابقة.");
       return;
     }
 
@@ -92,7 +92,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
       if (updateError) {
         logger.error("Password update error", updateError, "auth");
         setError(
-          "Failed to reset password. Please try again. / فشل إعادة تعيين كلمة المرور. يرجى المحاولة مرة أخرى."
+          "          فشل إعادة تعيين كلمة المرور. يرجى المحاولة مرة أخرى."
         );
       } else {
         setIsSuccess(true);
@@ -102,7 +102,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
     } catch (submitError) {
       logger.error("Password reset exception", submitError, "auth");
       setError(
-        "An error occurred. Please try again. / حدث خطأ. يرجى المحاولة مرة أخرى."
+        "        حدث خطأ. يرجى المحاولة مرة أخرى."
       );
     } finally {
       setIsSubmitting(false);
@@ -124,7 +124,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
         <div className="text-center">
           <div className="mx-auto mb-4 h-10 w-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-slate-700 dark:text-slate-300 font-medium">
-            Verifying reset link... / جاري التحقق من الرابط...
+            جاري التحقق من الرابط...
           </p>
         </div>
       </div>
@@ -141,21 +141,16 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
               <ExclamationCircleIcon className="w-8 h-8 text-red-600 dark:text-red-400" />
             </div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-              Invalid or Expired Link
+              رابط غير صالح أو منتهي الصلاحية
             </h1>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
-              رابط غير صالح أو منتهي الصلاحية
-            </p>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-              This password reset link is invalid or has expired. Please request a new one.
-              <br />
               رابط إعادة تعيين كلمة المرور هذا غير صالح أو منتهي الصلاحية. يرجى طلب رابط جديد.
             </p>
             <button
               onClick={handleBackToLogin}
               className="w-full py-3 rounded-lg font-semibold text-white bg-teal-600 hover:bg-teal-700 transition-colors"
             >
-              Back to Login / العودة لتسجيل الدخول
+              العودة لتسجيل الدخول
             </button>
           </div>
         </div>
@@ -173,21 +168,16 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
               <CheckCircleIcon className="w-8 h-8 text-green-600 dark:text-green-400" />
             </div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-              Password Reset Successful!
+              تم إعادة تعيين كلمة المرور بنجاح!
             </h1>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
-              تم إعادة تعيين كلمة المرور بنجاح!
-            </p>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-              Please log in with your new password.
-              <br />
               يرجى تسجيل الدخول بكلمة المرور الجديدة.
             </p>
             <button
               onClick={handleBackToLogin}
               className="w-full py-3 rounded-lg font-semibold text-white bg-teal-600 hover:bg-teal-700 transition-colors"
             >
-              Back to Login / العودة لتسجيل الدخول
+              العودة لتسجيل الدخول
             </button>
           </div>
         </div>
@@ -206,7 +196,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
             className="mb-6 flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
           >
             <ArrowLeftIcon className="w-5 h-5" />
-            <span>Back to Login / العودة لتسجيل الدخول</span>
+            <span>العودة لتسجيل الدخول</span>
           </button>
         )}
 
@@ -216,11 +206,8 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
             <LockClosedIcon className="w-8 h-8 text-teal-600 dark:text-teal-400" />
           </div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-            Reset Password
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400">
             إعادة تعيين كلمة المرور
-          </p>
+          </h1>
         </div>
 
         {error && (
@@ -232,7 +219,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              New Password / كلمة المرور الجديدة
+              كلمة المرور الجديدة
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -251,7 +238,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
 
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Confirm New Password / تأكيد كلمة المرور الجديدة
+              تأكيد كلمة المرور الجديدة
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -274,8 +261,8 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
             className="w-full py-3 rounded-lg font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors"
           >
             {isSubmitting
-              ? "Resetting... / جاري إعادة التعيين..."
-              : "Reset Password / إعادة تعيين كلمة المرور"}
+              ? "جاري إعادة التعيين..."
+              : "إعادة تعيين كلمة المرور"}
           </button>
         </form>
       </div>

@@ -185,7 +185,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
     // Check authentication
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      showToast("You must be logged in to upload photos", "error");
+      showToast("يجب تسجيل الدخول لرفع الصور", "error");
       return;
     }
 
@@ -197,7 +197,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         // Validate
         const validation = validateImageFile(file);
         if (!validation.valid) {
-          showToast(validation.error || "Invalid image", "error");
+          showToast(validation.error || "صورة غير صالحة", "error");
           continue;
         }
 
@@ -229,10 +229,10 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
           photos: [...(prev.photos || []), { url: publicUrl, type }]
         }));
         
-        showToast("Photo uploaded successfully", "success");
+        showToast("تم رفع الصورة بنجاح", "success");
       } catch (error) {
         logger.error('Upload error', error, 'upload');
-        showToast("Could not upload photo", "error");
+        showToast("تعذر رفع الصورة", "error");
       }
     }
 
@@ -257,12 +257,12 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
           const { error } = await supabase.storage.from('maintenance-photos').remove([path]);
           if (error) {
             logger.warn('Could not delete from storage', error, 'upload');
-            showToast("Photo removed from record, but could not delete from storage", "warning");
+            showToast("تمت إزالة الصورة من السجل، لكن تعذر حذفها من التخزين", "warning");
           }
         }
       } catch (error) {
         logger.warn('Could not delete from storage', error, 'upload');
-        showToast("Photo removed from record, but could not delete from storage", "warning");
+        showToast("تمت إزالة الصورة من السجل، لكن تعذر حذفها من التخزين", "warning");
       }
     }
   };
@@ -271,19 +271,19 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
     const newErrors: Record<string, string> = {};
 
     if (!editedRecord.maintenanceDate) {
-      newErrors.maintenanceDate = 'Date is required';
+      newErrors.maintenanceDate = 'التاريخ مطلوب';
     }
 
     if (!editedRecord.baristaName.trim()) {
-      newErrors.baristaName = 'Barista name is required';
+      newErrors.baristaName = 'اسم الباريستا مطلوب';
     }
 
     if (!editedRecord.supervisors || editedRecord.supervisors.length === 0) {
-      newErrors.supervisors = 'At least one supervisor is required';
+      newErrors.supervisors = 'مطلوب مشرف واحد على الأقل';
     } else {
       editedRecord.supervisors.forEach((supervisor, index) => {
         if (!supervisor.name.trim()) {
-          newErrors[`supervisor-${index}-name`] = 'Supervisor name is required';
+          newErrors[`supervisor-${index}-name`] = 'اسم المشرف مطلوب';
         }
       });
     }
@@ -326,9 +326,12 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       {/* Basic Info Section */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <SectionHeader
-          title="Basic Information"
+          title="المعلومات الأساسية"
           section="basic"
           icon={<DocumentTextIcon className="w-5 h-5" />}
+
+
+
         />
         
         {expandedSections.has('basic') && (
@@ -420,7 +423,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       name="baristaName"
                       value={editedRecord.baristaName}
                       onChange={handleFieldChange}
-                      placeholder="Enter barista name"
+                      placeholder="أدخل اسم الباريستا"
                       className={`w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 border ${
                         errors.baristaName 
                           ? 'border-red-500 focus:ring-red-500' 
@@ -459,7 +462,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       name="clientBaristaName"
                       value={editedRecord.clientBaristaName || ''}
                       onChange={handleFieldChange}
-                      placeholder="Enter client barista name"
+                      placeholder="أدخل اسم باريستا العميل"
                       className="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 border border-slate-200 dark:border-slate-600"
                     />
                   )}
@@ -517,7 +520,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       {/* Problems & Services Section */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <SectionHeader
-          title="Problems & Services"
+          title="المشاكل والخدمات"
           section="problems"
           icon={<ExclamationCircleIcon className="w-5 h-5" />}
           badge={editedRecord.problems?.length > 0 && (
@@ -587,7 +590,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       {/* Services Section */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <SectionHeader
-          title="Services Performed"
+          title="الخدمات المنفذة"
           section="services"
           icon={<WrenchIcon className="w-5 h-5" />}
           badge={editedRecord.servicesPerformed.length > 0 && (
@@ -611,7 +614,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       {/* Parts Section */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <SectionHeader
-          title="Parts Replaced"
+          title="القطع المستبدلة"
           section="parts"
           icon={<BeakerIcon className="w-5 h-5" />}
           badge={editedRecord.partsReplaced.length > 0 && (
@@ -653,7 +656,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       {/* Type & Payment Section */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <SectionHeader
-          title="Visit Type & Payment"
+          title="نوع الزيارة والدفع"
           section="payment"
           icon={<CurrencyDollarIcon className="w-5 h-5" />}
         />
@@ -662,7 +665,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <RadioGroup
-                label="Visit Type"
+                label="نوع الزيارة"
                 name="type"
                 options={[
                   { label: 'Requested', value: 'requested' },
@@ -750,7 +753,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       {/* Supervisor Section */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <SectionHeader
-          title="Supervisor Information"
+          title="بيانات المشرف"
           section="supervisor"
           icon={<ClipboardDocumentListIcon className="w-5 h-5" />}
           badge={
@@ -789,7 +792,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       value={supervisor.name}
                       onChange={(e) => updateSupervisor(index, 'name', e.target.value)}
                       className="w-full px-3 py-2 bg-white dark:bg-slate-600 text-slate-900 dark:text-white rounded-lg border border-slate-200 dark:border-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                      placeholder="Supervisor name"
+                      placeholder="اسم المشرف"
                     />
                     {errors[`supervisor-${index}-name`] && (
                       <p className="mt-1 text-sm text-red-600">{errors[`supervisor-${index}-name`]}</p>
@@ -802,7 +805,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       value={supervisor.phone}
                       onChange={(e) => updateSupervisor(index, 'phone', e.target.value)}
                       className="w-full px-3 py-2 bg-white dark:bg-slate-600 text-slate-900 dark:text-white rounded-lg border border-slate-200 dark:border-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                      placeholder="Phone number"
+                      placeholder="رقم الهاتف"
                     />
                   </div>
                 </div>
@@ -821,7 +824,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       {/* Notes Section */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <SectionHeader
-          title="Notes & Recommendations"
+          title="ملاحظات وتوصيات"
           section="notes"
           icon={<DocumentTextIcon className="w-5 h-5" />}
           badge={editedRecord.notes && (
@@ -842,7 +845,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 value={editedRecord.notes || ''}
                 onChange={handleFieldChange}
                 rows={4}
-                placeholder="Add any additional notes..."
+                placeholder="أضف أي ملاحظات إضافية..."
                 className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 border border-slate-200 dark:border-slate-600 resize-none"
               />
             </div>
@@ -856,7 +859,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 value={editedRecord.recommendations || ''}
                 onChange={handleFieldChange}
                 rows={3}
-                placeholder="Add recommendations for future visits..."
+                placeholder="أضف توصيات للزيارات القادمة..."
                 className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 border border-slate-200 dark:border-slate-600 resize-none"
               />
             </div>
@@ -867,7 +870,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       {/* Before & After Photos Section */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <SectionHeader
-          title="Before & After Photos"
+          title="صور قبل وبعد"
           section="photos"
           icon={<CameraIcon className="w-5 h-5" />}
           badge={editedRecord.photos && editedRecord.photos.length > 0 && (
@@ -922,7 +925,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                     <button 
                       onClick={() => handlePhotoRemove(photo)} 
                       className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                      title="Remove photo"
+                      title="إزالة الصورة"
                     >
                       <XMarkIcon className="w-4 h-4" />
                     </button>
@@ -971,7 +974,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                     <button 
                       onClick={() => handlePhotoRemove(photo)} 
                       className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                      title="Remove photo"
+                      title="إزالة الصورة"
                     >
                       <XMarkIcon className="w-4 h-4" />
                     </button>
@@ -1006,7 +1009,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       <button 
                         onClick={() => handlePhotoRemove(photo)} 
                         className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                        title="Remove photo"
+                        title="إزالة الصورة"
                       >
                         <XMarkIcon className="w-4 h-4" />
                       </button>

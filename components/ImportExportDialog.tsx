@@ -119,7 +119,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
             }
         } catch (error: any) {
             setImportStatus('error');
-            setImportMessage(error.message || 'Failed to import file');
+            setImportMessage(error.message || 'فشل استيراد الملف');
         }
     };
 
@@ -279,7 +279,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                                     }`} />
                                     
                                     <p className="font-medium text-slate-700 dark:text-slate-300">
-                                        {importStatus === 'loading' ? 'Processing...' : 'Click to upload file'}
+                                        {importStatus === 'loading' ? 'جاري المعالجة...' : 'اضغط لرفع الملف'}
                                     </p>
                                     
                                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">

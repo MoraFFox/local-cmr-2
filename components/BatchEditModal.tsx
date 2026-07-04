@@ -184,7 +184,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                                 {record.maintenanceDate || 'No Date'}
                                             </span>
                                             {record.problemSolved && (
-                                                <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Solved</span>
+                                                <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">تم الحل</span>
                                             )}
                                         </div>
                                         {record.baristaName && (
@@ -300,7 +300,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                             onChange={(e) => setOperation({ ...operation, value: e.target.value === 'true' })}
                                             className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg"
                                         >
-                                            <option value="true">Solved</option>
+                                            <option value="true">تم الحل</option>
                                             <option value="false">Not Solved</option>
                                         </select>
                                     )}

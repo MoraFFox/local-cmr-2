@@ -116,7 +116,7 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                     <button
                         onClick={onClose}
                         className="p-2 sm:p-2 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                        aria-label="Close modal"
+                        aria-label="إغلاق النافذة"
                     >
                         <XMarkIcon className="w-5 h-5" />
                     </button>
@@ -127,11 +127,11 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                     {/* Company Name */}
                     <div>
                         <TextInput
-                            label="Company Name"
+                            label="اسم الشركة"
                             name="companyName"
                             value={formData.companyName || ''}
                             onChange={handleChange}
-                            placeholder="Enter company name"
+                            placeholder="أدخل اسم الشركة"
                             icon={<BuildingOfficeIcon className="w-5 h-5" />}
                             error={errors.companyName}
                             required
@@ -141,7 +141,7 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                     {/* Email & Tax Number */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <TextInput
-                            label="Email Address"
+                            label="البريد الإلكتروني"
                             name="email"
                             type="email"
                             value={formData.email || ''}
@@ -151,11 +151,11 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                             error={errors.email}
                         />
                         <TextInput
-                            label="Tax Number"
+                            label="الرقم الضريبي"
                             name="taxNumber"
                             value={formData.taxNumber || ''}
                             onChange={handleChange}
-                            placeholder="Tax ID"
+                            placeholder="الرقم الضريبي"
                             icon={<IdentificationIcon className="w-5 h-5" />}
                             error={errors.taxNumber}
                         />
@@ -163,11 +163,11 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
 
                     {/* Location */}
                     <TextInput
-                        label="Location"
+                        label="الموقع"
                         name="location"
                         value={formData.location || ''}
                         onChange={handleChange}
-                        placeholder="Company address or location"
+                        placeholder="عنوان الشركة أو الموقع"
                         icon={<MapPinIcon className="w-5 h-5" />}
                     />
                 </div>

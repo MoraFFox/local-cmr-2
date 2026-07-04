@@ -17,7 +17,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({ currentStep, onPr
                     onClick={onPrev}
                     disabled={isLoading}
                     className="text-slate-600 dark:text-slate-300 font-medium py-3 px-4 rounded-lg hover:text-slate-900 dark:hover:text-white transition-colors disabled:opacity-50 transform active:scale-95"
-                    aria-label="Go to previous step"
+                    aria-label="الخطوة السابقة"
                 >
                     Back
                 </button>

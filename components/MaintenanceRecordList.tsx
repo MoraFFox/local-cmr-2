@@ -157,7 +157,7 @@ const MaintenanceRecordRow = React.memo(({
           <button
             onClick={() => onEdit(record, actualIndex)}
             className="p-2 text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-lg transition-colors"
-            title="Edit Record"
+            title="تعديل السجل"
           >
             <PencilIcon className="w-5 h-5" />
           </button>

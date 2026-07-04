@@ -41,11 +41,11 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
 
     const normalizedEmail = email.trim().toLowerCase();
     if (!normalizedEmail) {
-      setError("Please enter your email address. / يرجى إدخال بريدك الإلكتروني.");
+      setError("يرجى إدخال بريدك الإلكتروني.");
       return;
     }
     if (!validateEmail(normalizedEmail)) {
-      setError("Please enter a valid email address. / يرجى إدخال بريد إلكتروني صحيح.");
+      setError("يرجى إدخال بريد إلكتروني صحيح.");
       return;
     }
 
@@ -61,7 +61,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
       if (resetError) {
         logger.error("Password reset error", resetError, "auth");
         setError(
-          "Failed to send reset link. Please try again. / فشل إرسال رابط إعادة التعيين. يرجى المحاولة مرة أخرى."
+          "فشل إرسال رابط إعادة التعيين. يرجى المحاولة مرة أخرى."
         );
       } else {
         setIsSuccess(true);
@@ -69,7 +69,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
     } catch (submitError) {
       logger.error("Password reset exception", submitError, "auth");
       setError(
-        "An error occurred. Please try again. / حدث خطأ. يرجى المحاولة مرة أخرى."
+        "حدث خطأ. يرجى المحاولة مرة أخرى."
       );
     } finally {
       setIsSubmitting(false);
@@ -102,21 +102,19 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
               <CheckCircleIcon className="w-7 h-7 text-green-600 dark:text-green-400" />
             </div>
             <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-              Check Your Email
+              تحقق من بريدك الإلكتروني
             </h2>
             <p className="text-slate-600 dark:text-slate-400 mb-2">
               تحقق من بريدك الإلكتروني
             </p>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-              We've sent a password reset link to your email address.
-              <br />
               لقد أرسلنا رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.
             </p>
             <button
               onClick={handleClose}
               className="w-full py-3 rounded-lg font-semibold text-white bg-teal-600 hover:bg-teal-700 transition-colors"
             >
-              Back to Login / العودة لتسجيل الدخول
+              العودة لتسجيل الدخول
             </button>
           </div>
         ) : (
@@ -127,7 +125,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                 <EnvelopeIcon className="w-7 h-7 text-teal-600 dark:text-teal-400" />
               </div>
               <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                Reset Password
+                إعادة تعيين كلمة المرور
               </h2>
               <p className="text-slate-600 dark:text-slate-400">
                 إعادة تعيين كلمة المرور
@@ -135,8 +133,6 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
             </div>
 
             <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-4">
-              Enter your email address and we'll send you a link to reset your password.
-              <br />
               أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.
             </p>
 
@@ -149,7 +145,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Email / البريد الإلكتروني
+                  البريد الإلكتروني
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -174,8 +170,8 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                 className="w-full py-3 rounded-lg font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors"
               >
                 {isSubmitting
-                  ? "Sending... / جاري الإرسال..."
-                  : "Send Reset Link / إرسال رابط إعادة التعيين"}
+                  ? "جاري الإرسال..."
+                  : "إرسال رابط إعادة التعيين"}
               </button>
             </form>
           </>
@@ -214,11 +210,11 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
     if (contactType === "email") {
       const normalizedEmail = email.trim().toLowerCase();
       if (!normalizedEmail || !trimmedPassword) {
-        setError("Please enter email and password. / يرجى إدخال البريد الإلكتروني وكلمة المرور.");
+        setError("يرجى إدخال البريد الإلكتروني وكلمة المرور.");
         return;
       }
       if (!validateEmail(normalizedEmail)) {
-        setError("Please enter a valid email address. / يرجى إدخال بريد إلكتروني صحيح.");
+        setError("يرجى إدخال بريد إلكتروني صحيح.");
         return;
       }
 
@@ -230,13 +226,13 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
           });
 
           if (signInError) {
-            setError("Invalid credentials. / بيانات تسجيل الدخول غير صحيحة.");
+            setError("بيانات تسجيل الدخول غير صحيحة.");
           } else {
             window.location.href = '/';
           }
         } catch (submitError) {
           logger.error("Admin login exception", submitError, "auth");
-        setError("Login failed. Please try again. / فشل تسجيل الدخول، حاول مرة أخرى.");
+        setError("فشل تسجيل الدخول، حاول مرة أخرى.");
       } finally {
         setIsSubmitting(false);
       }
@@ -244,11 +240,11 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
       // Phone login
       const normalizedPhone = phone.trim();
       if (!normalizedPhone || !trimmedPassword) {
-        setError("Please enter phone number and password. / يرجى إدخال رقم الهاتف وكلمة المرور.");
+        setError("يرجى إدخال رقم الهاتف وكلمة المرور.");
         return;
       }
       if (!validatePhone(normalizedPhone)) {
-        setError("Please enter a valid phone number. / يرجى إدخال رقم هاتف صحيح.");
+        setError("يرجى إدخال رقم هاتف صحيح.");
         return;
       }
 
@@ -262,7 +258,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
 
         if (signInError) {
           logger.error("Phone sign in error", signInError, 'auth');
-          setError("Invalid credentials. / بيانات تسجيل الدخول غير صحيحة.");
+          setError("بيانات تسجيل الدخول غير صحيحة.");
         } else {
           logger.debug("Phone sign in successful", { 
             userId: data.user?.id, 
@@ -275,7 +271,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
         }
       } catch (submitError) {
         logger.error("Phone admin login exception", submitError, 'auth');
-        setError("Login failed. Please try again. / فشل تسجيل الدخول، حاول مرة أخرى.");
+        setError("فشل تسجيل الدخول، حاول مرة أخرى.");
       } finally {
         setIsSubmitting(false);
       }
@@ -295,9 +291,9 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
 
   const getLabel = () => {
     if (contactType === "email") {
-      return "Email / البريد الإلكتروني";
+      return "البريد الإلكتروني";
     }
-    return "Phone / الهاتف";
+    return "الهاتف";
   };
 
   return (
@@ -312,7 +308,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
             )}
           </div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-            Admin Login
+            تسجيل دخول الإدارة
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
             تسجيل دخول الإدارة
@@ -328,7 +324,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
         {/* Contact Type Toggle */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 text-center">
-            Email or Phone / البريد أو الهاتف
+            البريد أو الهاتف
           </label>
           <div className="flex rounded-lg bg-slate-100 dark:bg-slate-700 p-1">
             <button
@@ -341,8 +337,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
               }`}
             >
               <EnvelopeIcon className="w-4 h-4" />
-              <span>Email</span>
-              <span className="text-xs hidden sm:inline">/ البريد الإلكتروني</span>
+              <span>البريد الإلكتروني</span>
             </button>
             <button
               type="button"
@@ -354,8 +349,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
               }`}
             >
               <PhoneIcon className="w-4 h-4" />
-              <span>Phone</span>
-              <span className="text-xs hidden sm:inline">/ الهاتف</span>
+              <span>الهاتف</span>
             </button>
           </div>
         </div>
@@ -395,7 +389,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
 
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Password / كلمة المرور
+              كلمة المرور
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -418,8 +412,8 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
             className="w-full py-3 rounded-lg font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors"
           >
             {isSubmitting || isLoading
-              ? "Signing in... / جاري تسجيل الدخول..."
-              : "Sign In / تسجيل الدخول"}
+              ? "جاري تسجيل الدخول..."
+              : "تسجيل الدخول"}
           </button>
 
           {/* Forgot Password Link */}
@@ -430,7 +424,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
                 onClick={() => setShowForgotPassword(true)}
                 className="text-sm text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors"
               >
-                Forgot Password? / نسيت كلمة المرور؟
+                نسيت كلمة المرور؟
               </button>
             </div>
           )}

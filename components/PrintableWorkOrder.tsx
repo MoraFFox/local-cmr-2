@@ -125,7 +125,7 @@ const PrintableWorkOrder: React.FC<PrintableWorkOrderProps> = ({ onBack, partsLi
 
                 {/* Client & Visit Info */}
                 <section className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
-                    <LinedField label="Company Name" />
+                    <LinedField label="اسم الشركة" />
                     <LinedField label="Visit Date" />
                     <LinedField label="Technician" />
                     <LinedField label="Contact Name" />
@@ -138,7 +138,7 @@ const PrintableWorkOrder: React.FC<PrintableWorkOrderProps> = ({ onBack, partsLi
                         <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 bg-slate-200 -m-2 mb-2 p-2 rounded-t-md border-b-2 border-slate-400">Work Performed</h3>
                         
                         <div className="mb-3 break-inside-avoid">
-                            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Services Performed</h4>
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">الخدمات المنفذة</h4>
                             {Object.keys(serviceGroups).map(category => (
                                 <div key={category} className="mb-2 pl-2">
                                     <p className="text-xs font-semibold text-slate-500">{category}</p>

@@ -22,23 +22,23 @@ type Language = "en" | "ar";
 
 const copy = {
   en: {
-    title: "Emergency Admin Recovery",
-    subtitle: "Create a new admin account",
-    email: "Email",
-    name: "Name (Optional)",
-    password: "Password",
-    confirmPassword: "Confirm Password",
-    submit: "Recover Admin Access",
-    loading: "Recovering access...",
-    back: "Back to Login",
-    required: "Please fill in all required fields.",
-    invalidEmail: "Please enter a valid email address.",
-    passwordShort: "Password must be at least 8 characters.",
-    passwordMismatch: "Passwords do not match.",
-    networkError: "Network error. Please try again.",
+    title: "استعادة وصول المدير للطوارئ",
+    subtitle: "إنشاء حساب مدير جديد",
+    email: "البريد الإلكتروني",
+    name: "الاسم (اختياري)",
+    password: "كلمة المرور",
+    confirmPassword: "تأكيد كلمة المرور",
+    submit: "استعادة وصول الإدارة",
+    loading: "جاري استعادة الوصول...",
+    back: "العودة لتسجيل الدخول",
+    required: "يرجى تعبئة جميع الحقول المطلوبة.",
+    invalidEmail: "يرجى إدخال بريد إلكتروني صالح.",
+    passwordShort: "يجب أن تكون كلمة المرور 8 أحرف على الأقل.",
+    passwordMismatch: "كلمتا المرور غير متطابقتين.",
+    networkError: "خطأ في الشبكة. يرجى المحاولة مرة أخرى.",
     loginFailed:
-      "Account created but auto-login failed. Please login manually.",
-    success: "Recovery successful. Redirecting...",
+      "تم إنشاء الحساب ولكن فشل تسجيل الدخول التلقائي. يرجى تسجيل الدخول يدويًا.",
+    success: "تمت الاستعادة بنجاح. جاري التحويل...",
   },
   ar: {
     title: "استعادة وصول المدير للطوارئ",
@@ -220,7 +220,7 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
                   type="text"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  placeholder={lang === "ar" ? "اسم المدير" : "Admin name"}
+                  placeholder="اسم المدير"
                   className="w-full pr-10 pl-4 py-3 rounded-lg bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
                   dir={lang === "ar" ? "rtl" : "ltr"}
                 />

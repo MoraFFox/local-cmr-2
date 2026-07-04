@@ -71,7 +71,7 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="p-2 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
-        title="Quick Actions"
+        title="إجراءات سريعة"
       >
         <BoltIcon className="w-5 h-5" />
       </button>

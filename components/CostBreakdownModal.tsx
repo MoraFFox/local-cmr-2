@@ -114,7 +114,7 @@ const CostBreakdownModal: React.FC<CostBreakdownModalProps> = ({ isOpen, onClose
                         <>
                             {aggregatedData.totalVisitFees > 0 && (
                                 <CollapsibleSection title={`Visit Fees Total: ${formatCurrency(aggregatedData.totalVisitFees)}`}>
-                                    <CostDetail label="Total for all visit fees" value={aggregatedData.totalVisitFees} />
+                                    <CostDetail label="إجمالي رسوم الزيارات" value={aggregatedData.totalVisitFees} />
                                 </CollapsibleSection>
                             )}
 

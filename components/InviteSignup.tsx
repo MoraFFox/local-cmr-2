@@ -18,31 +18,31 @@ import { logger } from '../utils/logger';
 // ============================================
 const copy = {
   en: {
-    title: 'Accept Invitation',
-    subtitle: "You've been invited to join as",
-    formTitle: 'Create Your Account',
-    nameLabel: 'Name',
-    namePlaceholder: 'Enter your name',
-    emailLabel: 'Email',
-    phoneLabel: 'Phone',
-    passwordLabel: 'Password',
-    passwordPlaceholder: 'Enter password',
-    confirmPasswordLabel: 'Confirm Password',
-    confirmPasswordPlaceholder: 'Confirm password',
-    submitButton: 'Create Account',
-    backButton: 'Back to Login',
-    invalidInvite: 'Invalid or expired invitation',
-    passwordMismatch: 'Passwords do not match',
-    passwordTooShort: 'Password must be at least 8 characters',
-    nameRequired: 'Name is required',
-    creating: 'Creating account...',
-    validating: 'Validating invitation...',
-    networkError: 'Network error. Please try again.',
-    emailRequired: 'Email is required for this invite',
-    emailInvalid: 'Please enter a valid email address',
-    genericInviteNotice: 'This is a generic invitation link. Enter your email to continue.',
-    admin: 'Admin',
-    technician: 'Technician',
+    title: 'قبول الدعوة',
+    subtitle: 'لقد تمت دعوتك للانضمام كـ',
+    formTitle: 'إنشاء حسابك',
+    nameLabel: 'الاسم',
+    namePlaceholder: 'أدخل اسمك',
+    emailLabel: 'البريد الإلكتروني',
+    phoneLabel: 'رقم الهاتف',
+    passwordLabel: 'كلمة المرور',
+    passwordPlaceholder: 'أدخل كلمة المرور',
+    confirmPasswordLabel: 'تأكيد كلمة المرور',
+    confirmPasswordPlaceholder: 'تأكيد كلمة المرور',
+    submitButton: 'إنشاء الحساب',
+    backButton: 'العودة لتسجيل الدخول',
+    invalidInvite: 'الدعوة غير صالحة أو منتهية',
+    passwordMismatch: 'كلمات المرور غير متطابقة',
+    passwordTooShort: 'يجب أن تكون كلمة المرور 8 أحرف على الأقل',
+    nameRequired: 'الاسم مطلوب',
+    creating: 'جاري إنشاء الحساب...',
+    validating: 'جاري التحقق من الدعوة...',
+    networkError: 'خطأ في الشبكة. يرجى المحاولة مرة أخرى.',
+    emailRequired: 'البريد الإلكتروني مطلوب لهذه الدعوة',
+    emailInvalid: 'يرجى إدخال بريد إلكتروني صحيح',
+    genericInviteNotice: 'هذه دعوة عامة. أدخل بريدك الإلكتروني للمتابعة.',
+    admin: 'مدير',
+    technician: 'فني',
   },
   ar: {
     title: 'قبول الدعوة',
@@ -103,9 +103,9 @@ const PasswordStrength: React.FC<PasswordStrengthProps> = ({ password, lang }) =
     if (/[0-9]/.test(pwd)) score++;
     if (/[^A-Za-z0-9]/.test(pwd)) score++;
 
-    if (score <= 2) return { score: 1, label: lang === 'ar' ? 'ضعيفة' : 'Weak', color: 'bg-red-500' };
-    if (score <= 4) return { score: 2, label: lang === 'ar' ? 'متوسطة' : 'Medium', color: 'bg-yellow-500' };
-    return { score: 3, label: lang === 'ar' ? 'قوية' : 'Strong', color: 'bg-green-500' };
+    if (score <= 2) return { score: 1, label: 'ضعيفة', color: 'bg-red-500' };
+    if (score <= 4) return { score: 2, label: 'متوسطة', color: 'bg-yellow-500' };
+    return { score: 3, label: 'قوية', color: 'bg-green-500' };
   };
 
   const strength = getStrength(password);
@@ -199,7 +199,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
           setValidationError(
             lang === 'ar'
               ? `هذه الدعوة مخصصة لدور مختلف (${data.invite.role === 'admin' ? 'مدير' : 'فني'})`
-              : `This invitation is for a different role (${data.invite.role})`
+              : `هذه الدعوة مخصصة لدور مختلف (${data.invite.role === 'admin' ? 'مدير' : 'فني'})`
           );
         } else if (data.invite) {
           setInviteData(data.invite);

@@ -421,8 +421,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
           <div className="flex items-start gap-2">
             <InformationCircleIcon className="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-slate-500 dark:text-slate-400">
-              <p className="font-medium">Account creation is via invite link only.</p>
-              <p className="text-xs mt-0.5">إنشاء الحساب عبر رابط الدعوة فقط. تواصل مع المدير.</p>
+              <p className="font-medium">إنشاء الحساب عبر رابط الدعوة فقط. تواصل مع المدير.</p>
             </div>
           </div>
         </div>

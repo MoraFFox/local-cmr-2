@@ -74,15 +74,15 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
   const handleDelete = (e: React.MouseEvent, barista: AggregatedBarista) => {
     e.stopPropagation();
     if (!barista.sources || barista.sources.length === 0) {
-      alert("Cannot delete this barista (no source found).");
+      alert("لا يمكن حذف هذا الباريستا (لا يوجد مصدر).");
       return;
     }
 
     const count = barista.sources.length;
     const confirmMsg =
       count > 1
-        ? `This barista appears in ${count} places. Are you sure you want to delete them from ALL locations?`
-        : `Are you sure you want to delete ${barista.name}?`;
+        ? `هذا الباريستا يظهر في ${count} أماكن. هل أنت متأكد من حذفه من كل المواقع؟`
+        : `هل أنت متأكد من حذف ${barista.name}؟`;
 
     if (window.confirm(confirmMsg)) {
       onDelete(barista.sources);
@@ -141,10 +141,10 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div>
           <h1 className='text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50'>
-            Barista Performance
+            أداء الباريستا
           </h1>
           <p className='text-slate-600 dark:text-slate-400 mt-1'>
-            Track staff ratings, visits, and maintenance financials.
+            تتبع تقييمات الموظفين والزيارات والمالية الخاصة بالصيانة.
           </p>
         </div>
 
@@ -152,7 +152,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
           <button
             onClick={() => setShowDebug(!showDebug)}
             className={`p-2 rounded-md transition-colors ${showDebug ? "bg-red-100 text-red-700" : "bg-slate-100 text-slate-500"}`}
-            title='Toggle Debug Mode'
+            title='تبديل وضع التصحيح'
           >
             <BugAntIcon className='w-5 h-5' />
           </button>

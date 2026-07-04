@@ -170,13 +170,13 @@ export const servicesList: Service[] = [
 ];
 
 export const contactPositions = [
-  { label: "Manager", value: "manager" },
-  { label: "Operation Manager", value: "ops_manager" },
-  { label: "PR", value: "pr" },
-  { label: "Sales", value: "sales" },
-  { label: "Chief", value: "chief" },
-  { label: "Owner", value: "owner" },
-  { label: "Custom", value: "custom" },
+  { label: "مدير", value: "manager" },
+  { label: "مدير العمليات", value: "ops_manager" },
+  { label: "العلاقات العامة", value: "pr" },
+  { label: "المبيعات", value: "sales" },
+  { label: "الرئيس التنفيذي", value: "chief" },
+  { label: "المالك", value: "owner" },
+  { label: "مخصص", value: "custom" },
 ];
 
 export const problemCategories = [

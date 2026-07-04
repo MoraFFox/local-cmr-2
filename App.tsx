@@ -85,6 +85,7 @@ import { sanitizeString, sanitizeObject } from "./utils/sanitization";
 import { validateSubmissionId, isValidDbId, isLocalId } from "./utils/validation";
 import { useToast } from "./components/ToastContext.tsx";
 import { logger } from "./utils/logger";
+import { useT } from "./utils/i18n";
 
 // FIX: Initialize Gemini API client according to guidelines.
 // The API key MUST be provided via the `process.env.API_KEY` environment variable.
@@ -112,13 +113,13 @@ const initialFormData: FormData = {
 };
 
 const steps = [
-  { id: 1, name: "Company Info" },
-  { id: 2, name: "Branches" },
-  { id: 3, name: "Warehouse" },
-  { id: 4, name: "Team" },
-  { id: 4.5, name: "Client Baristas" },
-  { id: 5, name: "Maintenance" },
-  { id: 6, name: "Review" },
+  { id: 1, name: "معلومات الشركة" },
+  { id: 2, name: "الفروع" },
+  { id: 3, name: "المخزن" },
+  { id: 4, name: "الفريق" },
+  { id: 4.5, name: "باريستا العميل" },
+  { id: 5, name: "الصيانة" },
+  { id: 6, name: "المراجعة" },
 ];
 
 const allPredefinedProblems = problemCategories.flatMap((cat) =>
@@ -200,11 +201,11 @@ const SidebarContent = React.memo(({
       <div
         className={`flex items-center h-16 border-b border-slate-200 dark:border-slate-700 shrink-0 transition-all duration-300 ${isSidebarExpanded ? "justify-start px-6 gap-3" : "justify-center"}`}
       >
-        <img src="/logo.svg" alt="Logo" className="h-8 w-auto object-contain" />
+        <img src="/logo.svg" alt="شعار ميدوز" className="h-8 w-auto object-contain" />
         <h1
           className={`text-xl font-bold transition-opacity duration-200 whitespace-nowrap text-slate-800 dark:text-white ${isSidebarExpanded ? "opacity-100" : "opacity-0 w-0 overflow-hidden"}`}
         >
-          Form Builder
+          ميدوز
         </h1>
       </div>
       <nav className="flex-grow p-2 space-y-2">
@@ -218,7 +219,7 @@ const SidebarContent = React.memo(({
         >
           <HomeIcon className="h-6 w-6 shrink-0" />
           <span className={`truncate ${!isSidebarExpanded && "lg:hidden"}`}>
-            History
+            السجل
           </span>
         </button>
         <button
@@ -232,7 +233,7 @@ const SidebarContent = React.memo(({
           
           <WrenchIcon className="h-6 w-6 shrink-0" />
           <span className={`truncate ${!isSidebarExpanded && "lg:hidden"}`}>
-            Baristas / فنيين الصيانة
+            الفنيون
           </span>
         </button>
         <button
@@ -245,7 +246,7 @@ const SidebarContent = React.memo(({
         >
           <UsersIcon className="h-6 w-6 shrink-0" />
           <span className={`truncate ${!isSidebarExpanded && "lg:hidden"}`}>
-            User Access / إدارة المستخدمين
+            إدارة المستخدمين
           </span>
         </button>
         <button
@@ -258,7 +259,7 @@ const SidebarContent = React.memo(({
         >
           <DocumentTextIcon className="h-6 w-6 shrink-0" />
           <span className={`truncate ${!isSidebarExpanded && "lg:hidden"}`}>
-            Form Builder / بناء النموذج
+            بناء النموذج
           </span>
         </button>
       </nav>
@@ -269,7 +270,7 @@ const SidebarContent = React.memo(({
             <div className="relative flex items-center py-2">
               <div className="flex-grow border-t border-slate-300 dark:border-slate-600"></div>
               <span className="flex-shrink-0 mx-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                Drafts / المسودات
+                المسودات
               </span>
               <div className="flex-grow border-t border-slate-300 dark:border-slate-600"></div>
             </div>
@@ -282,7 +283,7 @@ const SidebarContent = React.memo(({
                 >
                   <div className="flex flex-col truncate">
                     <span className="font-medium truncate">
-                      {draft.formData.companyName || "Untitled Company"}
+                      {draft.formData.companyName || "شركة بدون اسم"}
                     </span>
                     <span className="text-xs opacity-70">
                       {new Date(draft.timestamp).toLocaleDateString()}{" "}
@@ -295,7 +296,7 @@ const SidebarContent = React.memo(({
                   <button
                     onClick={(e) => handleDeleteDraft(e, draft.id)}
                     className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-all"
-                    title="Delete Draft"
+                    title="حذف المسودة"
                   >
                     <XMarkIcon className="w-4 h-4" />
                   </button>
@@ -317,7 +318,7 @@ const SidebarContent = React.memo(({
           >
             <ArrowLeftOnRectangleIcon className="h-6 w-6 shrink-0" />
             <span className={`truncate ${!isSidebarExpanded && "lg:hidden"}`}>
-              Logout / تسجيل الخروج
+              تسجيل الخروج
             </span>
           </button>
         )}
@@ -327,7 +328,7 @@ const SidebarContent = React.memo(({
               // If we are currently editing a draft, confirm starting fresh
               if (
                 window.confirm(
-                  "Start a new form? This will save your current work as a draft.",
+                  "بدء نموذج جديد؟ سيتم حفظ عملك الحالي كمسودة.",
                 )
               ) {
                 setCurrentDraftId(null);
@@ -343,20 +344,20 @@ const SidebarContent = React.memo(({
         >
           <PlusCircleIcon className="h-6 w-6 shrink-0" />
           <span className={`truncate ${!isSidebarExpanded && "lg:hidden"}`}>
-            Add New Company / إضافة شركة جديدة
+            إضافة شركة جديدة
           </span>
         </button>
         <button
           onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
           className={`w-full hidden lg:flex items-center p-2 rounded-md text-sm font-medium text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 transition-colors ${!isSidebarExpanded && "justify-center"}`}
-          aria-label={isSidebarExpanded ? "Collapse sidebar" : "Expand sidebar"}
+          aria-label={isSidebarExpanded ? "طي الشريط الجانبي" : "فتح الشريط الجانبي"}
         >
           {isSidebarExpanded ? (
             <ChevronDoubleLeftIcon className="h-6 w-6 shrink-0" />
           ) : (
             <ChevronDoubleRightIcon className="h-6 w-6 shrink-0" />
           )}
-          {isSidebarExpanded && <span className="ml-2 truncate">Collapse</span>}
+          {isSidebarExpanded && <span className="ms-2 truncate">طي</span>}
         </button>
       </div>
     </>
@@ -1737,21 +1738,21 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
               onRemove={() => removeContact(path, contactIndex)}
               titleContent={
                 <span className="font-semibold">
-                  {contact.name || "New Contact"}
+                  {contact.name || "جهة اتصال جديدة"}
                 </span>
               }
             >
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <TextInput
-                    label="Name"
+                    label="الاسم"
                     name="name"
                     value={contact.name}
                     onChange={(e) => handleContactChange(e, path, contactIndex)}
                   />
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Position
+                      المسمى الوظيفي
                     </label>
                     <select
                       name="position"
@@ -1770,7 +1771,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                   </div>
                   {contact.position === "custom" && (
                     <TextInput
-                      label="Custom Position"
+                      label="مسمى وظيفي مخصص"
                       name="customPosition"
                       value={contact.customPosition || ""}
                       onChange={(e) =>
@@ -1782,7 +1783,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                 </div>
                 <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
                   <h5 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                    Phone Numbers
+                    أرقام الهواتف
                   </h5>
                   <div className="space-y-2">
                     {contact.phoneNumbers.map((phone, phoneIndex) => (
@@ -1803,7 +1804,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                               )
                             }
                             className="block w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg border-slate-200 dark:border-slate-600 shadow-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20"
-                            placeholder="e.g., 0100-123-4567"
+                            placeholder="مثال: 0100-123-4567"
                             maxLength={13}
                           />
                         </div>
@@ -1812,7 +1813,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                             removePhoneNumber(path, contactIndex, phoneIndex)
                           }
                           className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors transform active:scale-95"
-                          aria-label={`Remove phone number`}
+                          aria-label={`إزالة رقم الهاتف`}
                         >
                           <TrashIcon className="w-5 h-5" />
                         </button>
@@ -1824,7 +1825,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                     className="mt-3 w-full justify-center flex items-center gap-1.5 text-sm font-semibold text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-500/10 rounded-md py-2 transition-colors transform active:scale-95"
                   >
                     <PlusCircleIcon className="w-5 h-5" />
-                    Add Phone Number
+                    إضافة رقم هاتف
                   </button>
                 </div>
               </div>
@@ -1833,8 +1834,8 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
         ) : (
           <EmptyState
             icon={<UserGroupIcon className="w-8 h-8" />}
-            title="No Contacts"
-            message="Add key personnel for this location."
+            title="لا توجد جهات اتصال"
+            message="أضف الأفراد الرئيسيين لهذا الموقع."
           />
         )}
       </div>
@@ -1845,54 +1846,54 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
     switch (currentStep) {
       case 1:
         return (
-          <Card title="Company Information">
+          <Card title="معلومات الشركة">
             <div className="space-y-6">
               <TextInput
-                label="Company Name"
+                label="اسم الشركة"
                 name="companyName"
                 value={formData.companyName}
                 onChange={handleChange}
-                placeholder="e.g. The Daily Grind"
+                placeholder="مثال: شركة كافيه ميدوز"
               />
               <TextInput
-                label="Email"
+                label="البريد الإلكتروني"
                 name="email"
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="e.g. manager@dailygrind.com"
+                placeholder="مثال: manager@midoes.com"
               />
               <TextInput
-                label="Tax Number"
+                label="الرقم الضريبي"
                 name="taxNumber"
                 value={formData.taxNumber}
                 onChange={handleChange}
-                placeholder="e.g. 12-3456789"
+                placeholder="مثال: 12-3456789"
               />
               <TextInput
-                label="Location"
+                label="الموقع"
                 name="location"
                 value={formData.location}
                 onChange={handleChange}
-                placeholder="e.g. 123 Coffee St, Seattle, WA"
+                placeholder="مثال: شارع التحرير، القاهرة"
               />
               <div className="pt-8 mt-8 border-t dark:border-slate-700">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 tracking-tight">
-                    Contacts
+                    جهات الاتصال
                   </h3>
                   <button
                     onClick={() => addContact("main")}
                     className="flex items-center gap-2 bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transform active:scale-95"
                   >
                     <PlusCircleIcon className="w-5 h-5" />
-                    <span>Add Contact</span>
+                    <span>إضافة جهة اتصال</span>
                   </button>
                 </div>
                 {renderContacts("main")}
               </div>
               <RadioGroup
-                label="Does this company have multiple branches?"
+                label="هل لدى الشركة عدة فروع؟"
                 name="hasBranches"
                 value={formData.hasBranches}
                 onChange={(val) => handleRadioChange("hasBranches", val)}
@@ -1906,7 +1907,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
               {formData.hasBranches === false && (
                 <div className="pt-6 mt-6 border-t dark:border-slate-700 space-y-6">
                   <RadioGroup
-                    label="Are they using our machines?"
+                    label="هل يستخدمون ماكيناتنا؟"
                     name="usesOurMachines"
                     value={formData.usesOurMachines}
                     onChange={(val) =>
@@ -1921,22 +1922,22 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                   {formData.usesOurMachines === true && (
                     <div className="pl-6 border-l-2 border-slate-200 dark:border-slate-700">
                       <RadioGroup
-                        label="How was the machine acquired?"
+                        label="كيف تم الحصول على الماكينة؟"
                         name="machineOwnershipType"
                         value={formData.machineOwnershipType}
                         onChange={(val) =>
                           handleRadioChange("machineOwnershipType", val)
                         }
                         options={[
-                          { label: "Bought", value: "bought" },
-                          { label: "Leased", value: "leased" },
+                          { label: "شراء", value: "bought" },
+                          { label: "إيجار", value: "leased" },
                         ]}
                         inline
                       />
                       {formData.machineOwnershipType === "leased" && (
                         <div className="mt-4">
                           <TextInput
-                            label="Daily Lease Value (EGP)"
+                            label="قيمة الإيجار اليومي (ج.م)"
                             name="dailyLeaseCost"
                             type="number"
                             value={formData.dailyLeaseCost || ""}
@@ -1955,17 +1956,17 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
       case 2:
         if (!formData.hasBranches) return null;
         return (
-          <Card title="Branch Details">
+          <Card title="تفاصيل الفرع">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 tracking-tight">
-                Branches
+                الفروع
               </h3>
               <button
                 onClick={() => addListItem("branches")}
                 className="flex items-center gap-2 bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transform active:scale-95"
               >
                 <PlusCircleIcon className="w-5 h-5" />
-                Add Branch
+                إضافة فرع
               </button>
             </div>
             <div className="space-y-4">
@@ -1982,13 +1983,13 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                             className="font-bold truncate text-base"
                             title={formData.companyName}
                           >
-                            {formData.companyName || "Company"}
+                            {formData.companyName || "الشركة"}
                           </span>
                           <span className="text-slate-500 dark:text-slate-400">
                             -
                           </span>
                           <span className="truncate text-base">
-                            {branch.branchName || "New Branch"}
+                            {branch.branchName || "فرع جديد"}
                           </span>
                         </div>
                         <div className="flex items-center gap-x-4 text-xs text-slate-500 dark:text-slate-400 mt-1.5">
@@ -2005,8 +2006,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                           )}
                           <span className="flex items-center gap-1">
                             <UserGroupIcon className="w-3.5 h-3.5 shrink-0" />
-                            {branch.baristas.length} Barista
-                            {branch.baristas.length !== 1 ? "s" : ""}
+                            {branch.baristas.length} باريستا
                           </span>
                         </div>
                       </div>
@@ -2014,18 +2014,18 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                   >
                     <div className="space-y-4">
                       <TextInput
-                        label="Branch Name"
+                        label="اسم الفرع"
                         name="branchName"
                         value={branch.branchName || ""}
                         onChange={(e) =>
                           handleListItemChange(e, "branches", index)
                         }
-                        placeholder="e.g. Shrouk (Full name will be Company Name + Branch Name)"
+                        placeholder="مثال: المعادي (الاسم الكامل = اسم الشركة + اسم الفرع)"
                       />
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <TextInput
-                          label="Email"
+                          label="البريد الإلكتروني"
                           name="email"
                           value={branch.email}
                           onChange={(e) =>
@@ -2033,7 +2033,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                           }
                         />
                         <TextInput
-                          label="Tax Number"
+                          label="الرقم الضريبي"
                           name="taxNumber"
                           value={branch.taxNumber || ""}
                           onChange={(e) =>
@@ -2041,7 +2041,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                           }
                         />
                         <TextInput
-                          label="Location"
+                          label="الموقع"
                           name="location"
                           value={branch.location}
                           onChange={(e) =>
@@ -2051,7 +2051,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                         />
                         <div className="md:col-span-2">
                           <RadioGroup
-                            label="Are they using our machines?"
+                            label="هل يستخدمون ماكيناتنا؟"
                             name={`usesOurMachines-${branch.id}`}
                             value={branch.usesOurMachines}
                             onChange={(val) =>
@@ -2075,7 +2075,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                           {branch.usesOurMachines === true && (
                             <div className="pl-6 mt-4 border-l-2 border-slate-200 dark:border-slate-700">
                               <RadioGroup
-                                label="How was the machine acquired?"
+                                label="كيف تم الحصول على الماكينة؟"
                                 name={`machineOwnershipType-${branch.id}`}
                                 value={branch.machineOwnershipType}
                                 onChange={(val) =>
@@ -2091,15 +2091,15 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                                   )
                                 }
                                 options={[
-                                  { label: "Bought", value: "bought" },
-                                  { label: "Leased", value: "leased" },
+                                  { label: "شراء", value: "bought" },
+                                  { label: "إيجار", value: "leased" },
                                 ]}
                                 inline
                               />
                               {branch.machineOwnershipType === "leased" && (
                                 <div className="mt-4">
                                   <TextInput
-                                    label="Daily Lease Value (EGP)"
+                                    label="قيمة الإيجار اليومي (ج.م)"
                                     name="dailyLeaseCost"
                                     type="number"
                                     value={branch.dailyLeaseCost || ""}
@@ -2120,14 +2120,14 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                     <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
                       <div className="flex justify-between items-center mb-4">
                         <h4 className="text-lg font-bold text-slate-700 dark:text-slate-300 tracking-tight">
-                          Contacts
+                          جهات الاتصال
                         </h4>
                         <button
                           onClick={() => addContact(`branch-${index}`)}
                           className="flex items-center gap-2 bg-teal-600 text-white font-bold py-1.5 px-3 rounded-md hover:bg-teal-700 transition-colors text-sm shadow transform active:scale-95"
                         >
                           <PlusCircleIcon className="w-4 h-4" />
-                          <span>Add Contact</span>
+                          <span>إضافة جهة اتصال</span>
                         </button>
                       </div>
                       {renderContacts(`branch-${index}`)}
@@ -2137,13 +2137,13 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                     <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
                       <div className="flex justify-between items-center mb-4">
                         <h4 className="text-lg font-bold text-slate-700 dark:text-slate-300 tracking-tight">
-                          Baristas
+                          الباريستا
                         </h4>
                         <button
                           onClick={() => addNestedListItem(index, "baristas")}
                           className="flex items-center gap-2 bg-teal-600 text-white font-bold py-1.5 px-3 rounded-md hover:bg-teal-700 transition-colors text-sm shadow transform active:scale-95"
                         >
-                          <PlusCircleIcon className="w-4 h-4" /> Add Barista
+                          <PlusCircleIcon className="w-4 h-4" /> إضافة باريستا
                         </button>
                       </div>
                       <div className="space-y-3">
@@ -2161,14 +2161,14 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                               }
                               titleContent={
                                 <span className="font-semibold">
-                                  {barista.name || "New Barista"}
+                                  {barista.name || "باريستا جديد"}
                                 </span>
                               }
                             >
                               <div className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
                                   <TextInput
-                                    label="Name"
+                                    label="الاسم"
                                     name="name"
                                     value={barista.name}
                                     onChange={(e) =>
@@ -2181,7 +2181,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                                     }
                                   />
                                   <TextInput
-                                    label="Phone"
+                                    label="رقم الهاتف"
                                     name="phone"
                                     value={barista.phone}
                                     onChange={(e) =>
@@ -2196,7 +2196,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                                 </div>
                                  <div>
                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                     Notes
+                                     ملاحظات
                                    </label>
                                    <textarea
                                      name="notes"
@@ -2223,10 +2223,10 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                                      className="mt-2 text-sm text-teal-600 dark:text-teal-400 font-semibold disabled:opacity-50 transform active:scale-95 transition-transform"
                                    >
                                      {isLoading
-                                       ? "Generating..."
+                                       ? "جاري الإنشاء..."
                                        : isOnline
-                                         ? "✨ Suggest with AI"
-                                         : "⚠ AI Unavailable Offline"}
+                                         ? "✨ اقتراح بالذكاء الاصطناعي"
+                                         : "⚠ الذكاء الاصطناعي غير متاح دون اتصال"}
                                    </button>
                                  </div>
                               </div>
@@ -2235,8 +2235,8 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                         ) : (
                           <EmptyState
                             icon={<UserGroupIcon className="w-8 h-8" />}
-                            title="No Baristas"
-                            message="Add baristas who work at this branch."
+                            title="لا يوجد باريستا"
+            message="أضف الباريستا الذين يعملون في هذا الفرع."
                           />
                         )}
                       </div>
@@ -2246,7 +2246,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                     <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
                       <div className="flex justify-between items-center mb-4">
                         <h4 className="text-lg font-bold text-slate-700 dark:text-slate-300 tracking-tight">
-                          Client Baristas
+                          باريستا العميل
                         </h4>
                         <button
                           onClick={() =>
@@ -2254,8 +2254,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                           }
                           className="flex items-center gap-2 bg-teal-600 text-white font-bold py-1.5 px-3 rounded-md hover:bg-teal-700 transition-colors text-sm shadow transform active:scale-95"
                         >
-                          <PlusCircleIcon className="w-4 h-4" /> Add Client
-                          Barista
+                          <PlusCircleIcon className="w-4 h-4" /> إضافة باريستا عميل
                         </button>
                       </div>
                       <div className="space-y-3">
@@ -2276,14 +2275,14 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                                 }
                                 titleContent={
                                   <span className="font-semibold">
-                                    {clientBarista.name || "New Client Barista"}
+                                    {clientBarista.name || "باريستا عميل جديد"}
                                   </span>
                                 }
                               >
                                 <div className="space-y-4">
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
                                     <TextInput
-                                      label="Name"
+                                      label="الاسم"
                                       name="name"
                                       value={clientBarista.name}
                                       onChange={(e) =>
@@ -2296,7 +2295,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                                       }
                                     />
                                     <TextInput
-                                      label="Phone"
+                                      label="رقم الهاتف"
                                       name="phone"
                                       value={clientBarista.phone}
                                       onChange={(e) =>
@@ -2311,7 +2310,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                                   </div>
                                   <div>
                                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                      Notes
+                                      ملاحظات
                                     </label>
                                     <textarea
                                       name="notes"
@@ -2335,8 +2334,8 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                         ) : (
                           <EmptyState
                             icon={<UserGroupIcon className="w-8 h-8" />}
-                            title="No Client Baristas"
-                            message="Add client company baristas who work at this branch."
+                            title="لا يوجد باريستا للعميل"
+            message="أضف باريستا شركة العميل الذين يعملون في هذا الفرع."
                           />
                         )}
                       </div>
@@ -2346,7 +2345,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                     <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
                       <div className="flex justify-between items-center mb-4">
                         <h4 className="text-lg font-bold text-slate-700 dark:text-slate-300 tracking-tight">
-                          Maintenance History
+                          سجل الصيانة
                         </h4>
                         <button
                           onClick={() =>
@@ -2354,7 +2353,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                           }
                           className="flex items-center gap-2 bg-teal-600 text-white font-bold py-1.5 px-3 rounded-md hover:bg-teal-700 transition-colors text-sm shadow transform active:scale-95"
                         >
-                          <PlusCircleIcon className="w-4 h-4" /> Add Record
+                          <PlusCircleIcon className="w-4 h-4" /> إضافة سجل
                         </button>
                       </div>
                       <div className="space-y-3">
@@ -2402,8 +2401,8 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                         ) : (
                           <EmptyState
                             icon={<WrenchScrewdriverIcon className="w-8 h-8" />}
-                            title="No Maintenance History"
-                            message="Add maintenance records for this branch."
+                            title="لا يوجد سجل صيانة"
+            message="أضف سجلات الصيانة لهذا الفرع."
                           />
                         )}
                       </div>
@@ -2413,8 +2412,8 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
               ) : (
                 <EmptyState
                   icon={<BuildingOffice2Icon className="w-8 h-8" />}
-                  title="No Branches Added"
-                  message="Click the button above to add the first branch."
+                  title="لم تتم إضافة فروع"
+                  message="اضغط الزر أعلاه لإضافة أول فرع."
                 />
               )}
             </div>
@@ -2422,7 +2421,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
         );
       case 3:
         return (
-          <Card title="Warehouse Information">
+          <Card title="معلومات المخزن">
             <div className="space-y-6">
               <TextInput
                 label="Location"
@@ -2433,14 +2432,14 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
               <div className="pt-8 mt-8 border-t dark:border-slate-700">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 tracking-tight">
-                    Warehouse Contacts
+                    جهات اتصال المخزن
                   </h3>
                   <button
                     onClick={() => addContact("warehouse")}
                     className="flex items-center gap-2 bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transform active:scale-95"
                   >
                     <PlusCircleIcon className="w-5 h-5" />
-                    <span>Add Contact</span>
+                    <span>إضافة جهة اتصال</span>
                   </button>
                 </div>
                 {renderContacts("warehouse")}
@@ -2450,16 +2449,16 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
         );
       case 4:
         return (
-          <Card title="Team / Baristas (Main Office)">
+          <Card title="الفريق / الباريستا (المكتب الرئيسي)">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 tracking-tight">
-                Baristas
+                الباريستا
               </h3>
               <button
                 onClick={() => addListItem("baristas")}
                 className="flex items-center gap-2 bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transform active:scale-95"
               >
-                <PlusCircleIcon className="w-5 h-5" /> Add Barista
+                <PlusCircleIcon className="w-5 h-5" /> إضافة باريستا
               </button>
             </div>
             <div className="space-y-4">
@@ -2471,14 +2470,14 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                     onRemove={() => removeListItem("baristas", index)}
                     titleContent={
                       <span className="font-semibold">
-                        {barista.name || "New Barista"}
+                        {barista.name || "باريستا جديد"}
                       </span>
                     }
                   >
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <TextInput
-                          label="Name"
+                          label="الاسم"
                           name="name"
                           value={barista.name}
                           onChange={(e) =>
@@ -2486,7 +2485,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                           }
                         />
                         <TextInput
-                          label="Phone"
+                          label="رقم الهاتف"
                           name="phone"
                           value={barista.phone}
                           onChange={(e) =>
@@ -2496,7 +2495,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                          Notes
+                          ملاحظات
                         </label>
                         <textarea
                           name="notes"
@@ -2513,10 +2512,10 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                           className="mt-2 text-sm text-teal-600 dark:text-teal-400 font-semibold disabled:opacity-50 transform active:scale-95 transition-transform"
                         >
                           {isLoading
-                            ? "Generating..."
+                            ? "جاري الإنشاء..."
                             : isOnline
-                              ? "✨ Suggest with AI"
-                              : "⚠ AI Unavailable Offline"}
+                              ? "✨ اقتراح بالذكاء الاصطناعي"
+                              : "⚠ الذكاء الاصطناعي غير متاح دون اتصال"}
                         </button>
                       </div>
                     </div>
@@ -2525,8 +2524,8 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
               ) : (
                 <EmptyState
                   icon={<UserGroupIcon className="w-8 h-8" />}
-                  title="No Baristas"
-                  message="Add baristas who work at the main office."
+                  title="لا يوجد باريستا"
+                  message="أضف الباريستا الذين يعملون في المكتب الرئيسي."
                 />
               )}
             </div>
@@ -2534,10 +2533,10 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
         );
       case 4.5:
         return (
-          <Card title="Client Baristas (Main Office)">
+          <Card title="باريستا العميل (المكتب الرئيسي)">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 tracking-tight">
-                Client Baristas
+                باريستا العميل
               </h3>
               <button
                 onClick={() => {
@@ -2557,7 +2556,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                 }}
                 className="flex items-center gap-2 bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transform active:scale-95"
               >
-                <PlusCircleIcon className="w-5 h-5" /> Add Client Barista
+                <PlusCircleIcon className="w-5 h-5" /> إضافة باريستا عميل
               </button>
             </div>
             <div className="space-y-4">
@@ -2569,14 +2568,14 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                     onRemove={() => removeClientBarista(null, index)}
                     titleContent={
                       <span className="font-semibold">
-                        {clientBarista.name || "New Client Barista"}
+                        {clientBarista.name || "باريستا عميل جديد"}
                       </span>
                     }
                   >
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <TextInput
-                          label="Name"
+                          label="الاسم"
                           name="name"
                           value={clientBarista.name}
                           onChange={(e) =>
@@ -2584,7 +2583,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                           }
                         />
                         <TextInput
-                          label="Phone"
+                          label="رقم الهاتف"
                           name="phone"
                           value={clientBarista.phone}
                           onChange={(e) =>
@@ -2594,7 +2593,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                          Notes
+                          ملاحظات
                         </label>
                         <textarea
                           name="notes"
@@ -2612,8 +2611,8 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
               ) : (
                 <EmptyState
                   icon={<UserGroupIcon className="w-8 h-8" />}
-                  title="No Client Baristas"
-                  message="Add client company baristas who work with your machines."
+                  title="لا يوجد باريستا للعميل"
+                  message="أضف باريستا شركة العميل الذين يعملون مع ماكيناتنا."
                 />
               )}
             </div>
@@ -2621,16 +2620,16 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
         );
       case 5:
         return (
-          <Card title="Maintenance History (Main Office)">
+          <Card title="سجل الصيانة (المكتب الرئيسي)">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 tracking-tight">
-                Maintenance Records
+                سجلات الصيانة
               </h3>
               <button
                 onClick={() => addListItem("maintenanceHistory")}
                 className="flex items-center gap-2 bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transform active:scale-95"
               >
-                <PlusCircleIcon className="w-5 h-5" /> Add Record
+                <PlusCircleIcon className="w-5 h-5" /> إضافة سجل
               </button>
             </div>
             <div className="space-y-4">
@@ -2666,7 +2665,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
               ) : (
                 <EmptyState
                   icon={<WrenchScrewdriverIcon className="w-8 h-8" />}
-                  title="No Maintenance History"
+                  title="لا يوجد سجل صيانة"
                   message="Add maintenance records for the main office."
                 />
               )}
@@ -2847,7 +2846,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
         <div className="w-full">
           {isLoading && submissions.length === 0 ? (
             <div className="text-center text-slate-600 dark:text-slate-400 pt-12">
-              Loading history...
+              جاري تحميل السجل...
             </div>
           ) : (
             <HistoryPage
@@ -2885,7 +2884,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
               ) : (
                 <EyeIcon className="w-5 h-5" />
               )}
-              {showPreview ? "Hide Preview" : "Live Preview"}
+              {showPreview ? "إخفاء المعاينة" : "معاينة حية"}
             </button>
           </div>
           <StepIndicator steps={visibleSteps} currentStep={currentStep} />
@@ -2902,7 +2901,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
           <div className="hidden lg:block w-1/2 border-l border-slate-200 dark:border-slate-700 pl-6 h-[calc(100vh-140px)] overflow-y-auto sticky top-4 animate-item-fade-in-down custom-scrollbar">
             <div className="sticky top-0 bg-slate-100 dark:bg-slate-900 pt-2 pb-4 z-10 border-b border-slate-200 dark:border-slate-700 mb-4">
               <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
-                <EyeIcon className="w-4 h-4" /> Live Preview
+                <EyeIcon className="w-4 h-4" /> معاينة حية
               </h3>
             </div>
             <div className="pb-10">
@@ -2921,7 +2920,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
           <div className="lg:hidden fixed inset-0 z-50 bg-white dark:bg-slate-900 overflow-y-auto animate-content-fade-in">
             <div className="sticky top-0 bg-white dark:bg-slate-900 p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center shadow-md">
               <h3 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                <EyeIcon className="w-5 h-5 text-teal-600" /> Live Preview
+                <EyeIcon className="w-5 h-5 text-teal-600" /> معاينة حية
               </h3>
               <button
                 onClick={() => setShowPreview(false)}
@@ -2950,14 +2949,14 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
     view === "form"
       ? visibleSteps.find((s) => s.id === currentStep)?.name || "Form"
       : view === "print"
-        ? "Print Work Order"
+        ? "طباعة أمر العمل"
         : view === "details"
-          ? "Submission Details"
+          ? "تفاصيل السجل"
           : view === "baristas" || view === "barista-details"
-            ? "Barista Performance"
+            ? "أداء الباريستا"
             : view === "technicians"
-              ? "User Access / إدارة المستخدمين"
-              : "Submission History";
+              ? "إدارة المستخدمين"
+              : "سجل عمليات الإرسال";
 
   return (
     <div className="h-[100dvh] overflow-hidden flex bg-gradient-to-br from-slate-100 to-teal-50 dark:from-slate-900 dark:to-teal-900/20">
@@ -3023,7 +3022,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
               <div className="flex items-center gap-3 overflow-hidden">
                 <img
                   src="/logo.svg"
-                  alt="Logo"
+                  alt="شعار ميدوز"
                   className="h-8 w-auto object-contain"
                 />
                 <h1 className="text-lg font-bold text-slate-800 dark:text-white truncate">
@@ -3046,14 +3045,13 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
             {!isOnline && (
               <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 px-4 py-2 text-center text-sm font-medium border-b border-amber-200 dark:border-amber-800 flex items-center justify-center gap-2 shrink-0">
                 <SignalSlashIcon className="w-4 h-4" />
-                You are currently offline. Changes will be saved locally and
-                synced when connection is restored.
+                أنت غير متصل حالياً. سيتم حفظ التغييرات محلياً ومزامنتها عند عودة الاتصال.
               </div>
             )}
             {isSyncing && (
               <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 px-4 py-2 text-center text-sm font-medium border-b border-blue-200 dark:border-blue-800 flex items-center justify-center gap-2 shrink-0">
                 <CloudArrowUpIcon className="w-4 h-4 animate-bounce" />
-                Syncing offline changes...
+                جاري مزامنة التغييرات دون اتصال...
               </div>
             )}
 
@@ -3078,8 +3076,8 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
             isOpen={deleteCandidateId !== null}
             onClose={cancelDelete}
             onConfirm={confirmDelete}
-            title="Confirm Deletion"
-            message="Are you sure you want to delete this submission? This action cannot be undone."
+            title="تأكيد الحذف"
+            message="هل أنت متأكد من حذف هذا السجل؟ لا يمكن التراجع عن هذا الإجراء."
             isConfirming={isDeleting}
           />
     </div>
