@@ -94,7 +94,7 @@ const SelectDrawer: React.FC<SelectDrawerProps> = ({
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 placeholder="Search..."
-                                className="w-full bg-slate-800 text-white rounded-lg pl-10 pr-4 py-3 border border-slate-700 focus:outline-none focus:border-teal-500 transition-colors"
+                                className="w-full bg-slate-800 text-white rounded-lg pl-10 pr-4 py-3 border border-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus:border-teal-500 transition-colors"
                             />
                         </div>
                     )}

@@ -162,7 +162,7 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
           </button>
         </div>
 
-        <div className="rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-black/5 dark:border-white/10 shadow-2xl p-8">
+        <div className="rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-black/5 dark:border-white/10 shadow-sm p-8">
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
               <ShieldCheckIcon className="w-8 h-8 text-red-600 dark:text-red-400" />

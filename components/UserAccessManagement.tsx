@@ -826,7 +826,7 @@ const UserAccessManagement: React.FC = () => {
 
           {/* Invitations List */}
           {filteredInvitations.length === 0 ? (
-            <div className="text-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-12 rounded-2xl shadow-xl border border-black/5 dark:border-white/5">
+            <div className="text-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-black/5 dark:border-white/5">
               <UserPlusIcon className="mx-auto h-12 w-12 text-slate-400" />
               <h2 className="mt-4 text-lg font-semibold text-slate-700 dark:text-slate-200">
                 {t.noInvitations}
@@ -945,7 +945,7 @@ const UserAccessManagement: React.FC = () => {
               <ArrowPathIcon className="w-8 h-8 text-teal-500 animate-spin" />
             </div>
           ) : legacyBuckets.length === 0 ? (
-            <div className="text-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-12 rounded-2xl shadow-xl border border-black/5 dark:border-white/5">
+            <div className="text-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-black/5 dark:border-white/5">
               <DocumentTextIcon className="mx-auto h-12 w-12 text-slate-400" />
               <h2 className="mt-4 text-lg font-semibold text-slate-700 dark:text-slate-200">
                 {t.noLegacyRecords}
@@ -1319,7 +1319,7 @@ const UserAccessManagement: React.FC = () => {
 
           {/* Users List */}
           {users.length === 0 ? (
-            <div className="text-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-12 rounded-2xl shadow-xl border border-black/5 dark:border-white/5">
+            <div className="text-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-black/5 dark:border-white/5">
               <UsersIcon className="mx-auto h-12 w-12 text-slate-400" />
               <h2 className="mt-4 text-lg font-semibold text-slate-700 dark:text-slate-200">
                 {t.noUsers}

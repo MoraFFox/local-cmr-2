@@ -117,7 +117,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
 
       {/* Bottom Sheet */}
       <div className="fixed inset-x-0 bottom-0 z-50 animate-slide-up" dir="rtl">
-        <div className="bg-white dark:bg-slate-800 rounded-t-2xl shadow-2xl max-w-lg mx-auto">
+        <div className="bg-white dark:bg-slate-800 rounded-t-2xl shadow-sm max-w-lg mx-auto">
           {/* Drag Handle */}
           <div className="flex justify-center pt-3 pb-2">
             <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />

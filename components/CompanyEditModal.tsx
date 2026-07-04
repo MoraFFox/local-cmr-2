@@ -106,7 +106,7 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
             <div 
                 role="dialog" 
                 aria-modal="true" 
-                className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg my-4 sm:my-0 overflow-hidden animate-scale-in"
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm w-full max-w-lg my-4 sm:my-0 overflow-hidden animate-scale-in"
             >
                 {/* Header */}
                 <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">

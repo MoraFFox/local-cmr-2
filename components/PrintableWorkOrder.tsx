@@ -108,7 +108,7 @@ const PrintableWorkOrder: React.FC<PrintableWorkOrderProps> = ({ onBack, partsLi
                 </button>
             </div>
 
-            <div className="max-w-4xl mx-auto bg-white p-4 sm:p-8 shadow-2xl rounded-lg font-sans text-slate-800 print:shadow-none print:rounded-none">
+            <div className="max-w-4xl mx-auto bg-white p-4 sm:p-8 shadow-sm rounded-lg font-sans text-slate-800 print:shadow-none print:rounded-none">
                 {/* Header */}
                 <header className="flex justify-between items-center pb-3 border-b-2 border-slate-700">
                     <div>

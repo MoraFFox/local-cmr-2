@@ -39,6 +39,10 @@ const PayerSegmentedControl: React.FC<PayerSegmentedControlProps> = ({
     >
       <button
         type="button"
+        role="radio"
+        aria-checked={value === "client"}
+        role="radio"
+        aria-checked={value === "company"}
         onClick={handleMidosClick}
         disabled={disabled}
         className={`rounded-lg transition-all duration-300 font-bold tracking-wide ${sizeClasses[size]} ${
@@ -51,6 +55,10 @@ const PayerSegmentedControl: React.FC<PayerSegmentedControlProps> = ({
       </button>
       <button
         type="button"
+        role="radio"
+        aria-checked={value === "client"}
+        role="radio"
+        aria-checked={value === "company"}
         onClick={handleClientClick}
         disabled={disabled}
         className={`rounded-lg transition-all duration-300 font-bold tracking-wide ${sizeClasses[size]} ${

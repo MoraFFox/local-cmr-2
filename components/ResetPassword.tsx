@@ -135,7 +135,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
   if (!isValidSession) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-100 to-teal-50 dark:from-slate-900 dark:to-teal-900/20 flex items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-black/5 dark:border-white/10 shadow-2xl p-8">
+        <div className="w-full max-w-md rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-black/5 dark:border-white/10 shadow-sm p-8">
           <div className="text-center">
             <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
               <ExclamationCircleIcon className="w-8 h-8 text-red-600 dark:text-red-400" />
@@ -162,7 +162,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-100 to-teal-50 dark:from-slate-900 dark:to-teal-900/20 flex items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-black/5 dark:border-white/10 shadow-2xl p-8">
+        <div className="w-full max-w-md rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-black/5 dark:border-white/10 shadow-sm p-8">
           <div className="text-center">
             <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircleIcon className="w-8 h-8 text-green-600 dark:text-green-400" />
@@ -188,7 +188,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
   // Password reset form
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 to-teal-50 dark:from-slate-900 dark:to-teal-900/20 flex items-center justify-center p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-black/5 dark:border-white/10 shadow-2xl p-8">
+      <div className="w-full max-w-md rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-black/5 dark:border-white/10 shadow-sm p-8">
         {/* Back Button */}
         {onBack && (
           <button

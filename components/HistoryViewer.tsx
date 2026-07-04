@@ -123,7 +123,7 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col animate-scale-in">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm w-full max-w-3xl max-h-[85vh] flex flex-col animate-scale-in">
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
                     <div className="flex items-center gap-3">
@@ -284,7 +284,7 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
             {/* Confirm Restore Modal */}
             {showConfirmRestore && selectedSnapshot && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-6 animate-scale-in">
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm w-full max-w-md p-6 animate-scale-in">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
                                 <ExclamationTriangleIcon className="w-6 h-6 text-amber-600 dark:text-amber-400" />

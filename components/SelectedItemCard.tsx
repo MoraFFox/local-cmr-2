@@ -45,7 +45,7 @@ const SelectedItemCard: React.FC<SelectedItemCardProps> = ({
 
   return (
     <div
-      className={`relative group rounded-xl border backdrop-blur-md transition-all duration-300 ${borderColorClass} ${
+      className={`relative group rounded-xl border backdrop-blur-sm transition-all duration-300 ${borderColorClass} ${
         viewMode === 'list' 
           ? 'p-3 flex items-center justify-between gap-4' 
           : 'p-4 flex flex-col gap-4'

@@ -128,7 +128,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
             <div 
                 role="dialog"
                 aria-modal="true"
-                className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-scale-in"
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm w-full max-w-4xl max-h-[90vh] flex flex-col animate-scale-in"
             >
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">

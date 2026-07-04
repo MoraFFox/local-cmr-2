@@ -1095,7 +1095,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
     <div className="h-[100dvh] overflow-hidden flex bg-gradient-to-br from-slate-100 to-teal-50 dark:from-slate-900 dark:to-teal-900/20">
           {/* Desktop Sidebar */}
           <aside
-            className={`bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-r border-black/5 dark:border-white/5 text-slate-900 dark:text-white flex-col fixed h-full transition-all duration-300 ease-in-out hidden lg:flex shadow-2xl ${isSidebarExpanded ? "w-64" : "w-20"}`}
+            className={`bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-r border-black/5 dark:border-white/5 text-slate-900 dark:text-white flex-col fixed h-full transition-all duration-300 ease-in-out hidden lg:flex shadow-sm ${isSidebarExpanded ? "w-64" : "w-20"}`}
           >
             <SidebarContent 
               view={view}
@@ -1121,7 +1121,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
           <div
             className={`fixed inset-0 z-40 flex lg:hidden ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-300 ease-in-out`}
           >
-            <aside className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white flex flex-col w-64 h-full shadow-2xl">
+            <aside className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white flex flex-col w-64 h-full shadow-sm">
               <SidebarContent 
                 view={view}
                 isSidebarExpanded={isSidebarExpanded}
@@ -1151,7 +1151,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
           <div
             className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out lg:${isSidebarExpanded ? "ml-64" : "ml-20"}`}
           >
-            <header className="sticky top-0 z-30 flex items-center justify-between lg:hidden h-16 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 px-4 shrink-0">
+            <header className="sticky top-0 z-30 flex items-center justify-between lg:hidden h-16 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 px-4 shrink-0">
               <div className="flex items-center gap-3 overflow-hidden">
                 <img
                   src="/logo.svg"
@@ -1163,6 +1163,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                 </h1>
               </div>
               <button
+                aria-label="القائمة"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="p-2 rounded-md text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
               >

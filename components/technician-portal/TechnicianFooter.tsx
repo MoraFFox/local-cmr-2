@@ -28,7 +28,7 @@ const TechnicianFooter: React.FC<TechnicianFooterProps> = ({
         
         {/* Validation Error Banner */}
         {validationError && (
-            <div className="animate-in slide-in-from-bottom-2 fade-in bg-red-500/10 border border-red-500/50 rounded-xl p-3 flex items-center gap-3 backdrop-blur-md">
+            <div className="animate-in slide-in-from-bottom-2 fade-in bg-red-500/10 border border-red-500/50 rounded-xl p-3 flex items-center gap-3 backdrop-blur-sm">
                 <ExclamationTriangleIcon className="w-5 h-5 text-red-400 shrink-0" />
                 <span className="text-sm font-bold text-red-200">{validationError}</span>
             </div>

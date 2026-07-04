@@ -87,7 +87,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl bg-white dark:bg-slate-800 shadow-2xl p-6 relative">
+      <div className="w-full max-w-md rounded-2xl bg-white dark:bg-slate-800 shadow-sm p-6 relative">
         {/* Close Button */}
         <button
           onClick={handleClose}
@@ -298,7 +298,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 to-teal-50 dark:from-slate-900 dark:to-teal-900/20 flex items-center justify-center p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-black/5 dark:border-white/10 shadow-2xl p-8">
+      <div className="w-full max-w-md rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-black/5 dark:border-white/10 shadow-sm p-8">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-teal-100 dark:bg-teal-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
             {contactType === "email" ? (

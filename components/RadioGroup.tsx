@@ -20,7 +20,7 @@ interface RadioGroupProps {
 const RadioGroup: React.FC<RadioGroupProps> = ({ name, label, options, value, onChange, inline, disabled = false }) => {
     if (inline) {
         return (
-            <div className={disabled ? 'opacity-60' : ''}>
+            <div role="radiogroup" aria-label={label} className={disabled ? 'opacity-60' : ''}>
                 {label && <label className="text-sm font-medium text-slate-700 dark:text-slate-300 block mb-3">{label}</label>}
                 <div className="flex flex-wrap gap-3">
                     {options.map((option) => {
@@ -29,6 +29,8 @@ const RadioGroup: React.FC<RadioGroupProps> = ({ name, label, options, value, on
                             <button
                                 key={option.label}
                                 type="button"
+                                role="radio"
+                                aria-checked={isSelected}
                                 onClick={() => !disabled && onChange(option.value)}
                                 disabled={disabled}
                                 className={`
@@ -59,7 +61,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({ name, label, options, value, on
     }
 
     return (
-        <div className={disabled ? 'opacity-60' : ''}>
+        <div role="radiogroup" aria-label={label} className={disabled ? 'opacity-60' : ''}>
             {label && <label className="text-sm font-medium text-slate-700 dark:text-slate-300 block mb-3">{label}</label>}
             <div className="space-y-2">
                 {options.map((option) => {
@@ -68,6 +70,8 @@ const RadioGroup: React.FC<RadioGroupProps> = ({ name, label, options, value, on
                         <button
                             key={option.label}
                             type="button"
+                                role="radio"
+                                aria-checked={isSelected}
                             onClick={() => !disabled && onChange(option.value)}
                             disabled={disabled}
                             className={`

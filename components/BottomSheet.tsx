@@ -85,7 +85,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
             <div 
                 role="dialog"
                 aria-modal="true"
-                className={`relative w-full bg-slate-900 dark:bg-slate-900 rounded-t-3xl shadow-2xl transition-transform duration-300 ease-out transform pb-safe ${
+                className={`relative w-full bg-slate-900 dark:bg-slate-900 rounded-t-3xl shadow-sm transition-transform duration-300 ease-out transform pb-safe ${
                     isVisible ? 'translate-y-0' : 'translate-y-full'
                 }`}
                 style={{ 

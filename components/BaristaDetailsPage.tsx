@@ -138,7 +138,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
         <div className='p-6 sm:p-8 flex flex-col md:flex-row gap-8 items-center md:items-start text-center md:text-left'>
           <Avatar
             name={baristaName}
-            className='w-32 h-32 text-4xl shadow-2xl border-4 border-white dark:border-slate-700'
+            className='w-32 h-32 text-4xl shadow-sm border-4 border-white dark:border-slate-700'
           />
 
           <div className='flex-grow space-y-4'>
@@ -395,7 +395,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
       {/* Record Detail Modal */}
       {selectedRecord && (
         <div className='fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300'>
-          <div className='bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col xl:scale-100 scale-95 transition-transform'>
+          <div className='bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col xl:scale-100 scale-95 transition-transform'>
             {/* Modal Header */}
             <div className='px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50'>
               <div>

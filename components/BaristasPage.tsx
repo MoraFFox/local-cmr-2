@@ -477,7 +477,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
       {editingBarista && (
         <div className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200'>
           <div
-            className='bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md p-6'
+            className='bg-white dark:bg-slate-800 rounded-xl shadow-sm w-full max-w-md p-6'
             onClick={(e) => e.stopPropagation()}
           >
             <div className='flex justify-between items-center mb-4'>

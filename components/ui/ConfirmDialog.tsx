@@ -41,7 +41,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
       <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" onClick={onClose} />
       <div 
-        className="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md p-6 overflow-hidden animate-scale-in flex flex-col max-h-[90dvh]"
+        className="relative bg-white dark:bg-slate-800 rounded-xl shadow-sm w-full max-w-md p-6 overflow-hidden animate-scale-in flex flex-col max-h-[90dvh]"
         role="dialog" 
         aria-modal="true" 
         aria-labelledby="confirm-title"

@@ -411,9 +411,9 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
   };
 
   const textAreaClasses =
-    "block w-full px-5 py-4 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 border border-slate-200 dark:border-slate-600 shadow-sm";
+    "block w-full px-5 py-4 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 border border-slate-200 dark:border-slate-600 shadow-sm";
   const selectClasses =
-    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 border border-slate-200 dark:border-slate-600 shadow-sm";
+    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 border border-slate-200 dark:border-slate-600 shadow-sm";
 
   return (
     <CollapsibleCard
@@ -515,7 +515,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                     key={star}
                     type="button"
                     onClick={() => handleRatingChange(star)}
-                    className="focus:outline-none transform active:scale-110 transition-transform"
+                    className="focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 transform active:scale-110 transition-transform"
                   >
                     {star <= (record.visitRating || 0) ? (
                       <StarIconSolid className="w-6 h-6 text-yellow-400" />

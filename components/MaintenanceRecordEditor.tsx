@@ -927,7 +927,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                     <button 
                       onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: "before" })} 
                       className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                      title="إزالة الصورة"
+                      title="إزالة الصورة" aria-label="إزالة الصورة"
                     >
                       <XMarkIcon className="w-4 h-4" />
                     </button>
@@ -976,7 +976,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                     <button 
                       onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: "after" })} 
                       className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                      title="إزالة الصورة"
+                      title="إزالة الصورة" aria-label="إزالة الصورة"
                     >
                       <XMarkIcon className="w-4 h-4" />
                     </button>
@@ -1011,7 +1011,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       <button 
                         onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: "legacy" })} 
                         className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                        title="إزالة الصورة"
+                        title="إزالة الصورة" aria-label="إزالة الصورة"
                       >
                         <XMarkIcon className="w-4 h-4" />
                       </button>
@@ -1065,7 +1065,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
           }
           setConfirmPhotoDelete(null);
         }}
-        title="إزالة الصورة"
+        title="إزالة الصورة" aria-label="إزالة الصورة"
         message="هل أنت متأكد من رغبتك في إزالة هذه الصورة؟ لا يمكن التراجع عن هذا الإجراء."
         confirmLabel="نعم، إزالة"
       />
