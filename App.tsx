@@ -1,6 +1,7 @@
 /** @format */
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { Routes, Route, useNavigate, useLocation, useParams } from "react-router-dom";
 // FIX: Use correct import for GoogleGenAI
 import { GoogleGenAI } from "@google/genai";
 import { supabase } from "./supabaseClient";
@@ -178,6 +179,20 @@ interface AppProps {
 }
 
 const App: React.FC<AppProps> = ({ onAdminLogout }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const setViewWrapper = (v: any) => {
+    if (v === 'history') navigate('/');
+    else if (v === 'baristas') navigate('/baristas');
+    else if (v === 'maintenance-edit') navigate(`/companies/${selectedSubmission?.id}/maintenance`);
+    else if (v === 'barista-details') navigate(`/baristas/${selectedBarista}`);
+    else if (v === 'form') navigate('/companies/new');
+    else if (v === 'print') navigate('/print');
+    else if (v === 'details') navigate(`/companies/${selectedSubmission?.id}`);
+    else if (v === 'technicians') navigate('/users');
+  };
+
   const [view, setView] = useState<
     | "history"
     | "form"
@@ -473,7 +488,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
       setFormData(draft.formData);
       setCurrentStep(draft.currentStep);
       setCurrentDraftId(draft.id);
-      setView("form");
+      navigate("/companies/new");
       if (window.innerWidth < 1024) setIsSidebarExpanded(false);
     }
   };
@@ -504,7 +519,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
     setCurrentDraftId(null);
     setFormData(initialFormData);
     setCurrentStep(1);
-    setView("form");
+    navigate("/companies/new");
   };
 
   // Fix 3.6: Conflict detection helper for sync resolution
@@ -708,7 +723,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
 
   const handleEdit = (submission: FormData) => {
     setFormData(submission);
-    setView("form");
+    navigate("/companies/new");
     setCurrentStep(1);
     setShowPreview(false);
   };
@@ -770,7 +785,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
 
   const handleViewDetails = (submission: FormData & { created_at: string }) => {
     setSelectedSubmission(submission);
-    setView("details");
+    navigate(`/companies/${submission.id}`);
     setShowPreview(false);
   };
 
@@ -830,13 +845,13 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   const handleAddNew = () => {
     setFormData(initialFormData);
     setCurrentStep(1);
-    setView("form");
+    navigate("/companies/new");
     setIsMobileMenuOpen(false);
     setShowPreview(false);
   };
 
   const handlePrintRequest = () => {
-    setView("print");
+    navigate("/print");
     setIsMobileMenuOpen(false);
     setShowPreview(false);
   };
@@ -844,7 +859,10 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   const handleViewChange = (
     newView: "history" | "form" | "baristas" | "technicians",
   ) => {
-    setView(newView);
+    if (newView === "history") navigate("/");
+    else if (newView === "form") navigate("/companies/new");
+    else if (newView === "baristas") navigate("/baristas");
+    else if (newView === "technicians") navigate("/users");;
     setIsMobileMenuOpen(false);
     if (
       newView === "history" ||
@@ -991,19 +1009,19 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   };
 
   const renderCurrentView = () => {
-    if (view === "print") return <PrintView setView={setView} />;
+    if (view === "print") return <PrintView setView={setViewWrapper} />;
     if (view === "details") return (
       <SubmissionDetailsView 
         selectedSubmission={selectedSubmission} 
         setSelectedSubmission={setSelectedSubmission} 
-        setView={setView} 
+        setView={setViewWrapper} 
       />
     );
     if (view === "baristas") return (
       <BaristasView 
         submissions={submissions} 
         setSelectedBarista={setSelectedBarista} 
-        setView={setView} 
+        setView={setViewWrapper} 
         handleDeleteBarista={handleDeleteBarista} 
         handleUpdateBarista={handleUpdateBarista} 
       />
@@ -1012,14 +1030,14 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
       <BaristaDetailsView 
         selectedBarista={selectedBarista} 
         submissions={submissions} 
-        setView={setView} 
+        setView={setViewWrapper} 
       />
     );
     if (view === "maintenance-edit") return (
       <MaintenanceEditView 
         selectedSubmission={selectedSubmission} 
         setSelectedSubmission={setSelectedSubmission} 
-        setView={setView} 
+        setView={setViewWrapper} 
         handleUpdateCompany={handleUpdateCompany} 
         allPredefinedProblems={allPredefinedProblems} 
         isSidebarExpanded={isSidebarExpanded} 
@@ -1037,7 +1055,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
         handleViewDetails={handleViewDetails} 
         handleUpdateCompany={handleUpdateCompany} 
         setSelectedSubmission={setSelectedSubmission} 
-        setView={setView} 
+        setView={setViewWrapper} 
         getTechnicianDisplayName={getTechnicianDisplayName} 
       />
     );
@@ -1053,7 +1071,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
         setCurrentDraftId={setCurrentDraftId} 
         drafts={drafts} 
         setDrafts={setDrafts} 
-        setView={setView} 
+        setView={setViewWrapper} 
         setSubmissions={setSubmissions} 
       />
     );
@@ -1094,7 +1112,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
               setCurrentDraftId={setCurrentDraftId}
               setFormData={setFormData}
               setCurrentStep={setCurrentStep}
-              setView={setView}
+              setView={setViewWrapper}
             />
           </aside>
 
@@ -1119,7 +1137,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                 setCurrentDraftId={setCurrentDraftId}
                 setFormData={setFormData}
                 setCurrentStep={setCurrentStep}
-                setView={setView}
+                setView={setViewWrapper}
               />
             </aside>
             <div

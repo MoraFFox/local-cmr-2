@@ -15,7 +15,8 @@
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.8.4",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^6.30.4"
   },
   "devDependencies": {
     "@fontsource/cairo": "^5.2.7",
