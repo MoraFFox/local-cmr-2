@@ -130,3 +130,43 @@
 .animate-gentle-bounce {
     animation: gentleBounce 2s ease-in-out infinite;
 }
+
+/* Inline validation shake */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+.animate-shake {
+  animation: shake 0.3s ease-in-out;
+}
+
+/* Toast slide-in from top-right */
+@keyframes toastSlideIn {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.animate-toast-slide-in {
+  animation: toastSlideIn 0.3s ease-out forwards;
+}
+
+/* Skeleton loading */
+@keyframes skeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.animate-skeleton {
+  background: linear-gradient(90deg, #1A434C 25%, #2a5862 50%, #1A434C 75%);
+  background-size: 200% 100%;
+  animation: skeleton 1.5s infinite linear;
+}
+
+/* Completion burst */
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0.5); }
+  70% { transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.animate-pop-in {
+  animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
