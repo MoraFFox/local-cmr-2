@@ -170,3 +170,33 @@
 .animate-pop-in {
   animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
+
+/* Stepper pulse glow around active/completed step circles */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+.animate-pulse-glow {
+  animation: pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Shimmer sweep across the mobile progress bar fill */
+@keyframes shimmerSweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+.animate-shimmer-sweep {
+  animation: shimmerSweep 2s ease-in-out infinite;
+}
+
+

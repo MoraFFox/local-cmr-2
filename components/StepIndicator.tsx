@@ -1,4 +1,5 @@
 import React from 'react';
+import { CheckIcon } from '@heroicons/react/24/solid';
 
 interface Step {
     id: number;
@@ -18,36 +19,80 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ steps, currentStep }) => 
         <div className="w-full">
             {/* Desktop horizontal stepper */}
             <div className="hidden sm:block overflow-x-auto pb-4 -mb-4">
-                <ol className="flex items-start min-w-max">
+                <ol className="flex items-center min-w-max">
                     {steps.map((step, index) => {
                         const isCompleted = currentStep > step.id;
                         const isCurrent = currentStep === step.id;
+                        const isFuture = !isCurrent && !isCompleted;
 
                         return (
                             <React.Fragment key={step.id}>
-                                <li className="relative flex flex-col items-center justify-start w-20 md:w-28">
-                                    <div
-                                        className={`flex items-center justify-center h-8 w-8 rounded-full border-2 transition-all duration-300 z-10 ${
-                                            isCurrent ? 'border-success-500 bg-white dark:bg-slate-800 scale-110' :
-                                            isCompleted ? 'border-success-500 bg-success-500' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'
-                                        }`}
-                                        aria-current={isCurrent ? 'step' : undefined}
-                                    >
-                                        {isCompleted ? (
-                                            <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                            </svg>
-                                        ) : isCurrent ? (
-                                            <span className="h-2.5 w-2.5 rounded-full bg-success-500" />
-                                        ) : null}
+                                {/* Step node */}
+                                <li className="relative flex flex-col items-center w-20 md:w-28">
+                                    {/* Circle indicator */}
+                                    <div className="relative">
+                                        {/* Glow ring for active/completed */}
+                                        {(isCurrent || isCompleted) && (
+                                            <span
+                                                className={`absolute -inset-1.5 rounded-full animate-pulse-glow ${
+                                                    isCurrent ? 'bg-lava-500/15' : 'bg-lava-500/10'
+                                                }`}
+                                            />
+                                        )}
+
+                                        <div
+                                            className={`relative flex items-center justify-center h-9 w-9 rounded-full border-2 transition-all duration-300 z-10 ${
+                                                isCurrent
+                                                    ? 'border-lava-500 bg-lava-500 text-onyx shadow-[0_0_14px_rgba(230,57,35,0.35)] scale-110'
+                                                    : isCompleted
+                                                    ? 'border-lava-500 bg-lava-500 text-onyx shadow-[0_0_10px_rgba(230,57,35,0.25)]'
+                                                    : 'border-sea/50 bg-deep text-sage'
+                                            }`}
+                                            aria-current={isCurrent ? 'step' : undefined}
+                                        >
+                                            {isCompleted ? (
+                                                <CheckIcon className="w-4 h-4 animate-pop-in" />
+                                            ) : isCurrent ? (
+                                                <span className="w-6 h-6 rounded-full bg-lava-500/20 flex items-center justify-center">
+                                                    <span className="w-2.5 h-2.5 rounded-full bg-onyx" />
+                                                </span>
+                                            ) : (
+                                                <span className="text-sm font-bold text-sage/60">
+                                                    {index + 1}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
-                                    <p className={`mt-2 text-xs text-center transition-all duration-300 ${isCurrent ? 'font-bold text-success-700 dark:text-success-400' : 'font-medium text-slate-500 dark:text-slate-400'}`}>
+
+                                    {/* Label */}
+                                    <p
+                                        className={`mt-2 text-xs text-center transition-all duration-300 px-1 ${
+                                            isCurrent
+                                                ? 'font-bold text-onyx'
+                                                : isCompleted
+                                                ? 'font-semibold text-onyx/80'
+                                                : 'font-medium text-sage/50'
+                                        }`}
+                                    >
                                         {step.name}
                                     </p>
                                 </li>
+
+                                {/* Connector line between steps */}
                                 {index < steps.length - 1 && (
-                                    <div className="relative flex-auto mt-4 h-0.5 bg-slate-200 dark:bg-slate-700">
-                                        <div className={`absolute top-0 left-0 h-full bg-success-500 transition-all duration-500 ease-in-out ${isCompleted ? 'w-full' : 'w-0'}`} />
+                                    <div className="relative flex-1 mx-1 md:mx-2">
+                                        <div className="h-[3px] w-full bg-sea/40 rounded-full overflow-hidden">
+                                            <div
+                                                className={`h-full rounded-full transition-all duration-700 ease-out ${
+                                                    isCompleted
+                                                        ? 'bg-gradient-to-r from-lava-500 to-lava-400'
+                                                        : 'bg-lava-500/0'
+                                                }`}
+                                                style={{
+                                                    width: isCompleted ? '100%' : '0%',
+                                                }}
+                                            />
+                                        </div>
                                     </div>
                                 )}
                             </React.Fragment>
@@ -56,21 +101,29 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ steps, currentStep }) => 
                 </ol>
             </div>
 
-            {/* Mobile compact sticky-style progress */}
+            {/* Mobile compact progress bar */}
             <div className="sm:hidden mb-6">
-                <div className="flex items-center justify-between text-xs mb-2">
-                    <span className="font-bold text-slate-900 dark:text-slate-100">
-                        {steps[currentIndex]?.name}
-                    </span>
-                    <span className="text-slate-500 dark:text-slate-400">
-                        {currentIndex + 1} / {steps.length}
+                <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-lava-500 text-onyx text-xs font-bold">
+                            {currentIndex + 1}
+                        </span>
+                        <span className="text-sm font-bold text-onyx">
+                            {steps[currentIndex]?.name}
+                        </span>
+                    </div>
+                    <span className="text-xs text-sage font-mono">
+                        {currentIndex + 1}/{steps.length}
                     </span>
                 </div>
-                <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div className="h-2 w-full bg-sea/40 rounded-full overflow-hidden shadow-inner">
                     <div
-                        className="h-full bg-success-500 rounded-full transition-all duration-500 ease-out"
+                        className="h-full bg-gradient-to-l from-lava-500 to-lava-400 rounded-full transition-all duration-700 ease-out relative overflow-hidden"
                         style={{ width: `${progress}%` }}
-                    />
+                    >
+                        {/* Shimmer overlay */}
+                        <div className="absolute inset-0 bg-white/10 animate-shimmer-sweep" />
+                    </div>
                 </div>
             </div>
         </div>
