@@ -49,3 +49,4 @@ FIX_PLAN.md
 # Playwright MCP scratch output (local verification only)
 .playwright-mcp/
 *-screenshot.png
+.superpowers/
