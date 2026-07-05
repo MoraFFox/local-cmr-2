@@ -2413,7 +2413,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
         )}
       </div>
 
-      <div className="sticky bottom-3 left-3 right-3 z-30 mx-2 mb-2">
+      <div className="fixed bottom-3 left-3 right-3 z-30 mx-2 mb-2">
         <LiquidGlass
           displacementScale={50}
           blurAmount={0.1}
