@@ -2,6 +2,8 @@
 
 import React, { useState, useMemo } from "react";
 import { FormData } from "../types";
+import { useToast } from "./ToastContext";
+import { ConfirmDialog } from "./ui/ConfirmDialog";
 import {
   MagnifyingGlassIcon,
   UserIcon,
@@ -21,6 +23,7 @@ import { StarIcon as StarIconSolid, StarIcon } from "@heroicons/react/24/solid";
 import { StarIcon as StarIconOutline } from "@heroicons/react/24/outline";
 import Avatar from "./Avatar";
 import EmptyState from "./EmptyState";
+import Button from "./ui/Button";
 import {
   aggregateBaristaData,
   normalize,
@@ -53,10 +56,12 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
   onDelete,
   onUpdate,
 }) => {
+  const { showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [showDebug, setShowDebug] = useState(false);
   const [includeLogOnly, setIncludeLogOnly] = useState(false);
   const [includeZeroVisits, setIncludeZeroVisits] = useState(false);
+  const [confirmState, setConfirmState] = useState<{ open: boolean; onConfirm: () => void; message: string } | null>(null);
 
   // Edit State
   const [editingBarista, setEditingBarista] =
@@ -75,7 +80,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
   const handleDelete = (e: React.MouseEvent, barista: AggregatedBarista) => {
     e.stopPropagation();
     if (!barista.sources || barista.sources.length === 0) {
-      alert("لا يمكن حذف هذا الباريستا (لا يوجد مصدر).");
+      showToast("لا يمكن حذف هذا الباريستا (لا يوجد مصدر).", "error");
       return;
     }
 
@@ -85,9 +90,14 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
         ? `هذا الباريستا يظهر في ${count} أماكن. هل أنت متأكد من حذفه من كل المواقع؟`
         : `هل أنت متأكد من حذف ${barista.name}؟`;
 
-    if (window.confirm(confirmMsg)) {
-      onDelete(barista.sources);
-    }
+    setConfirmState({
+      open: true,
+      message: confirmMsg,
+      onConfirm: () => {
+        onDelete(barista.sources!);
+        setConfirmState(null);
+      }
+    });
   };
 
   const saveEdit = () => {
@@ -141,10 +151,10 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
       {/* Header Section */}
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div>
-          <h1 className='text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50'>
+          <h1 className='text-2xl sm:text-3xl font-bold text-onyx'>
             أداء الباريستا
           </h1>
-          <p className='text-slate-600 dark:text-slate-400 mt-1'>
+          <p className='text-sage mt-1'>
             تتبع تقييمات الموظفين والزيارات والمالية الخاصة بالصيانة.
           </p>
         </div>
@@ -173,13 +183,13 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
           </button>
           <div className='relative w-full sm:w-72'>
             <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
-              <MagnifyingGlassIcon className='h-5 w-5 text-slate-400' />
+              <MagnifyingGlassIcon className='h-5 w-5 text-sage' />
             </div>
             <input
               type='search'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='block w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 py-2.5 pl-10 pr-3 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-teal-500 focus:ring-teal-500 sm:text-sm shadow-sm'
+              className='block w-full rounded-lg border-sea bg-deep py-2.5 pl-10 pr-3 text-onyx placeholder:text-sage focus:border-lava-500 focus:ring-lava-500 sm:text-sm shadow-sm transition-colors'
               placeholder='Search baristas...'
             />
           </div>
@@ -231,42 +241,42 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
 
       {/* Stats Cards */}
       <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
-        <div className='bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4'>
-          <div className='p-3 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-full'>
+        <div className='bg-deep p-4 rounded-xl shadow-sm border border-sea flex items-center gap-4'>
+          <div className='p-3 bg-lava-500/10 text-lava-500 rounded-full'>
             <UserIcon className='w-6 h-6' />
           </div>
           <div>
-            <p className='text-xs font-bold uppercase text-slate-500 dark:text-slate-400'>
+            <p className='text-xs font-bold uppercase text-sage'>
               Total Staff
             </p>
-            <p className='text-2xl font-bold text-slate-900 dark:text-white'>
+            <p className='text-2xl font-bold text-onyx'>
               {filteredBaristas.length}
             </p>
           </div>
         </div>
-        <div className='bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4'>
-          <div className='p-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full'>
+        <div className='bg-deep p-4 rounded-xl shadow-sm border border-sea flex items-center gap-4'>
+          <div className='p-3 bg-sea text-onyx rounded-full'>
             <WrenchScrewdriverIcon className='w-6 h-6' />
           </div>
           <div>
-            <p className='text-xs font-bold uppercase text-slate-500 dark:text-slate-400'>
+            <p className='text-xs font-bold uppercase text-sage'>
               Total Visits
             </p>
-            <p className='text-2xl font-bold text-slate-900 dark:text-white'>
+            <p className='text-2xl font-bold text-onyx'>
               {totalVisits}
             </p>
           </div>
         </div>
-        <div className='bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4'>
-          <div className='p-3 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full'>
+        <div className='bg-deep p-4 rounded-xl shadow-sm border border-sea flex items-center gap-4'>
+          <div className='p-3 bg-amber-500/10 text-amber-500 rounded-full'>
             <BanknotesIcon className='w-6 h-6' />
           </div>
           <div>
-            <p className='text-xs font-bold uppercase text-slate-500 dark:text-slate-400'>
+            <p className='text-xs font-bold uppercase text-sage'>
               Total Company Paid
             </p>
             <p
-              className='text-xl font-bold text-slate-900 dark:text-white truncate'
+              className='text-xl font-bold text-onyx truncate'
               title={formatCurrency(totalCompanyCost)}
             >
               {new Intl.NumberFormat("en-US", {
@@ -287,7 +297,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
             <div
               key={`${barista.id}-${barista.name}`}
               onClick={() => onViewDetails(barista.name)}
-              className='bg-white dark:bg-slate-800 rounded-xl shadow-md border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col hover:shadow-lg hover:border-teal-500/50 dark:hover:border-teal-500/50 cursor-pointer transition-all duration-300 relative group'
+              className='bg-deep rounded-xl shadow-md border border-sea overflow-hidden flex flex-col hover:shadow-lg hover:border-lava-500/50 cursor-pointer transition-all duration-300 relative group'
             >
               {/* Auto Detected Badge */}
               {barista.isAutoDetected && (
@@ -423,39 +433,39 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                 </div>
 
                 {/* Financial Stats */}
-                <div className='bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3 space-y-2 text-sm border border-slate-100 dark:border-slate-700'>
+                <div className='bg-deep rounded-lg p-3 space-y-2 text-sm border border-sea'>
                   <div className='flex justify-between items-center'>
-                    <span className='text-slate-500 dark:text-slate-400 text-xs uppercase font-bold'>
+                    <span className='text-sage text-xs uppercase font-bold'>
                       Company Paid (Saved)
                     </span>
                     <span
-                      className={`font-mono font-bold ${barista.companyCost > 0 ? "text-amber-600 dark:text-amber-400" : "text-slate-400"}`}
+                      className={`font-mono font-bold ${barista.companyCost > 0 ? "text-amber-500" : "text-sage"}`}
                     >
                       {formatCurrency(barista.companyCost)}
                     </span>
                   </div>
-                  <div className='w-full h-px bg-slate-200 dark:bg-slate-700'></div>
+                  <div className='w-full h-px bg-sea'></div>
                   <div className='flex justify-between items-center'>
-                    <span className='text-slate-500 dark:text-slate-400 text-xs uppercase font-bold'>
+                    <span className='text-sage text-xs uppercase font-bold'>
                       Client Paid (Rev)
                     </span>
                     <span
-                      className={`font-mono font-bold ${barista.clientCost > 0 ? "text-teal-600 dark:text-teal-400" : "text-slate-400"}`}
+                      className={`font-mono font-bold ${barista.clientCost > 0 ? "text-success-500" : "text-sage"}`}
                     >
                       {formatCurrency(barista.clientCost)}
                     </span>
                   </div>
                 </div>
 
-                <div className='flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-700'>
+                <div className='flex items-center justify-between mt-2 pt-2 border-t border-sea'>
                   {barista.lastActive ? (
-                    <span className='text-[10px] text-slate-400 italic'>
+                    <span className='text-[10px] text-sage italic'>
                       Last active: {barista.lastActive}
                     </span>
                   ) : (
                     <span></span>
                   )}
-                  <span className='text-teal-600 dark:text-teal-400 text-xs font-bold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
+                  <span className='text-lava-500 text-xs font-bold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
                     View Work History <ArrowRightIcon className='w-3 h-3' />
                   </span>
                 </div>
@@ -472,10 +482,10 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
             message={searchTerm ? "لم يتم العثور على باريستا يطابق بحثك." : "لم يتم إضافة باريستا حتى الآن."}
           >
             {searchTerm && (
-                <button onClick={() => setSearchTerm('')} className="btn-secondary">
+                <Button variant="secondary" onClick={() => setSearchTerm('')}>
                     <XMarkIcon className="w-4 h-4" />
                     مسح البحث
-                </button>
+                </Button>
             )}
           </EmptyState>
         </div>
@@ -483,18 +493,18 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
 
       {/* Edit Modal */}
       {editingBarista && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200'>
+        <div className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200'>
           <div
-            className='bg-white dark:bg-slate-800 rounded-xl shadow-sm w-full max-w-md p-6'
+            className='bg-deep border border-sea rounded-xl shadow-xl w-full max-w-md p-6'
             onClick={(e) => e.stopPropagation()}
           >
             <div className='flex justify-between items-center mb-4'>
-              <h3 className='text-lg font-bold text-slate-900 dark:text-white'>
-                Edit Staff Details
+              <h3 className='text-lg font-bold text-onyx'>
+                تعديل التفاصيل
               </h3>
               <button
                 onClick={() => setEditingBarista(null)}
-                className='text-slate-400 hover:text-slate-600'
+                className='text-sage hover:text-onyx transition-colors'
               >
                 <XMarkIcon className='w-6 h-6' />
               </button>
@@ -502,7 +512,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
 
             <div className='space-y-4'>
               <div>
-                <label className='block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1'>
+                <label className='block text-sm font-medium text-onyx mb-1'>
                   Name
                 </label>
                 <input
@@ -511,11 +521,11 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                   onChange={(e) =>
                     setEditForm({ ...editForm, name: e.target.value })
                   }
-                  className='w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-2.5 text-slate-900 dark:text-white'
+                  className='w-full rounded-lg border-sea bg-deep p-2.5 text-onyx focus:border-lava-500 focus:ring-1 focus:ring-lava-500 transition-colors outline-none'
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1'>
+                <label className='block text-sm font-medium text-onyx mb-1'>
                   Phone
                 </label>
                 <input
@@ -524,30 +534,30 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                   onChange={(e) =>
                     setEditForm({ ...editForm, phone: e.target.value })
                   }
-                  className='w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-2.5 text-slate-900 dark:text-white'
+                  className='w-full rounded-lg border-sea bg-deep p-2.5 text-onyx focus:border-lava-500 focus:ring-1 focus:ring-lava-500 transition-colors outline-none'
                 />
               </div>
 
               {editingBarista.sources && editingBarista.sources.length > 1 && (
-                <div className='p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 text-xs rounded-lg border border-amber-200 dark:border-amber-800'>
+                <div className='p-3 bg-amber-500/10 text-amber-500 text-xs rounded-lg border border-amber-500/20'>
                   <span className='font-bold'>Note:</span> This barista appears
                   in {editingBarista.sources.length} locations. Updating here
                   will update all records.
                 </div>
               )}
 
-              <div className='flex gap-3 pt-4'>
+              <div className='flex gap-3 pt-4 border-t border-sea mt-6'>
                 <button
                   onClick={() => setEditingBarista(null)}
-                  className='flex-1 py-2.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors'
+                  className='flex-1 py-2.5 border border-sea text-onyx rounded-lg font-semibold hover:bg-sea transition-colors'
                 >
-                  Cancel
+                  إلغاء
                 </button>
                 <button
                   onClick={saveEdit}
-                  className='flex-1 py-2.5 bg-teal-600 text-white rounded-lg font-bold hover:bg-teal-700 transition-colors shadow-lg shadow-teal-500/20'
+                  className='flex-1 py-2.5 bg-lava-500 text-onyx rounded-lg font-bold hover:bg-lava-600 transition-colors shadow-sm'
                 >
-                  Save Changes
+                  حفظ التغييرات
                 </button>
               </div>
             </div>

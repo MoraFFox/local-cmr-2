@@ -21,6 +21,7 @@ import {
 } from '@heroicons/react/24/outline';
 import type { InvitationRecord, AdminUserInfo, InviteRole, InvitationStatus, LegacyMatchBucket, LegacyManualAssignResponse, LegacyTransferResponse, LegacyRecordRef } from '../types';
 import { ConfirmDialog } from "./ui/ConfirmDialog";
+import Button from './ui/Button';
 
 // Arabic-only translations (English dictionary removed)
 const translations = {
@@ -604,12 +605,11 @@ const UserAccessManagement: React.FC = () => {
         </div>
         <div className="flex items-center gap-3">
           {activeTab === 'invitations' && (
-            <button
+            <Button
               onClick={() => {
                 setShowForm(!showForm);
                 setCreatedLink(null);
               }}
-              className="bg-teal-600 text-white font-bold py-2 px-4 sm:px-6 rounded-lg hover:bg-teal-700 transition-colors text-sm sm:text-base transform active:scale-95 flex items-center gap-2"
             >
               {showForm ? (
                 <>
@@ -622,19 +622,19 @@ const UserAccessManagement: React.FC = () => {
                   {t.newInvitation}
                 </>
               )}
-            </button>
+            </Button>
           )}
         </div>
       </header>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-200 dark:border-slate-700 mb-6">
+      <div className="flex border-b border-sea mb-6">
         <button
           onClick={() => setActiveTab('invitations')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'invitations'
-              ? 'border-teal-500 text-teal-600 dark:text-teal-400'
-              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+              ? 'border-lava-500 text-lava-500'
+              : 'border-transparent text-sage hover:text-onyx'
           }`}
         >
           <EnvelopeIcon className="w-5 h-5" />
@@ -644,8 +644,8 @@ const UserAccessManagement: React.FC = () => {
           onClick={() => setActiveTab('users')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'users'
-              ? 'border-teal-500 text-teal-600 dark:text-teal-400'
-              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+              ? 'border-lava-500 text-lava-500'
+              : 'border-transparent text-sage hover:text-onyx'
           }`}
         >
           <UsersIcon className="w-5 h-5" />
@@ -655,8 +655,8 @@ const UserAccessManagement: React.FC = () => {
           onClick={() => setActiveTab('legacy')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'legacy'
-              ? 'border-teal-500 text-teal-600 dark:text-teal-400'
-              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+              ? 'border-lava-500 text-lava-500'
+              : 'border-transparent text-sage hover:text-onyx'
           }`}
         >
           <DocumentTextIcon className="w-5 h-5" />
@@ -666,20 +666,20 @@ const UserAccessManagement: React.FC = () => {
 
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <ArrowPathIcon className="w-8 h-8 text-teal-500 animate-spin" />
+          <ArrowPathIcon className="w-8 h-8 text-lava-500 animate-spin" />
         </div>
       ) : activeTab === 'invitations' ? (
         <>
           {/* Create Invitation Form */}
           {showForm && (
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-6 animate-item-fade-in-down">
-              <h2 className="text-lg font-semibold text-slate-800 dark:text-white mb-4">
+            <div className="bg-deep rounded-xl shadow-sm border border-sea p-6 mb-6 animate-item-fade-in-down">
+              <h2 className="text-lg font-semibold text-onyx mb-4">
                 {t.sendNewInvitation}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Role Selector */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-onyx mb-2">
                     {t.role}
                   </label>
                   <div className="flex gap-3">
@@ -688,8 +688,8 @@ const UserAccessManagement: React.FC = () => {
                       onClick={() => setFormData({ ...formData, role: 'admin' })}
                       className={`flex-1 py-2.5 px-4 rounded-lg border text-sm font-medium transition-colors ${
                         formData.role === 'admin'
-                          ? 'bg-purple-100 dark:bg-purple-900/50 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300'
-                          : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                          ? 'bg-purple-900/30 border-purple-700 text-purple-300'
+                          : 'bg-deep border-sea text-sage hover:bg-sea'
                       }`}
                     >
                       {t.admin}
@@ -699,8 +699,8 @@ const UserAccessManagement: React.FC = () => {
                       onClick={() => setFormData({ ...formData, role: 'technician' })}
                       className={`flex-1 py-2.5 px-4 rounded-lg border text-sm font-medium transition-colors ${
                         formData.role === 'technician'
-                          ? 'bg-teal-100 dark:bg-teal-900/50 border-teal-300 dark:border-teal-700 text-teal-700 dark:text-teal-300'
-                          : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                          ? 'bg-lava-500/10 border-lava-500 text-lava-500'
+                          : 'bg-deep border-sea text-sage hover:bg-sea'
                       }`}
                     >
                       {t.technician}
@@ -710,7 +710,7 @@ const UserAccessManagement: React.FC = () => {
 
                 {/* Expiry Selector */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-onyx mb-2">
                     {t.expiresIn}
                   </label>
                   <div className="flex gap-3">
@@ -721,8 +721,8 @@ const UserAccessManagement: React.FC = () => {
                         onClick={() => setFormData({ ...formData, expiry: hours as 24 | 48 | 168 })}
                         className={`py-2 px-4 rounded-lg border text-sm font-medium transition-colors ${
                           formData.expiry === hours
-                            ? 'bg-teal-100 dark:bg-teal-900/50 border-teal-300 dark:border-teal-700 text-teal-700 dark:text-teal-300'
-                            : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                            ? 'bg-lava-500/10 border-lava-500 text-lava-500'
+                            : 'bg-deep border-sea text-sage hover:bg-sea'
                         }`}
                       >
                         {hours === 24 ? t.hours24 : hours === 48 ? t.hours48 : t.days7}
@@ -733,8 +733,8 @@ const UserAccessManagement: React.FC = () => {
 
                 {/* Created Link Display */}
                 {createdLink && (
-                  <div className="bg-teal-50 dark:bg-teal-900/30 rounded-lg p-4 border border-teal-200 dark:border-teal-800">
-                    <label className="block text-sm font-medium text-teal-800 dark:text-teal-300 mb-2">
+                  <div className="bg-lava-500/10 rounded-lg p-4 border border-lava-500/20">
+                    <label className="block text-sm font-medium text-lava-400 mb-2">
                       {t.invitationLink}
                     </label>
                     <div className="flex gap-2">
@@ -742,24 +742,23 @@ const UserAccessManagement: React.FC = () => {
                         type="text"
                         value={createdLink}
                         readOnly
-                        className="flex-1 rounded-lg border-teal-300 dark:border-teal-700 bg-white dark:bg-slate-900 py-2 px-3 text-sm text-slate-900 dark:text-white"
+                        className="flex-1 rounded-lg border-lava-500/30 bg-deep py-2 px-3 text-sm text-onyx"
                       />
-                      <button
+                      <Button
                         type="button"
                         onClick={() => handleCopyLink(createdLink)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors"
                       >
                         <ClipboardDocumentIcon className="w-4 h-4" />
                         {t.copyLink}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 )}
 
                 {/* Submit Buttons */}
                 <div className="flex justify-end gap-3 pt-2">
-                  <button
-                    type="button"
+                  <Button
+                    variant="secondary"
                     onClick={() => {
                       setShowForm(false);
                       setCreatedLink(null);
@@ -768,16 +767,12 @@ const UserAccessManagement: React.FC = () => {
                         expiry: 24,
                       });
                     }}
-                    className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
                   >
                     {t.cancel}
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors"
-                  >
+                  </Button>
+                  <Button type="submit">
                     {t.createButton}
-                  </button>
+                  </Button>
                 </div>
               </form>
             </div>
@@ -785,17 +780,17 @@ const UserAccessManagement: React.FC = () => {
 
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-              <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{pendingCount}</div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">{t.pendingCount}</div>
+            <div className="bg-deep rounded-lg p-4 border border-sea">
+              <div className="text-2xl font-bold text-amber-500">{pendingCount}</div>
+              <div className="text-sm text-sage">{t.pendingCount}</div>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">{acceptedCount}</div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">{t.acceptedCount}</div>
+            <div className="bg-deep rounded-lg p-4 border border-sea">
+              <div className="text-2xl font-bold text-success-500">{acceptedCount}</div>
+              <div className="text-sm text-sage">{t.acceptedCount}</div>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-              <div className="text-2xl font-bold text-slate-600 dark:text-slate-400">{expiredCount}</div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">{t.expiredCount}</div>
+            <div className="bg-deep rounded-lg p-4 border border-sea">
+              <div className="text-2xl font-bold text-sage">{expiredCount}</div>
+              <div className="text-sm text-sage">{t.expiredCount}</div>
             </div>
           </div>
 
@@ -805,7 +800,7 @@ const UserAccessManagement: React.FC = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as InvitationStatus | 'all')}
-                className="rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 py-2 px-3 text-sm text-slate-700 dark:text-slate-300 focus:border-teal-500 focus:ring-teal-500"
+                className="rounded-lg border-sea bg-deep py-2 px-3 text-sm text-onyx focus:border-lava-500 focus:ring-lava-500"
               >
                 <option value="all">{t.allStatuses}</option>
                 <option value="pending">{t.filterPending}</option>
@@ -815,7 +810,7 @@ const UserAccessManagement: React.FC = () => {
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value as InviteRole | 'all')}
-                className="rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 py-2 px-3 text-sm text-slate-700 dark:text-slate-300 focus:border-teal-500 focus:ring-teal-500"
+                className="rounded-lg border-sea bg-deep py-2 px-3 text-sm text-onyx focus:border-lava-500 focus:ring-lava-500"
               >
                 <option value="all">{t.allRoles}</option>
                 <option value="admin">{t.admin}</option>
@@ -826,12 +821,12 @@ const UserAccessManagement: React.FC = () => {
 
           {/* Invitations List */}
           {filteredInvitations.length === 0 ? (
-            <div className="text-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-black/5 dark:border-white/5">
-              <UserPlusIcon className="mx-auto h-12 w-12 text-slate-400" />
-              <h2 className="mt-4 text-lg font-semibold text-slate-700 dark:text-slate-200">
+            <div className="text-center bg-deep/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-sea">
+              <UserPlusIcon className="mx-auto h-12 w-12 text-sage" />
+              <h2 className="mt-4 text-lg font-semibold text-onyx">
                 {t.noInvitations}
               </h2>
-              <p className="text-slate-500 dark:text-slate-400 mt-2">
+              <p className="text-sage mt-2">
                 {t.createInvitation}
               </p>
             </div>
@@ -848,7 +843,7 @@ const UserAccessManagement: React.FC = () => {
                 return (
                   <div
                     key={invitation.id}
-                    className={`bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 ${
+                    className={`bg-deep rounded-lg shadow-sm border border-sea p-4 ${
                       invitation.status === 'expired' ? 'opacity-60' : ''
                     }`}
                   >
@@ -856,32 +851,32 @@ const UserAccessManagement: React.FC = () => {
                       <div className="flex items-start gap-3">
                         <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
                           invitation.status === 'pending'
-                            ? 'bg-teal-100 dark:bg-teal-900/50'
+                            ? 'bg-lava-500/10'
                             : invitation.status === 'accepted'
-                            ? 'bg-green-100 dark:bg-green-900/50'
-                            : 'bg-slate-100 dark:bg-slate-700'
+                            ? 'bg-success-500/10'
+                            : 'bg-sea'
                         }`}>
                           <UserPlusIcon className={`h-5 w-5 ${
                             invitation.status === 'pending'
-                              ? 'text-teal-600 dark:text-teal-400'
+                              ? 'text-lava-500'
                               : invitation.status === 'accepted'
-                              ? 'text-green-600 dark:text-green-400'
-                              : 'text-slate-400'
+                              ? 'text-success-500'
+                              : 'text-sage'
                           }`} />
                         </div>
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-semibold text-slate-800 dark:text-white">
+                            <h4 className="font-semibold text-onyx">
                               {inviteTitle}
                             </h4>
                             {getRoleBadge(invitation.role)}
                             {getStatusBadge(invitation.status)}
                           </div>
-                          <div className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                          <div className="text-sm text-sage mt-1">
                             {invitation.email && <span className="mr-3">{invitation.email}</span>}
                             {invitation.phone && <span>{invitation.phone}</span>}
                           </div>
-                          <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                          <div className="text-xs text-sage mt-1">
                             {invitation.status === 'pending' && (
                               <span>{t.expires}: {getDaysRemaining(invitation.expires_at)}</span>
                             )}
@@ -897,10 +892,11 @@ const UserAccessManagement: React.FC = () => {
                       <div className="flex items-center gap-2 sm:gap-3">
                         {invitation.status === 'pending' && (
                           <>
-                            <button
-                              onClick={() => handleCopyLink(inviteLink, invitation.id)}
-                              className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/20 rounded-lg hover:bg-teal-100 dark:hover:bg-teal-900/40 transition-colors"
-                            >
+                        <Button
+                          variant="secondary"
+                          onClick={() => handleCopyLink(inviteLink, invitation.id)}
+                          className="!px-3 !py-2 !text-sm"
+                        >
                               {copiedId === invitation.id ? (
                                 <>
                                   <CheckIcon className="w-4 h-4" />
@@ -912,23 +908,25 @@ const UserAccessManagement: React.FC = () => {
                                   {t.copyLink}
                                 </>
                               )}
-                            </button>
-                            <button
-                              onClick={() => handleRevoke(invitation.id)}
-                              className="p-2 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
-                              title={t.revoke}
-                            >
-                              <ClockIcon className="w-5 h-5" />
-                            </button>
-                          </>
-                        )}
-                        <button
-                          onClick={() => handleDelete(invitation.id)}
-                          className="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                          title={t.delete}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => handleRevoke(invitation.id)}
+                          className="!p-2 text-amber-500 hover:text-amber-500 hover:bg-amber-500/10"
+                          title={t.revoke}
                         >
-                          <TrashIcon className="w-5 h-5" />
-                        </button>
+                          <ClockIcon className="w-5 h-5" />
+                        </Button>
+                      </>
+                    )}
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleDelete(invitation.id)}
+                      className="!p-2 text-lava-500 hover:text-lava-500 hover:bg-lava-500/10"
+                      title={t.delete}
+                    >
+                      <TrashIcon className="w-5 h-5" />
+                    </Button>
                       </div>
                     </div>
                   </div>
@@ -942,15 +940,15 @@ const UserAccessManagement: React.FC = () => {
           {/* Legacy Records Tab */}
           {legacyLoading ? (
             <div className="flex items-center justify-center py-12">
-              <ArrowPathIcon className="w-8 h-8 text-teal-500 animate-spin" />
+              <ArrowPathIcon className="w-8 h-8 text-lava-500 animate-spin" />
             </div>
           ) : legacyBuckets.length === 0 ? (
-            <div className="text-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-black/5 dark:border-white/5">
-              <DocumentTextIcon className="mx-auto h-12 w-12 text-slate-400" />
-              <h2 className="mt-4 text-lg font-semibold text-slate-700 dark:text-slate-200">
+            <div className="text-center bg-deep/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-sea">
+              <DocumentTextIcon className="mx-auto h-12 w-12 text-sage" />
+              <h2 className="mt-4 text-lg font-semibold text-onyx">
                 {t.noLegacyRecords}
               </h2>
-              <p className="text-slate-500 dark:text-slate-400 mt-2">
+              <p className="text-sage mt-2">
                 {t.legacyRecordsDesc}
               </p>
             </div>
@@ -958,35 +956,36 @@ const UserAccessManagement: React.FC = () => {
             /* Row-level view */
             <div>
               <div className="flex items-center gap-4 mb-6">
-                <button
+                <Button
+                  variant="secondary"
                   onClick={() => {
                     setSelectedBucket(null);
                     setSelectedSubmissionIds([]);
                   }}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  className="!px-4 !py-2 !text-sm"
                 >
                   <ArrowLeftIcon className="w-4 h-4" />
                   {t.backToBuckets}
-                </button>
-                <h2 className="text-lg font-semibold text-slate-800 dark:text-white">
+                </Button>
+                <h2 className="text-lg font-semibold text-onyx">
                   {selectedBucket.display_name}
                 </h2>
-                <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-700 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-400">
+                <span className="inline-flex items-center rounded-full bg-sea px-2.5 py-0.5 text-xs font-medium text-sage">
                   {selectedBucket.record_count} {t.records}
                 </span>
               </div>
 
               {selectedSubmissionIds.length > 0 && (
-                <div className="mb-4 p-4 bg-teal-50 dark:bg-teal-900/30 rounded-lg border border-teal-200 dark:border-teal-800">
+                <div className="mb-4 p-4 bg-sea/50 rounded-lg border border-sea">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <p className="text-sm text-teal-800 dark:text-teal-300">
+                    <p className="text-sm text-onyx">
                       {selectedSubmissionIds.length} {t.selectRecords}
                     </p>
                     <div className="flex items-center gap-3">
                       <select
                         value={selectedTechnicianId}
                         onChange={(e) => setSelectedTechnicianId(e.target.value)}
-                        className="rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 py-2 px-3 text-sm text-slate-700 dark:text-slate-300 focus:border-teal-500 focus:ring-teal-500"
+                        className="rounded-lg border-sea bg-deep py-2 px-3 text-sm text-onyx focus:border-lava-500 focus:ring-lava-500"
                       >
                         <option value="">{t.selectTechnician}</option>
                         {technicians.map((tech) => (
@@ -995,37 +994,34 @@ const UserAccessManagement: React.FC = () => {
                           </option>
                         ))}
                       </select>
-                      <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+                      <label className="flex items-center gap-2 text-sm text-onyx">
                         <input
                           type="checkbox"
                           checked={rewriteDisplayName}
                           onChange={(e) => setRewriteDisplayName(e.target.checked)}
-                          className="rounded border-slate-300 dark:border-slate-600 text-teal-600 focus:ring-teal-500"
+                          className="rounded border-sea bg-deep text-lava-500 focus:ring-lava-500"
                         />
                         {t.rewriteDisplayName}
                       </label>
-                      <button
+                      <Button
                         onClick={handleAssignSelectedRecords}
                         disabled={!selectedTechnicianId || assigning}
-                        className="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        isLoading={assigning}
+                        className="!px-4 !py-2 !text-sm"
                       >
-                        {assigning ? (
-                          <ArrowPathIcon className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <CheckIcon className="w-4 h-4" />
-                        )}
+                        {!assigning && <CheckIcon className="w-4 h-4" />}
                         {t.assignSelected}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>
               )}
 
-              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                  <thead className="bg-slate-50 dark:bg-slate-900">
+              <div className="bg-deep rounded-xl shadow-sm border border-sea overflow-hidden">
+                <table className="min-w-full divide-y divide-sea">
+                  <thead className="bg-sea/30">
                     <tr>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider w-10">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider w-10">
                         <input
                           type="checkbox"
                           checked={selectedSubmissionIds.length === selectedBucket.submission_ids.length}
@@ -1036,26 +1032,26 @@ const UserAccessManagement: React.FC = () => {
                               setSelectedSubmissionIds([]);
                             }
                           }}
-                          className="rounded border-slate-300 dark:border-slate-600 text-teal-600 focus:ring-teal-500"
+                          className="rounded border-sea bg-deep text-lava-500 focus:ring-lava-500"
                         />
                       </th>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider">
                         {t.date}
                       </th>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider">
                         {t.company}
                       </th>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider">
                         {t.baristaName}
                       </th>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider">
                         {t.confidence}
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                  <tbody className="divide-y divide-sea">
                     {selectedBucket.all_candidates.slice(0, selectedBucket.record_count).map((candidate, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                      <tr key={idx} className="hover:bg-sea/30">
                         <td className="px-4 py-3 whitespace-nowrap">
                           <input
                             type="checkbox"
@@ -1068,23 +1064,23 @@ const UserAccessManagement: React.FC = () => {
                                 setSelectedSubmissionIds(selectedSubmissionIds.filter(sid => sid !== id));
                               }
                             }}
-                            className="rounded border-slate-300 dark:border-slate-600 text-teal-600 focus:ring-teal-500"
+                            className="rounded border-sea bg-deep text-lava-500 focus:ring-lava-500"
                           />
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-900 dark:text-white">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-onyx">
                           {candidate.maintenance_date || '—'}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-900 dark:text-white">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-onyx">
                           {candidate.company_name || '—'}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-900 dark:text-white">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-onyx">
                           {selectedBucket.display_name}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                             candidate.confidence >= 0.70
-                              ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400'
-                              : 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-400'
+                              ? 'bg-success-500/10 text-success-500'
+                              : 'bg-amber-500/10 text-amber-500'
                           }`}>
                             {Math.round(candidate.confidence * 100)}% ({candidate.confidence >= 0.70 ? t.highConfidence : t.lowConfidence})
                           </span>
@@ -1098,22 +1094,22 @@ const UserAccessManagement: React.FC = () => {
           ) : (
             /* Bucket List View */
             <div>
-              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-6">
-                <h2 className="text-lg font-semibold text-slate-800 dark:text-white mb-2">
+              <div className="bg-deep rounded-xl shadow-sm border border-sea p-6 mb-6">
+                <h2 className="text-lg font-semibold text-onyx mb-2">
                   {t.transferRecords}
                 </h2>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                <p className="text-sm text-sage mb-4">
                   {t.legacyRecordsDesc}
                 </p>
                 <div className="flex flex-wrap gap-3 items-end">
                   <div className="flex-1 min-w-[200px]">
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-sm font-medium text-onyx mb-1">
                       {t.sourceTechnician}
                     </label>
                     <select
                       value={sourceTechnicianId}
                       onChange={(e) => setSourceTechnicianId(e.target.value)}
-                      className="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 py-2 px-3 text-sm text-slate-700 dark:text-slate-300 focus:border-teal-500 focus:ring-teal-500"
+                      className="w-full rounded-lg border-sea bg-deep py-2 px-3 text-sm text-onyx focus:border-lava-500 focus:ring-lava-500"
                     >
                       <option value="">{t.selectTechnician}</option>
                       {technicians.map((tech) => (
@@ -1123,15 +1119,15 @@ const UserAccessManagement: React.FC = () => {
                       ))}
                     </select>
                   </div>
-                  <ArrowRightIcon className="w-5 h-5 text-slate-400" />
+                  <ArrowRightIcon className="w-5 h-5 text-sage" />
                   <div className="flex-1 min-w-[200px]">
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-sm font-medium text-onyx mb-1">
                       {t.targetTechnician}
                     </label>
                     <select
                       value={targetTechnicianId}
                       onChange={(e) => setTargetTechnicianId(e.target.value)}
-                      className="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 py-2 px-3 text-sm text-slate-700 dark:text-slate-300 focus:border-teal-500 focus:ring-teal-500"
+                      className="w-full rounded-lg border-sea bg-deep py-2 px-3 text-sm text-onyx focus:border-lava-500 focus:ring-lava-500"
                     >
                       <option value="">{t.selectTechnician}</option>
                       {technicians.map((tech) => (
@@ -1141,18 +1137,15 @@ const UserAccessManagement: React.FC = () => {
                       ))}
                     </select>
                   </div>
-                  <button
+                  <Button
                     onClick={handleTransferRecords}
                     disabled={!sourceTechnicianId || !targetTechnicianId || transferring}
-                    className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    isLoading={transferring}
+                    className="!px-4 !py-2 !text-sm"
                   >
-                    {transferring ? (
-                      <ArrowPathIcon className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <ArrowRightIcon className="w-4 h-4" />
-                    )}
+                    {!transferring && <ArrowRightIcon className="w-4 h-4" />}
                     {t.transferAllRecords}
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -1160,55 +1153,57 @@ const UserAccessManagement: React.FC = () => {
                 {legacyBuckets.map((bucket) => (
                   <div
                     key={bucket.normalized_name}
-                    className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4"
+                    className="bg-deep rounded-lg shadow-sm border border-sea p-4"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <div className="flex items-start gap-3">
-                        <div className="h-10 w-10 rounded-full flex items-center justify-center bg-amber-100 dark:bg-amber-900/50">
-                          <UserCircleIcon className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                        <div className="h-10 w-10 rounded-full flex items-center justify-center bg-amber-500/10">
+                          <UserCircleIcon className="h-5 w-5 text-amber-500" />
                         </div>
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-semibold text-slate-800 dark:text-white">
+                            <h4 className="font-semibold text-onyx">
                               {bucket.display_name}
                             </h4>
-                            <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-700 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-400">
+                            <span className="inline-flex items-center rounded-full bg-sea px-2.5 py-0.5 text-xs font-medium text-sage">
                               {bucket.record_count} {t.records}
                             </span>
                             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                               bucket.confidence_level === 'high'
-                                ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400'
-                                : 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-400'
+                                ? 'bg-success-500/10 text-success-500'
+                                : 'bg-amber-500/10 text-amber-500'
                             }`}>
                               {bucket.confidence_level === 'high' ? t.highConfidence : t.lowConfidence}
                             </span>
                           </div>
                           {bucket.top_technician_name && (
-                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                            <p className="text-sm text-sage mt-1">
                               {t.suggestedTechnician}: {bucket.top_technician_name} ({Math.round(bucket.top_confidence * 100)}%)
                             </p>
                           )}
                         </div>
                       </div>
                       <div className="flex items-center gap-2 sm:gap-3">
-                        <button
+                        <Button
+                          variant="secondary"
                           onClick={() => {
                             setAssigningBucket(bucket);
                             setSelectedTechnicianId(bucket.top_technician_id || '');
                             setShowAssignModal(true);
                           }}
-                          className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/20 rounded-lg hover:bg-teal-100 dark:hover:bg-teal-900/40 transition-colors"
+                          className="!px-3 !py-2 !text-sm"
                         >
                           <UserPlusIcon className="w-4 h-4" />
                           {t.assignAll}
-                        </button>
-                        <button
-                          onClick={() => setSelectedBucket(bucket)}
-                          className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-                        >
+                        </Button>
+                      <Button
+                        variant="secondary"
+                        onClick={() => setSelectedBucket(bucket)}
+                        className="!px-3 !py-2 !text-sm"
+                      >
                           <EyeIcon className="w-4 h-4" />
                           {t.reviewRecords}
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -1220,9 +1215,9 @@ const UserAccessManagement: React.FC = () => {
           {/* Assignment Modal */}
           {showAssignModal && assigningBucket && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 p-6 w-full max-w-md animate-item-fade-in-down">
+              <div className="bg-deep rounded-xl shadow-xl border border-sea p-6 w-full max-w-md animate-item-fade-in-down">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-slate-800 dark:text-white">
+                  <h3 className="text-lg font-semibold text-onyx">
                     {t.assignAll}
                   </h3>
                   <button
@@ -1230,7 +1225,7 @@ const UserAccessManagement: React.FC = () => {
                       setShowAssignModal(false);
                       setAssigningBucket(null);
                     }}
-                    className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                    className="p-1 text-sage hover:text-onyx"
                   >
                     <XMarkIcon className="w-5 h-5" />
                   </button>
@@ -1238,13 +1233,13 @@ const UserAccessManagement: React.FC = () => {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-onyx mb-2">
                       {t.selectTechnician}
                     </label>
                     <select
                       value={selectedTechnicianId}
                       onChange={(e) => setSelectedTechnicianId(e.target.value)}
-                      className="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 py-2 px-3 text-sm text-slate-700 dark:text-slate-300 focus:border-teal-500 focus:ring-teal-500"
+                      className="w-full rounded-lg border-sea bg-deep py-2 px-3 text-sm text-onyx focus:border-lava-500 focus:ring-lava-500"
                     >
                       <option value="">{t.selectTechnician}</option>
                       {technicians.map((tech) => (
@@ -1256,42 +1251,40 @@ const UserAccessManagement: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+                    <label className="flex items-center gap-2 text-sm text-onyx">
                       <input
                         type="checkbox"
                         checked={rewriteDisplayName}
                         onChange={(e) => setRewriteDisplayName(e.target.checked)}
-                        className="rounded border-slate-300 dark:border-slate-600 text-teal-600 focus:ring-teal-500"
+                        className="rounded border-sea bg-deep text-lava-500 focus:ring-lava-500"
                       />
                       {t.rewriteDisplayName}
                     </label>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 ml-6">
+                    <p className="text-xs text-sage mt-1 ml-6">
                       {t.rewriteDesc}
                     </p>
                   </div>
 
                   <div className="flex justify-end gap-3 pt-2">
-                    <button
+                    <Button
+                      variant="secondary"
                       onClick={() => {
                         setShowAssignModal(false);
                         setAssigningBucket(null);
                       }}
-                      className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                      className="!px-4 !py-2 !text-sm"
                     >
                       {t.cancel}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={handleAssignRecords}
                       disabled={!selectedTechnicianId || assigning}
-                      className="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      isLoading={assigning}
+                      className="!px-4 !py-2 !text-sm"
                     >
-                      {assigning ? (
-                        <ArrowPathIcon className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <CheckIcon className="w-4 h-4" />
-                      )}
+                      {!assigning && <CheckIcon className="w-4 h-4" />}
                       {t.assign}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -1319,75 +1312,75 @@ const UserAccessManagement: React.FC = () => {
 
           {/* Users List */}
           {users.length === 0 ? (
-            <div className="text-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-black/5 dark:border-white/5">
-              <UsersIcon className="mx-auto h-12 w-12 text-slate-400" />
-              <h2 className="mt-4 text-lg font-semibold text-slate-700 dark:text-slate-200">
+            <div className="text-center bg-deep/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-sea">
+              <UsersIcon className="mx-auto h-12 w-12 text-sage" />
+              <h2 className="mt-4 text-lg font-semibold text-onyx">
                 {t.noUsers}
               </h2>
             </div>
           ) : (
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="bg-deep rounded-xl shadow-sm border border-sea overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                  <thead className="bg-slate-50 dark:bg-slate-900">
+                <table className="min-w-full divide-y divide-sea">
+                  <thead className="bg-sea/30">
                     <tr>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider">
                         {t.role}
                       </th>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider">
                         {t.contact}
                       </th>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider">
                         {t.nameOptional}
                       </th>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider">
                         {t.hasTechnicianProfile}
                       </th>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider">
                         {t.lastSignIn}
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                  <tbody className="divide-y divide-sea">
                     {users.map((user) => (
-                      <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                      <tr key={user.id} className="hover:bg-sea/30">
                         <td className="px-4 py-3 whitespace-nowrap">
                           {getUserRoleBadge(user.role)}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-900 dark:text-white">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-onyx">
                           <div className="flex items-center gap-2">
                             {user.email && (
                               <span className="flex items-center gap-1">
-                                <EnvelopeIcon className="w-4 h-4 text-slate-400" />
+                                <EnvelopeIcon className="w-4 h-4 text-sage" />
                                 {user.email}
                               </span>
                             )}
                             {user.phone && (
                               <span className="flex items-center gap-1">
-                                <PhoneIcon className="w-4 h-4 text-slate-400" />
+                                <PhoneIcon className="w-4 h-4 text-sage" />
                                 {user.phone}
                               </span>
                             )}
                             {!user.email && !user.phone && (
-                              <span className="text-slate-400">—</span>
+                              <span className="text-sage">—</span>
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-900 dark:text-white">
-                          {user.name || <span className="text-slate-400">—</span>}
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-onyx">
+                          {user.name || <span className="text-sage">—</span>}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm">
                           {user.hasTechnicianProfile ? (
-                            <span className="inline-flex items-center rounded-full bg-green-100 dark:bg-green-900/50 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400">
+                            <span className="inline-flex items-center rounded-full bg-success-500/10 px-2 py-0.5 text-xs font-medium text-success-500">
                               {t.yes}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-700 px-2 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-400">
+                            <span className="inline-flex items-center rounded-full bg-sea px-2 py-0.5 text-xs font-medium text-sage">
                               {t.no}
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-sage">
                           {formatDate(user.lastSignInAt)}
                         </td>
                       </tr>
@@ -1402,7 +1395,7 @@ const UserAccessManagement: React.FC = () => {
 
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}
-        onClose={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+        onCancel={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
         onConfirm={() => {
           if (confirmDialog.action) confirmDialog.action();
           setConfirmDialog({ ...confirmDialog, isOpen: false });

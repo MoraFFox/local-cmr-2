@@ -12,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { InviteValidationResponse, InviteRedeemResponse, InviteRole } from '../types';
 import { logger } from '../utils/logger';
+import Button from './ui/Button';
 
 // ============================================
 // Bilingual Copy
@@ -289,10 +290,10 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
   // ============================================
   if (isValidating) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-midnight flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="animate-spin h-12 w-12 border-4 border-teal-500 border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-slate-600 dark:text-slate-400">{copy[lang].validating}</p>
+          <div className="animate-spin h-12 w-12 border-4 border-lava-500 border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-sage">{copy[lang].validating}</p>
         </div>
       </div>
     );
@@ -303,27 +304,28 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
   // ============================================
   if (validationError || !inviteData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-midnight flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 text-center">
-            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ExclamationCircleIcon className="w-8 h-8 text-red-600 dark:text-red-400" />
+          <div className="bg-deep rounded-2xl shadow-xl border border-sea p-8 text-center">
+            <div className="w-16 h-16 bg-lava-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ExclamationCircleIcon className="w-8 h-8 text-lava-500" />
             </div>
-            <h1 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+            <h1 className="text-xl font-bold text-onyx mb-2">
               {copy[lang].invalidInvite}
             </h1>
             {validationError && (
-              <p className="text-slate-600 dark:text-slate-400 mb-6">
+              <p className="text-sage mb-6">
                 {validationError}
               </p>
             )}
-            <button
+            <Button
+              variant="secondary"
               onClick={onBack}
-              className="flex items-center justify-center gap-2 mx-auto text-teal-600 dark:text-teal-400 font-medium hover:underline"
+              className="w-full"
             >
               <ArrowLeftIcon className="w-5 h-5" />
               {copy[lang].backButton}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -339,8 +341,8 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
       <span
         className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
           isAdmin
-            ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-            : 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300'
+            ? 'bg-purple-900/30 text-purple-300'
+            : 'bg-lava-500/10 text-lava-500'
         }`}
       >
         {isAdmin ? (
@@ -357,72 +359,72 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
   // Main Form
   // ============================================
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-midnight flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Language Toggle */}
         <div className="flex justify-end mb-4">
           <button
             onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-            className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+            className="text-sm text-sage hover:text-onyx transition-colors"
           >
             {lang === 'ar' ? 'English' : 'العربية'}
           </button>
         </div>
 
         {/* Main Card */}
-        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 dark:border-slate-700/50 p-8">
+        <div className="bg-deep rounded-2xl shadow-xl border border-sea p-8">
           {/* Header */}
           <div className="text-center mb-8">
             <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
               inviteData.role === 'admin'
-                ? 'bg-purple-100 dark:bg-purple-900/30'
-                : 'bg-teal-100 dark:bg-teal-900/30'
+                ? 'bg-purple-900/30'
+                : 'bg-sea'
             }`}>
               {inviteData.role === 'admin' ? (
-                <ShieldCheckIcon className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                <ShieldCheckIcon className="w-8 h-8 text-purple-400" />
               ) : (
-                <WrenchScrewdriverIcon className="w-8 h-8 text-teal-600 dark:text-teal-400" />
+                <WrenchScrewdriverIcon className="w-8 h-8 text-lava-500" />
               )}
             </div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+            <h1 className="text-2xl font-bold text-onyx mb-2">
               {copy[lang].title}
             </h1>
-            <p className="text-slate-600 dark:text-slate-400 flex items-center justify-center gap-2 flex-wrap">
+            <p className="text-sage flex items-center justify-center gap-2 flex-wrap">
               {copy[lang].subtitle} <RoleBadge />
             </p>
           </div>
 
           {/* Pre-filled Contact Info (Read-only) */}
           {(inviteData.email || inviteData.phone) ? (
-            <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg space-y-2">
+            <div className="mb-6 p-4 bg-sea/50 rounded-lg space-y-2">
               {inviteData.email && (
-                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                  <EnvelopeIcon className="w-4 h-4 text-slate-400" />
+                <div className="flex items-center gap-2 text-sm text-onyx">
+                  <EnvelopeIcon className="w-4 h-4 text-sage" />
                   <span dir="ltr">{inviteData.email}</span>
                 </div>
               )}
               {inviteData.phone && (
-                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                  <PhoneIcon className="w-4 h-4 text-slate-400" />
+                <div className="flex items-center gap-2 text-sm text-onyx">
+                  <PhoneIcon className="w-4 h-4 text-sage" />
                   <span dir="ltr">{inviteData.phone}</span>
                 </div>
               )}
             </div>
           ) : (
-            <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800 text-sm text-amber-700 dark:text-amber-300">
+            <div className="mb-6 p-4 bg-amber-500/10 rounded-lg border border-amber-500/20 text-sm text-amber-500">
               {copy[lang].genericInviteNotice}
             </div>
           )}
 
           {/* Form Title */}
-          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4">
+          <h2 className="text-lg font-semibold text-onyx mb-4">
             {copy[lang].formTitle}
           </h2>
 
           {/* Error Message */}
           {formError && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <p className="text-sm text-red-600 dark:text-red-400 text-center">
+            <div className="mb-6 p-4 bg-lava-900/40 border border-lava-500/30 rounded-lg">
+              <p className="text-sm text-lava-400 text-center">
                 {formError}
               </p>
             </div>
@@ -432,19 +434,19 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
           <form onSubmit={handleSubmit} className="space-y-5" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
             {/* Name Field */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-onyx mb-2">
                 {copy[lang].nameLabel}
               </label>
               <div className="relative">
                 <div className={`absolute inset-y-0 ${lang === 'ar' ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
-                  <UserIcon className="h-5 w-5 text-slate-400" />
+                  <UserIcon className="h-5 w-5 text-sage" />
                 </div>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={copy[lang].namePlaceholder}
-                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg border border-slate-200 dark:border-slate-600 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all`}
+                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-deep text-onyx rounded-lg border border-sea focus:outline-none focus:border-lava-500 focus:ring-2 focus:ring-lava-500/20 transition-all`}
                   dir={lang === 'ar' ? 'rtl' : 'ltr'}
                 />
               </div>
@@ -453,19 +455,19 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
             {/* Email Field for Generic Invites */}
             {!inviteData.email && !inviteData.phone && (
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-onyx mb-2">
                   {copy[lang].emailLabel}
                 </label>
                 <div className="relative">
                   <div className={`absolute inset-y-0 ${lang === 'ar' ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
-                    <EnvelopeIcon className="h-5 w-5 text-slate-400" />
+                    <EnvelopeIcon className="h-5 w-5 text-sage" />
                   </div>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="email@example.com"
-                    className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg border border-slate-200 dark:border-slate-600 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all`}
+                    className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-deep text-onyx rounded-lg border border-sea focus:outline-none focus:border-lava-500 focus:ring-2 focus:ring-lava-500/20 transition-all`}
                     dir="ltr"
                   />
                 </div>
@@ -474,19 +476,19 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
 
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-onyx mb-2">
                 {copy[lang].passwordLabel}
               </label>
               <div className="relative">
                 <div className={`absolute inset-y-0 ${lang === 'ar' ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
-                  <LockClosedIcon className="h-5 w-5 text-slate-400" />
+                  <LockClosedIcon className="h-5 w-5 text-sage" />
                 </div>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={copy[lang].passwordPlaceholder}
-                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg border border-slate-200 dark:border-slate-600 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all`}
+                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-deep text-onyx rounded-lg border border-sea focus:outline-none focus:border-lava-500 focus:ring-2 focus:ring-lava-500/20 transition-all`}
                   dir="ltr"
                 />
               </div>
@@ -495,15 +497,15 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
 
             {/* Confirm Password Field */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-onyx mb-2">
                 {copy[lang].confirmPasswordLabel}
               </label>
               <div className="relative">
                 <div className={`absolute inset-y-0 ${lang === 'ar' ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
                   {password && confirmPassword && password === confirmPassword ? (
-                    <CheckCircleIcon className="h-5 w-5 text-green-500" />
+                    <CheckCircleIcon className="h-5 w-5 text-success-500" />
                   ) : (
-                    <LockClosedIcon className="h-5 w-5 text-slate-400" />
+                    <LockClosedIcon className="h-5 w-5 text-sage" />
                   )}
                 </div>
                 <input
@@ -511,62 +513,36 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder={copy[lang].confirmPasswordPlaceholder}
-                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg border ${
+                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-deep text-onyx rounded-lg border ${
                     password && confirmPassword && password !== confirmPassword
-                      ? 'border-red-300 dark:border-red-600'
-                      : 'border-slate-200 dark:border-slate-600'
-                  } focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all`}
+                      ? 'border-lava-500'
+                      : 'border-sea'
+                  } focus:outline-none focus:border-lava-500 focus:ring-2 focus:ring-lava-500/20 transition-all`}
                   dir="ltr"
                 />
               </div>
               {password && confirmPassword && password !== confirmPassword && (
-                <p className="mt-1 text-xs text-red-500">
+                <p className="mt-1 text-xs text-lava-500">
                   {copy[lang].passwordMismatch}
                 </p>
               )}
             </div>
 
             {/* Submit Button */}
-            <button
+            <Button
               type="submit"
-              disabled={isSubmitting}
-              className={`w-full font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed ${
-                inviteData.role === 'admin'
-                  ? 'bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400'
-                  : 'bg-teal-600 hover:bg-teal-700 disabled:bg-teal-400'
-              } text-white`}
+              isLoading={isSubmitting}
+              className="w-full"
             >
-              {isSubmitting ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  {copy[lang].creating}
-                </span>
-              ) : (
-                copy[lang].submitButton
-              )}
-            </button>
+              {copy[lang].submitButton}
+            </Button>
           </form>
 
           {/* Back Button */}
           <div className="mt-6 text-center">
             <button
               onClick={onBack}
-              className="flex items-center justify-center gap-2 mx-auto text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+              className="flex items-center justify-center gap-2 mx-auto text-sm text-sage hover:text-onyx transition-colors"
             >
               <ArrowLeftIcon className={`w-4 h-4 ${lang === 'ar' ? '' : 'rotate-180'}`} />
               {copy[lang].backButton}

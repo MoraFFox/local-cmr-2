@@ -776,9 +776,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
       setSubmissions(updatedSubmissions);
     } catch (e: any) {
       logger.error("Error updating company", e, 'data');
-      alert(
-        "Failed to update company. Changes saved locally and will sync when online.",
-      );
+      showToast("تم تحديث الشركة محلياً وستتم المزامنة لاحقاً.", "warning");
       // Still update locally
       const updatedSubmissions = submissions.map((sub) =>
         sub.id === updatedCompany.id

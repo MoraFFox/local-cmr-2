@@ -7,6 +7,7 @@ import {
   ExclamationCircleIcon,
   ArrowLeftIcon,
 } from "@heroicons/react/24/outline";
+import Button from "./ui/Button";
 
 interface ResetPasswordProps {
   onBack?: () => void;
@@ -92,7 +93,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
       if (updateError) {
         logger.error("Password update error", updateError, "auth");
         setError(
-          "          فشل إعادة تعيين كلمة المرور. يرجى المحاولة مرة أخرى."
+          "فشل إعادة تعيين كلمة المرور. يرجى المحاولة مرة أخرى."
         );
       } else {
         setIsSuccess(true);
@@ -102,7 +103,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
     } catch (submitError) {
       logger.error("Password reset exception", submitError, "auth");
       setError(
-        "        حدث خطأ. يرجى المحاولة مرة أخرى."
+        "حدث خطأ. يرجى المحاولة مرة أخرى."
       );
     } finally {
       setIsSubmitting(false);
@@ -120,10 +121,10 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
   // Loading state while checking session
   if (isValidSession === null) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-100 to-teal-50 dark:from-slate-900 dark:to-teal-900/20 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-midnight flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-10 w-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-slate-700 dark:text-slate-300 font-medium">
+          <div className="mx-auto mb-4 h-10 w-10 border-4 border-lava-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-onyx font-medium">
             جاري التحقق من الرابط...
           </p>
         </div>
@@ -134,24 +135,24 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
   // Invalid session state
   if (!isValidSession) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-100 to-teal-50 dark:from-slate-900 dark:to-teal-900/20 flex items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-black/5 dark:border-white/10 shadow-sm p-8">
+      <div className="min-h-screen bg-midnight flex items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-2xl bg-deep border border-sea shadow-sm p-8">
           <div className="text-center">
-            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ExclamationCircleIcon className="w-8 h-8 text-red-600 dark:text-red-400" />
+            <div className="w-16 h-16 bg-lava-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ExclamationCircleIcon className="w-8 h-8 text-lava-500" />
             </div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+            <h1 className="text-2xl font-bold text-onyx mb-2">
               رابط غير صالح أو منتهي الصلاحية
             </h1>
-            <p className="text-slate-600 dark:text-slate-400 mb-6">
+            <p className="text-sage mb-6">
               رابط إعادة تعيين كلمة المرور هذا غير صالح أو منتهي الصلاحية. يرجى طلب رابط جديد.
             </p>
-            <button
+            <Button
               onClick={handleBackToLogin}
-              className="w-full py-3 rounded-lg font-semibold text-white bg-teal-600 hover:bg-teal-700 transition-colors"
+              className="w-full"
             >
               العودة لتسجيل الدخول
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -161,24 +162,24 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
   // Success state
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-100 to-teal-50 dark:from-slate-900 dark:to-teal-900/20 flex items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-black/5 dark:border-white/10 shadow-sm p-8">
+      <div className="min-h-screen bg-midnight flex items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-2xl bg-deep border border-sea shadow-sm p-8">
           <div className="text-center">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircleIcon className="w-8 h-8 text-green-600 dark:text-green-400" />
+            <div className="w-16 h-16 bg-sea rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircleIcon className="w-8 h-8 text-success-500" />
             </div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+            <h1 className="text-2xl font-bold text-onyx mb-2">
               تم إعادة تعيين كلمة المرور بنجاح!
             </h1>
-            <p className="text-slate-600 dark:text-slate-400 mb-6">
+            <p className="text-sage mb-6">
               يرجى تسجيل الدخول بكلمة المرور الجديدة.
             </p>
-            <button
+            <Button
               onClick={handleBackToLogin}
-              className="w-full py-3 rounded-lg font-semibold text-white bg-teal-600 hover:bg-teal-700 transition-colors"
+              className="w-full"
             >
               العودة لتسجيل الدخول
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -187,13 +188,13 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
 
   // Password reset form
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-teal-50 dark:from-slate-900 dark:to-teal-900/20 flex items-center justify-center p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-black/5 dark:border-white/10 shadow-sm p-8">
+    <div className="min-h-screen bg-midnight flex items-center justify-center p-4">
+      <div className="w-full max-w-md rounded-2xl bg-deep border border-sea shadow-sm p-8">
         {/* Back Button */}
         {onBack && (
           <button
             onClick={onBack}
-            className="mb-6 flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+            className="mb-6 flex items-center gap-2 text-sage hover:text-onyx transition-colors"
           >
             <ArrowLeftIcon className="w-5 h-5" />
             <span>العودة لتسجيل الدخول</span>
@@ -202,72 +203,69 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-teal-100 dark:bg-teal-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <LockClosedIcon className="w-8 h-8 text-teal-600 dark:text-teal-400" />
+          <div className="w-16 h-16 bg-sea rounded-full flex items-center justify-center mx-auto mb-4">
+            <LockClosedIcon className="w-8 h-8 text-lava-500" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+          <h1 className="text-2xl font-bold text-onyx mb-2">
             إعادة تعيين كلمة المرور
           </h1>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 text-sm text-red-700 dark:text-red-300 text-center">
+          <div className="mb-6 p-4 rounded-lg border border-lava-500/30 bg-lava-900/40 text-sm text-lava-400 text-center">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-onyx mb-2">
               كلمة المرور الجديدة
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <LockClosedIcon className="w-5 h-5 text-slate-400" />
+                <LockClosedIcon className="w-5 h-5 text-sage" />
               </div>
               <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pr-10 pl-4 py-3 rounded-lg bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                className="w-full pr-10 pl-4 py-3 rounded-lg bg-deep border border-sea text-onyx focus:outline-none focus:border-lava-500 focus:ring-2 focus:ring-lava-500/20"
                 dir="ltr"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-onyx mb-2">
               تأكيد كلمة المرور الجديدة
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <LockClosedIcon className="w-5 h-5 text-slate-400" />
+                <LockClosedIcon className="w-5 h-5 text-sage" />
               </div>
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pr-10 pl-4 py-3 rounded-lg bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                className="w-full pr-10 pl-4 py-3 rounded-lg bg-deep border border-sea text-onyx focus:outline-none focus:border-lava-500 focus:ring-2 focus:ring-lava-500/20"
                 dir="ltr"
               />
             </div>
           </div>
 
-          <button
+          <Button
             type="submit"
-            disabled={isSubmitting}
-            className="w-full py-3 rounded-lg font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors"
+            isLoading={isSubmitting}
+            className="w-full py-3"
           >
-            {isSubmitting
-              ? "جاري إعادة التعيين..."
-              : "إعادة تعيين كلمة المرور"}
-          </button>
+            إعادة تعيين كلمة المرور
+          </Button>
         </form>
       </div>
     </div>
   );
 };
-
 export default ResetPassword;

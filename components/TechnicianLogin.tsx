@@ -14,6 +14,7 @@ import {
   XMarkIcon,
   CheckCircleIcon,
 } from "@heroicons/react/24/outline";
+import Button from "./ui/Button";
 
 interface TechnicianLoginProps {
   onBack?: () => void;
@@ -89,63 +90,63 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl bg-white dark:bg-slate-800 shadow-sm p-6 relative">
+      <div className="w-full max-w-md rounded-2xl bg-deep shadow-sm p-6 relative border border-sea">
         {/* Close Button */}
         <button
           onClick={handleClose}
-          className="absolute top-4 left-4 p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+          className="absolute top-4 left-4 p-1 rounded-lg text-sage hover:text-onyx hover:bg-sea transition-colors"
         >
           <XMarkIcon className="w-5 h-5" />
         </button>
 
         {isSuccess ? (
           <div className="text-center py-4">
-            <div className="w-14 h-14 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircleIcon className="w-7 h-7 text-green-600 dark:text-green-400" />
+            <div className="w-14 h-14 bg-sea rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircleIcon className="w-7 h-7 text-success-500" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+            <h2 className="text-xl font-bold text-onyx mb-2">
               تحقق من بريدك الإلكتروني
             </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+            <p className="text-sm text-sage mb-6">
               لقد أرسلنا رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.
             </p>
-            <button
+            <Button
               onClick={handleClose}
-              className="w-full py-3 rounded-lg font-semibold text-white bg-teal-600 hover:bg-teal-700 transition-colors"
+              className="w-full"
             >
               العودة لتسجيل الدخول
-            </button>
+            </Button>
           </div>
         ) : (
           <>
             {/* Header */}
             <div className="text-center mb-6">
-              <div className="w-14 h-14 bg-teal-100 dark:bg-teal-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <EnvelopeIcon className="w-7 h-7 text-teal-600 dark:text-teal-400" />
+              <div className="w-14 h-14 bg-sea rounded-full flex items-center justify-center mx-auto mb-4">
+                <EnvelopeIcon className="w-7 h-7 text-lava-500" />
               </div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+              <h2 className="text-xl font-bold text-onyx mb-2">
                 إعادة تعيين كلمة المرور
               </h2>
             </div>
 
-            <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-4">
+            <p className="text-sm text-sage text-center mb-4">
               أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.
             </p>
 
             {error && (
-              <div className="mb-4 p-3 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 text-sm text-red-600 dark:text-red-400 text-center">
+              <div className="mb-4 p-3 rounded-lg border border-lava-500/30 bg-lava-900/40 text-sm text-lava-400 text-center">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 text-right">
+                <label className="block text-sm font-medium text-onyx mb-2 text-right">
                   البريد الإلكتروني
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <EnvelopeIcon className="w-5 h-5 text-slate-400" />
+                    <EnvelopeIcon className="w-5 h-5 text-sage" />
                   </div>
                   <input
                     type="email"
@@ -154,19 +155,19 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                     placeholder="example@email.com"
                     autoCapitalize="none"
                     autoCorrect="off"
-                    className="w-full pr-10 pl-4 py-3 rounded-lg bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 text-right"
+                    className="w-full pr-10 pl-4 py-3 rounded-lg bg-sea border border-sea text-onyx focus:outline-none focus:border-lava-500 focus:ring-2 focus:ring-lava-500/20 text-right"
                     dir="ltr"
                   />
                 </div>
               </div>
 
-              <button
+              <Button
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full py-3 rounded-lg font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors"
+                isLoading={isSubmitting}
+                className="w-full"
               >
-                {isSubmitting ? "جاري الإرسال..." : "إرسال رابط إعادة التعيين"}
-              </button>
+                إرسال رابط إعادة التعيين
+              </Button>
             </form>
           </>
         )}
@@ -236,13 +237,13 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-midnight flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Back Button */}
         {onBack && (
           <button
             onClick={onBack}
-            className="mb-6 flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+            className="mb-6 flex items-center gap-2 text-sage hover:text-onyx transition-colors"
           >
             <ArrowLeftIcon className="w-5 h-5" />
             <span>العودة للتطبيق الرئيسي</span>
@@ -250,28 +251,28 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
         )}
 
         {/* Login Card */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8">
+        <div className="bg-deep border border-sea rounded-2xl shadow-xl p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-teal-100 dark:bg-teal-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-sea rounded-full flex items-center justify-center mx-auto mb-4">
               {contactType === "email" ? (
-                <EnvelopeIcon className="w-8 h-8 text-teal-600 dark:text-teal-400" />
+                <EnvelopeIcon className="w-8 h-8 text-lava-500" />
               ) : (
-                <PhoneIcon className="w-8 h-8 text-teal-600 dark:text-teal-400" />
+                <PhoneIcon className="w-8 h-8 text-lava-500" />
               )}
             </div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+            <h1 className="text-2xl font-bold text-onyx mb-2">
               {ar.login.title}
             </h1>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-sage">
               {ar.login.subtitle}
             </p>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <p className="text-sm text-red-600 dark:text-red-400 text-center">
+            <div className="mb-6 p-4 bg-lava-900/40 border border-lava-500/30 rounded-lg">
+              <p className="text-sm text-lava-400 text-center">
                 {error}
               </p>
             </div>
@@ -281,17 +282,17 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Contact Type Toggle */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 text-center">
+              <label className="block text-sm font-medium text-onyx mb-2 text-center">
                 البريد الإلكتروني أو الهاتف
               </label>
-              <div className="flex rounded-lg bg-slate-100 dark:bg-slate-700 p-1">
+              <div className="flex rounded-lg bg-sea p-1">
                 <button
                   type="button"
                   onClick={() => setContactType("email")}
                   className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${
                     contactType === "email"
-                      ? "bg-white dark:bg-slate-600 text-teal-600 dark:text-teal-400 shadow-sm"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                      ? "bg-deep text-lava-500 shadow-sm"
+                      : "text-sage hover:text-onyx"
                   }`}
                 >
                   <EnvelopeIcon className="w-4 h-4" />
@@ -302,8 +303,8 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                   onClick={() => setContactType("phone")}
                   className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${
                     contactType === "phone"
-                      ? "bg-white dark:bg-slate-600 text-teal-600 dark:text-teal-400 shadow-sm"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                      ? "bg-deep text-lava-500 shadow-sm"
+                      : "text-sage hover:text-onyx"
                   }`}
                 >
                   <PhoneIcon className="w-4 h-4" />
@@ -314,15 +315,15 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
 
             {/* Email/Phone Field */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-onyx mb-2">
                 {contactType === "email" ? "البريد الإلكتروني" : "رقم الهاتف"}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                   {contactType === "email" ? (
-                    <EnvelopeIcon className="h-5 w-5 text-slate-400" />
+                    <EnvelopeIcon className="h-5 w-5 text-sage" />
                   ) : (
-                    <PhoneIcon className="h-5 w-5 text-slate-400" />
+                    <PhoneIcon className="h-5 w-5 text-sage" />
                   )}
                 </div>
                 <input
@@ -339,7 +340,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                   placeholder={contactType === "email" ? "example@email.com" : "01xxxxxxxxx"}
                   autoCapitalize="none"
                   autoCorrect="off"
-                  className="block w-full pr-10 pl-4 py-3 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg border border-slate-200 dark:border-slate-600 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all text-right"
+                  className="block w-full pr-10 pl-4 py-3 bg-deep text-onyx rounded-lg border border-sea focus:outline-none focus:border-lava-500 focus:ring-2 focus:ring-lava-500/20 transition-all text-right"
                   dir="ltr"
                 />
               </div>
@@ -347,62 +348,40 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
 
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-onyx mb-2">
                 {ar.login.passwordLabel}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <LockClosedIcon className="h-5 w-5 text-slate-400" />
+                  <LockClosedIcon className="h-5 w-5 text-sage" />
                 </div>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={ar.login.passwordPlaceholder}
-                  className="block w-full pr-10 pl-4 py-3 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg border border-slate-200 dark:border-slate-600 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all text-right"
+                  className="block w-full pr-10 pl-4 py-3 bg-deep text-onyx rounded-lg border border-sea focus:outline-none focus:border-lava-500 focus:ring-2 focus:ring-lava-500/20 transition-all text-right"
                   dir="rtl"
                 />
               </div>
             </div>
 
             {/* Submit Button */}
-            <button
+            <Button
               type="submit"
-              disabled={isLoading}
-              className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-slate-400 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed"
+              isLoading={isLoading}
+              className="w-full py-3"
             >
-              {isLoading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  {ar.login.loggingIn}
-                </span>
-              ) : (
-                ar.login.loginButton
-              )}
-            </button>
+              {isLoading ? ar.login.loggingIn : ar.login.loginButton}
+            </Button>
 
             {/* Forgot Password Link */}
             {contactType === "email" && (
-              <div className="text-center">
+              <div className="text-center mt-4">
                 <button
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
-                  className="text-sm text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors"
+                  className="text-sm text-lava-500 hover:text-lava-600 transition-colors"
                 >
                   نسيت كلمة المرور؟
                 </button>
@@ -412,15 +391,15 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
         </div>
 
         {/* Footer */}
-        <p className="text-center mt-6 text-sm text-slate-500 dark:text-slate-400">
+        <p className="text-center mt-6 text-sm text-sage">
           بوابة خاصة بالفنيين لإدخال تقارير الصيانة
         </p>
 
         {/* Invite-Only Message */}
-        <div className="mt-4 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
+        <div className="mt-4 p-3 bg-sea rounded-lg border border-sea">
           <div className="flex items-start gap-2">
-            <InformationCircleIcon className="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-slate-500 dark:text-slate-400">
+            <InformationCircleIcon className="w-5 h-5 text-sage flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-sage">
               <p className="font-medium">إنشاء الحساب عبر رابط الدعوة فقط. تواصل مع المدير.</p>
             </div>
           </div>

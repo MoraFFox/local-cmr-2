@@ -20,6 +20,7 @@ import {
     exportSummaryReport
 } from '../utils/importExport';
 import { FormData } from '../types';
+import Button from './ui/Button';
 
 interface ImportExportDialogProps {
     isOpen: boolean;
@@ -157,30 +158,30 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
             <div 
                 role="dialog"
                 aria-modal="true"
-                className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm w-full max-w-2xl max-h-[85vh] flex flex-col animate-scale-in"
+                className="bg-deep border border-sea rounded-2xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col animate-scale-in"
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-sea bg-sea/30">
+                    <h2 className="text-xl font-bold text-onyx">
                         Import / Export
                     </h2>
                     
                     <button
                         onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                        className="p-2 text-sage hover:text-onyx rounded-full hover:bg-sea transition-colors"
                     >
                         <XMarkIcon className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b border-slate-200 dark:border-slate-700">
+                <div className="flex border-b border-sea bg-deep">
                     <button
                         onClick={() => setActiveTab('export')}
                         className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                             activeTab === 'export'
-                                ? 'text-teal-600 border-b-2 border-teal-600 bg-teal-50 dark:bg-teal-900/20'
-                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                                ? 'text-lava-500 border-b-2 border-lava-500 bg-lava-500/10'
+                                : 'text-sage hover:text-onyx'
                         }`}
                     >
                         <div className="flex items-center justify-center gap-2">
@@ -193,8 +194,8 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                         onClick={() => setActiveTab('import')}
                         className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                             activeTab === 'import'
-                                ? 'text-teal-600 border-b-2 border-teal-600 bg-teal-50 dark:bg-teal-900/20'
-                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                                ? 'text-lava-500 border-b-2 border-lava-500 bg-lava-500/10'
+                                : 'text-sage hover:text-onyx'
                         }`}
                     >
                         <div className="flex items-center justify-center gap-2">
@@ -205,20 +206,20 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6">
+                <div className="flex-1 overflow-y-auto p-6 bg-midnight">
                     {activeTab === 'export' ? (
                         <div className="space-y-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <button
                                     onClick={handleExportJSON}
-                                    className="flex flex-col items-center gap-3 p-6 bg-slate-50 dark:bg-slate-700/50 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-teal-500 dark:hover:border-teal-500 transition-colors group"
+                                    className="flex flex-col items-center gap-3 p-6 bg-deep rounded-xl border-2 border-sea hover:border-lava-500 transition-colors group"
                                 >
-                                    <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">
-                                        <CodeBracketIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                                    <div className="p-3 bg-sea rounded-xl group-hover:bg-lava-500/20 transition-colors">
+                                        <CodeBracketIcon className="w-8 h-8 text-onyx group-hover:text-lava-500" />
                                     </div>
                                     <div className="text-center">
-                                        <h3 className="font-semibold text-slate-800 dark:text-slate-200">Export as JSON</h3>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                        <h3 className="font-semibold text-onyx">Export as JSON</h3>
+                                        <p className="text-sm text-sage mt-1">
                                             Complete data with all details
                                         </p>
                                     </div>
@@ -226,14 +227,14 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
 
                                 <button
                                     onClick={handleExportCSV}
-                                    className="flex flex-col items-center gap-3 p-6 bg-slate-50 dark:bg-slate-700/50 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-teal-500 dark:hover:border-teal-500 transition-colors group"
+                                    className="flex flex-col items-center gap-3 p-6 bg-deep rounded-xl border-2 border-sea hover:border-lava-500 transition-colors group"
                                 >
-                                    <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl group-hover:bg-green-200 dark:group-hover:bg-green-800/50 transition-colors">
-                                        <TableCellsIcon className="w-8 h-8 text-green-600 dark:text-green-400" />
+                                    <div className="p-3 bg-sea rounded-xl group-hover:bg-lava-500/20 transition-colors">
+                                        <TableCellsIcon className="w-8 h-8 text-onyx group-hover:text-lava-500" />
                                     </div>
                                     <div className="text-center">
-                                        <h3 className="font-semibold text-slate-800 dark:text-slate-200">Export as CSV</h3>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                        <h3 className="font-semibold text-onyx">Export as CSV</h3>
+                                        <p className="text-sm text-sage mt-1">
                                             Maintenance records only
                                         </p>
                                     </div>
@@ -241,14 +242,14 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
 
                                 <button
                                     onClick={handleExportSummary}
-                                    className="flex flex-col items-center gap-3 p-6 bg-slate-50 dark:bg-slate-700/50 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-teal-500 dark:hover:border-teal-500 transition-colors group sm:col-span-2"
+                                    className="flex flex-col items-center gap-3 p-6 bg-deep rounded-xl border-2 border-sea hover:border-lava-500 transition-colors group sm:col-span-2"
                                 >
-                                    <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors">
-                                        <DocumentTextIcon className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                                    <div className="p-3 bg-sea rounded-xl group-hover:bg-lava-500/20 transition-colors">
+                                        <DocumentTextIcon className="w-8 h-8 text-onyx group-hover:text-lava-500" />
                                     </div>
                                     <div className="text-center">
-                                        <h3 className="font-semibold text-slate-800 dark:text-slate-200">Export Summary Report</h3>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                        <h3 className="font-semibold text-onyx">Export Summary Report</h3>
+                                        <p className="text-sm text-sage mt-1">
                                             Overview of all companies with counts
                                         </p>
                                     </div>
@@ -261,12 +262,12 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                             <div 
                                 className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
                                     importStatus === 'loading'
-                                        ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20'
+                                        ? 'border-amber-500 bg-amber-500/10'
                                         : importStatus === 'success'
-                                        ? 'border-green-400 bg-green-50 dark:bg-green-900/20'
+                                        ? 'border-success-500 bg-success-500/10'
                                         : importStatus === 'error'
-                                        ? 'border-red-400 bg-red-50 dark:bg-red-900/20'
-                                        : 'border-slate-300 dark:border-slate-600 hover:border-teal-400 dark:hover:border-teal-400'
+                                        ? 'border-lava-500 bg-lava-500/10'
+                                        : 'border-sea hover:border-lava-500'
                                 }`}
                             >
                                 <input
@@ -283,16 +284,16 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                                     className="w-full"
                                 >
                                     <DocumentArrowUpIcon className={`w-12 h-12 mx-auto mb-3 ${
-                                        importStatus === 'success' ? 'text-green-500' :
-                                        importStatus === 'error' ? 'text-red-500' :
-                                        'text-slate-400'
+                                        importStatus === 'success' ? 'text-success-500' :
+                                        importStatus === 'error' ? 'text-lava-500' :
+                                        'text-sage'
                                     }`} />
                                     
-                                    <p className="font-medium text-slate-700 dark:text-slate-300">
+                                    <p className="font-medium text-onyx">
                                         {importStatus === 'loading' ? 'جاري المعالجة...' : 'اضغط لرفع الملف'}
                                     </p>
                                     
-                                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                    <p className="text-sm text-sage mt-1">
                                         JSON or CSV format
                                     </p>
                                 </button>
@@ -300,10 +301,10 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
 
                             {/* Status Message */}
                             {importMessage && (
-                                <div className={`flex items-center gap-2 p-3 rounded-lg ${
-                                    importStatus === 'success' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
-                                    importStatus === 'error' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' :
-                                    'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+                                <div className={`flex items-center gap-2 p-3 rounded-lg border ${
+                                    importStatus === 'success' ? 'bg-success-500/10 text-success-500 border-success-500/20' :
+                                    importStatus === 'error' ? 'bg-lava-500/10 text-lava-500 border-lava-500/20' :
+                                    'bg-amber-500/10 text-amber-500 border-amber-500/20'
                                 }`}>
                                     {importStatus === 'success' ? (
                                         <CheckCircleIcon className="w-5 h-5" />
@@ -317,7 +318,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                             {/* Validation Results */}
                             {importedData.length > 0 && (
                                 <div className="space-y-2">
-                                    <h4 className="font-medium text-slate-700 dark:text-slate-300">
+                                    <h4 className="font-medium text-onyx">
                                         Validation Results
                                     </h4>
                                     
@@ -326,24 +327,24 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                                             key={index}
                                             className={`p-3 rounded-lg border ${
                                                 item.validation.isValid
-                                                    ? 'border-green-200 bg-green-50 dark:bg-green-900/20 dark:border-green-800'
-                                                    : 'border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800'
+                                                    ? 'border-success-500/30 bg-success-500/10'
+                                                    : 'border-lava-500/30 bg-lava-500/10'
                                             }`}
                                         >
                                             <div className="flex items-center gap-2">
                                                 {item.validation.isValid ? (
-                                                    <CheckCircleIcon className="w-5 h-5 text-green-600" />
+                                                    <CheckCircleIcon className="w-5 h-5 text-success-500" />
                                                 ) : (
-                                                    <ExclamationCircleIcon className="w-5 h-5 text-red-600" />
+                                                    <ExclamationCircleIcon className="w-5 h-5 text-lava-500" />
                                                 )}
                                                 
-                                                <span className="font-medium">
+                                                <span className="font-medium text-onyx">
                                                     {item.original.companyName || `Company ${index + 1}`}
                                                 </span>
                                             </div>
                                             
                                             {!item.validation.isValid && (
-                                                <ul className="mt-2 ml-7 text-sm text-red-600 dark:text-red-400">
+                                                <ul className="mt-2 ml-7 text-sm text-lava-400">
                                                     {item.validation.errors.map((error: string, i: number) => (
                                                         <li key={i}>{error}</li>
                                                     ))}
@@ -359,24 +360,25 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
 
                 {/* Footer */}
                 {activeTab === 'import' && importedData.some((item: any) => item.validation.isValid) && (
-                    <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-6 py-4 pb-safe border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
-                        <button
+                    <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-6 py-4 pb-safe border-t border-sea bg-surface-muted/30">
+                        <Button
+                            variant="secondary"
                             onClick={() => {
                                 setImportedData([]);
                                 setImportStatus('idle');
                                 setImportMessage('');
                             }}
-                            className="w-full sm:w-auto px-4 py-2 text-slate-700 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                            className="w-full sm:w-auto"
                         >
                             Clear
-                        </button>
+                        </Button>
                         
-                        <button
+                        <Button
                             onClick={handleImport}
-                            className="w-full sm:w-auto px-6 py-2 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition-colors"
+                            className="w-full sm:w-auto"
                         >
                             Import {importedData.filter((item: any) => item.validation.isValid).length} Companies
-                        </button>
+                        </Button>
                     </div>
                 )}
             </div>

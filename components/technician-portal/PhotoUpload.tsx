@@ -8,6 +8,7 @@ import {
 } from "../../utils/imageCompression";
 import { logger } from "../../utils/logger";
 import { CameraIcon, XMarkIcon, PhotoIcon } from "@heroicons/react/24/outline";
+import { useToast } from "../ToastContext";
 
 export interface Photo {
   id: string;
@@ -32,6 +33,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
 }) => {
   const [isCompressing, setIsCompressing] = useState(false);
   const [compressingId, setCompressingId] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   const handleFileSelect = useCallback(
     async (
@@ -45,8 +47,9 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
       const remainingSlots = Math.floor(maxPhotos / 2) - currentTypeCount;
 
       if (remainingSlots <= 0) {
-        alert(
+        showToast(
           `يمكنك إضافة ${Math.floor(maxPhotos / 2)} صور ${type === "before" ? "قبل" : "بعد"} فقط`,
+          "warning"
         );
         return;
       }
@@ -59,7 +62,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
         // Validate file
         const validation = validateImageFile(file, 10);
         if (!validation.valid) {
-          alert(validation.error);
+          showToast(validation.error || 'ملف غير صالح', "error");
           continue;
         }
 
