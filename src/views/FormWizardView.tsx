@@ -2307,7 +2307,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
   }, [currentStep]);
 
   return (
-    <div className="flex flex-col min-h-full bg-midnight -mx-4 sm:-mx-6 lg:-mx-10 -mt-4 sm:-mt-6 lg:-mt-10 -mb-4 sm:-mb-6 lg:-mb-10">
+    <div className="flex flex-col min-h-full bg-midnight">
 
       <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 relative flex-1 p-4 lg:p-6 pb-32">
         
@@ -2412,7 +2412,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
         )}
       </div>
 
-      <footer className="sticky bottom-0 z-40 bg-deep/90 backdrop-blur-sm border-t border-sea shadow-[0_-2px_10px_rgba(0,0,0,0.2)]">
+      <footer className="sticky bottom-0 z-30 bg-deep/90 backdrop-blur-sm border-t border-sea shadow-[0_-2px_10px_rgba(0,0,0,0.2)]">
         <div className="w-full max-w-4xl mx-auto p-4">
           <NavigationButtons
             currentStep={currentStep}
