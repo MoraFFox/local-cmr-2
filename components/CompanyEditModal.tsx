@@ -106,26 +106,26 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
             <div 
                 role="dialog" 
                 aria-modal="true" 
-                className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm w-full max-w-lg my-4 sm:my-0 overflow-hidden animate-scale-in"
+                className="bg-deep border border-sea rounded-2xl shadow-xl w-full max-w-lg my-4 sm:my-0 overflow-hidden animate-scale-in"
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+                <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-sea bg-sea/30">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-teal-100 dark:bg-teal-900/30 rounded-lg">
-                            <BuildingOfficeIcon className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                        <div className="p-2 bg-lava-500/10 rounded-lg">
+                            <BuildingOfficeIcon className="w-5 h-5 text-lava-500" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                                Edit Company
+                            <h2 className="text-lg font-bold text-onyx">
+                                تعديل الشركة
                             </h2>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">
-                                {company.companyName || 'Unnamed Company'}
+                            <p className="text-sm text-sage">
+                                {company.companyName || 'شركة غير مسماة'}
                             </p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 sm:p-2 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                        className="p-2 sm:p-2 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center text-sage hover:text-onyx rounded-full hover:bg-sea transition-colors"
                         aria-label="إغلاق النافذة"
                     >
                         <XMarkIcon className="w-5 h-5" />
@@ -183,18 +183,18 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                 </div>
 
                 {/* Footer Actions */}
-                <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-4 sm:px-6 py-4 pb-safe border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+                <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-4 sm:px-6 py-4 pb-safe border-t border-sea bg-surface-muted/30">
                     <button
                         onClick={onClose}
-                        className="w-full sm:w-auto px-4 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 text-slate-700 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                        className="w-full sm:w-auto px-4 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 text-sage hover:text-onyx font-medium rounded-lg hover:bg-sea transition-colors"
                         disabled={isSaving}
                     >
-                        Cancel
+                        إلغاء
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="w-full sm:w-auto px-6 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        className="w-full sm:w-auto px-6 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 bg-lava-500 text-onyx font-semibold rounded-lg hover:bg-lava-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                         {isSaving ? (
                             <>
@@ -202,10 +202,10 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                 </svg>
-                                Saving...
+                                جارٍ الحفظ...
                             </>
                         ) : (
-                            'Save Changes'
+                            'حفظ التغييرات'
                         )}
                     </button>
                 </div>
