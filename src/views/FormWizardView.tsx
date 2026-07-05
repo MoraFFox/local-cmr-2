@@ -2307,9 +2307,9 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
   }, [currentStep]);
 
   return (
-    <div className="flex flex-col h-full bg-midnight">
+    <div className="flex flex-col min-h-full bg-midnight -mx-4 sm:-mx-6 lg:-mx-10 -mt-4 sm:-mt-6 lg:-mt-10 -mb-4 sm:-mb-6 lg:-mb-10">
 
-      <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 relative h-full p-4 lg:p-6 pb-32">
+      <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 relative flex-1 p-4 lg:p-6 pb-32">
         
         {/* Stepper Sidebar */}
         <aside className="hidden lg:block w-64 shrink-0">
