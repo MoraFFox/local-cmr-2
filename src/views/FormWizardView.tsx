@@ -2412,7 +2412,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
         )}
       </div>
 
-      <footer className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100vw-6rem)] lg:w-[calc(100vw-20rem)] max-w-5xl z-50 bg-deep rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-white/5">
+      <footer className="sticky bottom-6 z-40 bg-deep rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-white/5 w-[90%] mx-auto">
         <div className="w-full p-4">
           <NavigationButtons
             currentStep={currentStep}
