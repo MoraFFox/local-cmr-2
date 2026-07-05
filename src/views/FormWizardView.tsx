@@ -2412,15 +2412,20 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
         )}
       </div>
 
-      <footer className="sticky bottom-0 z-30 liquid-glass">
-        <div className="w-full max-w-4xl mx-auto p-4">
-          <NavigationButtons
-            currentStep={currentStep}
-            onPrev={handlePrev}
-            onNext={currentStep === 6 ? handleSubmit : handleNext}
-            isLastStep={currentStep === 6}
-            isSubmitting={isSubmitting}
-          />
+      <footer className="sticky bottom-0 z-30 liquidGlass-wrapper">
+        <div className="liquidGlass-effect" />
+        <div className="liquidGlass-tint" />
+        <div className="liquidGlass-shine" />
+        <div className="liquidGlass-text w-full">
+          <div className="w-full max-w-4xl mx-auto p-4">
+            <NavigationButtons
+              currentStep={currentStep}
+              onPrev={handlePrev}
+              onNext={currentStep === 6 ? handleSubmit : handleNext}
+              isLastStep={currentStep === 6}
+              isSubmitting={isSubmitting}
+            />
+          </div>
         </div>
       </footer>
     </div>
