@@ -470,16 +470,16 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
         else serverData = companies?.map(d => ({ ...d.form_data, id: d.id, created_at: d.created_at })) || [];
 
         // Fetch portal records (Unified Storage)
-        const { data: [], error: subsError } = await supabase
-          .from("maintenance_[]")
+        const { data: portalData, error: subsError } = await supabase
+          .from("maintenance_portal_submissions")
           .select("*")
           .order("maintenance_date", { ascending: false });
 
         if (subsError) {
-          logger.error("Error fetching []", subsError, 'data');
+          logger.error("Error fetching maintenance_portal_submissions", subsError, 'data');
           showToast("خطأ في جلب بيانات الصيانة", "error");
         }
-        else portalSubmissions = [];
+        else portalSubmissions = portalData || [];
       }
 
       // 2. Merge Portal Submissions into Company/Branch History
@@ -551,7 +551,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
 
       setSubmissions(finalSubmissions);
     } catch (e) {
-      logger.error("Unexpected error fetching []", e, 'data');
+      logger.error("Unexpected error fetching submissions", e, 'data');
       showToast("حدث خطأ غير متوقع أثناء جلب البيانات", "error");
       setSubmissions(await getPendingCreations());
     } finally {
