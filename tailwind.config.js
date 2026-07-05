@@ -22,6 +22,28 @@ export default {
         ],
       },
       colors: {
+        midnight: '#081619',
+        deep: '#102A30',
+        sea: '#1A434C',
+        onyx: '#EAF2F3',
+        sage: '#829A9E',
+        lava: {
+          50: '#fdecea',
+          100: '#f9c8c3',
+          200: '#f5a39d',
+          300: '#f07f77',
+          400: '#ec5b51',
+          500: '#E63923',
+          600: '#c42b1a',
+          700: '#9e1f12',
+          800: '#77150d',
+          900: '#500c08',
+        },
+        surface: {
+          DEFAULT: '#102A30',
+          elevated: '#1A434C',
+          muted: '#081619',
+        },
         // Midoe's brand palette derived from public/logo.svg
         brand: {
           red: '#AF2025',

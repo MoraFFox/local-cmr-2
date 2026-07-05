@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MaintenanceRecord, Barista } from '../types';
 import Button from './ui/Button';
-import ConfirmDialog from './ui/ConfirmDialog';
+import { ConfirmDialog } from './ui/ConfirmDialog';
 
 import { 
     CheckCircleIcon, 
