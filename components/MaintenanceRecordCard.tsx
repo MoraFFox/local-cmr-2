@@ -20,8 +20,6 @@ import {
   TrashIcon,
   UserPlusIcon,
   ExclamationCircleIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
   WrenchIcon,
   CalendarIcon,
   UserIcon,
@@ -29,7 +27,6 @@ import {
   CurrencyDollarIcon,
   MapPinIcon,
   CheckCircleIcon,
-  XCircleIcon,
   ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
@@ -411,9 +408,9 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
   };
 
   const textAreaClasses =
-    "block w-full px-5 py-4 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 border border-slate-200 dark:border-slate-600 shadow-sm";
+    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-success-500 focus:border-success-500 focus:ring-2 focus:ring-success-500/20 border border-slate-200 dark:border-slate-700 shadow-sm";
   const selectClasses =
-    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 border border-slate-200 dark:border-slate-600 shadow-sm";
+    "input-base px-4 py-3 sm:px-5 sm:py-4";
 
   return (
     <CollapsibleCard
@@ -424,10 +421,10 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
     >
       <div className="space-y-6">
         {/* Basic Info Section */}
-        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 space-y-4">
-          <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-            <CalendarIcon className="w-4 h-4" />
-            Basic Information
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 space-y-4 border border-slate-200 dark:border-slate-800">
+          <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+            <CalendarIcon className="w-4 h-4 text-success-600" />
+            المعلومات الأساسية
           </h4>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -446,10 +443,10 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               onChange={handleFieldChange}
             />
 
-            {/* Barista Selector & Rating */}
+            {/* Staff Selector */}
             <div className="flex flex-col">
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                My Staff
+                فني الصيانة
               </label>
               <div className="flex gap-2 relative">
                 {baristas.length > 0 ? (
@@ -457,9 +454,9 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                     name="baristaName"
                     value={record.baristaName}
                     onChange={handleFieldChange}
-                    className={`flex-1 ${selectClasses}`}
+                    className={selectClasses}
                   >
-                    <option value="">-- Select Staff --</option>
+                    <option value="">اختر الفني</option>
                     {baristas.map((b) => (
                       <option key={b.id} value={b.name}>
                         {b.name}
@@ -473,22 +470,23 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                       value={record.baristaName}
                       onChange={handleFieldChange}
                       className={`w-full ${selectClasses} ${typoSuggestion ? "ring-2 ring-amber-400 border-amber-400" : ""}`}
-                      placeholder="اسم الموظف"
+                      placeholder="اسم الفني"
                     />
                     {typoSuggestion && (
-                      <div
-                        className="absolute left-0 top-full mt-1 z-10 w-full bg-amber-50 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-700 rounded-md p-2 shadow-lg flex items-center gap-2 cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-800/50 transition-colors animate-content-fade-in"
+                      <button
+                        type="button"
+                        className="absolute left-0 top-full mt-1 z-10 w-full text-right bg-amber-50 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-700 rounded-md p-2 shadow-lg flex items-center gap-2 cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-800/50 transition-colors animate-content-fade-in"
                         onClick={applySuggestion}
                       >
                         <ExclamationCircleIcon className="w-5 h-5 text-amber-600" />
-                        <div className="text-xs text-amber-800 dark:text-amber-100">
-                          Did you mean:{" "}
+                        <span className="text-xs text-amber-800 dark:text-amber-100">
+                          هل تقصد:{" "}
                           <span className="font-bold underline">
                             {typoSuggestion}
                           </span>
-                          ?
-                        </div>
-                      </div>
+                          ؟
+                        </span>
+                      </button>
                     )}
                   </div>
                 )}
@@ -496,8 +494,9 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                   <button
                     type="button"
                     onClick={handleQuickAddBarista}
-                    className="px-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors flex items-center justify-center shadow-sm active:scale-95"
-                    title="إضافة موظف جديد"
+                    className="px-3 bg-success-600 hover:bg-success-700 text-white rounded-lg transition-colors flex items-center justify-center shadow-sm active:scale-95 shrink-0"
+                    title="إضافة فني جديد"
+                    aria-label="إضافة فني جديد"
                   >
                     <UserPlusIcon className="w-5 h-5" />
                   </button>
@@ -505,36 +504,10 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               </div>
             </div>
 
+            {/* Client Barista Selector - unified responsive */}
             <div className="flex flex-col">
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Client Barista Performance
-              </label>
-              <div className="flex items-center gap-1 h-full bg-slate-100 dark:bg-slate-700 rounded-lg px-4 border border-slate-200 dark:border-slate-600">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => handleRatingChange(star)}
-                    className="focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 transform active:scale-110 transition-transform"
-                  >
-                    {star <= (record.visitRating || 0) ? (
-                      <StarIconSolid className="w-6 h-6 text-yellow-400" />
-                    ) : (
-                      <StarIcon className="w-6 h-6 text-slate-400" />
-                    )}
-                  </button>
-                ))}
-                <span className="text-xs text-slate-500 ml-2 font-semibold">
-                  {(record.visitRating || 0) > 0
-                    ? `${record.visitRating}/5`
-                    : "Rate"}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex flex-col md:hidden">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Client Barista
+                باريستا العميل
               </label>
               <div className="flex gap-2 relative">
                 {clientBaristas.length > 0 ? (
@@ -542,9 +515,9 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                     name="clientBaristaName"
                     value={record.clientBaristaName || ""}
                     onChange={handleFieldChange}
-                    className={`flex-1 ${selectClasses}`}
+                    className={selectClasses}
                   >
-                    <option value="">-- Select Client Barista --</option>
+                    <option value="">اختر باريستا العميل</option>
                     {clientBaristas.map((b) => (
                       <option key={b.id} value={b.name}>
                         {b.name}
@@ -556,7 +529,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                     name="clientBaristaName"
                     value={record.clientBaristaName || ""}
                     onChange={handleFieldChange}
-                    className={`flex-1 ${selectClasses}`}
+                    className={selectClasses}
                     placeholder="اسم باريستا العميل"
                   />
                 )}
@@ -564,61 +537,46 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                   <button
                     type="button"
                     onClick={() => {
-                      const name = window.prompt("Enter client barista name:");
+                      const name = window.prompt("اسم باريستا العميل:");
                       if (name && onAddClientBarista) onAddClientBarista(name);
                     }}
-                    className="px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors flex items-center justify-center shadow-sm active:scale-95"
+                    className="px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors flex items-center justify-center shadow-sm active:scale-95 shrink-0"
                     title="إضافة باريستا عميل جديد"
+                    aria-label="إضافة باريستا عميل جديد"
                   >
                     <UserPlusIcon className="w-5 h-5" />
                   </button>
                 )}
               </div>
             </div>
-          </div>
 
-          <div className="hidden md:flex flex-col">
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Client Barista
-            </label>
-            <div className="flex gap-2 relative">
-              {clientBaristas.length > 0 ? (
-                <select
-                  name="clientBaristaName"
-                  value={record.clientBaristaName || ""}
-                  onChange={handleFieldChange}
-                  className="flex-1"
-                  style={selectClasses}
-                >
-                  <option value="">-- Select Client Barista --</option>
-                  {clientBaristas.map((b) => (
-                    <option key={b.id} value={b.name}>
-                      {b.name}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  name="clientBaristaName"
-                  value={record.clientBaristaName || ""}
-                  onChange={handleFieldChange}
-                  className={`flex-1 ${selectClasses}`}
-                  placeholder="اسم باريستا العميل"
-                />
-              )}
-              {onAddClientBarista && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const name = window.prompt("Enter client barista name:");
-                    if (name && onAddClientBarista) onAddClientBarista(name);
-                  }}
-                  className="px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors flex items-center justify-center shadow-sm active:scale-95"
-                  title="إضافة باريستا عميل جديد"
-                >
-                  <UserPlusIcon className="w-5 h-5" />
-                </button>
-              )}
+            {/* Rating */}
+            <div className="flex flex-col">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                تقييم الأداء
+              </label>
+              <div className="flex items-center gap-1 h-full bg-slate-100 dark:bg-slate-800 rounded-lg px-3 border border-slate-200 dark:border-slate-700">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => handleRatingChange(star)}
+                    className="focus:outline-none focus-visible:ring-2 focus-visible:ring-success-500 rounded p-0.5 transform active:scale-110 transition-transform"
+                    aria-label={`تقييم ${star} من 5`}
+                  >
+                    {star <= (record.visitRating || 0) ? (
+                      <StarIconSolid className="w-5 h-5 text-yellow-400" />
+                    ) : (
+                      <StarIcon className="w-5 h-5 text-slate-400" />
+                    )}
+                  </button>
+                ))}
+                <span className="text-xs text-slate-500 ms-2 font-semibold">
+                  {(record.visitRating || 0) > 0
+                    ? `${record.visitRating}/5`
+                    : "بدون تقييم"}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -650,11 +608,11 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
         </div>
 
         {/* Problem Section */}
-        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 space-y-4">
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 space-y-4 border border-red-100 dark:border-red-900/30">
           <div className="flex items-center justify-between">
-            <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-              <WrenchIcon className="w-4 h-4" />
-              Problem & Services
+            <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+              <WrenchIcon className="w-4 h-4 text-red-500" />
+              المشكلة والخدمات
             </h4>
             <div className="flex items-center gap-x-3">
               <input
@@ -663,13 +621,13 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                 name="hadProblem"
                 checked={record.hadProblem}
                 onChange={handleFieldChange}
-                className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-teal-600 focus:ring-teal-600"
+                className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-red-600 focus:ring-red-600"
               />
               <label
                 htmlFor={`hadProblem-${record.id}`}
                 className="font-medium text-slate-800 dark:text-slate-200"
               >
-                Was there a problem?
+                هل كانت هناك مشكلة؟
               </label>
             </div>
           </div>
@@ -708,18 +666,18 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                   type="checkbox"
                   checked={record.partsWereReplaced}
                   onChange={handleFieldChange}
-                  className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-teal-600 focus:ring-teal-600"
+                  className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-amber-600 focus:ring-amber-600"
                 />
                 <label
                   htmlFor={`partsWereReplaced-${record.id}`}
                   className="font-medium text-slate-800 dark:text-slate-200"
                 >
-                  Were parts changed?
+                  هل تم تغيير قطع غيار؟
                 </label>
               </div>
 
               {record.partsWereReplaced && (
-                <div className="pl-6 space-y-4">
+                <div className="pe-6 ps-2 space-y-4">
                   <CollapsibleSection title="القطع المستبدلة">
                     <PartsSelector
                       options={props.partsList}
@@ -741,13 +699,13 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                   type="checkbox"
                   checked={record.problemSolved}
                   onChange={handleFieldChange}
-                  className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-teal-600 focus:ring-teal-600"
+                  className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-green-600 focus:ring-green-600"
                 />
                 <label
                   htmlFor={`problemSolved-${record.id}`}
                   className="font-medium text-slate-800 dark:text-slate-200"
                 >
-                  Is the problem solved?
+                  هل تم حل المشكلة؟
                 </label>
               </div>
 
@@ -755,12 +713,12 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               {!record.problemSolved && !isFollowUp && (
                 <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                      <ClipboardDocumentListIcon className="w-4 h-4" />
-                      Follow-up Visits
+                    <h4 className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                      <ClipboardDocumentListIcon className="w-4 h-4 text-success-600" />
+                      زيارات المتابعة
                     </h4>
                     <span className="text-sm text-slate-500">
-                      {(record.followUpVisits || []).length} visits
+                      {(record.followUpVisits || []).length} زيارة
                     </span>
                   </div>
                   <div className="space-y-3">
@@ -799,7 +757,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
         </div>
 
         {/* Type & Payment Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t dark:border-slate-700">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
           <RadioGroup
             name={`type-${record.id}`}
             label="النوع"
@@ -808,8 +766,8 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               handleFieldChange({ target: { name: "type", value: val } } as any)
             }
             options={[
-              { label: "Requested", value: "requested" },
-              { label: "Scheduled", value: "scheduled" },
+              { label: "طلب صيانة", value: "requested" },
+              { label: "صيانة دورية", value: "scheduled" },
             ]}
           />
           <RadioGroup
@@ -822,7 +780,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               } as any)
             }
             options={[
-              { label: "Mido's", value: "company" },
+              { label: "ميدوز", value: "company" },
               { label: "الشركة", value: "client" },
             ]}
           />
@@ -837,7 +795,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
         </div>
 
         {/* Machines Section */}
-        <div className="pt-4 border-t dark:border-slate-700">
+        <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
           <CollapsibleSection title="الماكينات التي تمت صيانتها">
             <div className="space-y-3">
               {(record.machines || []).map((machine, index) => (
@@ -877,23 +835,23 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               ))}
               <button
                 onClick={handleAddMachine}
-                className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-500 transition-colors transform active:scale-95"
+                className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-success-600 dark:text-success-400 hover:text-success-700 dark:hover:text-success-500 transition-colors transform active:scale-95"
               >
                 <PlusCircleIcon className="w-5 h-5" />
-                Add Machine
+                إضافة ماكينة
               </button>
             </div>
           </CollapsibleSection>
         </div>
 
         {/* Supervisors Section */}
-        <div className="pt-4 border-t dark:border-slate-700">
+        <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
           <CollapsibleSection title="بيانات المشرف">
             <div className="space-y-4">
               {(record.supervisors || []).map((supervisor, index) => (
                 <div
                   key={supervisor.id}
-                  className="p-3 border dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-800/40 relative"
+                  className="p-3 border border-slate-200 dark:border-slate-700 rounded-md bg-white dark:bg-slate-900 relative"
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <TextInput
@@ -922,19 +880,19 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               ))}
               <button
                 onClick={handleAddSupervisor}
-                className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-500 transition-colors transform active:scale-95"
+                className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-success-600 dark:text-success-400 hover:text-success-700 dark:hover:text-success-500 transition-colors transform active:scale-95"
               >
                 <PlusCircleIcon className="w-5 h-5" />
-                Add Supervisor
+                إضافة مشرف
               </button>
             </div>
           </CollapsibleSection>
         </div>
 
         {/* Notes Section */}
-        <div className="pt-4 border-t dark:border-slate-700">
+        <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Optional Notes
+            ملاحظات (اختياري)
           </label>
           <textarea
             name="notes"

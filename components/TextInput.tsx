@@ -8,10 +8,11 @@ interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, error, required, ...props }) => {
+    const inputId = props.id || name;
     return (
         <div className={className}>
             {label && (
-                <label htmlFor={name} className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label htmlFor={inputId} className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     {label}
                     {required && <span className="text-red-500 ml-1">*</span>}
                 </label>
@@ -23,18 +24,20 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, err
                     </div>
                 )}
                 <input
-                    id={name}
+                    id={inputId}
                     name={name}
+                    aria-invalid={error ? 'true' : undefined}
+                    aria-describedby={error ? `${inputId}-error` : undefined}
                     {...props}
-                    className={`block w-full ${icon ? 'pl-10' : 'px-4'} py-3 sm:py-4 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 border shadow-sm transition-colors ${
-                        error 
-                            ? 'border-red-300 focus:border-red-400 focus:ring-red-400/20 dark:border-red-600' 
-                            : 'border-slate-200 dark:border-slate-600 focus:border-teal-400 focus:ring-teal-400/20'
+                    className={`block w-full ${icon ? 'pl-10' : 'px-4'} h-[50px] bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 border shadow-sm transition-colors ${
+                        error
+                            ? 'border-red-300 focus:border-red-400 focus:ring-red-400/20 dark:border-red-600'
+                            : 'border-slate-200 dark:border-slate-700 focus:border-success-500 focus:ring-success-500/20'
                     }`}
                 />
             </div>
             {error && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400 animate-fade-in">
+                <p id={`${inputId}-error`} className="mt-1 text-sm text-red-600 dark:text-red-400 animate-fade-in">
                     {error}
                 </p>
             )}

@@ -33,6 +33,10 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
     this.setState({ hasError: false, error: null, errorInfo: null });
   };
 
+  handleGoHome = (): void => {
+    window.location.href = '/';
+  };
+
   render(): React.ReactNode {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
@@ -55,7 +59,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
             padding: '32px',
             textAlign: 'center',
             backdropFilter: 'blur(12px)',
-          }}>
+          }} role="alert">
             {/* Error Icon */}
             <div style={{
               width: '64px',
@@ -78,14 +82,14 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
               حدث خطأ غير متوقع
             </h2>
             <p style={{ color: '#94a3b8', fontSize: '14px', margin: '0 0 8px', direction: 'rtl' }}>
-              عذراً، حدث خطأ في التطبيق. يمكنك المحاولة مرة أخرى.
+              عذراً، حدث خطأ في التطبيق. يمكنك المحاولة مرة أخرى أو العودة للصفحة الرئيسية.
             </p>
 
             {/* Error Details (collapsible) */}
             {this.state.error && (
               <details style={{ margin: '16px 0', textAlign: 'left' }}>
                 <summary style={{ color: '#64748b', fontSize: '12px', cursor: 'pointer', marginBottom: '8px' }}>
-                  Technical Details
+                  التفاصيل التقنية
                 </summary>
                 <pre style={{
                   background: 'rgba(0,0,0,0.3)',
@@ -103,7 +107,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
               </details>
             )}
 
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <button
                 onClick={this.handleRetry}
                 style={{
@@ -121,6 +125,21 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
                 onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
               >
                 إعادة المحاولة
+              </button>
+              <button
+                onClick={this.handleGoHome}
+                style={{
+                  background: 'rgba(20, 184, 166, 0.2)',
+                  color: '#5eead4',
+                  border: '1px solid rgba(20, 184, 166, 0.4)',
+                  borderRadius: '10px',
+                  padding: '12px 24px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                العودة للرئيسية
               </button>
               <button
                 onClick={() => window.location.reload()}

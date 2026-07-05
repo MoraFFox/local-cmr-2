@@ -83,16 +83,16 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
         icon={<WrenchScrewdriverIcon />} 
         variant="active"
         action={
-            <button onClick={() => onEditStep(2)} className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-teal-400 transition-colors">
+            <button onClick={() => onEditStep(2)} className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-success-400 transition-colors" aria-label="تعديل">
                 <PencilIcon className="w-4 h-4" />
             </button>
         }
       >
          <div className="space-y-4">
             <div className={`p-3 rounded-lg border flex items-center gap-3 ${
-                step2Data.visitType === 'problem' 
-                ? 'bg-red-500/10 border-red-500/30 text-red-400' 
-                : 'bg-teal-500/10 border-teal-500/30 text-teal-400'
+                step2Data.visitType === 'problem'
+                ? 'bg-red-500/10 border-red-500/30 text-red-400'
+                : 'bg-success-500/10 border-success-500/30 text-success-400'
             }`}>
                {step2Data.visitType === 'problem' ? (
                    <>
@@ -101,7 +101,7 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
                    </>
                ) : (
                    <>
-                     <div className="p-1 bg-teal-500/20 rounded"><CheckBadgeIcon className="w-5 h-5"/></div>
+                     <div className="p-1 bg-success-500/20 rounded"><CheckBadgeIcon className="w-5 h-5"/></div>
                      <span className="font-bold">{ar.portal.scheduledVisit}</span>
                    </>
                )}
@@ -115,7 +115,7 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
                         {step2Data.servicesPerformed.map((s, idx) => (
                             <div key={idx} className="flex justify-between text-sm">
                                 <span className="text-slate-300">{s.name}</span>
-                                <span className="text-teal-400 font-mono">x{s.count}</span>
+                                <span className="text-success-400 font-mono">x{s.count}</span>
                             </div>
                         ))}
                     </div>
@@ -168,7 +168,7 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
                      <div className="flex items-center gap-2">
                          <button 
                             onClick={() => onUpdateProblemSolved(true)}
-                            className={`px-3 py-1 rounded text-xs font-bold transition-all ${step2Data.problemSolved ? 'bg-teal-500 text-slate-900' : 'text-slate-500 bg-slate-800'}`}
+                            className={`px-3 py-1 rounded text-xs font-bold transition-all ${step2Data.problemSolved ? 'bg-success-500 text-slate-900' : 'text-slate-500 bg-slate-800'}`}
                          >
                             {ar.common.yes}
                          </button>

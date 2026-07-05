@@ -158,9 +158,9 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
          </div>
 
          {data.visitType === 'scheduled' && (
-            <div className="mt-4 p-4 bg-teal-500/10 border border-teal-500/30 rounded-xl flex items-center gap-3 animate-in fade-in">
-                <CheckCircleIcon className="w-6 h-6 text-teal-400" />
-                <div className="text-sm text-teal-200">
+            <div className="mt-4 p-4 bg-success-500/10 border border-success-500/30 rounded-xl flex items-center gap-3 animate-in fade-in">
+                <CheckCircleIcon className="w-6 h-6 text-success-400" />
+                <div className="text-sm text-success-200">
                     <p className="font-bold">{ar.portal.routineMaintenance}</p>
                     <p className="opacity-80">{ar.portal.routineHint}</p>
                 </div>
@@ -225,7 +225,7 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
             <div className="bg-slate-900/50 p-1 rounded-xl flex border border-slate-700/50">
                 <button
                     onClick={() => handleProblemSolvedChange(true)}
-                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${data.problemSolved ? 'bg-teal-500 text-slate-900 shadow-lg shadow-teal-500/20' : 'text-slate-500 hover:text-slate-300'}`}
+                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${data.problemSolved ? 'bg-success-500 text-slate-900 shadow-lg shadow-success-500/20' : 'text-slate-500 hover:text-slate-300'}`}
                 >
                     <CheckCircleIcon className="w-5 h-5" />
                     {ar.step2.problemSolvedYes}
@@ -241,40 +241,63 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
          </TechCard>
       )}
 
-      {/* 6. Evidence Locker (Photos) */}
+      {/* 6. Photos - Before/After (Required) */}
       <TechCard title={ar.tactical.evidenceLocker} icon={<CameraIcon />}>
-         <div className="grid grid-cols-2 gap-3 mb-4">
-            <TechButton onClick={onCameraOpen} variant="secondary" className="h-full py-6 flex flex-col items-center justify-center gap-2 border-dashed border-2 border-slate-700 bg-slate-900/30 hover:bg-slate-800">
-                <CameraIcon className="w-8 h-8 text-teal-400" />
-                <span className="text-xs font-bold text-teal-400 uppercase tracking-widest">{ar.tactical.tapToCapture}</span>
-            </TechButton>
-            
-            {/* Photo Preview Grid */}
-            <div className="grid grid-cols-2 gap-2">
-                {data.photos.length > 0 ? (
-                    data.photos.slice(0, 3).map((photo) => (
+         <div className="space-y-4">
+            {/* Before Photos */}
+            <div>
+                <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{ar.portal.beforeMaintenance}</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${beforePhotos.length > 0 ? 'bg-success-500/20 text-success-400' : 'bg-red-500/20 text-red-400'}`}>
+                        {beforePhotos.length > 0 ? `${beforePhotos.length} صور` : 'مطلوب'}
+                    </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                    {beforePhotos.map((photo) => (
                         <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden border border-slate-700 group">
-                            <img src={photo.preview} alt="Evidence" className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <button onClick={() => handleRemovePhoto(photo.id)} className="p-2 bg-red-500 rounded-full text-white">
-                                    <TrashIcon className="w-4 h-4" />
-                                </button>
-                            </div>
-                            <span className="absolute bottom-1 right-1 px-1.5 py-0.5 bg-black/60 text-[10px] text-white rounded font-mono border border-white/10">
-                                {photo.type === 'before' ? ar.portal.beforeMaintenance : ar.portal.afterMaintenance}
-                            </span>
+                            <img src={photo.preview} alt={ar.portal.beforeMaintenance} className="w-full h-full object-cover" />
+                            <button onClick={() => handleRemovePhoto(photo.id)} className="absolute top-1 right-1 p-1 bg-red-500 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity" aria-label="حذف الصورة">
+                                <TrashIcon className="w-3 h-3" />
+                            </button>
                         </div>
-                    ))
-                ) : (
-                    <div className="col-span-2 flex items-center justify-center text-slate-600 text-xs italic">
-                        {ar.portal.noPhotosYet}
-                    </div>
-                )}
-                {data.photos.length > 3 && (
-                    <div className="aspect-square rounded-lg bg-slate-800 flex items-center justify-center border border-slate-700">
-                        <span className="text-slate-400 font-bold">+{data.photos.length - 3}</span>
-                    </div>
-                )}
+                    ))}
+                    <button
+                        onClick={onCameraOpen}
+                        className="aspect-square rounded-lg border-2 border-dashed border-slate-700 bg-slate-900/30 hover:bg-slate-800 hover:border-success-500/50 transition-colors flex flex-col items-center justify-center gap-1"
+                        aria-label={`${ar.portal.capturePhoto} - ${ar.portal.beforeMaintenance}`}
+                    >
+                        <CameraIcon className="w-6 h-6 text-success-400" />
+                        <span className="text-[10px] text-slate-500">{ar.tactical.tapToCapture}</span>
+                    </button>
+                </div>
+            </div>
+
+            {/* After Photos */}
+            <div>
+                <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{ar.portal.afterMaintenance}</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${afterPhotos.length > 0 ? 'bg-success-500/20 text-success-400' : 'bg-red-500/20 text-red-400'}`}>
+                        {afterPhotos.length > 0 ? `${afterPhotos.length} صور` : 'مطلوب'}
+                    </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                    {afterPhotos.map((photo) => (
+                        <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden border border-slate-700 group">
+                            <img src={photo.preview} alt={ar.portal.afterMaintenance} className="w-full h-full object-cover" />
+                            <button onClick={() => handleRemovePhoto(photo.id)} className="absolute top-1 right-1 p-1 bg-red-500 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity" aria-label="حذف الصورة">
+                                <TrashIcon className="w-3 h-3" />
+                            </button>
+                        </div>
+                    ))}
+                    <button
+                        onClick={onCameraOpen}
+                        className="aspect-square rounded-lg border-2 border-dashed border-slate-700 bg-slate-900/30 hover:bg-slate-800 hover:border-success-500/50 transition-colors flex flex-col items-center justify-center gap-1"
+                        aria-label={`${ar.portal.capturePhoto} - ${ar.portal.afterMaintenance}`}
+                    >
+                        <CameraIcon className="w-6 h-6 text-success-400" />
+                        <span className="text-[10px] text-slate-500">{ar.tactical.tapToCapture}</span>
+                    </button>
+                </div>
             </div>
          </div>
       </TechCard>

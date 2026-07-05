@@ -13,9 +13,25 @@
 @layer base {
   :root {
     color-scheme: light;
+    --bg-body: theme('colors.brand.cream');
+    --bg-surface: #ffffff;
+    --bg-surface-elevated: theme('colors.brand.cream-dark');
+    --text-primary: theme('colors.brand.espresso');
+    --text-secondary: theme('colors.slate.600');
+    --border-default: theme('colors.slate.200');
+    --border-focus: theme('colors.success.500');
+    --ring-focus: theme('colors.success.500');
   }
   .dark {
     color-scheme: dark;
+    --bg-body: theme('colors.slate.950');
+    --bg-surface: theme('colors.slate.900');
+    --bg-surface-elevated: theme('colors.slate.800');
+    --text-primary: theme('colors.slate.50');
+    --text-secondary: theme('colors.slate.400');
+    --border-default: theme('colors.slate.800');
+    --border-focus: theme('colors.success.400');
+    --ring-focus: theme('colors.success.400');
   }
 
   /* Safe-area helpers (Tailwind's pt-safe/pb-safe would need a plugin;
@@ -26,11 +42,49 @@
   .pr-safe { padding-right: env(safe-area-inset-right); }
 
   /* RTL: default Latin numerals/inputs read fine; cash chars already bi-di handled per-field. */
+  body {
+    direction: rtl;
+  }
 
   /* Keyboard focus rings — visible only for keyboard, not mouse clicks. */
   :focus-visible {
-    outline: 2px solid theme('colors.midoe.500');
+    outline: 2px solid theme('colors.success.500');
     outline-offset: 2px;
+  }
+  .dark :focus-visible {
+    outline-color: theme('colors.success.400');
+  }
+}
+
+@layer components {
+  /* ponytail: surface primitives only; add elevation tokens if cards need more depth */
+  .surface {
+    background-color: var(--bg-surface);
+    border-color: var(--border-default);
+  }
+  .surface-elevated {
+    background-color: var(--bg-surface-elevated);
+    border-color: var(--border-default);
+  }
+
+  /* ponytail: single primitive for white/subtle bordered inputs */
+  .input-base {
+    @apply block w-full rounded-lg border bg-white px-4 h-[50px] text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-success-500 focus:outline-none focus:ring-2 focus:ring-success-500/20 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-500;
+    border-color: var(--border-default);
+  }
+  .input-base:focus {
+    border-color: var(--border-focus);
+  }
+
+  /* ponytail: button primitives aligned with new semantic roles */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-success-600 px-4 py-2.5 font-semibold text-white shadow-sm transition-colors hover:bg-success-700 focus-visible:ring-2 focus-visible:ring-success-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-slate-500/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 font-semibold text-white shadow-sm transition-colors hover:bg-red-700 focus-visible:ring-2 focus-visible:ring-red-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
 }
 
@@ -43,5 +97,22 @@
   }
   .dark .custom-scrollbar::-webkit-scrollbar-thumb {
     background: theme('colors.slate.600');
+  }
+
+  /* Respect reduced motion globally */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Technician portal subtle grid */
+  .dark-grid {
+    background-image: radial-gradient(circle, #334155 1px, transparent 1px);
+    background-size: 20px 20px;
   }
 }

@@ -465,11 +465,19 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
         </div>
       ) : (
         <div className="mt-8">
-          <EmptyState 
-            icon={<UserIcon className="w-8 h-8" />} 
-            title="لا يوجد باريستا" 
-            message="لم يتم العثور على باريستا يطابق بحثك." 
-          />
+          <EmptyState
+            variant={searchTerm ? "search" : "primary"}
+            icon={<UserIcon />}
+            title="لا يوجد باريستا"
+            message={searchTerm ? "لم يتم العثور على باريستا يطابق بحثك." : "لم يتم إضافة باريستا حتى الآن."}
+          >
+            {searchTerm && (
+                <button onClick={() => setSearchTerm('')} className="btn-secondary">
+                    <XMarkIcon className="w-4 h-4" />
+                    مسح البحث
+                </button>
+            )}
+          </EmptyState>
         </div>
       )}
 

@@ -33,6 +33,7 @@ const PayerSegmentedControl: React.FC<PayerSegmentedControlProps> = ({
 
   return (
     <div
+      role="radiogroup"
       className={`inline-flex rounded-xl bg-slate-950 p-1 border border-slate-800 ${
         disabled ? 'opacity-50 cursor-not-allowed' : ''
       }`}
@@ -40,14 +41,12 @@ const PayerSegmentedControl: React.FC<PayerSegmentedControlProps> = ({
       <button
         type="button"
         role="radio"
-        aria-checked={value === "client"}
-        role="radio"
-        aria-checked={value === "company"}
+        aria-checked={!paidByClient}
         onClick={handleMidosClick}
         disabled={disabled}
         className={`rounded-lg transition-all duration-300 font-bold tracking-wide ${sizeClasses[size]} ${
           !paidByClient
-            ? 'bg-teal-500/20 text-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.3)] border border-teal-500/50'
+            ? 'bg-success-500/20 text-success-400 shadow-[0_0_15px_rgba(20,184,166,0.3)] border border-success-500/50'
             : 'bg-transparent text-slate-500 hover:text-slate-300'
         }`}
       >
@@ -56,9 +55,7 @@ const PayerSegmentedControl: React.FC<PayerSegmentedControlProps> = ({
       <button
         type="button"
         role="radio"
-        aria-checked={value === "client"}
-        role="radio"
-        aria-checked={value === "company"}
+        aria-checked={paidByClient}
         onClick={handleClientClick}
         disabled={disabled}
         className={`rounded-lg transition-all duration-300 font-bold tracking-wide ${sizeClasses[size]} ${

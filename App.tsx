@@ -80,6 +80,9 @@ import {
   servicesList,
   contactPositions,
   problemCategories,
+  NAV_ITEMS,
+  ViewKey,
+  pathToView,
 } from "./constants";
 import MaintenanceRecordCard from "./components/MaintenanceRecordCard";
 import PrintableWorkOrder from "./components/PrintableWorkOrder";
@@ -183,27 +186,31 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const setViewWrapper = (v: any) => {
-    if (v === 'history') navigate('/');
-    else if (v === 'baristas') navigate('/baristas');
-    else if (v === 'maintenance-edit') navigate(`/companies/${selectedSubmission?.id}/maintenance`);
-    else if (v === 'barista-details') navigate(`/baristas/${selectedBarista}`);
-    else if (v === 'form') navigate('/companies/new');
-    else if (v === 'print') navigate('/print');
-    else if (v === 'details') navigate(`/companies/${selectedSubmission?.id}`);
-    else if (v === 'technicians') navigate('/users');
-  };
+  const [view, setView] = useState<ViewKey>(pathToView(location.pathname));
 
-  const [view, setView] = useState<
-    | "history"
-    | "form"
-    | "print"
-    | "details"
-    | "baristas"
-    | "barista-details"
-    | "maintenance-edit"
-    | "technicians"
-  >("history");
+  useEffect(() => {
+    setView(pathToView(location.pathname));
+  }, [location.pathname]);
+
+  const setViewWrapper = (v: ViewKey) => {
+    const item = NAV_ITEMS.find((n) => n.key === v);
+    if (item) {
+      navigate(item.path);
+      return;
+    }
+    if (v === "maintenance-edit" && selectedSubmission?.id) {
+      navigate(`/companies/${selectedSubmission.id}/maintenance`);
+      return;
+    }
+    if (v === "barista-details" && selectedBarista) {
+      navigate(`/baristas/${selectedBarista}`);
+      return;
+    }
+    if (v === "details" && selectedSubmission?.id) {
+      navigate(`/companies/${selectedSubmission.id}`);
+      return;
+    }
+  };
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [submissions, setSubmissions] = useState<
@@ -224,6 +231,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   const [newlyAddedId, setNewlyAddedId] = useState<number | null>(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [offlineBannerDismissed, setOfflineBannerDismissed] = useState(false);
   const { showToast } = useToast();
   const [showPreview, setShowPreview] = useState(false);
   const [drafts, setDrafts] = useState<Draft[]>(() => {
@@ -271,7 +279,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
 
   useEffect(() => {
     if (newlyAddedId) {
-      const timer = setTimeout(() => setNewlyAddedId(null), 500);
+      const timer = setTimeout(() => setNewlyAddedId(null), 1500);
       return () => clearTimeout(timer);
     }
   }, [newlyAddedId]);
@@ -860,10 +868,8 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   const handleViewChange = (
     newView: "history" | "form" | "baristas" | "technicians",
   ) => {
-    if (newView === "history") navigate("/");
-    else if (newView === "form") navigate("/companies/new");
-    else if (newView === "baristas") navigate("/baristas");
-    else if (newView === "technicians") navigate("/users");;
+    const item = NAV_ITEMS.find((n) => n.key === newView);
+    if (item) navigate(item.path);
     setIsMobileMenuOpen(false);
     if (
       newView === "history" ||
@@ -923,9 +929,9 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   };
 
   const textAreaClasses =
-    "block w-full px-5 py-4 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 border border-slate-200 dark:border-slate-600 shadow-sm";
+    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-success-500 focus:ring-2 focus:ring-success-500/20 border border-slate-200 dark:border-slate-700 shadow-sm";
   const selectClasses =
-    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 border border-slate-200 dark:border-slate-600 shadow-sm";
+    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-success-500 focus:ring-2 focus:ring-success-500/20 border border-slate-200 dark:border-slate-700 shadow-sm";
 
   const handleDeleteBarista = (
     sources: {
@@ -1088,14 +1094,14 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
           : view === "baristas" || view === "barista-details"
             ? "أداء الباريستا"
             : view === "technicians"
-              ? "إدارة المستخدمين"
+              ? "إدارة الفنيين"
               : "سجل عمليات الإرسال";
 
   return (
-    <div className="h-[100dvh] overflow-hidden flex bg-gradient-to-br from-slate-100 to-teal-50 dark:from-slate-900 dark:to-teal-900/20">
+    <div className="h-[100dvh] overflow-hidden flex bg-brand-cream dark:bg-slate-950">
           {/* Desktop Sidebar */}
           <aside
-            className={`bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-r border-black/5 dark:border-white/5 text-slate-900 dark:text-white flex-col fixed h-full transition-all duration-300 ease-in-out hidden lg:flex shadow-sm ${isSidebarExpanded ? "w-64" : "w-20"}`}
+            className={`bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white flex-col fixed h-full transition-all duration-300 ease-in-out hidden lg:flex shadow-sm z-40 ${isSidebarExpanded ? "w-64" : "w-20"}`}
           >
             <SidebarContent 
               view={view}
@@ -1119,9 +1125,18 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
 
           {/* Mobile Sidebar */}
           <div
-            className={`fixed inset-0 z-40 flex lg:hidden ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-300 ease-in-out`}
+            className={`fixed inset-0 z-40 lg:hidden ${isMobileMenuOpen ? "pointer-events-auto" : "pointer-events-none"}`}
           >
-            <aside className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white flex flex-col w-64 h-full shadow-sm">
+            {/* Backdrop */}
+            <div
+              className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${isMobileMenuOpen ? "opacity-100" : "opacity-0"}`}
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            
+            {/* Sidebar Container */}
+            <aside 
+              className={`absolute top-0 right-0 h-full w-64 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-xl transition-transform duration-300 ease-in-out flex flex-col ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}
+            >
               <SidebarContent 
                 view={view}
                 isSidebarExpanded={isSidebarExpanded}
@@ -1141,45 +1156,46 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                 setView={setViewWrapper}
               />
             </aside>
-            <div
-              className="flex-1 bg-black/50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            ></div>
           </div>
 
           {/* Main Content */}
           <div
-            className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out lg:${isSidebarExpanded ? "ml-64" : "ml-20"}`}
+            className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out lg:${isSidebarExpanded ? "mr-64" : "mr-20"}`}
           >
-            <header className="sticky top-0 z-30 flex items-center justify-between lg:hidden h-16 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 px-4 shrink-0">
-              <div className="flex items-center gap-3 overflow-hidden">
-                <img
-                  src="/logo.svg"
-                  alt="شعار ميدوز"
-                  className="h-8 w-auto object-contain"
-                />
+            <header className="sticky top-0 z-30 flex items-center justify-between lg:hidden h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 shrink-0 gap-3">
+              <div className="flex items-center gap-2 overflow-hidden w-full">
+                <button
+                  aria-label="القائمة"
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="p-2 rounded-md text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
+                >
+                  <Bars3Icon className="h-6 w-6" />
+                </button>
                 <h1 className="text-lg font-bold text-slate-800 dark:text-white truncate">
                   {mobileTitle}
                 </h1>
               </div>
-              <button
-                aria-label="القائمة"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 rounded-md text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
-              >
-                {isMobileMenuOpen ? (
-                  <XMarkIcon className="h-6 w-6" />
-                ) : (
-                  <Bars3Icon className="h-6 w-6" />
-                )}
-              </button>
+              <img
+                src="/logo.svg"
+                alt="شعار ميدوز"
+                className="h-8 w-auto object-contain shrink-0"
+              />
             </header>
 
             {/* Offline Status Banner */}
-            {!isOnline && (
-              <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 px-4 py-2 text-center text-sm font-medium border-b border-amber-200 dark:border-amber-800 flex items-center justify-center gap-2 shrink-0">
-                <SignalSlashIcon className="w-4 h-4" />
-                أنت غير متصل حالياً. سيتم حفظ التغييرات محلياً ومزامنتها عند عودة الاتصال.
+            {!isOnline && !offlineBannerDismissed && (
+              <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 px-4 py-2 text-center text-sm font-medium border-b border-amber-200 dark:border-amber-800 flex items-center justify-between gap-2 shrink-0">
+                <span className="flex items-center gap-2 flex-1 justify-center">
+                  <SignalSlashIcon className="w-4 h-4" />
+                  أنت غير متصل حالياً. سيتم حفظ التغييرات محلياً ومزامنتها عند عودة الاتصال.
+                </span>
+                <button
+                  onClick={() => setOfflineBannerDismissed(true)}
+                  className="p-1 rounded hover:bg-amber-200 dark:hover:bg-amber-800/50 transition-colors"
+                  aria-label="إخفاء التنبيه"
+                >
+                  <XMarkIcon className="w-4 h-4" />
+                </button>
               </div>
             )}
             {isSyncing && (

@@ -17,18 +17,10 @@ export interface HistoryViewProps {
 }
 
 const HistoryView: React.FC<HistoryViewProps> = ({
-  isLoading, submissions, handleEdit, requestDelete, handleAddNew, 
-  handlePrintRequest, handleViewDetails, handleUpdateCompany, 
+  isLoading, submissions, handleEdit, requestDelete, handleAddNew,
+  handlePrintRequest, handleViewDetails, handleUpdateCompany,
   setSelectedSubmission, setView, getTechnicianDisplayName
 }) => {
-  if (isLoading && submissions.length === 0) {
-    return (
-      <div className="text-center text-slate-600 dark:text-slate-400 pt-12">
-        جاري تحميل السجل...
-      </div>
-    );
-  }
-
   return (
     <div className="w-full">
       <HistoryPage
@@ -44,9 +36,10 @@ const HistoryView: React.FC<HistoryViewProps> = ({
           setView("maintenance-edit");
         }}
         getTechnicianDisplayName={getTechnicianDisplayName}
+        isLoading={isLoading}
       />
     </div>
   );
-};
+}
 
 export default HistoryView;

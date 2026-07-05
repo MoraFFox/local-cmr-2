@@ -1339,12 +1339,11 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
   };
 
   const textAreaClasses =
-    "block w-full px-5 py-4 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 border border-slate-200 dark:border-slate-600 shadow-sm";
+    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-success-500 focus:ring-2 focus:ring-success-500/20 border border-slate-200 dark:border-slate-700 shadow-sm";
   const selectClasses =
-    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 border border-slate-200 dark:border-slate-600 shadow-sm";
+    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-success-500 focus:ring-2 focus:ring-success-500/20 border border-slate-200 dark:border-slate-700 shadow-sm";
 
   const renderContacts = (path: "main" | "warehouse" | `branch-${number}`) => {
-    // ... (existing code for renderContacts)
     let contacts: Contact[];
     if (path === "main") contacts = formData.contacts;
     else if (path === "warehouse") contacts = formData.warehouse.contacts;
@@ -1362,7 +1361,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
               initiallyOpen={contact.id === newlyAddedId}
               onRemove={() => removeContact(path, contactIndex)}
               titleContent={
-                <span className="font-semibold">
+                <span className="font-semibold text-slate-800 dark:text-slate-100">
                   {contact.name || "جهة اتصال جديدة"}
                 </span>
               }
@@ -1428,7 +1427,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                                 phoneIndex,
                               )
                             }
-                            className="block w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg border-slate-200 dark:border-slate-600 shadow-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20"
+                            className="input-base pl-10"
                             placeholder="مثال: 0100-123-4567"
                             maxLength={13}
                           />
@@ -1447,7 +1446,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                   </div>
                   <button
                     onClick={() => addPhoneNumber(path, contactIndex)}
-                    className="mt-3 w-full justify-center flex items-center gap-1.5 text-sm font-semibold text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-500/10 rounded-md py-2 transition-colors transform active:scale-95"
+                    className="mt-3 w-full justify-center flex items-center gap-1.5 text-sm font-semibold text-success-600 dark:text-success-400 hover:bg-success-50 dark:hover:bg-success-500/10 rounded-md py-2 transition-colors transform active:scale-95"
                   >
                     <PlusCircleIcon className="w-5 h-5" />
                     إضافة رقم هاتف
@@ -1458,10 +1457,15 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
           ))
         ) : (
           <EmptyState
-            icon={<UserGroupIcon className="w-8 h-8" />}
+            variant="inline"
+            icon={<UserGroupIcon />}
             title="لا توجد جهات اتصال"
-            message="أضف الأفراد الرئيسيين لهذا الموقع."
-          />
+            message="أضف الأفراد الرئيسيين لهذا الموقع للتواصل معهم لاحقاً."
+          >
+            <button onClick={() => addContact(path)} className="btn-secondary text-xs">
+              <PlusCircleIcon className="w-4 h-4" /> إضافة جهة اتصال
+            </button>
+          </EmptyState>
         )}
       </div>
     );
@@ -1523,14 +1527,14 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                 value={formData.hasBranches}
                 onChange={(val) => handleRadioChange("hasBranches", val)}
                 options={[
-                  { label: "Yes", value: true },
-                  { label: "No", value: false },
+                  { label: "نعم", value: true },
+                  { label: "لا", value: false },
                 ]}
                 inline
               />
 
               {formData.hasBranches === false && (
-                <div className="pt-6 mt-6 border-t dark:border-slate-700 space-y-6">
+                <div className="pt-6 mt-6 border-t dark:border-slate-800 space-y-6">
                   <RadioGroup
                     label="هل يستخدمون ماكيناتنا؟"
                     name="usesOurMachines"
@@ -1539,8 +1543,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                       handleRadioChange("usesOurMachines", val)
                     }
                     options={[
-                      { label: "Yes", value: true },
-                      { label: "No", value: false },
+                      { label: "نعم", value: true },
+                      { label: "لا", value: false },
                     ]}
                     inline
                   />
@@ -1692,8 +1696,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                               )
                             }
                             options={[
-                              { label: "Yes", value: true },
-                              { label: "No", value: false },
+                              { label: "نعم", value: true },
+                              { label: "لا", value: false },
                             ]}
                             inline
                           />
@@ -2025,10 +2029,15 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                           )
                         ) : (
                           <EmptyState
-                            icon={<WrenchScrewdriverIcon className="w-8 h-8" />}
+                            variant="inline"
+                            icon={<WrenchScrewdriverIcon />}
                             title="لا يوجد سجل صيانة"
-            message="أضف سجلات الصيانة لهذا الفرع."
-                          />
+                            message="أضف سجلات الصيانة لهذا الفرع."
+                          >
+                            <button onClick={() => addNestedListItem(index, "maintenanceHistory")} className="btn-secondary text-xs">
+                              <PlusCircleIcon className="w-4 h-4" /> إضافة سجل
+                            </button>
+                          </EmptyState>
                         )}
                       </div>
                     </div>
@@ -2036,10 +2045,15 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                 ))
               ) : (
                 <EmptyState
-                  icon={<BuildingOffice2Icon className="w-8 h-8" />}
+                  variant="inline"
+                  icon={<BuildingOffice2Icon />}
                   title="لم تتم إضافة فروع"
-                  message="اضغط الزر أعلاه لإضافة أول فرع."
-                />
+                  message="اضغط الزر لإضافة أول فرع."
+                >
+                    <button onClick={() => addListItem("branches")} className="btn-secondary text-xs">
+                        <PlusCircleIcon className="w-4 h-4" /> إضافة فرع
+                    </button>
+                </EmptyState>
               )}
             </div>
           </Card>
@@ -2148,10 +2162,15 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                 ))
               ) : (
                 <EmptyState
-                  icon={<UserGroupIcon className="w-8 h-8" />}
+                  variant="inline"
+                  icon={<UserGroupIcon />}
                   title="لا يوجد باريستا"
                   message="أضف الباريستا الذين يعملون في المكتب الرئيسي."
-                />
+                >
+                    <button onClick={() => addListItem("baristas")} className="btn-secondary text-xs">
+                        <PlusCircleIcon className="w-4 h-4" /> إضافة باريستا
+                    </button>
+                </EmptyState>
               )}
             </div>
           </Card>
@@ -2235,10 +2254,21 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                 ))
               ) : (
                 <EmptyState
-                  icon={<UserGroupIcon className="w-8 h-8" />}
+                  variant="inline"
+                  icon={<UserGroupIcon />}
                   title="لا يوجد باريستا للعميل"
                   message="أضف باريستا شركة العميل الذين يعملون مع ماكيناتنا."
-                />
+                >
+                    <button
+                        onClick={() => {
+                        const newClientBarista: ClientBarista = { id: Date.now(), name: "", phone: "", notes: "" };
+                        setFormData((prev) => ({ ...prev, clientBaristas: [...(prev.clientBaristas || []), newClientBarista] }));
+                        }}
+                        className="btn-secondary text-xs"
+                    >
+                        <PlusCircleIcon className="w-4 h-4" /> إضافة باريستا عميل
+                    </button>
+                </EmptyState>
               )}
             </div>
           </Card>
@@ -2289,10 +2319,15 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                 ))
               ) : (
                 <EmptyState
-                  icon={<WrenchScrewdriverIcon className="w-8 h-8" />}
+                  variant="inline"
+                  icon={<WrenchScrewdriverIcon />}
                   title="لا يوجد سجل صيانة"
-                  message="Add maintenance records for the main office."
-                />
+                  message="أضف سجلات الصيانة للمكتب الرئيسي."
+                >
+                    <button onClick={() => addListItem("maintenanceHistory")} className="btn-secondary text-xs">
+                        <PlusCircleIcon className="w-4 h-4" /> إضافة سجل
+                    </button>
+                </EmptyState>
               )}
             </div>
           </Card>

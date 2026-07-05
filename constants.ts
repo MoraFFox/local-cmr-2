@@ -1,5 +1,43 @@
 import { Part, Service } from './types';
 
+export type ViewKey =
+  | "history"
+  | "form"
+  | "print"
+  | "details"
+  | "baristas"
+  | "barista-details"
+  | "maintenance-edit"
+  | "technicians";
+
+export interface NavItem {
+  key: ViewKey;
+  path: string;
+  label: string;
+  iconName: "HomeIcon" | "UsersIcon" | "UserGroupIcon" | "DocumentTextIcon";
+  inSidebar: boolean;
+}
+
+export const NAV_ITEMS: NavItem[] = [
+  { key: "history", path: "/", label: "السجل", iconName: "HomeIcon", inSidebar: true },
+  { key: "baristas", path: "/baristas", label: "أداء الباريستا", iconName: "UsersIcon", inSidebar: true },
+  { key: "technicians", path: "/users", label: "إدارة الفنيين", iconName: "UserGroupIcon", inSidebar: true },
+  { key: "form", path: "/companies/new", label: "إضافة شركة", iconName: "DocumentTextIcon", inSidebar: true },
+  { key: "print", path: "/print", label: "طباعة", iconName: "DocumentTextIcon", inSidebar: false },
+];
+
+export const pathToView = (pathname: string): ViewKey => {
+  if (pathname === "/") return "history";
+  if (pathname.startsWith("/baristas/")) return "barista-details";
+  if (pathname === "/baristas") return "baristas";
+  if (pathname === "/users") return "technicians";
+  if (pathname === "/companies/new") return "form";
+  if (pathname === "/print") return "print";
+  if (/^\/companies\/[^/]+\/maintenance$/.test(pathname)) return "maintenance-edit";
+  if (/^\/companies\/[^/]+$/.test(pathname)) return "details";
+  return "history";
+};
+
 export const partsList: Part[] = [
   { label: "جوان", value: "جوان", cost: 100, isFrequentlyReplaced: true },
   { label: "شاور", value: "شاور", cost: 300, isFrequentlyReplaced: true },

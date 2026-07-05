@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { FormData, MaintenanceRecord } from '../types';
-import { PencilIcon, TrashIcon, ArrowDownTrayIcon, MagnifyingGlassIcon, PrinterIcon, CloudIcon, EyeIcon, FunnelIcon, XMarkIcon, CalendarIcon, ExclamationTriangleIcon, BuildingOfficeIcon, WrenchScrewdriverIcon, DocumentIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon, ArrowDownTrayIcon, MagnifyingGlassIcon, PrinterIcon, CloudIcon, EyeIcon, FunnelIcon, XMarkIcon, CalendarIcon, ExclamationTriangleIcon, BuildingOfficeIcon, WrenchScrewdriverIcon, DocumentIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 import CompanyEditModal from './CompanyEditModal';
 import EmptyState from './EmptyState';
+import { SkeletonCard } from './ui/Skeleton';
 
 interface HistoryPageProps {
     submissions: (FormData & { created_at: string })[];
@@ -14,9 +15,10 @@ interface HistoryPageProps {
     onUpdateCompany?: (updatedCompany: FormData) => void;
     onEditMaintenance?: (submission: FormData & { created_at: string }) => void;
     getTechnicianDisplayName?: (record: MaintenanceRecord) => string;
+    isLoading?: boolean;
 }
 
-const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete, onAddNew, onPrint, onViewDetails, onUpdateCompany, onEditMaintenance, getTechnicianDisplayName }) => {
+const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete, onAddNew, onPrint, onViewDetails, onUpdateCompany, onEditMaintenance, getTechnicianDisplayName, isLoading }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
@@ -24,6 +26,27 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
     const [showFilters, setShowFilters] = useState(false);
     const [editingCompany, setEditingCompany] = useState<FormData | null>(null);
     const [isCompanyEditModalOpen, setIsCompanyEditModalOpen] = useState(false);
+    const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+
+    const getTotalVisits = (sub: FormData): number => {
+        const countRecords = (records: MaintenanceRecord[]): number =>
+            records.reduce((acc, r) => acc + 1 + (r.followUpVisits ? countRecords(r.followUpVisits) : 0), 0);
+        return countRecords(sub.maintenanceHistory || []) + sub.branches.reduce((acc, b) => acc + countRecords(b.maintenanceHistory || []), 0);
+    };
+
+    const getLastMaintenanceDate = (sub: FormData): string | null => {
+        const dates: string[] = [];
+        const collect = (records: MaintenanceRecord[]) => {
+            records.forEach((r) => {
+                if (r.maintenanceDate) dates.push(r.maintenanceDate);
+                if (r.followUpVisits) collect(r.followUpVisits);
+            });
+        };
+        collect(sub.maintenanceHistory || []);
+        sub.branches.forEach((b) => collect(b.maintenanceHistory || []));
+        if (dates.length === 0) return null;
+        return dates.sort().reverse()[0];
+    };
 
     const downloadJSON = (data: any, filename: string) => {
         const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
@@ -167,205 +190,327 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                     <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50">سجل الإرسالات</h1>
                     <p className="text-slate-600 dark:text-slate-400 mt-1 sm:mt-2">عرض أو تعديل أو حذف الإرسالات السابقة.</p>
                  </div>
-                 <div className="flex items-center gap-x-2 sm:gap-x-4">
-                    <button 
+                 <div className="flex items-center gap-x-2 sm:gap-x-3">
+                    <button
                         onClick={onPrint}
-                        className="bg-white text-slate-700 font-bold py-2 px-4 sm:px-6 rounded-lg hover:bg-slate-50 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 transition-colors text-sm sm:text-base transform active:scale-95 flex items-center gap-2"
+                        className="btn-secondary"
                     >
                         <PrinterIcon className="w-5 h-5" />
-                        طباعة النموذج
+                        طباعة
                     </button>
-                     <button 
+                     <button
                         onClick={handleDownloadAll}
                         disabled={submissions.length === 0}
-                        className="bg-slate-600 text-white font-bold py-2 px-4 sm:px-6 rounded-lg hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base transform active:scale-95"
+                        className="btn-secondary"
                     >
-                        تنزيل الكل
+                        <ArrowDownTrayIcon className="w-5 h-5" />
+                        تنزيل
                     </button>
-                    <button 
+                    <button
                         onClick={onAddNew}
-                        className="bg-teal-600 text-white font-bold py-2 px-4 sm:px-6 rounded-lg hover:bg-teal-700 transition-colors text-sm sm:text-base transform active:scale-95"
+                        className="btn-primary"
                     >
-                        إضافة جديدة
+                        إضافة شركة
                     </button>
                  </div>
             </header>
 
+            {/* Active filter chips */}
+            {(activeFiltersCount > 0 || searchTerm) && (
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                    {searchTerm && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                            <MagnifyingGlassIcon className="w-3 h-3" />
+                            {searchTerm}
+                        </span>
+                    )}
+                    {startDate && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                            <CalendarIcon className="w-3 h-3" />
+                            من {startDate}
+                        </span>
+                    )}
+                    {endDate && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                            <CalendarIcon className="w-3 h-3" />
+                            إلى {endDate}
+                        </span>
+                    )}
+                    {showOnlyProblems && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300">
+                            <ExclamationTriangleIcon className="w-3 h-3" />
+                            به مشاكل
+                        </span>
+                    )}
+                    <button
+                        onClick={clearFilters}
+                        className="text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 underline"
+                    >
+                        مسح جميع الفلاتر
+                    </button>
+                </div>
+            )}
+
             {/* Advanced Search Panel */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-6 transition-all">
-                <div className="flex flex-col lg:flex-row gap-4">
-                    {/* Text Search */}
-                    <div className="flex-1">
-                        <label htmlFor="submission-search" className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">بحث نصي</label>
-                        <div className="relative rounded-md shadow-sm">
-                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                <MagnifyingGlassIcon className="h-5 w-5 text-slate-400" aria-hidden="true" />
-                            </div>
-                            <input
-                                type="search"
-                                id="submission-search"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="block w-full rounded-lg border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 py-2.5 pl-10 pr-3 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
-                                placeholder="شركة، فرع، باريستا..."
-                            />
-                        </div>
-                    </div>
-
-                    {/* Filter Toggle Button (Mobile/Tablet) */}
-                    <div className="lg:hidden">
-                        <button 
-                            onClick={() => setShowFilters(!showFilters)}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-semibold w-full justify-center transition-colors ${showFilters || activeFiltersCount > 0 ? 'bg-teal-50 border-teal-200 text-teal-700 dark:bg-teal-900/30 dark:border-teal-700 dark:text-teal-300' : 'bg-white border-slate-300 text-slate-700 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-300'}`}
-                        >
-                            <FunnelIcon className="w-5 h-5" />
-                            {showFilters ? 'إخفاء الفلاتر' : 'فلاتر متقدمة'}
-                            {activeFiltersCount > 0 && <span className="bg-teal-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center ml-1">{activeFiltersCount}</span>}
-                        </button>
-                    </div>
-
-                    {/* Filters Section (Always visible on large screens, collapsible on small) */}
-                    <div className={`flex-col lg:flex-row gap-4 lg:flex ${showFilters ? 'flex' : 'hidden'}`}>
-                        {/* Date Range */}
-                        <div className="flex gap-2">
-                            <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">من تاريخ</label>
-                                <div className="relative">
-                                    <input 
-                                        type="date" 
-                                        value={startDate}
-                                        onChange={(e) => setStartDate(e.target.value)}
-                                        className="block w-full sm:w-40 rounded-lg border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 py-2.5 px-3 text-slate-900 dark:text-white focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
-                                    />
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-4 mb-6">
+                <div className="flex flex-col gap-4 w-full">
+                    {/* Top Row: Search & Toggle */}
+                    <div className="grid grid-cols-1 sm:grid-cols-[1fr_180px] gap-4 items-end w-full">
+                        <div className="w-full">
+                            <label htmlFor="submission-search" className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">بحث نصي</label>
+                            <div className="relative rounded-md shadow-sm">
+                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                    <MagnifyingGlassIcon className="h-5 w-5 text-slate-400" aria-hidden="true" />
                                 </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">إلى تاريخ</label>
-                                <div className="relative">
-                                    <input 
-                                        type="date" 
-                                        value={endDate}
-                                        onChange={(e) => setEndDate(e.target.value)}
-                                        className="block w-full sm:w-40 rounded-lg border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 py-2.5 px-3 text-slate-900 dark:text-white focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Toggles */}
-                        <div className="flex items-end pb-1">
-                            <label className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer border transition-colors select-none ${showOnlyProblems ? 'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300' : 'bg-white border-slate-300 text-slate-600 dark:bg-slate-900 dark:border-slate-600 dark:text-slate-400'}`}>
-                                <input 
-                                    type="checkbox" 
-                                    checked={showOnlyProblems}
-                                    onChange={(e) => setShowOnlyProblems(e.target.checked)}
-                                    className="hidden"
+                                <input
+                                    type="search"
+                                    id="submission-search"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="input-base pl-10"
+                                    placeholder="شركة، فرع، باريستا..."
                                 />
-                                <ExclamationTriangleIcon className="w-5 h-5" />
-                                <span className="text-sm font-medium">به مشاكل</span>
-                            </label>
+                            </div>
                         </div>
 
-                        {/* Clear Button */}
-                        {(activeFiltersCount > 0 || searchTerm) && (
-                            <div className="flex items-end pb-1">
-                                <button 
-                                    onClick={clearFilters}
-                                    className="flex items-center gap-1 px-3 py-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors text-sm font-medium"
-                                >
-                                    <XMarkIcon className="w-4 h-4" /> مسح
-                                </button>
-                            </div>
-                        )}
+                        {/* Filter Toggle Button */}
+                        <div className="w-full shrink-0">
+                            <button
+                                onClick={() => setShowFilters(!showFilters)}
+                                className={`flex items-center gap-2 px-4 h-[50px] rounded-lg border text-sm font-semibold w-full justify-center transition-colors ${showFilters || activeFiltersCount > 0 ? 'bg-success-50 border-success-200 text-success-700 dark:bg-success-900/20 dark:border-success-800 dark:text-success-300' : 'bg-white border-slate-200 text-slate-700 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                            >
+                                <FunnelIcon className="w-5 h-5" />
+                                {showFilters ? 'إخفاء الفلاتر' : 'فلاتر متقدمة'}
+                                {activeFiltersCount > 0 && <span className="bg-success-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center ml-1">{activeFiltersCount}</span>}
+                            </button>
+                        </div>
                     </div>
+
+                    {/* Filters Section (Collapsible) */}
+                    {showFilters && (
+                        <div className="flex flex-wrap items-end gap-4 pt-4 mt-2 border-t border-slate-100 dark:border-slate-800 animate-fade-in w-full">
+                            {/* Date Range */}
+                            <div className="w-full sm:w-auto flex-1 sm:flex-none">
+                                <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">من تاريخ</label>
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    className="input-base w-full sm:w-[180px]"
+                                />
+                            </div>
+                            <div className="w-full sm:w-auto flex-1 sm:flex-none">
+                                <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">إلى تاريخ</label>
+                                <input
+                                    type="date"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    className="input-base w-full sm:w-[180px]"
+                                />
+                            </div>
+
+                            {/* Toggles */}
+                            <div className="w-full sm:w-auto shrink-0">
+                                <label className={`flex items-center justify-center gap-2 h-[50px] px-6 rounded-lg cursor-pointer border transition-colors select-none ${showOnlyProblems ? 'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300' : 'bg-white border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
+                                    <input
+                                        type="checkbox"
+                                        checked={showOnlyProblems}
+                                        onChange={(e) => setShowOnlyProblems(e.target.checked)}
+                                        className="hidden"
+                                    />
+                                    <ExclamationTriangleIcon className="w-5 h-5" />
+                                    <span className="text-sm font-medium">به مشاكل</span>
+                                </label>
+                            </div>
+
+                            {/* Spacer to push clear button to the end if needed */}
+                            <div className="hidden sm:block flex-1"></div>
+
+                            {/* Clear Button */}
+                            {(activeFiltersCount > 0 || searchTerm) && (
+                                <div className="w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
+                                    <button
+                                        onClick={clearFilters}
+                                        disabled={activeFiltersCount === 0 && !searchTerm}
+                                        className="flex items-center justify-center gap-2 h-[50px] px-6 text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 transition-colors text-sm font-medium rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed border border-transparent hover:border-red-200 dark:hover:border-red-900/40"
+                                    >
+                                        <XMarkIcon className="w-5 h-5" /> مسح الفلاتر
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
             
-            {submissions.length === 0 ? (
+            {isLoading && submissions.length === 0 ? (
+                <div className="space-y-4">
+                    <SkeletonCard />
+                    <SkeletonCard />
+                    <SkeletonCard />
+                </div>
+            ) : submissions.length === 0 ? (
                 <div className="mt-8">
-                    <EmptyState 
-                        icon={<DocumentIcon className="w-8 h-8" />} 
-                        title="لا توجد سجلات بعد." 
-                        message="اضغط 'إضافة جديدة' للبدء." 
-                    />
+                    <EmptyState
+                        variant="primary"
+                        icon={<DocumentIcon />}
+                        title="لا توجد سجلات بعد"
+                        message="نظام إدارة الصيانة فارغ حالياً. قم بإضافة أول شركة أو فرع للبدء بتسجيل بيانات وتقارير الصيانة."
+                    >
+                        <button
+                            onClick={onAddNew}
+                            className="btn-primary shadow-lg shadow-success-500/20"
+                        >
+                            <BuildingOfficeIcon className="w-5 h-5" />
+                            إضافة شركة جديدة
+                        </button>
+                    </EmptyState>
                 </div>
             ) : filteredSubmissions.length === 0 ? (
                 <div className="mt-8">
-                    <EmptyState 
-                        icon={<MagnifyingGlassIcon className="w-8 h-8" />} 
-                        title="لم يتم العثور على نتائج." 
-                        message="لا توجد إرسالات تطابق الفلاتر الحالية." 
+                    <EmptyState
+                        variant="search"
+                        icon={<MagnifyingGlassIcon />}
+                        title="لم يتم العثور على نتائج"
+                        message="لا توجد شركات أو إرسالات تطابق الفلاتر وعمليات البحث الحالية. حاول تغيير كلمات البحث أو تواريخ الفلتر."
                     >
-                        <button onClick={clearFilters} className="mt-2 text-teal-600 dark:text-teal-400 font-semibold hover:underline">مسح جميع الفلاتر</button>
+                        <button onClick={clearFilters} className="btn-secondary">
+                            <XMarkIcon className="w-4 h-4" />
+                            مسح جميع الفلاتر
+                        </button>
                     </EmptyState>
                 </div>
             ) : (
                 <div className="space-y-4">
                     {filteredSubmissions.map(sub => (
-                        <div key={sub.id} className={`bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg rounded-lg p-4 sm:p-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between transition-all hover:shadow-xl dark:hover:bg-slate-700/80 border ${sub.pendingSync ? 'border-amber-300 dark:border-amber-700/50 bg-amber-50 dark:bg-amber-900/10' : 'border-black/5 dark:border-white/5'}`}>
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">{sub.companyName || 'شركة بدون اسم'}</h3>
-                                    {sub.pendingSync && (
-                                        <span className="inline-flex items-center rounded-md bg-amber-100 dark:bg-amber-900/50 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-400 ring-1 ring-inset ring-amber-600/20">
-                                            <CloudIcon className="w-3.5 h-3.5 mr-1" />
-                                            بانتظار المزامنة
-                                        </span>
-                                    )}
+                        <div
+                            key={sub.id}
+                            className={`bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 flex flex-col gap-4 transition-all hover:shadow-md border ${sub.pendingSync ? 'border-amber-300 dark:border-amber-700/50 bg-amber-50 dark:bg-amber-900/10' : 'border-slate-200 dark:border-slate-800'}`}
+                        >
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center flex-wrap gap-2">
+                                        <h3 className="font-bold text-lg text-slate-900 dark:text-slate-50 truncate">{sub.companyName || 'شركة بدون اسم'}</h3>
+                                        {sub.pendingSync && (
+                                            <span className="inline-flex items-center rounded-md bg-amber-100 dark:bg-amber-900/50 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-400 ring-1 ring-inset ring-amber-600/20">
+                                                <CloudIcon className="w-3.5 h-3.5 mr-1" />
+                                                بانتظار المزامنة
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                        <span>أُرسلت: {new Date(sub.created_at).toLocaleDateString()}</span>
+                                        <span className="hidden sm:inline">•</span>
+                                        <span>{sub.hasBranches ? `${sub.branches.length} فروع` : 'لا فروع'}</span>
+                                        <span className="hidden sm:inline">•</span>
+                                        <span>{getTotalVisits(sub)} زيارة</span>
+                                        {getLastMaintenanceDate(sub) && (
+                                            <>
+                                                <span className="hidden sm:inline">•</span>
+                                                <span>آخر صيانة: {getLastMaintenanceDate(sub)}</span>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                    <span>أُرسلت: {new Date(sub.created_at).toLocaleDateString()}</span>
-                                    <span>•</span>
-                                    <span>{sub.hasBranches ? `${sub.branches.length} فروع` : 'لا فروع'}</span>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2 sm:gap-4 self-end sm:self-center">
-                                 <button 
-                                    onClick={() => onViewDetails(sub)} 
-                                    className="p-2 text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 rounded-full hover:bg-teal-50 dark:hover:bg-teal-500/10 transition-colors transform active:scale-95" 
-                                    aria-label={`عرض التفاصيل لـ ${sub.companyName}`}
-                                    title="عرض وتصدير التفاصيل"
-                                >
-                                    <EyeIcon className="h-5 w-5" />
-                                </button>
-                                <button 
-                                    onClick={() => handleDownloadSingle(sub)} 
-                                    disabled={!!sub.pendingSync}
-                                    className="p-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-full hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors transform active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed" 
-                                    aria-label={`تنزيل ${sub.companyName}`}
-                                    title={sub.pendingSync ? "لا يمكن التنزيل أثناء انتظار المزامنة" : "تنزيل JSON"}
-                                >
-                                    <ArrowDownTrayIcon className="h-5 w-5" />
-                                </button>
-                                <button 
-                                    onClick={() => handleQuickEditCompany(sub)} 
-                                    className="p-2 text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 rounded-full hover:bg-slate-100 dark:hover:bg-slate-600/50 transition-colors transform active:scale-95" 
-                                    aria-label={`تعديل سريع ${sub.companyName}`}
-                                    title="تعديل سريع لمعلومات الشركة"
-                                >
-                                    <BuildingOfficeIcon className="h-5 w-5" />
-                                </button>
-                                <button 
-                                    onClick={() => onEdit(sub)} 
-                                    className="p-2 text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 rounded-full hover:bg-slate-100 dark:hover:bg-slate-600/50 transition-colors transform active:scale-95" 
-                                    aria-label={`تعديل كامل ${sub.companyName}`}
-                                    title="تعديل كامل (المعالج)"
-                                >
-                                    <PencilIcon className="h-5 w-5" />
-                                </button>
-                                {onEditMaintenance && (
-                                    <button 
-                                        onClick={() => onEditMaintenance(sub)} 
-                                        className="p-2 text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 rounded-full hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors transform active:scale-95" 
-                                        aria-label={`تعديل سجلات الصيانة لـ ${sub.companyName}`}
-                                        title="تعديل سجلات الصيانة"
+
+                                {/* Desktop actions */}
+                                <div className="hidden sm:flex items-center gap-1 self-center">
+                                    <button
+                                        onClick={() => onViewDetails(sub)}
+                                        className="btn-secondary text-sm py-2 px-3"
+                                        title="عرض التفاصيل"
                                     >
-                                        <WrenchScrewdriverIcon className="h-5 w-5" />
+                                        <EyeIcon className="h-4 w-4" />
+                                        عرض
                                     </button>
-                                )}
-                                <button onClick={() => onDelete(sub.id!)} className="p-2 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-500 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors transform active:scale-95" aria-label={`حذف ${sub.companyName}`}>
-                                    <TrashIcon className="h-5 w-5" />
-                                </button>
+                                    <div className="relative">
+                                        <button
+                                            onClick={() => setOpenMenuId(openMenuId === sub.id ? null : sub.id!)}
+                                            className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors"
+                                            aria-label="المزيد من الإجراءات"
+                                            aria-expanded={openMenuId === sub.id}
+                                        >
+                                            <EllipsisVerticalIcon className="h-5 w-5" />
+                                        </button>
+                                        {openMenuId === sub.id && (
+                                            <div className="absolute left-0 top-full mt-1 w-48 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-800 py-1 z-20 animate-scale-in">
+                                                <button
+                                                    onClick={() => { handleDownloadSingle(sub); setOpenMenuId(null); }}
+                                                    disabled={!!sub.pendingSync}
+                                                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50"
+                                                >
+                                                    <ArrowDownTrayIcon className="h-4 w-4" />
+                                                    تنزيل JSON
+                                                </button>
+                                                <button
+                                                    onClick={() => { handleQuickEditCompany(sub); setOpenMenuId(null); }}
+                                                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                                                >
+                                                    <BuildingOfficeIcon className="h-4 w-4" />
+                                                    تعديل سريع
+                                                </button>
+                                                <button
+                                                    onClick={() => { onEdit(sub); setOpenMenuId(null); }}
+                                                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                                                >
+                                                    <PencilIcon className="h-4 w-4" />
+                                                    تعديل كامل
+                                                </button>
+                                                {onEditMaintenance && (
+                                                    <button
+                                                        onClick={() => { onEditMaintenance(sub); setOpenMenuId(null); }}
+                                                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                                                    >
+                                                        <WrenchScrewdriverIcon className="h-4 w-4" />
+                                                        تعديل الصيانة
+                                                    </button>
+                                                )}
+                                                <div className="border-t border-slate-200 dark:border-slate-800 my-1" />
+                                                <button
+                                                    onClick={() => { onDelete(sub.id!); setOpenMenuId(null); }}
+                                                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                                >
+                                                    <TrashIcon className="h-4 w-4" />
+                                                    حذف
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Mobile actions */}
+                                <div className="flex sm:hidden items-center gap-2 self-stretch">
+                                    <button
+                                        onClick={() => onViewDetails(sub)}
+                                        className="flex-1 btn-secondary text-sm py-2 justify-center"
+                                    >
+                                        <EyeIcon className="h-4 w-4" />
+                                        عرض
+                                    </button>
+                                    <button
+                                        onClick={() => onEdit(sub)}
+                                        className="flex-1 btn-secondary text-sm py-2 justify-center"
+                                    >
+                                        <PencilIcon className="h-4 w-4" />
+                                        تعديل
+                                    </button>
+                                    {onEditMaintenance && (
+                                        <button
+                                            onClick={() => onEditMaintenance(sub)}
+                                            className="flex-1 btn-secondary text-sm py-2 justify-center"
+                                        >
+                                            <WrenchScrewdriverIcon className="h-4 w-4" />
+                                            صيانة
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={() => onDelete(sub.id!)}
+                                        className="p-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/40 dark:hover:bg-red-900/20"
+                                        aria-label="حذف"
+                                    >
+                                        <TrashIcon className="h-5 w-5" />
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))}

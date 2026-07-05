@@ -1,118 +1,118 @@
-import React from 'react';
+import React, { useRef, useCallback } from 'react';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 
-interface RadioOption {
+interface RadioOption<T = string | boolean> {
     label: string;
-    value: any;
+    value: T;
     description?: string;
 }
 
-interface RadioGroupProps {
+interface RadioGroupProps<T = string | boolean> {
     name: string;
     label?: string;
-    options: RadioOption[];
-    value: any;
-    onChange: (value: any) => void;
+    options: RadioOption<T>[];
+    value: T;
+    onChange: (value: T) => void;
     inline?: boolean;
     disabled?: boolean;
 }
 
-const RadioGroup: React.FC<RadioGroupProps> = ({ name, label, options, value, onChange, inline, disabled = false }) => {
-    if (inline) {
+function RadioGroup<T extends string | boolean>({ name, label, options, value, onChange, inline, disabled = false }: RadioGroupProps<T>) {
+    const groupRef = useRef<HTMLDivElement>(null);
+
+    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+        if (disabled) return;
+        const enabled = options.map((o, i) => ({ ...o, index: i })).filter(o => value === o.value);
+        const currentIndex = enabled.length > 0 ? enabled[0].index : -1;
+        let nextIndex = currentIndex;
+
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            nextIndex = (currentIndex + 1) % options.length;
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            nextIndex = currentIndex <= 0 ? options.length - 1 : currentIndex - 1;
+        } else if (e.key === 'Home') {
+            e.preventDefault();
+            nextIndex = 0;
+        } else if (e.key === 'End') {
+            e.preventDefault();
+            nextIndex = options.length - 1;
+        }
+
+        if (nextIndex !== currentIndex && nextIndex >= 0) {
+            onChange(options[nextIndex].value);
+            const buttons = groupRef.current?.querySelectorAll('[role="radio"]');
+            (buttons?.[nextIndex] as HTMLElement)?.focus();
+        }
+    }, [disabled, options, value, onChange]);
+
+    const selectedClasses = 'border-success-500 bg-success-50 dark:bg-success-900/20 text-success-900 dark:text-success-100';
+    const unselectedClasses = 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600';
+
+    const commonButtonClasses = `
+        relative flex items-center gap-3 rounded-xl border-2 transition-all duration-200
+        ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:shadow-md'}
+    `;
+
+    const renderOption = (option: RadioOption<T>, isSelected: boolean) => {
+        const inputId = `${name}-${String(option.value)}`;
         return (
-            <div role="radiogroup" aria-label={label} className={disabled ? 'opacity-60' : ''}>
-                {label && <label className="text-sm font-medium text-slate-700 dark:text-slate-300 block mb-3">{label}</label>}
-                <div className="flex flex-wrap gap-3">
-                    {options.map((option) => {
-                        const isSelected = value === option.value;
-                        return (
-                            <button
-                                key={option.label}
-                                type="button"
-                                role="radio"
-                                aria-checked={isSelected}
-                                onClick={() => !disabled && onChange(option.value)}
-                                disabled={disabled}
-                                className={`
-                                    relative flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all duration-200
-                                    ${isSelected 
-                                        ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20 text-teal-900 dark:text-teal-100' 
-                                        : 'border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500'
-                                    }
-                                    ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:shadow-md'}
-                                `}
-                            >
-                                <div className={`
-                                    w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors
-                                    ${isSelected 
-                                        ? 'border-teal-500 bg-teal-500' 
-                                        : 'border-slate-300 dark:border-slate-500'
-                                    }
-                                `}>
-                                    {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
-                                </div>
-                                <span className="font-semibold text-sm">{option.label}</span>
-                            </button>
-                        );
-                    })}
+            <button
+                key={inputId}
+                type="button"
+                role="radio"
+                id={inputId}
+                aria-checked={isSelected}
+                tabIndex={isSelected ? 0 : -1}
+                onClick={() => !disabled && onChange(option.value)}
+                disabled={disabled}
+                className={`
+                    ${commonButtonClasses}
+                    ${isSelected ? selectedClasses : unselectedClasses}
+                    ${inline ? 'px-4 py-3 flex-nowrap' : 'w-full p-4 text-left'}
+                `}
+            >
+                <div className={`
+                    rounded-full border-2 flex items-center justify-center transition-colors
+                    ${inline ? 'w-5 h-5' : 'w-6 h-6 flex-shrink-0'}
+                    ${isSelected ? 'border-success-500 bg-success-500' : 'border-slate-300 dark:border-slate-500'}
+                `}>
+                    {isSelected && <div className={`rounded-full bg-white ${inline ? 'w-2 h-2' : 'w-2.5 h-2.5'}`} />}
                 </div>
-            </div>
+
+                <div className={`flex-1 min-w-0 ${inline ? '' : ''}`}>
+                    <div className={`font-semibold ${isSelected ? 'text-success-900 dark:text-success-100' : 'text-slate-900 dark:text-slate-100'}`}>
+                        {option.label}
+                    </div>
+                    {option.description && !inline && (
+                        <div className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                            {option.description}
+                        </div>
+                    )}
+                </div>
+
+                {isSelected && !inline && (
+                    <CheckCircleIcon className="w-6 h-6 text-success-500 flex-shrink-0" />
+                )}
+            </button>
         );
-    }
+    };
 
     return (
-        <div role="radiogroup" aria-label={label} className={disabled ? 'opacity-60' : ''}>
+        <div
+            ref={groupRef}
+            role="radiogroup"
+            aria-label={label}
+            onKeyDown={handleKeyDown}
+            className={disabled ? 'opacity-60' : ''}
+        >
             {label && <label className="text-sm font-medium text-slate-700 dark:text-slate-300 block mb-3">{label}</label>}
-            <div className="space-y-2">
-                {options.map((option) => {
-                    const isSelected = value === option.value;
-                    return (
-                        <button
-                            key={option.label}
-                            type="button"
-                                role="radio"
-                                aria-checked={isSelected}
-                            onClick={() => !disabled && onChange(option.value)}
-                            disabled={disabled}
-                            className={`
-                                w-full relative flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all duration-200
-                                ${isSelected 
-                                    ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20' 
-                                    : 'border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-500'
-                                }
-                                ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:shadow-md'}
-                            `}
-                        >
-                            <div className={`
-                                w-6 h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors
-                                ${isSelected 
-                                    ? 'border-teal-500 bg-teal-500' 
-                                    : 'border-slate-300 dark:border-slate-500'
-                                }
-                            `}>
-                                {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-white" />}
-                            </div>
-                            
-                            <div className="flex-1 min-w-0">
-                                <div className={`font-semibold ${isSelected ? 'text-teal-900 dark:text-teal-100' : 'text-slate-900 dark:text-slate-100'}`}>
-                                    {option.label}
-                                </div>
-                                {option.description && (
-                                    <div className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                                        {option.description}
-                                    </div>
-                                )}
-                            </div>
-                            
-                            {isSelected && (
-                                <CheckCircleIcon className="w-6 h-6 text-teal-500 flex-shrink-0" />
-                            )}
-                        </button>
-                    );
-                })}
+            <div className={inline ? 'flex flex-wrap gap-3' : 'space-y-2'}>
+                {options.map((option) => renderOption(option, value === option.value))}
             </div>
         </div>
     );
-};
+}
 
 export default RadioGroup;

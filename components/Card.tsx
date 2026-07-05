@@ -3,13 +3,14 @@ import React from 'react';
 interface CardProps {
     title?: string;
     children: React.ReactNode;
+    className?: string;
 }
 
-const Card: React.FC<CardProps> = ({ title, children }) => {
+const Card: React.FC<CardProps> = ({ title, children, className = '' }) => {
     return (
-        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-sm dark:shadow-black/30 rounded-2xl p-6 sm:p-8 lg:p-12 border border-black/5 dark:border-white/5">
+        <div className={`bg-white dark:bg-slate-900 shadow-sm dark:shadow-black/20 rounded-xl p-5 sm:p-6 lg:p-8 border border-slate-200 dark:border-slate-800 ${className}`}>
             {title && (
-                <h2 className="text-2xl sm:text-3xl font-semibold text-slate-800 dark:text-slate-100 mb-8 sm:mb-10 text-center hidden lg:block">
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-50 mb-6 sm:mb-8">
                     {title}
                 </h2>
             )}
