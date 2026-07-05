@@ -74,6 +74,7 @@ import {
   QueueItem,
 } from "../../utils/offlineQueue";
 import { sanitizeString, sanitizeObject } from "../../utils/sanitization";
+import LiquidGlass from "liquid-glass-react";
 import { validateSubmissionId, isValidDbId, isLocalId } from "../../utils/validation";
 import { useToast } from "../../components/ToastContext.tsx";
 import { logger } from "../../utils/logger";
@@ -2412,17 +2413,28 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
         )}
       </div>
 
-      <footer className="sticky bottom-3 left-3 right-3 z-30 liquid-glass mx-2 mb-2">
-        <div className="w-full max-w-4xl mx-auto p-4">
-          <NavigationButtons
-            currentStep={currentStep}
-            onPrev={handlePrev}
-            onNext={currentStep === 6 ? handleSubmit : handleNext}
-            isLastStep={currentStep === 6}
-            isSubmitting={isSubmitting}
-          />
-        </div>
-      </footer>
+      <div className="sticky bottom-3 left-3 right-3 z-30 mx-2 mb-2">
+        <LiquidGlass
+          displacementScale={50}
+          blurAmount={0.1}
+          saturation={140}
+          aberrationIntensity={2}
+          elasticity={0.25}
+          cornerRadius={18}
+          overLight={false}
+          mode="standard"
+        >
+          <div className="p-4">
+            <NavigationButtons
+              currentStep={currentStep}
+              onPrev={handlePrev}
+              onNext={currentStep === 6 ? handleSubmit : handleNext}
+              isLastStep={currentStep === 6}
+              isSubmitting={isSubmitting}
+            />
+          </div>
+        </LiquidGlass>
+      </div>
     </div>
   );
 };
