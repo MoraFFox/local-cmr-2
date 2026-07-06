@@ -182,8 +182,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
 
   const { showToast } = useToast();
   const [showPre, setShowPre] = useState(false);
-  
-    const [technicians, setTechnicians] = useState<Array<{id: string, name: string}>>([]);
+
+  const [technicians, setTechnicians] = useState<Array<{id: string, name: string}>>([]);
 
   // COLLECT ALL KNOWN BARISTAS FOR AUTO-SUGGEST
   const allKnownBaristaNames = useMemo(() => {
@@ -2322,24 +2322,15 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
           </div>
         </aside>
 
-        {/* Mobile stepper */}
-        <div className="lg:hidden mb-4">
-          <div className="bg-cream border border-hairline rounded-xl p-3">
-            <div className="flex justify-between items-center mb-1">
-              <p className="text-xs text-latte">
-                {visibleSteps.find((s) => s.id === currentStep)?.name}
-              </p>
-              <p className="text-xs text-latte">{visibleSteps.findIndex((s) => s.id === currentStep) + 1} / {visibleSteps.length}</p>
-            </div>
-            <div className="h-1.5 w-full bg-cream-2 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-copper-500 rounded-full transition-all duration-500"
-                style={{
-                  width: `${visibleSteps.length > 1 ? ((visibleSteps.findIndex((s) => s.id === currentStep) / (visibleSteps.length - 1)) * 100) : 0}%`,
-                }}
-              />
-            </div>
-          </div>
+        {/* Mobile stepper (horizontal scrollable) */}
+        <div className="lg:hidden mb-4 bg-cream border border-hairline rounded-xl py-3 px-1 shadow-sm overflow-hidden">
+          <Stepper
+            steps={visibleSteps}
+            currentStep={currentStep}
+            completedSteps={completedSteps}
+            onChange={setCurrentStep}
+            layout="horizontal"
+          />
         </div>
 
         {/* Form Content */}

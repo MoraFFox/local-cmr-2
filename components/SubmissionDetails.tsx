@@ -665,7 +665,7 @@ const BranchPrintableDocument: React.FC<{
   return (
     <div
       id='print-container'
-      className='hidden print:block font-sans text-black bg-white w-full max-w-[210mm] mx-auto p-8'
+      className='hidden print:block font-sans text-black force-daylight bg-white w-full max-w-[210mm] mx-auto p-8'
     >
       {/* Header */}
       <div className='flex justify-between items-start mb-8 border-b-2 border-hairline pb-6'>
@@ -828,7 +828,7 @@ const PrintableDocument: React.FC<{
   return (
     <div
       id='print-container'
-      className='hidden print:block font-sans text-black bg-white w-full max-w-[210mm] mx-auto'
+      className='hidden print:block font-sans text-black force-daylight bg-white w-full max-w-[210mm] mx-auto'
     >
       {/* Logo Center */}
       <div className='flex justify-center mb-6'>

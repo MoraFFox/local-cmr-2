@@ -91,7 +91,7 @@ const PrintableWorkOrder: React.FC<PrintableWorkOrderProps> = ({ onBack, partsLi
 
     return (
         <div className="bg-cream-2 dark:bg-espresso p-4 sm:p-8 print:p-0 print:bg-white">
-            <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-3 print:hidden">
+            <div className="fixed bottom-4 left-4 z-30 flex flex-col gap-3 print:hidden">
                 <button
                     onClick={() => window.print()}
                     className="flex items-center gap-2 bg-copper-600 text-white font-bold py-3 px-5 rounded-full hover:bg-copper-700 transition-colors shadow-lg transform active:scale-95"
@@ -108,7 +108,7 @@ const PrintableWorkOrder: React.FC<PrintableWorkOrderProps> = ({ onBack, partsLi
                 </button>
             </div>
 
-            <div className="max-w-4xl mx-auto bg-white p-4 sm:p-8 shadow-sm rounded-lg font-sans text-ink print:shadow-none print:rounded-none">
+            <div className="max-w-4xl mx-auto force-daylight bg-white p-4 sm:p-8 shadow-sm rounded-lg font-sans text-ink print:shadow-none print:rounded-none">
                 {/* Header */}
                 <header className="flex justify-between items-center pb-3 border-b-2 border-hairline">
                     <div>

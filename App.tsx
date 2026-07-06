@@ -74,6 +74,8 @@ import {
   EyeSlashIcon,
   UsersIcon,
   ArrowLeftOnRectangleIcon,
+  MoonIcon,
+  SunIcon,
 } from "@heroicons/react/24/outline";
 import {
   partsList,
@@ -1160,24 +1162,45 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
           <div
             className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out lg:${isSidebarExpanded ? "mr-64" : "mr-20"}`}
           >
-            <header className="sticky top-0 z-30 flex items-center justify-between lg:hidden h-16 chrome border-b border-brass/20 px-4 shrink-0 gap-3">
-              <div className="flex items-center gap-2 overflow-hidden w-full">
+            <header className="sticky top-0 z-30 flex items-center justify-between lg:hidden h-16 chrome border-b border-brass/20 px-4 shrink-0">
+              {/* Left: Menu Button + Theme Toggle */}
+              <div className="w-1/4 flex justify-start items-center gap-1">
                 <button
                   aria-label="القائمة"
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="p-2 rounded-md text-cream/70 hover:text-cream hover:bg-espresso-light transition-colors shrink-0"
+                  className="p-2 -mr-2 rounded-md text-cream/70 hover:text-cream hover:bg-espresso-light transition-colors shrink-0"
                 >
                   <Bars3Icon className="h-6 w-6" />
                 </button>
+                <button
+                  onClick={toggleTheme}
+                  className="p-2 rounded-md text-cream/70 hover:text-cream hover:bg-espresso-light transition-colors shrink-0"
+                  aria-label={theme === "light" ? "الوضع الليلي" : "الوضع النهاري"}
+                  title={theme === "light" ? "الوضع الليلي" : "الوضع النهاري"}
+                >
+                  {theme === "light" ? (
+                    <MoonIcon className="h-5 w-5" />
+                  ) : (
+                    <SunIcon className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+              
+              {/* Center: Title Alone */}
+              <div className="flex-1 flex items-center justify-center overflow-hidden">
                 <h1 className="text-lg font-bold text-cream truncate">
                   {mobileTitle}
                 </h1>
               </div>
-              <img
-                src="/logo.svg"
-                alt="شعار ميدوز"
-                className="h-10 w-auto object-contain shrink-0"
-              />
+
+              {/* Right: Logo */}
+              <div className="w-1/4 flex justify-end">
+                <img
+                  src="/logo.svg"
+                  alt="شعار ميدوز"
+                  className="h-9 w-auto object-contain shrink-0 -ml-2"
+                />
+              </div>
             </header>
 
             {/* Offline Status Banner */}

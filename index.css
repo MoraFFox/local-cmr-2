@@ -131,6 +131,27 @@
   /* Logout button specifically used text-ember-300 which is slightly too dim, pop it to ember-100 */
   .dark .text-ember-300 { color: #F8D7D2 !important; }
 
+  /* ── Print / Light-Forced Contexts ──
+     Printable documents (Work Orders, PDF previews) must always render with
+     dark text on white/light backgrounds, even when the app is in Dark Mode.
+     The rules below force the tokens back to their daylight values inside any
+     container marked with .force-daylight. */
+  .force-daylight .text-ink { color: #3D2C24 !important; }
+  .force-daylight .text-ink\/80 { color: #3D2C24CC !important; }
+  .force-daylight .text-ink\/90 { color: #3D2C24E6 !important; }
+  .force-daylight .text-ink\/70 { color: #3D2C24B3 !important; }
+  .force-daylight .text-latte { color: #8A7468 !important; }
+  .force-daylight .text-latte\/60 { color: #8A746899 !important; }
+  .force-daylight .text-latte\/70 { color: #8A7468B3 !important; }
+  .force-daylight .text-latte\/80 { color: #8A7468CC !important; }
+  
+  .force-daylight .border-hairline { border-color: #D9CFB8 !important; }
+  .force-daylight .border-hairline\/20 { border-color: #D9CFB833 !important; }
+  .force-daylight .border-hairline\/50 { border-color: #D9CFB880 !important; }
+  
+  .force-daylight .bg-cream-2 { background-color: #E8DFCC !important; }
+  .force-daylight .bg-cream { background-color: #F1EADB !important; }
+
   /* text-cream stays — it's already the light text token */
 
   /* Safe-area helpers */
@@ -230,14 +251,39 @@
 }
 
 @layer utilities {
-  /* Horizontal scrollbar that doesn't steal vertical scroll space. */
-  .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+  /* ── Modern Global Scrollbars ── */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(138, 116, 104, 0.3); /* latte tint */
+    border-radius: 10px;
+    transition: background-color 0.2s ease-in-out;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(138, 116, 104, 0.5); /* darker latte tint on hover */
+  }
+  
+  .dark ::-webkit-scrollbar-thumb {
+    background-color: rgba(61, 44, 36, 0.4); /* espresso-light tint */
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(61, 44, 36, 0.7);
+  }
+
+  /* Keep custom-scrollbar utility for explicit overrides if needed, but make it match the global style */
+  .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: theme('colors.latte');
-    border-radius: 4px;
+    background-color: rgba(138, 116, 104, 0.3);
+    border-radius: 10px;
   }
   .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: theme('colors.espresso.light');
+    background-color: rgba(61, 44, 36, 0.4);
   }
 
   /* Respect reduced motion globally */
