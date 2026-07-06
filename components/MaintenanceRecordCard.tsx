@@ -851,9 +851,9 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               {(record.supervisors || []).map((supervisor, index) => (
                 <div
                   key={supervisor.id}
-                  className="p-3 border border-hairline dark:border-hairline rounded-md bg-white dark:bg-espresso relative"
+                  className="p-3 border border-hairline dark:border-hairline rounded-md bg-white dark:bg-espresso flex gap-3 items-start"
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <TextInput
                       label="اسم المشرف"
                       value={supervisor.name}
@@ -871,7 +871,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                   </div>
                   <button
                     onClick={() => handleRemoveSupervisor(index)}
-                    className="absolute top-2 right-2 p-1.5 text-latte hover:text-ember-500 dark:hover:text-ember-300 rounded-full hover:bg-ember-500/20 dark:hover:bg-ember-500/20 transition-colors transform active:scale-95"
+                    className="p-1.5 mt-2 shrink-0 text-latte hover:text-ember-500 dark:hover:text-ember-300 rounded-full hover:bg-ember-500/20 dark:hover:bg-ember-500/20 transition-colors transform active:scale-95"
                     aria-label="إزالة المشرف"
                   >
                     <TrashIcon className="w-5 h-5" />
