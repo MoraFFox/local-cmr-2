@@ -20,7 +20,12 @@ root.render(
   <React.StrictMode>
     <ErrorBoundary>
       <ToastProvider>
-        <BrowserRouter>
+        <BrowserRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
           <AppRouter />
         </BrowserRouter>
         {import.meta.env.DEV && <DebugPanel />}

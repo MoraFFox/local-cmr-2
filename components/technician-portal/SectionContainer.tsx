@@ -16,32 +16,32 @@ interface SectionContainerProps {
 }
 
 const accentBorderMap = {
-  teal: 'border-l-teal-500 dark:border-l-teal-400',
-  red: 'border-l-red-500 dark:border-l-red-400',
-  blue: 'border-l-blue-500 dark:border-l-blue-400',
-  amber: 'border-l-amber-500 dark:border-l-amber-400',
-  slate: 'border-l-slate-300 dark:border-l-slate-600',
+  teal: 'border-l-copper-500 dark:border-l-copper-400',
+  red: 'border-l-ember-500 dark:border-l-ember-400',
+  blue: 'border-l-copper-500 dark:border-l-copper-400',
+  amber: 'border-l-copper-500 dark:border-l-copper-400',
+  slate: 'border-l-hairline dark:border-l-hairline',
 };
 
 const iconBgMap = {
-  teal: 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400',
-  red: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
-  blue: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-  amber: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400',
-  slate: 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400',
+  teal: 'bg-copper-500/10 dark:bg-copper-500/20 text-copper-600 dark:text-copper-400',
+  red: 'bg-ember-500/10 dark:bg-ember-500/20 text-ember-700 dark:text-ember-300',
+  blue: 'bg-copper-500/10 dark:bg-copper-500/20 text-copper-600 dark:text-copper-400',
+  amber: 'bg-copper-500/10 dark:bg-copper-500/20 text-copper-600 dark:text-copper-400',
+  slate: 'bg-cream-2 dark:bg-espresso-light text-latte dark:text-cream/70',
 };
 
 const badgeBgMap = {
-  teal: 'bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300',
-  red: 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300',
-  blue: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300',
-  amber: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
-  slate: 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300',
+  teal: 'bg-copper-500/10 dark:bg-copper-500/20 text-copper-700 dark:text-copper-400',
+  red: 'bg-ember-500/10 dark:bg-ember-500/20 text-ember-700 dark:text-ember-300',
+  blue: 'bg-copper-500/10 dark:bg-copper-500/20 text-copper-700 dark:text-copper-400',
+  amber: 'bg-copper-500/10 dark:bg-copper-500/20 text-copper-700 dark:text-copper-400',
+  slate: 'bg-cream-2 dark:bg-espresso-light text-ink dark:text-cream',
 };
 
 const variantStyles = {
-  primary: 'bg-white dark:bg-slate-800/80 p-6 shadow-lg border-l-4 rounded-2xl',
-  secondary: 'bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl',
+  primary: 'bg-cream dark:bg-espresso-light/80 p-6 shadow-lg border-l-4 rounded-2xl',
+  secondary: 'bg-cream dark:bg-espresso-light/50 p-4 rounded-xl',
   tertiary: 'py-3',
 };
 
@@ -95,7 +95,7 @@ const SectionContainer: React.FC<SectionContainerProps> = ({
 
         <div className="flex items-center gap-2 flex-1 min-w-0">
           {title && (
-            <h3 className="text-base font-semibold text-slate-900 dark:text-white truncate">
+            <h3 className="text-base font-semibold text-ink dark:text-cream truncate">
               {title}
             </h3>
           )}
@@ -110,7 +110,7 @@ const SectionContainer: React.FC<SectionContainerProps> = ({
 
         {collapsible && (
           <ChevronDownIcon
-            className={`w-5 h-5 text-slate-400 dark:text-slate-500 flex-shrink-0 transition-transform duration-200 ${
+            className={`w-5 h-5 text-latte dark:text-cream/70 flex-shrink-0 transition-transform duration-200 ${
               isCollapsed ? '' : 'rotate-180'
             }`}
           />

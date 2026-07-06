@@ -151,10 +151,10 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
       {/* Header Section */}
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div>
-          <h1 className='text-2xl sm:text-3xl font-bold text-onyx'>
+          <h1 className='text-2xl sm:text-3xl font-bold text-ink'>
             أداء الباريستا
           </h1>
-          <p className='text-sage mt-1'>
+          <p className='text-latte mt-1'>
             تتبع تقييمات الموظفين والزيارات والمالية الخاصة بالصيانة.
           </p>
         </div>
@@ -162,34 +162,34 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
         <div className='flex items-center gap-2'>
           <button
             onClick={() => setShowDebug(!showDebug)}
-            className={`p-2 rounded-md transition-colors ${showDebug ? "bg-red-100 text-red-700" : "bg-slate-100 text-slate-500"}`}
+            className={`p-2 rounded-md transition-colors ${showDebug ? "bg-ember-50 text-ember-700" : "bg-cream text-latte"}`}
             title='تبديل وضع التصحيح'
           >
             <BugAntIcon className='w-5 h-5' />
           </button>
           <button
             onClick={() => setIncludeLogOnly(!includeLogOnly)}
-            className={`px-3 py-2 rounded-md text-xs font-bold uppercase tracking-wide transition-colors ${includeLogOnly ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-500"}`}
+            className={`px-3 py-2 rounded-md text-xs font-bold uppercase tracking-wide transition-colors ${includeLogOnly ? "bg-blue-100 text-blue-700" : "bg-cream text-latte"}`}
             title='Include baristas detected only from maintenance logs'
           >
             Include Log-Only
           </button>
           <button
             onClick={() => setIncludeZeroVisits(!includeZeroVisits)}
-            className={`px-3 py-2 rounded-md text-xs font-bold uppercase tracking-wide transition-colors ${includeZeroVisits ? "bg-slate-200 text-slate-700" : "bg-slate-100 text-slate-500"}`}
+            className={`px-3 py-2 rounded-md text-xs font-bold uppercase tracking-wide transition-colors ${includeZeroVisits ? "bg-cream-2 text-ink" : "bg-cream text-latte"}`}
             title='Include client staff with zero visits'
           >
             Include 0 Visits
           </button>
           <div className='relative w-full sm:w-72'>
             <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
-              <MagnifyingGlassIcon className='h-5 w-5 text-sage' />
+              <MagnifyingGlassIcon className='h-5 w-5 text-latte' />
             </div>
             <input
               type='search'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='block w-full rounded-lg border-sea bg-deep py-2.5 pl-10 pr-3 text-onyx placeholder:text-sage focus:border-lava-500 focus:ring-lava-500 sm:text-sm shadow-sm transition-colors'
+              className='block w-full rounded-lg border-hairline bg-cream py-2.5 pl-10 pr-3 text-ink placeholder:text-latte focus:border-copper-500 focus:ring-copper-500 sm:text-sm shadow-sm transition-colors'
               placeholder='Search baristas...'
             />
           </div>
@@ -197,13 +197,13 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
       </div>
 
       {showDebug && (
-        <div className='bg-slate-900 text-green-400 p-4 rounded-lg text-xs font-mono overflow-x-auto border border-green-900 shadow-lg mb-6'>
-          <h3 className='text-white font-bold text-sm mb-2 border-b border-green-800 pb-1'>
+        <div className='bg-espresso text-leaf-500 p-4 rounded-lg text-xs font-mono overflow-x-auto border border-leaf-500 shadow-lg mb-6'>
+          <h3 className='text-white font-bold text-sm mb-2 border-b border-leaf-500 pb-1'>
             Debug: Profile Aggregation Logic
           </h3>
           <table className='w-full text-left'>
             <thead>
-              <tr className='text-slate-400'>
+              <tr className='text-latte/70'>
                 <th className='p-1'>ID</th>
                 <th className='p-1'>Displayed Name</th>
                 <th className='p-1'>Norm. Name Key</th>
@@ -216,20 +216,20 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
               {aggregatedBaristas.map((b) => (
                 <tr
                   key={b.id}
-                  className='border-b border-slate-800 hover:bg-slate-800'
+                  className='border-b border-hairline hover:bg-espresso-light/50'
                 >
-                  <td className='p-1 text-xs text-slate-500 font-mono'>
+                  <td className='p-1 text-xs text-latte font-mono'>
                     {b.id}
                   </td>
                   <td className='p-1 font-bold'>{b.name}</td>
-                  <td className='p-1 text-slate-500'>{normalize(b.name)}</td>
+                  <td className='p-1 text-latte'>{normalize(b.name)}</td>
                   <td className='p-1'>
                     {Array.from(b._companiesVisited || []).join(", ")}
                   </td>
                   <td className='p-1 text-xs'>
                     {Array.from(b._rawNames || []).join(", ")}
                   </td>
-                  <td className='p-1 text-right font-bold text-teal-400'>
+                  <td className='p-1 text-right font-bold text-copper-400'>
                     {b.isAutoDetected ? "YES" : "NO"}
                   </td>
                 </tr>
@@ -241,42 +241,42 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
 
       {/* Stats Cards */}
       <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
-        <div className='bg-deep p-4 rounded-xl shadow-sm border border-sea flex items-center gap-4'>
-          <div className='p-3 bg-lava-500/10 text-lava-500 rounded-full'>
+        <div className='bg-cream p-4 rounded-xl shadow-sm border border-hairline flex items-center gap-4'>
+          <div className='p-3 bg-copper-500/10 text-copper-500 rounded-full'>
             <UserIcon className='w-6 h-6' />
           </div>
           <div>
-            <p className='text-xs font-bold uppercase text-sage'>
+            <p className='text-xs font-bold uppercase text-latte'>
               Total Staff
             </p>
-            <p className='text-2xl font-bold text-onyx'>
+            <p className='text-2xl font-bold text-ink'>
               {filteredBaristas.length}
             </p>
           </div>
         </div>
-        <div className='bg-deep p-4 rounded-xl shadow-sm border border-sea flex items-center gap-4'>
-          <div className='p-3 bg-sea text-onyx rounded-full'>
+        <div className='bg-cream p-4 rounded-xl shadow-sm border border-hairline flex items-center gap-4'>
+          <div className='p-3 bg-cream-2 text-ink rounded-full'>
             <WrenchScrewdriverIcon className='w-6 h-6' />
           </div>
           <div>
-            <p className='text-xs font-bold uppercase text-sage'>
+            <p className='text-xs font-bold uppercase text-latte'>
               Total Visits
             </p>
-            <p className='text-2xl font-bold text-onyx'>
+            <p className='text-2xl font-bold text-ink'>
               {totalVisits}
             </p>
           </div>
         </div>
-        <div className='bg-deep p-4 rounded-xl shadow-sm border border-sea flex items-center gap-4'>
+        <div className='bg-cream p-4 rounded-xl shadow-sm border border-hairline flex items-center gap-4'>
           <div className='p-3 bg-amber-500/10 text-amber-500 rounded-full'>
             <BanknotesIcon className='w-6 h-6' />
           </div>
           <div>
-            <p className='text-xs font-bold uppercase text-sage'>
+            <p className='text-xs font-bold uppercase text-latte'>
               Total Company Paid
             </p>
             <p
-              className='text-xl font-bold text-onyx truncate'
+              className='text-xl font-bold text-ink truncate'
               title={formatCurrency(totalCompanyCost)}
             >
               {new Intl.NumberFormat("en-US", {
@@ -297,7 +297,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
             <div
               key={`${barista.id}-${barista.name}`}
               onClick={() => onViewDetails(barista.name)}
-              className='bg-deep rounded-xl shadow-md border border-sea overflow-hidden flex flex-col hover:shadow-lg hover:border-lava-500/50 cursor-pointer transition-all duration-300 relative group'
+              className='bg-cream rounded-xl shadow-md border border-hairline overflow-hidden flex flex-col hover:shadow-lg hover:border-copper-500/50 cursor-pointer transition-all duration-300 relative group'
             >
               {/* Auto Detected Badge */}
               {barista.isAutoDetected && (
@@ -310,11 +310,11 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
               )}
 
               {/* Card Header */}
-              <div className='p-5 border-b border-slate-100 dark:border-slate-700 flex items-start justify-between'>
+              <div className='p-5 border-b border-hairline flex items-start justify-between'>
                 <div className='flex items-center gap-3'>
                   <Avatar name={barista.name} />
                   <div>
-                    <h3 className='font-bold text-slate-900 dark:text-white text-lg group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors'>
+                    <h3 className='font-bold text-ink dark:text-white text-lg group-hover:text-copper-600 dark:group-hover:text-copper-400 transition-colors'>
                       {barista.name}
                     </h3>
                     <div className='flex flex-col gap-0.5 mt-0.5'>
@@ -323,7 +323,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                           className='flex items-center gap-1.5'
                           title='Average performance from maintenance visits'
                         >
-                          <span className='font-bold text-teal-600 dark:text-teal-400 text-sm'>
+                          <span className='font-bold text-copper-600 dark:text-copper-400 text-sm'>
                             {barista.averageVisitRating.toFixed(1)}
                           </span>
                           <div className='flex'>
@@ -331,17 +331,17 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                               i < Math.round(barista.averageVisitRating) ? (
                                 <StarIconSolid
                                   key={i}
-                                  className='w-3.5 h-3.5 text-teal-400'
+                                  className='w-3.5 h-3.5 text-copper-400'
                                 />
                               ) : (
                                 <StarIcon
                                   key={i}
-                                  className='w-3.5 h-3.5 text-slate-300 dark:text-slate-600'
+                                  className='w-3.5 h-3.5 text-latte/70 dark:text-latte/70'
                                 />
                               ),
                             )}
                           </div>
-                          <span className='text-[10px] text-slate-400 font-medium bg-slate-100 dark:bg-slate-700 px-1.5 rounded'>
+                          <span className='text-[10px] text-latte font-medium bg-cream dark:bg-espresso-light px-1.5 rounded'>
                             Perf.
                           </span>
                         </div>
@@ -351,12 +351,12 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                           title='Initial Profile Rating'
                         >
                           {barista.isAutoDetected ? (
-                            <span className='text-[10px] text-slate-400 italic'>
+                            <span className='text-[10px] text-latte italic'>
                               No Rating Yet
                             </span>
                           ) : (
                             <>
-                              <span className='text-[10px] text-slate-400 font-medium bg-slate-100 dark:bg-slate-700 px-1.5 rounded'>
+                              <span className='text-[10px] text-latte font-medium bg-cream dark:bg-espresso-light px-1.5 rounded'>
                                 Profile
                               </span>
                             </>
@@ -368,7 +368,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                 </div>
                 <div className='flex flex-col items-end gap-2'>
                   <span
-                    className={`text-xs px-2 py-1 rounded-full font-bold uppercase tracking-wider ${barista.visitCount > 0 ? "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300" : "bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400"}`}
+                    className={`text-xs px-2 py-1 rounded-full font-bold uppercase tracking-wider ${barista.visitCount > 0 ? "bg-cream-2 text-copper-700 dark:bg-copper-500/20 dark:text-copper-400" : "bg-cream text-latte dark:bg-espresso-light dark:text-latte/70"}`}
                   >
                     {barista.visitCount} Visit
                     {barista.visitCount !== 1 ? "s" : ""}
@@ -377,7 +377,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                     className={`text-[9px] px-1.5 py-0.5 rounded border font-bold uppercase tracking-tighter ${
                       barista.isAutoDetected
                         ? "border-blue-200 text-blue-600 bg-blue-50 dark:border-blue-900/50 dark:text-blue-400 dark:bg-blue-900/20"
-                        : "border-teal-200 text-teal-600 bg-teal-50 dark:border-teal-900/50 dark:text-teal-400 dark:bg-teal-900/20"
+                        : "border-copper-500/30 text-copper-600 bg-cream-2 dark:border-copper-500/30 dark:text-copper-400 dark:bg-copper-500/10"
                     }`}
                     title={
                       barista.isAutoDetected
@@ -396,15 +396,15 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                   {/* Location Context */}
                   <div>
                     <div className='flex items-start gap-2 text-sm mb-1'>
-                      <BriefcaseIcon className='w-4 h-4 text-slate-400 mt-0.5 shrink-0' />
+                      <BriefcaseIcon className='w-4 h-4 text-latte mt-0.5 shrink-0' />
                       <span
-                        className='font-semibold text-slate-700 dark:text-slate-300 line-clamp-1'
+                        className='font-semibold text-ink dark:text-latte/70 line-clamp-1'
                         title={barista.companyName}
                       >
                         {barista.companyName}
                       </span>
                     </div>
-                    <div className='flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 ml-6'>
+                    <div className='flex items-center gap-2 text-xs text-latte dark:text-latte/70 ml-6'>
                       {barista.branchName === "Main Office" ? (
                         <BuildingStorefrontIcon className='w-3 h-3' />
                       ) : (
@@ -417,14 +417,14 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                   <div className='flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity pl-2'>
                     <button
                       onClick={(e) => startEdit(e, barista)}
-                      className='p-1.5 text-slate-400 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/30 rounded-lg transition-colors'
+                      className='p-1.5 text-latte hover:text-copper-600 hover:bg-cream-2 dark:hover:bg-copper-500/20 rounded-lg transition-colors'
                       title='Edit Details'
                     >
                       <PencilIcon className='w-5 h-5' />
                     </button>
                     <button
                       onClick={(e) => handleDelete(e, barista)}
-                      className='p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors'
+                      className='p-1.5 text-latte hover:text-ember-700 hover:bg-ember-50 dark:hover:bg-ember-500/20 rounded-lg transition-colors'
                       title='Delete Barista'
                     >
                       <TrashIcon className='w-5 h-5' />
@@ -433,39 +433,39 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                 </div>
 
                 {/* Financial Stats */}
-                <div className='bg-deep rounded-lg p-3 space-y-2 text-sm border border-sea'>
+                <div className='bg-cream rounded-lg p-3 space-y-2 text-sm border border-hairline'>
                   <div className='flex justify-between items-center'>
-                    <span className='text-sage text-xs uppercase font-bold'>
+                    <span className='text-latte text-xs uppercase font-bold'>
                       Company Paid (Saved)
                     </span>
                     <span
-                      className={`font-mono font-bold ${barista.companyCost > 0 ? "text-amber-500" : "text-sage"}`}
+                      className={`font-mono font-bold ${barista.companyCost > 0 ? "text-amber-500" : "text-latte"}`}
                     >
                       {formatCurrency(barista.companyCost)}
                     </span>
                   </div>
-                  <div className='w-full h-px bg-sea'></div>
+                  <div className='w-full h-px bg-cream-2'></div>
                   <div className='flex justify-between items-center'>
-                    <span className='text-sage text-xs uppercase font-bold'>
+                    <span className='text-latte text-xs uppercase font-bold'>
                       Client Paid (Rev)
                     </span>
                     <span
-                      className={`font-mono font-bold ${barista.clientCost > 0 ? "text-success-500" : "text-sage"}`}
+                      className={`font-mono font-bold ${barista.clientCost > 0 ? "text-copper-500" : "text-latte"}`}
                     >
                       {formatCurrency(barista.clientCost)}
                     </span>
                   </div>
                 </div>
 
-                <div className='flex items-center justify-between mt-2 pt-2 border-t border-sea'>
+                <div className='flex items-center justify-between mt-2 pt-2 border-t border-hairline'>
                   {barista.lastActive ? (
-                    <span className='text-[10px] text-sage italic'>
+                    <span className='text-[10px] text-latte italic'>
                       Last active: {barista.lastActive}
                     </span>
                   ) : (
                     <span></span>
                   )}
-                  <span className='text-lava-500 text-xs font-bold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
+                  <span className='text-copper-500 text-xs font-bold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
                     View Work History <ArrowRightIcon className='w-3 h-3' />
                   </span>
                 </div>
@@ -495,16 +495,16 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
       {editingBarista && (
         <div className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200'>
           <div
-            className='bg-deep border border-sea rounded-xl shadow-xl w-full max-w-md p-6'
+            className='bg-cream border border-hairline rounded-xl shadow-xl w-full max-w-md p-6'
             onClick={(e) => e.stopPropagation()}
           >
             <div className='flex justify-between items-center mb-4'>
-              <h3 className='text-lg font-bold text-onyx'>
+              <h3 className='text-lg font-bold text-ink'>
                 تعديل التفاصيل
               </h3>
               <button
                 onClick={() => setEditingBarista(null)}
-                className='text-sage hover:text-onyx transition-colors'
+                className='text-latte hover:text-ink transition-colors'
               >
                 <XMarkIcon className='w-6 h-6' />
               </button>
@@ -512,7 +512,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
 
             <div className='space-y-4'>
               <div>
-                <label className='block text-sm font-medium text-onyx mb-1'>
+                <label className='block text-sm font-medium text-ink mb-1'>
                   Name
                 </label>
                 <input
@@ -521,11 +521,11 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                   onChange={(e) =>
                     setEditForm({ ...editForm, name: e.target.value })
                   }
-                  className='w-full rounded-lg border-sea bg-deep p-2.5 text-onyx focus:border-lava-500 focus:ring-1 focus:ring-lava-500 transition-colors outline-none'
+                  className='w-full rounded-lg border-hairline bg-cream p-2.5 text-ink focus:border-copper-500 focus:ring-1 focus:ring-copper-500 transition-colors outline-none'
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium text-onyx mb-1'>
+                <label className='block text-sm font-medium text-ink mb-1'>
                   Phone
                 </label>
                 <input
@@ -534,7 +534,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                   onChange={(e) =>
                     setEditForm({ ...editForm, phone: e.target.value })
                   }
-                  className='w-full rounded-lg border-sea bg-deep p-2.5 text-onyx focus:border-lava-500 focus:ring-1 focus:ring-lava-500 transition-colors outline-none'
+                  className='w-full rounded-lg border-hairline bg-cream p-2.5 text-ink focus:border-copper-500 focus:ring-1 focus:ring-copper-500 transition-colors outline-none'
                 />
               </div>
 
@@ -546,16 +546,16 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                 </div>
               )}
 
-              <div className='flex gap-3 pt-4 border-t border-sea mt-6'>
+              <div className='flex gap-3 pt-4 border-t border-hairline mt-6'>
                 <button
                   onClick={() => setEditingBarista(null)}
-                  className='flex-1 py-2.5 border border-sea text-onyx rounded-lg font-semibold hover:bg-sea transition-colors'
+                  className='flex-1 py-2.5 border border-hairline text-ink rounded-lg font-semibold hover:bg-cream-2 transition-colors'
                 >
                   إلغاء
                 </button>
                 <button
                   onClick={saveEdit}
-                  className='flex-1 py-2.5 bg-lava-500 text-onyx rounded-lg font-bold hover:bg-lava-600 transition-colors shadow-sm'
+                  className='btn-primary flex-1 py-2.5 rounded-lg font-bold transition-colors'
                 >
                   حفظ التغييرات
                 </button>

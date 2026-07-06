@@ -106,26 +106,26 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
             <div 
                 role="dialog" 
                 aria-modal="true" 
-                className="bg-deep border border-sea rounded-2xl shadow-xl w-full max-w-lg my-4 sm:my-0 overflow-hidden animate-scale-in"
+                className="bg-cream border border-hairline rounded-2xl shadow-xl w-full max-w-lg my-4 sm:my-0 overflow-hidden animate-scale-in"
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-sea bg-sea/30">
+                <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-hairline bg-cream-2/50">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-lava-500/10 rounded-lg">
-                            <BuildingOfficeIcon className="w-5 h-5 text-lava-500" />
+                        <div className="p-2 bg-copper-500/10 rounded-lg">
+                            <BuildingOfficeIcon className="w-5 h-5 text-copper-500" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-bold text-onyx">
+                            <h2 className="text-lg font-bold text-ink">
                                 تعديل الشركة
                             </h2>
-                            <p className="text-sm text-sage">
+                            <p className="text-sm text-latte">
                                 {company.companyName || 'شركة غير مسماة'}
                             </p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 sm:p-2 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center text-sage hover:text-onyx rounded-full hover:bg-sea transition-colors"
+                        className="p-2 sm:p-2 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center text-latte hover:text-ink rounded-full hover:bg-cream-2 transition-colors"
                         aria-label="إغلاق النافذة"
                     >
                         <XMarkIcon className="w-5 h-5" />
@@ -183,10 +183,10 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                 </div>
 
                 {/* Footer Actions */}
-                <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-4 sm:px-6 py-4 pb-safe border-t border-sea bg-surface-muted/30">
+                <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-4 sm:px-6 py-4 pb-safe border-t border-hairline bg-surface-muted/30">
                     <button
                         onClick={onClose}
-                        className="w-full sm:w-auto px-4 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 text-sage hover:text-onyx font-medium rounded-lg hover:bg-sea transition-colors"
+                        className="w-full sm:w-auto px-4 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 text-latte hover:text-ink font-medium rounded-lg hover:bg-cream-2 transition-colors"
                         disabled={isSaving}
                     >
                         إلغاء
@@ -194,7 +194,7 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="w-full sm:w-auto px-6 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 bg-lava-500 text-onyx font-semibold rounded-lg hover:bg-lava-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        className="btn-primary w-full sm:w-auto px-6 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 font-semibold flex items-center justify-center gap-2 disabled:cursor-not-allowed"
                     >
                         {isSaving ? (
                             <>

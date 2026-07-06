@@ -158,30 +158,30 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
             <div 
                 role="dialog"
                 aria-modal="true"
-                className="bg-deep border border-sea rounded-2xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col animate-scale-in"
+                className="bg-cream border border-hairline rounded-2xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col animate-scale-in"
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-sea bg-sea/30">
-                    <h2 className="text-xl font-bold text-onyx">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-hairline bg-cream-2/50">
+                    <h2 className="text-xl font-bold text-ink">
                         Import / Export
                     </h2>
-                    
+
                     <button
                         onClick={onClose}
-                        className="p-2 text-sage hover:text-onyx rounded-full hover:bg-sea transition-colors"
+                        className="p-2 text-latte hover:text-ink rounded-full hover:bg-cream-2 transition-colors"
                     >
                         <XMarkIcon className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b border-sea bg-deep">
+                <div className="flex border-b border-hairline bg-cream">
                     <button
                         onClick={() => setActiveTab('export')}
                         className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                             activeTab === 'export'
-                                ? 'text-lava-500 border-b-2 border-lava-500 bg-lava-500/10'
-                                : 'text-sage hover:text-onyx'
+                                ? 'text-copper-600 border-b-2 border-copper-500 bg-copper-500/10'
+                                : 'text-latte hover:text-ink'
                         }`}
                     >
                         <div className="flex items-center justify-center gap-2">
@@ -189,13 +189,13 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                             Export
                         </div>
                     </button>
-                    
+
                     <button
                         onClick={() => setActiveTab('import')}
                         className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                             activeTab === 'import'
-                                ? 'text-lava-500 border-b-2 border-lava-500 bg-lava-500/10'
-                                : 'text-sage hover:text-onyx'
+                                ? 'text-copper-600 border-b-2 border-copper-500 bg-copper-500/10'
+                                : 'text-latte hover:text-ink'
                         }`}
                     >
                         <div className="flex items-center justify-center gap-2">
@@ -206,20 +206,20 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6 bg-midnight">
+                <div className="flex-1 overflow-y-auto p-6 bg-paper">
                     {activeTab === 'export' ? (
                         <div className="space-y-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <button
                                     onClick={handleExportJSON}
-                                    className="flex flex-col items-center gap-3 p-6 bg-deep rounded-xl border-2 border-sea hover:border-lava-500 transition-colors group"
+                                    className="flex flex-col items-center gap-3 p-6 bg-cream rounded-xl border-2 border-hairline hover:border-copper-500 transition-colors group"
                                 >
-                                    <div className="p-3 bg-sea rounded-xl group-hover:bg-lava-500/20 transition-colors">
-                                        <CodeBracketIcon className="w-8 h-8 text-onyx group-hover:text-lava-500" />
+                                    <div className="p-3 bg-cream-2 rounded-xl group-hover:bg-copper-500/20 transition-colors">
+                                        <CodeBracketIcon className="w-8 h-8 text-ink group-hover:text-copper-500" />
                                     </div>
                                     <div className="text-center">
-                                        <h3 className="font-semibold text-onyx">Export as JSON</h3>
-                                        <p className="text-sm text-sage mt-1">
+                                        <h3 className="font-semibold text-ink">Export as JSON</h3>
+                                        <p className="text-sm text-latte mt-1">
                                             Complete data with all details
                                         </p>
                                     </div>
@@ -227,14 +227,14 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
 
                                 <button
                                     onClick={handleExportCSV}
-                                    className="flex flex-col items-center gap-3 p-6 bg-deep rounded-xl border-2 border-sea hover:border-lava-500 transition-colors group"
+                                    className="flex flex-col items-center gap-3 p-6 bg-cream rounded-xl border-2 border-hairline hover:border-copper-500 transition-colors group"
                                 >
-                                    <div className="p-3 bg-sea rounded-xl group-hover:bg-lava-500/20 transition-colors">
-                                        <TableCellsIcon className="w-8 h-8 text-onyx group-hover:text-lava-500" />
+                                    <div className="p-3 bg-cream-2 rounded-xl group-hover:bg-copper-500/20 transition-colors">
+                                        <TableCellsIcon className="w-8 h-8 text-ink group-hover:text-copper-500" />
                                     </div>
                                     <div className="text-center">
-                                        <h3 className="font-semibold text-onyx">Export as CSV</h3>
-                                        <p className="text-sm text-sage mt-1">
+                                        <h3 className="font-semibold text-ink">Export as CSV</h3>
+                                        <p className="text-sm text-latte mt-1">
                                             Maintenance records only
                                         </p>
                                     </div>
@@ -242,14 +242,14 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
 
                                 <button
                                     onClick={handleExportSummary}
-                                    className="flex flex-col items-center gap-3 p-6 bg-deep rounded-xl border-2 border-sea hover:border-lava-500 transition-colors group sm:col-span-2"
+                                    className="flex flex-col items-center gap-3 p-6 bg-cream rounded-xl border-2 border-hairline hover:border-copper-500 transition-colors group sm:col-span-2"
                                 >
-                                    <div className="p-3 bg-sea rounded-xl group-hover:bg-lava-500/20 transition-colors">
-                                        <DocumentTextIcon className="w-8 h-8 text-onyx group-hover:text-lava-500" />
+                                    <div className="p-3 bg-cream-2 rounded-xl group-hover:bg-copper-500/20 transition-colors">
+                                        <DocumentTextIcon className="w-8 h-8 text-ink group-hover:text-copper-500" />
                                     </div>
                                     <div className="text-center">
-                                        <h3 className="font-semibold text-onyx">Export Summary Report</h3>
-                                        <p className="text-sm text-sage mt-1">
+                                        <h3 className="font-semibold text-ink">Export Summary Report</h3>
+                                        <p className="text-sm text-latte mt-1">
                                             Overview of all companies with counts
                                         </p>
                                     </div>
@@ -259,15 +259,15 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                     ) : (
                         <div className="space-y-4">
                             {/* File Upload */}
-                            <div 
+                            <div
                                 className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
                                     importStatus === 'loading'
-                                        ? 'border-amber-500 bg-amber-500/10'
+                                        ? 'border-copper-500 bg-copper-500/10'
                                         : importStatus === 'success'
-                                        ? 'border-success-500 bg-success-500/10'
+                                        ? 'border-leaf-500 bg-leaf-500/10'
                                         : importStatus === 'error'
-                                        ? 'border-lava-500 bg-lava-500/10'
-                                        : 'border-sea hover:border-lava-500'
+                                        ? 'border-ember-500 bg-ember-500/10'
+                                        : 'border-hairline hover:border-copper-500'
                                 }`}
                             >
                                 <input
@@ -277,23 +277,23 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                                     onChange={handleFileSelect}
                                     className="hidden"
                                 />
-                                
+
                                 <button
                                     onClick={() => fileInputRef.current?.click()}
                                     disabled={importStatus === 'loading'}
                                     className="w-full"
                                 >
                                     <DocumentArrowUpIcon className={`w-12 h-12 mx-auto mb-3 ${
-                                        importStatus === 'success' ? 'text-success-500' :
-                                        importStatus === 'error' ? 'text-lava-500' :
-                                        'text-sage'
+                                        importStatus === 'success' ? 'text-leaf-500' :
+                                        importStatus === 'error' ? 'text-ember-300' :
+                                        'text-latte'
                                     }`} />
-                                    
-                                    <p className="font-medium text-onyx">
+
+                                    <p className="font-medium text-ink">
                                         {importStatus === 'loading' ? 'جاري المعالجة...' : 'اضغط لرفع الملف'}
                                     </p>
-                                    
-                                    <p className="text-sm text-sage mt-1">
+
+                                    <p className="text-sm text-latte mt-1">
                                         JSON or CSV format
                                     </p>
                                 </button>
@@ -302,9 +302,9 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                             {/* Status Message */}
                             {importMessage && (
                                 <div className={`flex items-center gap-2 p-3 rounded-lg border ${
-                                    importStatus === 'success' ? 'bg-success-500/10 text-success-500 border-success-500/20' :
-                                    importStatus === 'error' ? 'bg-lava-500/10 text-lava-500 border-lava-500/20' :
-                                    'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                    importStatus === 'success' ? 'bg-leaf-500/10 text-leaf-600 border-leaf-500/20' :
+                                    importStatus === 'error' ? 'bg-ember-500/10 text-ember-700 border-ember-500/20' :
+                                    'bg-copper-500/10 text-copper-600 border-copper-500/20'
                                 }`}>
                                     {importStatus === 'success' ? (
                                         <CheckCircleIcon className="w-5 h-5" />
@@ -318,7 +318,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                             {/* Validation Results */}
                             {importedData.length > 0 && (
                                 <div className="space-y-2">
-                                    <h4 className="font-medium text-onyx">
+                                    <h4 className="font-medium text-ink">
                                         Validation Results
                                     </h4>
                                     
@@ -327,24 +327,24 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                                             key={index}
                                             className={`p-3 rounded-lg border ${
                                                 item.validation.isValid
-                                                    ? 'border-success-500/30 bg-success-500/10'
-                                                    : 'border-lava-500/30 bg-lava-500/10'
+                                                    ? 'border-leaf-500/30 bg-leaf-500/10'
+                                                    : 'border-ember-500/30 bg-ember-500/10'
                                             }`}
                                         >
                                             <div className="flex items-center gap-2">
                                                 {item.validation.isValid ? (
-                                                    <CheckCircleIcon className="w-5 h-5 text-success-500" />
+                                                    <CheckCircleIcon className="w-5 h-5 text-leaf-500" />
                                                 ) : (
-                                                    <ExclamationCircleIcon className="w-5 h-5 text-lava-500" />
+                                                    <ExclamationCircleIcon className="w-5 h-5 text-ember-500" />
                                                 )}
                                                 
-                                                <span className="font-medium text-onyx">
+                                                <span className="font-medium text-ink">
                                                     {item.original.companyName || `Company ${index + 1}`}
                                                 </span>
                                             </div>
                                             
                                             {!item.validation.isValid && (
-                                                <ul className="mt-2 ml-7 text-sm text-lava-400">
+                                                <ul className="mt-2 ml-7 text-sm text-ember-300">
                                                     {item.validation.errors.map((error: string, i: number) => (
                                                         <li key={i}>{error}</li>
                                                     ))}
@@ -360,7 +360,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
 
                 {/* Footer */}
                 {activeTab === 'import' && importedData.some((item: any) => item.validation.isValid) && (
-                    <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-6 py-4 pb-safe border-t border-sea bg-surface-muted/30">
+                    <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-6 py-4 pb-safe border-t border-hairline bg-surface-muted/30">
                         <Button
                             variant="secondary"
                             onClick={() => {

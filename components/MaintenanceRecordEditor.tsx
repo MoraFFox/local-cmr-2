@@ -308,17 +308,17 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
   }> = ({ title, section, icon, badge }) => (
     <button
       onClick={() => toggleSection(section)}
-      className="w-full flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors rounded-t-lg"
+      className="w-full flex items-center justify-between p-4 bg-cream dark:bg-espresso/50 hover:bg-cream dark:hover:bg-espresso-light/50/50 transition-colors rounded-t-lg"
     >
       <div className="flex items-center gap-3">
-        <span className="text-slate-500 dark:text-slate-400">{icon}</span>
-        <span className="font-semibold text-slate-900 dark:text-white">{title}</span>
+        <span className="text-latte dark:text-latte">{icon}</span>
+        <span className="font-semibold text-ink dark:text-white">{title}</span>
         {badge}
       </div>
       {expandedSections.has(section) ? (
-        <ChevronUpIcon className="w-5 h-5 text-slate-400" />
+        <ChevronUpIcon className="w-5 h-5 text-latte" />
       ) : (
-        <ChevronDownIcon className="w-5 h-5 text-slate-400" />
+        <ChevronDownIcon className="w-5 h-5 text-latte" />
       )}
     </button>
   );
@@ -326,7 +326,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
   return (
     <div className="space-y-6">
       {/* Basic Info Section */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden">
         <SectionHeader
           title="المعلومات الأساسية"
           section="basic"
@@ -341,39 +341,39 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Date */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
                   Maintenance Date *
                 </label>
                 <div className="relative">
-                  <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
                   <input
                     type="date"
                     name="maintenanceDate"
                     value={editedRecord.maintenanceDate}
                     onChange={handleFieldChange}
-                    className={`w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 border ${
+                    className={`w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-copper-500 border ${
                       errors.maintenanceDate 
-                        ? 'border-red-500 focus:ring-red-500' 
-                        : 'border-slate-200 dark:border-slate-600'
+                        ? 'border-ember-500 focus:ring-ember-500' 
+                        : 'border-hairline dark:border-hairline'
                     }`}
                   />
                 </div>
                 {errors.maintenanceDate && (
-                  <p className="mt-1 text-sm text-red-600">{errors.maintenanceDate}</p>
+                  <p className="mt-1 text-sm text-ember-700">{errors.maintenanceDate}</p>
                 )}
               </div>
 
               {/* Last Visit Info */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
                   Last Visit
                 </label>
                 <div className="relative">
                   {lastVisitDate ? (
-                    <div className="flex items-center gap-3 p-3 bg-slate-100 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600">
-                      <CalendarIcon className="w-5 h-5 text-teal-500" />
+                    <div className="flex items-center gap-3 p-3 bg-cream dark:bg-espresso-light rounded-lg border border-hairline dark:border-hairline">
+                      <CalendarIcon className="w-5 h-5 text-copper-500" />
                       <div>
-                        <div className="text-slate-900 dark:text-white font-medium">
+                        <div className="text-ink dark:text-white font-medium">
                           {lastVisitDate.toLocaleDateString('en-GB', { 
                             day: 'numeric', 
                             month: 'short', 
@@ -381,14 +381,14 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                           })}
                         </div>
                         {averageDays && (
-                          <div className="text-xs text-slate-500 dark:text-slate-400">
+                          <div className="text-xs text-latte dark:text-latte">
                             Average {averageDays} days between visits
                           </div>
                         )}
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 p-3 bg-slate-100 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400">
+                    <div className="flex items-center gap-2 p-3 bg-cream dark:bg-espresso-light rounded-lg border border-hairline dark:border-hairline text-latte dark:text-latte">
                       <CalendarIcon className="w-5 h-5" />
                       <span className="text-sm">No previous visits</span>
                     </div>
@@ -398,20 +398,20 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
 
               {/* Barista */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
                   My Technician *
                 </label>
                 <div className="relative">
-                  <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
                   {baristas.length > 0 ? (
                     <select
                       name="baristaName"
                       value={editedRecord.baristaName}
                       onChange={handleFieldChange}
-                      className={`w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 border ${
+                      className={`w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-copper-500 border ${
                         errors.baristaName 
-                          ? 'border-red-500 focus:ring-red-500' 
-                          : 'border-slate-200 dark:border-slate-600'
+                          ? 'border-ember-500 focus:ring-ember-500' 
+                          : 'border-hairline dark:border-hairline'
                       }`}
                     >
                       <option value="">Select Barista</option>
@@ -426,32 +426,32 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       value={editedRecord.baristaName}
                       onChange={handleFieldChange}
                       placeholder="أدخل اسم الباريستا"
-                      className={`w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 border ${
+                      className={`w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-copper-500 border ${
                         errors.baristaName 
-                          ? 'border-red-500 focus:ring-red-500' 
-                          : 'border-slate-200 dark:border-slate-600'
+                          ? 'border-ember-500 focus:ring-ember-500' 
+                          : 'border-hairline dark:border-hairline'
                       }`}
                     />
                   )}
                 </div>
                 {errors.baristaName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.baristaName}</p>
+                  <p className="mt-1 text-sm text-ember-700">{errors.baristaName}</p>
                 )}
               </div>
 
               {/* Client Barista */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
                   Client Barista
                 </label>
                 <div className="relative">
-                  <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
                   {clientBaristas && clientBaristas.length > 0 ? (
                     <select
                       name="clientBaristaName"
                       value={editedRecord.clientBaristaName || ''}
                       onChange={handleFieldChange}
-                      className="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 border border-slate-200 dark:border-slate-600"
+                      className="w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-copper-500 border border-hairline dark:border-hairline"
                     >
                       <option value="">Select Client Barista</option>
                       {clientBaristas.map(barista => (
@@ -465,7 +465,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       value={editedRecord.clientBaristaName || ''}
                       onChange={handleFieldChange}
                       placeholder="أدخل اسم باريستا العميل"
-                      className="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 border border-slate-200 dark:border-slate-600"
+                      className="w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-copper-500 border border-hairline dark:border-hairline"
                     />
                   )}
                 </div>
@@ -473,7 +473,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
 
               {/* Client Barista Performance Rating */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
                   Client Barista Performance Rating
                 </label>
                 <div className="flex items-center gap-1 sm:gap-2">
@@ -487,7 +487,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       {star <= (editedRecord.visitRating || 0) ? (
                         <StarIconSolid className="w-8 h-8 text-yellow-400" />
                       ) : (
-                        <StarIcon className="w-8 h-8 text-slate-300 dark:text-slate-600" />
+                        <StarIcon className="w-8 h-8 text-latte/70 dark:text-ink" />
                       )}
                     </button>
                   ))}
@@ -496,16 +496,16 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
 
               {/* Visit Zone */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
                   Visit Zone
                 </label>
                 <div className="relative">
-                  <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
                   <select
                     name="visitZone"
                     value={editedRecord.visitZone || ''}
                     onChange={handleFieldChange}
-                    className="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 border border-slate-200 dark:border-slate-600"
+                    className="w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-copper-500 border border-hairline dark:border-hairline"
                   >
                     <option value="">Select Zone</option>
                     <option value="cairo">Cairo (500 EGP)</option>
@@ -520,13 +520,13 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       </div>
 
       {/* Problems & Services Section */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden">
         <SectionHeader
           title="المشاكل والخدمات"
           section="problems"
           icon={<ExclamationCircleIcon className="w-5 h-5" />}
           badge={editedRecord.problems?.length > 0 && (
-            <span className="px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs rounded-full">
+            <span className="px-2 py-0.5 bg-ember-50 dark:bg-ember-500/10 text-ember-700 dark:text-ember-300 text-xs rounded-full">
               {editedRecord.problems.length} problems
             </span>
           )}
@@ -542,9 +542,9 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 name="hadProblem"
                 checked={editedRecord.hadProblem}
                 onChange={handleFieldChange}
-                className="w-5 h-5 text-teal-600 rounded focus:ring-teal-500"
+                className="w-5 h-5 text-copper-600 rounded focus:ring-copper-500"
               />
-              <label htmlFor="hadProblem" className="text-slate-700 dark:text-slate-300">
+              <label htmlFor="hadProblem" className="text-ink dark:text-latte/70">
                 Was there a problem?
               </label>
             </div>
@@ -559,24 +559,24 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                     predefinedProblems={allPredefinedProblems}
                   />
 
-                  <div className="flex items-center gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center gap-3 pt-4 border-t border-hairline dark:border-hairline">
                     <input
                       type="checkbox"
                       id="problemSolved"
                       name="problemSolved"
                       checked={editedRecord.problemSolved}
                       onChange={handleFieldChange}
-                      className="w-5 h-5 text-teal-600 rounded focus:ring-teal-500"
+                      className="w-5 h-5 text-copper-600 rounded focus:ring-copper-500"
                     />
-                    <label htmlFor="problemSolved" className="text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    <label htmlFor="problemSolved" className="text-ink dark:text-latte/70 flex items-center gap-2">
                       {editedRecord.problemSolved ? (
                         <>
-                          <CheckCircleIcon className="w-5 h-5 text-green-500" />
+                          <CheckCircleIcon className="w-5 h-5 text-leaf-500" />
                           Problem is solved
                         </>
                       ) : (
                         <>
-                          <XCircleIcon className="w-5 h-5 text-red-500" />
+                          <XCircleIcon className="w-5 h-5 text-ember-500" />
                           Problem is NOT solved
                         </>
                       )}
@@ -590,7 +590,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       </div>
 
       {/* Services Section */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden">
         <SectionHeader
           title="الخدمات المنفذة"
           section="services"
@@ -614,7 +614,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       </div>
 
       {/* Parts Section */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden">
         <SectionHeader
           title="القطع المستبدلة"
           section="parts"
@@ -635,9 +635,9 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 name="partsWereReplaced"
                 checked={editedRecord.partsWereReplaced}
                 onChange={handleFieldChange}
-                className="w-5 h-5 text-teal-600 rounded focus:ring-teal-500"
+                className="w-5 h-5 text-copper-600 rounded focus:ring-copper-500"
               />
-              <label htmlFor="partsWereReplaced" className="text-slate-700 dark:text-slate-300">
+              <label htmlFor="partsWereReplaced" className="text-ink dark:text-latte/70">
                 Were parts replaced?
               </label>
             </div>
@@ -656,7 +656,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       </div>
 
       {/* Type & Payment Section */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden">
         <SectionHeader
           title="نوع الزيارة والدفع"
           section="payment"
@@ -678,7 +678,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
               />
 
               <div>
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 block mb-3">Paid By</label>
+                <label className="text-sm font-medium text-ink dark:text-latte/70 block mb-3">Paid By</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
                     type="button"
@@ -686,26 +686,26 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                     className={`
                       relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200
                       ${editedRecord.paidBy === 'company'
-                        ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20 text-teal-900 dark:text-teal-100'
-                        : 'border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500'
+                        ? 'border-copper-500 bg-cream-2 dark:bg-copper-500/10 text-copper-900 dark:text-copper-300'
+                        : 'border-hairline dark:border-hairline bg-cream dark:bg-espresso text-ink dark:text-latte/70 hover:border-hairline dark:hover:border-hairline'
                       }
                     `}
                   >
                     <div className={`
                       w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold
                       ${editedRecord.paidBy === 'company'
-                        ? 'bg-teal-500 text-white'
-                        : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
+                        ? 'bg-copper-500 text-white'
+                        : 'bg-cream-2 dark:bg-espresso-light text-ink dark:text-latte'
                       }
                     `}>
                       M
                     </div>
                     <div className="text-center">
                       <div className="font-semibold">Mido's</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">Company pays</div>
+                      <div className="text-xs text-latte dark:text-latte">Company pays</div>
                     </div>                    
                     {editedRecord.paidBy === 'company' && (
-                      <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-teal-500 flex items-center justify-center">
+                      <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-copper-500 flex items-center justify-center">
                         <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
@@ -720,7 +720,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200
                       ${editedRecord.paidBy === 'client'
                         ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-900 dark:text-amber-100'
-                        : 'border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500'
+                        : 'border-hairline dark:border-hairline bg-cream dark:bg-espresso text-ink dark:text-latte/70 hover:border-hairline dark:hover:border-hairline'
                       }
                     `}
                   >
@@ -728,14 +728,14 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold
                       ${editedRecord.paidBy === 'client'
                         ? 'bg-amber-500 text-white'
-                        : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
+                        : 'bg-cream-2 dark:bg-espresso-light text-ink dark:text-latte'
                       }
                     `}>
                       C
                     </div>
                     <div className="text-center">
                       <div className="font-semibold">Client</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">Customer pays</div>
+                      <div className="text-xs text-latte dark:text-latte">Customer pays</div>
                     </div>
                     {editedRecord.paidBy === 'client' && (
                       <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center">
@@ -753,18 +753,18 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       </div>
 
       {/* Supervisor Section */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden">
         <SectionHeader
           title="بيانات المشرف"
           section="supervisor"
           icon={<ClipboardDocumentListIcon className="w-5 h-5" />}
           badge={
             !editedRecord.supervisors || editedRecord.supervisors.length === 0 ? (
-              <span className="px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs rounded-full">
+              <span className="px-2 py-0.5 bg-ember-50 dark:bg-ember-500/10 text-ember-700 dark:text-ember-300 text-xs rounded-full">
                 Required
               </span>
             ) : (
-              <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs rounded-full">
+              <span className="px-2 py-0.5 bg-leaf-50 dark:bg-leaf-500/10 text-leaf-700 dark:text-leaf-300 text-xs rounded-full">
                 {editedRecord.supervisors.length} supervisor(s)
               </span>
             )
@@ -773,14 +773,14 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         {expandedSections.has('supervisor') && (
           <div className="p-6 space-y-4">
             {(editedRecord.supervisors || []).map((supervisor, index) => (
-              <div key={supervisor.id} className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
+              <div key={supervisor.id} className="p-4 bg-cream dark:bg-espresso-light/50 rounded-lg border border-hairline dark:border-hairline">
                 <div className="flex justify-between items-center mb-3">
-                  <h4 className="font-semibold text-slate-700 dark:text-slate-300">Supervisor {index + 1}</h4>
+                  <h4 className="font-semibold text-ink dark:text-latte/70">Supervisor {index + 1}</h4>
                   {(editedRecord.supervisors || []).length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeSupervisor(index)}
-                      className="min-h-[44px] px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm font-medium rounded-lg transition-colors"
+                      className="min-h-[44px] px-3 py-2 text-ember-700 hover:text-ember-700 hover:bg-ember-50 dark:hover:bg-ember-500/10 text-sm font-medium rounded-lg transition-colors"
                     >
                       Remove
                     </button>
@@ -788,25 +788,25 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Name *</label>
+                    <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">Name *</label>
                     <input
                       type="text"
                       value={supervisor.name}
                       onChange={(e) => updateSupervisor(index, 'name', e.target.value)}
-                      className="w-full px-3 py-2 bg-white dark:bg-slate-600 text-slate-900 dark:text-white rounded-lg border border-slate-200 dark:border-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="w-full px-3 py-2 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg border border-hairline dark:border-hairline focus:outline-none focus:ring-2 focus:ring-copper-500"
                       placeholder="اسم المشرف"
                     />
                     {errors[`supervisor-${index}-name`] && (
-                      <p className="mt-1 text-sm text-red-600">{errors[`supervisor-${index}-name`]}</p>
+                      <p className="mt-1 text-sm text-ember-700">{errors[`supervisor-${index}-name`]}</p>
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Phone</label>
+                    <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">Phone</label>
                     <input
                       type="text"
                       value={supervisor.phone}
                       onChange={(e) => updateSupervisor(index, 'phone', e.target.value)}
-                      className="w-full px-3 py-2 bg-white dark:bg-slate-600 text-slate-900 dark:text-white rounded-lg border border-slate-200 dark:border-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="w-full px-3 py-2 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg border border-hairline dark:border-hairline focus:outline-none focus:ring-2 focus:ring-copper-500"
                       placeholder="رقم الهاتف"
                     />
                   </div>
@@ -816,7 +816,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             <button
               type="button"
               onClick={addSupervisor}
-              className="flex items-center gap-2 px-4 py-2 text-teal-600 dark:text-teal-400 font-medium hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-lg border border-teal-300 dark:border-teal-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-copper-600 dark:text-copper-400 font-medium hover:bg-cream-2 dark:hover:bg-copper-500/10 rounded-lg border border-copper-500/30 dark:border-copper-700 transition-colors"
             >
               <PlusCircleIcon className="w-5 h-5" /> Add Supervisor
             </button>
@@ -824,13 +824,13 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         )}
       </div>
       {/* Notes Section */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden">
         <SectionHeader
           title="ملاحظات وتوصيات"
           section="notes"
           icon={<DocumentTextIcon className="w-5 h-5" />}
           badge={editedRecord.notes && (
-            <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 text-xs rounded-full">
+            <span className="px-2 py-0.5 bg-cream dark:bg-espresso-light text-ink dark:text-latte text-xs rounded-full">
               Has notes
             </span>
           )}
@@ -839,7 +839,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         {expandedSections.has('notes') && (
           <div className="p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
                 Notes
               </label>
               <textarea
@@ -848,12 +848,12 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 onChange={handleFieldChange}
                 rows={4}
                 placeholder="أضف أي ملاحظات إضافية..."
-                className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 border border-slate-200 dark:border-slate-600 resize-none"
+                className="w-full px-4 py-3 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-copper-500 border border-hairline dark:border-hairline resize-none"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
                 Recommendations
               </label>
               <textarea
@@ -862,7 +862,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 onChange={handleFieldChange}
                 rows={3}
                 placeholder="أضف توصيات للزيارات القادمة..."
-                className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 border border-slate-200 dark:border-slate-600 resize-none"
+                className="w-full px-4 py-3 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-copper-500 border border-hairline dark:border-hairline resize-none"
               />
             </div>
           </div>
@@ -870,13 +870,13 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       </div>
 
       {/* Before & After Photos Section */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden">
         <SectionHeader
           title="صور قبل وبعد"
           section="photos"
           icon={<CameraIcon className="w-5 h-5" />}
           badge={editedRecord.photos && editedRecord.photos.length > 0 && (
-            <span className="px-2 py-0.5 bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 text-xs rounded-full">
+            <span className="px-2 py-0.5 bg-copper-500/10 dark:bg-copper-500/10 text-copper-700 dark:text-copper-400 text-xs rounded-full">
               {editedRecord.photos.length} photo(s)
             </span>
           )}
@@ -886,23 +886,23 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
           <div className="p-6 space-y-6">
             {/* Upload Progress Indicator */}
             {uploadingPhotos && (
-              <div className="flex items-center gap-3 p-4 bg-teal-50 dark:bg-teal-900/20 rounded-lg border border-teal-200 dark:border-teal-800">
-                <svg className="animate-spin w-5 h-5 text-teal-500" fill="none" viewBox="0 0 24 24">
+              <div className="flex items-center gap-3 p-4 bg-cream-2 dark:bg-copper-500/10 rounded-lg border border-copper-500/30 dark:border-copper-500/30">
+                <svg className="animate-spin w-5 h-5 text-copper-500" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span className="text-teal-700 dark:text-teal-300 font-medium">Uploading photos...</span>
+                <span className="text-copper-700 dark:text-copper-400 font-medium">Uploading photos...</span>
               </div>
             )}
 
             {/* Before Photos */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <span className="font-medium text-slate-700 dark:text-slate-300">Before Photos</span>
+                <span className="font-medium text-ink dark:text-latte/70">Before Photos</span>
                 <label className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg cursor-pointer transition-colors ${
                   uploadingPhotos 
-                    ? 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed' 
-                    : 'bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400 hover:bg-teal-100 dark:hover:bg-teal-900/30 border border-teal-200 dark:border-teal-800'
+                    ? 'bg-cream dark:bg-espresso-light text-latte dark:text-latte cursor-not-allowed' 
+                    : 'bg-cream-2 dark:bg-copper-500/10 text-copper-600 dark:text-copper-400 hover:bg-copper-500/10 dark:hover:bg-copper-500/10 border border-copper-500/30 dark:border-copper-500/30'
                 }`}>
                   <ArrowUpTrayIcon className="w-4 h-4" />
                   <span>Upload Before</span>
@@ -922,11 +922,11 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                     <img 
                       src={photo.url} 
                       alt={`Before photo ${i + 1}`} 
-                      className="w-full h-full object-cover rounded-lg border border-slate-200 dark:border-slate-600" 
+                      className="w-full h-full object-cover rounded-lg border border-hairline dark:border-hairline" 
                     />
                     <button 
                       onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: "before" })} 
-                      className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                      className="absolute top-2 right-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                       title="إزالة الصورة" aria-label="إزالة الصورة"
                     >
                       <XMarkIcon className="w-4 h-4" />
@@ -937,8 +937,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                   </div>
                 ))}
                 {(!editedRecord.photos || editedRecord.photos.filter(p => p.type === "before").length === 0) && (
-                  <div className="col-span-full flex items-center justify-center h-20 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-dashed border-slate-300 dark:border-slate-600">
-                    <span className="text-sm text-slate-400 dark:text-slate-500">No before photos</span>
+                  <div className="col-span-full flex items-center justify-center h-20 bg-cream dark:bg-espresso-light/50 rounded-lg border border-dashed border-hairline dark:border-hairline">
+                    <span className="text-sm text-latte dark:text-latte">No before photos</span>
                   </div>
                 )}
               </div>
@@ -947,11 +947,11 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             {/* After Photos */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <span className="font-medium text-slate-700 dark:text-slate-300">After Photos</span>
+                <span className="font-medium text-ink dark:text-latte/70">After Photos</span>
                 <label className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg cursor-pointer transition-colors ${
                   uploadingPhotos 
-                    ? 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed' 
-                    : 'bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400 hover:bg-teal-100 dark:hover:bg-teal-900/30 border border-teal-200 dark:border-teal-800'
+                    ? 'bg-cream dark:bg-espresso-light text-latte dark:text-latte cursor-not-allowed' 
+                    : 'bg-cream-2 dark:bg-copper-500/10 text-copper-600 dark:text-copper-400 hover:bg-copper-500/10 dark:hover:bg-copper-500/10 border border-copper-500/30 dark:border-copper-500/30'
                 }`}>
                   <ArrowUpTrayIcon className="w-4 h-4" />
                   <span>Upload After</span>
@@ -971,23 +971,23 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                     <img 
                       src={photo.url} 
                       alt={`After photo ${i + 1}`} 
-                      className="w-full h-full object-cover rounded-lg border border-slate-200 dark:border-slate-600" 
+                      className="w-full h-full object-cover rounded-lg border border-hairline dark:border-hairline" 
                     />
                     <button 
                       onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: "after" })} 
-                      className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                      className="absolute top-2 right-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                       title="إزالة الصورة" aria-label="إزالة الصورة"
                     >
                       <XMarkIcon className="w-4 h-4" />
                     </button>
-                    <div className="absolute bottom-2 left-2 px-2 py-1 bg-green-500/80 text-white text-xs rounded">
+                    <div className="absolute bottom-2 left-2 px-2 py-1 bg-leaf-500/80 text-white text-xs rounded">
                       After
                     </div>
                   </div>
                 ))}
                 {(!editedRecord.photos || editedRecord.photos.filter(p => p.type === "after").length === 0) && (
-                  <div className="col-span-full flex items-center justify-center h-20 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-dashed border-slate-300 dark:border-slate-600">
-                    <span className="text-sm text-slate-400 dark:text-slate-500">No after photos</span>
+                  <div className="col-span-full flex items-center justify-center h-20 bg-cream dark:bg-espresso-light/50 rounded-lg border border-dashed border-hairline dark:border-hairline">
+                    <span className="text-sm text-latte dark:text-latte">No after photos</span>
                   </div>
                 )}
               </div>
@@ -997,8 +997,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             {editedRecord.photos && editedRecord.photos.filter(p => p.type === "legacy").length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="font-medium text-slate-700 dark:text-slate-300">Legacy Photos</span>
-                  <span className="text-xs text-slate-400 dark:text-slate-500">Imported from previous records</span>
+                  <span className="font-medium text-ink dark:text-latte/70">Legacy Photos</span>
+                  <span className="text-xs text-latte dark:text-latte">Imported from previous records</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {editedRecord.photos.filter(p => p.type === "legacy").map((photo, i) => (
@@ -1006,16 +1006,16 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       <img 
                         src={photo.url} 
                         alt={`Legacy photo ${i + 1}`} 
-                        className="w-full h-full object-cover rounded-lg border border-slate-200 dark:border-slate-600" 
+                        className="w-full h-full object-cover rounded-lg border border-hairline dark:border-hairline" 
                       />
                       <button 
                         onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: "legacy" })} 
-                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                        className="absolute top-2 right-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                         title="إزالة الصورة" aria-label="إزالة الصورة"
                       >
                         <XMarkIcon className="w-4 h-4" />
                       </button>
-                      <div className="absolute bottom-2 left-2 px-2 py-1 bg-slate-500/80 text-white text-xs rounded">
+                      <div className="absolute bottom-2 left-2 px-2 py-1 bg-espresso/80 text-white text-xs rounded">
                         Legacy
                       </div>
                     </div>
@@ -1028,12 +1028,12 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       </div>
 
       {/* Action Bar */}
-      <div className={`fixed bottom-0 left-0 right-0 ${isSidebarExpanded ? 'lg:left-64' : 'lg:left-20'} bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-700 shadow-lg z-50 transition-all duration-300`}>
+      <div className={`fixed bottom-0 left-0 right-0 ${isSidebarExpanded ? 'lg:left-64' : 'lg:left-20'} bg-cream/90 dark:bg-espresso/90 backdrop-blur-lg border-t border-hairline dark:border-hairline shadow-lg z-50 transition-all duration-300`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-3">
             <button
               onClick={onCancel}
-              className="flex items-center justify-center gap-2 min-h-[44px] px-4 sm:px-5 py-2.5 text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              className="flex items-center justify-center gap-2 min-h-[44px] px-4 sm:px-5 py-2.5 text-ink dark:text-latte font-medium hover:text-ink dark:hover:text-white hover:bg-cream dark:hover:bg-espresso-light/50 rounded-lg transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1043,7 +1043,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             
             <button
               onClick={handleSave}
-              className="flex items-center justify-center gap-2 min-h-[44px] px-5 sm:px-6 py-2.5 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-semibold rounded-lg shadow-lg shadow-teal-500/25 hover:shadow-teal-500/40 transform hover:-translate-y-0.5 transition-all duration-200"
+              className="btn-primary rounded-lg min-h-[44px] px-5 sm:px-6 py-2.5 shadow-lg"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />

@@ -471,12 +471,12 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
 
         // Fetch portal records (Unified Storage)
         const { data: portalData, error: subsError } = await supabase
-          .from("maintenance_portal_submissions")
+          .from("maintenance_submissions")
           .select("*")
           .order("maintenance_date", { ascending: false });
 
         if (subsError) {
-          logger.error("Error fetching maintenance_portal_submissions", subsError, 'data');
+          logger.error("Error fetching maintenance_submissions", subsError, 'data');
           showToast("خطأ في جلب بيانات الصيانة", "error");
         }
         else portalSubmissions = portalData || [];
@@ -1330,9 +1330,9 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
   };
 
   const textAreaClasses =
-    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-deep text-onyx rounded-lg placeholder-sage focus:outline-none focus:border-lava-500 focus:ring-2 focus:ring-lava-500/20 border border-sea shadow-sm transition-colors";
+    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-cream text-ink rounded-lg placeholder-latte focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-copper-500/20 border border-hairline shadow-sm transition-colors";
   const selectClasses =
-    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-deep text-onyx rounded-lg placeholder-sage focus:outline-none focus:border-lava-500 focus:ring-2 focus:ring-lava-500/20 border border-sea shadow-sm transition-colors";
+    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-cream text-ink rounded-lg placeholder-latte focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-copper-500/20 border border-hairline shadow-sm transition-colors";
 
   const renderContacts = (path: "main" | "warehouse" | `branch-${number}`) => {
     let contacts: Contact[];
@@ -1352,7 +1352,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
               initiallyOpen={contact.id === newlyAddedId}
               onRemove={() => removeContact(path, contactIndex)}
               titleContent={
-                <span className="font-semibold text-slate-800 dark:text-slate-100">
+                <span className="font-semibold text-ink dark:text-cream">
                   {contact.name || "جهة اتصال جديدة"}
                 </span>
               }
@@ -1366,7 +1366,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                     onChange={(e) => handleContactChange(e, path, contactIndex)}
                   />
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-ink dark:text-latte mb-2">
                       المسمى الوظيفي
                     </label>
                     <select
@@ -1396,8 +1396,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                     />
                   )}
                 </div>
-                <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
-                  <h5 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                <div className="pt-4 border-t border-hairline dark:border-hairline">
+                  <h5 className="text-sm font-semibold text-ink dark:text-latte mb-2">
                     أرقام الهواتف
                   </h5>
                   <div className="space-y-2">
@@ -1405,7 +1405,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                       <div key={phone.id} className="flex items-center gap-2">
                         <div className="relative flex-grow">
                           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                            <PhoneIcon className="h-5 w-5 text-slate-400" />
+                            <PhoneIcon className="h-5 w-5 text-latte" />
                           </div>
                           <input
                             type="tel"
@@ -1427,7 +1427,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                           onClick={() =>
                             removePhoneNumber(path, contactIndex, phoneIndex)
                           }
-                          className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors transform active:scale-95"
+                          className="p-1.5 text-latte hover:text-ember-700 dark:hover:text-ember-300 rounded-full hover:bg-ember-500/10 dark:hover:bg-ember-500/20 transition-colors transform active:scale-95"
                           aria-label={`إزالة رقم الهاتف`}
                         >
                           <TrashIcon className="w-5 h-5" />
@@ -1437,7 +1437,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                   </div>
                   <button
                     onClick={() => addPhoneNumber(path, contactIndex)}
-                    className="mt-3 w-full justify-center flex items-center gap-1.5 text-sm font-semibold text-success-600 dark:text-success-400 hover:bg-success-50 dark:hover:bg-success-500/10 rounded-md py-2 transition-colors transform active:scale-95"
+                    className="mt-3 w-full justify-center flex items-center gap-1.5 text-sm font-semibold text-copper-700 dark:text-copper-400 hover:bg-copper-500/10 dark:hover:bg-copper-500/10 rounded-md py-2 transition-colors transform active:scale-95"
                   >
                     <PlusCircleIcon className="w-5 h-5" />
                     إضافة رقم هاتف
@@ -1497,9 +1497,9 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                 onChange={handleChange}
                 placeholder="مثال: شارع التحرير، القاهرة"
               />
-              <div className="pt-8 mt-8 border-t border-sea">
+              <div className="pt-8 mt-8 border-t border-hairline">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-bold text-onyx tracking-tight">
+                  <h3 className="text-xl font-bold text-ink tracking-tight">
                     جهات الاتصال
                   </h3>
                   <Button onClick={() => addContact("main")}>
@@ -1522,7 +1522,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
               />
 
               {formData.hasBranches === false && (
-                <div className="pt-6 mt-6 border-t border-sea space-y-6">
+                <div className="pt-6 mt-6 border-t border-hairline space-y-6">
                   <RadioGroup
                     label="هل يستخدمون ماكيناتنا؟"
                     name="usesOurMachines"
@@ -1537,7 +1537,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                     inline
                   />
                   {formData.usesOurMachines === true && (
-                    <div className="pl-6 border-l-2 border-sea">
+                    <div className="pl-6 border-l-2 border-hairline">
                       <RadioGroup
                         label="كيف تم الحصول على الماكينة؟"
                         name="machineOwnershipType"
@@ -1575,7 +1575,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
         return (
           <Card title="تفاصيل الفرع">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-onyx tracking-tight">
+              <h3 className="text-xl font-bold text-ink tracking-tight">
                 الفروع
               </h3>
               <Button onClick={() => addListItem("branches")}>
@@ -1599,14 +1599,14 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                           >
                             {formData.companyName || "الشركة"}
                           </span>
-                          <span className="text-slate-500 dark:text-slate-400">
+                          <span className="text-latte dark:text-latte">
                             -
                           </span>
                           <span className="truncate text-base">
                             {branch.branchName || "فرع جديد"}
                           </span>
                         </div>
-                        <div className="flex items-center gap-x-4 text-xs text-slate-500 dark:text-slate-400 mt-1.5">
+                        <div className="flex items-center gap-x-4 text-xs text-latte dark:text-latte mt-1.5">
                           {branch.location && (
                             <span
                               className="flex items-center gap-1 truncate"
@@ -1687,7 +1687,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                             inline
                           />
                           {branch.usesOurMachines === true && (
-                            <div className="pl-6 mt-4 border-l-2 border-sea">
+                            <div className="pl-6 mt-4 border-l-2 border-hairline">
                               <RadioGroup
                                 label="كيف تم الحصول على الماكينة؟"
                                 name={`machineOwnershipType-${branch.id}`}
@@ -1731,9 +1731,9 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                     </div>
 
                     {/* Contacts in Branch */}
-                    <div className="mt-6 pt-6 border-t border-sea">
+                    <div className="mt-6 pt-6 border-t border-hairline">
                       <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-lg font-bold text-onyx tracking-tight">
+                        <h4 className="text-lg font-bold text-ink tracking-tight">
                           جهات الاتصال
                         </h4>
                         <Button
@@ -1747,9 +1747,9 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                     </div>
 
                     {/* Baristas in Branch */}
-                    <div className="mt-6 pt-6 border-t border-sea">
+                    <div className="mt-6 pt-6 border-t border-hairline">
                       <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-lg font-bold text-onyx tracking-tight">
+                        <h4 className="text-lg font-bold text-ink tracking-tight">
                           الباريستا
                         </h4>
                         <Button
@@ -1807,7 +1807,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                                     />
                                   </div>
                                    <div>
-                                     <label className="block text-sm font-medium text-onyx mb-2">
+                                     <label className="block text-sm font-medium text-ink mb-2">
                                        ملاحظات
                                      </label>
                                      <textarea
@@ -1839,9 +1839,9 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                     </div>
 
                     {/* Client Baristas in Branch */}
-                    <div className="mt-6 pt-6 border-t border-sea">
+                    <div className="mt-6 pt-6 border-t border-hairline">
                       <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-lg font-bold text-onyx tracking-tight">
+                        <h4 className="text-lg font-bold text-ink tracking-tight">
                           باريستا العميل
                         </h4>
                         <Button
@@ -1904,7 +1904,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                                     />
                                   </div>
                                   <div>
-                                    <label className="block text-sm font-medium text-onyx mb-2">
+                                    <label className="block text-sm font-medium text-ink mb-2">
                                       ملاحظات
                                     </label>
                                     <textarea
@@ -1937,9 +1937,9 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                     </div>
 
                     {/* Maintenance in Branch */}
-                    <div className="mt-6 pt-6 border-t border-sea">
+                    <div className="mt-6 pt-6 border-t border-hairline">
                       <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-lg font-bold text-onyx tracking-tight">
+                        <h4 className="text-lg font-bold text-ink tracking-tight">
                           سجل الصيانة
                         </h4>
                         <Button
@@ -2033,9 +2033,9 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                 value={formData.warehouse.location}
                 onChange={handleChange}
               />
-              <div className="pt-8 mt-8 border-t dark:border-slate-700">
+              <div className="pt-8 mt-8 border-t dark:border-hairline">
                 <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-onyx tracking-tight">
+              <h3 className="text-xl font-bold text-ink tracking-tight">
                 جهات اتصال المخزن
               </h3>
               <Button onClick={() => addContact("warehouse")}>
@@ -2052,7 +2052,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
         return (
           <Card title="الفريق / الباريستا (المكتب الرئيسي)">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-onyx tracking-tight">
+              <h3 className="text-xl font-bold text-ink tracking-tight">
                 الباريستا
               </h3>
               <Button onClick={() => addListItem("baristas")}>
@@ -2092,7 +2092,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        <label className="block text-sm font-medium text-ink dark:text-latte mb-2">
                           ملاحظات
                         </label>
                         <textarea
@@ -2107,7 +2107,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                         <button
                           onClick={() => suggestNotes(index)}
                           disabled={isSubmitting || false}
-                          className="mt-2 text-sm text-teal-600 dark:text-teal-400 font-semibold disabled:opacity-50 transform active:scale-95 transition-transform"
+                          className="mt-2 text-sm text-copper-700 dark:text-copper-400 font-semibold disabled:opacity-50 transform active:scale-95 transition-transform"
                         >
                           {isSubmitting
                             ? "جاري الإنشاء..."
@@ -2138,7 +2138,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
         return (
           <Card title="باريستا العميل (المكتب الرئيسي)">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-onyx tracking-tight">
+              <h3 className="text-xl font-bold text-ink tracking-tight">
                 باريستا العميل
               </h3>
               <Button
@@ -2194,7 +2194,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        <label className="block text-sm font-medium text-ink dark:text-latte mb-2">
                           ملاحظات
                         </label>
                         <textarea
@@ -2235,7 +2235,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
         return (
           <Card title="سجل الصيانة (المكتب الرئيسي)">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-onyx tracking-tight">
+              <h3 className="text-xl font-bold text-ink tracking-tight">
                 سجلات الصيانة
               </h3>
               <Button onClick={() => addListItem("maintenanceHistory")}>
@@ -2307,13 +2307,13 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
   }, [currentStep]);
 
   return (
-    <div className="flex flex-col min-h-full w-full bg-midnight">
+    <div className="flex flex-col min-h-full w-full bg-paper">
 
       <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 relative flex-1 p-4 lg:p-6 pb-32">
         
         {/* Stepper Sidebar */}
         <aside className="hidden lg:block w-64 shrink-0">
-          <div className="sticky top-6 bg-deep border border-sea rounded-xl p-4 shadow-sm">
+          <div className="sticky top-6 bg-cream border border-hairline rounded-xl p-4 shadow-sm">
             <Stepper
               steps={visibleSteps}
               currentStep={currentStep}
@@ -2324,16 +2324,16 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
 
         {/* Mobile stepper */}
         <div className="lg:hidden mb-4">
-          <div className="bg-deep border border-sea rounded-xl p-3">
+          <div className="bg-cream border border-hairline rounded-xl p-3">
             <div className="flex justify-between items-center mb-1">
-              <p className="text-xs text-sage">
+              <p className="text-xs text-latte">
                 {visibleSteps.find((s) => s.id === currentStep)?.name}
               </p>
-              <p className="text-xs text-sage">{visibleSteps.findIndex((s) => s.id === currentStep) + 1} / {visibleSteps.length}</p>
+              <p className="text-xs text-latte">{visibleSteps.findIndex((s) => s.id === currentStep) + 1} / {visibleSteps.length}</p>
             </div>
-            <div className="h-1.5 w-full bg-sea rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-cream-2 rounded-full overflow-hidden">
               <div
-                className="h-full bg-lava-500 rounded-full transition-all duration-500"
+                className="h-full bg-copper-500 rounded-full transition-all duration-500"
                 style={{
                   width: `${visibleSteps.length > 1 ? ((visibleSteps.findIndex((s) => s.id === currentStep) / (visibleSteps.length - 1)) * 100) : 0}%`,
                 }}
@@ -2369,9 +2369,9 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
 
         {/* Pre Panel (Desktop Split) */}
         {showPre && (
-          <div className="hidden lg:block w-1/2 border-r border-sea pr-6 h-[calc(100vh-140px)] overflow-y-auto sticky top-4 animate-item-fade-in-down custom-scrollbar">
-            <div className="sticky top-0 bg-midnight pt-2 pb-4 z-10 border-b border-sea mb-4">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-sage flex items-center gap-2">
+          <div className="hidden lg:block w-1/2 border-r border-hairline pr-6 h-[calc(100vh-140px)] overflow-y-auto sticky top-4 animate-item-fade-in-down custom-scrollbar">
+            <div className="sticky top-0 bg-paper pt-2 pb-4 z-10 border-b border-hairline mb-4">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-latte flex items-center gap-2">
                 <EyeIcon className="w-4 h-4" /> معاينة حية
               </h3>
             </div>
@@ -2388,14 +2388,14 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
 
         {/* Pre Modal (Mobile Overlay) */}
         {showPre && (
-          <div className="lg:hidden fixed inset-0 z-50 bg-midnight overflow-y-auto animate-content-fade-in">
-            <div className="sticky top-0 bg-deep p-4 border-b border-sea flex justify-between items-center shadow-md">
-              <h3 className="text-lg font-bold text-onyx flex items-center gap-2">
-                <EyeIcon className="w-5 h-5 text-lava-500" /> معاينة حية
+          <div className="lg:hidden fixed inset-0 z-50 bg-paper overflow-y-auto animate-content-fade-in">
+            <div className="sticky top-0 bg-cream p-4 border-b border-hairline flex justify-between items-center shadow-md">
+              <h3 className="text-lg font-bold text-ink flex items-center gap-2">
+                <EyeIcon className="w-5 h-5 text-copper-500" /> معاينة حية
               </h3>
               <button
                 onClick={() => setShowPre(false)}
-                className="p-2 bg-sea rounded-full text-sage hover:text-onyx transition-colors"
+                className="p-2 bg-cream-2 rounded-full text-latte hover:text-ink transition-colors"
               >
                 <XMarkIcon className="w-6 h-6" />
               </button>
@@ -2412,8 +2412,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
         )}
       </div>
 
-      <footer className="sticky bottom-6 z-40 w-full max-w-4xl mx-auto px-4">
-        <div className="bg-deep rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-white/5 w-full">
+      <footer className="fixed lg:absolute bottom-6 left-0 right-0 z-30 w-[90%] mx-auto pointer-events-none flex justify-center">
+        <div className="bg-cream rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-hairline/20 pointer-events-auto max-w-4xl w-full">
           <div className="w-full p-4">
             <NavigationButtons
               currentStep={currentStep}

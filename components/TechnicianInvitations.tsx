@@ -82,13 +82,13 @@ const TechnicianInvitations: React.FC = () => {
         );
       case 'accepted':
         return (
-          <span className="inline-flex items-center rounded-full bg-green-100 dark:bg-green-900/50 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:text-green-400">
+          <span className="inline-flex items-center rounded-full bg-leaf-50 dark:bg-leaf-500/20 px-2.5 py-0.5 text-xs font-medium text-leaf-600 dark:text-leaf-500">
             Accepted
           </span>
         );
       case 'expired':
         return (
-          <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-700 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-400">
+          <span className="inline-flex items-center rounded-full bg-cream dark:bg-espresso-light px-2.5 py-0.5 text-xs font-medium text-ink dark:text-latte/70">
             Expired
           </span>
         );
@@ -123,16 +123,16 @@ const TechnicianInvitations: React.FC = () => {
     <div className="w-full max-w-5xl mx-auto">
       <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50">
+          <h1 className="text-2xl sm:text-3xl font-bold text-ink dark:text-white">
             Technician Invitations
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-1 sm:mt-2">
+          <p className="text-ink dark:text-latte/70 mt-1 sm:mt-2">
             Manage technician invitations and invite links.
           </p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="bg-teal-600 text-white font-bold py-2 px-4 sm:px-6 rounded-lg hover:bg-teal-700 transition-colors text-sm sm:text-base transform active:scale-95 flex items-center gap-2"
+          className="btn-primary font-bold py-2 px-4 sm:px-6 rounded-lg transition-colors text-sm sm:text-base flex items-center gap-2"
         >
           {showForm ? (
             <>
@@ -150,21 +150,21 @@ const TechnicianInvitations: React.FC = () => {
 
       {/* Create Invitation Form */}
       {showForm && (
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-6 animate-item-fade-in-down">
-          <h2 className="text-lg font-semibold text-slate-800 dark:text-white mb-4">
+        <div className="bg-cream dark:bg-espresso-light rounded-xl shadow-sm border border-hairline p-6 mb-6 animate-item-fade-in-down">
+          <h2 className="text-lg font-semibold text-ink dark:text-white mb-4">
             Send New Invitation
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="tech-name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Technician Name <span className="text-red-500">*</span>
+              <label htmlFor="tech-name" className="block text-sm font-medium text-ink dark:text-latte/70 mb-1">
+                Technician Name <span className="text-ember-500">*</span>
               </label>
               <input
                 id="tech-name"
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="block w-full rounded-lg border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 py-2.5 px-3 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                className="block w-full rounded-lg border-hairline dark:border-hairline bg-cream dark:bg-espresso py-2.5 px-3 text-ink dark:text-white placeholder:text-latte focus:border-copper-500 focus:ring-copper-500 sm:text-sm"
                 placeholder="e.g., Ahmed Mohamed"
                 required
               />
@@ -172,7 +172,7 @@ const TechnicianInvitations: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="tech-email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label htmlFor="tech-email" className="block text-sm font-medium text-ink dark:text-latte/70 mb-1">
                   Email (Optional)
                 </label>
                 <input
@@ -180,12 +180,12 @@ const TechnicianInvitations: React.FC = () => {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="block w-full rounded-lg border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 py-2.5 px-3 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                  className="block w-full rounded-lg border-hairline dark:border-hairline bg-cream dark:bg-espresso py-2.5 px-3 text-ink dark:text-white placeholder:text-latte focus:border-copper-500 focus:ring-copper-500 sm:text-sm"
                   placeholder="e.g., ahmed@example.com"
                 />
               </div>
               <div>
-                <label htmlFor="tech-phone" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label htmlFor="tech-phone" className="block text-sm font-medium text-ink dark:text-latte/70 mb-1">
                   Phone (Optional)
                 </label>
                 <input
@@ -193,13 +193,13 @@ const TechnicianInvitations: React.FC = () => {
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="block w-full rounded-lg border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 py-2.5 px-3 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                  className="block w-full rounded-lg border-hairline dark:border-hairline bg-cream dark:bg-espresso py-2.5 px-3 text-ink dark:text-white placeholder:text-latte focus:border-copper-500 focus:ring-copper-500 sm:text-sm"
                   placeholder="e.g., 0100-123-4567"
                 />
               </div>
             </div>
 
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-latte dark:text-latte/70">
               At least one of Email or Phone is required for the technician to sign up.
             </p>
 
@@ -210,13 +210,13 @@ const TechnicianInvitations: React.FC = () => {
                   setShowForm(false);
                   setFormData({ name: '', email: '', phone: '' });
                 }}
-                className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-ink dark:text-latte/70 bg-cream dark:bg-espresso-light rounded-lg hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors"
+                className="btn-primary px-4 py-2 text-sm font-medium rounded-lg transition-colors"
               >
                 Create Invitation
               </button>
@@ -227,28 +227,28 @@ const TechnicianInvitations: React.FC = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
+        <div className="bg-cream dark:bg-espresso-light rounded-lg p-4 border border-hairline">
           <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{pendingInvites.length}</div>
-          <div className="text-sm text-slate-600 dark:text-slate-400">Pending</div>
+          <div className="text-sm text-ink dark:text-latte/70">Pending</div>
         </div>
-        <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-          <div className="text-2xl font-bold text-green-600 dark:text-green-400">{acceptedInvites.length}</div>
-          <div className="text-sm text-slate-600 dark:text-slate-400">Accepted</div>
+        <div className="bg-cream dark:bg-espresso-light rounded-lg p-4 border border-hairline">
+          <div className="text-2xl font-bold text-leaf-600 dark:text-leaf-500">{acceptedInvites.length}</div>
+          <div className="text-sm text-ink dark:text-latte/70">Accepted</div>
         </div>
-        <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-          <div className="text-2xl font-bold text-slate-600 dark:text-slate-400">{expiredInvites.length}</div>
-          <div className="text-sm text-slate-600 dark:text-slate-400">Expired</div>
+        <div className="bg-cream dark:bg-espresso-light rounded-lg p-4 border border-hairline">
+          <div className="text-2xl font-bold text-ink dark:text-latte/70">{expiredInvites.length}</div>
+          <div className="text-sm text-ink dark:text-latte/70">Expired</div>
         </div>
       </div>
 
       {/* Invites List */}
       {invites.length === 0 ? (
-        <div className="text-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-black/5 dark:border-white/5">
-          <UserPlusIcon className="mx-auto h-12 w-12 text-slate-400" />
-          <h2 className="mt-4 text-lg font-semibold text-slate-700 dark:text-slate-200">
+        <div className="text-center bg-cream/80 dark:bg-espresso-light/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-black/5 dark:border-white/5">
+          <UserPlusIcon className="mx-auto h-12 w-12 text-latte" />
+          <h2 className="mt-4 text-lg font-semibold text-ink dark:text-latte/70">
             No invitations yet
           </h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-2">
+          <p className="text-latte dark:text-latte/70 mt-2">
             Create an invitation to send to your technicians.
           </p>
         </div>
@@ -257,29 +257,29 @@ const TechnicianInvitations: React.FC = () => {
           {/* Pending Invites */}
           {pendingInvites.length > 0 && (
             <>
-              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mt-6 mb-3">
+              <h3 className="text-lg font-semibold text-ink dark:text-latte/70 mt-6 mb-3">
                 Pending Invitations
               </h3>
               {pendingInvites.map(invite => (
                 <div
                   key={invite.id}
-                  className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4"
+                  className="bg-cream dark:bg-espresso-light rounded-lg shadow-sm border border-hairline p-4"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex items-start gap-3">
-                      <div className="h-10 w-10 rounded-full bg-teal-100 dark:bg-teal-900/50 flex items-center justify-center">
-                        <UserPlusIcon className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+                      <div className="h-10 w-10 rounded-full bg-cream-2 dark:bg-copper-500/20 flex items-center justify-center">
+                        <UserPlusIcon className="h-5 w-5 text-copper-600 dark:text-copper-400" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="font-semibold text-slate-800 dark:text-white">{invite.name}</h4>
+                          <h4 className="font-semibold text-ink dark:text-white">{invite.name}</h4>
                           {getStatusBadge(invite.status)}
                         </div>
-                        <div className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                        <div className="text-sm text-latte dark:text-latte/70 mt-1">
                           {invite.email && <span className="mr-3">{invite.email}</span>}
                           {invite.phone && <span>{invite.phone}</span>}
                         </div>
-                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                        <div className="text-xs text-latte dark:text-latte/70 mt-1">
                           Expires in {getDaysRemaining(invite.expiresAt)}
                         </div>
                       </div>
@@ -287,7 +287,7 @@ const TechnicianInvitations: React.FC = () => {
                     <div className="flex items-center gap-2 sm:gap-3">
                       <button
                         onClick={() => handleCopyLink(invite)}
-                        className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/20 rounded-lg hover:bg-teal-100 dark:hover:bg-teal-900/40 transition-colors"
+                        className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-copper-600 dark:text-copper-400 bg-cream-2 dark:bg-copper-500/10 rounded-lg hover:bg-cream-3 dark:hover:bg-copper-500/20 transition-colors"
                       >
                         {copiedId === invite.id ? (
                           <>
@@ -303,14 +303,14 @@ const TechnicianInvitations: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleRevoke(invite.id)}
-                        className="p-2 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
+                        className="p-2 text-latte hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
                         title="Revoke invitation"
                       >
                         <ClockIcon className="w-5 h-5" />
                       </button>
                       <button
                         onClick={() => handleDelete(invite.id)}
-                        className="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        className="p-2 text-latte hover:text-ember-700 dark:hover:text-ember-300 hover:bg-ember-50 dark:hover:bg-ember-500/10 rounded-lg transition-colors"
                         title="Delete invitation"
                       >
                         <DeleteIcon className="w-5 h-5" />
@@ -325,29 +325,29 @@ const TechnicianInvitations: React.FC = () => {
           {/* Accepted Invites */}
           {acceptedInvites.length > 0 && (
             <>
-              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mt-6 mb-3">
+              <h3 className="text-lg font-semibold text-ink dark:text-latte/70 mt-6 mb-3">
                 Accepted Invitations
               </h3>
               {acceptedInvites.map(invite => (
                 <div
                   key={invite.id}
-                  className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 opacity-75"
+                  className="bg-cream dark:bg-espresso-light rounded-lg shadow-sm border border-hairline p-4 opacity-75"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex items-start gap-3">
-                      <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
-                        <EyeIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
+                      <div className="h-10 w-10 rounded-full bg-leaf-50 dark:bg-leaf-500/20 flex items-center justify-center">
+                        <EyeIcon className="h-5 w-5 text-leaf-600 dark:text-leaf-500" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="font-semibold text-slate-800 dark:text-white">{invite.name}</h4>
+                          <h4 className="font-semibold text-ink dark:text-white">{invite.name}</h4>
                           {getStatusBadge(invite.status)}
                         </div>
-                        <div className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                        <div className="text-sm text-latte dark:text-latte/70 mt-1">
                           {invite.email && <span className="mr-3">{invite.email}</span>}
                           {invite.phone && <span>{invite.phone}</span>}
                         </div>
-                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                        <div className="text-xs text-latte dark:text-latte/70 mt-1">
                           Accepted {invite.acceptedAt ? formatDate(invite.acceptedAt) : 'N/A'}
                         </div>
                       </div>
@@ -355,7 +355,7 @@ const TechnicianInvitations: React.FC = () => {
                     <div className="flex items-center gap-2 sm:gap-3">
                       <button
                         onClick={() => handleDelete(invite.id)}
-                        className="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        className="p-2 text-latte hover:text-ember-700 dark:hover:text-ember-300 hover:bg-ember-50 dark:hover:bg-ember-500/10 rounded-lg transition-colors"
                         title="Delete invitation"
                       >
                         <DeleteIcon className="w-5 h-5" />
@@ -370,29 +370,29 @@ const TechnicianInvitations: React.FC = () => {
           {/* Expired Invites */}
           {expiredInvites.length > 0 && (
             <>
-              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mt-6 mb-3">
+              <h3 className="text-lg font-semibold text-ink dark:text-latte/70 mt-6 mb-3">
                 Expired Invitations
               </h3>
               {expiredInvites.map(invite => (
                 <div
                   key={invite.id}
-                  className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 opacity-60"
+                  className="bg-cream dark:bg-espresso-light rounded-lg shadow-sm border border-hairline p-4 opacity-60"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex items-start gap-3">
-                      <div className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-                        <ClockIcon className="h-5 w-5 text-slate-400" />
+                      <div className="h-10 w-10 rounded-full bg-cream-2 dark:bg-espresso-light flex items-center justify-center">
+                        <ClockIcon className="h-5 w-5 text-latte" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="font-semibold text-slate-600 dark:text-slate-300">{invite.name}</h4>
+                          <h4 className="font-semibold text-ink dark:text-latte/70">{invite.name}</h4>
                           {getStatusBadge(invite.status)}
                         </div>
-                        <div className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                        <div className="text-sm text-latte dark:text-latte/70 mt-1">
                           {invite.email && <span className="mr-3">{invite.email}</span>}
                           {invite.phone && <span>{invite.phone}</span>}
                         </div>
-                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                        <div className="text-xs text-latte dark:text-latte/70 mt-1">
                           Expired {formatDate(invite.expiresAt)}
                         </div>
                       </div>
@@ -400,7 +400,7 @@ const TechnicianInvitations: React.FC = () => {
                     <div className="flex items-center gap-2 sm:gap-3">
                       <button
                         onClick={() => handleDelete(invite.id)}
-                        className="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        className="p-2 text-latte hover:text-ember-700 dark:hover:text-ember-300 hover:bg-ember-50 dark:hover:bg-ember-500/10 rounded-lg transition-colors"
                         title="Delete invitation"
                       >
                         <DeleteIcon className="w-5 h-5" />

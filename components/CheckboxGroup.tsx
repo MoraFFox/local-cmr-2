@@ -91,7 +91,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                     placeholder={ar.selectors.searchProblems}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    icon={<MagnifyingGlassIcon className="w-5 h-5 text-slate-500" />}
+                    icon={<MagnifyingGlassIcon className="w-5 h-5 text-latte" />}
                 />
             </div>
             
@@ -99,8 +99,8 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
             {filteredCategories.length > 0 ? (
                 <div className="space-y-6">
                     {filteredCategories.map((category) => (
-                        <div key={category.title} className="bg-slate-900/30 border border-slate-800 rounded-xl p-4">
-                            <h3 className="text-sm font-bold text-teal-400 uppercase tracking-wider mb-4 border-b border-slate-800 pb-2">
+                        <div key={category.title} className="bg-espresso-light/30 border border-espresso-light rounded-xl p-4">
+                            <h3 className="text-sm font-bold text-copper-400 uppercase tracking-wider mb-4 border-b border-espresso-light pb-2">
                                 {category.title}
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -111,8 +111,8 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                                             key={option.value} 
                                             className={`relative flex items-center p-3 rounded-lg border cursor-pointer transition-all duration-200 ${
                                                 isSelected 
-                                                    ? 'bg-red-500/10 border-red-500/50 shadow-[0_0_10px_rgba(239,68,68,0.2)]' 
-                                                    : 'bg-slate-950 border-slate-800 hover:border-slate-600'
+                                                    ? 'bg-ember-500/10 border-ember-500/50 shadow-[0_0_10px_rgba(192,57,43,0.2)]' 
+                                                    : 'bg-espresso border-espresso-light hover:border-espresso-lighter'
                                             }`}
                                         >
                                             <input
@@ -122,7 +122,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                                                 className="sr-only"
                                             />
                                             <div className={`w-5 h-5 rounded border flex items-center justify-center mr-3 transition-colors ${
-                                                isSelected ? 'bg-red-500 border-red-500' : 'border-slate-600 bg-slate-900'
+                                                isSelected ? 'bg-ember-500 border-ember-500' : 'border-espresso-lighter bg-espresso-light'
                                             }`}>
                                                 {isSelected && (
                                                     <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -130,7 +130,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                                                     </svg>
                                                 )}
                                             </div>
-                                            <span className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-slate-400'}`}>
+                                            <span className={`text-sm font-medium ${isSelected ? 'text-cream' : 'text-latte'}`}>
                                                 {option.label}
                                             </span>
                                         </label>
@@ -141,14 +141,14 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                     ))}
                 </div>
             ) : (
-                 <div className="text-center py-12 bg-slate-900/50 rounded-xl border border-dashed border-slate-700">
-                    <p className="text-slate-500">{ar.selectors.noProblemsMatch} "{searchTerm}".</p>
+                 <div className="text-center py-12 bg-espresso-light/50 rounded-xl border border-dashed border-espresso-lighter">
+                    <p className="text-latte">{ar.selectors.noProblemsMatch} "{searchTerm}".</p>
                 </div>
             )}
 
             {/* Custom Problems */}
-            <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-4">
-                <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">
+            <div className="bg-espresso-light/30 border border-espresso-light rounded-xl p-4">
+                <h4 className="text-sm font-bold text-latte uppercase tracking-wider mb-4">
                     {ar.selectors.customProblems}
                 </h4>
                 
@@ -159,12 +159,12 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                                 type="text"
                                 value={problem}
                                 onChange={(e) => handleCustomProblemChange(index, e.target.value)}
-                                className="block w-full px-4 py-3 bg-slate-950 text-white rounded-lg border border-slate-700 focus:border-red-500 focus:ring-1 focus:ring-red-500/50 placeholder-slate-600 outline-none transition-all"
+                                className="block w-full px-4 py-3 bg-espresso text-cream rounded-lg border border-espresso-light focus:border-ember-500 focus:ring-1 focus:ring-ember-500/50 placeholder-latte outline-none transition-all"
                                 placeholder={ar.selectors.problemPlaceholder}
                             />
                              <button 
                                 onClick={() => handleRemoveCustomProblem(index)} 
-                                className="p-3 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                className="p-3 text-latte hover:text-ember-300 hover:bg-ember-500/10 rounded-lg transition-colors"
                             >
                                 <TrashIcon className="w-5 h-5" />
                             </button>
@@ -173,7 +173,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                     
                     <button 
                         onClick={handleAddCustomProblem} 
-                        className="w-full py-3 border-2 border-dashed border-slate-700 rounded-lg text-slate-500 hover:text-white hover:border-slate-500 hover:bg-slate-800 transition-all flex items-center justify-center gap-2 font-medium"
+                        className="w-full py-3 border-2 border-dashed border-espresso-lighter rounded-lg text-latte hover:text-cream hover:border-copper-500 hover:bg-espresso-light transition-all flex items-center justify-center gap-2 font-medium"
                     >
                         <PlusCircleIcon className="w-5 h-5"/>
                         {ar.selectors.addCustomProblem}

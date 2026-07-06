@@ -132,7 +132,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
 
     return (
       <div className="space-y-3">
-        <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <h4 className="text-sm font-medium text-ink dark:text-cream">
           {title}
         </h4>
 
@@ -142,7 +142,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
             {typePhotos.map((photo) => (
               <div
                 key={photo.id}
-                className="relative aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600 bg-slate-100 dark:bg-slate-800"
+                className="relative aspect-square rounded-lg overflow-hidden border border-hairline dark:border-hairline bg-cream dark:bg-espresso-light"
               >
                 <img
                   src={photo.preview}
@@ -152,7 +152,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
 
                 {/* Compression Badge */}
                 {photo.compressed && photo.compressedSize && (
-                  <div className="absolute bottom-1 left-1 bg-green-500/80 text-white text-xs px-2 py-0.5 rounded">
+                  <div className="absolute bottom-1 left-1 bg-leaf-500/80 text-white text-xs px-2 py-0.5 rounded">
                     {formatFileSize(photo.compressedSize)}
                   </div>
                 )}
@@ -160,7 +160,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
                 {/* Remove Button */}
                 <button
                   onClick={() => handleRemove(photo.id)}
-                  className="absolute top-1 right-1 p-1 bg-red-500/80 hover:bg-red-600 text-white rounded-full transition-colors"
+                  className="absolute top-1 right-1 p-1 bg-ember-500/80 hover:bg-ember-700 text-white rounded-full transition-colors"
                 >
                   <XMarkIcon className="w-4 h-4" />
                 </button>
@@ -178,9 +178,9 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
 
         {/* Add Photo Button */}
         {typePhotos.length < maxPerType && (
-          <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg cursor-pointer hover:border-teal-500 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 transition-all">
-            <CameraIcon className="w-5 h-5 text-slate-400" />
-            <span className="text-sm text-slate-600 dark:text-slate-400">
+          <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-hairline dark:border-hairline rounded-lg cursor-pointer hover:border-copper-500 hover:bg-copper-500/5 dark:hover:bg-copper-500/10 transition-all">
+            <CameraIcon className="w-5 h-5 text-latte" />
+            <span className="text-sm text-ink dark:text-cream">
               {ar.step3.addPhoto}
             </span>
             <input
@@ -199,12 +199,12 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+      <div className="flex items-center gap-2 text-ink dark:text-cream">
         <PhotoIcon className="w-5 h-5" />
         <span className="font-medium">{ar.step3.photosLabel}</span>
       </div>
 
-      <p className="text-sm text-slate-500 dark:text-slate-400">
+      <p className="text-sm text-latte dark:text-cream/70">
         {ar.step3.photosHint}
       </p>
 

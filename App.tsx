@@ -927,9 +927,9 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   };
 
   const textAreaClasses =
-    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-success-500 focus:ring-2 focus:ring-success-500/20 border border-slate-200 dark:border-slate-700 shadow-sm";
+    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-cream dark:bg-espresso-light text-ink dark:text-cream rounded-lg placeholder-latte dark:placeholder-latte focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-copper-500/20 border border-hairline dark:border-hairline shadow-sm";
   const selectClasses =
-    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-success-500 focus:ring-2 focus:ring-success-500/20 border border-slate-200 dark:border-slate-700 shadow-sm";
+    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-cream dark:bg-espresso-light text-ink dark:text-cream rounded-lg placeholder-latte dark:placeholder-latte focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-copper-500/20 border border-hairline dark:border-hairline shadow-sm";
 
   const handleDeleteBarista = (
     sources: {
@@ -1096,10 +1096,10 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
               : "سجل عمليات الإرسال";
 
   return (
-    <div className="h-[100dvh] overflow-hidden flex bg-brand-cream dark:bg-slate-950">
-          {/* Desktop Sidebar */}
+    <div className="h-[100dvh] overflow-hidden flex bg-paper dark:bg-[#1A1210]">
+          {/* Desktop Sidebar — espresso chrome */}
           <aside
-            className={`bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white flex-col fixed h-full transition-all duration-300 ease-in-out hidden lg:flex shadow-sm z-40 ${isSidebarExpanded ? "w-64" : "w-20"}`}
+            className={`chrome border-l border-brass/20 flex-col fixed h-full transition-all duration-300 ease-in-out hidden lg:flex z-50 ${isSidebarExpanded ? "w-64" : "w-20"}`}
           >
             <SidebarContent 
               view={view}
@@ -1131,9 +1131,9 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
               onClick={() => setIsMobileMenuOpen(false)}
             />
             
-            {/* Sidebar Container */}
+            {/* Sidebar Container — espresso chrome */}
             <aside 
-              className={`absolute top-0 right-0 h-full w-64 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-xl transition-transform duration-300 ease-in-out flex flex-col ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}
+              className={`absolute top-0 right-0 h-full w-64 chrome border-l border-brass/20 shadow-xl transition-transform duration-300 ease-in-out flex flex-col ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}
             >
               <SidebarContent 
                 view={view}
@@ -1160,36 +1160,36 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
           <div
             className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out lg:${isSidebarExpanded ? "mr-64" : "mr-20"}`}
           >
-            <header className="sticky top-0 z-30 flex items-center justify-between lg:hidden h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 shrink-0 gap-3">
+            <header className="sticky top-0 z-30 flex items-center justify-between lg:hidden h-16 chrome border-b border-brass/20 px-4 shrink-0 gap-3">
               <div className="flex items-center gap-2 overflow-hidden w-full">
                 <button
                   aria-label="القائمة"
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="p-2 rounded-md text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
+                  className="p-2 rounded-md text-cream/70 hover:text-cream hover:bg-espresso-light transition-colors shrink-0"
                 >
                   <Bars3Icon className="h-6 w-6" />
                 </button>
-                <h1 className="text-lg font-bold text-slate-800 dark:text-white truncate">
+                <h1 className="text-lg font-bold text-cream truncate">
                   {mobileTitle}
                 </h1>
               </div>
               <img
                 src="/logo.svg"
                 alt="شعار ميدوز"
-                className="h-8 w-auto object-contain shrink-0"
+                className="h-10 w-auto object-contain shrink-0"
               />
             </header>
 
             {/* Offline Status Banner */}
             {!isOnline && !offlineBannerDismissed && (
-              <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 px-4 py-2 text-center text-sm font-medium border-b border-amber-200 dark:border-amber-800 flex items-center justify-between gap-2 shrink-0">
+              <div className="bg-cream-2 text-espresso px-4 py-2 text-center text-sm font-medium border-b border-hairline flex items-center justify-between gap-2 shrink-0">
                 <span className="flex items-center gap-2 flex-1 justify-center">
-                  <SignalSlashIcon className="w-4 h-4" />
+                  <SignalSlashIcon className="w-4 h-4 text-ember-500" />
                   أنت غير متصل حالياً. سيتم حفظ التغييرات محلياً ومزامنتها عند عودة الاتصال.
                 </span>
                 <button
                   onClick={() => setOfflineBannerDismissed(true)}
-                  className="p-1 rounded hover:bg-amber-200 dark:hover:bg-amber-800/50 transition-colors"
+                  className="p-1 rounded hover:bg-cream-3 transition-colors"
                   aria-label="إخفاء التنبيه"
                 >
                   <XMarkIcon className="w-4 h-4" />
@@ -1197,8 +1197,8 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
               </div>
             )}
             {isSyncing && (
-              <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 px-4 py-2 text-center text-sm font-medium border-b border-blue-200 dark:border-blue-800 flex items-center justify-center gap-2 shrink-0">
-                <CloudArrowUpIcon className="w-4 h-4 animate-bounce" />
+              <div className="bg-cream-2 text-espresso px-4 py-2 text-center text-sm font-medium border-b border-hairline flex items-center justify-center gap-2 shrink-0">
+                <CloudArrowUpIcon className="w-4 h-4 text-copper-500 animate-bounce" />
                 جاري مزامنة التغييرات دون اتصال...
               </div>
             )}

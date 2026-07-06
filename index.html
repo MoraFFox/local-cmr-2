@@ -6,7 +6,7 @@
     <title>ميدوز — نظام إدارة الصيانة</title>
 
     <!-- PWA / mobile web app metas -->
-    <meta name="theme-color" content="#0d9488" />
+    <meta name="theme-color" content="#241B16" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -14,8 +14,40 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/logo.png" />
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <!-- Pre-paint theme init: applies .dark before CSS loads on EVERY route
+         (login, technician, invite, recovery, reset-password, admin) so dark
+         mode is never flash-of-light and always honored. Mirrors App.tsx logic. -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {
+          if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+          }
+        }
+      })();
+    </script>
   </head>
-  <body class="bg-slate-100 dark:bg-slate-900">
+  <body class="bg-paper dark:bg-[#1A1210]">
+    <!-- SVG filters for liquid glass effect -->
+    <svg style="position:absolute;width:0;height:0" aria-hidden="true">
+      <defs>
+        <filter id="liquid-glass">
+          <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+        <filter id="liquid-glass-subtle">
+          <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+    </svg>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

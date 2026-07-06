@@ -29,7 +29,7 @@ const CompactStarRating: React.FC<CompactStarRatingProps> = ({
   return (
     <div className="flex flex-col gap-2">
       {label && (
-        <span className={`${textClass} font-bold uppercase tracking-wider text-slate-500`}>
+        <span className={`${textClass} font-bold uppercase tracking-wider text-latte`}>
           {label}
         </span>
       )}
@@ -51,7 +51,7 @@ const CompactStarRating: React.FC<CompactStarRatingProps> = ({
                 />
               ) : (
                 <StarIcon
-                  className={`${starSize} text-slate-700 transition-all`}
+                  className={`${starSize} text-latte transition-all`}
                 />
               )}
             </button>

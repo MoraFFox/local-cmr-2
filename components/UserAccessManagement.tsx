@@ -497,14 +497,14 @@ const UserAccessManagement: React.FC = () => {
         );
       case 'accepted':
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-green-100 dark:bg-green-900/50 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:text-green-400">
+          <span className="inline-flex items-center gap-1 rounded-full bg-leaf-50 dark:bg-leaf-500/20 px-2.5 py-0.5 text-xs font-medium text-leaf-600 dark:text-leaf-500">
             <CheckIcon className="w-3.5 h-3.5" />
             {t.accepted}
           </span>
         );
       case 'expired':
         return (
-          <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-700 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-400">
+          <span className="inline-flex items-center rounded-full bg-cream-2 dark:bg-espresso-light px-2.5 py-0.5 text-xs font-medium text-ink dark:text-latte/70">
             {t.expired}
           </span>
         );
@@ -523,7 +523,7 @@ const UserAccessManagement: React.FC = () => {
         );
       case 'technician':
         return (
-          <span className="inline-flex items-center rounded-full bg-teal-100 dark:bg-teal-900/50 px-2.5 py-0.5 text-xs font-medium text-teal-700 dark:text-teal-400">
+          <span className="inline-flex items-center rounded-full bg-cream-2 dark:bg-copper-500/20 px-2.5 py-0.5 text-xs font-medium text-copper-700 dark:text-copper-400">
             {t.technician}
           </span>
         );
@@ -542,13 +542,13 @@ const UserAccessManagement: React.FC = () => {
         );
       case 'technician':
         return (
-          <span className="inline-flex items-center rounded-full bg-teal-100 dark:bg-teal-900/50 px-2.5 py-0.5 text-xs font-medium text-teal-700 dark:text-teal-400">
+          <span className="inline-flex items-center rounded-full bg-cream-2 dark:bg-copper-500/20 px-2.5 py-0.5 text-xs font-medium text-copper-700 dark:text-copper-400">
             {t.technician}
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-700 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-400">
+          <span className="inline-flex items-center rounded-full bg-cream-2 dark:bg-espresso-light px-2.5 py-0.5 text-xs font-medium text-ink dark:text-latte/70">
             {role}
           </span>
         );
@@ -595,10 +595,10 @@ const UserAccessManagement: React.FC = () => {
       <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <div className="flex items-center gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50">
+            <h1 className="text-2xl sm:text-3xl font-bold text-ink dark:text-white">
               {t.title}
             </h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-1 sm:mt-2">
+            <p className="text-ink dark:text-latte/70 mt-1 sm:mt-2">
               {activeTab === 'invitations' ? t.manageInvitations : activeTab === 'users' ? t.manageUsers : t.legacyRecordsDesc}
             </p>
           </div>
@@ -628,13 +628,13 @@ const UserAccessManagement: React.FC = () => {
       </header>
 
       {/* Tabs */}
-      <div className="flex border-b border-sea mb-6">
+      <div className="flex border-b border-hairline mb-6">
         <button
           onClick={() => setActiveTab('invitations')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'invitations'
-              ? 'border-lava-500 text-lava-500'
-              : 'border-transparent text-sage hover:text-onyx'
+              ? 'border-copper-500 text-copper-500'
+              : 'border-transparent text-latte hover:text-ink'
           }`}
         >
           <EnvelopeIcon className="w-5 h-5" />
@@ -644,8 +644,8 @@ const UserAccessManagement: React.FC = () => {
           onClick={() => setActiveTab('users')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'users'
-              ? 'border-lava-500 text-lava-500'
-              : 'border-transparent text-sage hover:text-onyx'
+              ? 'border-copper-500 text-copper-500'
+              : 'border-transparent text-latte hover:text-ink'
           }`}
         >
           <UsersIcon className="w-5 h-5" />
@@ -655,8 +655,8 @@ const UserAccessManagement: React.FC = () => {
           onClick={() => setActiveTab('legacy')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'legacy'
-              ? 'border-lava-500 text-lava-500'
-              : 'border-transparent text-sage hover:text-onyx'
+              ? 'border-copper-500 text-copper-500'
+              : 'border-transparent text-latte hover:text-ink'
           }`}
         >
           <DocumentTextIcon className="w-5 h-5" />
@@ -666,20 +666,20 @@ const UserAccessManagement: React.FC = () => {
 
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <ArrowPathIcon className="w-8 h-8 text-lava-500 animate-spin" />
+          <ArrowPathIcon className="w-8 h-8 text-copper-500 animate-spin" />
         </div>
       ) : activeTab === 'invitations' ? (
         <>
           {/* Create Invitation Form */}
           {showForm && (
-            <div className="bg-deep rounded-xl shadow-sm border border-sea p-6 mb-6 animate-item-fade-in-down">
-              <h2 className="text-lg font-semibold text-onyx mb-4">
+            <div className="bg-cream rounded-xl shadow-sm border border-hairline p-6 mb-6 animate-item-fade-in-down">
+              <h2 className="text-lg font-semibold text-ink mb-4">
                 {t.sendNewInvitation}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Role Selector */}
                 <div>
-                  <label className="block text-sm font-medium text-onyx mb-2">
+                  <label className="block text-sm font-medium text-ink mb-2">
                     {t.role}
                   </label>
                   <div className="flex gap-3">
@@ -689,7 +689,7 @@ const UserAccessManagement: React.FC = () => {
                       className={`flex-1 py-2.5 px-4 rounded-lg border text-sm font-medium transition-colors ${
                         formData.role === 'admin'
                           ? 'bg-purple-900/30 border-purple-700 text-purple-300'
-                          : 'bg-deep border-sea text-sage hover:bg-sea'
+                          : 'bg-cream border-hairline text-latte hover:bg-cream-2'
                       }`}
                     >
                       {t.admin}
@@ -699,8 +699,8 @@ const UserAccessManagement: React.FC = () => {
                       onClick={() => setFormData({ ...formData, role: 'technician' })}
                       className={`flex-1 py-2.5 px-4 rounded-lg border text-sm font-medium transition-colors ${
                         formData.role === 'technician'
-                          ? 'bg-lava-500/10 border-lava-500 text-lava-500'
-                          : 'bg-deep border-sea text-sage hover:bg-sea'
+                          ? 'bg-copper-500/10 border-copper-500 text-copper-500'
+                          : 'bg-cream border-hairline text-latte hover:bg-cream-2'
                       }`}
                     >
                       {t.technician}
@@ -710,7 +710,7 @@ const UserAccessManagement: React.FC = () => {
 
                 {/* Expiry Selector */}
                 <div>
-                  <label className="block text-sm font-medium text-onyx mb-2">
+                  <label className="block text-sm font-medium text-ink mb-2">
                     {t.expiresIn}
                   </label>
                   <div className="flex gap-3">
@@ -721,8 +721,8 @@ const UserAccessManagement: React.FC = () => {
                         onClick={() => setFormData({ ...formData, expiry: hours as 24 | 48 | 168 })}
                         className={`py-2 px-4 rounded-lg border text-sm font-medium transition-colors ${
                           formData.expiry === hours
-                            ? 'bg-lava-500/10 border-lava-500 text-lava-500'
-                            : 'bg-deep border-sea text-sage hover:bg-sea'
+                            ? 'bg-copper-500/10 border-copper-500 text-copper-500'
+                            : 'bg-cream border-hairline text-latte hover:bg-cream-2'
                         }`}
                       >
                         {hours === 24 ? t.hours24 : hours === 48 ? t.hours48 : t.days7}
@@ -733,8 +733,8 @@ const UserAccessManagement: React.FC = () => {
 
                 {/* Created Link Display */}
                 {createdLink && (
-                  <div className="bg-lava-500/10 rounded-lg p-4 border border-lava-500/20">
-                    <label className="block text-sm font-medium text-lava-400 mb-2">
+                  <div className="bg-copper-500/10 rounded-lg p-4 border border-copper-500/20">
+                    <label className="block text-sm font-medium text-copper-600 mb-2">
                       {t.invitationLink}
                     </label>
                     <div className="flex gap-2">
@@ -742,7 +742,7 @@ const UserAccessManagement: React.FC = () => {
                         type="text"
                         value={createdLink}
                         readOnly
-                        className="flex-1 rounded-lg border-lava-500/30 bg-deep py-2 px-3 text-sm text-onyx"
+                        className="flex-1 rounded-lg border-copper-500/30 bg-cream py-2 px-3 text-sm text-ink"
                       />
                       <Button
                         type="button"
@@ -780,17 +780,17 @@ const UserAccessManagement: React.FC = () => {
 
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="bg-deep rounded-lg p-4 border border-sea">
+            <div className="bg-cream rounded-lg p-4 border border-hairline">
               <div className="text-2xl font-bold text-amber-500">{pendingCount}</div>
-              <div className="text-sm text-sage">{t.pendingCount}</div>
+              <div className="text-sm text-latte">{t.pendingCount}</div>
             </div>
-            <div className="bg-deep rounded-lg p-4 border border-sea">
-              <div className="text-2xl font-bold text-success-500">{acceptedCount}</div>
-              <div className="text-sm text-sage">{t.acceptedCount}</div>
+            <div className="bg-cream rounded-lg p-4 border border-hairline">
+              <div className="text-2xl font-bold text-leaf-500">{acceptedCount}</div>
+              <div className="text-sm text-latte">{t.acceptedCount}</div>
             </div>
-            <div className="bg-deep rounded-lg p-4 border border-sea">
-              <div className="text-2xl font-bold text-sage">{expiredCount}</div>
-              <div className="text-sm text-sage">{t.expiredCount}</div>
+            <div className="bg-cream rounded-lg p-4 border border-hairline">
+              <div className="text-2xl font-bold text-latte">{expiredCount}</div>
+              <div className="text-sm text-latte">{t.expiredCount}</div>
             </div>
           </div>
 
@@ -800,7 +800,7 @@ const UserAccessManagement: React.FC = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as InvitationStatus | 'all')}
-                className="rounded-lg border-sea bg-deep py-2 px-3 text-sm text-onyx focus:border-lava-500 focus:ring-lava-500"
+                className="rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-ink focus:border-copper-500 focus:ring-copper-500"
               >
                 <option value="all">{t.allStatuses}</option>
                 <option value="pending">{t.filterPending}</option>
@@ -810,7 +810,7 @@ const UserAccessManagement: React.FC = () => {
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value as InviteRole | 'all')}
-                className="rounded-lg border-sea bg-deep py-2 px-3 text-sm text-onyx focus:border-lava-500 focus:ring-lava-500"
+                className="rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-ink focus:border-copper-500 focus:ring-copper-500"
               >
                 <option value="all">{t.allRoles}</option>
                 <option value="admin">{t.admin}</option>
@@ -821,12 +821,12 @@ const UserAccessManagement: React.FC = () => {
 
           {/* Invitations List */}
           {filteredInvitations.length === 0 ? (
-            <div className="text-center bg-deep/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-sea">
-              <UserPlusIcon className="mx-auto h-12 w-12 text-sage" />
-              <h2 className="mt-4 text-lg font-semibold text-onyx">
+            <div className="text-center bg-cream/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-hairline">
+              <UserPlusIcon className="mx-auto h-12 w-12 text-latte" />
+              <h2 className="mt-4 text-lg font-semibold text-ink">
                 {t.noInvitations}
               </h2>
-              <p className="text-sage mt-2">
+              <p className="text-latte mt-2">
                 {t.createInvitation}
               </p>
             </div>
@@ -843,7 +843,7 @@ const UserAccessManagement: React.FC = () => {
                 return (
                   <div
                     key={invitation.id}
-                    className={`bg-deep rounded-lg shadow-sm border border-sea p-4 ${
+                    className={`bg-cream rounded-lg shadow-sm border border-hairline p-4 ${
                       invitation.status === 'expired' ? 'opacity-60' : ''
                     }`}
                   >
@@ -851,32 +851,32 @@ const UserAccessManagement: React.FC = () => {
                       <div className="flex items-start gap-3">
                         <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
                           invitation.status === 'pending'
-                            ? 'bg-lava-500/10'
+                            ? 'bg-copper-500/10'
                             : invitation.status === 'accepted'
-                            ? 'bg-success-500/10'
-                            : 'bg-sea'
+                            ? 'bg-leaf-500/10'
+                            : 'bg-cream-2'
                         }`}>
                           <UserPlusIcon className={`h-5 w-5 ${
                             invitation.status === 'pending'
-                              ? 'text-lava-500'
+                              ? 'text-copper-500'
                               : invitation.status === 'accepted'
-                              ? 'text-success-500'
-                              : 'text-sage'
+                              ? 'text-leaf-500'
+                              : 'text-latte'
                           }`} />
                         </div>
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-semibold text-onyx">
+                            <h4 className="font-semibold text-ink">
                               {inviteTitle}
                             </h4>
                             {getRoleBadge(invitation.role)}
                             {getStatusBadge(invitation.status)}
                           </div>
-                          <div className="text-sm text-sage mt-1">
+                          <div className="text-sm text-latte mt-1">
                             {invitation.email && <span className="mr-3">{invitation.email}</span>}
                             {invitation.phone && <span>{invitation.phone}</span>}
                           </div>
-                          <div className="text-xs text-sage mt-1">
+                          <div className="text-xs text-latte mt-1">
                             {invitation.status === 'pending' && (
                               <span>{t.expires}: {getDaysRemaining(invitation.expires_at)}</span>
                             )}
@@ -922,7 +922,7 @@ const UserAccessManagement: React.FC = () => {
                     <Button
                       variant="ghost"
                       onClick={() => handleDelete(invitation.id)}
-                      className="!p-2 text-lava-500 hover:text-lava-500 hover:bg-lava-500/10"
+                      className="!p-2 text-ember-500 hover:text-ember-500 hover:bg-ember-500/10"
                       title={t.delete}
                     >
                       <TrashIcon className="w-5 h-5" />
@@ -940,15 +940,15 @@ const UserAccessManagement: React.FC = () => {
           {/* Legacy Records Tab */}
           {legacyLoading ? (
             <div className="flex items-center justify-center py-12">
-              <ArrowPathIcon className="w-8 h-8 text-lava-500 animate-spin" />
+              <ArrowPathIcon className="w-8 h-8 text-copper-500 animate-spin" />
             </div>
           ) : legacyBuckets.length === 0 ? (
-            <div className="text-center bg-deep/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-sea">
-              <DocumentTextIcon className="mx-auto h-12 w-12 text-sage" />
-              <h2 className="mt-4 text-lg font-semibold text-onyx">
+            <div className="text-center bg-cream/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-hairline">
+              <DocumentTextIcon className="mx-auto h-12 w-12 text-latte" />
+              <h2 className="mt-4 text-lg font-semibold text-ink">
                 {t.noLegacyRecords}
               </h2>
-              <p className="text-sage mt-2">
+              <p className="text-latte mt-2">
                 {t.legacyRecordsDesc}
               </p>
             </div>
@@ -967,25 +967,25 @@ const UserAccessManagement: React.FC = () => {
                   <ArrowLeftIcon className="w-4 h-4" />
                   {t.backToBuckets}
                 </Button>
-                <h2 className="text-lg font-semibold text-onyx">
+                <h2 className="text-lg font-semibold text-ink">
                   {selectedBucket.display_name}
                 </h2>
-                <span className="inline-flex items-center rounded-full bg-sea px-2.5 py-0.5 text-xs font-medium text-sage">
+                <span className="inline-flex items-center rounded-full bg-cream-2 px-2.5 py-0.5 text-xs font-medium text-latte">
                   {selectedBucket.record_count} {t.records}
                 </span>
               </div>
 
               {selectedSubmissionIds.length > 0 && (
-                <div className="mb-4 p-4 bg-sea/50 rounded-lg border border-sea">
+                <div className="mb-4 p-4 bg-cream-2/50 rounded-lg border border-hairline">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <p className="text-sm text-onyx">
+                    <p className="text-sm text-ink">
                       {selectedSubmissionIds.length} {t.selectRecords}
                     </p>
                     <div className="flex items-center gap-3">
                       <select
                         value={selectedTechnicianId}
                         onChange={(e) => setSelectedTechnicianId(e.target.value)}
-                        className="rounded-lg border-sea bg-deep py-2 px-3 text-sm text-onyx focus:border-lava-500 focus:ring-lava-500"
+                        className="rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-ink focus:border-copper-500 focus:ring-copper-500"
                       >
                         <option value="">{t.selectTechnician}</option>
                         {technicians.map((tech) => (
@@ -994,12 +994,12 @@ const UserAccessManagement: React.FC = () => {
                           </option>
                         ))}
                       </select>
-                      <label className="flex items-center gap-2 text-sm text-onyx">
+                      <label className="flex items-center gap-2 text-sm text-ink">
                         <input
                           type="checkbox"
                           checked={rewriteDisplayName}
                           onChange={(e) => setRewriteDisplayName(e.target.checked)}
-                          className="rounded border-sea bg-deep text-lava-500 focus:ring-lava-500"
+                          className="rounded border-hairline bg-cream text-copper-500 focus:ring-copper-500"
                         />
                         {t.rewriteDisplayName}
                       </label>
@@ -1017,11 +1017,11 @@ const UserAccessManagement: React.FC = () => {
                 </div>
               )}
 
-              <div className="bg-deep rounded-xl shadow-sm border border-sea overflow-hidden">
-                <table className="min-w-full divide-y divide-sea">
-                  <thead className="bg-sea/30">
+              <div className="bg-cream rounded-xl shadow-sm border border-hairline overflow-hidden">
+                <table className="min-w-full divide-y divide-hairline">
+                  <thead className="bg-cream-2/30">
                     <tr>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider w-10">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-latte uppercase tracking-wider w-10">
                         <input
                           type="checkbox"
                           checked={selectedSubmissionIds.length === selectedBucket.submission_ids.length}
@@ -1032,26 +1032,26 @@ const UserAccessManagement: React.FC = () => {
                               setSelectedSubmissionIds([]);
                             }
                           }}
-                          className="rounded border-sea bg-deep text-lava-500 focus:ring-lava-500"
+                          className="rounded border-hairline bg-cream text-copper-500 focus:ring-copper-500"
                         />
                       </th>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-latte uppercase tracking-wider">
                         {t.date}
                       </th>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-latte uppercase tracking-wider">
                         {t.company}
                       </th>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-latte uppercase tracking-wider">
                         {t.baristaName}
                       </th>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-latte uppercase tracking-wider">
                         {t.confidence}
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-sea">
+                  <tbody className="divide-y divide-hairline">
                     {selectedBucket.all_candidates.slice(0, selectedBucket.record_count).map((candidate, idx) => (
-                      <tr key={idx} className="hover:bg-sea/30">
+                      <tr key={idx} className="hover:bg-cream-2/30">
                         <td className="px-4 py-3 whitespace-nowrap">
                           <input
                             type="checkbox"
@@ -1064,22 +1064,22 @@ const UserAccessManagement: React.FC = () => {
                                 setSelectedSubmissionIds(selectedSubmissionIds.filter(sid => sid !== id));
                               }
                             }}
-                            className="rounded border-sea bg-deep text-lava-500 focus:ring-lava-500"
+                            className="rounded border-hairline bg-cream text-copper-500 focus:ring-copper-500"
                           />
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-onyx">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-ink">
                           {candidate.maintenance_date || '—'}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-onyx">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-ink">
                           {candidate.company_name || '—'}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-onyx">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-ink">
                           {selectedBucket.display_name}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                             candidate.confidence >= 0.70
-                              ? 'bg-success-500/10 text-success-500'
+                              ? 'bg-copper-500/10 text-copper-500'
                               : 'bg-amber-500/10 text-amber-500'
                           }`}>
                             {Math.round(candidate.confidence * 100)}% ({candidate.confidence >= 0.70 ? t.highConfidence : t.lowConfidence})
@@ -1094,22 +1094,22 @@ const UserAccessManagement: React.FC = () => {
           ) : (
             /* Bucket List View */
             <div>
-              <div className="bg-deep rounded-xl shadow-sm border border-sea p-6 mb-6">
-                <h2 className="text-lg font-semibold text-onyx mb-2">
+              <div className="bg-cream rounded-xl shadow-sm border border-hairline p-6 mb-6">
+                <h2 className="text-lg font-semibold text-ink mb-2">
                   {t.transferRecords}
                 </h2>
-                <p className="text-sm text-sage mb-4">
+                <p className="text-sm text-latte mb-4">
                   {t.legacyRecordsDesc}
                 </p>
                 <div className="flex flex-wrap gap-3 items-end">
                   <div className="flex-1 min-w-[200px]">
-                    <label className="block text-sm font-medium text-onyx mb-1">
+                    <label className="block text-sm font-medium text-ink mb-1">
                       {t.sourceTechnician}
                     </label>
                     <select
                       value={sourceTechnicianId}
                       onChange={(e) => setSourceTechnicianId(e.target.value)}
-                      className="w-full rounded-lg border-sea bg-deep py-2 px-3 text-sm text-onyx focus:border-lava-500 focus:ring-lava-500"
+                      className="w-full rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-ink focus:border-copper-500 focus:ring-copper-500"
                     >
                       <option value="">{t.selectTechnician}</option>
                       {technicians.map((tech) => (
@@ -1119,15 +1119,15 @@ const UserAccessManagement: React.FC = () => {
                       ))}
                     </select>
                   </div>
-                  <ArrowRightIcon className="w-5 h-5 text-sage" />
+                  <ArrowRightIcon className="w-5 h-5 text-latte" />
                   <div className="flex-1 min-w-[200px]">
-                    <label className="block text-sm font-medium text-onyx mb-1">
+                    <label className="block text-sm font-medium text-ink mb-1">
                       {t.targetTechnician}
                     </label>
                     <select
                       value={targetTechnicianId}
                       onChange={(e) => setTargetTechnicianId(e.target.value)}
-                      className="w-full rounded-lg border-sea bg-deep py-2 px-3 text-sm text-onyx focus:border-lava-500 focus:ring-lava-500"
+                      className="w-full rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-ink focus:border-copper-500 focus:ring-copper-500"
                     >
                       <option value="">{t.selectTechnician}</option>
                       {technicians.map((tech) => (
@@ -1153,7 +1153,7 @@ const UserAccessManagement: React.FC = () => {
                 {legacyBuckets.map((bucket) => (
                   <div
                     key={bucket.normalized_name}
-                    className="bg-deep rounded-lg shadow-sm border border-sea p-4"
+                    className="bg-cream rounded-lg shadow-sm border border-hairline p-4"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <div className="flex items-start gap-3">
@@ -1162,22 +1162,22 @@ const UserAccessManagement: React.FC = () => {
                         </div>
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-semibold text-onyx">
+                            <h4 className="font-semibold text-ink">
                               {bucket.display_name}
                             </h4>
-                            <span className="inline-flex items-center rounded-full bg-sea px-2.5 py-0.5 text-xs font-medium text-sage">
+                            <span className="inline-flex items-center rounded-full bg-cream-2 px-2.5 py-0.5 text-xs font-medium text-latte">
                               {bucket.record_count} {t.records}
                             </span>
                             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                               bucket.confidence_level === 'high'
-                                ? 'bg-success-500/10 text-success-500'
+                                ? 'bg-copper-500/10 text-copper-500'
                                 : 'bg-amber-500/10 text-amber-500'
                             }`}>
                               {bucket.confidence_level === 'high' ? t.highConfidence : t.lowConfidence}
                             </span>
                           </div>
                           {bucket.top_technician_name && (
-                            <p className="text-sm text-sage mt-1">
+                            <p className="text-sm text-latte mt-1">
                               {t.suggestedTechnician}: {bucket.top_technician_name} ({Math.round(bucket.top_confidence * 100)}%)
                             </p>
                           )}
@@ -1215,9 +1215,9 @@ const UserAccessManagement: React.FC = () => {
           {/* Assignment Modal */}
           {showAssignModal && assigningBucket && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-              <div className="bg-deep rounded-xl shadow-xl border border-sea p-6 w-full max-w-md animate-item-fade-in-down">
+              <div className="bg-cream rounded-xl shadow-xl border border-hairline p-6 w-full max-w-md animate-item-fade-in-down">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-onyx">
+                  <h3 className="text-lg font-semibold text-ink">
                     {t.assignAll}
                   </h3>
                   <button
@@ -1225,7 +1225,7 @@ const UserAccessManagement: React.FC = () => {
                       setShowAssignModal(false);
                       setAssigningBucket(null);
                     }}
-                    className="p-1 text-sage hover:text-onyx"
+                    className="p-1 text-latte hover:text-ink"
                   >
                     <XMarkIcon className="w-5 h-5" />
                   </button>
@@ -1233,13 +1233,13 @@ const UserAccessManagement: React.FC = () => {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-onyx mb-2">
+                    <label className="block text-sm font-medium text-ink mb-2">
                       {t.selectTechnician}
                     </label>
                     <select
                       value={selectedTechnicianId}
                       onChange={(e) => setSelectedTechnicianId(e.target.value)}
-                      className="w-full rounded-lg border-sea bg-deep py-2 px-3 text-sm text-onyx focus:border-lava-500 focus:ring-lava-500"
+                      className="w-full rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-ink focus:border-copper-500 focus:ring-copper-500"
                     >
                       <option value="">{t.selectTechnician}</option>
                       {technicians.map((tech) => (
@@ -1251,16 +1251,16 @@ const UserAccessManagement: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="flex items-center gap-2 text-sm text-onyx">
+                    <label className="flex items-center gap-2 text-sm text-ink">
                       <input
                         type="checkbox"
                         checked={rewriteDisplayName}
                         onChange={(e) => setRewriteDisplayName(e.target.checked)}
-                        className="rounded border-sea bg-deep text-lava-500 focus:ring-lava-500"
+                        className="rounded border-hairline bg-cream text-copper-500 focus:ring-copper-500"
                       />
                       {t.rewriteDisplayName}
                     </label>
-                    <p className="text-xs text-sage mt-1 ml-6">
+                    <p className="text-xs text-latte mt-1 ml-6">
                       {t.rewriteDesc}
                     </p>
                   </div>
@@ -1296,78 +1296,78 @@ const UserAccessManagement: React.FC = () => {
           {/* Users Tab */}
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
+            <div className="bg-cream dark:bg-espresso-light rounded-lg p-4 border border-hairline">
               <div className="text-2xl font-bold text-slate-900 dark:text-white">{users.length}</div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">{t.totalUsers}</div>
+              <div className="text-sm text-ink dark:text-latte/70">{t.totalUsers}</div>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
+            <div className="bg-cream dark:bg-espresso-light rounded-lg p-4 border border-hairline">
               <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{adminCount}</div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">{t.adminUsers}</div>
+              <div className="text-sm text-ink dark:text-latte/70">{t.adminUsers}</div>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-              <div className="text-2xl font-bold text-teal-600 dark:text-teal-400">{technicianCount}</div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">{t.technicianUsers}</div>
+            <div className="bg-cream dark:bg-espresso-light rounded-lg p-4 border border-hairline">
+              <div className="text-2xl font-bold text-copper-600 dark:text-copper-400">{technicianCount}</div>
+              <div className="text-sm text-ink dark:text-latte/70">{t.technicianUsers}</div>
             </div>
           </div>
 
           {/* Users List */}
           {users.length === 0 ? (
-            <div className="text-center bg-deep/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-sea">
-              <UsersIcon className="mx-auto h-12 w-12 text-sage" />
-              <h2 className="mt-4 text-lg font-semibold text-onyx">
+            <div className="text-center bg-cream/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-hairline">
+              <UsersIcon className="mx-auto h-12 w-12 text-latte" />
+              <h2 className="mt-4 text-lg font-semibold text-ink">
                 {t.noUsers}
               </h2>
             </div>
           ) : (
-            <div className="bg-deep rounded-xl shadow-sm border border-sea overflow-hidden">
+            <div className="bg-cream rounded-xl shadow-sm border border-hairline overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-sea">
-                  <thead className="bg-sea/30">
+                <table className="min-w-full divide-y divide-hairline">
+                  <thead className="bg-cream-2/30">
                     <tr>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-latte uppercase tracking-wider">
                         {t.role}
                       </th>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-latte uppercase tracking-wider">
                         {t.contact}
                       </th>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-latte uppercase tracking-wider">
                         {t.nameOptional}
                       </th>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-latte uppercase tracking-wider">
                         {t.hasTechnicianProfile}
                       </th>
-                      <th className="px-4 py-3 text-start text-xs font-medium text-sage uppercase tracking-wider">
+                      <th className="px-4 py-3 text-start text-xs font-medium text-latte uppercase tracking-wider">
                         {t.lastSignIn}
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-sea">
+                  <tbody className="divide-y divide-hairline">
                     {users.map((user) => (
-                      <tr key={user.id} className="hover:bg-sea/30">
+                      <tr key={user.id} className="hover:bg-cream-2/30">
                         <td className="px-4 py-3 whitespace-nowrap">
                           {getUserRoleBadge(user.role)}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-onyx">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-ink">
                           <div className="flex items-center gap-2">
                             {user.email && (
                               <span className="flex items-center gap-1">
-                                <EnvelopeIcon className="w-4 h-4 text-sage" />
+                                <EnvelopeIcon className="w-4 h-4 text-latte" />
                                 {user.email}
                               </span>
                             )}
                             {user.phone && (
                               <span className="flex items-center gap-1">
-                                <PhoneIcon className="w-4 h-4 text-sage" />
+                                <PhoneIcon className="w-4 h-4 text-latte" />
                                 {user.phone}
                               </span>
                             )}
                             {!user.email && !user.phone && (
-                              <span className="text-sage">—</span>
+                              <span className="text-latte">—</span>
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-onyx">
-                          {user.name || <span className="text-sage">—</span>}
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-ink">
+                          {user.name || <span className="text-latte">—</span>}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm">
                           {user.hasTechnicianProfile ? (
@@ -1375,12 +1375,12 @@ const UserAccessManagement: React.FC = () => {
                               {t.yes}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center rounded-full bg-sea px-2 py-0.5 text-xs font-medium text-sage">
+                            <span className="inline-flex items-center rounded-full bg-cream-2 px-2 py-0.5 text-xs font-medium text-latte">
                               {t.no}
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-sage">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-latte">
                           {formatDate(user.lastSignInAt)}
                         </td>
                       </tr>

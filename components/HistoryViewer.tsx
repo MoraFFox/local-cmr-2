@@ -88,13 +88,13 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
     const getActionColor = (entry: HistoryEntry) => {
         switch (entry.action) {
             case 'create':
-                return 'text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-400';
+                return 'text-leaf-600 bg-leaf-50 dark:bg-leaf-500/10 dark:text-leaf-300';
             case 'update':
                 return 'text-blue-600 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400';
             case 'delete':
-                return 'text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400';
+                return 'text-ember-700 bg-ember-50 dark:bg-ember-500/10 dark:text-ember-300';
             default:
-                return 'text-slate-600 bg-slate-100 dark:bg-slate-700 dark:text-slate-400';
+                return 'text-ink bg-cream dark:bg-espresso-light dark:text-latte';
         }
     };
 
@@ -123,18 +123,18 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm w-full max-w-3xl max-h-[85vh] flex flex-col animate-scale-in">
+            <div className="bg-cream dark:bg-espresso rounded-2xl shadow-sm w-full max-w-3xl max-h-[85vh] flex flex-col animate-scale-in">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-hairline dark:border-hairline">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-teal-100 dark:bg-teal-900/30 rounded-lg">
-                            <ClockIcon className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                        <div className="p-2 bg-copper-500/10 dark:bg-copper-500/10 rounded-lg">
+                            <ClockIcon className="w-5 h-5 text-copper-600 dark:text-copper-400" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                            <h2 className="text-xl font-bold text-ink dark:text-white">
                                 History & Versions
                             </h2>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                            <p className="text-sm text-latte dark:text-latte">
                                 Track changes and restore previous versions
                             </p>
                         </div>
@@ -142,20 +142,20 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
                     
                     <button
                         onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                        className="p-2 text-latte hover:text-ink dark:hover:text-latte/70 rounded-full hover:bg-cream dark:hover:bg-espresso-light/50 transition-colors"
                     >
                         <XMarkIcon className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b border-slate-200 dark:border-slate-700">
+                <div className="flex border-b border-hairline dark:border-hairline">
                     <button
                         onClick={() => setActiveTab('history')}
                         className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                             activeTab === 'history'
-                                ? 'text-teal-600 border-b-2 border-teal-600 bg-teal-50 dark:bg-teal-900/20'
-                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                                ? 'text-copper-600 border-b-2 border-copper-600 bg-cream-2 dark:bg-copper-500/10'
+                                : 'text-ink dark:text-latte hover:text-ink dark:hover:text-cream'
                         }`}
                     >
                         Activity History ({history.length})
@@ -165,8 +165,8 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
                         onClick={() => setActiveTab('snapshots')}
                         className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                             activeTab === 'snapshots'
-                                ? 'text-teal-600 border-b-2 border-teal-600 bg-teal-50 dark:bg-teal-900/20'
-                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                                ? 'text-copper-600 border-b-2 border-copper-600 bg-cream-2 dark:bg-copper-500/10'
+                                : 'text-ink dark:text-latte hover:text-ink dark:hover:text-cream'
                         }`}
                     >
                         Saved Versions ({snapshots.length})
@@ -179,21 +179,21 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
                         <div className="divide-y divide-slate-100 dark:divide-slate-700">
                             {history.length === 0 ? (
                                 <div className="p-8 text-center">
-                                    <ClockIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                                    <p className="text-slate-500 dark:text-slate-400">No activity history yet</p>
+                                    <ClockIcon className="w-12 h-12 text-latte/70 mx-auto mb-3" />
+                                    <p className="text-latte dark:text-latte">No activity history yet</p>
                                 </div>
                             ) : (
                                 history.map((entry) => (
                                     <div
                                         key={entry.id}
-                                        className="flex items-start gap-3 p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                                        className="flex items-start gap-3 p-4 hover:bg-cream dark:hover:bg-espresso-light/50/50 transition-colors"
                                     >
                                         <div className={`flex-shrink-0 p-2 rounded-lg ${getActionColor(entry)}`}>
                                             {getActionIcon(entry)}
                                         </div>
                                         
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                                            <p className="text-sm font-medium text-ink dark:text-cream">
                                                 {entry.description}
                                             </p>
                                             
@@ -201,7 +201,7 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
                                                 <span className={`text-xs px-2 py-0.5 rounded-full ${getActionColor(entry)}`}>
                                                     {entry.action}
                                                 </span>
-                                                <span className="text-xs text-slate-400">
+                                                <span className="text-xs text-latte">
                                                     {formatRelativeTime(entry.timestamp)}
                                                 </span>
                                             </div>
@@ -214,9 +214,9 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
                         <div className="divide-y divide-slate-100 dark:divide-slate-700">
                             {snapshots.length === 0 ? (
                                 <div className="p-8 text-center">
-                                    <ArrowUturnLeftIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                                    <p className="text-slate-500 dark:text-slate-400">No saved versions yet</p>
-                                    <p className="text-sm text-slate-400 mt-1">
+                                    <ArrowUturnLeftIcon className="w-12 h-12 text-latte/70 mx-auto mb-3" />
+                                    <p className="text-latte dark:text-latte">No saved versions yet</p>
+                                    <p className="text-sm text-latte mt-1">
                                         Snapshots are created automatically before major changes
                                     </p>
                                 </div>
@@ -227,28 +227,28 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
                                         onClick={() => setSelectedSnapshot(snapshot)}
                                         className={`flex items-center gap-3 p-4 cursor-pointer transition-colors ${
                                             selectedSnapshot?.id === snapshot.id
-                                                ? 'bg-teal-50 dark:bg-teal-900/20'
-                                                : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                                                ? 'bg-cream-2 dark:bg-copper-500/10'
+                                                : 'hover:bg-cream dark:hover:bg-espresso-light/50/50'
                                         }`}
                                     >
                                         <div className="flex-shrink-0">
                                             {selectedSnapshot?.id === snapshot.id ? (
-                                                <div className="w-10 h-10 bg-teal-100 dark:bg-teal-900/30 rounded-lg flex items-center justify-center">
-                                                    <CheckIcon className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                                                <div className="w-10 h-10 bg-copper-500/10 dark:bg-copper-500/10 rounded-lg flex items-center justify-center">
+                                                    <CheckIcon className="w-5 h-5 text-copper-600 dark:text-copper-400" />
                                                 </div>
                                             ) : (
-                                                <div className="w-10 h-10 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center">
-                                                    <ArrowUturnLeftIcon className="w-5 h-5 text-slate-500" />
+                                                <div className="w-10 h-10 bg-cream dark:bg-espresso-light rounded-lg flex items-center justify-center">
+                                                    <ArrowUturnLeftIcon className="w-5 h-5 text-latte" />
                                                 </div>
                                             )}
                                         </div>
                                         
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                                            <p className="text-sm font-medium text-ink dark:text-cream">
                                                 {snapshot.description}
                                             </p>
                                             
-                                            <p className="text-xs text-slate-400 mt-1">
+                                            <p className="text-xs text-latte mt-1">
                                                 {formatTimestamp(snapshot.timestamp)}
                                             </p>
                                         </div>
@@ -260,10 +260,10 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+                <div className="flex items-center justify-between px-6 py-4 border-t border-hairline dark:border-hairline bg-cream dark:bg-espresso/50">
                     <button
                         onClick={activeTab === 'history' ? handleClearHistory : handleClearSnapshots}
-                        className="flex items-center gap-2 px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors text-sm font-medium"
+                        className="flex items-center gap-2 px-3 py-2 text-ember-700 dark:text-ember-300 hover:bg-ember-50 dark:hover:bg-ember-500/10 rounded-lg transition-colors text-sm font-medium"
                     >
                         <TrashIcon className="w-4 h-4" />
                         Clear {activeTab === 'history' ? 'History' : 'Snapshots'}
@@ -272,7 +272,7 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
                     {activeTab === 'snapshots' && selectedSnapshot && (
                         <button
                             onClick={() => setShowConfirmRestore(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium"
+                            className="flex items-center gap-2 px-4 py-2 bg-copper-600 text-white rounded-lg hover:bg-copper-700 transition-colors font-medium"
                         >
                             <ArrowUturnLeftIcon className="w-4 h-4" />
                             Restore Version
@@ -284,17 +284,17 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
             {/* Confirm Restore Modal */}
             {showConfirmRestore && selectedSnapshot && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm w-full max-w-md p-6 animate-scale-in">
+                    <div className="bg-cream dark:bg-espresso rounded-2xl shadow-sm w-full max-w-md p-6 animate-scale-in">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
                                 <ExclamationTriangleIcon className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                            <h3 className="text-lg font-bold text-ink dark:text-white">
                                 Restore Version?
                             </h3>
                         </div>
 
-                        <p className="text-slate-600 dark:text-slate-400 mb-6">
+                        <p className="text-ink dark:text-latte mb-6">
                             This will replace your current data with the version from{' '}
                             <strong>{formatTimestamp(selectedSnapshot.timestamp)}</strong>.{' '}
                             This action cannot be undone.
@@ -303,14 +303,14 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
                         <div className="flex gap-3 justify-end">
                             <button
                                 onClick={() => setShowConfirmRestore(false)}
-                                className="px-4 py-2 text-slate-700 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                                className="px-4 py-2 text-ink dark:text-latte/70 font-medium rounded-lg hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
                             >
                                 Cancel
                             </button>
                             
                             <button
                                 onClick={handleRestoreSnapshot}
-                                className="px-4 py-2 bg-teal-600 text-white font-medium rounded-lg hover:bg-teal-700 transition-colors"
+                                className="px-4 py-2 bg-copper-600 text-white font-medium rounded-lg hover:bg-copper-700 transition-colors"
                             >
                                 Restore
                             </button>

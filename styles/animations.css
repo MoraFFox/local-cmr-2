@@ -156,7 +156,7 @@
   100% { background-position: -200% 0; }
 }
 .animate-skeleton {
-  background: linear-gradient(90deg, #1A434C 25%, #2a5862 50%, #1A434C 75%);
+  background: linear-gradient(90deg, #E8DFCC 25%, #F1EADB 50%, #E8DFCC 75%);
   background-size: 200% 100%;
   animation: skeleton 1.5s infinite linear;
 }
@@ -197,4 +197,87 @@
 }
 .animate-shimmer-sweep {
   animation: shimmerSweep 2s ease-in-out infinite;
+}
+
+/* ── Liquid Glass ───────────────────────────────────────────────
+   Visual principles from the WebGL shader:
+   - Superellipse mask with soft edges
+   - Lens distortion (background blur + subtle scale)
+   - Specular gradient (light sweep top→bottom)
+   - Bright edge rim glow
+   - Inner refraction caustics (animated)
+   ─────────────────────────────────────────────────────────────── */
+
+.liquid-glass {
+  position: relative;
+  /* Lens: blur + warmth = looking through amber glass */
+  background: rgba(241, 234, 219, 0.35);
+  backdrop-filter: blur(24px) saturate(1.4) brightness(1.04);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4) brightness(1.04);
+  /* Superellipse-like soft border radius */
+  border-radius: 18px;
+  /* Edge glow: warm brass tint */
+  border: 1px solid rgba(201, 168, 106, 0.25);
+  box-shadow:
+    0 -6px 40px rgba(36, 27, 22, 0.12),
+    0 -1px 6px rgba(184, 115, 51, 0.06),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(36, 27, 22, 0.08),
+    inset 0 0 20px rgba(255, 255, 255, 0.02);
+  overflow: hidden;
+}
+
+/* Specular highlight — warm light band across the top third */
+.liquid-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    /* Top-edge specular streak */
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.10) 0%,
+      rgba(255, 255, 255, 0.03) 30%,
+      transparent 60%
+    ),
+    /* Diagonal caustic sweep — warm copper tint */
+    linear-gradient(
+      135deg,
+      rgba(184, 115, 51, 0.04) 0%,
+      rgba(255, 255, 255, 0.05) 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.02) 75%,
+      rgba(184, 115, 51, 0.02) 100%
+    );
+  /* SVG displacement for wavy refraction */
+  filter: url(#liquid-glass-subtle);
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Edge rim highlight — warm brass line at the top */
+.liquid-glass::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 5%;
+  right: 5%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(201, 168, 106, 0.5) 20%,
+    rgba(201, 168, 106, 0.6) 50%,
+    rgba(201, 168, 106, 0.5) 80%,
+    transparent
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Ensure content sits above the glass layers */
+.liquid-glass > * {
+  position: relative;
+  z-index: 3;
 }

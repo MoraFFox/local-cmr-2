@@ -121,10 +121,10 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
   // Loading state while checking session
   if (isValidSession === null) {
     return (
-      <div className="min-h-screen bg-midnight flex items-center justify-center p-4">
+      <div className="min-h-screen bg-paper flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-10 w-10 border-4 border-lava-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-onyx font-medium">
+          <div className="mx-auto mb-4 h-10 w-10 border-4 border-copper-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-ink font-medium">
             جاري التحقق من الرابط...
           </p>
         </div>
@@ -135,16 +135,16 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
   // Invalid session state
   if (!isValidSession) {
     return (
-      <div className="min-h-screen bg-midnight flex items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-2xl bg-deep border border-sea shadow-sm p-8">
+      <div className="min-h-screen bg-paper flex items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-2xl bg-cream border border-hairline shadow-sm p-8">
           <div className="text-center">
-            <div className="w-16 h-16 bg-lava-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ExclamationCircleIcon className="w-8 h-8 text-lava-500" />
+            <div className="w-16 h-16 bg-ember-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ExclamationCircleIcon className="w-8 h-8 text-ember-500" />
             </div>
-            <h1 className="text-2xl font-bold text-onyx mb-2">
+            <h1 className="text-2xl font-bold text-ink mb-2">
               رابط غير صالح أو منتهي الصلاحية
             </h1>
-            <p className="text-sage mb-6">
+            <p className="text-latte mb-6">
               رابط إعادة تعيين كلمة المرور هذا غير صالح أو منتهي الصلاحية. يرجى طلب رابط جديد.
             </p>
             <Button
@@ -162,16 +162,16 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
   // Success state
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-midnight flex items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-2xl bg-deep border border-sea shadow-sm p-8">
+      <div className="min-h-screen bg-paper flex items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-2xl bg-cream border border-hairline shadow-sm p-8">
           <div className="text-center">
-            <div className="w-16 h-16 bg-sea rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircleIcon className="w-8 h-8 text-success-500" />
+            <div className="w-16 h-16 bg-cream-2 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircleIcon className="w-8 h-8 text-leaf-500" />
             </div>
-            <h1 className="text-2xl font-bold text-onyx mb-2">
+            <h1 className="text-2xl font-bold text-ink mb-2">
               تم إعادة تعيين كلمة المرور بنجاح!
             </h1>
-            <p className="text-sage mb-6">
+            <p className="text-latte mb-6">
               يرجى تسجيل الدخول بكلمة المرور الجديدة.
             </p>
             <Button
@@ -194,7 +194,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
         {onBack && (
           <button
             onClick={onBack}
-            className="mb-6 flex items-center gap-2 text-sage hover:text-onyx transition-colors"
+            className="mb-6 flex items-center gap-2 text-latte hover:text-ink transition-colors"
           >
             <ArrowLeftIcon className="w-5 h-5" />
             <span>العودة لتسجيل الدخول</span>
@@ -203,54 +203,54 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-sea rounded-full flex items-center justify-center mx-auto mb-4">
-            <LockClosedIcon className="w-8 h-8 text-lava-500" />
+          <div className="w-16 h-16 bg-cream-2 rounded-full flex items-center justify-center mx-auto mb-4">
+            <LockClosedIcon className="w-8 h-8 text-copper-500" />
           </div>
-          <h1 className="text-2xl font-bold text-onyx mb-2">
+          <h1 className="text-2xl font-bold text-ink mb-2">
             إعادة تعيين كلمة المرور
           </h1>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 rounded-lg border border-lava-500/30 bg-lava-900/40 text-sm text-lava-400 text-center">
+          <div className="mb-6 p-4 rounded-lg border border-copper-500/30 bg-ember-500/20 text-sm text-ember-700 text-center">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-onyx mb-2">
+            <label className="block text-sm font-medium text-ink mb-2">
               كلمة المرور الجديدة
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <LockClosedIcon className="w-5 h-5 text-sage" />
+                <LockClosedIcon className="w-5 h-5 text-latte" />
               </div>
               <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pr-10 pl-4 py-3 rounded-lg bg-deep border border-sea text-onyx focus:outline-none focus:border-lava-500 focus:ring-2 focus:ring-lava-500/20"
+                className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream border border-hairline text-ink focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-copper-500/20"
                 dir="ltr"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-onyx mb-2">
+            <label className="block text-sm font-medium text-ink mb-2">
               تأكيد كلمة المرور الجديدة
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <LockClosedIcon className="w-5 h-5 text-sage" />
+                <LockClosedIcon className="w-5 h-5 text-latte" />
               </div>
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pr-10 pl-4 py-3 rounded-lg bg-deep border border-sea text-onyx focus:outline-none focus:border-lava-500 focus:ring-2 focus:ring-lava-500/20"
+                className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream border border-hairline text-ink focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-copper-500/20"
                 dir="ltr"
               />
             </div>

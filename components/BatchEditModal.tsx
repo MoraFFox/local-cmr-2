@@ -149,22 +149,22 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
             <div 
                 role="dialog"
                 aria-modal="true"
-                className="bg-deep border border-sea rounded-2xl shadow-sm w-full max-w-4xl max-h-[90vh] flex flex-col animate-scale-in"
+                className="bg-cream border border-hairline rounded-2xl shadow-sm w-full max-w-4xl max-h-[90vh] flex flex-col animate-scale-in"
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-sea bg-sea/30">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-hairline bg-cream-2/50">
                     <div>
-                        <h2 className="text-xl font-bold text-onyx">
+                        <h2 className="text-xl font-bold text-ink">
                             Batch Edit Maintenance Records
                         </h2>
-                        <p className="text-sm text-sage mt-1">
+                        <p className="text-sm text-latte mt-1">
                             Select records and choose an operation to apply to all selected
                         </p>
                     </div>
-                    
+
                     <button
                         onClick={onClose}
-                        className="p-2 text-sage hover:text-onyx rounded-full hover:bg-sea transition-colors"
+                        className="p-2 text-latte hover:text-ink rounded-full hover:bg-cream-2 transition-colors"
                     >
                         <XMarkIcon className="w-5 h-5" />
                     </button>
@@ -172,20 +172,20 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
 
                 <div className="flex flex-1 overflow-hidden">
                     {/* Left Panel - Record Selection */}
-                    <div className="w-1/2 border-r border-sea flex flex-col">
-                        <div className="flex items-center justify-between p-4 border-b border-sea bg-sea/10">
+                    <div className="w-1/2 border-r border-hairline flex flex-col">
+                        <div className="flex items-center justify-between p-4 border-b border-hairline bg-cream-2">
                             <button
                                 onClick={toggleAll}
-                                className="flex items-center gap-2 text-sm font-medium text-onyx"
+                                className="flex items-center gap-2 text-sm font-medium text-ink"
                             >
                                 {selectedIds.size === records.length ? (
-                                    <><CheckCircleIcon className="w-5 h-5 text-lava-500" /> Deselect All</>
+                                    <><CheckCircleIcon className="w-5 h-5 text-copper-500" /> Deselect All</>
                                 ) : (
                                     <><StopIcon className="w-5 h-5" /> Select All</>
                                 )}
                             </button>
-                            
-                            <span className="text-sm text-sage">
+
+                            <span className="text-sm text-latte">
                                 {selectedIds.size} of {records.length} selected
                             </span>
                         </div>
@@ -195,31 +195,31 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                 <div
                                     key={record.id}
                                     onClick={() => toggleSelection(record.id)}
-                                    className={`flex items-center gap-3 p-4 border-b border-sea/50 cursor-pointer transition-colors ${
+                                    className={`flex items-center gap-3 p-4 border-b border-hairline/50 cursor-pointer transition-colors ${
                                         selectedIds.has(record.id)
-                                            ? 'bg-lava-500/10'
-                                            : 'hover:bg-sea/30'
+                                            ? 'bg-copper-500/10'
+                                            : 'hover:bg-cream-2'
                                     }`}
                                 >
                                     <div className="flex-shrink-0">
                                         {selectedIds.has(record.id) ? (
-                                            <CheckCircleIcon className="w-5 h-5 text-lava-500" />
+                                            <CheckCircleIcon className="w-5 h-5 text-copper-500" />
                                         ) : (
-                                            <StopIcon className="w-5 h-5 text-sage" />
+                                            <StopIcon className="w-5 h-5 text-latte" />
                                         )}
                                     </div>
-                                    
+
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                            <span className="font-medium text-onyx">
+                                            <span className="font-medium text-ink">
                                                 {record.maintenanceDate || 'No Date'}
                                             </span>
                                             {record.problemSolved && (
-                                                <span className="text-xs px-2 py-0.5 bg-success-500/20 text-success-400 rounded-full">تم الحل</span>
+                                                <span className="text-xs px-2 py-0.5 bg-leaf-500/20 text-leaf-600 rounded-full">تم الحل</span>
                                             )}
                                         </div>
                                         {record.baristaName && (
-                                            <p className="text-sm text-sage truncate">
+                                            <p className="text-sm text-latte truncate">
                                                 {record.baristaName}
                                             </p>
                                         )}
@@ -231,14 +231,14 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
 
                     {/* Right Panel - Operations */}
                     <div className="w-1/2 flex flex-col">
-                        <div className="p-4 border-b border-sea">
-                            <h3 className="font-semibold text-onyx mb-4">
+                        <div className="p-4 border-b border-hairline">
+                            <h3 className="font-semibold text-ink mb-4">
                                 Choose Operation
                             </h3>
 
                             <div className="space-y-3">
                                 {/* Date Operation */}
-                                <div className={`p-3 rounded-lg border ${operation?.field === 'maintenanceDate' ? 'border-lava-500 bg-lava-500/10' : 'border-sea'}`}>
+                                <div className={`p-3 rounded-lg border ${operation?.field === 'maintenanceDate' ? 'border-copper-500 bg-copper-500/10' : 'border-hairline'}`}>
                                     <label className="flex items-center gap-2 mb-2">
                                         <input
                                             type="radio"
@@ -247,21 +247,21 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                             onChange={() => setOperation({ field: 'maintenanceDate', value: new Date().toISOString().split('T')[0] })}
                                             className="w-4 h-4"
                                         />
-                                        <CalendarIcon className="w-4 h-4 text-sage" />
-                                        <span className="font-medium text-onyx">Change Date</span>
+                                        <CalendarIcon className="w-4 h-4 text-latte" />
+                                        <span className="font-medium text-ink">Change Date</span>
                                     </label>
                                     {operation?.field === 'maintenanceDate' && (
                                         <input
                                             type="date"
                                             value={operation.value}
                                             onChange={(e) => setOperation({ ...operation, value: e.target.value })}
-                                            className="w-full px-3 py-2 bg-deep text-onyx border border-sea rounded-lg focus:border-lava-500 focus:ring-1 focus:ring-lava-500"
+                                            className="w-full px-3 py-2 bg-cream text-ink border border-hairline rounded-lg focus:border-copper-500 focus:ring-1 focus:ring-copper-500"
                                         />
                                     )}
                                 </div>
 
                                 {/* Staff Operation */}
-                                <div className={`p-3 rounded-lg border ${operation?.field === 'baristaName' ? 'border-lava-500 bg-lava-500/10' : 'border-sea'}`}>
+                                <div className={`p-3 rounded-lg border ${operation?.field === 'baristaName' ? 'border-copper-500 bg-copper-500/10' : 'border-hairline'}`}>
                                     <label className="flex items-center gap-2 mb-2">
                                         <input
                                             type="radio"
@@ -270,14 +270,14 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                             onChange={() => setOperation({ field: 'baristaName', value: '' })}
                                             className="w-4 h-4"
                                         />
-                                        <UserIcon className="w-4 h-4 text-sage" />
-                                        <span className="font-medium text-onyx">Assign Staff</span>
+                                        <UserIcon className="w-4 h-4 text-latte" />
+                                        <span className="font-medium text-ink">Assign Staff</span>
                                     </label>
                                     {operation?.field === 'baristaName' && (
                                         <select
                                             value={operation.value}
                                             onChange={(e) => setOperation({ ...operation, value: e.target.value })}
-                                            className="w-full px-3 py-2 bg-deep text-onyx border border-sea rounded-lg focus:border-lava-500 focus:ring-1 focus:ring-lava-500"
+                                            className="w-full px-3 py-2 bg-cream text-ink border border-hairline rounded-lg focus:border-copper-500 focus:ring-1 focus:ring-copper-500"
                                         >
                                             <option value="">Select Staff</option>
                                             {baristas.map(b => (
@@ -288,7 +288,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                 </div>
 
                                 {/* Type Operation */}
-                                <div className={`p-3 rounded-lg border ${operation?.field === 'type' ? 'border-lava-500 bg-lava-500/10' : 'border-sea'}`}>
+                                <div className={`p-3 rounded-lg border ${operation?.field === 'type' ? 'border-copper-500 bg-copper-500/10' : 'border-hairline'}`}>
                                     <label className="flex items-center gap-2 mb-2">
                                         <input
                                             type="radio"
@@ -297,14 +297,14 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                             onChange={() => setOperation({ field: 'type', value: 'scheduled' })}
                                             className="w-4 h-4"
                                         />
-                                        <WrenchIcon className="w-4 h-4 text-sage" />
-                                        <span className="font-medium text-onyx">Change Type</span>
+                                        <WrenchIcon className="w-4 h-4 text-latte" />
+                                        <span className="font-medium text-ink">Change Type</span>
                                     </label>
                                     {operation?.field === 'type' && (
                                         <select
                                             value={operation.value}
                                             onChange={(e) => setOperation({ ...operation, value: e.target.value })}
-                                            className="w-full px-3 py-2 bg-deep text-onyx border border-sea rounded-lg focus:border-lava-500 focus:ring-1 focus:ring-lava-500"
+                                            className="w-full px-3 py-2 bg-cream text-ink border border-hairline rounded-lg focus:border-copper-500 focus:ring-1 focus:ring-copper-500"
                                         >
                                             <option value="scheduled">Scheduled</option>
                                             <option value="requested">Requested</option>
@@ -313,7 +313,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                 </div>
 
                                 {/* Mark Solved Operation */}
-                                <div className={`p-3 rounded-lg border ${operation?.field === 'problemSolved' ? 'border-lava-500 bg-lava-500/10' : 'border-sea'}`}>
+                                <div className={`p-3 rounded-lg border ${operation?.field === 'problemSolved' ? 'border-copper-500 bg-copper-500/10' : 'border-hairline'}`}>
                                     <label className="flex items-center gap-2 mb-2">
                                         <input
                                             type="radio"
@@ -322,14 +322,14 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                             onChange={() => setOperation({ field: 'problemSolved', value: true })}
                                             className="w-4 h-4"
                                         />
-                                        <ArrowPathIcon className="w-4 h-4 text-sage" />
-                                        <span className="font-medium text-onyx">Mark Status</span>
+                                        <ArrowPathIcon className="w-4 h-4 text-latte" />
+                                        <span className="font-medium text-ink">Mark Status</span>
                                     </label>
                                     {operation?.field === 'problemSolved' && (
                                         <select
                                             value={operation.value.toString()}
                                             onChange={(e) => setOperation({ ...operation, value: e.target.value === 'true' })}
-                                            className="w-full px-3 py-2 bg-deep text-onyx border border-sea rounded-lg focus:border-lava-500 focus:ring-1 focus:ring-lava-500"
+                                            className="w-full px-3 py-2 bg-cream text-ink border border-hairline rounded-lg focus:border-copper-500 focus:ring-1 focus:ring-copper-500"
                                         >
                                             <option value="true">تم الحل</option>
                                             <option value="false">Not Solved</option>
@@ -338,7 +338,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                 </div>
 
                                 {/* Delete Operation */}
-                                <div className={`p-3 rounded-lg border ${operation?.field === 'delete' ? 'border-lava-500 bg-lava-500/20' : 'border-sea'}`}>
+                                <div className={`p-3 rounded-lg border ${operation?.field === 'delete' ? 'border-ember-500 bg-ember-500/20' : 'border-hairline'}`}>
                                     <label className="flex items-center gap-2">
                                         <input
                                             type="radio"
@@ -347,8 +347,8 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                             onChange={() => setOperation({ field: 'delete', value: null })}
                                             className="w-4 h-4"
                                         />
-                                        <TrashIcon className="w-4 h-4 text-lava-500" />
-                                        <span className="font-medium text-lava-400">Delete Records</span>
+                                        <TrashIcon className="w-4 h-4 text-copper-500" />
+                                        <span className="font-medium text-copper-400">Delete Records</span>
                                     </label>
                                 </div>
                             </div>
@@ -357,12 +357,12 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 pb-safe border-t border-sea bg-surface-muted/30 gap-4">
+                <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 pb-safe border-t border-hairline bg-surface-muted/30 gap-4">
                     <div className="flex items-center gap-2 w-full sm:w-auto">
                         {operation && selectedIds.size > 0 && (
                             <>
-                                <ExclamationTriangleIcon className={`w-5 h-5 ${operation.field === 'delete' ? 'text-lava-500' : 'text-amber-500'}`} />
-                                <span className={`text-sm ${operation.field === 'delete' ? 'text-lava-400' : 'text-amber-500'}`}>
+                                <ExclamationTriangleIcon className={`w-5 h-5 ${operation.field === 'delete' ? 'text-copper-500' : 'text-copper-600'}`} />
+                                <span className={`text-sm ${operation.field === 'delete' ? 'text-copper-400' : 'text-copper-600'}`}>
                                     {getOperationDescription()}
                                 </span>
                             </>

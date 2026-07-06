@@ -82,10 +82,10 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
 
             {/* Sheet Content */}
-            <div 
+            <div
                 role="dialog"
                 aria-modal="true"
-                className={`relative w-full bg-slate-900 dark:bg-slate-900 rounded-t-3xl shadow-sm transition-transform duration-300 ease-out transform pb-safe ${
+                className={`relative w-full bg-espresso dark:bg-espresso rounded-t-3xl shadow-sm transition-transform duration-300 ease-out transform pb-safe ${
                     isVisible ? 'translate-y-0' : 'translate-y-full'
                 }`}
                 style={{ 
@@ -104,20 +104,20 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                              // Add mouse support for drag handle if needed, or keep it touch only
                          }}
                     >
-                        <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-600 rounded-full" />
+                        <div className="w-12 h-1.5 bg-hairline dark:bg-hairline rounded-full" />
                     </div>
                 )}
 
                 {/* Header */}
                 {(title) && (
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-gray-900 dark:border-slate-800">
-                        <h3 className="text-lg font-bold text-slate-200 dark:text-white">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-hairline dark:border-hairline">
+                        <h3 className="text-lg font-bold text-cream dark:text-cream">
                             {title}
                         </h3>
                         <button
                             onClick={onClose}
                             aria-label="إغلاق"
-                            className="p-2 -mr-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                            className="p-2 -mr-2 text-latte hover:text-cream dark:hover:text-cream rounded-full hover:bg-espresso-light dark:hover:bg-espresso-light transition-colors"
                         >
                             <XMarkIcon className="w-6 h-6" />
                         </button>

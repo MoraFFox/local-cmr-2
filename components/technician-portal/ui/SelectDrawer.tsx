@@ -49,33 +49,33 @@ const SelectDrawer: React.FC<SelectDrawerProps> = ({
 
     return (
         <div className="w-full">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 ml-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-latte mb-2 ml-1">
                 {label}
             </label>
-            
+
             <button
                 type="button"
                 onClick={() => !disabled && setIsOpen(true)}
                 disabled={disabled}
                 className={`
-                    w-full flex items-center justify-between px-4 py-3.5 
-                    bg-slate-800/50 border rounded-xl text-left transition-all
-                    ${disabled ? 'opacity-50 cursor-not-allowed border-slate-800' : 'border-slate-700 hover:border-slate-600 active:bg-slate-800'}
-                    ${value ? 'text-slate-100' : 'text-slate-500'}
+                    w-full flex items-center justify-between px-4 py-3.5
+                    bg-espresso-light/50 border rounded-xl text-left transition-all
+                    ${disabled ? 'opacity-50 cursor-not-allowed border-hairline' : 'border-hairline hover:border-brass active:bg-espresso-light'}
+                    ${value ? 'text-cream' : 'text-latte'}
                 `}
             >
                 <div className="flex items-center gap-3 overflow-hidden">
-                    {icon && <span className="text-slate-400">{icon}</span>}
+                    {icon && <span className="text-latte">{icon}</span>}
                     <div className="flex flex-col truncate">
                         <span className="truncate font-medium">
                             {selectedOption ? selectedOption.label : placeholder}
                         </span>
                         {selectedOption?.description && (
-                            <span className="text-xs text-slate-500 truncate">{selectedOption.description}</span>
+                            <span className="text-xs text-latte truncate">{selectedOption.description}</span>
                         )}
                     </div>
                 </div>
-                <ChevronDownIcon className="w-5 h-5 text-slate-500 flex-shrink-0" />
+                <ChevronDownIcon className="w-5 h-5 text-latte flex-shrink-0" />
             </button>
 
             <BottomSheet
@@ -85,16 +85,16 @@ const SelectDrawer: React.FC<SelectDrawerProps> = ({
                 maxHeight="85vh"
                 contentClassName="flex flex-col h-full"
             >
-                <div className="p-4 bg-slate-900 h-full flex flex-col overflow-hidden">
+                <div className="p-4 bg-espresso h-full flex flex-col overflow-hidden">
                     {searchable && (
                         <div className="mb-4 relative flex-shrink-0">
-                            <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                            <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-latte" />
                             <input
                                 type="text"
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 placeholder="Search..."
-                                className="w-full bg-slate-800 text-white rounded-lg pl-10 pr-4 py-3 border border-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus:border-teal-500 transition-colors"
+                                className="w-full bg-espresso-light text-cream rounded-lg pl-10 pr-4 py-3 border border-hairline focus:outline-none focus-visible:ring-2 focus-visible:ring-copper-500 focus:border-copper-500 transition-colors"
                             />
                         </div>
                     )}
@@ -108,38 +108,38 @@ const SelectDrawer: React.FC<SelectDrawerProps> = ({
                                     className={`
                                         w-full flex items-center justify-between p-4 rounded-xl border transition-all text-right
                                         ${String(value) === String(opt.value)
-                                            ? 'bg-teal-500/10 border-teal-500/50 text-teal-100'
-                                            : 'bg-slate-800/30 border-slate-800 text-slate-300 hover:bg-slate-800 hover:border-slate-700'
+                                            ? 'bg-copper-500/10 border-copper-500/50 text-cream'
+                                            : 'bg-espresso-light/30 border-hairline text-cream hover:bg-espresso-light hover:border-brass'
                                         }
                                     `}
                                 >
                                     <div className="flex items-center gap-3 text-left">
                                         {opt.icon && <span className="text-2xl">{opt.icon}</span>}
                                         <div className="flex flex-col">
-                                            <span className={`font-semibold ${String(value) === String(opt.value) ? 'text-teal-400' : 'text-slate-200'}`}>
+                                            <span className={`font-semibold ${String(value) === String(opt.value) ? 'text-copper-400' : 'text-cream'}`}>
                                                 {opt.label}
                                             </span>
                                             {opt.description && (
-                                                <span className="text-xs text-slate-500">{opt.description}</span>
+                                                <span className="text-xs text-latte">{opt.description}</span>
                                             )}
                                         </div>
                                     </div>
-                                    
+
                                     {String(value) === String(opt.value) && (
-                                        <div className="w-6 h-6 rounded-full bg-teal-500 flex items-center justify-center">
+                                        <div className="w-6 h-6 rounded-full bg-copper-500 flex items-center justify-center">
                                             <CheckIcon className="w-4 h-4 text-white" />
                                         </div>
                                     )}
                                 </button>
                             ))
                         ) : (
-                            <div className="text-center py-8 text-slate-500">
+                            <div className="text-center py-8 text-latte">
                                 No options found.
                             </div>
                         )}
                     </div>
-                    
-                     <div className="pt-4 pb-8 border-t border-slate-800 mt-auto bg-slate-900 flex-shrink-0">
+
+                     <div className="pt-4 pb-8 border-t border-hairline mt-auto bg-espresso flex-shrink-0">
                          <TechButton variant="secondary" fullWidth onClick={() => setIsOpen(false)}>
                              Cancel
                          </TechButton>

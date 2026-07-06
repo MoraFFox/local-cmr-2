@@ -12,7 +12,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, toggleTheme, expanded 
     return (
         <button
             onClick={toggleTheme}
-            className="w-full flex items-center p-3 rounded-md text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors justify-center lg:justify-start gap-3"
+            className="w-full flex items-center p-3 rounded-md text-sm font-medium text-latte dark:text-latte/70 hover:bg-cream-2 dark:hover:bg-espresso-light/50 hover:text-ink dark:hover:text-white transition-colors justify-center lg:justify-start gap-3"
             aria-label={label}
             title={label}
         >

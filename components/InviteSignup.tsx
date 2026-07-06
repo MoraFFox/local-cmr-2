@@ -104,9 +104,9 @@ const PasswordStrength: React.FC<PasswordStrengthProps> = ({ password, lang }) =
     if (/[0-9]/.test(pwd)) score++;
     if (/[^A-Za-z0-9]/.test(pwd)) score++;
 
-    if (score <= 2) return { score: 1, label: 'ضعيفة', color: 'bg-red-500' };
+    if (score <= 2) return { score: 1, label: 'ضعيفة', color: 'bg-ember-500' };
     if (score <= 4) return { score: 2, label: 'متوسطة', color: 'bg-yellow-500' };
-    return { score: 3, label: 'قوية', color: 'bg-green-500' };
+    return { score: 3, label: 'قوية', color: 'bg-leaf-500' };
   };
 
   const strength = getStrength(password);
@@ -120,15 +120,15 @@ const PasswordStrength: React.FC<PasswordStrengthProps> = ({ password, lang }) =
           <div
             key={level}
             className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-              level <= strength.score ? strength.color : 'bg-slate-200 dark:bg-slate-700'
+              level <= strength.score ? strength.color : 'bg-cream-2 dark:bg-espresso-light'
             }`}
           />
         ))}
       </div>
       {strength.label && (
         <p className={`text-xs ${
-          strength.score === 1 ? 'text-red-500' : 
-          strength.score === 2 ? 'text-yellow-500' : 'text-green-500'
+          strength.score === 1 ? 'text-ember-500' : 
+          strength.score === 2 ? 'text-yellow-500' : 'text-leaf-500'
         }`}>
           {strength.label}
         </p>
@@ -290,10 +290,10 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
   // ============================================
   if (isValidating) {
     return (
-      <div className="min-h-screen bg-midnight flex items-center justify-center p-4">
+      <div className="min-h-screen bg-paper flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="animate-spin h-12 w-12 border-4 border-lava-500 border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-sage">{copy[lang].validating}</p>
+          <div className="animate-spin h-12 w-12 border-4 border-copper-500 border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-latte">{copy[lang].validating}</p>
         </div>
       </div>
     );
@@ -304,17 +304,17 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
   // ============================================
   if (validationError || !inviteData) {
     return (
-      <div className="min-h-screen bg-midnight flex items-center justify-center p-4">
+      <div className="min-h-screen bg-paper flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <div className="bg-deep rounded-2xl shadow-xl border border-sea p-8 text-center">
-            <div className="w-16 h-16 bg-lava-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ExclamationCircleIcon className="w-8 h-8 text-lava-500" />
+          <div className="bg-cream rounded-2xl shadow-xl border border-hairline p-8 text-center">
+            <div className="w-16 h-16 bg-ember-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ExclamationCircleIcon className="w-8 h-8 text-ember-500" />
             </div>
-            <h1 className="text-xl font-bold text-onyx mb-2">
+            <h1 className="text-xl font-bold text-ink mb-2">
               {copy[lang].invalidInvite}
             </h1>
             {validationError && (
-              <p className="text-sage mb-6">
+              <p className="text-latte mb-6">
                 {validationError}
               </p>
             )}
@@ -342,7 +342,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
         className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
           isAdmin
             ? 'bg-purple-900/30 text-purple-300'
-            : 'bg-lava-500/10 text-lava-500'
+            : 'bg-copper-500/10 text-copper-500'
         }`}
       >
         {isAdmin ? (
@@ -359,53 +359,53 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
   // Main Form
   // ============================================
   return (
-    <div className="min-h-screen bg-midnight flex items-center justify-center p-4">
+    <div className="min-h-screen bg-paper flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Language Toggle */}
         <div className="flex justify-end mb-4">
           <button
             onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-            className="text-sm text-sage hover:text-onyx transition-colors"
+            className="text-sm text-latte hover:text-ink transition-colors"
           >
             {lang === 'ar' ? 'English' : 'العربية'}
           </button>
         </div>
 
         {/* Main Card */}
-        <div className="bg-deep rounded-2xl shadow-xl border border-sea p-8">
+        <div className="bg-cream rounded-2xl shadow-xl border border-hairline p-8">
           {/* Header */}
           <div className="text-center mb-8">
             <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
               inviteData.role === 'admin'
                 ? 'bg-purple-900/30'
-                : 'bg-sea'
+                : 'bg-cream-2'
             }`}>
               {inviteData.role === 'admin' ? (
                 <ShieldCheckIcon className="w-8 h-8 text-purple-400" />
               ) : (
-                <WrenchScrewdriverIcon className="w-8 h-8 text-lava-500" />
+                <WrenchScrewdriverIcon className="w-8 h-8 text-copper-500" />
               )}
             </div>
-            <h1 className="text-2xl font-bold text-onyx mb-2">
+            <h1 className="text-2xl font-bold text-ink mb-2">
               {copy[lang].title}
             </h1>
-            <p className="text-sage flex items-center justify-center gap-2 flex-wrap">
+            <p className="text-latte flex items-center justify-center gap-2 flex-wrap">
               {copy[lang].subtitle} <RoleBadge />
             </p>
           </div>
 
           {/* Pre-filled Contact Info (Read-only) */}
           {(inviteData.email || inviteData.phone) ? (
-            <div className="mb-6 p-4 bg-sea/50 rounded-lg space-y-2">
+            <div className="mb-6 p-4 bg-cream-2/50 rounded-lg space-y-2">
               {inviteData.email && (
-                <div className="flex items-center gap-2 text-sm text-onyx">
-                  <EnvelopeIcon className="w-4 h-4 text-sage" />
+                <div className="flex items-center gap-2 text-sm text-ink">
+                  <EnvelopeIcon className="w-4 h-4 text-latte" />
                   <span dir="ltr">{inviteData.email}</span>
                 </div>
               )}
               {inviteData.phone && (
-                <div className="flex items-center gap-2 text-sm text-onyx">
-                  <PhoneIcon className="w-4 h-4 text-sage" />
+                <div className="flex items-center gap-2 text-sm text-ink">
+                  <PhoneIcon className="w-4 h-4 text-latte" />
                   <span dir="ltr">{inviteData.phone}</span>
                 </div>
               )}
@@ -417,14 +417,14 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
           )}
 
           {/* Form Title */}
-          <h2 className="text-lg font-semibold text-onyx mb-4">
+          <h2 className="text-lg font-semibold text-ink mb-4">
             {copy[lang].formTitle}
           </h2>
 
           {/* Error Message */}
           {formError && (
-            <div className="mb-6 p-4 bg-lava-900/40 border border-lava-500/30 rounded-lg">
-              <p className="text-sm text-lava-400 text-center">
+            <div className="mb-6 p-4 bg-ember-500/20 border border-copper-500/30 rounded-lg">
+              <p className="text-sm text-ember-700 text-center">
                 {formError}
               </p>
             </div>
@@ -434,19 +434,19 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
           <form onSubmit={handleSubmit} className="space-y-5" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
             {/* Name Field */}
             <div>
-              <label className="block text-sm font-medium text-onyx mb-2">
+              <label className="block text-sm font-medium text-ink mb-2">
                 {copy[lang].nameLabel}
               </label>
               <div className="relative">
                 <div className={`absolute inset-y-0 ${lang === 'ar' ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
-                  <UserIcon className="h-5 w-5 text-sage" />
+                  <UserIcon className="h-5 w-5 text-latte" />
                 </div>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={copy[lang].namePlaceholder}
-                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-deep text-onyx rounded-lg border border-sea focus:outline-none focus:border-lava-500 focus:ring-2 focus:ring-lava-500/20 transition-all`}
+                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-cream text-ink rounded-lg border border-hairline focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-copper-500/20 transition-all`}
                   dir={lang === 'ar' ? 'rtl' : 'ltr'}
                 />
               </div>
@@ -455,19 +455,19 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
             {/* Email Field for Generic Invites */}
             {!inviteData.email && !inviteData.phone && (
               <div>
-                <label className="block text-sm font-medium text-onyx mb-2">
+                <label className="block text-sm font-medium text-ink mb-2">
                   {copy[lang].emailLabel}
                 </label>
                 <div className="relative">
                   <div className={`absolute inset-y-0 ${lang === 'ar' ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
-                    <EnvelopeIcon className="h-5 w-5 text-sage" />
+                    <EnvelopeIcon className="h-5 w-5 text-latte" />
                   </div>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="email@example.com"
-                    className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-deep text-onyx rounded-lg border border-sea focus:outline-none focus:border-lava-500 focus:ring-2 focus:ring-lava-500/20 transition-all`}
+                    className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-cream text-ink rounded-lg border border-hairline focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-copper-500/20 transition-all`}
                     dir="ltr"
                   />
                 </div>
@@ -476,19 +476,19 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
 
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-medium text-onyx mb-2">
+              <label className="block text-sm font-medium text-ink mb-2">
                 {copy[lang].passwordLabel}
               </label>
               <div className="relative">
                 <div className={`absolute inset-y-0 ${lang === 'ar' ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
-                  <LockClosedIcon className="h-5 w-5 text-sage" />
+                  <LockClosedIcon className="h-5 w-5 text-latte" />
                 </div>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={copy[lang].passwordPlaceholder}
-                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-deep text-onyx rounded-lg border border-sea focus:outline-none focus:border-lava-500 focus:ring-2 focus:ring-lava-500/20 transition-all`}
+                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-cream text-ink rounded-lg border border-hairline focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-copper-500/20 transition-all`}
                   dir="ltr"
                 />
               </div>
@@ -497,15 +497,15 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
 
             {/* Confirm Password Field */}
             <div>
-              <label className="block text-sm font-medium text-onyx mb-2">
+              <label className="block text-sm font-medium text-ink mb-2">
                 {copy[lang].confirmPasswordLabel}
               </label>
               <div className="relative">
                 <div className={`absolute inset-y-0 ${lang === 'ar' ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
                   {password && confirmPassword && password === confirmPassword ? (
-                    <CheckCircleIcon className="h-5 w-5 text-success-500" />
+                    <CheckCircleIcon className="h-5 w-5 text-leaf-500" />
                   ) : (
-                    <LockClosedIcon className="h-5 w-5 text-sage" />
+                    <LockClosedIcon className="h-5 w-5 text-latte" />
                   )}
                 </div>
                 <input
@@ -513,16 +513,16 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder={copy[lang].confirmPasswordPlaceholder}
-                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-deep text-onyx rounded-lg border ${
+                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-cream text-ink rounded-lg border ${
                     password && confirmPassword && password !== confirmPassword
-                      ? 'border-lava-500'
-                      : 'border-sea'
-                  } focus:outline-none focus:border-lava-500 focus:ring-2 focus:ring-lava-500/20 transition-all`}
+                      ? 'border-ember-500'
+                      : 'border-hairline'
+                  } focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-copper-500/20 transition-all`}
                   dir="ltr"
                 />
               </div>
               {password && confirmPassword && password !== confirmPassword && (
-                <p className="mt-1 text-xs text-lava-500">
+                <p className="mt-1 text-xs text-ember-500">
                   {copy[lang].passwordMismatch}
                 </p>
               )}
@@ -542,7 +542,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
           <div className="mt-6 text-center">
             <button
               onClick={onBack}
-              className="flex items-center justify-center gap-2 mx-auto text-sm text-sage hover:text-onyx transition-colors"
+              className="flex items-center justify-center gap-2 mx-auto text-sm text-latte hover:text-ink transition-colors"
             >
               <ArrowLeftIcon className={`w-4 h-4 ${lang === 'ar' ? '' : 'rotate-180'}`} />
               {copy[lang].backButton}

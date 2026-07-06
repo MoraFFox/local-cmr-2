@@ -34,13 +34,13 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
               {!isLast && (
                 <div className="absolute top-8 right-[15px] w-[3px] h-[calc(100%_-_8px)] overflow-hidden rounded-full" aria-hidden="true">
                   {/* Background track */}
-                  <div className="absolute inset-0 bg-sea/40 rounded-full" />
+                  <div className="absolute inset-0 bg-hairline/40 rounded-full" />
                   {/* Animated fill */}
                   <div
                     className={`absolute inset-0 rounded-full transition-all duration-700 ease-out ${
                       isCompleted
-                        ? 'bg-gradient-to-b from-lava-500 to-lava-400'
-                        : 'bg-lava-500/0'
+                        ? 'bg-gradient-to-b from-copper-500 to-copper-400'
+                        : 'bg-copper-500/0'
                     }`}
                     style={{
                       transformOrigin: 'top',
@@ -66,7 +66,7 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                     : 'cursor-pointer'
                 } ${
                   isHovered && isClickable && !isFuture
-                    ? 'bg-sea/20 shadow-sm'
+                    ? 'bg-cream-2 shadow-sm'
                     : ''
                 }`}
                 aria-current={isCurrent ? 'step' : undefined}
@@ -78,7 +78,7 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                   {(isCurrent || isCompleted) && (
                     <span
                       className={`absolute -inset-1.5 rounded-full animate-pulse-glow ${
-                        isCurrent ? 'bg-lava-500/15' : 'bg-lava-500/10'
+                        isCurrent ? 'bg-copper-500/15' : 'bg-copper-500/10'
                       }`}
                     />
                   )}
@@ -86,10 +86,10 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                   <span
                     className={`relative flex items-center justify-center w-9 h-9 rounded-full border-2 transition-all duration-300 ${
                       isCurrent
-                        ? 'border-lava-500 bg-lava-500 text-onyx shadow-[0_0_14px_rgba(230,57,35,0.35)] scale-110'
+                        ? 'border-copper-500 bg-copper-500 text-white shadow-[0_0_14px_rgba(184,115,51,0.35)] scale-110'
                         : isCompleted
-                        ? 'border-lava-500 bg-lava-500 text-onyx shadow-[0_0_10px_rgba(230,57,35,0.25)]'
-                        : 'border-sea/60 bg-deep text-sage'
+                        ? 'border-copper-500 bg-copper-500 text-white shadow-[0_0_10px_rgba(184,115,51,0.25)]'
+                        : 'border-hairline bg-cream-2 text-latte'
                     } ${isHovered && !isFuture ? 'scale-105' : ''}`}
                   >
                     {isCompleted ? (
@@ -111,22 +111,22 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                   <p
                     className={`text-sm font-semibold truncate transition-all duration-200 ${
                       isCurrent
-                        ? 'text-onyx'
+                        ? 'text-ink'
                         : isCompleted
-                        ? 'text-onyx/90'
-                        : 'text-sage/70'
+                        ? 'text-ink/90'
+                        : 'text-latte/70'
                     }`}
                   >
                     {step.name}
                   </p>
                   {isCurrent && (
-                    <p className="text-[11px] text-lava-400/80 mt-0.5 font-medium flex items-center gap-1">
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-lava-500 animate-pulse" />
+                    <p className="text-[11px] text-copper-600/80 mt-0.5 font-medium flex items-center gap-1">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-copper-500 animate-pulse" />
                       الخطوة الحالية
                     </p>
                   )}
                   {isCompleted && (
-                    <p className="text-[11px] text-success-500/70 mt-0.5 font-medium">
+                    <p className="text-[11px] text-leaf-500/70 mt-0.5 font-medium">
                       ✓ تم الإكمال
                     </p>
                   )}
@@ -134,7 +134,7 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
 
                 {/* Step number badge */}
                 {!isCurrent && !isCompleted && (
-                  <span className="text-[10px] text-sage/40 font-mono mt-1.5 ml-1">
+                  <span className="text-[10px] text-latte/40 font-mono mt-1.5 ml-1">
                     {String(index + 1).padStart(2, '0')}
                   </span>
                 )}

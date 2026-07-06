@@ -84,8 +84,8 @@ const aggregateCosts = (formData: FormData, partsList: Part[], servicesList: Ser
 
 const CostDetail: React.FC<{ label: React.ReactNode; value: string | number; isSubItem?: boolean }> = ({ label, value, isSubItem = false }) => (
     <div className={`flex justify-between items-center py-1 ${isSubItem ? 'pl-4 text-xs' : 'text-sm'}`}>
-        <span className={isSubItem ? "text-slate-500 dark:text-slate-400" : "text-slate-600 dark:text-slate-300"}>{label}</span>
-        <span className="font-medium text-slate-800 dark:text-slate-100">{typeof value === 'number' ? formatCurrency(value) : value}</span>
+        <span className={isSubItem ? "text-latte dark:text-latte" : "text-ink dark:text-latte/70"}>{label}</span>
+        <span className="font-medium text-ink dark:text-cream">{typeof value === 'number' ? formatCurrency(value) : value}</span>
     </div>
 );
 
@@ -108,12 +108,12 @@ const CostBreakdownModal: React.FC<CostBreakdownModalProps> = ({ isOpen, onClose
             <div 
                 role="dialog"
                 aria-modal="true"
-                className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-2xl m-4 transform transition-all duration-300 scale-95 opacity-0 animate-fade-in-scale max-h-[90vh] flex flex-col"
+                className="bg-cream dark:bg-espresso rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-2xl m-4 transform transition-all duration-300 scale-95 opacity-0 animate-fade-in-scale max-h-[90vh] flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="flex justify-between items-center mb-4 pb-4 border-b border-slate-200 dark:border-slate-700">
-                    <h2 id="modal-title" className="text-xl font-bold text-slate-900 dark:text-white">Aggregated Cost Summary</h2>
-                    <button onClick={onClose} className="p-1 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">
+                <div className="flex justify-between items-center mb-4 pb-4 border-b border-hairline dark:border-hairline">
+                    <h2 id="modal-title" className="text-xl font-bold text-ink dark:text-white">Aggregated Cost Summary</h2>
+                    <button onClick={onClose} className="p-1 rounded-full text-latte dark:text-latte hover:bg-cream dark:hover:bg-espresso-light/50">
                         <XMarkIcon className="h-6 w-6" />
                     </button>
                 </div>
@@ -134,7 +134,7 @@ const CostBreakdownModal: React.FC<CostBreakdownModalProps> = ({ isOpen, onClose
                                                 key={`${data.name}#${data.unitCost}`}
                                                 label={
                                                     <span>
-                                                        {data.count}x {data.name} <span className="text-slate-400">@ {formatCurrency(data.unitCost)}</span>
+                                                        {data.count}x {data.name} <span className="text-latte">@ {formatCurrency(data.unitCost)}</span>
                                                     </span>
                                                 }
                                                 value={data.totalCost}
@@ -153,7 +153,7 @@ const CostBreakdownModal: React.FC<CostBreakdownModalProps> = ({ isOpen, onClose
                                                 key={`${data.name}#${data.unitCost}`}
                                                 label={
                                                     <span>
-                                                        {data.count}x {data.name} <span className="text-slate-400">@ {formatCurrency(data.unitCost)}</span>
+                                                        {data.count}x {data.name} <span className="text-latte">@ {formatCurrency(data.unitCost)}</span>
                                                     </span>
                                                 }
                                                 value={data.totalCost}
@@ -166,13 +166,13 @@ const CostBreakdownModal: React.FC<CostBreakdownModalProps> = ({ isOpen, onClose
                         </>
                     ) : (
                         <div className="flex items-center justify-center h-full">
-                           <p className="text-slate-500 dark:text-slate-400 text-center py-8">No maintenance costs to display.</p>
+                           <p className="text-latte dark:text-latte text-center py-8">No maintenance costs to display.</p>
                         </div>
                     )}
                 </div>
-                <div className="mt-6 pt-4 pb-safe border-t border-slate-200 dark:border-slate-700 flex justify-between items-center">
-                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Grand Total:</span>
-                    <span className="text-xl font-bold text-teal-800 dark:text-teal-300">{formatCurrency(aggregatedData.grandTotal)}</span>
+                <div className="mt-6 pt-4 pb-safe border-t border-hairline dark:border-hairline flex justify-between items-center">
+                    <span className="text-sm font-medium text-latte dark:text-latte">Grand Total:</span>
+                    <span className="text-xl font-bold text-copper-800 dark:text-copper-400">{formatCurrency(aggregatedData.grandTotal)}</span>
                 </div>
                 <style>{`
                     @keyframes fade-in-scale {

@@ -25,8 +25,8 @@ export default defineConfig(({ mode }) => {
             start_url: '/',
             scope: '/',
             display: 'standalone',
-            background_color: '#0f766e',
-            theme_color: '#0d9488',
+	            background_color: '#FAF6EF',
+	            theme_color: '#241B16',
             orientation: 'portrait-primary',
             icons: [
               // ponytail:logo.png is 1392x768, not 192/512 maskable. Add sized
@@ -92,7 +92,14 @@ export default defineConfig(({ mode }) => {
           'react': 'react', // Force single React instance to prevent hooks context errors
         }
       },
-      build: {
+      test: {
+      include: ['tests/**/*.test.{ts,tsx}'],
+      exclude: ['e2e/**', 'tests/**/*.spec.ts'],
+      environment: 'jsdom',
+      setupFiles: ['./vitest.setup.ts'],
+      globals: true
+    },
+    build: {
         rollupOptions: {
           output: {
             manualChunks: {

@@ -22,14 +22,14 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ titleContent, childre
     const shouldRenderChildren = isOpen || hasBeenOpened;
 
     return (
-        <div className={`border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 shadow-md transition-shadow duration-300 ${isOpen ? 'shadow-lg' : 'shadow-md'}`}>
+        <div className={`border border-hairline rounded-xl bg-cream shadow-md transition-shadow duration-300 ${isOpen ? 'shadow-lg' : 'shadow-md'}`}>
             <button
                 type="button"
-                className={`w-full flex justify-between items-center p-4 cursor-pointer rounded-t-xl ${!isOpen ? 'rounded-b-xl' : ''} focus:outline-none focus-visible:ring-2 focus-visible:ring-success-500/40`}
+                className={`w-full flex justify-between items-center p-4 cursor-pointer rounded-t-xl ${!isOpen ? 'rounded-b-xl' : ''} focus:outline-none focus-visible:ring-2 focus-visible:ring-copper-500/30`}
                 onClick={() => setIsOpen(!isOpen)}
                 aria-expanded={isOpen}
             >
-                <div className="flex-grow font-semibold text-slate-800 dark:text-slate-200 relative text-right">
+                <div className="flex-grow font-semibold text-ink relative text-right">
                     {titleContent}
                 </div>
                 <div className="flex items-center gap-2 sm:gap-4 pl-2">
@@ -38,13 +38,13 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ titleContent, childre
                             role="button"
                             tabIndex={-1}
                             onClick={(e) => { e.stopPropagation(); onRemove(); }}
-                            className="text-xs font-semibold text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 transition-colors"
+                            className="text-xs font-semibold text-latte hover:text-ember-600 transition-colors"
                             aria-label={removeLabel}
                         >
                             حذف
                         </span>
                     )}
-                    <ChevronUpIcon className={`w-5 h-5 text-slate-400 transform transition-transform duration-300 ${isOpen ? '' : 'rotate-180'}`} />
+                    <ChevronUpIcon className={`w-5 h-5 text-latte transform transition-transform duration-300 ${isOpen ? '' : 'rotate-180'}`} />
                 </div>
             </button>
             <div
@@ -53,7 +53,7 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ titleContent, childre
                 }`}
             >
                 <div className="overflow-hidden rounded-b-xl">
-                    <div className="p-4 border-t border-slate-200 dark:border-slate-700">
+                    <div className="p-4 border-t border-hairline">
                         {shouldRenderChildren && children}
                     </div>
                 </div>

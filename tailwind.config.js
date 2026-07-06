@@ -6,6 +6,7 @@ export default {
     './App.tsx',
     './components/**/*.{ts,tsx}',
     './utils/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
   ],
   darkMode: 'class',
   theme: {
@@ -20,8 +21,73 @@ export default {
           'Roboto',
           'sans-serif',
         ],
+        display: ['Cairo', 'Tajawal', 'sans-serif'],
+        mono: ['IBM Plex Mono', 'Cascadia Code', 'Consolas', 'monospace'],
       },
       colors: {
+        /* ── Brass & Cream — coffee-service palette ──
+         * Dark chrome (espresso) for sidebar/header rail,
+         * warm paper for content area,
+         * copper accent for primary CTAs,
+         * brass for signature hairlines,
+         * leaf-green for success/sync,
+         * ember for danger.
+         * Kept: lava + success scales for backward compat during migration;
+         *        prefer the new named tokens going forward.
+         */
+        paper: '#FAF6EF',
+        cream: {
+          DEFAULT: '#F1EADB',
+          2: '#E8DFCC',
+          3: '#DED3B8',
+        },
+        espresso: {
+          DEFAULT: '#241B16',
+          light: '#3D2C24',
+          lighter: '#5C4639',
+        },
+        ink: '#3D2C24',
+        latte: '#8A7468',
+        hairline: '#D9CFB8',
+        brass: '#C9A86A',
+        copper: {
+          50: '#fdf4eb',
+          100: '#f9e3cc',
+          200: '#f2c399',
+          300: '#e8a266',
+          400: '#d98940',
+          500: '#B87333',
+          600: '#9E5E28',
+          700: '#7D4A1E',
+          800: '#5E3715',
+          900: '#3F250D',
+        },
+        leaf: {
+          50: '#f0f7f0',
+          100: '#d6ecd6',
+          200: '#b0d9b0',
+          300: '#82be82',
+          400: '#5fa55f',
+          500: '#4F7A52',
+          600: '#3f6241',
+          700: '#314e33',
+          800: '#243a25',
+          900: '#172817',
+        },
+        ember: {
+          50: '#fdf0ee',
+          100: '#f8d7d2',
+          200: '#f0afa6',
+          300: '#e28377',
+          400: '#d35a4c',
+          500: '#C0392B',
+          600: '#a62e22',
+          700: '#87231a',
+          800: '#6a1c14',
+          900: '#4c1310',
+        },
+
+        /* ── Legacy tokens (being phased out) ── */
         midnight: '#081619',
         deep: '#102A30',
         sea: '#1A434C',
@@ -39,12 +105,6 @@ export default {
           800: '#77150d',
           900: '#500c08',
         },
-        surface: {
-          DEFAULT: '#102A30',
-          elevated: '#1A434C',
-          muted: '#081619',
-        },
-        // Midoe's brand palette derived from public/logo.svg
         brand: {
           red: '#AF2025',
           'red-dark': '#8E1A1E',
@@ -54,7 +114,6 @@ export default {
           espresso: '#3D2C24',
           'espresso-light': '#5C4639',
         },
-        // Semantic: teal is now success/sync/complete, not the brand accent
         success: {
           50: '#f0fdfa',
           100: '#ccfbf1',
@@ -67,7 +126,6 @@ export default {
           800: '#115e59',
           900: '#134e4a',
         },
-        // Functional aliases for backward compatibility during migration
         midoe: {
           50: '#f0fdfa',
           100: '#ccfbf1',
@@ -81,7 +139,6 @@ export default {
           900: '#134e4a',
         },
       },
-      // Safe-area utilities for iOS notch / home indicator.
       padding: {
         safe: 'env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)',
       },

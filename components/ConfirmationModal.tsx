@@ -22,24 +22,24 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, 
             aria-modal="true"
             onClick={onClose}
         >
-            <div 
-                className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md m-4 transform transition-all duration-300 scale-95 opacity-0 animate-fade-in-scale"
+            <div
+                className="bg-cream dark:bg-espresso-light rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md m-4 transform transition-all duration-300 scale-95 opacity-0 animate-fade-in-scale"
                 onClick={(e) => e.stopPropagation()}
             >
-                <h2 id="modal-title" className="text-xl font-bold text-slate-900 dark:text-white">{title}</h2>
-                <p className="mt-2 text-slate-600 dark:text-slate-300">{message}</p>
+                <h2 id="modal-title" className="text-xl font-bold text-ink dark:text-cream">{title}</h2>
+                <p className="mt-2 text-latte dark:text-cream/70">{message}</p>
                 <div className="mt-8 flex justify-end space-x-3">
-                    <button 
-                        onClick={onClose} 
+                    <button
+                        onClick={onClose}
                         disabled={isConfirming}
-                        className="px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400 disabled:opacity-50 transform active:scale-95"
+                        className="px-5 py-2.5 text-sm font-semibold text-ink dark:text-cream bg-cream dark:bg-espresso-light border border-hairline rounded-lg hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-copper-500/30 disabled:opacity-50 transform active:scale-95"
                     >
                         No
                     </button>
-                    <button 
-                        onClick={onConfirm} 
+                    <button
+                        onClick={onConfirm}
                         disabled={isConfirming}
-                        className="px-5 py-2.5 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-wait transform active:scale-95"
+                        className="px-5 py-2.5 text-sm font-semibold text-white bg-ember-600 rounded-lg hover:bg-ember-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ember-500 disabled:opacity-50 disabled:cursor-wait transform active:scale-95"
                     >
                         {isConfirming ? 'Deleting...' : 'Yes, Delete'}
                     </button>

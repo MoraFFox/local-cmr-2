@@ -70,28 +70,28 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
+        className="p-2 text-latte hover:text-copper-600 dark:hover:text-copper-400 hover:bg-copper-500/10 dark:hover:bg-copper-500/20 rounded-lg transition-colors"
         title="إجراءات سريعة"
       >
         <BoltIcon className="w-5 h-5" />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden">
+        <div className="absolute right-0 mt-2 w-56 bg-cream dark:bg-espresso-light rounded-xl shadow-xl border border-hairline dark:border-hairline z-50 overflow-hidden">
           <div className="py-1">
             <button
               onClick={handleToggleSolved}
-              className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+              className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
             >
               {record.problemSolved ? (
                 <>
-                  <XCircleIcon className="w-5 h-5 text-red-500" />
-                  <span className="text-sm text-slate-700 dark:text-slate-300">Mark as Unsolved</span>
+                  <XCircleIcon className="w-5 h-5 text-ember-500" />
+                  <span className="text-sm text-ink dark:text-cream">Mark as Unsolved</span>
                 </>
               ) : (
                 <>
-                  <CheckCircleIcon className="w-5 h-5 text-green-500" />
-                  <span className="text-sm text-slate-700 dark:text-slate-300">Mark as Solved</span>
+                  <CheckCircleIcon className="w-5 h-5 text-leaf-500" />
+                  <span className="text-sm text-ink dark:text-cream">Mark as Solved</span>
                 </>
               )}
             </button>
@@ -102,14 +102,14 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
                   setShowRatingPicker(!showRatingPicker);
                   setShowDatePicker(false);
                 }}
-                className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
               >
                 <StarIcon className="w-5 h-5 text-yellow-500" />
-                <span className="text-sm text-slate-700 dark:text-slate-300">Change Rating</span>
+                <span className="text-sm text-ink dark:text-cream">Change Rating</span>
               </button>
 
               {showRatingPicker && (
-                <div className="px-4 py-3 bg-slate-50 dark:bg-slate-700/30 border-t border-slate-100 dark:border-slate-700">
+                <div className="px-4 py-3 bg-cream-2 dark:bg-espresso-light/50 border-t border-hairline dark:border-hairline">
                   <div className="flex items-center justify-center gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
@@ -120,7 +120,7 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
                         {star <= (record.visitRating || 0) ? (
                           <StarIconSolid className="w-6 h-6 text-yellow-400" />
                         ) : (
-                          <StarIcon className="w-6 h-6 text-slate-300 dark:text-slate-600" />
+                          <StarIcon className="w-6 h-6 text-cream-3 dark:text-espresso-light" />
                         )}
                       </button>
                     ))}
@@ -135,19 +135,19 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
                   setShowDatePicker(!showDatePicker);
                   setShowRatingPicker(false);
                 }}
-                className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
               >
-                <CalendarIcon className="w-5 h-5 text-blue-500" />
-                <span className="text-sm text-slate-700 dark:text-slate-300">Change Date</span>
+                <CalendarIcon className="w-5 h-5 text-copper-500" />
+                <span className="text-sm text-ink dark:text-cream">Change Date</span>
               </button>
 
               {showDatePicker && (
-                <div className="px-4 py-3 bg-slate-50 dark:bg-slate-700/30 border-t border-slate-100 dark:border-slate-700">
+                <div className="px-4 py-3 bg-cream-2 dark:bg-espresso-light/50 border-t border-hairline dark:border-hairline">
                   <input
                     type="date"
                     value={record.maintenanceDate}
                     onChange={handleDateChange}
-                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full px-3 py-2 bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline rounded-lg text-sm text-ink dark:text-cream focus:outline-none focus:ring-2 focus:ring-copper-500"
                   />
                 </div>
               )}
@@ -155,8 +155,8 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
 
             {onDelete && (
               <>
-                <div className="border-t border-slate-200 dark:border-slate-700" />
-                
+                <div className="border-t border-hairline dark:border-hairline" />
+
                 <div className="relative">
                   <button
                     onClick={() => {
@@ -164,30 +164,30 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
                       setShowRatingPicker(false);
                       setShowDatePicker(false);
                     }}
-                    className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-red-600 dark:text-red-400"
+                    className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-ember-500/10 dark:hover:bg-ember-500/20 transition-colors text-ember-700 dark:text-ember-300"
                   >
                     <TrashIcon className="w-5 h-5" />
                     <span className="text-sm font-medium">Delete Record</span>
                   </button>
 
                   {showDeleteConfirm && (
-                    <div className="px-4 py-3 bg-red-50 dark:bg-red-900/30 border-t border-red-100 dark:border-red-800">
+                    <div className="px-4 py-3 bg-ember-500/10 dark:bg-ember-500/20 border-t border-ember-500/20 dark:border-ember-500/30">
                       <div className="flex items-start gap-2 mb-3">
-                        <ExclamationTriangleIcon className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-                        <p className="text-sm text-red-800 dark:text-red-200">
+                        <ExclamationTriangleIcon className="w-5 h-5 text-ember-700 dark:text-ember-300 flex-shrink-0 mt-0.5" />
+                        <p className="text-sm text-ember-700 dark:text-ember-300">
                           Are you sure? This action cannot be undone.
                         </p>
                       </div>
                       <div className="flex gap-2">
                         <button
                           onClick={handleDelete}
-                          className="flex-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors"
+                          className="flex-1 px-3 py-2 bg-ember-600 hover:bg-ember-700 text-white text-sm font-medium rounded-lg transition-colors"
                         >
                           Yes, Delete
                         </button>
                         <button
                           onClick={() => setShowDeleteConfirm(false)}
-                          className="flex-1 px-3 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
+                          className="flex-1 px-3 py-2 bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-ink dark:text-cream text-sm font-medium rounded-lg hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
                         >
                           Cancel
                         </button>

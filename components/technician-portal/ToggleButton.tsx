@@ -16,10 +16,10 @@ interface ToggleButtonProps {
 }
 
 const activeMap = {
-  teal: 'border-teal-500 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 shadow-sm',
-  red: 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 shadow-sm',
-  blue: 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 shadow-sm',
-  amber: 'border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 shadow-sm',
+  teal: 'border-copper-500 bg-copper-500/10 dark:bg-copper-500/20 text-copper-700 dark:text-copper-400 shadow-sm',
+  red: 'border-ember-500 bg-ember-500/10 dark:bg-ember-500/20 text-ember-700 dark:text-ember-300 shadow-sm',
+  blue: 'border-copper-500 bg-copper-500/10 dark:bg-copper-500/20 text-copper-700 dark:text-copper-400 shadow-sm',
+  amber: 'border-copper-500 bg-copper-500/10 dark:bg-copper-500/20 text-copper-700 dark:text-copper-400 shadow-sm',
 };
 
 const ToggleButton: React.FC<ToggleButtonProps> = ({
@@ -45,7 +45,7 @@ const ToggleButton: React.FC<ToggleButtonProps> = ({
             } ${
               isActive
                 ? activeMap[accentColor]
-                : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-500'
+                : 'border-hairline dark:border-hairline text-ink dark:text-cream hover:border-brass dark:hover:border-brass'
             }`}
           >
             {option.icon && (

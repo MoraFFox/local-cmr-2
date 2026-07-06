@@ -47,8 +47,8 @@ function RadioGroup<T extends string | boolean>({ name, label, options, value, o
         }
     }, [disabled, options, value, onChange]);
 
-    const selectedClasses = 'border-success-500 bg-success-50 dark:bg-success-900/20 text-success-900 dark:text-success-100';
-    const unselectedClasses = 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600';
+    const selectedClasses = 'border-copper-500 bg-copper-500/10 text-copper-700 dark:text-copper-400';
+    const unselectedClasses = 'border-hairline bg-cream text-ink hover:border-copper-500/30';
 
     const commonButtonClasses = `
         relative flex items-center gap-3 rounded-xl border-2 transition-all duration-200
@@ -76,24 +76,24 @@ function RadioGroup<T extends string | boolean>({ name, label, options, value, o
                 <div className={`
                     rounded-full border-2 flex items-center justify-center transition-colors
                     ${inline ? 'w-5 h-5' : 'w-6 h-6 flex-shrink-0'}
-                    ${isSelected ? 'border-success-500 bg-success-500' : 'border-slate-300 dark:border-slate-500'}
+                    ${isSelected ? 'border-copper-500 bg-copper-500' : 'border-hairline'}
                 `}>
                     {isSelected && <div className={`rounded-full bg-white ${inline ? 'w-2 h-2' : 'w-2.5 h-2.5'}`} />}
                 </div>
 
                 <div className={`flex-1 min-w-0 ${inline ? '' : ''}`}>
-                    <div className={`font-semibold ${isSelected ? 'text-success-900 dark:text-success-100' : 'text-slate-900 dark:text-slate-100'}`}>
+                    <div className={`font-semibold ${isSelected ? 'text-copper-700 dark:text-copper-400' : 'text-ink'}`}>
                         {option.label}
                     </div>
                     {option.description && !inline && (
-                        <div className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                        <div className="text-sm text-latte mt-0.5">
                             {option.description}
                         </div>
                     )}
                 </div>
 
                 {isSelected && !inline && (
-                    <CheckCircleIcon className="w-6 h-6 text-success-500 flex-shrink-0" />
+                    <CheckCircleIcon className="w-6 h-6 text-copper-500 flex-shrink-0" />
                 )}
             </button>
         );
@@ -107,7 +107,7 @@ function RadioGroup<T extends string | boolean>({ name, label, options, value, o
             onKeyDown={handleKeyDown}
             className={disabled ? 'opacity-60' : ''}
         >
-            {label && <label className="text-sm font-medium text-slate-700 dark:text-slate-300 block mb-3">{label}</label>}
+            {label && <label className="text-sm font-medium text-ink block mb-3">{label}</label>}
             <div className={inline ? 'flex flex-wrap gap-3' : 'space-y-2'}>
                 {options.map((option) => renderOption(option, value === option.value))}
             </div>

@@ -19,13 +19,13 @@ const TechButton: React.FC<TechButtonProps> = ({
     const getBaseStyles = () => {
         switch (variant) {
             case 'primary':
-                return 'bg-teal-600 text-white shadow-[0_0_20px_rgba(20,184,166,0.3)] hover:bg-teal-500 active:bg-teal-700 border border-teal-500/50';
+                return 'btn-primary';
             case 'secondary':
-                return 'bg-slate-800 text-slate-200 border border-slate-700 hover:bg-slate-700 active:bg-slate-900';
+                return 'bg-cream border border-hairline text-ink hover:bg-cream-2 active:bg-cream-3';
             case 'danger':
-                return 'bg-red-500/10 text-red-500 border border-red-500/50 hover:bg-red-500/20 active:bg-red-500/30';
+                return 'bg-ember-500/10 text-ember-700 border border-ember-500/50 hover:bg-ember-500/20 active:bg-ember-500/30';
             case 'ghost':
-                return 'bg-transparent text-slate-400 hover:text-white active:bg-white/5';
+                return 'bg-transparent text-latte hover:text-ink active:bg-copper-500/5';
         }
     };
 

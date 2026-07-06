@@ -23,14 +23,14 @@ const TechnicianFooter: React.FC<TechnicianFooterProps> = ({
   validationError,
 }) => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-gradient-to-t from-slate-950 via-slate-950/95 to-transparent pb-[env(safe-area-inset-bottom)]">
+    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-gradient-to-t from-espresso via-espresso/95 to-transparent pb-[env(safe-area-inset-bottom)]">
       <div className="max-w-2xl mx-auto space-y-3">
-        
+
         {/* Validation Error Banner */}
         {validationError && (
-            <div className="animate-in slide-in-from-bottom-2 fade-in bg-red-500/10 border border-red-500/50 rounded-xl p-3 flex items-center gap-3 backdrop-blur-sm">
-                <ExclamationTriangleIcon className="w-5 h-5 text-red-400 shrink-0" />
-                <span className="text-sm font-bold text-red-200">{validationError}</span>
+            <div className="animate-in slide-in-from-bottom-2 fade-in bg-ember-500/10 border border-ember-500/50 rounded-xl p-3 flex items-center gap-3 backdrop-blur-sm">
+                <ExclamationTriangleIcon className="w-5 h-5 text-ember-300 shrink-0" />
+                <span className="text-sm font-bold text-ember-300">{validationError}</span>
             </div>
         )}
 

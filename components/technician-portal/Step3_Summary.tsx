@@ -47,9 +47,9 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
   onUpdateSupervisorPhone,
 }) => {
   const renderDataRow = (label: string, value: string | React.ReactNode) => (
-    <div className="flex justify-between items-start py-2 border-b border-dashed border-slate-800 last:border-0">
-      <span className="text-sm text-slate-500">{label}</span>
-      <span className="text-sm font-medium text-slate-200 text-right max-w-[60%] break-words">
+    <div className="flex justify-between items-start py-2 border-b border-dashed border-hairline last:border-0">
+      <span className="text-sm text-latte">{label}</span>
+      <span className="text-sm font-medium text-ink text-right max-w-[60%] break-words">
         {value}
       </span>
     </div>
@@ -64,7 +64,7 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
         icon={<BuildingOfficeIcon />} 
         variant="primary"
         action={
-            <button onClick={() => onEditStep(1)} className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-teal-400 transition-colors">
+            <button onClick={() => onEditStep(1)} className="p-1 hover:bg-cream-2 rounded text-latte hover:text-copper-600 transition-colors">
                 <PencilIcon className="w-4 h-4" />
             </button>
         }
@@ -83,7 +83,7 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
         icon={<WrenchScrewdriverIcon />} 
         variant="active"
         action={
-            <button onClick={() => onEditStep(2)} className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-success-400 transition-colors" aria-label="تعديل">
+            <button onClick={() => onEditStep(2)} className="p-1 hover:bg-cream-2 rounded text-latte hover:text-leaf-600 transition-colors" aria-label="تعديل">
                 <PencilIcon className="w-4 h-4" />
             </button>
         }
@@ -91,17 +91,17 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
          <div className="space-y-4">
             <div className={`p-3 rounded-lg border flex items-center gap-3 ${
                 step2Data.visitType === 'problem'
-                ? 'bg-red-500/10 border-red-500/30 text-red-400'
-                : 'bg-success-500/10 border-success-500/30 text-success-400'
+                ? 'bg-ember-500/10 border-ember-500/30 text-ember-700'
+                : 'bg-leaf-500/10 border-leaf-500/30 text-leaf-600'
             }`}>
                {step2Data.visitType === 'problem' ? (
                    <>
-                     <div className="p-1 bg-red-500/20 rounded"><WrenchScrewdriverIcon className="w-5 h-5"/></div>
+                     <div className="p-1 bg-ember-500/20 rounded"><WrenchScrewdriverIcon className="w-5 h-5"/></div>
                      <span className="font-bold">{ar.portal.problemVisit}</span>
                    </>
                ) : (
                    <>
-                     <div className="p-1 bg-success-500/20 rounded"><CheckBadgeIcon className="w-5 h-5"/></div>
+                     <div className="p-1 bg-leaf-500/20 rounded"><CheckBadgeIcon className="w-5 h-5"/></div>
                      <span className="font-bold">{ar.portal.scheduledVisit}</span>
                    </>
                )}
@@ -110,12 +110,12 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
             {/* Services */}
             {step2Data.servicesPerformed.length > 0 && (
                 <div>
-                    <h4 className="text-xs font-bold uppercase text-slate-500 mb-2">{ar.tactical.executedProtocols}</h4>
-                    <div className="bg-slate-950/50 rounded-lg p-2 border border-slate-800 space-y-2">
+                    <h4 className="text-xs font-bold uppercase text-latte mb-2">{ar.tactical.executedProtocols}</h4>
+                    <div className="bg-cream-2/50 rounded-lg p-2 border border-hairline space-y-2">
                         {step2Data.servicesPerformed.map((s, idx) => (
                             <div key={idx} className="flex justify-between text-sm">
-                                <span className="text-slate-300">{s.name}</span>
-                                <span className="text-success-400 font-mono">x{s.count}</span>
+                                <span className="text-ink">{s.name}</span>
+                                <span className="text-leaf-600 font-mono">x{s.count}</span>
                             </div>
                         ))}
                     </div>
@@ -125,12 +125,12 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
             {/* Parts */}
             {step2Data.partsWereReplaced && step2Data.partsReplaced.length > 0 && (
                 <div>
-                   <h4 className="text-xs font-bold uppercase text-slate-500 mb-2">{ar.tactical.replacedHardware}</h4>
-                   <div className="bg-slate-950/50 rounded-lg p-2 border border-slate-800 space-y-2">
+                   <h4 className="text-xs font-bold uppercase text-latte mb-2">{ar.tactical.replacedHardware}</h4>
+                   <div className="bg-cream-2/50 rounded-lg p-2 border border-hairline space-y-2">
                        {step2Data.partsReplaced.map((p, idx) => (
                            <div key={idx} className="flex justify-between text-sm">
-                               <span className="text-slate-300">{p.name}</span>
-                               <span className="text-amber-400 font-mono">x{p.count}</span>
+                               <span className="text-ink">{p.name}</span>
+                               <span className="text-copper-600 font-mono">x{p.count}</span>
                            </div>
                        ))}
                    </div>
@@ -163,18 +163,18 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
          <div className="space-y-4">
              {/* Problem Solved Toggle (Quick Edit) */}
              {step2Data.visitType === 'problem' && (
-                 <div className="flex items-center justify-between p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
-                     <span className="text-sm font-medium text-slate-300">{ar.step2.problemSolvedLabel}</span>
+                 <div className="flex items-center justify-between p-3 bg-cream-2 border border-hairline rounded-xl">
+                     <span className="text-sm font-medium text-ink">{ar.step2.problemSolvedLabel}</span>
                      <div className="flex items-center gap-2">
-                         <button 
+                         <button
                             onClick={() => onUpdateProblemSolved(true)}
-                            className={`px-3 py-1 rounded text-xs font-bold transition-all ${step2Data.problemSolved ? 'bg-success-500 text-slate-900' : 'text-slate-500 bg-slate-800'}`}
+                            className={`px-3 py-1 rounded text-xs font-bold transition-all ${step2Data.problemSolved ? 'bg-leaf-500 text-white' : 'text-latte bg-cream-3'}`}
                          >
                             {ar.common.yes}
                          </button>
-                         <button 
+                         <button
                             onClick={() => onUpdateProblemSolved(false)}
-                            className={`px-3 py-1 rounded text-xs font-bold transition-all ${!step2Data.problemSolved ? 'bg-red-500 text-white' : 'text-slate-500 bg-slate-800'}`}
+                            className={`px-3 py-1 rounded text-xs font-bold transition-all ${!step2Data.problemSolved ? 'bg-ember-500 text-white' : 'text-latte bg-cream-3'}`}
                          >
                             {ar.common.no}
                          </button>
@@ -184,10 +184,10 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
              
              {/* Rating */}
              {step1Data.clientBaristaName && (
-                 <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
+                 <div className="p-3 bg-cream-2 border border-hairline rounded-xl">
                      <div className="flex justify-between items-center mb-2">
-                         <span className="text-sm font-medium text-slate-300">{step1Data.clientBaristaName}</span>
-                         <span className="text-xs text-slate-500">{ar.tactical.clientContact}</span>
+                         <span className="text-sm font-medium text-ink">{step1Data.clientBaristaName}</span>
+                         <span className="text-xs text-latte">{ar.tactical.clientContact}</span>
                      </div>
                      <CompactStarRating 
                         value={step1Data.clientBaristaRating}
@@ -198,9 +198,9 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
              )}
 
              {step2Data.notes && (
-                 <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
-                     <h4 className="text-xs font-bold uppercase text-slate-500 mb-1">{ar.tactical.fieldNotes}</h4>
-                     <p className="text-sm text-slate-300 italic">"{step2Data.notes}"</p>
+                 <div className="p-3 bg-cream-2 border border-hairline rounded-xl">
+                     <h4 className="text-xs font-bold uppercase text-latte mb-1">{ar.tactical.fieldNotes}</h4>
+                     <p className="text-sm text-ink italic">"{step2Data.notes}"</p>
                  </div>
              )}
          </div>

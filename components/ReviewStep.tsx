@@ -33,10 +33,10 @@ const Detail: React.FC<{ label: string; value: React.ReactNode }> = ({
 }) =>
   value || value === 0 || value === "لا" || value === "نعم" ? (
     <div className="py-2 sm:grid sm:grid-cols-3 sm:gap-4">
-      <dt className="text-sm font-medium text-slate-500 dark:text-slate-400">
+      <dt className="text-sm font-medium text-latte">
         {label}
       </dt>
-      <dd className="mt-1 text-sm text-slate-900 dark:text-slate-100 sm:col-span-2 sm:mt-0 break-words">
+      <dd className="mt-1 text-sm text-ink sm:col-span-2 sm:mt-0 break-words">
         {value}
       </dd>
     </div>
@@ -49,14 +49,14 @@ const ContactReview: React.FC<{ contacts: Contact[] }> = ({ contacts }) => {
 
   return (
     <div className="py-2 sm:grid sm:grid-cols-3 sm:gap-4">
-      <dt className="text-sm font-medium text-slate-500 dark:text-slate-400">
+      <dt className="text-sm font-medium text-latte">
         Contacts
       </dt>
-      <dd className="mt-1 text-sm text-slate-900 dark:text-slate-100 sm:col-span-2 sm:mt-0 space-y-3">
+      <dd className="mt-1 text-sm text-ink sm:col-span-2 sm:mt-0 space-y-3">
         {contacts.map((contact) => (
           <div key={contact.id}>
             <p className="font-semibold">{contact.name}</p>
-            <p className="text-xs text-slate-600 dark:text-slate-400 capitalize">
+            <p className="text-xs text-latte capitalize">
               {contact.position === "custom"
                 ? contact.customPosition
                 : contact.position.replace("_", " ")}
@@ -65,7 +65,7 @@ const ContactReview: React.FC<{ contacts: Contact[] }> = ({ contacts }) => {
               {contact.phoneNumbers.map((phone) => (
                 <li
                   key={phone.id}
-                  className="text-xs text-slate-500 dark:text-slate-400"
+                  className="text-xs text-latte"
                 >
                   {phone.number}
                 </li>
@@ -195,20 +195,20 @@ const MaintenanceRecordReview: React.FC<{
 
   return (
     <div
-      className={`p-3 my-2 border dark:border-slate-600 rounded-md ${isFollowUp ? "bg-slate-100/50 dark:bg-slate-800/40" : "bg-slate-50/50 dark:bg-slate-800/20"}`}
+      className={`p-3 my-2 border border-hairline rounded-md ${isFollowUp ? "bg-cream/50" : "bg-cream-2/50"}`}
     >
       <div className="flex justify-between items-center">
-        <h5 className="font-semibold text-slate-700 dark:text-slate-300">
+        <h5 className="font-semibold text-ink">
           {isFollowUp ? "Follow-up Visit:" : "Record from"}{" "}
           {record.maintenanceDate}
         </h5>
         {record.nextVisitDate && (
-          <span className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-1 rounded-full font-medium">
+          <span className="text-xs bg-cream-2 text-espresso dark:bg-espresso dark:text-cream px-2 py-1 rounded-full font-medium">
             Next Visit: {record.nextVisitDate}
           </span>
         )}
       </div>
-      <dl className="mt-2 text-xs divide-y divide-slate-200 dark:divide-slate-700">
+      <dl className="mt-2 text-xs divide-y divide-hairline">
         <Detail label="الموظفون" value={record.baristaName} />
         <Detail label="النوع" value={record.type} />
         <Detail
@@ -278,7 +278,7 @@ const MaintenanceRecordReview: React.FC<{
                 {record.supervisors.map((s) => (
                   <li
                     key={s.id}
-                    className="border-l-2 pl-2 border-slate-200 dark:border-slate-600"
+                    className="border-l-2 pl-2 border-hairline"
                   >
                     <p className="font-semibold">{s.name}</p>
                     <p className="text-xs">{s.phone}</p>
@@ -289,8 +289,8 @@ const MaintenanceRecordReview: React.FC<{
           />
         )}
 
-        <div className="pt-3 mt-3 border-t dark:border-slate-700">
-          <h6 className="text-sm font-semibold text-slate-600 dark:text-slate-400">
+        <div className="pt-3 mt-3 border-t border-hairline">
+          <h6 className="text-sm font-semibold text-latte">
             Cost Breakdown for this Visit
           </h6>
           <dl className="mt-1 text-xs">
@@ -308,7 +308,7 @@ const MaintenanceRecordReview: React.FC<{
                         <li key={s.name}>
                           {s.count}x {s.name}{" "}
                           {s.paidByClient && (
-                            <span className="text-xs font-semibold text-teal-600 dark:text-teal-400">
+                            <span className="text-xs font-semibold text-copper-700">
                               (Paid by Client)
                             </span>
                           )}
@@ -332,7 +332,7 @@ const MaintenanceRecordReview: React.FC<{
                       <li key={p.name}>
                         {p.count}x {p.name}{" "}
                         {p.paidByClient && (
-                          <span className="text-xs font-semibold text-teal-600 dark:text-teal-400">
+                          <span className="text-xs font-semibold text-copper-700">
                             (Paid by Client)
                           </span>
                         )}
@@ -350,7 +350,7 @@ const MaintenanceRecordReview: React.FC<{
             <Detail
               label="This Visit Total"
               value={
-                <span className="font-bold text-base text-slate-800 dark:text-slate-200">
+                <span className="font-bold text-base text-ink">
                   {formatCurrency(singleRecordTotal)}
                 </span>
               }
@@ -358,8 +358,8 @@ const MaintenanceRecordReview: React.FC<{
           </dl>
         </div>
         {record.followUpVisits && record.followUpVisits.length > 0 && (
-          <div className="pl-4 mt-2 pt-2 border-t dark:border-slate-600">
-            <h6 className="text-sm font-semibold text-slate-600 dark:text-slate-400">
+          <div className="pl-4 mt-2 pt-2 border-t border-hairline">
+            <h6 className="text-sm font-semibold text-latte">
               Follow-up Visits:
             </h6>
             <div className="space-y-2 mt-1">
@@ -379,7 +379,7 @@ const MaintenanceRecordReview: React.FC<{
           <Detail
             label="Total For Issue (incl. follow-ups)"
             value={
-              <span className="font-bold text-lg text-teal-800 dark:text-teal-300">
+            <span className="font-bold text-lg text-copper-700">
                 {formatCurrency(totalCostForThisAndChildren)}
               </span>
             }
@@ -465,10 +465,10 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
     <div className="space-y-8">
       {/* Main Company Info */}
       <section>
-        <h3 className="text-lg font-semibold text-teal-700 dark:text-teal-400 border-b dark:border-slate-600 pb-2 mb-3">
+        <h3 className="text-lg font-semibold text-copper-700 border-b border-hairline pb-2 mb-3">
           Company Details
         </h3>
-        <dl className="divide-y divide-slate-200 dark:divide-slate-700">
+        <dl className="divide-y divide-hairline">
           <Detail label="اسم الشركة" value={formData.companyName} />
           <Detail label="Email" value={formData.email} />
           <Detail label="الرقم الضريبي" value={formData.taxNumber} />
@@ -490,22 +490,22 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
       {/* Branches */}
       {formData.hasBranches && formData.branches.length > 0 && (
         <section>
-          <h3 className="text-lg font-semibold text-teal-700 dark:text-teal-400 border-b dark:border-slate-600 pb-2 mb-3">
+          <h3 className="text-lg font-semibold text-copper-700 border-b border-hairline pb-2 mb-3">
             Branches
           </h3>
           <div className="space-y-4">
             {formData.branches.map((branch, index) => (
               <div
                 key={branch.id}
-                className="p-4 border dark:border-slate-700 rounded-lg bg-slate-50/70 dark:bg-slate-800/30"
+                className="p-4 border border-hairline rounded-lg bg-cream/70"
               >
-                <h4 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">
+                <h4 className="font-semibold text-ink mb-2">
                   {formData.companyName}
                   {branch.branchName
                     ? ` ${branch.branchName}`
                     : ` (Branch ${index + 1})`}
                 </h4>
-                <dl className="divide-y divide-slate-200 dark:divide-slate-700">
+                <dl className="divide-y divide-hairline">
                   <Detail
                     label="Branch Specific Name"
                     value={branch.branchName || "N/A"}
@@ -520,18 +520,18 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                   />
                 </dl>
                 {branch.baristas && branch.baristas.length > 0 && (
-                  <div className="mt-4 pt-3 border-t dark:border-slate-700">
-                    <h5 className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-2">
+                  <div className="mt-4 pt-3 border-t border-hairline">
+                    <h5 className="text-sm font-semibold text-ink mb-2">
                       Baristas at this Branch:
                     </h5>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                       {branch.baristas.map((barista) => (
                         <div
                           key={barista.id}
-                          className="flex flex-col items-center text-center p-2 rounded-lg bg-white/50 dark:bg-slate-900/20"
+                          className="flex flex-col items-center text-center p-2 rounded-lg bg-cream/50"
                         >
                           <Avatar name={barista.name} />
-                          <p className="font-medium text-slate-800 dark:text-slate-100 text-sm mt-2">
+                          <p className="font-medium text-ink text-sm mt-2">
                             {barista.name}
                           </p>
                           <div className="flex mt-1">
@@ -547,7 +547,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                               (_, i) => (
                                 <StarIcon
                                   key={i}
-                                  className="h-4 w-4 text-slate-300 dark:text-slate-600"
+                                  className="h-4 w-4 text-hairline"
                                 />
                               ),
                             )}
@@ -565,10 +565,10 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
 
       {/* Warehouse */}
       <section>
-        <h3 className="text-lg font-semibold text-teal-700 dark:text-teal-400 border-b dark:border-slate-600 pb-2 mb-3">
+        <h3 className="text-lg font-semibold text-copper-700 border-b border-hairline pb-2 mb-3">
           Warehouse
         </h3>
-        <dl className="divide-y divide-slate-200 dark:divide-slate-700">
+        <dl className="divide-y divide-hairline">
           <Detail
             label="الموقع"
             value={formData.warehouse.location || "Not specified"}
@@ -580,17 +580,17 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
       {/* Baristas */}
       {formData.baristas.length > 0 && (
         <section>
-          <h3 className="text-lg font-semibold text-teal-700 dark:text-teal-400 border-b dark:border-slate-600 pb-2 mb-3">
+          <h3 className="text-lg font-semibold text-copper-700 border-b border-hairline pb-2 mb-3">
             Baristas (Main Office)
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {formData.baristas.map((barista) => (
               <div
                 key={barista.id}
-                className="flex flex-col items-center text-center p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50"
+                className="flex flex-col items-center text-center p-2 rounded-lg bg-cream"
               >
                 <Avatar name={barista.name} />
-                <p className="font-medium text-slate-800 dark:text-slate-100 text-sm mt-2">
+                <p className="font-medium text-ink text-sm mt-2">
                   {barista.name}
                 </p>
                 <div className="flex mt-1">
@@ -600,7 +600,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                   {Array.from({ length: 5 - barista.rating }).map((_, i) => (
                     <StarIcon
                       key={i}
-                      className="h-4 w-4 text-slate-300 dark:text-slate-600"
+                      className="h-4 w-4 text-hairline"
                     />
                   ))}
                 </div>
@@ -612,19 +612,19 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
 
       {/* Maintenance */}
       <section>
-        <h3 className="text-lg font-semibold text-teal-700 dark:text-teal-400 border-b dark:border-slate-600 pb-2 mb-3">
+        <h3 className="text-lg font-semibold text-copper-700 border-b border-hairline pb-2 mb-3">
           Maintenance
         </h3>
         {formData.maintenanceHistory.length === 0 &&
         formData.branches.every((b) => b.maintenanceHistory.length === 0) ? (
-          <dl className="divide-y divide-slate-200 dark:divide-slate-700">
+          <dl className="divide-y divide-hairline">
             <Detail label="History" value="No maintenance records found." />
           </dl>
         ) : (
           <>
             {formData.maintenanceHistory.length > 0 && (
               <div className="mb-4">
-                <h4 className="text-md font-semibold text-slate-800 dark:text-slate-200 mb-2">
+                <h4 className="text-md font-semibold text-ink mb-2">
                   Main Office Records
                 </h4>
                 {formData.maintenanceHistory.map((record) => (
@@ -641,7 +641,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
               (branch, index) =>
                 branch.maintenanceHistory.length > 0 && (
                   <div key={branch.id} className="mb-4">
-                    <h4 className="text-md font-semibold text-slate-800 dark:text-slate-200 mb-2">
+                    <h4 className="text-md font-semibold text-ink mb-2">
                       {formData.companyName}
                       {branch.branchName
                         ? ` ${branch.branchName}`
@@ -659,19 +659,19 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                   </div>
                 ),
             )}
-            <div className="mt-4 p-4 rounded-lg bg-teal-50/50 dark:bg-teal-900/20">
+            <div className="mt-4 p-4 rounded-lg bg-cream-2/50 dark:bg-copper-500/10">
               <div className="py-2 sm:grid sm:grid-cols-3 sm:gap-4 items-center">
-                <dt className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                <dt className="text-sm font-medium text-latte">
                   Total Maintenance Cost
                 </dt>
-                <dd className="mt-1 text-slate-900 dark:text-slate-100 sm:col-span-2 sm:mt-0 flex justify-between items-center">
-                  <span className="font-bold text-teal-800 dark:text-teal-300 text-base">
+                <dd className="mt-1 text-ink sm:col-span-2 sm:mt-0 flex justify-between items-center">
+                  <span className="font-bold text-copper-700 text-base">
                     {formatCurrency(totalMaintenanceCost)}
                   </span>
                   {totalMaintenanceCost > 0 && (
                     <button
                       onClick={() => setIsCostModalOpen(true)}
-                      className="text-sm font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-500 transition-colors transform active:scale-95"
+                      className="text-sm font-semibold text-copper-700 hover:text-copper-600 transition-colors transform active:scale-95"
                     >
                       View Details
                     </button>

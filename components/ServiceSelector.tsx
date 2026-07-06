@@ -120,20 +120,20 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
       <button
         key={option.value}
         onClick={() => handleAddService(option.value)}
-        className={`group border border-slate-700/50 bg-slate-900/50 hover:bg-slate-800 hover:border-teal-500/50 rounded-xl p-4 flex transition-all duration-200 text-left ${viewMode === 'grid' ? gridClasses : listClasses}`}
+        className={`group border border-espresso-light/50 bg-espresso-light/50 hover:bg-espresso-light hover:border-copper-500/50 rounded-xl p-4 flex transition-all duration-200 text-left ${viewMode === 'grid' ? gridClasses : listClasses}`}
       >
         <div>
-          <p className="font-semibold text-slate-200 group-hover:text-white transition-colors">
+          <p className="font-semibold text-cream group-hover:text-white transition-colors">
             {option.label}
           </p>
           {option.description && (
-            <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+            <p className="text-xs text-latte mt-1 line-clamp-2">
               {option.description}
             </p>
           )}
         </div>
         <div className={`mt-3 ${viewMode === 'list' && 'mt-0 ml-4'}`}>
-            <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-teal-500 group-hover:bg-teal-500 group-hover:text-white transition-all">
+            <div className="w-8 h-8 rounded-full bg-espresso-light flex items-center justify-center text-copper-400 group-hover:bg-copper-500 group-hover:text-white transition-all">
                 <PlusIcon className="w-5 h-5" />
             </div>
         </div>
@@ -145,12 +145,12 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
     const isMidos = payer === 'client' ? false : true;
     const summary = isMidos ? payerGroupSummary.midos : payerGroupSummary.client;
     
-    const headerBorderColor = isMidos ? 'border-teal-500/30' : 'border-amber-500/30';
-    const headerBgColor = isMidos ? 'bg-teal-500/10' : 'bg-amber-500/10';
-    const textColor = isMidos ? 'text-teal-400' : 'text-amber-400';
+    const headerBorderColor = isMidos ? 'border-copper-500/30' : 'border-amber-500/30';
+    const headerBgColor = isMidos ? 'bg-copper-500/10' : 'bg-amber-500/10';
+    const textColor = isMidos ? 'text-copper-400' : 'text-amber-400';
 
     return (
-      <div className={`rounded-xl border ${headerBorderColor} overflow-hidden bg-slate-950/30 backdrop-blur-sm`}>
+      <div className={`rounded-xl border ${headerBorderColor} overflow-hidden bg-espresso/30 backdrop-blur-sm`}>
         <div className={`px-4 py-3 ${headerBgColor} flex items-center justify-between border-b ${headerBorderColor}`}>
           <div className="flex items-center gap-2">
             <span className={`font-bold uppercase tracking-wider text-xs ${textColor}`}>
@@ -183,7 +183,7 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
                 );
             })
           ) : (
-            <div className="text-center py-6 text-slate-600 text-sm italic">
+            <div className="text-center py-6 text-latte text-sm italic">
               {ar.payerFirstUI.noSelectedItems}
             </div>
           )}
@@ -204,19 +204,19 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
                  placeholder={ar.selectors.searchServices}
                  value={searchTerm}
                  onChange={(e) => setSearchTerm(e.target.value)}
-                 icon={<MagnifyingGlassIcon className="w-5 h-5 text-slate-500" />}
+                 icon={<MagnifyingGlassIcon className="w-5 h-5 text-latte" />}
              />
         </div>
-        <div className="flex bg-slate-900 rounded-xl p-1 border border-slate-700/50">
+        <div className="flex bg-espresso rounded-xl p-1 border border-espresso-light/50">
           <button
             onClick={() => setViewMode('grid')}
-            className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
+            className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-espresso-light text-white shadow-sm' : 'text-latte hover:text-cream'}`}
           >
             <Squares2X2Icon className="h-5 w-5" />
           </button>
           <button
             onClick={() => setViewMode('list')}
-            className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
+            className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-espresso-light text-white shadow-sm' : 'text-latte hover:text-cream'}`}
           >
             <ListBulletIcon className="h-5 w-5" />
           </button>
@@ -227,11 +227,11 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
       <div className="space-y-4">
         <button
             onClick={() => setIsSelectedSectionExpanded(!isSelectedSectionExpanded)}
-            className="w-full flex items-center justify-between text-slate-400 hover:text-white transition-colors py-2 group"
+            className="w-full flex items-center justify-between text-latte hover:text-cream transition-colors py-2 group"
         >
             <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
                 SELECTED OPS
-                {totalSelectedCount > 0 && <span className="bg-teal-500 text-slate-900 px-1.5 py-0.5 rounded text-[10px]">{totalSelectedCount}</span>}
+                {totalSelectedCount > 0 && <span className="bg-copper-500 text-espresso px-1.5 py-0.5 rounded text-[10px]">{totalSelectedCount}</span>}
             </span>
             {isSelectedSectionExpanded ? <ChevronUpIcon className="w-4 h-4"/> : <ChevronDownIcon className="w-4 h-4"/>}
         </button>
@@ -243,7 +243,7 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
                 
                 <button
                     onClick={handleAddCustomService}
-                    className="w-full py-3 border border-dashed border-slate-700 rounded-xl text-slate-500 hover:text-teal-400 hover:border-teal-500/50 hover:bg-slate-900 transition-all flex items-center justify-center gap-2 font-medium"
+                    className="w-full py-3 border border-dashed border-espresso-lighter rounded-xl text-latte hover:text-copper-400 hover:border-copper-500/50 hover:bg-espresso transition-all flex items-center justify-center gap-2 font-medium"
                 >
                     <PlusCircleIcon className="w-5 h-5" />
                     {ar.selectors.addCustomService}
@@ -253,14 +253,14 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
       </div>
 
       {/* Available Section */}
-      <div className="bg-slate-950/50 border border-slate-800 rounded-2xl p-4 md:p-6">
-        <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">Available Protocols</h3>
+      <div className="bg-espresso/50 border border-espresso-light rounded-2xl p-4 md:p-6">
+        <h3 className="text-xs font-bold uppercase tracking-widest text-latte mb-4">Available Protocols</h3>
         
         {Object.keys(categories).length > 0 ? (
           <div className="space-y-8">
             {Object.keys(categories).map((category) => (
               <section key={category}>
-                <h4 className="text-sm font-semibold text-teal-500/80 mb-3 border-b border-teal-500/10 pb-2">
+                <h4 className="text-sm font-semibold text-copper-400/80 mb-3 border-b border-copper-500/10 pb-2">
                   {category}
                 </h4>
                 <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'flex flex-col gap-2'}`}>
@@ -270,7 +270,7 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 text-slate-600">
+          <div className="text-center py-12 text-latte">
              <p>{searchTerm ? ar.selectors.noServicesMatch : ar.payerFirstUI.noAvailableItems}</p>
           </div>
         )}

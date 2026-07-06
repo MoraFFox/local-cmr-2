@@ -29,7 +29,7 @@ const FloatingCameraFAB: React.FC<FloatingCameraFABProps> = ({
         fixed right-4 bottom-28 z-40
         w-14 h-14 rounded-full
         flex items-center justify-center
-        bg-teal-500 hover:bg-teal-400
+        bg-copper-500 hover:bg-copper-600
         text-white shadow-lg
         transition-all duration-150 ease-out
         active:scale-95
@@ -45,7 +45,7 @@ const FloatingCameraFAB: React.FC<FloatingCameraFABProps> = ({
           className="
             absolute -top-1 -right-1
             w-5 h-5 rounded-full
-            bg-red-500 text-white
+            bg-ember-500 text-white
             text-xs font-medium
             flex items-center justify-center
           "

@@ -1,8 +1,12 @@
+/* ── Brass & Cream: Font imports ── */
 @import '@fontsource/tajawal/400.css';
 @import '@fontsource/tajawal/500.css';
 @import '@fontsource/tajawal/700.css';
-@import '@fontsource/cairo/400.css';
 @import '@fontsource/cairo/600.css';
+@import '@fontsource/cairo/700.css';
+@import '@fontsource/cairo/800.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
 
 @import './styles/animations.css';
 
@@ -12,38 +16,144 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
-    --bg-body: #081619;
-    --bg-surface: #102A30;
-    --bg-surface-elevated: #1A434C;
-    --text-primary: #EAF2F3;
-    --text-secondary: #829A9E;
-    --border-default: #1A434C;
-    --border-focus: #E63923;
-    --ring-focus: #E63923;
+    color-scheme: light dark;
+
+    /* ── Brass & Cream design tokens ── */
+    --bg-body: #FAF6EF;          /* paper */
+    --bg-surface: #F1EADB;       /* cream */
+    --bg-surface-elevated: #E8DFCC; /* cream-2 */
+    --bg-chrome: #241B16;        /* espresso */
+    --text-primary: #3D2C24;     /* ink */
+    --text-secondary: #8A7468;   /* latte */
+    --text-on-chrome: #F1EADB;   /* cream on dark chrome */
+    --text-muted-chrome: #8A7468;/* latte on dark chrome */
+    --border-default: #D9CFB8;   /* hairline */
+    --border-brass: #C9A86A;     /* brass — signature */
+    --border-focus: #B87333;     /* copper — focus/accent */
+    --ring-focus: #B87333;
+
+    /* Gradient for the single primary CTA per screen */
+    --gradient-cta: linear-gradient(135deg, #E8C9A0 0%, #B87333 100%);
   }
 
-  /* Safe-area helpers (Tailwind's pt-safe/pb-safe would need a plugin;
-     expose as utilities here for clarity). */
+  .dark {
+    --bg-body: #1A1210;
+    --bg-surface: #2A1F1A;
+    --bg-surface-elevated: #3D2C24;
+    --bg-chrome: #110D0A;
+    --text-primary: #F1EADB;
+    --text-secondary: #8A7468;
+    --text-on-chrome: #F1EADB;
+    --text-muted-chrome: #8A7468;
+    --border-default: #3D2C24;
+    --border-brass: #C9A86A;
+    --border-focus: #B87333;
+    --ring-focus: #B87333;
+  }
+
+  /* ── Dark-mode color remap ──
+     Most components were written without `dark:` variants (the migration used
+     `bg-cream` etc. unconditionally). To make dark mode coherent without
+     touching every file, we override the resolved colors of the named Brass &
+     Cream tokens UNDER `.dark`. Light-by-default mapping stays untouched.
+
+     Light → Dark color substitution:
+       paper #FAF6EF → body #1A1210
+       cream #F1EADB → surface #2A1F1A  (lighter than body, lifts cards)
+       cream-2 #E8DFCC → elevated #3D2C24
+       cream-3 #DED3B8 → elevated #4A382E
+       ink #3D2C24 → cream #F1EADB (text flips light)
+       latte #8A7468 → #A89483 (warmer muted for dark, ~AA on #2A1F1A)
+       hairline #D9CFB8 → #4A382E (visible dark divider)
+       espresso #241B16 → #110D0A (chrome goes even darker)
+       espresso-light #3D2C24 → #1A1210 (chrome hover)
+       espresso-lighter #5C4639 → #2A1F1A
+     copper/leaf/ember accents stay the same — they read fine on both.
+
+     ponytail: overrides live here so component files stay variant-free;
+     add `dark:` modifiers per-component later if a specific surface needs
+     to opt OUT of the global remap. */
+  .dark .bg-paper { background-color: #1A1210 !important; }
+  .dark .bg-cream { background-color: #2A1F1A !important; }
+  .dark .bg-cream-2 { background-color: #3D2C24 !important; }
+  .dark .bg-cream-3 { background-color: #4A382E !important; }
+  /* Opacity /20 /30 /50 /60 /70 of cream/cream-2 — used for hovers, chips, ring tint */
+  .dark .bg-cream\/20 { background-color: #2A1F1A33 !important; }
+  .dark .bg-cream\/50 { background-color: #2A1F1A80 !important; }
+  .dark .bg-cream-2\/20 { background-color: #3D2C2433 !important; }
+  .dark .bg-cream-2\/50 { background-color: #3D2C2480 !important; }
+  /* Fluid / arbitrary */
+  .dark .bg-cream\/90 { background-color: #2A1F1AE6 !important; }
+  .dark .bg-cream\/95 { background-color: #2A1F1AF2 !important; }
+
+  /* Ring mappings (for knockout effects matching the background) */
+  .dark .ring-paper { --tw-ring-color: #1A1210 !important; }
+  .dark .ring-cream { --tw-ring-color: #2A1F1A !important; }
+  .dark .ring-cream-2 { --tw-ring-color: #3D2C24 !important; }
+
+  .dark .text-ink { color: #F1EADB !important; }
+  .dark .text-ink\/80 { color: #F1EADBCC !important; }
+  .dark .text-ink\/90 { color: #F1EADBE6 !important; }
+  .dark .text-ink\/70 { color: #F1EADBB3 !important; }
+  .dark .text-latte { color: #A89483 !important; }
+  .dark .text-latte\/60 { color: #A8948399 !important; }
+  .dark .text-latte\/70 { color: #A89483B3 !important; }
+  .dark .text-latte\/80 { color: #A89483CC !important; }
+
+  .dark .border-hairline { border-color: #4A382E !important; }
+  .dark .border-hairline\/20 { border-color: #4A382E33 !important; }
+  .dark .border-hairline\/50 { border-color: #4A382E80 !important; }
+
+  /* Chrome surfaces in dark mode: keep them dark but distinct from card surfaces */
+  .dark .bg-espresso { background-color: #110D0A !important; }
+  .dark .bg-espresso-light { background-color: #1A1210 !important; }
+  .dark .bg-espresso-light\/30 { background-color: #1A12104D !important; }
+  .dark .bg-espresso-light\/40 { background-color: #1A121066 !important; }
+  .dark .bg-espresso-light\/50 { background-color: #1A121080 !important; }
+  .dark .bg-espresso-lighter { background-color: #2A1F1A !important; }
+
+  /* text-espresso (used for chrome-on-light contexts, e.g. offline banner text)
+     reads as cream in dark mode */
+  .dark .text-espresso { color: #F1EADB !important; }
+  .dark .text-espresso-light { color: #F1EADBCC !important; }
+
+  /* Accent text mappings for dark mode legibility.
+     Dark shades (600/700) used on light cards need to flip to light shades on dark cards. */
+  .dark .text-copper-700 { color: #F2C399 !important; } /* copper-200 */
+  .dark .text-copper-600 { color: #F2C399 !important; } /* copper-200 */
+  .dark .text-copper-600\/80 { color: #F2C399CC !important; }
+  
+  .dark .text-leaf-700 { color: #B0D9B0 !important; } /* leaf-200 */
+  .dark .text-leaf-600 { color: #B0D9B0 !important; } /* leaf-200 */
+  
+  .dark .text-ember-700 { color: #F0AFA6 !important; } /* ember-200 */
+  .dark .text-ember-600 { color: #F0AFA6 !important; } /* ember-200 */
+  /* Logout button specifically used text-ember-300 which is slightly too dim, pop it to ember-100 */
+  .dark .text-ember-300 { color: #F8D7D2 !important; }
+
+  /* text-cream stays — it's already the light text token */
+
+  /* Safe-area helpers */
   .pt-safe { padding-top: env(safe-area-inset-top); }
   .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
   .pl-safe { padding-left: env(safe-area-inset-left); }
   .pr-safe { padding-right: env(safe-area-inset-right); }
 
-  /* RTL: default Latin numerals/inputs read fine; cash chars already bi-di handled per-field. */
   body {
     direction: rtl;
+    background-color: var(--bg-body);
+    color: var(--text-primary);
   }
 
-  /* Keyboard focus rings — visible only for keyboard, not mouse clicks. */
+  /* Keyboard focus rings — copper for Brass & Cream */
   :focus-visible {
-    outline: 2px solid theme('colors.lava.500');
+    outline: 2px solid var(--ring-focus);
     outline-offset: 2px;
   }
 }
 
 @layer components {
-  /* ponytail: surface primitives only; add elevation tokens if cards need more depth */
+  /* ── Surface primitives ── */
   .surface {
     background-color: var(--bg-surface);
     border-color: var(--border-default);
@@ -52,25 +162,70 @@
     background-color: var(--bg-surface-elevated);
     border-color: var(--border-default);
   }
+  /* Dark chrome surfaces (sidebar, mobile header) */
+  .chrome {
+    background-color: var(--bg-chrome);
+    color: var(--text-on-chrome);
+  }
 
-  /* ponytail: single primitive for white/subtle bordered inputs */
+  /* ── Input ── */
   .input-base {
-    @apply block w-full rounded-lg bg-deep border border-sea px-4 h-[50px] text-onyx shadow-sm transition-colors placeholder:text-sage focus:border-lava-500 focus:outline-none focus:ring-2 focus:ring-lava-500/20 disabled:opacity-50 disabled:cursor-not-allowed;
-    border-color: var(--border-default);
+    @apply block w-full rounded-lg px-4 h-[50px] text-ink shadow-sm transition-colors placeholder:text-latte focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-default);
   }
   .input-base:focus {
     border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(184, 115, 51, 0.15);
+  }
+  .dark .input-base {
+    @apply text-cream;
   }
 
-  /* ponytail: button primitives aligned with new semantic roles */
+  /* ── Buttons ── */
+  /* Primary: crema→copper gradient — reserved for the ONE main action per screen */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-lava-500 px-4 py-2.5 font-semibold text-onyx shadow-sm transition-colors hover:bg-lava-600 focus-visible:ring-2 focus-visible:ring-lava-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-white shadow-sm transition-all hover:brightness-110 focus-visible:ring-2 focus-visible:ring-copper-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    background: var(--gradient-cta);
   }
+  /* Secondary: cream surface with copper border */
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-sea bg-deep px-4 py-2.5 font-semibold text-onyx shadow-sm transition-colors hover:bg-sea focus-visible:ring-2 focus-visible:ring-sea/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-ink shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-copper-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-default);
   }
+  .btn-secondary:hover {
+    background-color: var(--bg-surface-elevated);
+  }
+  .dark .btn-secondary {
+    @apply text-cream;
+  }
+  /* Danger: ember */
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-lava-700 px-4 py-2.5 font-semibold text-onyx shadow-sm transition-colors hover:bg-lava-800 focus-visible:ring-2 focus-visible:ring-lava-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-ember-500 px-4 py-2.5 font-semibold text-white shadow-sm transition-colors hover:bg-ember-600 focus-visible:ring-2 focus-visible:ring-ember-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  /* Ghost: transparent, shows on hover */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 font-medium transition-colors focus-visible:ring-2 focus-visible:ring-copper-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    color: var(--text-secondary);
+  }
+  .btn-ghost:hover {
+    background-color: var(--bg-surface);
+    color: var(--text-primary);
+  }
+
+  /* ── Brass hairline divider (signature element) ── */
+  .brass-hairline {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-brass), transparent);
+    margin: 0.75rem 0;
+  }
+
+  /* ── Work-order ID stamp (signature element) ── */
+  .stamp-id {
+    @apply font-mono text-xs tracking-wider text-latte;
+    letter-spacing: 0.12em;
   }
 }
 
@@ -78,11 +233,11 @@
   /* Horizontal scrollbar that doesn't steal vertical scroll space. */
   .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: theme('colors.slate.300');
+    background: theme('colors.latte');
     border-radius: 4px;
   }
   .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: theme('colors.slate.600');
+    background: theme('colors.espresso.light');
   }
 
   /* Respect reduced motion globally */
@@ -96,9 +251,12 @@
     }
   }
 
-  /* Technician portal subtle grid */
-  .dark-grid {
-    background-image: radial-gradient(circle, #334155 1px, transparent 1px);
-    background-size: 20px 20px;
+  /* Subtle dot grid for content areas */
+  .paper-grid {
+    background-image: radial-gradient(circle, #D9CFB8 0.5px, transparent 0.5px);
+    background-size: 24px 24px;
+  }
+  .dark .paper-grid {
+    background-image: radial-gradient(circle, #3D2C24 0.5px, transparent 0.5px);
   }
 }

@@ -119,11 +119,11 @@ const InfoRow = ({
   if (!value && value !== 0) return null;
   return (
     <div className='flex items-start gap-2 text-sm py-1'>
-      {Icon && <Icon className='w-4 h-4 text-sage mt-0.5 shrink-0' />}
-      <span className='font-medium text-sage shrink-0'>
+      {Icon && <Icon className='w-4 h-4 text-latte mt-0.5 shrink-0' />}
+      <span className='font-medium text-latte shrink-0'>
         {label}:
       </span>
-      <span className='text-onyx break-all'>
+      <span className='text-ink break-all'>
         {value}
       </span>
     </div>
@@ -132,26 +132,26 @@ const InfoRow = ({
 
 const ContactList = ({ contacts }: { contacts: Contact[] }) => {
   if (!contacts || contacts.length === 0)
-    return <p className='text-xs text-sage italic'>No contacts listed.</p>;
+    return <p className='text-xs text-latte italic'>No contacts listed.</p>;
   return (
     <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2'>
       {contacts.map((c) => (
         <div
           key={c.id}
-          className='bg-sea/50 p-2 rounded border border-sea'
+          className='bg-cream-2 p-2 rounded border border-hairline'
         >
-          <p className='font-bold text-onyx text-sm'>
+          <p className='font-bold text-ink text-sm'>
             {c.name}
           </p>
-          <p className='text-xs text-sage uppercase font-semibold mb-1'>
+          <p className='text-xs text-latte uppercase font-semibold mb-1'>
             {c.position === "custom" ? c.customPosition : c.position}
           </p>
           {c.phoneNumbers.map((p) => (
             <div
               key={p.id}
-              className='flex items-center gap-1 text-xs text-onyx'
+              className='flex items-center gap-1 text-xs text-ink'
             >
-              <PhoneIcon className='w-3 h-3 text-sage' />
+              <PhoneIcon className='w-3 h-3 text-latte' />
               {p.number}
             </div>
           ))}
@@ -171,7 +171,7 @@ const renderPhotoGroup = (
 
   return (
     <div className="mb-3">
-      <span className="text-sm font-medium text-sage">{label}</span>
+      <span className="text-sm font-medium text-latte">{label}</span>
       <div className="grid grid-cols-4 gap-2 mt-1">
         {filtered.map((photo, i) => (
           <a
@@ -184,7 +184,7 @@ const renderPhotoGroup = (
             <img
               src={photo.url}
               alt={`${label} photo ${i + 1}`}
-              className="w-full h-20 object-cover rounded border border-sea group-hover:ring-2 group-hover:ring-lava-500 transition-all"
+              className="w-full h-20 object-cover rounded border border-hairline group-hover:ring-2 group-hover:ring-copper-500 transition-all"
             />
           </a>
         ))}
@@ -197,11 +197,11 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
   record,
 }) => {
   return (
-    <div className='border-l-2 border-lava-500 pl-4 py-2 mb-4 bg-sea/30 rounded-r-md'>
+    <div className='border-l-2 border-copper-500 pl-4 py-2 mb-4 bg-cream-2 rounded-r-md'>
       <div className='flex justify-between items-start'>
         <div>
           <div className='flex items-center gap-2'>
-            <p className='font-bold text-onyx'>
+            <p className='font-bold text-ink'>
               {record.maintenanceDate}
             </p>
             {record.dailyLeaseCost && (
@@ -209,22 +209,22 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
                 Lease: {record.dailyLeaseCost} EGP
               </span>
             )}
-            <span className='text-xs bg-lava-500/10 px-1.5 py-0.5 rounded text-lava-400 border border-lava-500/20'>
+            <span className='text-xs bg-copper-500/10 px-1.5 py-0.5 rounded text-copper-600 border border-copper-500/20'>
               Paid By: {getPaidByLabel(record.paidBy)}
             </span>
           </div>
-          <p className='text-xs text-sage'>
+          <p className='text-xs text-latte'>
             {record.type} • {record.visitZone || "No Zone"}
           </p>
           {record.nextVisitDate && (
-            <p className='text-xs text-lava-500 mt-1'>
+            <p className='text-xs text-copper-500 mt-1'>
               <span className='font-semibold'>Next Scheduled:</span>{" "}
               {record.nextVisitDate}
             </p>
           )}
         </div>
         {record.baristaName && (
-          <span className='text-xs bg-sea px-2 py-1 rounded text-onyx'>
+          <span className='text-xs bg-cream-2 px-2 py-1 rounded text-ink'>
             Staff: {record.baristaName}
           </span>
         )}
@@ -233,10 +233,10 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
       <div className='mt-2 text-sm space-y-1'>
         {record.machines && record.machines.length > 0 && (
           <div>
-            <span className='font-semibold text-onyx'>
+            <span className='font-semibold text-ink'>
               Machines:
             </span>
-            <ul className='list-disc list-inside pl-1 text-onyx'>
+            <ul className='list-disc list-inside pl-1 text-ink'>
               {record.machines.map((m) => (
                 <li key={m.id}>
                   {m.count}x {m.name}
@@ -246,7 +246,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
           </div>
         )}
         {record.problems && record.problems.length > 0 && (
-          <p className="text-onyx">
+          <p className="text-ink">
             <span className='font-semibold'>Issues:</span>{" "}
             {record.problems.join(", ")}
           </p>
@@ -255,10 +255,10 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
           record.partsReplaced &&
           record.partsReplaced.length > 0 && (
             <div>
-              <span className='font-semibold text-red-600 dark:text-red-400'>
+              <span className='font-semibold text-ember-700 dark:text-ember-300'>
                 Parts Replaced:
               </span>
-              <ul className='list-disc list-inside pl-1 text-slate-700 dark:text-slate-300'>
+              <ul className='list-disc list-inside pl-1 text-ink dark:text-latte/70'>
                 {record.partsReplaced.map((p, i) => (
                   <li key={i}>
                     {p.count}x {p.name} {p.paidByClient && "(Paid by Client)"}
@@ -272,7 +272,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
             <span className='font-semibold text-blue-600 dark:text-blue-400'>
               Services:
             </span>
-            <ul className='list-disc list-inside pl-1 text-slate-700 dark:text-slate-300'>
+            <ul className='list-disc list-inside pl-1 text-ink dark:text-latte/70'>
               {record.servicesPerformed.map((s, i) => (
                 <li key={i}>
                   {s.count}x {s.name} {s.paidByClient && "(Paid by Client)"}
@@ -282,7 +282,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
           </div>
         )}
         {record.notes && (
-          <p className='italic text-slate-600 dark:text-slate-400 mt-1'>
+          <p className='italic text-ink dark:text-latte mt-1'>
             "{record.notes}"
           </p>
         )}
@@ -290,8 +290,8 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
 
       {/* Photos Section */}
       {record.photos && record.photos.length > 0 && (
-        <div className="mt-4 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-          <h4 className="text-sm font-semibold mb-2 text-slate-700 dark:text-slate-300">Photos</h4>
+        <div className="mt-4 p-3 bg-cream dark:bg-espresso rounded-lg">
+          <h4 className="text-sm font-semibold mb-2 text-ink dark:text-latte/70">Photos</h4>
           {renderPhotoGroup(record.photos, "before", "Before")}
           {renderPhotoGroup(record.photos, "after", "After")}
           {renderPhotoGroup(record.photos, "legacy", "Legacy")}
@@ -301,7 +301,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
       {/* Recursively show follow-ups */}
       {record.followUpVisits && record.followUpVisits.length > 0 && (
         <div className='mt-3 ml-2'>
-          <p className='text-xs font-bold uppercase text-slate-500 mb-1'>
+          <p className='text-xs font-bold uppercase text-latte mb-1'>
             Follow-up Visits
           </p>
           {record.followUpVisits.map((fu) => (
@@ -320,7 +320,7 @@ const PrintSection: React.FC<{ title: string; children: React.ReactNode }> = ({
   children,
 }) => (
   <div className='mb-6 break-inside-avoid'>
-    <h3 className='text-xs font-bold uppercase tracking-widest text-slate-500 border-b border-slate-300 pb-1 mb-3'>
+    <h3 className='text-xs font-bold uppercase tracking-widest text-latte border-b border-hairline pb-1 mb-3'>
       {title}
     </h3>
     {children}
@@ -332,10 +332,10 @@ const PrintField: React.FC<{ label: string; value: React.ReactNode }> = ({
   value,
 }) => (
   <div className='flex flex-col mb-2 break-inside-avoid'>
-    <span className='text-[10px] uppercase text-slate-500 font-semibold'>
+    <span className='text-[10px] uppercase text-latte font-semibold'>
       {label}
     </span>
-    <span className='text-sm text-slate-900 font-medium'>{value || "-"}</span>
+    <span className='text-sm text-ink font-medium'>{value || "-"}</span>
   </div>
 );
 
@@ -344,15 +344,15 @@ const MaintenanceTable: React.FC<{
   hideCosts?: boolean;
 }> = ({ records, hideCosts }) => {
   if (!records || records.length === 0)
-    return <p className='text-xs text-slate-500 italic'>No records found.</p>;
+    return <p className='text-xs text-latte italic'>No records found.</p>;
 
   return (
-    <table className='w-full text-left text-xs border border-slate-300 mb-4 break-inside-auto'>
-      <thead className='bg-slate-100 text-slate-700 uppercase font-bold'>
+    <table className='w-full text-left text-xs border border-hairline mb-4 break-inside-auto'>
+      <thead className='bg-cream text-ink uppercase font-bold'>
         <tr>
-          <th className='px-2 py-1.5 border-b border-slate-300 w-24'>Date</th>
-          <th className='px-2 py-1.5 border-b border-slate-300 w-32'>Staff</th>
-          <th className='px-2 py-1.5 border-b border-slate-300'>
+          <th className='px-2 py-1.5 border-b border-hairline w-24'>Date</th>
+          <th className='px-2 py-1.5 border-b border-hairline w-32'>Staff</th>
+          <th className='px-2 py-1.5 border-b border-hairline'>
             Work Details
           </th>
         </tr>
@@ -363,11 +363,11 @@ const MaintenanceTable: React.FC<{
             <tr className='break-inside-avoid'>
               <td className='px-2 py-2 align-top'>
                 <div>{rec.maintenanceDate}</div>
-                <div className='text-[10px] text-slate-500 mt-0.5'>
+                <div className='text-[10px] text-latte mt-0.5'>
                   {rec.type}
                 </div>
                 {rec.nextVisitDate && (
-                  <div className='text-[10px] text-teal-700 mt-1 font-semibold'>
+                  <div className='text-[10px] text-copper-700 mt-1 font-semibold'>
                     Next: {rec.nextVisitDate}
                   </div>
                 )}
@@ -394,7 +394,7 @@ const MaintenanceTable: React.FC<{
                 )}
                 {rec.hadProblem && (
                   <div className='mb-1'>
-                    <span className='font-bold text-red-700'>Issue:</span>{" "}
+                    <span className='font-bold text-ember-700'>Issue:</span>{" "}
                     {rec.problems?.join(", ") || "Unspecified"}
                   </div>
                 )}
@@ -417,16 +417,16 @@ const MaintenanceTable: React.FC<{
                   </div>
                 )}
                 {rec.notes && (
-                  <div className='italic text-slate-600 mt-1'>
+                  <div className='italic text-ink mt-1'>
                     "{rec.notes}"
                   </div>
                 )}
               </td>
             </tr>
             {rec.followUpVisits && rec.followUpVisits.length > 0 && (
-              <tr className='bg-slate-50'>
-                <td colSpan={3} className='px-4 py-1 border-t border-slate-200'>
-                  <div className='text-[10px] font-bold uppercase text-slate-500 my-1'>
+              <tr className='bg-cream'>
+                <td colSpan={3} className='px-4 py-1 border-t border-hairline'>
+                  <div className='text-[10px] font-bold uppercase text-latte my-1'>
                     Follow-ups
                   </div>
                   <MaintenanceTable
@@ -450,18 +450,18 @@ const DetailedRecordPrint: React.FC<{
 }> = ({ record, depth = 0, hideCosts }) => {
   return (
     <div
-      className={`mb-6 break-inside-avoid border border-slate-300 rounded-lg overflow-hidden ${depth > 0 ? "ml-6 border-l-4 border-l-slate-400 bg-slate-50" : "bg-white shadow-sm"}`}
+      className={`mb-6 break-inside-avoid border border-hairline rounded-lg overflow-hidden ${depth > 0 ? "ml-6 border-l-4 border-l-slate-400 bg-cream" : "bg-white shadow-sm"}`}
     >
-      <div className='bg-slate-100 px-4 py-2 border-b border-slate-300 flex justify-between items-center'>
+      <div className='bg-cream px-4 py-2 border-b border-hairline flex justify-between items-center'>
         <div className='flex items-center gap-3'>
-          <span className='font-bold text-sm text-slate-900'>
+          <span className='font-bold text-sm text-ink'>
             {record.maintenanceDate}
           </span>
-          <span className='text-xs text-slate-500 uppercase font-semibold tracking-wider bg-white border border-slate-200 px-2 py-0.5 rounded-full'>
+          <span className='text-xs text-latte uppercase font-semibold tracking-wider bg-white border border-hairline px-2 py-0.5 rounded-full'>
             {record.type} Visit
           </span>
           {record.visitZone && (
-            <span className='text-xs text-teal-700 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-full capitalize'>
+            <span className='text-xs text-copper-700 bg-cream-2 border border-copper-500/30 px-2 py-0.5 rounded-full capitalize'>
               {record.visitZone.replace("_", " ")}
             </span>
           )}
@@ -473,10 +473,10 @@ const DetailedRecordPrint: React.FC<{
               Next: {record.nextVisitDate}
             </span>
           )}
-          <div className='flex items-center gap-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-200 px-2 py-1 rounded shadow-sm'>
-            <UserIcon className='w-3.5 h-3.5 text-slate-500' />
+          <div className='flex items-center gap-1.5 text-xs font-semibold text-ink bg-white border border-hairline px-2 py-1 rounded shadow-sm'>
+            <UserIcon className='w-3.5 h-3.5 text-latte' />
             Performed by:{" "}
-            <span className='text-slate-900 font-bold'>
+            <span className='text-ink font-bold'>
               {record.baristaName || "Unknown"}
             </span>
           </div>
@@ -506,17 +506,17 @@ const DetailedRecordPrint: React.FC<{
 
           {/* Machines Section - Highlighted */}
           {record.machines && record.machines.length > 0 ? (
-            <div className='flex gap-2 p-2 bg-slate-50 rounded border border-slate-200'>
-              <span className='font-bold text-slate-700 w-20 uppercase text-[10px] tracking-wider pt-0.5'>
+            <div className='flex gap-2 p-2 bg-cream rounded border border-hairline'>
+              <span className='font-bold text-ink w-20 uppercase text-[10px] tracking-wider pt-0.5'>
                 Machines
               </span>
               <div className='flex-1 flex flex-wrap gap-2'>
                 {record.machines.map((m, i) => (
                   <span
                     key={i}
-                    className='inline-flex items-center bg-white border border-slate-300 px-2 py-1 rounded font-bold text-slate-800 shadow-sm'
+                    className='inline-flex items-center bg-white border border-hairline px-2 py-1 rounded font-bold text-ink shadow-sm'
                   >
-                    <CubeIcon className='w-3 h-3 text-slate-400 mr-1' />
+                    <CubeIcon className='w-3 h-3 text-latte mr-1' />
                     {m.count > 1 ? `${m.count}x ` : ""}
                     {m.name}
                   </span>
@@ -525,19 +525,19 @@ const DetailedRecordPrint: React.FC<{
             </div>
           ) : (
             <div className='flex gap-2'>
-              <span className='font-bold text-slate-400 w-20 uppercase text-[10px] tracking-wider pt-0.5'>
+              <span className='font-bold text-latte w-20 uppercase text-[10px] tracking-wider pt-0.5'>
                 Machines
               </span>
-              <span className='text-slate-400 italic'>No machines listed</span>
+              <span className='text-latte italic'>No machines listed</span>
             </div>
           )}
 
           {record.hadProblem && (
             <div className='flex gap-2 mt-2'>
-              <span className='font-bold text-red-700 w-20 uppercase text-[10px] tracking-wider pt-0.5'>
+              <span className='font-bold text-ember-700 w-20 uppercase text-[10px] tracking-wider pt-0.5'>
                 Issues
               </span>
-              <div className='flex-1 font-medium text-red-800 bg-red-50 p-1.5 rounded border border-red-100'>
+              <div className='flex-1 font-medium text-ember-700 bg-ember-50 p-1.5 rounded border border-ember-500/30'>
                 {record.problems?.join(", ") || "Unspecified"}
               </div>
             </div>
@@ -546,20 +546,20 @@ const DetailedRecordPrint: React.FC<{
           {(record.partsWereReplaced ||
             record.servicesPerformed.length > 0) && (
             <div className='flex gap-2'>
-              <span className='font-bold text-slate-600 w-20 uppercase text-[10px] tracking-wider pt-0.5'>
+              <span className='font-bold text-ink w-20 uppercase text-[10px] tracking-wider pt-0.5'>
                 Work Done
               </span>
               <div className='flex-1 space-y-1'>
                 {record.partsReplaced?.map((p, i) => (
                   <div key={`p-${i}`} className='flex items-center gap-1'>
-                    <WrenchScrewdriverIcon className='w-3 h-3 text-slate-400' />
+                    <WrenchScrewdriverIcon className='w-3 h-3 text-latte' />
                     <span>
                       Replaced:{" "}
                       <b>
                         {p.count}x {p.name}
                       </b>{" "}
                       {p.paidByClient ? (
-                        <span className='text-[10px] text-teal-600 border border-teal-200 px-1 rounded bg-teal-50'>
+                        <span className='text-[10px] text-copper-600 border border-copper-500/30 px-1 rounded bg-cream-2'>
                           (Client Paid)
                         </span>
                       ) : (
@@ -570,7 +570,7 @@ const DetailedRecordPrint: React.FC<{
                 ))}
                 {record.servicesPerformed?.map((s, i) => (
                   <div key={`s-${i}`} className='flex items-center gap-1'>
-                    <CheckBadgeIcon className='w-3 h-3 text-slate-400' />
+                    <CheckBadgeIcon className='w-3 h-3 text-latte' />
                     <span>
                       Service:{" "}
                       <b>
@@ -584,51 +584,51 @@ const DetailedRecordPrint: React.FC<{
           )}
 
           {record.recommendations && (
-            <div className='flex gap-2 mt-2 pt-2 border-t border-slate-100'>
-              <span className='font-bold text-slate-600 w-20 uppercase text-[10px] tracking-wider'>
+            <div className='flex gap-2 mt-2 pt-2 border-t border-hairline'>
+              <span className='font-bold text-ink w-20 uppercase text-[10px] tracking-wider'>
                 Recs
               </span>
-              <div className='italic text-slate-700 bg-yellow-50/50 p-1 rounded'>
+              <div className='italic text-ink bg-yellow-50/50 p-1 rounded'>
                 {record.recommendations}
               </div>
             </div>
           )}
           {record.notes && (
             <div className='flex gap-2'>
-              <span className='font-bold text-slate-600 w-20 uppercase text-[10px] tracking-wider'>
+              <span className='font-bold text-ink w-20 uppercase text-[10px] tracking-wider'>
                 Notes
               </span>
-              <div className='italic text-slate-700'>{record.notes}</div>
+              <div className='italic text-ink'>{record.notes}</div>
             </div>
           )}
         </div>
 
         {/* Right Col: Supervisors */}
         <div className='col-span-4 pl-4 flex flex-col'>
-          <div className='bg-white p-3 rounded-lg border-2 border-dashed border-slate-300 h-full flex flex-col justify-between'>
+          <div className='bg-white p-3 rounded-lg border-2 border-dashed border-hairline h-full flex flex-col justify-between'>
             <div>
-              <p className='font-bold text-slate-400 uppercase tracking-wider text-[10px] mb-3 text-center border-b border-slate-100 pb-1'>
+              <p className='font-bold text-latte uppercase tracking-wider text-[10px] mb-3 text-center border-b border-hairline pb-1'>
                 Supervisors
               </p>
               {record.supervisors && record.supervisors.length > 0 ? (
                 <div className='space-y-2'>
                   {record.supervisors.map((s) => (
-                    <div key={s.id} className='text-center p-2 bg-slate-50 rounded'>
-                      <p className='font-bold text-[11px] text-slate-700 uppercase'>
+                    <div key={s.id} className='text-center p-2 bg-cream rounded'>
+                      <p className='font-bold text-[11px] text-ink uppercase'>
                         {s.name}
                       </p>
-                      <p className='text-[9px] text-slate-500'>{s.phone}</p>
+                      <p className='text-[9px] text-latte'>{s.phone}</p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className='h-24 flex flex-col items-center justify-center text-slate-300 italic text-center'>
+                <div className='h-24 flex flex-col items-center justify-center text-latte/70 italic text-center'>
                   <UserIcon className='w-6 h-6 mb-1 opacity-50' />
                   <span>No supervisors</span>
                 </div>
               )}
             </div>
-            <div className='text-[9px] text-center text-slate-300 mt-2'>
+            <div className='text-[9px] text-center text-latte/70 mt-2'>
               Verified & Approved
             </div>
           </div>
@@ -637,8 +637,8 @@ const DetailedRecordPrint: React.FC<{
 
       {/* Recursion for Follow-ups */}
       {record.followUpVisits && record.followUpVisits.length > 0 && (
-        <div className='bg-slate-50 px-4 py-3 border-t border-slate-200'>
-          <p className='text-[10px] font-bold uppercase text-slate-500 mb-3 flex items-center gap-1'>
+        <div className='bg-cream px-4 py-3 border-t border-hairline'>
+          <p className='text-[10px] font-bold uppercase text-latte mb-3 flex items-center gap-1'>
             <ArrowLeftIcon className='w-3 h-3 rotate-180' /> Follow-up Visits
           </p>
           {record.followUpVisits.map((fu) => (
@@ -668,7 +668,7 @@ const BranchPrintableDocument: React.FC<{
       className='hidden print:block font-sans text-black bg-white w-full max-w-[210mm] mx-auto p-8'
     >
       {/* Header */}
-      <div className='flex justify-between items-start mb-8 border-b-2 border-slate-800 pb-6'>
+      <div className='flex justify-between items-start mb-8 border-b-2 border-hairline pb-6'>
         <div className='flex items-center gap-4'>
           <img
             src='/logo.svg'
@@ -676,87 +676,87 @@ const BranchPrintableDocument: React.FC<{
             className='h-16 w-auto object-contain'
           />
           <div>
-            <h1 className='text-2xl font-bold text-slate-900 tracking-tight leading-none'>
+            <h1 className='text-2xl font-bold text-ink tracking-tight leading-none'>
               {companyName}
             </h1>
-            <h2 className='text-lg text-slate-600 mt-1 font-medium'>
+            <h2 className='text-lg text-ink mt-1 font-medium'>
               {branch.branchName || "Branch Report"}
             </h2>
           </div>
         </div>
         <div className='text-right'>
-          <div className='text-3xl font-bold text-slate-200'>BRANCH REPORT</div>
-          <p className='text-xs text-slate-500 mt-1'>
+          <div className='text-3xl font-bold text-cream'>BRANCH REPORT</div>
+          <p className='text-xs text-latte mt-1'>
             Generated: {new Date().toLocaleDateString()}
           </p>
-          <p className='text-xs text-slate-500'>{branch.location}</p>
+          <p className='text-xs text-latte'>{branch.location}</p>
         </div>
       </div>
 
       {/* Branch Summary & Staff Grid */}
       <div className='grid grid-cols-12 gap-6 mb-8'>
         {/* Info Card */}
-        <div className='col-span-8 bg-slate-50 border border-slate-200 rounded-lg p-4'>
+        <div className='col-span-8 bg-cream border border-hairline rounded-lg p-4'>
           <div className='grid grid-cols-2 gap-x-8 gap-y-4 text-sm'>
             <div>
-              <span className='text-xs font-bold text-slate-500 uppercase block mb-0.5'>
+              <span className='text-xs font-bold text-latte uppercase block mb-0.5'>
                 Email
               </span>
-              <span className='font-medium text-slate-900'>
+              <span className='font-medium text-ink'>
                 {branch.email || "-"}
               </span>
             </div>
             <div>
-              <span className='text-xs font-bold text-slate-500 uppercase block mb-0.5'>
+              <span className='text-xs font-bold text-latte uppercase block mb-0.5'>
                 Tax ID
               </span>
-              <span className='font-medium text-slate-900'>
+              <span className='font-medium text-ink'>
                 {branch.taxNumber || "-"}
               </span>
             </div>
             <div>
-              <span className='text-xs font-bold text-slate-500 uppercase block mb-0.5'>
+              <span className='text-xs font-bold text-latte uppercase block mb-0.5'>
                 Machine Ownership
               </span>
-              <span className='font-medium text-slate-900'>
+              <span className='font-medium text-ink'>
                 {getMachineOwnershipStatus(branch, hideCosts)}
               </span>
             </div>
             <div>
-              <span className='text-xs font-bold text-slate-500 uppercase block mb-0.5'>
+              <span className='text-xs font-bold text-latte uppercase block mb-0.5'>
                 Total Visits
               </span>
-              <span className='font-medium text-slate-900'>
+              <span className='font-medium text-ink'>
                 {stats.visitCount}
               </span>
             </div>
           </div>
 
-          <div className='mt-4 pt-4 border-t border-slate-200'>
-            <span className='text-[10px] font-bold text-slate-500 uppercase block mb-2'>
+          <div className='mt-4 pt-4 border-t border-hairline'>
+            <span className='text-[10px] font-bold text-latte uppercase block mb-2'>
               Key Contacts
             </span>
             {branch.contacts.length > 0 ? (
               <div className='grid grid-cols-2 gap-2'>
                 {branch.contacts.map((c) => (
                   <div key={c.id} className='text-xs'>
-                    <span className='font-bold text-slate-800'>{c.name}</span>
-                    <span className='text-slate-500 mx-1'>•</span>
-                    <span className='text-slate-600'>
+                    <span className='font-bold text-ink'>{c.name}</span>
+                    <span className='text-latte mx-1'>•</span>
+                    <span className='text-ink'>
                       {c.phoneNumbers[0]?.number}
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <span className='text-xs text-slate-400 italic'>No contacts</span>
+              <span className='text-xs text-latte italic'>No contacts</span>
             )}
           </div>
         </div>
 
         {/* Assigned Staff Card - NEW */}
-        <div className='col-span-4 border border-slate-200 rounded-lg p-4 flex flex-col'>
-          <h4 className='text-xs font-bold uppercase text-slate-500 border-b border-slate-200 pb-2 mb-2 flex items-center gap-1'>
+        <div className='col-span-4 border border-hairline rounded-lg p-4 flex flex-col'>
+          <h4 className='text-xs font-bold uppercase text-latte border-b border-hairline pb-2 mb-2 flex items-center gap-1'>
             <UserGroupIcon className='w-4 h-4' /> Assigned Staff
           </h4>
           {branch.baristas && branch.baristas.length > 0 ? (
@@ -764,9 +764,9 @@ const BranchPrintableDocument: React.FC<{
               {branch.baristas.map((b) => (
                 <div
                   key={b.id}
-                  className='flex justify-between items-center text-xs p-1.5 bg-slate-50 rounded'
+                  className='flex justify-between items-center text-xs p-1.5 bg-cream rounded'
                 >
-                  <span className='font-semibold text-slate-700 truncate'>
+                  <span className='font-semibold text-ink truncate'>
                     {b.name}
                   </span>
                   <div className='flex items-center gap-1'>
@@ -777,7 +777,7 @@ const BranchPrintableDocument: React.FC<{
               ))}
             </div>
           ) : (
-            <div className='flex-1 flex items-center justify-center text-slate-400 text-xs italic'>
+            <div className='flex-1 flex items-center justify-center text-latte text-xs italic'>
               No baristas assigned
             </div>
           )}
@@ -786,7 +786,7 @@ const BranchPrintableDocument: React.FC<{
 
       {/* Detailed Maintenance History */}
       <div>
-        <div className='flex items-center gap-2 mb-4 bg-slate-800 text-white p-2 rounded'>
+        <div className='flex items-center gap-2 mb-4 bg-espresso text-white p-2 rounded'>
           <ClipboardDocumentCheckIcon className='w-5 h-5' />
           <h3 className='text-sm font-bold uppercase tracking-wider'>
             Maintenance History Log
@@ -804,9 +804,9 @@ const BranchPrintableDocument: React.FC<{
             ))}
           </div>
         ) : (
-          <div className='p-12 text-center border-2 border-dashed border-slate-200 rounded-lg'>
-            <WrenchScrewdriverIcon className='w-10 h-10 text-slate-300 mx-auto mb-2' />
-            <p className='text-slate-400 italic'>
+          <div className='p-12 text-center border-2 border-dashed border-hairline rounded-lg'>
+            <WrenchScrewdriverIcon className='w-10 h-10 text-latte/70 mx-auto mb-2' />
+            <p className='text-latte italic'>
               No maintenance records found for this branch.
             </p>
           </div>
@@ -814,7 +814,7 @@ const BranchPrintableDocument: React.FC<{
       </div>
 
       {/* Footer */}
-      <div className='mt-12 pt-4 border-t border-slate-200 text-center text-[10px] text-slate-400'>
+      <div className='mt-12 pt-4 border-t border-hairline text-center text-[10px] text-latte'>
         <p>CONFIDENTIAL - Internal Use Only • Mido for Distribution</p>
       </div>
     </div>
@@ -840,16 +840,16 @@ const PrintableDocument: React.FC<{
       </div>
 
       {/* Document Header */}
-      <div className='flex justify-between items-end border-b-2 border-slate-800 pb-4 mb-8'>
+      <div className='flex justify-between items-end border-b-2 border-hairline pb-4 mb-8'>
         <div>
-          <h1 className='text-3xl font-bold text-slate-900 tracking-tight'>
+          <h1 className='text-3xl font-bold text-ink tracking-tight'>
             {data.companyName}
           </h1>
-          <p className='text-sm text-slate-600 mt-1'>
+          <p className='text-sm text-ink mt-1'>
             Comprehensive Maintenance Report
           </p>
         </div>
-        <div className='text-right text-xs text-slate-500'>
+        <div className='text-right text-xs text-latte'>
           <p>Report Date: {new Date().toLocaleDateString()}</p>
           <p>Submission ID: {data.id ? data.id : "Pending"}</p>
         </div>
@@ -871,16 +871,16 @@ const PrintableDocument: React.FC<{
 
         {data.contacts.length > 0 && (
           <div className='mt-2'>
-            <h4 className='text-[10px] uppercase text-slate-500 font-semibold mb-1'>
+            <h4 className='text-[10px] uppercase text-latte font-semibold mb-1'>
               Key Contacts
             </h4>
             <ul className='text-sm list-disc pl-4 space-y-0.5'>
               {data.contacts.map((c) => (
                 <li key={c.id}>
                   <span className='font-semibold'>{c.name}</span>
-                  <span className='text-slate-600'> — {c.position}</span>
+                  <span className='text-ink'> — {c.position}</span>
                   {c.phoneNumbers.length > 0 && (
-                    <span className='text-slate-500 text-xs ml-2'>
+                    <span className='text-latte text-xs ml-2'>
                       ({c.phoneNumbers.map((p) => p.number).join(", ")})
                     </span>
                   )}
@@ -904,7 +904,7 @@ const PrintableDocument: React.FC<{
       {/* Branches Section */}
       {data.hasBranches && (
         <div className='mt-8'>
-          <h2 className='text-lg font-bold text-slate-900 border-b-2 border-slate-300 pb-1 mb-4'>
+          <h2 className='text-lg font-bold text-ink border-b-2 border-hairline pb-1 mb-4'>
             Branch Details & Maintenance
           </h2>
 
@@ -912,11 +912,11 @@ const PrintableDocument: React.FC<{
             const stats = getBranchStats(branch.maintenanceHistory);
             return (
               <div key={branch.id} className='mb-8 break-inside-avoid-page'>
-                <div className='bg-slate-100 p-2 border-l-4 border-slate-600 mb-3 flex justify-between items-baseline'>
-                  <h3 className='font-bold text-base text-slate-900'>
+                <div className='bg-cream p-2 border-l-4 border-hairline mb-3 flex justify-between items-baseline'>
+                  <h3 className='font-bold text-base text-ink'>
                     {branch.branchName || `Branch ${idx + 1}`}
                   </h3>
-                  <span className='text-xs text-slate-600 font-normal'>
+                  <span className='text-xs text-ink font-normal'>
                     {branch.location}
                   </span>
                 </div>
@@ -940,23 +940,23 @@ const PrintableDocument: React.FC<{
                 {/* Financials & Stats Row */}
                 {((!hideCosts && branch.dailyLeaseCost) ||
                   Object.keys(stats.partsMap).length > 0) && (
-                  <div className='mb-4 px-2 py-2 bg-slate-50 border border-slate-200 rounded text-xs flex flex-wrap gap-x-8 gap-y-2'>
+                  <div className='mb-4 px-2 py-2 bg-cream border border-hairline rounded text-xs flex flex-wrap gap-x-8 gap-y-2'>
                     {!hideCosts && branch.dailyLeaseCost && (
                       <div>
-                        <span className='uppercase text-slate-500 font-bold mr-2'>
+                        <span className='uppercase text-latte font-bold mr-2'>
                           Daily Lease:
                         </span>
-                        <span className='font-bold text-slate-900'>
+                        <span className='font-bold text-ink'>
                           {branch.dailyLeaseCost} EGP
                         </span>
                       </div>
                     )}
                     {Object.keys(stats.partsMap).length > 0 && (
                       <div>
-                        <span className='uppercase text-slate-500 font-bold mr-2'>
+                        <span className='uppercase text-latte font-bold mr-2'>
                           Parts Replaced:
                         </span>
-                        <span className='text-slate-800'>
+                        <span className='text-ink'>
                           {Object.entries(stats.partsMap)
                             .map(([name, count]) => `${count}x ${name}`)
                             .join(", ")}
@@ -968,17 +968,17 @@ const PrintableDocument: React.FC<{
 
                 {branch.contacts.length > 0 && (
                   <div className='mb-4 px-2'>
-                    <p className='text-[10px] uppercase text-slate-500 font-semibold mb-1'>
+                    <p className='text-[10px] uppercase text-latte font-semibold mb-1'>
                       Contacts
                     </p>
-                    <div className='text-xs text-slate-700'>
+                    <div className='text-xs text-ink'>
                       {branch.contacts.map((c) => c.name).join(", ")}
                     </div>
                   </div>
                 )}
 
                 <div className='px-2'>
-                  <p className='text-[10px] uppercase text-slate-500 font-semibold mb-2'>
+                  <p className='text-[10px] uppercase text-latte font-semibold mb-2'>
                     Maintenance Records
                   </p>
                   <MaintenanceTable
@@ -1034,7 +1034,7 @@ const PrintDropdown: React.FC<{
           setIsOpen(!isOpen);
         }}
         disabled={disabled}
-        className='flex items-center gap-2 bg-lava-500 text-onyx font-bold py-2 px-4 rounded-lg hover:bg-lava-600 transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lava-500 disabled:opacity-50 disabled:cursor-not-allowed'
+        className='flex items-center gap-2 bg-copper-500 text-ink font-bold py-2 px-4 rounded-lg hover:bg-copper-600 transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-copper-500 disabled:opacity-50 disabled:cursor-not-allowed'
       >
         <PrinterIcon className='w-5 h-5' />
         {label}
@@ -1042,25 +1042,25 @@ const PrintDropdown: React.FC<{
       </button>
 
       {isOpen && (
-        <div className='origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-deep border border-sea focus:outline-none z-50'>
+        <div className='origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-cream border border-hairline focus:outline-none z-50'>
           <div className='py-1' role='menu' aria-orientation='vertical'>
             <button
               onClick={() => handleSelect("internal")}
-              className='block w-full text-left px-4 py-3 text-sm text-onyx hover:bg-sea'
+              className='block w-full text-left px-4 py-3 text-sm text-ink hover:bg-cream-2'
               role='menuitem'
             >
               <span className='font-bold'>Internal Report</span>
-              <span className='block text-xs text-sage mt-0.5'>
+              <span className='block text-xs text-latte mt-0.5'>
                 Includes all costs & financial data
               </span>
             </button>
             <button
               onClick={() => handleSelect("client")}
-              className='block w-full text-left px-4 py-3 text-sm text-onyx hover:bg-sea border-t border-sea'
+              className='block w-full text-left px-4 py-3 text-sm text-ink hover:bg-cream-2 border-t border-hairline'
               role='menuitem'
             >
               <span className='font-bold'>Client Report</span>
-              <span className='block text-xs text-sage mt-0.5'>
+              <span className='block text-xs text-latte mt-0.5'>
                 Hides all cost information
               </span>
             </button>
@@ -1144,7 +1144,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
         <div className='flex justify-between items-center mb-6'>
           <button
             onClick={onBack}
-            className='flex items-center gap-2 text-sage hover:text-onyx transition-colors'
+            className='flex items-center gap-2 text-latte hover:text-ink transition-colors'
           >
             <ArrowLeftIcon className='w-5 h-5' /> Back to History
           </button>
@@ -1156,9 +1156,9 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
         </div>
 
         {/* Local Date Range Filter */}
-        <div className='bg-deep p-4 rounded-xl shadow-sm border border-sea mb-6 flex flex-col sm:flex-row items-center justify-between gap-4'>
-          <div className='flex items-center gap-2 text-onyx font-semibold text-sm'>
-            <CalendarIcon className='w-5 h-5 text-lava-500' />
+        <div className='bg-cream p-4 rounded-xl shadow-sm border border-hairline mb-6 flex flex-col sm:flex-row items-center justify-between gap-4'>
+          <div className='flex items-center gap-2 text-ink font-semibold text-sm'>
+            <CalendarIcon className='w-5 h-5 text-copper-500' />
             <span>Filter History by Date:</span>
           </div>
           <div className='flex items-center gap-2'>
@@ -1166,14 +1166,14 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
               type='date'
               value={filterStartDate}
               onChange={(e) => setFilterStartDate(e.target.value)}
-              className='px-3 py-1.5 rounded-lg border-sea bg-deep text-onyx text-sm focus:ring-lava-500 focus:border-lava-500'
+              className='px-3 py-1.5 rounded-lg border-hairline bg-cream text-ink text-sm focus:ring-copper-500 focus:border-copper-500'
             />
-            <span className='text-sage'>-</span>
+            <span className='text-latte'>-</span>
             <input
               type='date'
               value={filterEndDate}
               onChange={(e) => setFilterEndDate(e.target.value)}
-              className='px-3 py-1.5 rounded-lg border-sea bg-deep text-onyx text-sm focus:ring-lava-500 focus:border-lava-500'
+              className='px-3 py-1.5 rounded-lg border-hairline bg-cream text-ink text-sm focus:ring-copper-500 focus:border-copper-500'
             />
             {(filterStartDate || filterEndDate) && (
               <button
@@ -1181,7 +1181,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                   setFilterStartDate("");
                   setFilterEndDate("");
                 }}
-                className='ml-2 p-1.5 text-sage hover:text-lava-500 hover:bg-lava-500/10 rounded-full transition-colors'
+                className='ml-2 p-1.5 text-latte hover:text-copper-500 hover:bg-copper-500/10 rounded-full transition-colors'
                 title='Clear Dates'
               >
                 <XMarkIcon className='w-5 h-5' />
@@ -1190,12 +1190,12 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
           </div>
         </div>
 
-        <div className='bg-deep rounded-xl shadow-lg overflow-hidden border border-sea'>
+        <div className='bg-cream rounded-xl shadow-lg overflow-hidden border border-hairline'>
           {/* Screen View Content */}
-          <div className='p-6 sm:p-8 bg-sea/20 border-b border-sea'>
+          <div className='p-6 sm:p-8 bg-cream-2/20 border-b border-hairline'>
             <div className='flex flex-col sm:flex-row justify-between items-start gap-4'>
               <div className='flex items-center gap-4'>
-                <div className='h-16 w-16 bg-sea rounded-lg border border-sea flex items-center justify-center p-2 shadow-sm shrink-0'>
+                <div className='h-16 w-16 bg-cream-2 rounded-lg border border-hairline flex items-center justify-center p-2 shadow-sm shrink-0'>
                   <img
                     src='/logo.svg'
                     alt='Logo'
@@ -1203,10 +1203,10 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                   />
                 </div>
                 <div>
-                  <h1 className='text-3xl font-bold text-onyx mb-1'>
+                  <h1 className='text-3xl font-bold text-ink mb-1'>
                     {submission.companyName}
                   </h1>
-                  <div className='flex flex-wrap gap-x-4 gap-y-1 text-sm text-sage'>
+                  <div className='flex flex-wrap gap-x-4 gap-y-1 text-sm text-latte'>
                     {submission.created_at && (
                       <span>
                         Submitted:{" "}
@@ -1222,11 +1222,11 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                   </div>
                 </div>
               </div>
-              <div className='bg-deep p-3 rounded-lg border border-sea shadow-sm self-start'>
-                <div className='text-xs text-sage uppercase font-semibold'>
+              <div className='bg-cream p-3 rounded-lg border border-hairline shadow-sm self-start'>
+                <div className='text-xs text-latte uppercase font-semibold'>
                   Status
                 </div>
-                <div className='font-bold text-lava-500'>
+                <div className='font-bold text-copper-500'>
                   {submission.pendingSync ? "Offline (Pending Sync)" : "Synced"}
                 </div>
               </div>
@@ -1234,7 +1234,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
 
             <div className='mt-6 grid grid-cols-1 md:grid-cols-2 gap-6'>
               <div>
-                <h3 className='text-sm font-bold uppercase text-sage mb-2'>
+                <h3 className='text-sm font-bold uppercase text-latte mb-2'>
                   Company Details
                 </h3>
                 <div className='space-y-1'>
@@ -1263,7 +1263,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                 </div>
               </div>
               <div>
-                <h3 className='text-sm font-bold uppercase text-sage mb-2'>
+                <h3 className='text-sm font-bold uppercase text-latte mb-2'>
                   Main Contacts
                 </h3>
                 <ContactList contacts={submission.contacts} />
@@ -1272,8 +1272,8 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
 
             {/* Main Office Maintenance */}
             {filteredMainHistory.length > 0 && (
-              <div className='mt-6 pt-6 border-t border-sea'>
-                <h3 className='text-md font-bold text-onyx mb-3 flex items-center gap-2'>
+              <div className='mt-6 pt-6 border-t border-hairline'>
+                <h3 className='text-md font-bold text-ink mb-3 flex items-center gap-2'>
                   <WrenchScrewdriverIcon className='w-5 h-5' /> Main Office
                   Maintenance
                 </h3>
@@ -1284,8 +1284,8 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
             )}
             {submission.maintenanceHistory.length > 0 &&
               filteredMainHistory.length === 0 && (
-                <div className='mt-6 pt-6 border-t border-sea text-center py-8'>
-                  <p className='text-sage italic'>
+                <div className='mt-6 pt-6 border-t border-hairline text-center py-8'>
+                  <p className='text-latte italic'>
                     No maintenance records match the selected date range.
                   </p>
                 </div>
@@ -1294,9 +1294,9 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
 
           {/* Branches List Screen View */}
           {submission.hasBranches && (
-            <div className='p-6 sm:p-8 bg-midnight'>
-              <h2 className='text-xl font-bold text-onyx mb-4 flex items-center gap-2 border-b border-sea pb-2'>
-                <BuildingStorefrontIcon className='w-6 h-6 text-lava-500' />
+            <div className='p-6 sm:p-8 bg-paper'>
+              <h2 className='text-xl font-bold text-ink mb-4 flex items-center gap-2 border-b border-hairline pb-2'>
+                <BuildingStorefrontIcon className='w-6 h-6 text-copper-500' />
                 Branches & Maintenance
               </h2>
 
@@ -1357,7 +1357,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
 
                           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                             <div>
-                              <h4 className='text-xs font-bold uppercase text-sage mb-2'>
+                              <h4 className='text-xs font-bold uppercase text-latte mb-2'>
                                 Branch Info
                               </h4>
                               <InfoRow
@@ -1382,7 +1382,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                               />
                             </div>
                             <div>
-                              <h4 className='text-xs font-bold uppercase text-sage mb-2'>
+                              <h4 className='text-xs font-bold uppercase text-latte mb-2'>
                                 Contacts
                               </h4>
                               <ContactList contacts={branch.contacts} />
@@ -1390,13 +1390,13 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                           </div>
 
                           {/* Branch Stats Summary */}
-                          <div className='bg-deep rounded-lg p-3 border border-sea flex flex-wrap gap-4 text-sm'>
+                          <div className='bg-cream rounded-lg p-3 border border-hairline flex flex-wrap gap-4 text-sm'>
                             <div className='flex items-center gap-2'>
-                              <ClipboardDocumentCheckIcon className='w-4 h-4 text-sage' />
-                              <span className='text-sage font-medium'>
+                              <ClipboardDocumentCheckIcon className='w-4 h-4 text-latte' />
+                              <span className='text-latte font-medium'>
                                 Total Visits:
                               </span>
-                              <span className='font-bold text-onyx'>
+                              <span className='font-bold text-ink'>
                                 {stats.visitCount}
                               </span>
                             </div>
@@ -1404,12 +1404,12 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                             {/* Machine Status */}
                             {branch.usesOurMachines && (
                               <div className='flex items-center gap-2'>
-                                <WrenchScrewdriverIcon className='w-4 h-4 text-sage' />
-                                <span className='text-sage font-medium'>
+                                <WrenchScrewdriverIcon className='w-4 h-4 text-latte' />
+                                <span className='text-latte font-medium'>
                                   Machines:
                                 </span>
                                 <span
-                                  className={`font-bold ${branch.machineOwnershipType === "leased" ? "text-amber-500" : "text-success-500"}`}
+                                  className={`font-bold ${branch.machineOwnershipType === "leased" ? "text-amber-500" : "text-leaf-500"}`}
                                 >
                                   {branch.machineOwnershipType === "leased"
                                     ? "Leased"
@@ -1420,27 +1420,27 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
 
                             {branch.dailyLeaseCost && (
                               <div className='flex items-center gap-2'>
-                                <BanknotesIcon className='w-4 h-4 text-sage' />
-                                <span className='text-sage font-medium'>
+                                <BanknotesIcon className='w-4 h-4 text-latte' />
+                                <span className='text-latte font-medium'>
                                   Daily Lease:
                                 </span>
-                                <span className='font-bold text-onyx'>
+                                <span className='font-bold text-ink'>
                                   {branch.dailyLeaseCost} EGP
                                 </span>
                               </div>
                             )}
                             {Object.keys(stats.partsMap).length > 0 && (
-                              <div className='flex items-start gap-2 w-full pt-2 border-t border-sea'>
-                                <CubeIcon className='w-4 h-4 text-sage mt-0.5' />
+                              <div className='flex items-start gap-2 w-full pt-2 border-t border-hairline'>
+                                <CubeIcon className='w-4 h-4 text-latte mt-0.5' />
                                 <div className='flex flex-wrap gap-x-3 gap-y-1'>
-                                  <span className='text-sage font-medium'>
+                                  <span className='text-latte font-medium'>
                                     Parts Summary:
                                   </span>
                                   {Object.entries(stats.partsMap).map(
                                     ([name, count]) => (
                                       <span
                                         key={name}
-                                        className='inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-sea border border-sea text-onyx'
+                                        className='inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-cream-2 border border-hairline text-ink'
                                       >
                                         <span className='font-bold mr-1'>
                                           {count}x
@@ -1456,14 +1456,14 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
 
                           {branch.baristas && branch.baristas.length > 0 && (
                             <div>
-                              <h4 className='text-xs font-bold uppercase text-sage mb-2 flex items-center gap-1'>
+                              <h4 className='text-xs font-bold uppercase text-latte mb-2 flex items-center gap-1'>
                                 <UserGroupIcon className='w-4 h-4' /> Baristas
                               </h4>
                               <div className='flex flex-wrap gap-2'>
                                 {branch.baristas.map((b) => (
                                   <span
                                     key={b.id}
-                                    className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sea text-onyx'
+                                    className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream-2 text-ink'
                                   >
                                     {b.name} ({b.rating}★)
                                   </span>
@@ -1473,7 +1473,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                           )}
 
                           <div>
-                            <h4 className='text-sm font-bold text-onyx mb-3 flex items-center gap-2 border-t pt-3 border-sea'>
+                            <h4 className='text-sm font-bold text-ink mb-3 flex items-center gap-2 border-t pt-3 border-hairline'>
                               <WrenchScrewdriverIcon className='w-4 h-4' />{" "}
                               Maintenance History
                             </h4>
@@ -1482,7 +1482,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                                 <MaintenanceRecordView key={r.id} record={r} />
                               ))
                             ) : (
-                              <p className='text-sm text-sage italic'>
+                              <p className='text-sm text-latte italic'>
                                 No maintenance records match filter.
                               </p>
                             )}
