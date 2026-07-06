@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CheckIcon } from '@heroicons/react/24/solid';
 
 export interface StepperStep {
@@ -16,13 +16,31 @@ interface StepperProps {
 
 const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, completedSteps = [], layout = 'vertical' }) => {
   const [hoveredStep, setHoveredStep] = useState<number | null>(null);
+  const scrollContainerRef = useRef<HTMLOListElement>(null);
+
+  // Auto-scroll to keep active step visible in horizontal mode
+  useEffect(() => {
+    if (layout === 'horizontal' && scrollContainerRef.current) {
+      const activeElement = document.getElementById(`step-node-${currentStep}`);
+      if (activeElement) {
+        // Calculate position to center the element
+        const container = scrollContainerRef.current;
+        const scrollLeft = activeElement.offsetLeft - (container.clientWidth / 2) + (activeElement.clientWidth / 2);
+        
+        container.scrollTo({
+          left: scrollLeft,
+          behavior: 'smooth'
+        });
+      }
+    }
+  }, [currentStep, layout]);
 
   const isClickable = !!onChange;
 
   if (layout === 'horizontal') {
     return (
       <nav aria-label="Progress">
-        <ol className="flex items-start w-full overflow-x-auto custom-scrollbar pb-2 pt-1 px-1">
+        <ol ref={scrollContainerRef} className="flex items-start w-full overflow-x-auto custom-scrollbar pb-2 pt-1 px-1 relative scroll-smooth">
           {steps.map((step, index) => {
             const isCurrent = currentStep === step.id;
             const isCompleted = completedSteps.includes(step.id) || currentStep > step.id;
@@ -30,7 +48,7 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
             const isLast = index === steps.length - 1;
             
             return (
-              <li key={step.id} className={`relative shrink-0 flex flex-col items-center ${isLast ? 'w-20' : 'w-28'}`}>
+              <li id={`step-node-${step.id}`} key={step.id} className={`relative shrink-0 flex flex-col items-center ${isLast ? 'w-20' : 'w-28'}`}>
                 {/* Connector line */}
                 {!isLast && (
                   <div 
