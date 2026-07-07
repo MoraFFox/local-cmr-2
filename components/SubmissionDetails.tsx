@@ -262,13 +262,16 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
               <WrenchScrewdriverIcon className="w-4 h-4 text-latte" />
               الماكينات
             </div>
-            <ul className='list-disc pr-5 space-y-0.5 text-ink'>
+            <div className='space-y-1 text-ink'>
               {record.machines.map((m) => (
-                <li key={m.id}>
-                  <bdi>{m.count}x {m.name}</bdi>
-                </li>
+                <div key={m.id} className="flex items-start gap-1.5">
+                  <span className="text-latte mt-0.5">•</span>
+                  <div className="flex-1 min-w-0" dir="ltr">
+                    <div className="text-right w-full">{m.count}x {m.name}</div>
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
         
@@ -297,18 +300,21 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
               <CubeIcon className="w-4 h-4" />
               قطع الغيار المستبدلة
             </div>
-            <ul className='list-disc pr-5 space-y-0.5 text-ink dark:text-latte/70'>
+            <div className='space-y-1 text-ink dark:text-latte/70'>
               {record.partsReplaced.map((p, i) => (
-                <li key={i}>
-                  <bdi>{p.count}x {p.name}</bdi>
-                  {p.paidByClient && (
-                    <span className="text-xs text-ember-600 bg-ember-50 px-1.5 py-0.5 rounded mr-2 border border-ember-100">
-                      (على حساب العميل)
-                    </span>
-                  )}
-                </li>
+                <div key={i} className="flex items-start gap-1.5">
+                  <span className="text-latte mt-0.5">•</span>
+                  <div className="flex-1 flex flex-wrap items-center gap-x-2 gap-y-1" dir="rtl">
+                    <div dir="ltr" className="text-right">{p.count}x {p.name}</div>
+                    {p.paidByClient && (
+                      <span className="text-xs text-ember-600 bg-ember-50 px-1.5 py-0.5 rounded border border-ember-100 whitespace-nowrap">
+                        (على حساب العميل)
+                      </span>
+                    )}
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
         
@@ -318,18 +324,21 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
               <ClipboardDocumentListIcon className="w-4 h-4" />
               الخدمات المقدمة
             </div>
-            <ul className='list-disc pr-5 space-y-0.5 text-ink dark:text-latte/70'>
+            <div className='space-y-1 text-ink dark:text-latte/70'>
               {record.servicesPerformed.map((s, i) => (
-                <li key={i}>
-                  <bdi>{s.count}x {s.name}</bdi>
-                  {s.paidByClient && (
-                    <span className="text-xs text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded mr-2 border border-blue-100">
-                      (على حساب العميل)
-                    </span>
-                  )}
-                </li>
+                <div key={i} className="flex items-start gap-1.5">
+                  <span className="text-latte mt-0.5">•</span>
+                  <div className="flex-1 flex flex-wrap items-center gap-x-2 gap-y-1" dir="rtl">
+                    <div dir="ltr" className="text-right">{s.count}x {s.name}</div>
+                    {s.paidByClient && (
+                      <span className="text-xs text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100 whitespace-nowrap">
+                        (على حساب العميل)
+                      </span>
+                    )}
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
         
