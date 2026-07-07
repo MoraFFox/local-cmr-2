@@ -307,7 +307,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
                   <div className="flex-1 flex flex-wrap items-center gap-x-2 gap-y-1" dir="rtl">
                     <div dir="ltr" className="text-right">{p.count}x {p.name}</div>
                     {p.paidByClient && (
-                      <span className="text-xs text-ember-600 bg-ember-50 px-1.5 py-0.5 rounded border border-ember-100 whitespace-nowrap">
+                      <span className="text-xs text-ember-600 dark:text-ember-400 bg-ember-50 dark:bg-ember-900/30 px-1.5 py-0.5 rounded border border-ember-100 dark:border-ember-800/50 whitespace-nowrap">
                         (على حساب العميل)
                       </span>
                     )}
@@ -331,7 +331,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
                   <div className="flex-1 flex flex-wrap items-center gap-x-2 gap-y-1" dir="rtl">
                     <div dir="ltr" className="text-right">{s.count}x {s.name}</div>
                     {s.paidByClient && (
-                      <span className="text-xs text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100 whitespace-nowrap">
+                      <span className="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded border border-blue-100 dark:border-blue-800/50 whitespace-nowrap">
                         (على حساب العميل)
                       </span>
                     )}
