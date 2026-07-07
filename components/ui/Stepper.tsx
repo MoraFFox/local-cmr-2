@@ -16,7 +16,7 @@ interface StepperProps {
 
 const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, completedSteps = [], layout = 'vertical' }) => {
   const [hoveredStep, setHoveredStep] = useState<number | null>(null);
-  const scrollContainerRef = useRef<HTMLOListElement>(null);
+  const scrollContainerRef = useRef<HTMLElement>(null);
 
   // Auto-scroll to keep active step visible in horizontal mode
   useEffect(() => {
@@ -39,8 +39,8 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
 
   if (layout === 'horizontal') {
     return (
-      <nav aria-label="Progress">
-        <ol ref={scrollContainerRef} className="flex items-start w-full overflow-x-auto custom-scrollbar pb-2 pt-1 px-1 relative scroll-smooth">
+      <nav aria-label="Progress" className="w-full overflow-x-auto custom-scrollbar pb-2 pt-1 px-1 relative scroll-smooth" ref={scrollContainerRef}>
+        <ol className="flex items-start w-max min-w-full justify-center mx-auto">
           {steps.map((step, index) => {
             const isCurrent = currentStep === step.id;
             const isCompleted = completedSteps.includes(step.id) || currentStep > step.id;

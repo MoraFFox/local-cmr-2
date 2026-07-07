@@ -23,18 +23,18 @@ const TechInput: React.FC<TechInputProps> = ({
       )}
 
       <div className={`
-        relative flex items-center bg-espresso-light/50 border rounded-xl overflow-hidden transition-all duration-200
+        relative flex items-center bg-espresso-light/50 border rounded-xl overflow-hidden transition-all duration-200 px-4
         ${disabled ? 'opacity-50 cursor-not-allowed border-hairline' : 'border-hairline hover:border-brass focus-within:border-copper-500/50 focus-within:ring-2 focus-within:ring-copper-500/20'}
       `}>
         {icon && (
-          <div className="pl-4 text-latte">
+          <div className="text-latte shrink-0">
             {icon}
           </div>
         )}
 
         <input
           className={`
-            w-full bg-transparent px-4 py-3.5 text-cream placeholder-latte outline-none
+            w-full bg-transparent px-3 py-3.5 text-cream placeholder-latte outline-none
             disabled:cursor-not-allowed
             ${className}
           `}
@@ -43,7 +43,7 @@ const TechInput: React.FC<TechInputProps> = ({
         />
 
         {rightElement && (
-           <div className="pr-4">
+           <div className="shrink-0">
                {rightElement}
            </div>
         )}

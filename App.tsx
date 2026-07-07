@@ -104,6 +104,7 @@ import { validateSubmissionId, isValidDbId, isLocalId } from "./utils/validation
 import { useToast } from "./components/ToastContext";
 import { logger } from "./utils/logger";
 import { useT } from "./utils/i18n";
+import { generateMockWizardData } from "./utils/mockData";
 
 // FIX: Initialize Gemini API client according to guidelines.
 // The API key MUST be provided via the `process.env.API_KEY` environment variable.
@@ -371,7 +372,19 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
     if (view === "maintenance-edit") {
       setIsSidebarExpanded(false);
     }
-  }, [view]);
+  }, [theme]);
+
+  // Dev-only listener to fill mock wizard data
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const handleMockData = () => {
+      setFormData(generateMockWizardData());
+      setCurrentStep(6);
+      showToast("تم ملء بيانات المسودة التجريبية للشركة", "success");
+    };
+    window.addEventListener('MOCK_WIZARD_DATA', handleMockData);
+    return () => window.removeEventListener('MOCK_WIZARD_DATA', handleMockData);
+  }, [showToast]);
 
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));

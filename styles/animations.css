@@ -199,6 +199,30 @@
   animation: shimmerSweep 2s ease-in-out infinite;
 }
 
+/* Infinite RTL Marquee */
+@keyframes marquee-rtl {
+  0% { transform: translateX(0); }
+  /* Translate by 50% of the container's width (since content is duplicated exactly once) */
+  100% { transform: translateX(50%); } 
+}
+.animate-marquee-rtl {
+  display: inline-flex;
+  white-space: nowrap;
+  /* Use a slower, smoother timing for reading */
+  animation: marquee-rtl 12s linear infinite;
+}
+.marquee-container {
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  /* Fade edges to make the loop look natural */
+  mask-image: linear-gradient(to left, transparent, black 12px, black calc(100% - 12px), transparent);
+  -webkit-mask-image: linear-gradient(to left, transparent, black 12px, black calc(100% - 12px), transparent);
+}
+.marquee-container:hover .animate-marquee-rtl {
+  animation-play-state: paused;
+}
+
 /* ── Liquid Glass ───────────────────────────────────────────────
    Visual principles from the WebGL shader:
    - Superellipse mask with soft edges

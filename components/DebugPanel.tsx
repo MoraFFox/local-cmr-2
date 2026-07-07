@@ -159,11 +159,11 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ isOpen: externalIsOpen, onToggl
 
   return (
     <div className="fixed bottom-0 left-0 right-0 h-[50vh] z-[99999] flex flex-col bg-slate-900/97 border-t border-slate-700/15 backdrop-blur-xl font-mono text-xs text-slate-200">
-      <div className="flex items-center justify-between px-3 py-1.5 border-b border-slate-700/10 bg-slate-800/50 shrink-0">
-        <div className="flex items-center gap-3">
-          <span className="font-bold text-blue-400">🐛 Debug</span>
+      <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 border-b border-slate-700/10 bg-slate-800/50 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 md:gap-3">
+          <span className="font-bold text-blue-400 shrink-0">🐛 Debug</span>
           
-          <div className="flex gap-1">
+          <div className="flex flex-wrap gap-1">
             {(['logs', 'network'] as Tab[]).map(t => (
               <button
                 key={t}
@@ -220,14 +220,14 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ isOpen: externalIsOpen, onToggl
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="Search... (/)"
+            placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-slate-800 border border-slate-600/30 rounded px-2 py-0.5 text-[10px] text-slate-300 w-32 focus:outline-none focus:border-blue-500/50"
+            className="bg-slate-800 border border-slate-600/30 rounded px-2 py-0.5 text-[10px] text-slate-300 w-24 sm:w-32 focus:outline-none focus:border-blue-500/50"
           />
 
           <label className="flex items-center gap-1 cursor-pointer text-slate-500 text-[10px]">
@@ -239,6 +239,22 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ isOpen: externalIsOpen, onToggl
             />
             Auto
           </label>
+
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('MOCK_TECHNICIAN_DATA'))}
+            className="px-2 py-0.5 rounded border border-copper-500/30 bg-copper-500/10 text-copper-400 text-[10px] cursor-pointer hover:bg-copper-500/20 font-bold ml-2"
+            title="Mock Technician Flow Data"
+          >
+            🔧 Mock Tech
+          </button>
+
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('MOCK_WIZARD_DATA'))}
+            className="px-2 py-0.5 rounded border border-leaf-500/30 bg-leaf-500/10 text-leaf-400 text-[10px] cursor-pointer hover:bg-leaf-500/20 font-bold"
+            title="Mock Admin Wizard Data"
+          >
+            📋 Mock Wizard
+          </button>
 
           <button
             onClick={() => navigator.clipboard.writeText(JSON.stringify(context, null, 2))}

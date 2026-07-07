@@ -109,7 +109,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                                     return (
                                         <label 
                                             key={option.value} 
-                                            className={`relative flex items-center p-3 rounded-lg border cursor-pointer transition-all duration-200 ${
+                                            className={`relative flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all duration-200 ${
                                                 isSelected 
                                                     ? 'bg-ember-500/10 border-ember-500/50 shadow-[0_0_10px_rgba(192,57,43,0.2)]' 
                                                     : 'bg-espresso border-espresso-light hover:border-espresso-lighter'
@@ -121,7 +121,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                                                 onChange={() => handleCheckboxChange(option.value)}
                                                 className="sr-only"
                                             />
-                                            <div className={`w-5 h-5 rounded border flex items-center justify-center mr-3 transition-colors ${
+                                            <div className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors ${
                                                 isSelected ? 'bg-ember-500 border-ember-500' : 'border-espresso-lighter bg-espresso-light'
                                             }`}>
                                                 {isSelected && (
@@ -130,7 +130,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                                                     </svg>
                                                 )}
                                             </div>
-                                            <span className={`text-sm font-medium ${isSelected ? 'text-cream' : 'text-latte'}`}>
+                                            <span className={`text-sm font-medium leading-tight ${isSelected ? 'text-cream' : 'text-latte'}`}>
                                                 {option.label}
                                             </span>
                                         </label>

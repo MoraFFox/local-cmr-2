@@ -16,6 +16,7 @@ import { supabase } from "../../supabaseClient";
 import { logger } from "../../utils/logger";
 import { partsList, servicesList, problemCategories } from "../../constants";
 import { Part, Service, PortalPhotoEntry } from "../../types";
+import { generateMockTechnicianStep1, generateMockTechnicianStep2 } from "../../utils/mockData";
 
 interface TechnicianPortalProps {
   onBackToMain?: () => void;
@@ -96,6 +97,25 @@ const TechnicianPortal: React.FC<TechnicianPortalProps> = ({
 
   const [companyName, setCompanyName] = useState("");
   const [branchName, setBranchName] = useState("");
+
+  // Dev-only listener to fill mock technician data
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const handleMockData = () => {
+      if (!isAuthenticated) return; // don't mock if not logged in
+      const step1Mock = generateMockTechnicianStep1(companies);
+      setStep1Data(prev => ({ ...prev, ...step1Mock }));
+      
+      const step2Mock = generateMockTechnicianStep2();
+      setStep2Data(prev => ({ ...prev, ...step2Mock }));
+      
+      // Auto-advance to review step
+      setCurrentStep(3);
+      showToast("تم ملء بيانات التقرير التجريبية", "success");
+    };
+    window.addEventListener('MOCK_TECHNICIAN_DATA', handleMockData);
+    return () => window.removeEventListener('MOCK_TECHNICIAN_DATA', handleMockData);
+  }, [isAuthenticated, companies, showToast]);
 
   const fetchCompanies = useCallback(async () => {
     setLoadingCompanies(true);

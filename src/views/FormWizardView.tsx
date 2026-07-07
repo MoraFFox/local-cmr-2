@@ -1607,19 +1607,30 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                     onRemove={() => removeListItem("branches", index)}
                     titleContent={
                       <div className="min-w-0 pr-1">
-                        <div className="flex items-center gap-x-2 w-full overflow-hidden">
-                          <span
-                            className="font-bold truncate text-base shrink"
-                            title={formData.companyName}
-                          >
-                            {formData.companyName || "الشركة"}
-                          </span>
-                          <span className="text-latte shrink-0">
-                            -
-                          </span>
-                          <span className="truncate text-base shrink">
-                            {branch.branchName || "فرع جديد"}
-                          </span>
+                        {/* Marquee container for mobile, standard flex for desktop */}
+                        <div className="marquee-container w-full">
+                          <div className="inline-flex items-center gap-x-2 md:truncate md:animate-none lg:hover:animate-none animate-marquee-rtl pr-8">
+                            <span className="font-bold text-base whitespace-nowrap">
+                              {formData.companyName || "الشركة"}
+                            </span>
+                            <span className="text-latte shrink-0">
+                              -
+                            </span>
+                            <span className="text-base whitespace-nowrap">
+                              {branch.branchName || "فرع جديد"}
+                            </span>
+                            
+                            {/* Duplicate the text for seamless infinite scrolling loop */}
+                            <span className="font-bold text-base whitespace-nowrap lg:hidden" aria-hidden="true">
+                              {formData.companyName || "الشركة"}
+                            </span>
+                            <span className="text-latte shrink-0 lg:hidden" aria-hidden="true">
+                              -
+                            </span>
+                            <span className="text-base whitespace-nowrap lg:hidden" aria-hidden="true">
+                              {branch.branchName || "فرع جديد"}
+                            </span>
+                          </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-latte mt-1.5">
                           {branch.location && (
