@@ -239,6 +239,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   const [showPreview, setShowPreview] = useState(false);
   const [draftToDelete, setDraftToDelete] = useState<string | null>(null);
   const [draftToLoad, setDraftToLoad] = useState<Draft | null>(null);
+  const justLoadedDraftRef = React.useRef(false);
   const [drafts, setDrafts] = useState<Draft[]>(() => {
     if (typeof window !== "undefined" && window.localStorage) {
       const saved = localStorage.getItem("cmr_drafts");
@@ -333,6 +334,13 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   useEffect(() => {
     if (view !== "form") return;
 
+    // Skip auto-save immediately after loading a draft to prevent race conditions 
+    // where closure captures an empty prev state and wipes localStorage.
+    if (justLoadedDraftRef.current) {
+      justLoadedDraftRef.current = false;
+      return;
+    }
+
     // Don't auto-save if form is empty (fresh state)
     const isFormEmpty =
       !formData.companyName &&
@@ -351,6 +359,9 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
       }
 
       setDrafts((prev) => {
+        // Double check against potential empty states during hot reloads
+        if (!prev) prev = [];
+        
         const otherDrafts = prev.filter((d) => d.id !== draftId);
         const updatedDraft = {
           id: draftId!,
@@ -511,6 +522,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
 
   const confirmLoadDraft = () => {
     if (draftToLoad) {
+      justLoadedDraftRef.current = true;
       setFormData(draftToLoad.formData);
       setCurrentStep(draftToLoad.currentStep);
       setCurrentDraftId(draftToLoad.id);
@@ -875,6 +887,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   const handleAddNew = () => {
     setFormData(initialFormData);
     setCurrentStep(1);
+    setCurrentDraftId(null);
     navigate("/companies/new");
     setIsMobileMenuOpen(false);
     setShowPreview(false);
