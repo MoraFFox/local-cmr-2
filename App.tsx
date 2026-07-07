@@ -237,6 +237,8 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   const [offlineBannerDismissed, setOfflineBannerDismissed] = useState(false);
   const { showToast } = useToast();
   const [showPreview, setShowPreview] = useState(false);
+  const [draftToDelete, setDraftToDelete] = useState<string | null>(null);
+  const [draftToLoad, setDraftToLoad] = useState<Draft | null>(null);
   const [drafts, setDrafts] = useState<Draft[]>(() => {
     if (typeof window !== "undefined" && window.localStorage) {
       const saved = localStorage.getItem("cmr_drafts");
@@ -504,31 +506,37 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   };
 
   const handleLoadDraft = (draft: Draft) => {
-    if (
-      window.confirm(
-        "Load this draft? Current unsaved changes will be lost if not drafted.",
-      )
-    ) {
-      setFormData(draft.formData);
-      setCurrentStep(draft.currentStep);
-      setCurrentDraftId(draft.id);
+    setDraftToLoad(draft);
+  };
+
+  const confirmLoadDraft = () => {
+    if (draftToLoad) {
+      setFormData(draftToLoad.formData);
+      setCurrentStep(draftToLoad.currentStep);
+      setCurrentDraftId(draftToLoad.id);
       navigate("/companies/new");
       if (window.innerWidth < 1024) setIsSidebarExpanded(false);
+      setDraftToLoad(null);
     }
   };
 
   const handleDeleteDraft = (e: React.MouseEvent, draftId: string) => {
     e.stopPropagation();
-    if (window.confirm("Delete this draft?")) {
+    setDraftToDelete(draftId);
+  };
+
+  const confirmDeleteDraft = () => {
+    if (draftToDelete) {
       setDrafts((prev) => {
-        const newDrafts = prev.filter((d) => d.id !== draftId);
+        const newDrafts = prev.filter((d) => d.id !== draftToDelete);
         localStorage.setItem("cmr_drafts", JSON.stringify(newDrafts));
         return newDrafts;
       });
-      if (currentDraftId === draftId) {
+      if (currentDraftId === draftToDelete) {
         setCurrentDraftId(null);
-        // Optional: Reset form or keep as is? keeping as is for now implies "detached from draft"
       }
+      setDraftToDelete(null);
+      showToast("تم حذف المسودة بنجاح", "success");
     }
   };
 
@@ -1251,6 +1259,23 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
             title="تأكيد الحذف"
             message="هل أنت متأكد من حذف هذا السجل؟ لا يمكن التراجع عن هذا الإجراء."
             isConfirming={isDeleting}
+          />
+          <ConfirmDialog
+            isOpen={draftToDelete !== null}
+            onClose={() => setDraftToDelete(null)}
+            onConfirm={confirmDeleteDraft}
+            title="تأكيد حذف المسودة"
+            message="هل أنت متأكد من حذف هذه المسودة؟ سيتم فقدان كافة البيانات المحفوظة بها."
+            confirmLabel="حذف المسودة"
+          />
+          <ConfirmDialog
+            isOpen={draftToLoad !== null}
+            onClose={() => setDraftToLoad(null)}
+            onConfirm={confirmLoadDraft}
+            title="تحميل المسودة"
+            message="هل تريد تحميل هذه المسودة؟ سيتم فقدان أي تغييرات حالية غير محفوظة."
+            confirmLabel="تحميل المسودة"
+            confirmLabelClass="btn-primary"
           />
     </div>
   );
