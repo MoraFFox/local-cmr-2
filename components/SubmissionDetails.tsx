@@ -36,6 +36,9 @@ import {
   CalendarIcon,
   XMarkIcon,
   ChevronDownIcon,
+  ExclamationCircleIcon,
+  ClipboardDocumentListIcon,
+  ArrowUturnLeftIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
 
@@ -199,101 +202,135 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
   record,
 }) => {
   return (
-    <div className='border-l-2 border-copper-500 pl-4 py-2 mb-4 bg-cream-2 rounded-r-md'>
-      <div className='flex justify-between items-start'>
-        <div>
-          <div className='flex items-center gap-2'>
-            <p className='font-bold text-ink'>
+    <div className='border-r-2 border-copper-500 pr-4 py-3 mb-4 bg-cream-2 rounded-l-md'>
+      <div className='flex flex-col sm:flex-row justify-between items-start gap-3'>
+        <div className='space-y-1.5 w-full sm:w-auto'>
+          <div className='flex flex-wrap items-center gap-2'>
+            <p className='font-bold text-ink' dir="ltr">
               {record.maintenanceDate}
             </p>
             {record.dailyLeaseCost && (
-              <span className='text-xs bg-amber-500/10 px-1.5 py-0.5 rounded text-amber-500 border border-amber-500/20'>
-                Lease: {record.dailyLeaseCost} EGP
+              <span className='text-xs bg-amber-500/10 px-1.5 py-0.5 rounded text-amber-500 border border-amber-500/20 flex items-center gap-1'>
+                <BanknotesIcon className="w-3.5 h-3.5" />
+                {record.dailyLeaseCost} ج.م.
               </span>
             )}
             <span className='text-xs bg-copper-500/10 px-1.5 py-0.5 rounded text-copper-600 border border-copper-500/20'>
-              Paid By: {getPaidByLabel(record.paidBy)}
+              جهة الدفع: {getPaidByLabel(record.paidBy)}
             </span>
           </div>
-          <p className='text-xs text-latte'>
-            {record.type} • {record.visitZone || "No Zone"}
-          </p>
+          <div className='flex items-center gap-1.5 text-xs text-latte'>
+            <span className='bg-cream px-1.5 rounded border border-hairline'>{record.type}</span>
+            {record.visitZone && <span>• {record.visitZone}</span>}
+          </div>
           {record.nextVisitDate && (
-            <p className='text-xs text-copper-500 mt-1'>
-              <span className='font-semibold'>Next Scheduled:</span>{" "}
-              {record.nextVisitDate}
+            <p className='text-xs text-copper-500 flex items-center gap-1'>
+              <CalendarIcon className="w-3.5 h-3.5" />
+              الزيارة القادمة: <span dir="ltr">{record.nextVisitDate}</span>
             </p>
           )}
         </div>
+        
         {record.baristaName && (
-          <span className='text-xs bg-cream-2 px-2 py-1 rounded text-ink'>
-            Staff: {record.baristaName}
-          </span>
+          <div className='w-full sm:w-auto mt-1 sm:mt-0'>
+            <span className='text-xs bg-cream px-2.5 py-1 border border-hairline rounded text-ink flex items-center gap-1.5 w-fit'>
+              <UserIcon className="w-3.5 h-3.5 text-latte" />
+              <span className='font-medium'>{record.baristaName}</span>
+            </span>
+          </div>
         )}
       </div>
 
-      <div className='mt-2 text-sm space-y-1'>
+      <div className='mt-4 text-sm space-y-3'>
         {record.machines && record.machines.length > 0 && (
           <div>
-            <span className='font-semibold text-ink'>
-              Machines:
-            </span>
-            <ul className='list-disc list-inside pl-1 text-ink'>
+            <div className='font-semibold text-ink flex items-center gap-1 mb-1'>
+              <WrenchScrewdriverIcon className="w-4 h-4 text-latte" />
+              الماكينات
+            </div>
+            <div className='space-y-1 pr-2'>
               {record.machines.map((m) => (
-                <li key={m.id}>
-                  {m.count}x {m.name}
-                </li>
+                <div key={m.id} className="flex items-start gap-1.5 text-ink">
+                  <span className="text-latte mt-0.5">•</span>
+                  <span dir="ltr" className="text-right flex-1">{m.count}x {m.name}</span>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
+        
         {record.problems && record.problems.length > 0 && (
-          <p className="text-ink">
-            <span className='font-semibold'>Issues:</span>{" "}
-            {record.problems.join(", ")}
-          </p>
-        )}
-        {record.partsWereReplaced &&
-          record.partsReplaced &&
-          record.partsReplaced.length > 0 && (
-            <div>
-              <span className='font-semibold text-ember-700 dark:text-ember-300'>
-                Parts Replaced:
-              </span>
-              <ul className='list-disc list-inside pl-1 text-ink dark:text-latte/70'>
-                {record.partsReplaced.map((p, i) => (
-                  <li key={i}>
-                    {p.count}x {p.name} {p.paidByClient && "(Paid by Client)"}
-                  </li>
-                ))}
-              </ul>
+          <div className='text-ink'>
+            <div className='font-semibold mb-1 flex items-center gap-1'>
+              <ExclamationCircleIcon className="w-4 h-4 text-amber-500" />
+              المشاكل
             </div>
-          )}
+            <div className='flex flex-wrap gap-1.5 pr-2'>
+              {record.problems.map((p, i) => (
+                <span
+                  key={i}
+                  className='inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-ember-500/10 border border-ember-500/20 text-ember-700 dark:text-ember-300'
+                >
+                  {p}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {record.partsWereReplaced && record.partsReplaced && record.partsReplaced.length > 0 && (
+          <div>
+            <div className='font-semibold text-ember-700 dark:text-ember-300 flex items-center gap-1 mb-1'>
+              <CubeIcon className="w-4 h-4" />
+              قطع الغيار المستبدلة
+            </div>
+            <div className='space-y-1 pr-2'>
+              {record.partsReplaced.map((p, i) => (
+                <div key={i} className="flex items-start gap-1.5 text-ink dark:text-latte/70">
+                  <span className="text-latte mt-0.5">•</span>
+                  <span>
+                    <span dir="ltr" className="inline-block">{p.count}x</span> {p.name}
+                    {p.paidByClient && <span className="text-xs text-ember-500 mr-1 bg-ember-50 px-1 rounded">(على حساب العميل)</span>}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
         {record.servicesPerformed && record.servicesPerformed.length > 0 && (
           <div>
-            <span className='font-semibold text-blue-600 dark:text-blue-400'>
-              Services:
-            </span>
-            <ul className='list-disc list-inside pl-1 text-ink dark:text-latte/70'>
+            <div className='font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1 mb-1'>
+              <ClipboardDocumentListIcon className="w-4 h-4" />
+              الخدمات المقدمة
+            </div>
+            <div className='space-y-1 pr-2'>
               {record.servicesPerformed.map((s, i) => (
-                <li key={i}>
-                  {s.count}x {s.name} {s.paidByClient && "(Paid by Client)"}
-                </li>
+                <div key={i} className="flex items-start gap-1.5 text-ink dark:text-latte/70">
+                  <span className="text-latte mt-0.5">•</span>
+                  <span>
+                    <span dir="ltr" className="inline-block">{s.count}x</span> {s.name}
+                    {s.paidByClient && <span className="text-xs text-blue-500 mr-1 bg-blue-50 px-1 rounded">(على حساب العميل)</span>}
+                  </span>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
+        
         {record.notes && (
-          <p className='italic text-ink dark:text-latte mt-1'>
-            "{record.notes}"
-          </p>
+          <div className='mt-2 bg-cream/50 dark:bg-espresso-light/50 p-2.5 rounded-lg border border-hairline/50'>
+            <p className='italic text-ink dark:text-latte break-words'>
+              "{record.notes}"
+            </p>
+          </div>
         )}
       </div>
 
       {/* Photos Section */}
       {record.photos && record.photos.length > 0 && (
         <div className="mt-4 p-3 bg-cream dark:bg-espresso rounded-lg">
-          <h4 className="text-sm font-semibold mb-2 text-ink dark:text-latte/70">Photos</h4>
+          <h4 className="text-sm font-semibold mb-2 text-ink dark:text-latte/70">الصور</h4>
           {renderPhotoGroup(record.photos, "before", "Before")}
           {renderPhotoGroup(record.photos, "after", "After")}
           {renderPhotoGroup(record.photos, "legacy", "Legacy")}
@@ -302,9 +339,10 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
 
       {/* Recursively show follow-ups */}
       {record.followUpVisits && record.followUpVisits.length > 0 && (
-        <div className='mt-3 ml-2'>
-          <p className='text-xs font-bold uppercase text-latte mb-1'>
-            Follow-up Visits
+        <div className='mt-4 pr-3 border-r-2 border-hairline'>
+          <p className='text-xs font-bold text-latte mb-2 flex items-center gap-1'>
+            <ArrowUturnLeftIcon className="w-3.5 h-3.5" />
+            زيارات المتابعة
           </p>
           {record.followUpVisits.map((fu) => (
             <MaintenanceRecordView key={fu.id} record={fu} />
@@ -1132,10 +1170,10 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
     <div className='w-full max-w-5xl mx-auto pb-10 print:max-w-none print:pb-0 print:w-full'>
       {/* === SCREEN VIEW === */}
       <div className='print:hidden'>
-        <div className='flex justify-between items-center mb-6'>
+        <div className='flex flex-wrap items-center justify-between gap-3 mb-6'>
           <button
             onClick={onBack}
-            className='flex items-center gap-2 text-latte hover:text-ink transition-colors'
+            className='flex items-center gap-2 text-latte hover:text-ink transition-colors min-h-[44px] py-1'
           >
             <ArrowLeftIcon className='w-5 h-5' /> Back to History
           </button>
@@ -1194,7 +1232,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                   />
                 </div>
                 <div>
-                  <h1 className='text-3xl font-bold text-ink mb-1'>
+                  <h1 className='text-2xl sm:text-3xl font-bold text-ink mb-1 break-words'>
                     {submission.companyName}
                   </h1>
                   <div className='flex flex-wrap gap-x-4 gap-y-1 text-sm text-latte'>
@@ -1464,7 +1502,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                           )}
 
                           <div>
-                            <h4 className='text-sm font-bold text-ink mb-3 flex items-center gap-2 border-t pt-3 border-hairline'>
+                            <h4 className='text-sm font-bold text-ink flex items-center gap-2 border-t pt-3 border-hairline sticky top-0 sm:static bg-cream dark:bg-espresso z-10 -mx-4 px-4 py-3'>
                               <WrenchScrewdriverIcon className='w-4 h-4' />{" "}
                               Maintenance History
                             </h4>
