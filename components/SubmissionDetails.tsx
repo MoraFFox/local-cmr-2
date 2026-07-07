@@ -39,6 +39,7 @@ import {
   ExclamationCircleIcon,
   ClipboardDocumentListIcon,
   ArrowUturnLeftIcon,
+  CameraIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
 
@@ -203,12 +204,14 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
 }) => {
   return (
     <div className='border-r-2 border-copper-500 pr-4 py-3 mb-4 bg-cream-2 rounded-l-md'>
-      <div className='flex flex-col sm:flex-row justify-between items-start gap-3'>
-        <div className='space-y-1.5 w-full sm:w-auto'>
+      {/* Header Row */}
+      <div className='flex flex-wrap justify-between items-start gap-y-3 gap-x-4'>
+        {/* Right side (start of RTL flow): Date, Badges, Next Visit */}
+        <div className='flex flex-col gap-1.5'>
           <div className='flex flex-wrap items-center gap-2'>
-            <p className='font-bold text-ink' dir="ltr">
+            <span className='font-bold text-ink' dir="ltr">
               {record.maintenanceDate}
-            </p>
+            </span>
             {record.dailyLeaseCost && (
               <span className='text-xs bg-amber-500/10 px-1.5 py-0.5 rounded text-amber-500 border border-amber-500/20 flex items-center gap-1'>
                 <BanknotesIcon className="w-3.5 h-3.5" />
@@ -219,57 +222,67 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
               جهة الدفع: {getPaidByLabel(record.paidBy)}
             </span>
           </div>
-          <div className='flex items-center gap-1.5 text-xs text-latte'>
-            <span className='bg-cream px-1.5 rounded border border-hairline'>{record.type}</span>
-            {record.visitZone && <span>• {record.visitZone}</span>}
+          
+          <div className='flex flex-wrap items-center gap-1.5 text-xs text-latte'>
+            <span className='bg-cream px-1.5 rounded border border-hairline'>
+              <bdi>{record.type}</bdi>
+            </span>
+            {record.visitZone && (
+              <>
+                <span>•</span>
+                <span><bdi>{record.visitZone}</bdi></span>
+              </>
+            )}
           </div>
+          
           {record.nextVisitDate && (
-            <p className='text-xs text-copper-500 flex items-center gap-1'>
+            <div className='text-xs text-copper-500 flex items-center gap-1 mt-0.5'>
               <CalendarIcon className="w-3.5 h-3.5" />
-              الزيارة القادمة: <span dir="ltr">{record.nextVisitDate}</span>
-            </p>
+              <span>الزيارة القادمة: <bdi>{record.nextVisitDate}</bdi></span>
+            </div>
           )}
         </div>
         
+        {/* Left side (end of RTL flow): Staff Badge */}
         {record.baristaName && (
-          <div className='w-full sm:w-auto mt-1 sm:mt-0'>
-            <span className='text-xs bg-cream px-2.5 py-1 border border-hairline rounded text-ink flex items-center gap-1.5 w-fit'>
-              <UserIcon className="w-3.5 h-3.5 text-latte" />
-              <span className='font-medium'>{record.baristaName}</span>
+          <div className='shrink-0'>
+            <span className='text-xs bg-cream px-2.5 py-1.5 border border-hairline rounded text-ink flex items-center gap-1.5'>
+              <UserIcon className="w-4 h-4 text-latte" />
+              <span className='font-bold'>{record.baristaName}</span>
             </span>
           </div>
         )}
       </div>
 
-      <div className='mt-4 text-sm space-y-3'>
+      {/* Body: Lists and Notes */}
+      <div className='mt-5 text-sm space-y-4'>
         {record.machines && record.machines.length > 0 && (
           <div>
-            <div className='font-semibold text-ink flex items-center gap-1 mb-1'>
+            <div className='font-semibold text-ink flex items-center gap-1.5 mb-1.5'>
               <WrenchScrewdriverIcon className="w-4 h-4 text-latte" />
               الماكينات
             </div>
-            <div className='space-y-1 pr-2'>
+            <ul className='list-disc pr-5 space-y-0.5 text-ink'>
               {record.machines.map((m) => (
-                <div key={m.id} className="flex items-start gap-1.5 text-ink">
-                  <span className="text-latte mt-0.5">•</span>
-                  <span dir="ltr" className="text-right flex-1">{m.count}x {m.name}</span>
-                </div>
+                <li key={m.id}>
+                  <bdi>{m.count}x {m.name}</bdi>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         )}
         
         {record.problems && record.problems.length > 0 && (
-          <div className='text-ink'>
-            <div className='font-semibold mb-1 flex items-center gap-1'>
+          <div>
+            <div className='font-semibold text-ink flex items-center gap-1.5 mb-2'>
               <ExclamationCircleIcon className="w-4 h-4 text-amber-500" />
               المشاكل
             </div>
-            <div className='flex flex-wrap gap-1.5 pr-2'>
+            <div className='flex flex-wrap gap-1.5'>
               {record.problems.map((p, i) => (
                 <span
                   key={i}
-                  className='inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-ember-500/10 border border-ember-500/20 text-ember-700 dark:text-ember-300'
+                  className='inline-flex items-center px-2 py-0.5 rounded text-xs bg-ember-500/10 border border-ember-500/20 text-ember-700 dark:text-ember-300 font-medium'
                 >
                   {p}
                 </span>
@@ -280,47 +293,49 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
         
         {record.partsWereReplaced && record.partsReplaced && record.partsReplaced.length > 0 && (
           <div>
-            <div className='font-semibold text-ember-700 dark:text-ember-300 flex items-center gap-1 mb-1'>
+            <div className='font-semibold text-ember-700 dark:text-ember-300 flex items-center gap-1.5 mb-1.5'>
               <CubeIcon className="w-4 h-4" />
               قطع الغيار المستبدلة
             </div>
-            <div className='space-y-1 pr-2'>
+            <ul className='list-disc pr-5 space-y-0.5 text-ink dark:text-latte/70'>
               {record.partsReplaced.map((p, i) => (
-                <div key={i} className="flex items-start gap-1.5 text-ink dark:text-latte/70">
-                  <span className="text-latte mt-0.5">•</span>
-                  <span>
-                    <span dir="ltr" className="inline-block">{p.count}x</span> {p.name}
-                    {p.paidByClient && <span className="text-xs text-ember-500 mr-1 bg-ember-50 px-1 rounded">(على حساب العميل)</span>}
-                  </span>
-                </div>
+                <li key={i}>
+                  <bdi>{p.count}x {p.name}</bdi>
+                  {p.paidByClient && (
+                    <span className="text-xs text-ember-600 bg-ember-50 px-1.5 py-0.5 rounded mr-2 border border-ember-100">
+                      (على حساب العميل)
+                    </span>
+                  )}
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         )}
         
         {record.servicesPerformed && record.servicesPerformed.length > 0 && (
           <div>
-            <div className='font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1 mb-1'>
+            <div className='font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1.5 mb-1.5'>
               <ClipboardDocumentListIcon className="w-4 h-4" />
               الخدمات المقدمة
             </div>
-            <div className='space-y-1 pr-2'>
+            <ul className='list-disc pr-5 space-y-0.5 text-ink dark:text-latte/70'>
               {record.servicesPerformed.map((s, i) => (
-                <div key={i} className="flex items-start gap-1.5 text-ink dark:text-latte/70">
-                  <span className="text-latte mt-0.5">•</span>
-                  <span>
-                    <span dir="ltr" className="inline-block">{s.count}x</span> {s.name}
-                    {s.paidByClient && <span className="text-xs text-blue-500 mr-1 bg-blue-50 px-1 rounded">(على حساب العميل)</span>}
-                  </span>
-                </div>
+                <li key={i}>
+                  <bdi>{s.count}x {s.name}</bdi>
+                  {s.paidByClient && (
+                    <span className="text-xs text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded mr-2 border border-blue-100">
+                      (على حساب العميل)
+                    </span>
+                  )}
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         )}
         
         {record.notes && (
-          <div className='mt-2 bg-cream/50 dark:bg-espresso-light/50 p-2.5 rounded-lg border border-hairline/50'>
-            <p className='italic text-ink dark:text-latte break-words'>
+          <div className='mt-3 bg-white/50 dark:bg-black/20 p-3 rounded-lg border border-hairline'>
+            <p className='italic text-ink dark:text-latte break-words leading-relaxed'>
               "{record.notes}"
             </p>
           </div>
@@ -329,8 +344,11 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
 
       {/* Photos Section */}
       {record.photos && record.photos.length > 0 && (
-        <div className="mt-4 p-3 bg-cream dark:bg-espresso rounded-lg">
-          <h4 className="text-sm font-semibold mb-2 text-ink dark:text-latte/70">الصور</h4>
+        <div className="mt-5 p-3 bg-white/50 dark:bg-black/20 border border-hairline rounded-lg">
+          <h4 className="text-sm font-semibold mb-3 text-ink dark:text-latte/70 flex items-center gap-1.5">
+            <CameraIcon className="w-4 h-4 text-latte" />
+            الصور
+          </h4>
           {renderPhotoGroup(record.photos, "before", "Before")}
           {renderPhotoGroup(record.photos, "after", "After")}
           {renderPhotoGroup(record.photos, "legacy", "Legacy")}
@@ -339,9 +357,9 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
 
       {/* Recursively show follow-ups */}
       {record.followUpVisits && record.followUpVisits.length > 0 && (
-        <div className='mt-4 pr-3 border-r-2 border-hairline'>
-          <p className='text-xs font-bold text-latte mb-2 flex items-center gap-1'>
-            <ArrowUturnLeftIcon className="w-3.5 h-3.5" />
+        <div className='mt-5 pr-3 border-r-2 border-hairline pt-2'>
+          <p className='text-xs font-bold text-latte mb-3 flex items-center gap-1.5'>
+            <ArrowUturnLeftIcon className="w-4 h-4" />
             زيارات المتابعة
           </p>
           {record.followUpVisits.map((fu) => (
