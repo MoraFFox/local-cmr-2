@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+import { useFloatingMenu } from "../hooks/useFloatingMenu";
 import {
   MaintenanceRecord,
   Part,
@@ -229,6 +231,13 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
     suggestedNames = [],
   } = props;
   const [typoSuggestion, setTypoSuggestion] = useState<string | null>(null);
+  // Auto-triggered "did you mean…" popover. Controlled open because it's
+  // driven by the fuzzy-match state rather than a click. Rendered through a
+  // portal so CollapsibleCard's overflow-hidden can't clip it.
+  const typoMenu = useFloatingMenu({
+    controlledOpen: typoSuggestion !== null,
+    menuWidth: 320, // full-width suggestions can be wide
+  });
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(),
   );
@@ -466,16 +475,19 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                 ) : (
                   <div className="flex-1 relative">
                     <input
+                      ref={typoMenu.triggerRef as React.RefObject<HTMLInputElement>}
                       name="baristaName"
                       value={record.baristaName}
                       onChange={handleFieldChange}
                       className={`w-full ${selectClasses} ${typoSuggestion ? "ring-2 ring-amber-400 border-amber-400" : ""}`}
                       placeholder="اسم الفني"
                     />
-                    {typoSuggestion && (
+                    {typoSuggestion && createPortal(
                       <button
+                        ref={typoMenu.contentRef as React.RefObject<HTMLButtonElement>}
                         type="button"
-                        className="absolute left-0 top-full mt-1 z-10 w-full text-right bg-amber-50 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-700 rounded-md p-2 shadow-lg flex items-center gap-2 cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-800/50 transition-colors animate-content-fade-in"
+                        className="fixed z-[9999] text-right bg-amber-50 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-700 rounded-md p-2 shadow-lg flex items-center gap-2 cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-800/50 transition-colors animate-content-fade-in"
+                        style={typoMenu.style}
                         onClick={applySuggestion}
                       >
                         <ExclamationCircleIcon className="w-5 h-5 text-amber-600" />
@@ -486,7 +498,8 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                           </span>
                           ؟
                         </span>
-                      </button>
+                      </button>,
+                      document.body
                     )}
                   </div>
                 )}

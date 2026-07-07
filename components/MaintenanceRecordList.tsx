@@ -219,13 +219,13 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
   };
 
   return (
-    <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden">
-      <div className="px-6 py-4 border-b border-hairline dark:border-hairline bg-cream dark:bg-espresso/50">
+    <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline">
+      <div className="px-6 py-4 border-b border-hairline dark:border-hairline bg-cream dark:bg-espresso/50 rounded-t-[0.75rem]">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h3 className="text-lg font-semibold text-ink dark:text-white">
             {branchName}
           </h3>
-          
+
           <div className="flex items-center gap-2">
             <span className="text-sm text-latte dark:text-latte">Sort by:</span>
             <div className="flex items-center gap-1">
@@ -250,7 +250,7 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto invisible-scrollbar">
         <table className="w-full">
           <thead className="bg-cream dark:bg-espresso/50">
             <tr>

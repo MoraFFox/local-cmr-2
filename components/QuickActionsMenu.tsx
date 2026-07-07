@@ -1,6 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useFloatingMenu } from '../hooks/useFloatingMenu';
 import { MaintenanceRecord } from '../types';
-import { 
+import {
   BoltIcon,
   CheckCircleIcon,
   XCircleIcon,
@@ -22,24 +24,20 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
   onQuickUpdate,
   onDelete
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [showRatingPicker, setShowRatingPicker] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-        setShowRatingPicker(false);
-        setShowDatePicker(false);
-      }
-    };
+  const { open: isOpen, setOpen: setIsOpen, triggerRef, contentRef, style, toggle } = useFloatingMenu();
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  // Sub-state cleanup when the menu is closed via outside click / Escape.
+  React.useEffect(() => {
+    if (!isOpen) {
+      setShowRatingPicker(false);
+      setShowDatePicker(false);
+      setShowDeleteConfirm(false);
+    }
+  }, [isOpen]);
 
   const handleToggleSolved = () => {
     onQuickUpdate(record.id, { problemSolved: !record.problemSolved });
@@ -67,17 +65,22 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
   };
 
   return (
-    <div className="relative" ref={menuRef}>
+    <div className="relative">
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        ref={triggerRef as React.RefObject<HTMLButtonElement>}
+        onClick={toggle}
         className="p-2 text-latte hover:text-copper-600 dark:hover:text-copper-400 hover:bg-copper-500/10 dark:hover:bg-copper-500/20 rounded-lg transition-colors"
         title="إجراءات سريعة"
       >
         <BoltIcon className="w-5 h-5" />
       </button>
 
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-cream dark:bg-espresso-light rounded-xl shadow-xl border border-hairline dark:border-hairline z-50 overflow-hidden">
+      {isOpen && createPortal(
+        <div
+          ref={contentRef}
+          className="fixed w-56 bg-cream dark:bg-espresso-light rounded-xl shadow-xl border border-hairline dark:border-hairline z-[9999] overflow-hidden"
+          style={style}
+        >
           <div className="py-1">
             <button
               onClick={handleToggleSolved}
@@ -198,7 +201,8 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
               </>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

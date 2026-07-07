@@ -1,4 +1,6 @@
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
+import { useFloatingMenu } from '../hooks/useFloatingMenu';
 import { FormData, MaintenanceRecord } from '../types';
 import { PencilIcon, TrashIcon, ArrowDownTrayIcon, MagnifyingGlassIcon, PrinterIcon, CloudIcon, EyeIcon, FunnelIcon, XMarkIcon, CalendarIcon, ExclamationTriangleIcon, BuildingOfficeIcon, WrenchScrewdriverIcon, DocumentIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 import CompanyEditModal from './CompanyEditModal';
@@ -420,59 +422,16 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                         <EyeIcon className="h-4 w-4" />
                                         عرض
                                     </Button>
-                                    <div className="relative">
-                                        <button
-                                            onClick={() => setOpenMenuId(openMenuId === sub.id ? null : sub.id!)}
-                                            className="p-2 rounded-lg text-latte hover:text-ink hover:bg-cream-2 transition-colors"
-                                            aria-label="المزيد من الإجراءات"
-                                            aria-expanded={openMenuId === sub.id}
-                                        >
-                                            <EllipsisVerticalIcon className="h-5 w-5" />
-                                        </button>
-                                        {openMenuId === sub.id && (
-                                            <div className="absolute left-0 top-full mt-1 w-48 bg-cream rounded-lg shadow-lg border border-hairline py-1 z-20 animate-scale-in">
-                                                <button
-                                                    onClick={() => { handleDownloadSingle(sub); setOpenMenuId(null); }}
-                                                    disabled={!!sub.pendingSync}
-                                                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-cream-2 disabled:opacity-50"
-                                                >
-                                                    <ArrowDownTrayIcon className="h-4 w-4" />
-                                                    تنزيل JSON
-                                                </button>
-                                                <button
-                                                    onClick={() => { handleQuickEditCompany(sub); setOpenMenuId(null); }}
-                                                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-cream-2"
-                                                >
-                                                    <BuildingOfficeIcon className="h-4 w-4" />
-                                                    تعديل سريع
-                                                </button>
-                                                <button
-                                                    onClick={() => { onEdit(sub); setOpenMenuId(null); }}
-                                                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-cream-2"
-                                                >
-                                                    <PencilIcon className="h-4 w-4" />
-                                                    تعديل كامل
-                                                </button>
-                                                {onEditMaintenance && (
-                                                    <button
-                                                        onClick={() => { onEditMaintenance(sub); setOpenMenuId(null); }}
-                                                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-cream-2"
-                                                    >
-                                                        <WrenchScrewdriverIcon className="h-4 w-4" />
-                                                        تعديل الصيانة
-                                                    </button>
-                                                )}
-                                                <div className="border-t border-hairline my-1" />
-                                                <button
-                                                    onClick={() => { handleDelete(sub.id!); setOpenMenuId(null); }}
-                                                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ember-500 hover:bg-ember-500/10"
-                                                >
-                                                    <TrashIcon className="h-4 w-4" />
-                                                    حذف
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
+                                    <RowEllipsisMenu
+                                        sub={sub}
+                                        isOpen={openMenuId === sub.id}
+                                        onOpenChange={(o) => setOpenMenuId(o ? sub.id! : null)}
+                                        onDownload={handleDownloadSingle}
+                                        onQuickEdit={handleQuickEditCompany}
+                                        onEdit={(s) => onEdit(s)}
+                                        onEditMaintenance={onEditMaintenance}
+                                        onDelete={handleDelete}
+                                    />
                                 </div>
 
                                 {/* Mobile actions */}
@@ -526,6 +485,87 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
             />
         </div>
     );
+};
+
+// Per-row ⋮ actions rendered through a portal so the dropdown can never be clipped
+// by the page scroll container (main.overflow-y-auto) or card ancestors.
+const RowEllipsisMenu: React.FC<{
+  sub: FormData & { created_at: string; id?: number | null; pendingSync?: boolean };
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  onDownload: (sub: FormData & { created_at: string }) => void;
+  onQuickEdit: (sub: FormData & { created_at: string }) => void;
+  onEdit: (sub: FormData & { created_at: string }) => void;
+  onEditMaintenance?: (sub: FormData & { created_at: string }) => void;
+  onDelete: (id: number) => void;
+}> = ({ sub, isOpen, onOpenChange, onDownload, onQuickEdit, onEdit, onEditMaintenance, onDelete }) => {
+  const { triggerRef, contentRef, style } = useFloatingMenu({
+    controlledOpen: isOpen,
+    menuWidth: 192, // w-48 = 12rem = 192px
+  });
+
+  return (
+    <div className="relative">
+      <button
+        ref={triggerRef as React.RefObject<HTMLButtonElement>}
+        onClick={() => onOpenChange(!isOpen)}
+        className="p-2 rounded-lg text-latte hover:text-ink hover:bg-cream-2 transition-colors"
+        aria-label="المزيد من الإجراءات"
+        aria-expanded={isOpen}
+      >
+        <EllipsisVerticalIcon className="h-5 w-5" />
+      </button>
+
+      {isOpen && createPortal(
+        <div
+          ref={contentRef}
+          className="fixed w-48 bg-cream rounded-lg shadow-lg border border-hairline py-1 z-[9999] overflow-hidden animate-scale-in"
+          style={style}
+        >
+          <button
+            onClick={() => { onDownload(sub); onOpenChange(false); }}
+            disabled={!!sub.pendingSync}
+            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-cream-2 disabled:opacity-50"
+          >
+            <ArrowDownTrayIcon className="h-4 w-4" />
+            تنزيل JSON
+          </button>
+          <button
+            onClick={() => { onQuickEdit(sub); onOpenChange(false); }}
+            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-cream-2"
+          >
+            <BuildingOfficeIcon className="h-4 w-4" />
+            تعديل سريع
+          </button>
+          <button
+            onClick={() => { onEdit(sub); onOpenChange(false); }}
+            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-cream-2"
+          >
+            <PencilIcon className="h-4 w-4" />
+            تعديل كامل
+          </button>
+          {onEditMaintenance && (
+            <button
+              onClick={() => { onEditMaintenance(sub); onOpenChange(false); }}
+              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-cream-2"
+            >
+              <WrenchScrewdriverIcon className="h-4 w-4" />
+              تعديل الصيانة
+            </button>
+          )}
+          <div className="border-t border-hairline my-1" />
+          <button
+            onClick={() => { onDelete(sub.id!); onOpenChange(false); }}
+            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ember-500 hover:bg-ember-500/10"
+          >
+            <TrashIcon className="h-4 w-4" />
+            حذف
+          </button>
+        </div>,
+        document.body
+      )}
+    </div>
+  );
 };
 
 export default HistoryPage;

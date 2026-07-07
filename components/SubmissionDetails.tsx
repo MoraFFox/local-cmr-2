@@ -1,6 +1,8 @@
 /** @format */
 
 import React, { useState, useMemo, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { useFloatingMenu } from "../hooks/useFloatingMenu";
 import {
   FormData,
   MaintenanceRecord,
@@ -1001,21 +1003,7 @@ const PrintDropdown: React.FC<{
   className?: string;
   disabled?: boolean;
 }> = ({ label, onPrint, className, disabled }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  const { open: isOpen, setOpen: setIsOpen, triggerRef, contentRef, style, toggle } = useFloatingMenu();
 
   const handleSelect = (mode: "internal" | "client") => {
     setIsOpen(false);
@@ -1023,15 +1011,13 @@ const PrintDropdown: React.FC<{
   };
 
   return (
-    <div
-      className={`relative inline-block text-left ${className}`}
-      ref={dropdownRef}
-    >
+    <div className={`relative inline-block text-left ${className}`}>
       <button
+        ref={triggerRef as React.RefObject<HTMLButtonElement>}
         type='button'
         onClick={(e) => {
           e.stopPropagation();
-          setIsOpen(!isOpen);
+          toggle();
         }}
         disabled={disabled}
         className='flex items-center gap-2 bg-copper-500 text-ink font-bold py-2 px-4 rounded-lg hover:bg-copper-600 transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-copper-500 disabled:opacity-50 disabled:cursor-not-allowed'
@@ -1041,8 +1027,12 @@ const PrintDropdown: React.FC<{
         <ChevronDownIcon className='w-4 h-4 ml-1' />
       </button>
 
-      {isOpen && (
-        <div className='origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-cream border border-hairline focus:outline-none z-50'>
+      {isOpen && createPortal(
+        <div
+          ref={contentRef}
+          className='fixed w-56 rounded-md shadow-lg bg-cream border border-hairline focus:outline-none z-[9999] overflow-hidden'
+          style={style}
+        >
           <div className='py-1' role='menu' aria-orientation='vertical'>
             <button
               onClick={() => handleSelect("internal")}
@@ -1065,7 +1055,8 @@ const PrintDropdown: React.FC<{
               </span>
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

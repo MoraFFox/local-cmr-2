@@ -743,6 +743,30 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
     fetchSubmissions();
   }, [isOnline]); // Re-fetch when online status changes
 
+  // Hydrate `selectedSubmission` from the URL's company id on a hard refresh.
+  // Without this, navigating directly to /companies/:id/maintenance (or /companies/:id)
+  // leaves selectedSubmission null after refresh, so the view renders empty.
+  // Ownership note: this is the deep-link restoration path; in-app navigation
+  // sets selectedSubmission before navigating, so the early-return keeps us out.
+  useEffect(() => {
+    const m = location.pathname.match(/^\/companies\/([^/]+)(\/maintenance)?$/);
+    if (!m) return;                  // some other view — nothing to hydrate
+    const id = m[1];
+    const found = submissions.find((s) => String(s.id) === id);
+
+    if (found) {
+      // Found: set it so the view populates (no-op on in-app nav since it's already set).
+      setSelectedSubmission((prev) => (prev?.id === found.id ? prev : found));
+      return;
+    }
+    // Not found. Only redirect once the fetch finished — otherwise empty-loading
+    // state would bounce us home before data arrives.
+    if (!isLoading && submissions.length > 0) {
+      navigate("/");
+      showToast("السجل غير متاح، تم العودة للرئيسية", "info");
+    }
+  }, [location.pathname, submissions, isLoading, navigate, showToast]);
+
   const visibleSteps = formData.hasBranches
     ? steps.filter((step) => step.id !== 4 && step.id !== 5)
     : steps.filter((step) => step.id !== 2);
