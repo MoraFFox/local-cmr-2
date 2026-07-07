@@ -17,10 +17,13 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, err
           {required && <span className="text-copper-500 mr-1">*</span>}
         </label>
       )}
-      <div className="relative">
+      <div className="relative group focus-within:text-copper-500">
         {icon && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-latte">
-            {icon}
+          <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-latte group-focus-within:text-copper-500 transition-colors">
+            {React.cloneElement(icon as React.ReactElement, {
+              className: 'w-4 h-4',
+              'aria-hidden': 'true',
+            })}
           </div>
         )}
         <input
@@ -29,7 +32,7 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, err
           aria-invalid={error ? 'true' : undefined}
           aria-describedby={error ? `${inputId}-error` : undefined}
           {...props}
-          className={`block w-full ${icon ? 'pr-10' : 'px-4'} h-[50px] bg-cream text-ink rounded-lg placeholder-latte focus:outline-none focus:ring-2 border transition-colors ${
+          className={`block w-full ${icon ? 'pr-10 pl-4' : 'px-4'} h-[50px] bg-cream text-ink rounded-lg placeholder-latte focus:outline-none focus:ring-2 border transition-colors ${
             error
               ? 'border-ember-500 focus:border-copper-500 focus:ring-copper-500/20 animate-shake'
               : 'border-hairline focus:border-copper-500 focus:ring-copper-500/20'

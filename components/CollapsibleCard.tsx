@@ -25,14 +25,14 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ titleContent, childre
         <div className={`border border-hairline rounded-xl bg-cream shadow-md transition-shadow duration-300 ${isOpen ? 'shadow-lg' : 'shadow-md'}`}>
             <button
                 type="button"
-                className={`w-full flex justify-between items-center p-4 cursor-pointer rounded-t-xl ${!isOpen ? 'rounded-b-xl' : ''} focus:outline-none focus-visible:ring-2 focus-visible:ring-copper-500/30`}
+                className={`w-full flex justify-between items-start sm:items-center p-4 cursor-pointer rounded-t-xl ${!isOpen ? 'rounded-b-xl' : ''} focus:outline-none focus-visible:ring-2 focus-visible:ring-copper-500/30 gap-4`}
                 onClick={() => setIsOpen(!isOpen)}
                 aria-expanded={isOpen}
             >
-                <div className="flex-grow font-semibold text-ink relative text-right">
+                <div className="flex-1 min-w-0 font-semibold text-ink relative text-right">
                     {titleContent}
                 </div>
-                <div className="flex items-center gap-2 sm:gap-4 pl-2">
+                <div className="flex items-center shrink-0 gap-3 pt-1 sm:pt-0">
                     {onRemove && (
                         <span
                             role="button"

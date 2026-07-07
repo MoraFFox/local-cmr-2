@@ -195,7 +195,7 @@ const MaintenanceRecordReview: React.FC<{
 
   return (
     <div
-      className={`p-3 my-2 border border-hairline rounded-md ${isFollowUp ? "bg-cream/50" : "bg-cream-2/50"}`}
+      className={`p-3 my-2 border border-hairline rounded-md ${isFollowUp ? "bg-cream-2" : "bg-cream-3"}`}
     >
       <div className="flex justify-between items-center">
         <h5 className="font-semibold text-ink">
@@ -497,7 +497,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
             {formData.branches.map((branch, index) => (
               <div
                 key={branch.id}
-                className="p-4 border border-hairline rounded-lg bg-cream/70"
+                className="p-4 border border-hairline rounded-lg bg-cream-2"
               >
                 <h4 className="font-semibold text-ink mb-2">
                   {formData.companyName}
@@ -528,7 +528,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                       {branch.baristas.map((barista) => (
                         <div
                           key={barista.id}
-                          className="flex flex-col items-center text-center p-2 rounded-lg bg-cream/50"
+                          className="flex flex-col items-center text-center p-2 rounded-lg bg-cream shadow-sm border border-hairline/50"
                         >
                           <Avatar name={barista.name} />
                           <p className="font-medium text-ink text-sm mt-2">

@@ -37,21 +37,19 @@ import Card from "../../components/Card";
 import TextInput from "../../components/TextInput";
 import RadioGroup from "../../components/RadioGroup";
 import ReviewStep from "../../components/ReviewStep";
+import { BuildingOfficeIcon, EnvelopeIcon, DocumentTextIcon, MapPinIcon, CurrencyDollarIcon, BuildingStorefrontIcon, UserIcon, PhoneIcon, BriefcaseIcon } from "@heroicons/react/24/outline";
 import {
   HomeIcon,
-  DocumentTextIcon,
   PlusCircleIcon,
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
   Bars3Icon,
   XMarkIcon,
-  PhoneIcon,
   TrashIcon,
   UserGroupIcon,
   BuildingOffice2Icon,
   WrenchScrewdriverIcon,
   WrenchIcon,
-  MapPinIcon,
   CloudArrowUpIcon,
   WifiIcon,
   SignalSlashIcon,
@@ -1364,25 +1362,36 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                     name="name"
                     value={contact.name}
                     onChange={(e) => handleContactChange(e, path, contactIndex)}
+                    icon={<UserIcon />}
                   />
                   <div>
-                    <label className="block text-sm font-medium text-ink dark:text-latte mb-2">
+                    <label className="block text-sm font-medium text-ink mb-1.5">
                       المسمى الوظيفي
                     </label>
-                    <select
-                      name="position"
-                      value={contact.position}
-                      onChange={(e) =>
-                        handleContactChange(e, path, contactIndex)
-                      }
-                      className={selectClasses}
-                    >
-                      {contactPositions.map((pos) => (
-                        <option key={pos.value} value={pos.value}>
-                          {pos.label}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative group focus-within:text-copper-500">
+                      <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-latte group-focus-within:text-copper-500 transition-colors">
+                        <BriefcaseIcon className="w-4 h-4" aria-hidden="true" />
+                      </div>
+                      <select
+                        name="position"
+                        value={contact.position}
+                        onChange={(e) =>
+                          handleContactChange(e, path, contactIndex)
+                        }
+                        className="block w-full pr-10 h-[50px] bg-cream text-ink rounded-lg placeholder-latte focus:outline-none focus:ring-2 border border-hairline focus:border-copper-500 focus:ring-copper-500/20 transition-colors appearance-none"
+                      >
+                        {contactPositions.map((pos) => (
+                          <option key={pos.value} value={pos.value}>
+                            {pos.label}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-latte">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                   {contact.position === "custom" && (
                     <TextInput
@@ -1393,7 +1402,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                         handleContactChange(e, path, contactIndex)
                       }
                       className="md:col-span-2"
-                    />
+                      icon={<BriefcaseIcon />}
+                  />
                   )}
                 </div>
                 <div className="pt-4 border-t border-hairline dark:border-hairline">
@@ -1474,7 +1484,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                 value={formData.companyName}
                 onChange={handleChange}
                 placeholder="مثال: شركة كافيه ميدوز"
-              />
+                icon={<BuildingOfficeIcon />}
+                  />
               <TextInput
                 label="البريد الإلكتروني"
                 name="email"
@@ -1482,21 +1493,24 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="مثال: manager@midoes.com"
-              />
+                icon={<EnvelopeIcon />}
+                  />
               <TextInput
                 label="الرقم الضريبي"
                 name="taxNumber"
                 value={formData.taxNumber}
                 onChange={handleChange}
                 placeholder="مثال: 12-3456789"
-              />
+                icon={<DocumentTextIcon />}
+                  />
               <TextInput
                 label="الموقع"
                 name="location"
                 value={formData.location}
                 onChange={handleChange}
                 placeholder="مثال: شارع التحرير، القاهرة"
-              />
+                icon={<MapPinIcon />}
+                  />
               <div className="pt-8 mt-8 border-t border-hairline">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-xl font-bold text-ink tracking-tight">
@@ -1560,7 +1574,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                             value={formData.dailyLeaseCost || ""}
                             onChange={handleChange}
                             placeholder="0.00"
-                          />
+                            icon={<CurrencyDollarIcon />}
+                  />
                         </div>
                       )}
                     </div>
@@ -1591,25 +1606,25 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                     initiallyOpen={branch.id === newlyAddedId}
                     onRemove={() => removeListItem("branches", index)}
                     titleContent={
-                      <div>
-                        <div className="flex flex-wrap items-baseline gap-x-2">
+                      <div className="min-w-0 pr-1">
+                        <div className="flex items-center gap-x-2 w-full overflow-hidden">
                           <span
-                            className="font-bold truncate text-base"
+                            className="font-bold truncate text-base shrink"
                             title={formData.companyName}
                           >
                             {formData.companyName || "الشركة"}
                           </span>
-                          <span className="text-latte dark:text-latte">
+                          <span className="text-latte shrink-0">
                             -
                           </span>
-                          <span className="truncate text-base">
+                          <span className="truncate text-base shrink">
                             {branch.branchName || "فرع جديد"}
                           </span>
                         </div>
-                        <div className="flex items-center gap-x-4 text-xs text-latte dark:text-latte mt-1.5">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-latte mt-1.5">
                           {branch.location && (
                             <span
-                              className="flex items-center gap-1 truncate"
+                              className="flex items-center gap-1 truncate max-w-full"
                               title={branch.location}
                             >
                               <MapPinIcon className="w-3.5 h-3.5 shrink-0" />
@@ -1635,7 +1650,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                           handleListItemChange(e, "branches", index)
                         }
                         placeholder="مثال: المعادي (الاسم الكامل = اسم الشركة + اسم الفرع)"
-                      />
+                        icon={<BuildingStorefrontIcon />}
+                  />
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <TextInput
@@ -1645,7 +1661,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                           onChange={(e) =>
                             handleListItemChange(e, "branches", index)
                           }
-                        />
+                          icon={<EnvelopeIcon />}
+                  />
                         <TextInput
                           label="الرقم الضريبي"
                           name="taxNumber"
@@ -1653,7 +1670,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                           onChange={(e) =>
                             handleListItemChange(e, "branches", index)
                           }
-                        />
+                          icon={<DocumentTextIcon />}
+                  />
                         <TextInput
                           label="الموقع"
                           name="location"
@@ -1662,7 +1680,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                             handleListItemChange(e, "branches", index)
                           }
                           className="md:col-span-2"
-                        />
+                          icon={<MapPinIcon />}
+                  />
                         <div className="md:col-span-2">
                           <RadioGroup
                             label="هل يستخدمون ماكيناتنا؟"
@@ -1721,7 +1740,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                                       handleListItemChange(e, "branches", index)
                                     }
                                     placeholder="0.00"
-                                  />
+                                    icon={<CurrencyDollarIcon />}
+                  />
                                 </div>
                               )}
                             </div>
@@ -1791,7 +1811,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                                           baristaIndex,
                                         )
                                       }
-                                    />
+                                      icon={<UserIcon />}
+                  />
                                     <TextInput
                                       label="رقم الهاتف"
                                       name="phone"
@@ -1804,7 +1825,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                                           baristaIndex,
                                         )
                                       }
-                                    />
+                                      icon={<PhoneIcon />}
+                  />
                                   </div>
                                    <div>
                                      <label className="block text-sm font-medium text-ink mb-2">
@@ -1888,7 +1910,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                                           clientBaristaIndex,
                                         )
                                       }
-                                    />
+                                      icon={<UserIcon />}
+                  />
                                     <TextInput
                                       label="رقم الهاتف"
                                       name="phone"
@@ -1901,7 +1924,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                                           clientBaristaIndex,
                                         )
                                       }
-                                    />
+                                      icon={<PhoneIcon />}
+                  />
                                   </div>
                                   <div>
                                     <label className="block text-sm font-medium text-ink mb-2">
@@ -2032,7 +2056,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                 name="warehouse.location"
                 value={formData.warehouse.location}
                 onChange={handleChange}
-              />
+                icon={<MapPinIcon />}
+                  />
               <div className="pt-8 mt-8 border-t dark:border-hairline">
                 <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold text-ink tracking-tight">
@@ -2081,7 +2106,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                           onChange={(e) =>
                             handleListItemChange(e, "baristas", index)
                           }
-                        />
+                          icon={<UserIcon />}
+                  />
                         <TextInput
                           label="رقم الهاتف"
                           name="phone"
@@ -2089,7 +2115,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                           onChange={(e) =>
                             handleListItemChange(e, "baristas", index)
                           }
-                        />
+                          icon={<PhoneIcon />}
+                  />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-ink dark:text-latte mb-2">
@@ -2183,7 +2210,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                           onChange={(e) =>
                             handleClientBaristaChange(e, null, index)
                           }
-                        />
+                          icon={<UserIcon />}
+                  />
                         <TextInput
                           label="رقم الهاتف"
                           name="phone"
@@ -2191,7 +2219,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
                           onChange={(e) =>
                             handleClientBaristaChange(e, null, index)
                           }
-                        />
+                          icon={<PhoneIcon />}
+                  />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-ink dark:text-latte mb-2">
