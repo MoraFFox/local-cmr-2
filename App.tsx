@@ -749,7 +749,8 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   // Ownership note: this is the deep-link restoration path; in-app navigation
   // sets selectedSubmission before navigating, so the early-return keeps us out.
   useEffect(() => {
-    const m = location.pathname.match(/^\/companies\/([^/]+)(\/maintenance)?$/);
+    // Look ahead to ignore "/companies/new" since that's the form wizard, not an ID.
+    const m = location.pathname.match(/^\/companies\/(?!new)([^/]+)(\/maintenance)?$/);
     if (!m) return;                  // some other view — nothing to hydrate
     const id = m[1];
     const found = submissions.find((s) => String(s.id) === id);
