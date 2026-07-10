@@ -440,6 +440,10 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
             selectedSubmission={selectedSubmission}
             setSelectedSubmission={setSelectedSubmission}
             setView={setViewWrapper}
+            onUpdate={(updated) => {
+              updateCompany(updated);
+              setSelectedSubmission(updated);
+            }}
           />
         );
       case "baristas":
@@ -485,6 +489,10 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
             handleViewDetails={handleViewDetails}
             handleUpdateCompany={updateCompany}
             handleEditMaintenance={handleEditMaintenance}
+            handleRequestMissingData={(sub) => {
+              setSelectedSubmission(sub);
+              navigate(`/companies/${sub.id}`);
+            }}
             getTechnicianDisplayName={getTechnicianDisplayName}
           />
         );

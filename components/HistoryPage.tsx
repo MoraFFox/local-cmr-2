@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useFloatingMenu } from '../hooks/useFloatingMenu';
 import { FormData, MaintenanceRecord } from '../types';
-import { PencilIcon, TrashIcon, ArrowDownTrayIcon, MagnifyingGlassIcon, PrinterIcon, CloudIcon, EyeIcon, FunnelIcon, XMarkIcon, CalendarIcon, ExclamationTriangleIcon, BuildingOfficeIcon, WrenchScrewdriverIcon, DocumentIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon, ArrowDownTrayIcon, MagnifyingGlassIcon, PrinterIcon, CloudIcon, EyeIcon, FunnelIcon, XMarkIcon, CalendarIcon, ExclamationTriangleIcon, BuildingOfficeIcon, WrenchScrewdriverIcon, DocumentIcon, EllipsisVerticalIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import CompanyEditModal from './CompanyEditModal';
 import EmptyState from './EmptyState';
 import { SkeletonCard } from './ui/Skeleton';
@@ -18,11 +18,12 @@ interface HistoryPageProps {
     onViewDetails: (submission: FormData & { created_at: string }) => void;
     onUpdateCompany?: (updatedCompany: FormData) => void;
     onEditMaintenance?: (submission: FormData & { created_at: string }) => void;
+    onRequestMissingData?: (submission: FormData & { created_at: string }) => void;
     getTechnicianDisplayName?: (record: MaintenanceRecord) => string;
     isLoading?: boolean;
 }
 
-const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete, onAddNew, onPrint, onViewDetails, onUpdateCompany, onEditMaintenance, getTechnicianDisplayName, isLoading }) => {
+const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete, onAddNew, onPrint, onViewDetails, onUpdateCompany, onEditMaintenance, onRequestMissingData, getTechnicianDisplayName, isLoading }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
@@ -422,6 +423,12 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                         <EyeIcon className="h-4 w-4" />
                                         عرض
                                     </Button>
+                                    {onRequestMissingData && (
+                                        <Button variant="secondary" onClick={() => onRequestMissingData(sub)} className="text-sm py-2 px-3">
+                                            <DocumentArrowDownIcon className="h-4 w-4" />
+                                            استكمال
+                                        </Button>
+                                    )}
                                     <RowEllipsisMenu
                                         sub={sub}
                                         isOpen={openMenuId === sub.id}
@@ -431,6 +438,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                         onEdit={(s) => onEdit(s)}
                                         onEditMaintenance={onEditMaintenance}
                                         onDelete={handleDelete}
+                                        onRequestMissingData={onRequestMissingData}
                                     />
                                 </div>
 
@@ -497,8 +505,9 @@ const RowEllipsisMenu: React.FC<{
   onQuickEdit: (sub: FormData & { created_at: string }) => void;
   onEdit: (sub: FormData & { created_at: string }) => void;
   onEditMaintenance?: (sub: FormData & { created_at: string }) => void;
+  onRequestMissingData?: (sub: FormData & { created_at: string }) => void;
   onDelete: (id: number) => void;
-}> = ({ sub, isOpen, onOpenChange, onDownload, onQuickEdit, onEdit, onEditMaintenance, onDelete }) => {
+}> = ({ sub, isOpen, onOpenChange, onDownload, onQuickEdit, onEdit, onEditMaintenance, onRequestMissingData, onDelete }) => {
   const { triggerRef, contentRef, style } = useFloatingMenu({
     controlledOpen: isOpen,
     menuWidth: 192, // w-48 = 12rem = 192px
@@ -551,6 +560,15 @@ const RowEllipsisMenu: React.FC<{
             >
               <WrenchScrewdriverIcon className="h-4 w-4" />
               تعديل الصيانة
+            </button>
+          )}
+          {onRequestMissingData && (
+            <button
+              onClick={() => { onRequestMissingData(sub); onOpenChange(false); }}
+              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-cream-2"
+            >
+              <DocumentArrowDownIcon className="h-4 w-4" />
+              استكمال بيانات
             </button>
           )}
           <div className="border-t border-hairline my-1" />

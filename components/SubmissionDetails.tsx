@@ -14,8 +14,14 @@ import {
 import CollapsibleCard from "./CollapsibleCard";
 import Avatar from "./Avatar";
 import { generateCompanyPDF, generateBranchPDF } from "../utils/pdfGenerator";
+import {
+  generateMissingDataPDF,
+  parseMissingDataPDF,
+  applyParsedMissingData,
+} from "../utils/missingDataPdf";
 import { logger } from "../utils/logger";
 import { useToast } from "./ToastContext";
+import { ConfirmDialog } from "./ui/ConfirmDialog";
 import {
   PrinterIcon,
   ArrowLeftIcon,
@@ -40,12 +46,15 @@ import {
   ClipboardDocumentListIcon,
   ArrowUturnLeftIcon,
   CameraIcon,
+  DocumentArrowUpIcon,
+  DocumentArrowDownIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
 
 interface SubmissionDetailsProps {
   submission: FormData & { created_at?: string };
   onBack: () => void;
+  onUpdate?: (updated: FormData & { created_at?: string }) => void;
 }
 
 // --- HELPERS ---
@@ -1132,6 +1141,7 @@ const PrintDropdown: React.FC<{
 const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
   submission,
   onBack,
+  onUpdate,
 }) => {
   const { showToast } = useToast();
   const [printingBranch, setPrintingBranch] = useState<Branch | null>(null);
@@ -1139,6 +1149,9 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
   const [filterStartDate, setFilterStartDate] = useState("");
   const [filterEndDate, setFilterEndDate] = useState("");
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [isParsingPDF, setIsParsingPDF] = useState(false);
+  const [pendingParsedData, setPendingParsedData] = useState<FormData | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePrintFull = async (mode: "internal" | "client") => {
     setIsGeneratingPDF(true);
@@ -1175,6 +1188,58 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
     }
   };
 
+  const handleGenerateMissingDataPDF = async (scope: "company" | "branch", branchId?: number) => {
+    setIsGeneratingPDF(true);
+    try {
+      const doc = await generateMissingDataPDF(submission, {
+        scope,
+        branchId,
+      });
+      if (!doc) {
+        showToast("لا توجد بيانات ناقصة لاستكمالها.", "info");
+        return;
+      }
+      const scopeLabel = scope === "company" ? "Company" : "Branch";
+      const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${scopeLabel}_Missing_Data_${new Date().toISOString().split("T")[0]}.pdf`;
+      doc.save(fileName);
+    } catch (error) {
+      logger.error("Error generating missing data PDF", error, "pdf");
+      showToast("فشل إنشاء PDF. يرجى المحاولة مرة أخرى.", "error");
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
+  const handleUploadFilledPDF = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsParsingPDF(true);
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const parsed = await parseMissingDataPDF(arrayBuffer);
+      const updated = applyParsedMissingData(submission, parsed);
+      setPendingParsedData(updated);
+    } catch (error) {
+      logger.error("Error parsing filled PDF", error, "pdf");
+      showToast(error instanceof Error ? error.message : "فشل استيراد البيانات.", "error");
+    } finally {
+      setIsParsingPDF(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const confirmApplyParsedData = () => {
+    if (!pendingParsedData) return;
+    onUpdate?.(pendingParsedData);
+    showToast("تم استيراد البيانات بنجاح.", "success");
+    setPendingParsedData(null);
+  };
+
+  const cancelApplyParsedData = () => {
+    setPendingParsedData(null);
+  };
+
   const filterRecords = (records: MaintenanceRecord[]) => {
     if (!filterStartDate && !filterEndDate) return records;
 
@@ -1204,11 +1269,37 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
           >
             <ArrowLeftIcon className='w-5 h-5' /> Back to History
           </button>
-          <PrintDropdown
-            label='Export Full Report'
-            onPrint={handlePrintFull}
-            disabled={isGeneratingPDF}
-          />
+          <div className='flex flex-wrap items-center gap-2'>
+            <input
+              type='file'
+              accept='.pdf'
+              ref={fileInputRef}
+              onChange={handleUploadFilledPDF}
+              className='hidden'
+              disabled={isParsingPDF}
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isParsingPDF || !onUpdate}
+              className='flex items-center gap-2 bg-cream-2 text-ink font-bold py-2 px-4 rounded-lg hover:bg-cream-3 transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-copper-500 disabled:opacity-50 disabled:cursor-not-allowed'
+            >
+              <DocumentArrowUpIcon className='w-5 h-5' />
+              {isParsingPDF ? "جاري الاستيراد..." : "رفع PDF مكتمل"}
+            </button>
+            <button
+              onClick={() => handleGenerateMissingDataPDF("company")}
+              disabled={isGeneratingPDF}
+              className='flex items-center gap-2 bg-copper-500 text-ink font-bold py-2 px-4 rounded-lg hover:bg-copper-600 transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-copper-500 disabled:opacity-50 disabled:cursor-not-allowed'
+            >
+              <DocumentArrowDownIcon className='w-5 h-5' />
+              استكمال بيانات ناقصة
+            </button>
+            <PrintDropdown
+              label='Export Full Report'
+              onPrint={handlePrintFull}
+              disabled={isGeneratingPDF}
+            />
+          </div>
         </div>
 
         {/* Local Date Range Filter */}
@@ -1384,7 +1475,15 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                             <div className='flex-grow'></div>
 
                             {/* Desktop Dropdown for Branch */}
-                            <div className='hidden sm:block'>
+                            <div className='hidden sm:flex items-center gap-2'>
+                              <button
+                                onClick={() => handleGenerateMissingDataPDF("branch", branch.id)}
+                                disabled={isGeneratingPDF}
+                                className='flex items-center gap-1 bg-copper-500/10 text-copper-700 hover:bg-copper-500/20 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed'
+                              >
+                                <DocumentArrowDownIcon className='w-4 h-4' />
+                                استكمال
+                              </button>
                               <PrintDropdown
                                 label='Print Branch'
                                 onPrint={(mode) =>
@@ -1553,6 +1652,16 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={pendingParsedData !== null}
+        onClose={cancelApplyParsedData}
+        onConfirm={confirmApplyParsedData}
+        title="استكمال البيانات"
+        message="سيتم استبدال البيانات الناقصة بالبيانات المستوردة من ملف PDF. هل تريد المتابعة؟"
+        confirmLabel="استيراد"
+        cancelLabel="إلغاء"
+      />
     </div>
   );
 };

@@ -12,13 +12,14 @@ export interface HistoryViewProps {
   handleViewDetails: (submission: FormData & { created_at: string }) => void;
   handleUpdateCompany: (updatedCompany: FormData) => void;
   handleEditMaintenance: (submission: FormData & { created_at: string }) => void;
+  handleRequestMissingData?: (submission: FormData & { created_at: string }) => void;
   getTechnicianDisplayName: (record: MaintenanceRecord) => string;
 }
 
 const HistoryView: React.FC<HistoryViewProps> = ({
   isLoading, submissions, handleEdit, requestDelete, handleAddNew,
   handlePrintRequest, handleViewDetails, handleUpdateCompany,
-  handleEditMaintenance, getTechnicianDisplayName
+  handleEditMaintenance, handleRequestMissingData, getTechnicianDisplayName
 }) => {
   return (
     <div className="w-full">
@@ -31,6 +32,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({
         onViewDetails={handleViewDetails}
         onUpdateCompany={handleUpdateCompany}
         onEditMaintenance={handleEditMaintenance}
+        onRequestMissingData={handleRequestMissingData}
         getTechnicianDisplayName={getTechnicianDisplayName}
         isLoading={isLoading}
       />
