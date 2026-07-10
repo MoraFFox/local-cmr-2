@@ -82,10 +82,12 @@ function generateSessionId(): string {
 }
 
 function getAppVersion(): string {
+  if (typeof window === 'undefined') return 'unknown';
   return (window as any).__CMR_VERSION__ || 'unknown';
 }
 
 function getBuildTime(): string {
+  if (typeof window === 'undefined') return new Date().toISOString();
   return (window as any).__CMR_BUILD_TIME__ || new Date().toISOString();
 }
 
@@ -110,7 +112,7 @@ class Logger {
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
     };
 
-    if (this.config.persistToLocalStorage) {
+    if (this.config.persistToLocalStorage && typeof localStorage !== 'undefined') {
       this.loadPersistedLogs();
     }
   }
@@ -193,6 +195,7 @@ class Logger {
 
   private persistLogs(): void {
     if (!this.config.persistToLocalStorage) return;
+    if (typeof localStorage === 'undefined') return;
     
     try {
       const data = {
@@ -208,6 +211,8 @@ class Logger {
   }
 
   private loadPersistedLogs(): void {
+    if (typeof localStorage === 'undefined') return;
+    
     try {
       const stored = localStorage.getItem(this.config.localStorageKey);
       if (!stored) return;
@@ -344,7 +349,7 @@ class Logger {
     this.networkLogs = [];
     this.timers.clear();
     
-    if (this.config.persistToLocalStorage) {
+    if (this.config.persistToLocalStorage && typeof localStorage !== 'undefined') {
       localStorage.removeItem(this.config.localStorageKey);
     }
     
