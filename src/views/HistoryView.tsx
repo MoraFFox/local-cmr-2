@@ -11,15 +11,14 @@ export interface HistoryViewProps {
   handlePrintRequest: () => void;
   handleViewDetails: (submission: FormData & { created_at: string }) => void;
   handleUpdateCompany: (updatedCompany: FormData) => void;
-  setSelectedSubmission: React.Dispatch<React.SetStateAction<any>>;
-  setView: React.Dispatch<React.SetStateAction<string>>;
+  handleEditMaintenance: (submission: FormData & { created_at: string }) => void;
   getTechnicianDisplayName: (record: MaintenanceRecord) => string;
 }
 
 const HistoryView: React.FC<HistoryViewProps> = ({
   isLoading, submissions, handleEdit, requestDelete, handleAddNew,
   handlePrintRequest, handleViewDetails, handleUpdateCompany,
-  setSelectedSubmission, setView, getTechnicianDisplayName
+  handleEditMaintenance, getTechnicianDisplayName
 }) => {
   return (
     <div className="w-full">
@@ -31,10 +30,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({
         onPrint={handlePrintRequest}
         onViewDetails={handleViewDetails}
         onUpdateCompany={handleUpdateCompany}
-        onEditMaintenance={(submission) => {
-          setSelectedSubmission(submission);
-          setView("maintenance-edit");
-        }}
+        onEditMaintenance={handleEditMaintenance}
         getTechnicianDisplayName={getTechnicianDisplayName}
         isLoading={isLoading}
       />
