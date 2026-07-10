@@ -375,6 +375,263 @@ describe('applyParsedMissingData', () => {
   });
 });
 
+describe('getMissingFields - dynamic mode', () => {
+  it('detects missing CEO, sales, accounting, ops contacts and company location', () => {
+    const data = createBaseFormData({
+      location: '',
+      contacts: [],
+    });
+
+    const result = getMissingFields(data, { scope: 'company', mode: 'dynamic' });
+
+    expect(result.hasMissing).toBe(true);
+    expect(result.company.some((f) => f.key === 'company.contacts.chief.name')).toBe(true);
+    expect(result.company.some((f) => f.key === 'company.contacts.chief.email')).toBe(true);
+    expect(result.company.some((f) => f.key === 'company.contacts.chief.phone')).toBe(true);
+    expect(result.company.some((f) => f.key === 'company.location')).toBe(true);
+    expect(result.company.some((f) => f.key === 'company.contacts.sales.name')).toBe(true);
+    expect(result.company.some((f) => f.key === 'company.contacts.accounting.email')).toBe(true);
+    expect(result.company.some((f) => f.key === 'company.contacts.ops_manager.phone')).toBe(true);
+
+    const chiefName = result.company.find((f) => f.key === 'company.contacts.chief.name');
+    expect(chiefName?.label).toBe('اسم مدير الشركه');
+    const chiefEmail = result.company.find((f) => f.key === 'company.contacts.chief.email');
+    expect(chiefEmail?.label).toBe('بريد مدير الشركه');
+
+    const salesName = result.company.find((f) => f.key === 'company.contacts.sales.name');
+    expect(salesName?.label).toBe('اسم مدير المبيعات');
+    const salesEmail = result.company.find((f) => f.key === 'company.contacts.sales.email');
+    expect(salesEmail?.label).toBe('بريد مدير المبيعات');
+  });
+
+  it('skips complete role contacts in dynamic mode', () => {
+    const data = createBaseFormData({
+      contacts: [
+        createContact({ position: 'chief', name: 'CEO', email: 'ceo@test.com', phoneNumbers: [{ id: 1, number: '0100' }] }),
+        createContact({ position: 'sales', name: 'Sales', email: 'sales@test.com', phoneNumbers: [{ id: 2, number: '0200' }] }),
+        createContact({ position: 'accounting', name: 'Acc', email: 'acc@test.com', phoneNumbers: [{ id: 3, number: '0300' }] }),
+        createContact({ position: 'ops_manager', name: 'Ops', email: 'ops@test.com', phoneNumbers: [{ id: 4, number: '0400' }] }),
+      ],
+    });
+
+    const result = getMissingFields(data, { scope: 'company', mode: 'dynamic' });
+
+    expect(result.company.some((f) => f.key.startsWith('company.contacts.'))).toBe(false);
+  });
+
+  it('always generates 3 barista slots in dynamic mode', () => {
+    const data = createBaseFormData({
+      hasBranches: false,
+      baristas: [createBarista({ name: 'B1', phone: '0100' })],
+    });
+
+    const result = getMissingFields(data, { scope: 'company', mode: 'dynamic' });
+
+    expect(result.company.some((f) => f.key === 'company.baristas.0.name')).toBe(false);
+    expect(result.company.some((f) => f.key === 'company.baristas.0.phone')).toBe(false);
+    expect(result.company.some((f) => f.key === 'company.baristas.1.name')).toBe(true);
+    expect(result.company.some((f) => f.key === 'company.baristas.1.phone')).toBe(true);
+    expect(result.company.some((f) => f.key === 'company.baristas.2.name')).toBe(true);
+    expect(result.company.some((f) => f.key === 'company.baristas.2.phone')).toBe(true);
+  });
+
+  it('marks first two baristas as required and third as optional', () => {
+    const data = createBaseFormData({
+      hasBranches: false,
+      baristas: [],
+    });
+
+    const result = getMissingFields(data, { scope: 'company', mode: 'dynamic' });
+
+    const barista1 = result.company.find((f) => f.key === 'company.baristas.0.name');
+    const barista2 = result.company.find((f) => f.key === 'company.baristas.1.name');
+    const barista3 = result.company.find((f) => f.key === 'company.baristas.2.name');
+
+    expect(barista1?.required).toBe(true);
+    expect(barista2?.required).toBe(true);
+    expect(barista3?.required).toBe(false);
+  });
+
+  it('detects branch manager, location, baristas, maintenance times and coffee consumption in dynamic mode', () => {
+    const branch = createBranch({
+      branchName: '',
+      location: '',
+      contacts: [],
+      baristas: [],
+    });
+    const data = createBaseFormData({
+      hasBranches: true,
+      branches: [branch],
+    });
+
+    const result = getMissingFields(data, { scope: 'company', mode: 'dynamic' });
+
+    expect(result.branches[0].some((f) => f.key === 'branch.0.branchName')).toBe(true);
+    expect(result.branches[0].some((f) => f.key === 'branch.0.location')).toBe(true);
+    expect(result.branches[0].some((f) => f.key === 'branch.0.contacts.manager.name')).toBe(true);
+    expect(result.branches[0].some((f) => f.key === 'branch.0.baristas.0.name')).toBe(true);
+    expect(result.branches[0].some((f) => f.key === 'branch.0.allowedMaintenanceTimes')).toBe(true);
+    expect(result.branches[0].some((f) => f.key === 'branch.0.coffeeConsumptionKg')).toBe(true);
+  });
+
+  it('excludes company coffee consumption when already set in dynamic mode', () => {
+    const data = createBaseFormData({
+      coffeeConsumptionKg: 120,
+      location: '',
+    });
+
+    const result = getMissingFields(data, { scope: 'company', mode: 'dynamic' });
+
+    expect(result.company.some((f) => f.key === 'company.coffeeConsumptionKg')).toBe(false);
+    expect(result.company.some((f) => f.key === 'company.location')).toBe(true);
+  });
+
+  it('includes company coffee consumption when set to 0 in dynamic mode', () => {
+    const data = createBaseFormData({
+      coffeeConsumptionKg: 0,
+      location: '',
+    });
+
+    const result = getMissingFields(data, { scope: 'company', mode: 'dynamic' });
+
+    expect(result.company.some((f) => f.key === 'company.coffeeConsumptionKg')).toBe(true);
+    expect(result.company.some((f) => f.key === 'company.location')).toBe(true);
+  });
+
+  it('excludes branch coffee consumption when already set in dynamic mode', () => {
+    const branch = createBranch({
+      location: '',
+      coffeeConsumptionKg: 80,
+    });
+    const data = createBaseFormData({
+      hasBranches: true,
+      branches: [branch],
+    });
+
+    const result = getMissingFields(data, { scope: 'company', mode: 'dynamic' });
+
+    expect(result.branches[0].some((f) => f.key === 'branch.0.coffeeConsumptionKg')).toBe(false);
+    expect(result.branches[0].some((f) => f.key === 'branch.0.location')).toBe(true);
+  });
+
+  it('excludes company allowed maintenance times when already set in dynamic mode', () => {
+    const data = createBaseFormData({
+      allowedMaintenanceTimes: 'Sat-Sun 10AM-2PM',
+      location: '',
+    });
+
+    const result = getMissingFields(data, { scope: 'company', mode: 'dynamic' });
+
+    expect(result.company.some((f) => f.key === 'company.allowedMaintenanceTimes')).toBe(false);
+    expect(result.company.some((f) => f.key === 'company.location')).toBe(true);
+  });
+
+  it('excludes branch allowed maintenance times when already set in dynamic mode', () => {
+    const branch = createBranch({
+      location: '',
+      allowedMaintenanceTimes: 'Daily 8PM-12AM',
+    });
+    const data = createBaseFormData({
+      hasBranches: true,
+      branches: [branch],
+    });
+
+    const result = getMissingFields(data, { scope: 'company', mode: 'dynamic' });
+
+    expect(result.branches[0].some((f) => f.key === 'branch.0.allowedMaintenanceTimes')).toBe(false);
+    expect(result.branches[0].some((f) => f.key === 'branch.0.location')).toBe(true);
+  });
+
+  it('excludes company location when already set in dynamic mode', () => {
+    const data = createBaseFormData({
+      location: 'Cairo',
+      allowedMaintenanceTimes: '',
+    });
+
+    const result = getMissingFields(data, { scope: 'company', mode: 'dynamic' });
+
+    expect(result.company.some((f) => f.key === 'company.location')).toBe(false);
+    expect(result.company.some((f) => f.key === 'company.allowedMaintenanceTimes')).toBe(true);
+  });
+
+  it('excludes branch location when already set in dynamic mode', () => {
+    const branch = createBranch({
+      location: 'Alexandria',
+      allowedMaintenanceTimes: '',
+    });
+    const data = createBaseFormData({
+      hasBranches: true,
+      branches: [branch],
+    });
+
+    const result = getMissingFields(data, { scope: 'company', mode: 'dynamic' });
+
+    expect(result.branches[0].some((f) => f.key === 'branch.0.location')).toBe(false);
+    expect(result.branches[0].some((f) => f.key === 'branch.0.allowedMaintenanceTimes')).toBe(true);
+  });
+});
+
+describe('applyParsedMissingData - dynamic mode', () => {
+  it('applies position-based company contact fields', () => {
+    const data = createBaseFormData({ contacts: [] });
+    const result = applyParsedMissingData(data, {
+      'company.contacts.chief.name': 'CEO Name',
+      'company.contacts.chief.email': 'ceo@test.com',
+      'company.contacts.chief.phone': '0100',
+    });
+
+    const chief = result.contacts.find((c) => c.position === 'chief');
+    expect(chief?.name).toBe('CEO Name');
+    expect(chief?.email).toBe('ceo@test.com');
+    expect(chief?.phoneNumbers[0].number).toBe('0100');
+  });
+
+  it('applies allowed maintenance times to company and branch', () => {
+    const data = createBaseFormData({
+      branches: [createBranch({ allowedMaintenanceTimes: undefined })],
+    });
+    const result = applyParsedMissingData(data, {
+      'company.allowedMaintenanceTimes': 'Sat-Sun 10AM-2PM',
+      'branch.0.allowedMaintenanceTimes': 'Daily 8PM-12AM',
+    });
+
+    expect(result.allowedMaintenanceTimes).toBe('Sat-Sun 10AM-2PM');
+    expect(result.branches[0].allowedMaintenanceTimes).toBe('Daily 8PM-12AM');
+  });
+
+  it('applies coffee consumption as a number to company and branch', () => {
+    const data = createBaseFormData({
+      branches: [createBranch({ coffeeConsumptionKg: undefined })],
+    });
+    const result = applyParsedMissingData(data, {
+      'company.coffeeConsumptionKg': '150',
+      'branch.0.coffeeConsumptionKg': '75',
+    });
+
+    expect(result.coffeeConsumptionKg).toBe(150);
+    expect(result.branches[0].coffeeConsumptionKg).toBe(75);
+  });
+
+  it('applies 3 barista slots', () => {
+    const data = createBaseFormData({
+      hasBranches: false,
+      baristas: [],
+    });
+    const result = applyParsedMissingData(data, {
+      'company.baristas.0.name': 'B1',
+      'company.baristas.0.phone': '0100',
+      'company.baristas.1.name': 'B2',
+      'company.baristas.1.phone': '0200',
+      'company.baristas.2.name': 'B3',
+      'company.baristas.2.phone': '0300',
+    });
+
+    expect(result.baristas).toHaveLength(3);
+    expect(result.baristas[0].name).toBe('B1');
+    expect(result.baristas[2].name).toBe('B3');
+  });
+});
+
 describe('parseMissingDataPDF', () => {
   const createTestPDF = async (fields: { name: string; type: 'text' | 'checkbox'; value?: string; checked?: boolean }[]) => {
     const pdfDoc = await PDFDocument.create();
