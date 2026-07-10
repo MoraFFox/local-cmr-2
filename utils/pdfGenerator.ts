@@ -26,6 +26,58 @@ const fontCache: {
 const imageCache = new Map<string, string>();
 
 /**
+ * Rasterize an SVG file to a transparent PNG data URL.
+ * jsPDF cannot embed SVG directly, so we draw it to a canvas
+ * and export as PNG. The canvas preserves the SVG's alpha channel.
+ */
+async function svgToPngDataUrl(svgUrl: string): Promise<string | null> {
+  try {
+    const response = await fetch(svgUrl);
+    if (!response.ok) return null;
+
+    const svgText = await response.text();
+    if (!/<svg/i.test(svgText)) return null;
+
+    const blob = new Blob([svgText], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        // Use the SVG's intrinsic size, but cap at a reasonable resolution
+        const maxWidth = 800;
+        const scale = Math.min(1, maxWidth / img.naturalWidth);
+        canvas.width = Math.max(1, Math.floor(img.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.floor(img.naturalHeight * scale));
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          URL.revokeObjectURL(url);
+          resolve(null);
+          return;
+        }
+
+        // Clear canvas so background stays transparent
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+
+        resolve(canvas.toDataURL("image/png"));
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(null);
+      };
+      img.src = url;
+    });
+  } catch (error) {
+    logger.warn("Failed to rasterize SVG logo", error, "pdf");
+    return null;
+  }
+}
+
+/**
  * Load a remote image and convert to base64 data URL
  */
 async function loadImageAsBase64(url: string): Promise<string | null> {
@@ -189,7 +241,7 @@ const flattenMaintenanceRecords = (
   return result;
 };
 
-const loadFonts = async (doc: jsPDF) => {
+export const loadFonts = async (doc: jsPDF) => {
   const toBase64 = (buffer: ArrayBuffer) => {
     let binary = "";
     const bytes = new Uint8Array(buffer);
@@ -236,10 +288,10 @@ const loadFonts = async (doc: jsPDF) => {
   };
 
   try {
-    const [regular, bold, logo] = await Promise.all([
+    const [regular, bold, svgLogo] = await Promise.all([
       fetchAsset("/fonts/Amiri-Regular.ttf"),
       fetchAsset("/fonts/Amiri-Bold.ttf"),
-      fetchAsset("/logo.png"),
+      svgToPngDataUrl("/logo.svg"),
     ]);
 
     if (regular) {
@@ -258,28 +310,42 @@ const loadFonts = async (doc: jsPDF) => {
       doc.addFont("Amiri-Bold.ttf", "Amiri", "bold");
     }
 
-    let logoData = null;
+    let logoData: string | null = null;
     let logoFormat: "PNG" | "JPEG" = "PNG";
 
-    if (logo) {
-      const uint8 = new Uint8Array(logo);
-      if (
-        uint8[0] === 0x89 &&
-        uint8[1] === 0x50 &&
-        uint8[2] === 0x4e &&
-        uint8[3] === 0x47
-      ) {
-        logoFormat = "PNG";
-      } else if (uint8[0] === 0xff && uint8[1] === 0xd8 && uint8[2] === 0xff) {
-        logoFormat = "JPEG";
-      } else {
-        return { logo: null, logoFormat: "PNG" };
+    // Prefer the SVG logo because it has a transparent background.
+    // jsPDF cannot embed SVG directly, so we rasterize it to PNG.
+    if (svgLogo) {
+      logoData = svgLogo;
+      logoFormat = "PNG";
+    } else {
+      // Fallback to the raster logo if SVG conversion fails.
+      const pngLogo = await fetchAsset("/logo.png");
+      if (pngLogo) {
+        const uint8 = new Uint8Array(pngLogo);
+        if (
+          uint8[0] === 0x89 &&
+          uint8[1] === 0x50 &&
+          uint8[2] === 0x4e &&
+          uint8[3] === 0x47
+        ) {
+          logoFormat = "PNG";
+        } else if (
+          uint8[0] === 0xff &&
+          uint8[1] === 0xd8 &&
+          uint8[2] === 0xff
+        ) {
+          logoFormat = "JPEG";
+        } else {
+          return { logo: null, logoFormat: "PNG" };
+        }
+        logoData = `data:image/${logoFormat.toLowerCase()};base64,${toBase64(pngLogo)}`;
       }
-      logoData = `data:image/${logoFormat.toLowerCase()};base64,${toBase64(logo)}`;
-      // Fix 4.3: Cache the logo
-      fontCache.logo = logoData;
-      fontCache.logoFormat = logoFormat;
     }
+
+    // Fix 4.3: Cache the logo
+    fontCache.logo = logoData;
+    fontCache.logoFormat = logoFormat;
 
     return {
       logo: logoData,
