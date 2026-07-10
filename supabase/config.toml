@@ -96,6 +96,9 @@ verify_jwt = true
 [functions.admin-recovery]
 verify_jwt = false
 
+[functions.sync-sheets]
+verify_jwt = true
+
 [functions]
 # Configure edge functions globally
 # verify_jwt = true (default for all functions unless overridden)

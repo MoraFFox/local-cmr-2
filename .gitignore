@@ -30,6 +30,8 @@ dist-ssr
 *.sql
 # secret files
 .env
+*-service-account*.json
+client_secret_*.json
 
 # ++ 
 .claude
@@ -50,3 +52,6 @@ FIX_PLAN.md
 .playwright-mcp/
 *-screenshot.png
 .superpowers/
+*.png
+playwright-report/
+nul
