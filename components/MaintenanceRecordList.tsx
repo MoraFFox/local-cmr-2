@@ -49,6 +49,47 @@ const createDateFormatter = () => {
 // Fix 4.8: Use the memoized date formatter
 const formatDate = createDateFormatter();
 
+// Hoisted so both the desktop table row and the mobile card reuse them.
+const getStatusBadge = (rec: MaintenanceRecord) => {
+  if (rec.problemSolved) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-leaf-50 text-leaf-700 dark:bg-leaf-500/10 dark:text-leaf-300">
+        <CheckCircleIcon className="w-3 h-3" />
+        Solved
+      </span>
+    );
+  } else if (rec.hadProblem) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-ember-50 text-ember-700 dark:bg-ember-500/10 dark:text-ember-300">
+        <ExclamationCircleIcon className="w-3 h-3" />
+        Problem
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream text-ink dark:bg-espresso-light dark:text-latte/70">
+      <WrenchIcon className="w-3 h-3" />
+      Routine
+    </span>
+  );
+};
+
+const renderStars = (rating: number | undefined) => {
+  if (!rating) return <span className="text-latte dark:text-latte text-sm">-</span>;
+
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        star <= rating ? (
+          <StarIconSolid key={star} className="w-4 h-4 text-yellow-400" />
+        ) : (
+          <StarIcon key={star} className="w-4 h-4 text-latte/70 dark:text-ink" />
+        )
+      ))}
+    </div>
+  );
+};
+
 // Fix 4.5: Extract and memoize the row component
 interface MaintenanceRecordRowProps {
   record: MaintenanceRecord;
@@ -58,53 +99,13 @@ interface MaintenanceRecordRowProps {
   onDelete?: (recordId: number) => void;
 }
 
-const MaintenanceRecordRow = React.memo(({ 
-  record, 
-  actualIndex, 
-  onEdit, 
-  onQuickUpdate, 
-  onDelete 
+const MaintenanceRecordRow = React.memo(({
+  record,
+  actualIndex,
+  onEdit,
+  onQuickUpdate,
+  onDelete
 }: MaintenanceRecordRowProps) => {
-  const getStatusBadge = (rec: MaintenanceRecord) => {
-    if (rec.problemSolved) {
-      return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-leaf-50 text-leaf-700 dark:bg-leaf-500/10 dark:text-leaf-300">
-          <CheckCircleIcon className="w-3 h-3" />
-          Solved
-        </span>
-      );
-    } else if (rec.hadProblem) {
-      return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-ember-50 text-ember-700 dark:bg-ember-500/10 dark:text-ember-300">
-          <ExclamationCircleIcon className="w-3 h-3" />
-          Problem
-        </span>
-      );
-    }
-    return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream text-ink dark:bg-espresso-light dark:text-latte/70">
-        <WrenchIcon className="w-3 h-3" />
-        Routine
-      </span>
-    );
-  };
-
-  const renderStars = (rating: number | undefined) => {
-    if (!rating) return <span className="text-latte dark:text-latte text-sm">-</span>;
-    
-    return (
-      <div className="flex items-center gap-0.5">
-        {[1, 2, 3, 4, 5].map((star) => (
-          star <= rating ? (
-            <StarIconSolid key={star} className="w-4 h-4 text-yellow-400" />
-          ) : (
-            <StarIcon key={star} className="w-4 h-4 text-latte/70 dark:text-ink" />
-          )
-        ))}
-      </div>
-    );
-  };
-
   return (
     <tr className="hover:bg-cream dark:hover:bg-espresso-light/50/50 transition-colors">
       <td className="px-6 py-4 whitespace-nowrap">
@@ -170,6 +171,70 @@ const MaintenanceRecordRow = React.memo(({
 });
 
 MaintenanceRecordRow.displayName = 'MaintenanceRecordRow';
+
+// Mobile layout: one card per record instead of the 7-column table, which
+// squeezes to unreadable slivers and forces horizontal scroll on phones.
+const MaintenanceRecordCardMobile: React.FC<MaintenanceRecordRowProps> = ({
+  record,
+  actualIndex,
+  onEdit,
+  onQuickUpdate,
+  onDelete
+}) => (
+  <div className="bg-cream dark:bg-espresso-light rounded-xl border border-hairline dark:border-hairline p-4 shadow-sm">
+    {/* Top row: date + status */}
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-2 min-w-0">
+        <CalendarIcon className="w-4 h-4 text-latte shrink-0" />
+        <span className="text-sm font-medium text-ink dark:text-white truncate">
+          {formatDate(record.maintenanceDate)}
+        </span>
+      </div>
+      {getStatusBadge(record)}
+    </div>
+
+    {/* Middle: technician → client */}
+    <div className="mt-3 flex items-center gap-2 text-sm">
+      <div className="flex items-center gap-1.5 min-w-0">
+        <UserIcon className="w-4 h-4 text-latte shrink-0" />
+        <span className="text-ink dark:text-white truncate">
+          {record.baristaName || '-'}
+        </span>
+      </div>
+      <span className="text-latte shrink-0">→</span>
+      <span className="text-ink dark:text-white truncate min-w-0">
+        {record.clientBaristaName || '-'}
+      </span>
+    </div>
+
+    {/* Bottom: rating + services + actions */}
+    <div className="mt-3 flex items-center justify-between gap-3">
+      <div className="flex items-center gap-3 min-w-0">
+        {renderStars(record.visitRating)}
+        <span className="text-xs text-latte dark:text-latte truncate">
+          {record.servicesPerformed.length > 0
+            ? `${record.servicesPerformed.length} service(s)`
+            : 'No services'}
+        </span>
+      </div>
+      <div className="flex items-center gap-1 shrink-0">
+        <QuickActionsMenu
+          record={record}
+          onQuickUpdate={onQuickUpdate}
+          onDelete={onDelete}
+        />
+        <button
+          onClick={() => onEdit(record, actualIndex)}
+          className="p-2 text-latte hover:text-copper-600 dark:hover:text-copper-400 hover:bg-cream-2 dark:hover:bg-copper-500/10 rounded-lg transition-colors"
+          title="تعديل السجل"
+          aria-label="Edit record"
+        >
+          <PencilIcon className="w-5 h-5" />
+        </button>
+      </div>
+    </div>
+  </div>
+);
 
 const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
   records,
@@ -250,7 +315,34 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
         </div>
       </div>
 
-      <div className="overflow-x-auto invisible-scrollbar">
+      {/* Mobile: vertical card list per record. Reuses paginatedRecords so the
+          existing pagination below controls both layouts. */}
+      <div className="sm:hidden space-y-3">
+        {paginatedRecords.length === 0 ? (
+          <EmptyState
+            icon={<WrenchScrewdriverIcon className="w-8 h-8" />}
+            title="لا يوجد سجل صيانة"
+            message="لم يتم العثور على سجلات صيانة."
+          />
+        ) : (
+          paginatedRecords.map((record, index) => {
+            const actualIndex = startIndex + index;
+            return (
+              <MaintenanceRecordCardMobile
+                key={record.id}
+                record={record}
+                actualIndex={actualIndex}
+                onEdit={onEdit}
+                onQuickUpdate={onQuickUpdate}
+                onDelete={onDelete}
+              />
+            );
+          })
+        )}
+      </div>
+
+      {/* Desktop: 7-column table (hidden on phones). */}
+      <div className="hidden sm:block overflow-x-auto invisible-scrollbar">
         <table className="w-full">
           <thead className="bg-cream dark:bg-espresso/50">
             <tr>

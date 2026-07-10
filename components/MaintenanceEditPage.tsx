@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { FormData, Branch, MaintenanceRecord } from '../types';
-import { 
-  ArrowLeftIcon, 
+import {
+  ArrowLeftIcon,
   WrenchScrewdriverIcon,
   BuildingOfficeIcon,
   ChevronLeftIcon,
@@ -14,6 +14,20 @@ import {
 import MaintenanceRecordList from './MaintenanceRecordList';
 import MaintenanceRecordEditor from './MaintenanceRecordEditor';
 import { getNewMaintenanceRecord } from './MaintenanceRecordCard';
+
+/**
+ * Generate a collision-resistant record id.
+ *
+ * Bare Date.now() collides if two records are created in the same millisecond
+ * (e.g. rapid double-add) and also collides with the supervisor id, which
+ * `getNewMaintenanceRecord` also derives from Date.now(). Combine the timestamp
+ * with a monotonic counter so every id in a session is unique.
+ */
+const recordIdCounter = { n: 0 };
+const generateRecordId = (): number => {
+  // epoch-ms * 1000 + counter(0..999) → unique within 1000 ids per ms
+  return Date.now() * 1000 + (recordIdCounter.n++ % 1000);
+};
 
 interface MaintenanceEditPageProps {
   submission: FormData;
@@ -41,38 +55,58 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
   const [editingRecordIndex, setEditingRecordIndex] = useState<number>(-1);
   const [localSubmission, setLocalSubmission] = useState<FormData>(submission);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [unsavedNewRecord, setUnsavedNewRecord] = useState<MaintenanceRecord | null>(null);
+
+  // Staging model (Change 2): a brand-new record is held here until the user
+  // Saves (then it is appended to the branch's history) or Cancels (then it is
+  // discarded). This avoids leaving an empty "ghost" record in localSubmission
+  // when the user cancels out of the editor.
+  // `branchId === -1` denotes the Main Office.
+  const [stagingNewRecord, setStagingNewRecord] = useState<{ branchId: number } | null>(null);
+
+  // Track which company we're currently rendering so a switch to a different
+  // company resyncs localSubmission from props (Change 5). Using a ref avoids
+  // resyncing on every parent re-render within the same company.
+  const currentCompanyIdRef = useRef<number | string | undefined>(submission.id);
+
+  useEffect(() => {
+    if (submission.id !== currentCompanyIdRef.current) {
+      currentCompanyIdRef.current = submission.id;
+      setLocalSubmission(submission);
+    }
+  }, [submission]);
 
   const branches = useMemo(() => {
     const allBranches: (Branch & { isMainOffice: boolean })[] = [];
-    
-    if (localSubmission.maintenanceHistory.length > 0) {
-      allBranches.push({
-        id: -1,
-        branchName: 'Main Office',
-        email: localSubmission.email,
-        taxNumber: localSubmission.taxNumber,
-        location: localSubmission.location,
-        contacts: localSubmission.contacts,
-        baristas: localSubmission.baristas,
-        clientBaristas: localSubmission.clientBaristas || [],
-        usesOurMachines: localSubmission.usesOurMachines,
-        machineOwnershipType: localSubmission.machineOwnershipType,
-        dailyLeaseCost: localSubmission.dailyLeaseCost,
-        maintenanceHistory: localSubmission.maintenanceHistory,
-        isMainOffice: true
-      });
-    }
-    
-    localSubmission.branches.forEach(branch => {
-      if (branch.maintenanceHistory.length > 0) {
-        allBranches.push({
-          ...branch,
-          isMainOffice: false
-        });
-      }
+
+    // Main Office is always selectable, even with zero records, so users can
+    // add the first maintenance record. (Previously gated on
+    // maintenanceHistory.length > 0, which hid empty branches entirely and made
+    // it impossible to reach them to add the first record.)
+    allBranches.push({
+      id: -1,
+      branchName: 'Main Office',
+      email: localSubmission.email,
+      taxNumber: localSubmission.taxNumber,
+      location: localSubmission.location,
+      contacts: localSubmission.contacts,
+      baristas: localSubmission.baristas,
+      clientBaristas: localSubmission.clientBaristas || [],
+      usesOurMachines: localSubmission.usesOurMachines,
+      machineOwnershipType: localSubmission.machineOwnershipType,
+      dailyLeaseCost: localSubmission.dailyLeaseCost,
+      maintenanceHistory: localSubmission.maintenanceHistory,
+      isMainOffice: true
     });
-    
+
+    // Every branch is always selectable, regardless of record count, so users
+    // can add the first maintenance record to any branch.
+    localSubmission.branches.forEach(branch => {
+      allBranches.push({
+        ...branch,
+        isMainOffice: false
+      });
+    });
+
     return allBranches;
   }, [localSubmission]);
 
@@ -126,50 +160,65 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
   };
 
   const handleCloseEditor = () => {
-    // Warn if closing editor with unsaved new record
-    if (editingRecord?.id === unsavedNewRecord) {
-      if (!window.confirm('This new record has not been saved yet. Are you sure you want to leave? It will be saved as a draft.')) {
-        return;
-      }
+    // A staged new record has NOT been written to localSubmission yet, so
+    // cancelling simply discards it — no ghost record is left behind.
+    if (stagingNewRecord) {
+      setStagingNewRecord(null);
     }
 
     setEditingRecord(null);
     setEditingRecordIndex(-1);
-    setUnsavedNewRecord(null);
   };
 
   const handleSaveRecord = (updatedRecord: MaintenanceRecord) => {
-    const newSubmission = { ...localSubmission };
+    // Deep-clone so nested arrays/objects (branches[].maintenanceHistory) are
+    // never mutated in place on the existing state (Change 4).
+    const newSubmission = structuredClone(localSubmission) as FormData;
 
-    if (selectedBranch?.isMainOffice) {
-      const newHistory = [...newSubmission.maintenanceHistory];
-      newHistory[editingRecordIndex] = updatedRecord;
-      newSubmission.maintenanceHistory = newHistory;
-    } else if (selectedBranch) {
-      const branchIndex = newSubmission.branches.findIndex(b => b.id === selectedBranch.id);
-      if (branchIndex !== -1) {
-        const newHistory = [...newSubmission.branches[branchIndex].maintenanceHistory];
+    const isStagedNew = !!stagingNewRecord;
+    const targetIsMainOffice = isStagedNew
+      ? stagingNewRecord!.branchId === -1
+      : !!selectedBranch?.isMainOffice;
+
+    if (targetIsMainOffice) {
+      if (isStagedNew) {
+        // Append the newly-added record.
+        newSubmission.maintenanceHistory = [...newSubmission.maintenanceHistory, updatedRecord];
+      } else {
+        const newHistory = [...newSubmission.maintenanceHistory];
         newHistory[editingRecordIndex] = updatedRecord;
-        newSubmission.branches[branchIndex].maintenanceHistory = newHistory;
+        newSubmission.maintenanceHistory = newHistory;
+      }
+    } else {
+      const targetBranchId = isStagedNew ? stagingNewRecord!.branchId : selectedBranch!.id;
+      const branchIndex = newSubmission.branches.findIndex(b => b.id === targetBranchId);
+      if (branchIndex !== -1) {
+        if (isStagedNew) {
+          newSubmission.branches[branchIndex].maintenanceHistory = [
+            ...newSubmission.branches[branchIndex].maintenanceHistory,
+            updatedRecord
+          ];
+        } else {
+          const newHistory = [...newSubmission.branches[branchIndex].maintenanceHistory];
+          newHistory[editingRecordIndex] = updatedRecord;
+          newSubmission.branches[branchIndex].maintenanceHistory = newHistory;
+        }
       }
     }
-
-    // Check if we're saving a new unsaved record
-    const wasNewRecord = editingRecord?.id === unsavedNewRecord;
 
     setLocalSubmission(newSubmission);
     onSave(newSubmission);
 
-    // Clear editing state and unsaved tracking
+    // Clear editing + staging state
     setEditingRecord(null);
     setEditingRecordIndex(-1);
-    setUnsavedNewRecord(null);
+    setStagingNewRecord(null);
 
-    // Show appropriate success message
-    if (wasNewRecord) {
-      const branchName = selectedBranch?.isMainOffice
+    // Show a success message for new records
+    if (isStagedNew) {
+      const branchName = targetIsMainOffice
         ? 'Main Office'
-        : selectedBranch?.branchName || 'this branch';
+        : (newSubmission.branches.find(b => b.id === stagingNewRecord!.branchId)?.branchName) || 'this branch';
       setSuccessMessage(`New maintenance record saved successfully for ${branchName}!`);
 
       setTimeout(() => {
@@ -179,8 +228,8 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
   };
 
   const handleQuickUpdate = (recordId: number, updates: Partial<MaintenanceRecord>) => {
-    const newSubmission = { ...localSubmission };
-    
+    const newSubmission = structuredClone(localSubmission) as FormData;
+
     if (selectedBranch?.isMainOffice) {
       const recordIndex = newSubmission.maintenanceHistory.findIndex(r => r.id === recordId);
       if (recordIndex !== -1) {
@@ -201,14 +250,14 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
         }
       }
     }
-    
+
     setLocalSubmission(newSubmission);
     onSave(newSubmission);
   };
 
   const handleDeleteRecord = (recordId: number) => {
-    const newSubmission = { ...localSubmission };
-    
+    const newSubmission = structuredClone(localSubmission) as FormData;
+
     if (selectedBranch?.isMainOffice) {
       newSubmission.maintenanceHistory = newSubmission.maintenanceHistory.filter(r => r.id !== recordId);
     } else if (selectedBranch) {
@@ -237,19 +286,15 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
   const handleNavigateRecord = (direction: 'prev' | 'next') => {
     if (!selectedBranch || editingRecordIndex === -1) return;
 
-    // Warn if navigating away from unsaved new record
-    if (editingRecord?.id === unsavedNewRecord) {
-      if (!window.confirm('This new record has not been saved yet. Are you sure you want to navigate away? It will be saved as a draft.')) {
-        return;
-      }
-    }
-    if (!selectedBranch || editingRecordIndex === -1) return;
-    
+    // A staged new record isn't part of the history yet, so there is nothing to
+    // navigate to — just bail (the prev/next buttons are disabled in this case).
+    if (stagingNewRecord) return;
+
     const records = selectedBranch.maintenanceHistory;
-    const newIndex = direction === 'prev' 
-      ? editingRecordIndex - 1 
+    const newIndex = direction === 'prev'
+      ? editingRecordIndex - 1
       : editingRecordIndex + 1;
-    
+
     if (newIndex >= 0 && newIndex < records.length) {
       setEditingRecord(records[newIndex]);
       setEditingRecordIndex(newIndex);
@@ -259,35 +304,19 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
   const handleAddNewRecord = async () => {
     if (!selectedBranch) return;
 
-    const newId = Date.now();
+    // Collision-resistant id (Change 3). `getNewMaintenanceRecord` also derives
+    // a supervisor id from Date.now(); the counter entropy keeps them distinct.
+    const newId = generateRecordId();
     const newRecord = getNewMaintenanceRecord(newId);
 
-    // Add to local state without saving to database
-    const newSubmission = { ...localSubmission };
+    // Staging model (Change 2): do NOT mutate localSubmission yet — the record
+    // is only persisted when the user Saves. On Cancel it is discarded.
+    setStagingNewRecord({ branchId: selectedBranch.isMainOffice ? -1 : selectedBranch.id });
 
-    if (selectedBranch.isMainOffice) {
-      newSubmission.maintenanceHistory = [...newSubmission.maintenanceHistory, newRecord];
-    } else {
-      const branchIndex = newSubmission.branches.findIndex(b => b.id === selectedBranch.id);
-      if (branchIndex !== -1) {
-        newSubmission.branches[branchIndex].maintenanceHistory = [
-          ...newSubmission.branches[branchIndex].maintenanceHistory,
-          newRecord
-        ];
-      }
-    }
-
-    setLocalSubmission(newSubmission);
-    setUnsavedNewRecord(newId);
-
-    // Open editor for the new record immediately
-    const newIndex = (selectedBranch.isMainOffice
-      ? newSubmission.maintenanceHistory
-      : newSubmission.branches.find(b => b.id === selectedBranch.id)?.maintenanceHistory || []
-    ).length - 1;
-
+    // Open the editor immediately. The new record will be appended at save time,
+    // so its index isn't known until then; use -1 to signal "new/unsaved".
     setEditingRecord(newRecord);
-    setEditingRecordIndex(newIndex);
+    setEditingRecordIndex(-1);
   };
 
   if (editingRecord && selectedBranch) {
@@ -296,7 +325,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
         {/* Redesigned Header */}
         <div className="sticky top-0 z-50 rounded-lg bg-gradient-to-r from-espresso-light to-espresso dark:from-espresso dark:to-black border-1 border-brass shadow-lg">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-4">
                 <button
                   onClick={handleCloseEditor}
@@ -306,20 +335,24 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                   <span className="hidden sm:inline font-medium">Back</span>
                 </button>
                 
-                <div className="h-8 w-px bg-espresso-light" />
+                <div className="hidden sm:block h-8 w-px bg-espresso-light" />
                 
                 <div>
                   <h1 className="text-xl font-bold text-white">
                     {localSubmission.companyName}
                   </h1>
-                  <div className="flex items-center gap-3 text-sm text-latte/70">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-latte/70">
                     <span>{selectedBranch.branchName}</span>
                     <span className="text-latte">•</span>
                     <span className="flex items-center gap-1">
                       <CalendarIcon className="w-4 h-4" />
-                      Record {editingRecordIndex + 1} of {selectedBranch.maintenanceHistory.length}
+                      {stagingNewRecord ? (
+                        'New record'
+                      ) : (
+                        <>Record {editingRecordIndex + 1} of {selectedBranch.maintenanceHistory.length}</>
+                      )}
                     </span>
-                    {editingRecord.id === unsavedNewRecord && (
+                    {stagingNewRecord && (
                       <>
                         <span className="text-latte">•</span>
                         <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded-full text-xs font-medium">
@@ -343,25 +376,25 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleNavigateRecord('prev')}
-                  disabled={editingRecordIndex === 0}
+                  disabled={stagingNewRecord || editingRecordIndex === 0}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white/10 text-white transition-colors backdrop-blur-sm"
                 >
                   <ChevronLeftIcon className="w-5 h-5" />
                   <span className="hidden sm:inline">Prev</span>
                 </button>
-                <div className="px-4 py-2 bg-white/5 rounded-lg text-white font-medium min-w-[80px] text-center">
-                  {editingRecordIndex + 1} / {selectedBranch.maintenanceHistory.length}
+                <div className="hidden sm:block px-4 py-2 bg-white/5 rounded-lg text-white font-medium min-w-[80px] text-center">
+                  {stagingNewRecord ? 'NEW' : `${editingRecordIndex + 1} / ${selectedBranch.maintenanceHistory.length}`}
                 </div>
                 <button
                   onClick={() => handleNavigateRecord('next')}
-                  disabled={editingRecordIndex === selectedBranch.maintenanceHistory.length - 1}
+                  disabled={stagingNewRecord || editingRecordIndex === selectedBranch.maintenanceHistory.length - 1}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white/10 text-white transition-colors backdrop-blur-sm"
                 >
                   <span className="hidden sm:inline">Next</span>
                   <ChevronRightIcon className="w-5 h-5" />
                 </button>
                 
-                <div className="h-8 w-px bg-espresso-light" />
+                <div className="hidden sm:block h-8 w-px bg-espresso-light" />
                 
                 <button
                   onClick={handleAddNewRecord}
@@ -376,7 +409,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
           </div>
         </div>
         
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <MaintenanceRecordEditor
             record={editingRecord}
             onSave={handleSaveRecord}
@@ -444,6 +477,14 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                 <span className="text-sm font-medium text-ink dark:text-latte/70 px-3 py-1 bg-cream dark:bg-espresso-light rounded-full">
                   {selectedBranch.maintenanceHistory.length} records
                 </span>
+                <button
+                  onClick={handleAddNewRecord}
+                  className="btn-primary rounded-lg shadow-lg"
+                  title="إضافة سجل صيانة جديد لهذا الفرع"
+                >
+                  <PlusIcon className="w-5 h-5" />
+                  <span className="hidden sm:inline font-medium">Add Record</span>
+                </button>
               </div>
             </div>
             
