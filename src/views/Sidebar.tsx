@@ -1,4 +1,4 @@
-import { initialFormData } from "../../App";
+import { initialFormData } from "../../utils/sharedConstants";
 import { NAV_ITEMS } from "../../constants";
 import React, { useState } from "react";
 import { FormData } from "../../types";
@@ -12,10 +12,13 @@ import {
   UserGroupIcon,
   XMarkIcon,
   ArrowLeftOnRectangleIcon,
+  CloudArrowUpIcon,
 } from "@heroicons/react/24/outline";
 import ThemeToggle from "../../components/ThemeToggle";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { logger } from "../../utils/logger";
+import { syncAllCompaniesToSheets } from "../../utils/googleSheetsSync";
+import { useToast } from "../../components/ToastContext";
 
 interface Draft {
   id: string;
@@ -69,6 +72,24 @@ const SidebarContent = React.memo(({
   setView,
 }: SidebarContentProps) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [isSheetsSyncing, setIsSheetsSyncing] = useState(false);
+  const { showToast } = useToast();
+
+  const handleSheetsSync = async () => {
+    setIsSheetsSyncing(true);
+    try {
+      const result = await syncAllCompaniesToSheets();
+      if (result.success) {
+        showToast("تمت المزامنة إلى Google Sheets بنجاح", "success");
+      } else {
+        showToast(result.error || "فشلت المزامنة", "error");
+      }
+    } catch {
+      showToast("فشلت المزامنة إلى Google Sheets", "error");
+    } finally {
+      setIsSheetsSyncing(false);
+    }
+  };
 
   return (
     <>
@@ -186,6 +207,20 @@ const SidebarContent = React.memo(({
         )}
 
         <ThemeToggle theme={theme} toggleTheme={toggleTheme} expanded={isSidebarExpanded} />
+
+        {/* Google Sheets Sync Button */}
+        <button
+          onClick={handleSheetsSync}
+          disabled={isSheetsSyncing}
+          className={`w-full flex items-center gap-3 p-3 rounded-md text-sm font-semibold border border-leaf-500/30 bg-leaf-500/10 text-leaf-300 hover:bg-leaf-500/20 transition-colors disabled:opacity-50 ${!isSidebarExpanded && "justify-center"}`}
+          title="مزامنة إلى Google Sheets"
+        >
+          <CloudArrowUpIcon className={`h-6 w-6 shrink-0 ${isSheetsSyncing ? "animate-bounce" : ""}`} />
+          <span className={`truncate ${!isSidebarExpanded && "lg:hidden"}`}>
+            {isSheetsSyncing ? "جاري المزامنة..." : "مزامنة Sheets"}
+          </span>
+        </button>
+
         {onAdminLogout && (
           <button
             onClick={() => {
