@@ -1,4 +1,4 @@
-/* ── Brass & Cream: Font imports ── */
+/* ── Font imports ── */
 @import '@fontsource/tajawal/400.css';
 @import '@fontsource/tajawal/500.css';
 @import '@fontsource/tajawal/700.css';
@@ -18,141 +18,116 @@
   :root {
     color-scheme: light dark;
 
-    /* ── Crimson & Off-White design tokens ── */
-    --bg-body: #FFFFFE;          /* brand-offwhite */
-    --bg-surface: #FFFFFF;       /* white */
-    --bg-surface-elevated: #F9FAFB; /* very subtle gray */
-    --bg-chrome: #3D2C24;        /* brand-espresso */
-    --text-primary: #3D2C24;     /* brand-espresso */
-    --text-secondary: #4B5563;   /* gray-600 */
-    --text-on-chrome: #FFFFFE;   /* offwhite on espresso chrome */
-    --text-muted-chrome: #D1D5DB;/* gray-300 */
-    --border-default: #E5E7EB;   /* gray-200 */
-    --border-brass: #C9A86A;     /* brass — keep for signature if needed, or remove */
-    --border-focus: #AF2025;     /* brand-red */
-    --ring-focus: #AF2025;
+    /* ── Crimson & White (Bold) design tokens ──
+     * Primary    #B61E24
+     * Hover      #8F171C
+     * Background #FFFFFF
+     * Section    #F8F9FA
+     * Text       #222222
+     * Accent     #D4A017
+     */
+    --bg-body: #FFFFFF;
+    --bg-surface: #F8F9FA;
+    --bg-surface-elevated: #F0F1F3;
+    --bg-chrome: #FFFFFF;
+    --text-primary: #222222;
+    --text-secondary: #6B6B6B;
+    --text-on-chrome: #222222;
+    --text-muted-chrome: #6B6B6B;
+    --border-default: #E5E7EB;
+    --border-brass: #D4A017;
+    --border-focus: #B61E24;
+    --ring-focus: #B61E24;
 
     /* Gradient for the single primary CTA per screen */
-    --gradient-cta: linear-gradient(135deg, #D6454A 0%, #AF2025 100%);
+    --gradient-cta: linear-gradient(135deg, #C43237 0%, #B61E24 100%);
   }
 
   .dark {
-    --bg-body: #111827;          /* dark-bg */
-    --bg-surface: #1F2937;       /* dark-surface */
-    --bg-surface-elevated: #374151; /* gray-700 */
-    --bg-chrome: #111827;        /* dark-bg */
-    --text-primary: #FFFFFE;     /* brand-offwhite */
-    --text-secondary: #9CA3AF;   /* gray-400 */
-    --text-on-chrome: #FFFFFE;   
-    --text-muted-chrome: #9CA3AF;
-    --border-default: #374151;   /* gray-700 */
-    --border-brass: #C9A86A;     
-    --border-focus: #D6454A;     /* brand-red-light */
-    --ring-focus: #D6454A;
+    --bg-body: #1A1A1A;
+    --bg-surface: #262626;
+    --bg-surface-elevated: #333333;
+    --bg-chrome: #1A1A1A;
+    --text-primary: #F8F9FA;
+    --text-secondary: #A0A0A0;
+    --text-on-chrome: #F8F9FA;
+    --text-muted-chrome: #A0A0A0;
+    --border-default: #404040;
+    --border-brass: #D4A017;
+    --border-focus: #E47477;
+    --ring-focus: #E47477;
   }
 
   /* ── Dark-mode color remap ──
-     Most components were written without `dark:` variants (the migration used
-     `bg-cream` etc. unconditionally). To make dark mode coherent without
-     touching every file, we override the resolved colors of the named Brass &
-     Cream tokens UNDER `.dark`. Light-by-default mapping stays untouched.
+     Most components were written without `dark:` variants. To make dark mode
+     coherent without touching every file, we override the resolved colors of
+     the named tokens UNDER `.dark`. Light-by-default mapping stays untouched. */
+  .dark .bg-paper { background-color: #1A1A1A !important; }
+  .dark .bg-cream { background-color: #262626 !important; }
+  .dark .bg-cream-2 { background-color: #333333 !important; }
+  .dark .bg-cream-3 { background-color: #404040 !important; }
+  .dark .bg-cream\/20 { background-color: #26262633 !important; }
+  .dark .bg-cream\/50 { background-color: #26262680 !important; }
+  .dark .bg-cream\/90 { background-color: #262626E6 !important; }
+  .dark .bg-cream\/95 { background-color: #262626F2 !important; }
+  .dark .bg-cream-2\/20 { background-color: #33333333 !important; }
+  .dark .bg-cream-2\/50 { background-color: #33333380 !important; }
 
-     Light → Dark color substitution:
-       paper #FAF6EF → body #1A1210
-       cream #F1EADB → surface #2A1F1A  (lighter than body, lifts cards)
-       cream-2 #E8DFCC → elevated #3D2C24
-       cream-3 #DED3B8 → elevated #4A382E
-       ink #3D2C24 → cream #F1EADB (text flips light)
-       latte #8A7468 → #A89483 (warmer muted for dark, ~AA on #2A1F1A)
-       hairline #D9CFB8 → #4A382E (visible dark divider)
-       espresso #241B16 → #110D0A (chrome goes even darker)
-       espresso-light #3D2C24 → #1A1210 (chrome hover)
-       espresso-lighter #5C4639 → #2A1F1A
-     copper/leaf/ember accents stay the same — they read fine on both.
+  /* Ring mappings */
+  .dark .ring-paper { --tw-ring-color: #1A1A1A !important; }
+  .dark .ring-cream { --tw-ring-color: #262626 !important; }
+  .dark .ring-cream-2 { --tw-ring-color: #333333 !important; }
 
-     ponytail: overrides live here so component files stay variant-free;
-     add `dark:` modifiers per-component later if a specific surface needs
-     to opt OUT of the global remap. */
-  .dark .bg-paper { background-color: #1A1210 !important; }
-  .dark .bg-cream { background-color: #2A1F1A !important; }
-  .dark .bg-cream-2 { background-color: #3D2C24 !important; }
-  .dark .bg-cream-3 { background-color: #4A382E !important; }
-  /* Opacity /20 /30 /50 /60 /70 of cream/cream-2 — used for hovers, chips, ring tint */
-  .dark .bg-cream\/20 { background-color: #2A1F1A33 !important; }
-  .dark .bg-cream\/50 { background-color: #2A1F1A80 !important; }
-  .dark .bg-cream-2\/20 { background-color: #3D2C2433 !important; }
-  .dark .bg-cream-2\/50 { background-color: #3D2C2480 !important; }
-  /* Fluid / arbitrary */
-  .dark .bg-cream\/90 { background-color: #2A1F1AE6 !important; }
-  .dark .bg-cream\/95 { background-color: #2A1F1AF2 !important; }
+  .dark .text-ink { color: #F8F9FA !important; }
+  .dark .text-ink\/70 { color: #F8F9FAB3 !important; }
+  .dark .text-ink\/80 { color: #F8F9FACC !important; }
+  .dark .text-ink\/90 { color: #F8F9FAE6 !important; }
+  .dark .text-latte { color: #A0A0A0 !important; }
+  .dark .text-latte\/60 { color: #A0A0A099 !important; }
+  .dark .text-latte\/70 { color: #A0A0A0B3 !important; }
+  .dark .text-latte\/80 { color: #A0A0A0CC !important; }
 
-  /* Ring mappings (for knockout effects matching the background) */
-  .dark .ring-paper { --tw-ring-color: #1A1210 !important; }
-  .dark .ring-cream { --tw-ring-color: #2A1F1A !important; }
-  .dark .ring-cream-2 { --tw-ring-color: #3D2C24 !important; }
+  .dark .border-hairline { border-color: #404040 !important; }
+  .dark .border-hairline\/20 { border-color: #40404033 !important; }
+  .dark .border-hairline\/50 { border-color: #40404080 !important; }
 
-  .dark .text-ink { color: #F1EADB !important; }
-  .dark .text-ink\/80 { color: #F1EADBCC !important; }
-  .dark .text-ink\/90 { color: #F1EADBE6 !important; }
-  .dark .text-ink\/70 { color: #F1EADBB3 !important; }
-  .dark .text-latte { color: #A89483 !important; }
-  .dark .text-latte\/60 { color: #A8948399 !important; }
-  .dark .text-latte\/70 { color: #A89483B3 !important; }
-  .dark .text-latte\/80 { color: #A89483CC !important; }
+  /* Chrome surfaces in dark mode */
+  .dark .bg-espresso { background-color: #1A1A1A !important; }
+  .dark .bg-espresso-light { background-color: #262626 !important; }
+  .dark .bg-espresso-light\/30 { background-color: #2626264D !important; }
+  .dark .bg-espresso-light\/40 { background-color: #26262666 !important; }
+  .dark .bg-espresso-light\/50 { background-color: #26262680 !important; }
+  .dark .bg-espresso-lighter { background-color: #333333 !important; }
 
-  .dark .border-hairline { border-color: #4A382E !important; }
-  .dark .border-hairline\/20 { border-color: #4A382E33 !important; }
-  .dark .border-hairline\/50 { border-color: #4A382E80 !important; }
+  .dark .text-espresso { color: #F8F9FA !important; }
+  .dark .text-espresso-light { color: #F8F9FACC !important; }
 
-  /* Chrome surfaces in dark mode: keep them dark but distinct from card surfaces */
-  .dark .bg-espresso { background-color: #110D0A !important; }
-  .dark .bg-espresso-light { background-color: #1A1210 !important; }
-  .dark .bg-espresso-light\/30 { background-color: #1A12104D !important; }
-  .dark .bg-espresso-light\/40 { background-color: #1A121066 !important; }
-  .dark .bg-espresso-light\/50 { background-color: #1A121080 !important; }
-  .dark .bg-espresso-lighter { background-color: #2A1F1A !important; }
-
-  /* text-espresso (used for chrome-on-light contexts, e.g. offline banner text)
-     reads as cream in dark mode */
-  .dark .text-espresso { color: #F1EADB !important; }
-  .dark .text-espresso-light { color: #F1EADBCC !important; }
-
-  /* Accent text mappings for dark mode legibility.
-     Dark shades (600/700) used on light cards need to flip to light shades on dark cards. */
-  .dark .text-copper-700 { color: #F2C399 !important; } /* copper-200 */
-  .dark .text-copper-600 { color: #F2C399 !important; } /* copper-200 */
-  .dark .text-copper-600\/80 { color: #F2C399CC !important; }
-  
-  .dark .text-leaf-700 { color: #B0D9B0 !important; } /* leaf-200 */
-  .dark .text-leaf-600 { color: #B0D9B0 !important; } /* leaf-200 */
-  
-  .dark .text-ember-700 { color: #F0AFA6 !important; } /* ember-200 */
-  .dark .text-ember-600 { color: #F0AFA6 !important; } /* ember-200 */
-  /* Logout button specifically used text-ember-300 which is slightly too dim, pop it to ember-100 */
+  /* Accent text mappings for dark mode legibility */
+  .dark .text-copper-700 { color: #E47477 !important; }
+  .dark .text-copper-600 { color: #E47477 !important; }
+  .dark .text-copper-600\/80 { color: #E47477CC !important; }
+  .dark .text-leaf-700 { color: #B0D9B0 !important; }
+  .dark .text-leaf-600 { color: #B0D9B0 !important; }
+  .dark .text-ember-700 { color: #F0AFA6 !important; }
+  .dark .text-ember-600 { color: #F0AFA6 !important; }
   .dark .text-ember-300 { color: #F8D7D2 !important; }
 
   /* ── Print / Light-Forced Contexts ──
-     Printable documents (Work Orders, PDF previews) must always render with
-     dark text on white/light backgrounds, even when the app is in Dark Mode.
-     The rules below force the tokens back to their daylight values inside any
-     container marked with .force-daylight. */
-  .force-daylight .text-ink { color: #3D2C24 !important; }
-  .force-daylight .text-ink\/80 { color: #3D2C24CC !important; }
-  .force-daylight .text-ink\/90 { color: #3D2C24E6 !important; }
-  .force-daylight .text-ink\/70 { color: #3D2C24B3 !important; }
-  .force-daylight .text-latte { color: #8A7468 !important; }
-  .force-daylight .text-latte\/60 { color: #8A746899 !important; }
-  .force-daylight .text-latte\/70 { color: #8A7468B3 !important; }
-  .force-daylight .text-latte\/80 { color: #8A7468CC !important; }
-  
-  .force-daylight .border-hairline { border-color: #D9CFB8 !important; }
-  .force-daylight .border-hairline\/20 { border-color: #D9CFB833 !important; }
-  .force-daylight .border-hairline\/50 { border-color: #D9CFB880 !important; }
-  
-  .force-daylight .bg-cream-2 { background-color: #E8DFCC !important; }
-  .force-daylight .bg-cream { background-color: #F1EADB !important; }
-
-  /* text-cream stays — it's already the light text token */
+     Printable documents must always render with dark text on white backgrounds,
+     even when the app is in Dark Mode. */
+  .force-daylight .text-ink { color: #222222 !important; }
+  .force-daylight .text-ink\/70 { color: #222222B3 !important; }
+  .force-daylight .text-ink\/80 { color: #222222CC !important; }
+  .force-daylight .text-ink\/90 { color: #222222E6 !important; }
+  .force-daylight .text-latte { color: #6B6B6B !important; }
+  .force-daylight .text-latte\/60 { color: #6B6B6B99 !important; }
+  .force-daylight .text-latte\/70 { color: #6B6B6BB3 !important; }
+  .force-daylight .text-latte\/80 { color: #6B6B6BCC !important; }
+  .force-daylight .border-hairline { border-color: #E5E7EB !important; }
+  .force-daylight .border-hairline\/20 { border-color: #E5E7EB33 !important; }
+  .force-daylight .border-hairline\/50 { border-color: #E5E7EB80 !important; }
+  .force-daylight .bg-cream { background-color: #F8F9FA !important; }
+  .force-daylight .bg-cream-2 { background-color: #F0F1F3 !important; }
 
   /* Safe-area helpers */
   .pt-safe { padding-top: env(safe-area-inset-top); }
@@ -166,7 +141,7 @@
     color: var(--text-primary);
   }
 
-  /* Keyboard focus rings — copper for Brass & Cream */
+  /* Keyboard focus rings — crimson */
   :focus-visible {
     outline: 2px solid var(--ring-focus);
     outline-offset: 2px;
@@ -191,35 +166,29 @@
 
   /* ── Input ── */
   .input-base {
-    @apply block w-full rounded-lg px-4 h-[50px] text-ink shadow-sm transition-colors placeholder:text-latte focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply block w-full rounded-lg px-4 h-[50px] text-text shadow-sm transition-colors placeholder:text-text-secondary focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed;
     background-color: var(--bg-surface);
     border: 1px solid var(--border-default);
   }
   .input-base:focus {
     border-color: var(--border-focus);
-    box-shadow: 0 0 0 3px rgba(184, 115, 51, 0.15);
-  }
-  .dark .input-base {
-    @apply text-cream;
+    box-shadow: 0 0 0 3px rgba(182, 30, 36, 0.15);
   }
 
   /* ── Buttons ── */
-  /* Primary: crema→copper gradient — reserved for the ONE main action per screen */
+  /* Primary: crimson gradient — reserved for the ONE main action per screen */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-white shadow-sm transition-all hover:brightness-110 focus-visible:ring-2 focus-visible:ring-copper-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-white shadow-sm transition-all hover:brightness-110 focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
     background: var(--gradient-cta);
   }
-  /* Secondary: cream surface with copper border */
+  /* Secondary: section surface with default border */
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-ink shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-copper-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-text shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
     background-color: var(--bg-surface);
     border: 1px solid var(--border-default);
   }
   .btn-secondary:hover {
     background-color: var(--bg-surface-elevated);
-  }
-  .dark .btn-secondary {
-    @apply text-cream;
   }
   /* Danger: ember */
   .btn-danger {
@@ -227,7 +196,7 @@
   }
   /* Ghost: transparent, shows on hover */
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 font-medium transition-colors focus-visible:ring-2 focus-visible:ring-copper-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
     color: var(--text-secondary);
   }
   .btn-ghost:hover {
@@ -235,7 +204,7 @@
     color: var(--text-primary);
   }
 
-  /* ── Brass hairline divider (signature element) ── */
+  /* ── Accent hairline divider (signature element) ── */
   .brass-hairline {
     border: none;
     height: 1px;
@@ -245,7 +214,7 @@
 
   /* ── Work-order ID stamp (signature element) ── */
   .stamp-id {
-    @apply font-mono text-xs tracking-wider text-latte;
+    @apply font-mono text-xs tracking-wider text-text-secondary;
     letter-spacing: 0.12em;
   }
 }
@@ -260,30 +229,30 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background-color: rgba(138, 116, 104, 0.3); /* latte tint */
+    background-color: rgba(107, 107, 107, 0.3);
     border-radius: 10px;
     transition: background-color 0.2s ease-in-out;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(138, 116, 104, 0.5); /* darker latte tint on hover */
-  }
-  
-  .dark ::-webkit-scrollbar-thumb {
-    background-color: rgba(61, 44, 36, 0.4); /* espresso-light tint */
-  }
-  .dark ::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(61, 44, 36, 0.7);
+    background-color: rgba(107, 107, 107, 0.5);
   }
 
-  /* Keep custom-scrollbar utility for explicit overrides if needed, but make it match the global style */
+  .dark ::-webkit-scrollbar-thumb {
+    background-color: rgba(248, 249, 250, 0.2);
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(248, 249, 250, 0.35);
+  }
+
+  /* Keep custom-scrollbar utility for explicit overrides if needed */
   .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
   .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(138, 116, 104, 0.3);
+    background-color: rgba(107, 107, 107, 0.3);
     border-radius: 10px;
   }
   .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(61, 44, 36, 0.4);
+    background-color: rgba(248, 249, 250, 0.2);
   }
 
   /* Respect reduced motion globally */
@@ -299,10 +268,10 @@
 
   /* Subtle dot grid for content areas */
   .paper-grid {
-    background-image: radial-gradient(circle, #D9CFB8 0.5px, transparent 0.5px);
+    background-image: radial-gradient(circle, #E5E7EB 0.5px, transparent 0.5px);
     background-size: 24px 24px;
   }
   .dark .paper-grid {
-    background-image: radial-gradient(circle, #3D2C24 0.5px, transparent 0.5px);
+    background-image: radial-gradient(circle, #404040 0.5px, transparent 0.5px);
   }
 }

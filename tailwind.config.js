@@ -25,53 +25,64 @@ export default {
         mono: ['IBM Plex Mono', 'Cascadia Code', 'Consolas', 'monospace'],
       },
       colors: {
-        background: 'var(--bg-body)',
-        surface: 'var(--bg-surface)',
-        'surface-elevated': 'var(--bg-surface-elevated)',
-        chrome: 'var(--bg-chrome)',
-        primary: 'var(--text-primary)',
-        secondary: 'var(--text-secondary)',
+        /* ── New palette: Crimson & White (Bold) ──
+         * Primary      #B61E24  — brand, buttons, accents
+         * Hover        #8F171C  — primary hover
+         * Background   #FFFFFF  — page
+         * Section      #F8F9FA  — card/section surfaces
+         * Text         #222222  — primary text
+         * Accent       #D4A017  — signature accent (badges, highlights)
+         */
+        primary: '#B61E24',
+        hover: '#8F171C',
+        background: '#FFFFFF',
+        section: '#F8F9FA',
+        text: '#222222',
+        accent: '#D4A017',
+
+        /* Semantic tokens backed by CSS vars for dark-mode swap */
+        'bg-body': 'var(--bg-body)',
+        'bg-surface': 'var(--bg-surface)',
+        'bg-surface-elevated': 'var(--bg-surface-elevated)',
+        'bg-chrome': 'var(--bg-chrome)',
+        'text-primary': 'var(--text-primary)',
+        'text-secondary': 'var(--text-secondary)',
         'on-chrome': 'var(--text-on-chrome)',
         'muted-chrome': 'var(--text-muted-chrome)',
-        default: 'var(--border-default)',
+        'border-default': 'var(--border-default)',
+        'ring-focus': 'var(--ring-focus)',
 
-        // New Semantic Colors (Crimson & Off-White)
-        'brand-red': '#AF2025',
-        'brand-red-light': '#D6454A',
-        'brand-offwhite': '#FFFFFE',
-        'brand-espresso': '#3D2C24',
-        'dark-bg': '#111827',
-        'dark-surface': '#1F2937',
-
-        /* ── Legacy tokens (being phased out) ──
-         * TODO: Deprecate legacy "Brass & Cream" and other tokens after component migration
+        /* ── Legacy token aliases ──
+         * These are mapped to the new palette so any component still
+         * referencing an old token name renders the new colors instead.
+         * Do NOT use these in new code — prefer the semantic tokens above.
          */
-        paper: '#FAF6EF',
+        paper: '#FFFFFF',
         cream: {
-          DEFAULT: '#F1EADB',
-          2: '#E8DFCC',
-          3: '#DED3B8',
+          DEFAULT: '#F8F9FA',
+          2: '#F0F1F3',
+          3: '#E9EAEC',
         },
         espresso: {
-          DEFAULT: '#241B16',
-          light: '#3D2C24',
-          lighter: '#5C4639',
+          DEFAULT: '#222222',
+          light: '#3A3A3A',
+          lighter: '#5C5C5C',
         },
-        ink: '#3D2C24',
-        latte: '#8A7468',
-        hairline: '#D9CFB8',
-        brass: '#C9A86A',
+        ink: '#222222',
+        latte: '#6B6B6B',
+        hairline: '#E5E7EB',
+        brass: '#D4A017',
         copper: {
-          50: '#fdf4eb',
-          100: '#f9e3cc',
-          200: '#f2c399',
-          300: '#e8a266',
-          400: '#d98940',
-          500: '#B87333',
-          600: '#9E5E28',
-          700: '#7D4A1E',
-          800: '#5E3715',
-          900: '#3F250D',
+          50: '#FDF3F3',
+          100: '#FAE1E2',
+          200: '#F4C2C3',
+          300: '#EE9EA0',
+          400: '#E47477',
+          500: '#B61E24',
+          600: '#9E1A20',
+          700: '#8F171C',
+          800: '#6E1116',
+          900: '#4A0B0F',
         },
         leaf: {
           50: '#f0f7f0',
@@ -97,31 +108,31 @@ export default {
           800: '#6a1c14',
           900: '#4c1310',
         },
-        midnight: '#081619',
-        deep: '#102A30',
-        sea: '#1A434C',
-        onyx: '#EAF2F3',
-        sage: '#829A9E',
+        midnight: '#222222',
+        deep: '#3A3A3A',
+        sea: '#5C5C5C',
+        onyx: '#F8F9FA',
+        sage: '#6B6B6B',
         lava: {
-          50: '#fdecea',
-          100: '#f9c8c3',
-          200: '#f5a39d',
-          300: '#f07f77',
-          400: '#ec5b51',
-          500: '#E63923',
-          600: '#c42b1a',
-          700: '#9e1f12',
-          800: '#77150d',
-          900: '#500c08',
+          50: '#FDF3F3',
+          100: '#FAE1E2',
+          200: '#F4C2C3',
+          300: '#EE9EA0',
+          400: '#E47477',
+          500: '#B61E24',
+          600: '#9E1A20',
+          700: '#8F171C',
+          800: '#6E1116',
+          900: '#4A0B0F',
         },
         brand: {
-          red: '#AF2025',
-          'red-dark': '#8E1A1E',
-          'red-light': '#D6454A',
-          cream: '#F5F0E8',
-          'cream-dark': '#EBE5DA',
-          espresso: '#3D2C24',
-          'espresso-light': '#5C4639',
+          red: '#B61E24',
+          'red-dark': '#8F171C',
+          'red-light': '#E47477',
+          cream: '#F8F9FA',
+          'cream-dark': '#E9EAEC',
+          espresso: '#222222',
+          'espresso-light': '#5C5C5C',
         },
         success: {
           50: '#f0fdfa',
@@ -147,6 +158,20 @@ export default {
           800: '#115e59',
           900: '#134e4a',
         },
+
+        /* ── Dark mode helpers ── */
+        'dark-bg': '#1A1A1A',
+        'dark-surface': '#262626',
+        'dark-elevated': '#333333',
+        'dark-border': '#404040',
+        'dark-text': '#F8F9FA',
+        'dark-muted': '#A0A0A0',
+
+        /* Old crimson tokens, kept for back-compat, mapped to new values */
+        'brand-red': '#B61E24',
+        'brand-red-light': '#E47477',
+        'brand-offwhite': '#FFFFFF',
+        'brand-espresso': '#222222',
       },
       padding: {
         safe: 'env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)',
