@@ -18,37 +18,37 @@
   :root {
     color-scheme: light dark;
 
-    /* ── Brass & Cream design tokens ── */
-    --bg-body: #FAF6EF;          /* paper */
-    --bg-surface: #F1EADB;       /* cream */
-    --bg-surface-elevated: #E8DFCC; /* cream-2 */
-    --bg-chrome: #241B16;        /* espresso */
-    --text-primary: #3D2C24;     /* ink */
-    --text-secondary: #8A7468;   /* latte */
-    --text-on-chrome: #F1EADB;   /* cream on dark chrome */
-    --text-muted-chrome: #8A7468;/* latte on dark chrome */
-    --border-default: #D9CFB8;   /* hairline */
-    --border-brass: #C9A86A;     /* brass — signature */
-    --border-focus: #B87333;     /* copper — focus/accent */
-    --ring-focus: #B87333;
+    /* ── Crimson & Off-White design tokens ── */
+    --bg-body: #FFFFFE;          /* brand-offwhite */
+    --bg-surface: #FFFFFF;       /* white */
+    --bg-surface-elevated: #F9FAFB; /* very subtle gray */
+    --bg-chrome: #3D2C24;        /* brand-espresso */
+    --text-primary: #3D2C24;     /* brand-espresso */
+    --text-secondary: #4B5563;   /* gray-600 */
+    --text-on-chrome: #FFFFFE;   /* offwhite on espresso chrome */
+    --text-muted-chrome: #D1D5DB;/* gray-300 */
+    --border-default: #E5E7EB;   /* gray-200 */
+    --border-brass: #C9A86A;     /* brass — keep for signature if needed, or remove */
+    --border-focus: #AF2025;     /* brand-red */
+    --ring-focus: #AF2025;
 
     /* Gradient for the single primary CTA per screen */
-    --gradient-cta: linear-gradient(135deg, #E8C9A0 0%, #B87333 100%);
+    --gradient-cta: linear-gradient(135deg, #D6454A 0%, #AF2025 100%);
   }
 
   .dark {
-    --bg-body: #1A1210;
-    --bg-surface: #2A1F1A;
-    --bg-surface-elevated: #3D2C24;
-    --bg-chrome: #110D0A;
-    --text-primary: #F1EADB;
-    --text-secondary: #8A7468;
-    --text-on-chrome: #F1EADB;
-    --text-muted-chrome: #8A7468;
-    --border-default: #3D2C24;
-    --border-brass: #C9A86A;
-    --border-focus: #B87333;
-    --ring-focus: #B87333;
+    --bg-body: #111827;          /* dark-bg */
+    --bg-surface: #1F2937;       /* dark-surface */
+    --bg-surface-elevated: #374151; /* gray-700 */
+    --bg-chrome: #111827;        /* dark-bg */
+    --text-primary: #FFFFFE;     /* brand-offwhite */
+    --text-secondary: #9CA3AF;   /* gray-400 */
+    --text-on-chrome: #FFFFFE;   
+    --text-muted-chrome: #9CA3AF;
+    --border-default: #374151;   /* gray-700 */
+    --border-brass: #C9A86A;     
+    --border-focus: #D6454A;     /* brand-red-light */
+    --ring-focus: #D6454A;
   }
 
   /* ── Dark-mode color remap ──
