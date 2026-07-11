@@ -541,7 +541,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   const syncBanner = isSyncing;
 
   return (
-    <div className="h-[100dvh] overflow-hidden flex bg-paper dark:bg-[#0F0F0F]">
+    <div className="h-[100dvh] overflow-hidden flex bg-paper ">
       {/* Desktop Sidebar */}
       <aside
         className={`chrome border-l border-brass/20 flex-col fixed h-full transition-all duration-300 ease-in-out hidden lg:flex z-50 ${

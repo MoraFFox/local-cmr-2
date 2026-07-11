@@ -13,7 +13,7 @@ const InviteSignup = lazy(() => import("./InviteSignup.tsx"));
 const ResetPassword = lazy(() => import("./ResetPassword.tsx"));
 
 const LoadingFallback = () => (
-  <div className="min-h-screen bg-paper dark:bg-[#0F0F0F] flex items-center justify-center p-4">
+  <div className="min-h-screen bg-paper  flex items-center justify-center p-4">
     <div className="text-center">
       <div className="mx-auto mb-4 h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       <p className="text-ink dark:text-cream font-medium">
@@ -363,7 +363,7 @@ const AppRouter: React.FC = () => {
   if (isRecoveryRouteWithoutKey()) {
     window.location.replace("/");
     return (
-      <div className="min-h-screen bg-paper dark:bg-[#0F0F0F] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-paper  flex items-center justify-center p-4">
         <div className="text-center">
           <div className="mx-auto mb-4 h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
           <p className="text-ink dark:text-cream font-medium">
@@ -392,7 +392,7 @@ const AppRouter: React.FC = () => {
     const path = window.location.pathname;
     window.location.replace(path.startsWith("/admin") ? "/" : "/technician");
     return (
-      <div className="min-h-screen bg-paper dark:bg-[#0F0F0F] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-paper  flex items-center justify-center p-4">
         <div className="text-center">
           <div className="mx-auto mb-4 h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
           <p className="text-ink dark:text-cream font-medium">
@@ -441,7 +441,7 @@ const AppRouter: React.FC = () => {
 
   if (adminAccessState === "checking") {
     return (
-      <div className="min-h-screen bg-paper dark:bg-[#0F0F0F] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-paper  flex items-center justify-center p-4">
         <div className="text-center">
           <div className="mx-auto mb-4 h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
           <p className="text-ink dark:text-cream font-medium">

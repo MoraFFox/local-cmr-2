@@ -81,7 +81,9 @@
   .dark .ring-cream { --tw-ring-color: #262626 !important; }
   .dark .ring-cream-2 { --tw-ring-color: #333333 !important; }
 
-  .dark .text-ink { color: #F8F9FA !important; }
+    .dark .text-text { color: #F8F9FA !important; }
+  .dark .text-text-secondary { color: #A0A0A0 !important; }
+.dark .text-ink { color: #F8F9FA !important; }
   .dark .text-ink\/70 { color: #F8F9FAB3 !important; }
   .dark .text-ink\/80 { color: #F8F9FACC !important; }
   .dark .text-ink\/90 { color: #F8F9FAE6 !important; }
@@ -154,11 +156,11 @@
 @layer components {
   /* ── Surface primitives ── */
   .surface {
-    background-color: var(--bg-surface);
+    background-color: var(--bg-body);
     border-color: var(--border-default);
   }
   .surface-elevated {
-    background-color: var(--bg-surface-elevated);
+    background-color: var(--bg-cream-2);
     border-color: var(--border-default);
   }
   /* Dark chrome surfaces (sidebar, mobile header) */
@@ -169,9 +171,9 @@
 
   /* ── Input ── */
   .input-base {
-    @apply block w-full rounded-lg px-4 h-[50px] text-text shadow-sm transition-colors placeholder:text-text-secondary focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed;
-    background-color: var(--bg-surface);
-    border: 1px solid var(--border-default);
+    @apply block w-full rounded-lg px-4 h-[50px] text-ink shadow-sm transition-colors placeholder:text-latte focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed;
+    background-color: var(--bg-body);
+    border: 1px solid var(--border-hairline);
   }
   .input-base:focus {
     border-color: var(--border-focus);
@@ -186,12 +188,12 @@
   }
   /* Secondary: section surface with default border */
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-text shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
-    background-color: var(--bg-surface);
-    border: 1px solid var(--border-default);
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-ink shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    background-color: var(--bg-body);
+    border: 1px solid var(--border-hairline);
   }
   .btn-secondary:hover {
-    background-color: var(--bg-surface-elevated);
+    background-color: var(--bg-cream-2);
   }
   /* Danger: ember */
   .btn-danger {
@@ -200,10 +202,10 @@
   /* Ghost: transparent, shows on hover */
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
-    color: var(--text-secondary);
+    color: var(--text-latte);
   }
   .btn-ghost:hover {
-    background-color: var(--bg-surface);
+    background-color: var(--bg-body);
     color: var(--text-primary);
   }
 
