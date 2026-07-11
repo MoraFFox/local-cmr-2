@@ -163,7 +163,7 @@
 
   /* ── Input ── */
   .input-base {
-    @apply block w-full rounded-lg px-4 h-[50px] text-primary shadow-sm transition-colors placeholder:text-latte focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply block w-full rounded-lg px-4 h-[50px] text-text shadow-sm transition-colors placeholder:text-latte focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed;
     background-color: var(--bg-body);
     border: 1px solid var(--border-hairline);
   }
@@ -180,7 +180,7 @@
   }
   /* Secondary: section surface with default border */
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-primary shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-text shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
     background-color: var(--bg-body);
     border: 1px solid var(--border-hairline);
   }
