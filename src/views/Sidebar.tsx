@@ -132,8 +132,8 @@ const SidebarContent = React.memo(({
               onClick={() => handleViewChange(item.key as any)}
               className={`group relative flex items-center w-full gap-3 p-2.5 rounded-lg text-sm font-medium transition-all duration-300 overflow-hidden ${
                 isActive
-                  ? "text-cream bg-gradient-to-l from-copper-500/15 to-transparent shadow-[inset_-3px_0_0_0_#B87333]"
-                  : "text-cream/60 hover:bg-espresso-light/40 hover:text-cream"
+                  ? "text-on-chrome bg-gradient-to-l from-copper-500/15 to-transparent shadow-[inset_-3px_0_0_0_#B87333]"
+                  : "text-muted-chrome hover:bg-espresso-light/40 hover:text-on-chrome"
               } ${!isSidebarExpanded && "justify-center"}`}
               title={item.label}
             >
@@ -146,7 +146,7 @@ const SidebarContent = React.memo(({
                 className={`h-5 w-5 shrink-0 transition-transform duration-300 ${
                   isActive 
                     ? "text-primary-400 scale-110 drop-shadow-[0_0_8px_rgba(184,115,51,0.5)]" 
-                    : "group-hover:scale-110 group-hover:text-cream/90"
+                    : "group-hover:scale-110 group-hover:text-on-chrome"
                 }`} 
               />
               <span className={`truncate transition-all duration-300 ${
@@ -179,7 +179,7 @@ const SidebarContent = React.memo(({
                 <div
                   key={draft.id}
                   onClick={() => handleLoadDraft(draft)}
-                  className={`group flex items-center justify-between p-2 rounded-md text-sm cursor-pointer transition-colors ${currentDraftId === draft.id ? "bg-espresso-light border-r-2 border-primary text-cream" : "text-cream/60 hover:bg-espresso-light/40 hover:text-cream"}`}
+                  className={`group flex items-center justify-between p-2 rounded-md text-sm cursor-pointer transition-colors ${currentDraftId === draft.id ? "bg-espresso-light border-r-2 border-primary text-on-chrome" : "text-muted-chrome hover:bg-espresso-light/40 hover:text-on-chrome"}`}
                 >
                   <div className="flex flex-col truncate">
                     <span className="font-medium truncate">
@@ -195,7 +195,7 @@ const SidebarContent = React.memo(({
                   </div>
                   <button
                     onClick={(e) => handleDeleteDraft(e, draft.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1 text-cream/40 hover:text-ember-400 transition-all"
+                    className="opacity-0 group-hover:opacity-100 p-1 text-muted-chrome hover:text-ember-400 transition-all"
                     title="حذف المسودة"
                   >
                     <XMarkIcon className="w-4 h-4" />
@@ -239,7 +239,7 @@ const SidebarContent = React.memo(({
         )}
         <button
           onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
-          className={`w-full hidden lg:flex items-center p-2 rounded-md text-sm font-medium text-cream/40 hover:text-cream/70 hover:bg-espresso-light/30 transition-colors overflow-hidden ${!isSidebarExpanded && "justify-center"}`}
+          className={`w-full hidden lg:flex items-center p-2 rounded-md text-sm font-medium text-muted-chrome hover:text-on-chrome hover:bg-espresso-light/30 transition-colors overflow-hidden ${!isSidebarExpanded && "justify-center"}`}
           aria-label={isSidebarExpanded ? "طي الشريط الجانبي" : "فتح الشريط الجانبي"}
           title={isSidebarExpanded ? "طي" : "فتح"}
         >

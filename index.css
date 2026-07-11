@@ -176,7 +176,7 @@
   /* Primary: crimson gradient — reserved for the ONE main action per screen */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-white shadow-sm transition-all hover:brightness-110 focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
-    background: var(--gradient-cta);
+    background: var(--gradient-cta) !important;
   }
   /* Secondary: section surface with default border */
   .btn-secondary {
