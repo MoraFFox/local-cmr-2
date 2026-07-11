@@ -64,9 +64,9 @@ export default {
           3: '#E9EAEC',
         },
         espresso: {
-          DEFAULT: '#222222',
-          light: '#3A3A3A',
-          lighter: '#5C5C5C',
+          DEFAULT: '#1F1F1F', // chrome bg — always dark (both modes)
+          light: '#2E2E2E',
+          lighter: '#3D3D3D',
         },
         ink: '#222222',
         latte: '#6B6B6B',

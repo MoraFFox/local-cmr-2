@@ -25,15 +25,18 @@
      * Section    #F8F9FA
      * Text       #222222
      * Accent     #D4A017
+     *
+     * Note: chrome (sidebar / mobile header) is an ALWAYS-DARK surface in
+     * both modes, so it uses dark bg + light text regardless of theme.
      */
     --bg-body: #FFFFFF;
     --bg-surface: #F8F9FA;
     --bg-surface-elevated: #F0F1F3;
-    --bg-chrome: #FFFFFF;
+    --bg-chrome: #1F1F1F;
     --text-primary: #222222;
     --text-secondary: #6B6B6B;
-    --text-on-chrome: #222222;
-    --text-muted-chrome: #6B6B6B;
+    --text-on-chrome: #FFFFFF;
+    --text-muted-chrome: #B0B0B0;
     --border-default: #E5E7EB;
     --border-brass: #D4A017;
     --border-focus: #B61E24;
@@ -44,15 +47,15 @@
   }
 
   .dark {
-    --bg-body: #1A1A1A;
-    --bg-surface: #262626;
-    --bg-surface-elevated: #333333;
-    --bg-chrome: #1A1A1A;
-    --text-primary: #F8F9FA;
-    --text-secondary: #A0A0A0;
-    --text-on-chrome: #F8F9FA;
-    --text-muted-chrome: #A0A0A0;
-    --border-default: #404040;
+    --bg-body: #0F0F0F;
+    --bg-surface: #1C1C1C;
+    --bg-surface-elevated: #2A2A2A;
+    --bg-chrome: #1F1F1F;
+    --text-primary: #F5F5F5;
+    --text-secondary: #B5B5B5;
+    --text-on-chrome: #FFFFFF;
+    --text-muted-chrome: #B0B0B0;
+    --border-default: #3A3A3A;
     --border-brass: #D4A017;
     --border-focus: #E47477;
     --ring-focus: #E47477;
