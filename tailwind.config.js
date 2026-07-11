@@ -25,6 +25,16 @@ export default {
         mono: ['IBM Plex Mono', 'Cascadia Code', 'Consolas', 'monospace'],
       },
       colors: {
+        background: 'var(--bg-body)',
+        surface: 'var(--bg-surface)',
+        'surface-elevated': 'var(--bg-surface-elevated)',
+        chrome: 'var(--bg-chrome)',
+        primary: 'var(--text-primary)',
+        secondary: 'var(--text-secondary)',
+        'on-chrome': 'var(--text-on-chrome)',
+        'muted-chrome': 'var(--text-muted-chrome)',
+        default: 'var(--border-default)',
+
         // New Semantic Colors (Crimson & Off-White)
         'brand-red': '#AF2025',
         'brand-red-light': '#D6454A',
