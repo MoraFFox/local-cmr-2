@@ -19,7 +19,7 @@ export const Step5_MaintenanceHistory: React.FC<WizardStepProps> = ({
 }) => (
   <Card title="سجل الصيانة (المكتب الرئيسي)">
     <div className="flex justify-between items-center mb-6">
-      <h3 className="text-xl font-bold text-primary tracking-tight">سجلات الصيانة</h3>
+      <h3 className="text-xl font-bold text-ink tracking-tight">سجلات الصيانة</h3>
       <Button onClick={() => actions.addListItem("maintenanceHistory")}>
         <PlusCircleIcon className="w-5 h-5" /> إضافة سجل
       </Button>

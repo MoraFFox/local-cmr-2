@@ -119,7 +119,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
       <button
         key={option.value}
         onClick={() => handleAddPart(option.value)}
-        className={`group border border-espresso-light/50 bg-chrome-light/50 hover:bg-chrome-light hover:border-brand-red/50 rounded-xl p-4 flex transition-all duration-200 text-left ${viewMode === 'grid' ? gridClasses : listClasses}`}
+        className={`group border border-espresso-light/50 bg-espresso-light/50 hover:bg-espresso-light hover:border-primary/50 rounded-xl p-4 flex transition-all duration-200 text-left ${viewMode === 'grid' ? gridClasses : listClasses}`}
       >
         <div>
           <p className="font-semibold text-cream group-hover:text-white transition-colors">
@@ -127,7 +127,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
           </p>
         </div>
         <div className={`mt-3 ${viewMode === 'list' && 'mt-0 ml-4'}`}>
-            <div className="w-8 h-8 rounded-full bg-chrome-light flex items-center justify-center text-brand-red-400 group-hover:bg-brand-red group-hover:text-white transition-all">
+            <div className="w-8 h-8 rounded-full bg-espresso-light flex items-center justify-center text-primary-400 group-hover:bg-primary group-hover:text-white transition-all">
                 <PlusIcon className="w-5 h-5" />
             </div>
         </div>
@@ -139,12 +139,12 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
     const isMidos = payer === 'client' ? false : true;
     const summary = isMidos ? payerGroupSummary.midos : payerGroupSummary.client;
     
-    const headerBorderColor = isMidos ? 'border-brand-red/30' : 'border-amber-500/30';
-    const headerBgColor = isMidos ? 'bg-brand-red/10' : 'bg-amber-500/10';
-    const textColor = isMidos ? 'text-brand-red-400' : 'text-amber-400';
+    const headerBorderColor = isMidos ? 'border-primary/30' : 'border-amber-500/30';
+    const headerBgColor = isMidos ? 'bg-primary/10' : 'bg-amber-500/10';
+    const textColor = isMidos ? 'text-primary-400' : 'text-amber-400';
 
     return (
-      <div className={`rounded-xl border ${headerBorderColor} overflow-hidden bg-chrome/30 backdrop-blur-sm`}>
+      <div className={`rounded-xl border ${headerBorderColor} overflow-hidden bg-espresso/30 backdrop-blur-sm`}>
         <div className={`px-4 py-3 ${headerBgColor} flex items-center justify-between border-b ${headerBorderColor}`}>
           <div className="flex items-center gap-2">
             <span className={`font-bold uppercase tracking-wider text-xs ${textColor}`}>
@@ -177,7 +177,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
                 );
             })
           ) : (
-            <div className="text-center py-6 text-secondary text-sm italic">
+            <div className="text-center py-6 text-latte text-sm italic">
               {ar.payerFirstUI.noSelectedItems}
             </div>
           )}
@@ -198,19 +198,19 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
                  placeholder={ar.selectors.searchParts}
                  value={searchTerm}
                  onChange={(e) => setSearchTerm(e.target.value)}
-                 icon={<MagnifyingGlassIcon className="w-5 h-5 text-secondary" />}
+                 icon={<MagnifyingGlassIcon className="w-5 h-5 text-latte" />}
              />
         </div>
-        <div className="flex bg-chrome rounded-xl p-1 border border-espresso-light/50">
+        <div className="flex bg-espresso rounded-xl p-1 border border-espresso-light/50">
           <button
             onClick={() => setViewMode('grid')}
-            className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-chrome-light text-white shadow-sm' : 'text-secondary hover:text-cream'}`}
+            className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-espresso-light text-white shadow-sm' : 'text-latte hover:text-cream'}`}
           >
             <Squares2X2Icon className="h-5 w-5" />
           </button>
           <button
             onClick={() => setViewMode('list')}
-            className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-chrome-light text-white shadow-sm' : 'text-secondary hover:text-cream'}`}
+            className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-espresso-light text-white shadow-sm' : 'text-latte hover:text-cream'}`}
           >
             <ListBulletIcon className="h-5 w-5" />
           </button>
@@ -221,11 +221,11 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
       <div className="space-y-4">
         <button
             onClick={() => setIsSelectedSectionExpanded(!isSelectedSectionExpanded)}
-            className="w-full flex items-center justify-between text-secondary hover:text-cream transition-colors py-2 group"
+            className="w-full flex items-center justify-between text-latte hover:text-cream transition-colors py-2 group"
         >
             <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
                 SELECTED PARTS
-                {totalSelectedCount > 0 && <span className="bg-brand-red text-espresso px-1.5 py-0.5 rounded text-[10px]">{totalSelectedCount}</span>}
+                {totalSelectedCount > 0 && <span className="bg-primary text-espresso px-1.5 py-0.5 rounded text-[10px]">{totalSelectedCount}</span>}
             </span>
             {isSelectedSectionExpanded ? <ChevronUpIcon className="w-4 h-4"/> : <ChevronDownIcon className="w-4 h-4"/>}
         </button>
@@ -237,7 +237,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
                 
                 <button
                     onClick={handleAddCustomPart}
-                    className="w-full py-3 border border-dashed border-espresso-lighter rounded-xl text-secondary hover:text-brand-red-400 hover:border-brand-red/50 hover:bg-chrome transition-all flex items-center justify-center gap-2 font-medium"
+                    className="w-full py-3 border border-dashed border-espresso-lighter rounded-xl text-latte hover:text-primary-400 hover:border-primary/50 hover:bg-espresso transition-all flex items-center justify-center gap-2 font-medium"
                 >
                     <PlusCircleIcon className="w-5 h-5" />
                     {ar.selectors.addCustomPart}
@@ -247,15 +247,15 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
       </div>
 
       {/* Available Section */}
-      <div className="bg-chrome/50 border border-espresso-light rounded-2xl p-4 md:p-6">
-        <h3 className="text-xs font-bold uppercase tracking-widest text-secondary mb-4">Replacements Inventory</h3>
+      <div className="bg-espresso/50 border border-espresso-light rounded-2xl p-4 md:p-6">
+        <h3 className="text-xs font-bold uppercase tracking-widest text-latte mb-4">Replacements Inventory</h3>
         
         {filteredOptions.length > 0 ? (
           <div className="space-y-8">
             {/* Frequent */}
             {frequentlyReplaced.length > 0 && (
                 <section>
-                    <h4 className="text-sm font-semibold text-brand-red-400/80 mb-3 border-b border-brand-red/10 pb-2">
+                    <h4 className="text-sm font-semibold text-primary-400/80 mb-3 border-b border-primary/10 pb-2">
                         Common
                     </h4>
                     <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'flex flex-col gap-2'}`}>
@@ -267,7 +267,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
             {/* Regular */}
             {regularParts.length > 0 && (
                 <section>
-                    <h4 className="text-sm font-semibold text-secondary/80 mb-3 border-b border-espresso-light pb-2">
+                    <h4 className="text-sm font-semibold text-latte/80 mb-3 border-b border-espresso-light pb-2">
                         All Parts
                     </h4>
                     <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'flex flex-col gap-2'}`}>
@@ -278,7 +278,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
 
           </div>
         ) : (
-          <div className="text-center py-12 text-secondary">
+          <div className="text-center py-12 text-latte">
              <p>{searchTerm ? ar.selectors.noPartsMatch : ar.payerFirstUI.noAvailableItems}</p>
           </div>
         )}

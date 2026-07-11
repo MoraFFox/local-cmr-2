@@ -4,14 +4,14 @@ import { logger, LogLevel, LogEntry, NetworkLogEntry } from '../utils/logger';
 type Tab = 'logs' | 'network';
 
 const LEVEL_COLORS: Record<LogLevel, string> = {
-  debug: 'text-secondary',
+  debug: 'text-latte',
   info: 'text-blue-400',
   warn: 'text-amber-400',
   error: 'text-red-400',
 };
 
 const LEVEL_BG: Record<LogLevel, string> = {
-  debug: 'bg-chrome/50',
+  debug: 'bg-espresso/50',
   info: 'bg-blue-900/20',
   warn: 'bg-amber-900/20',
   error: 'bg-red-900/20',
@@ -25,8 +25,8 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 function getStatusColor(status?: number): string {
-  if (!status) return 'text-secondary';
-  return STATUS_COLORS[String(status)[0]] || 'text-secondary';
+  if (!status) return 'text-latte';
+  return STATUS_COLORS[String(status)[0]] || 'text-latte';
 }
 
 function formatTime(ts: number): string {
@@ -150,7 +150,7 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ isOpen: externalIsOpen, onToggl
       <button
         onClick={() => setIsOpen(true)}
         title="Debug Panel (Ctrl+Shift+D)"
-        className="fixed bottom-20 left-2 z-[99999] w-9 h-9 rounded-full bg-chrome/90 border border-default/20 text-blue-400 text-base cursor-pointer flex items-center justify-center backdrop-blur-sm opacity-60 hover:opacity-100 transition-opacity"
+        className="fixed bottom-20 left-2 z-[99999] w-9 h-9 rounded-full bg-espresso/90 border border-hairline/20 text-blue-400 text-base cursor-pointer flex items-center justify-center backdrop-blur-sm opacity-60 hover:opacity-100 transition-opacity"
       >
         🐛
       </button>
@@ -242,7 +242,7 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ isOpen: externalIsOpen, onToggl
 
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('MOCK_TECHNICIAN_DATA'))}
-            className="px-2 py-0.5 rounded border border-brand-red/30 bg-brand-red/10 text-brand-red-400 text-[10px] cursor-pointer hover:bg-brand-red/20 font-bold ml-2"
+            className="px-2 py-0.5 rounded border border-primary/30 bg-primary/10 text-primary-400 text-[10px] cursor-pointer hover:bg-primary/20 font-bold ml-2"
             title="Mock Technician Flow Data"
           >
             🔧 Mock Tech

@@ -21,8 +21,8 @@ const TechCard: React.FC<TechCardProps> = ({
       switch (variant) {
           case 'alert': return 'border-ember-500/50';
           case 'success': return 'border-leaf-500/50';
-          case 'active': return 'border-brand-red/50';
-          default: return 'border-default';
+          case 'active': return 'border-primary/50';
+          default: return 'border-hairline';
       }
   };
 
@@ -31,7 +31,7 @@ const TechCard: React.FC<TechCardProps> = ({
         case 'alert': return 'from-espresso to-ember-500/10';
         case 'success': return 'from-espresso to-leaf-500/10';
         case 'active': return 'from-espresso to-copper-500/10';
-        default: return 'bg-chrome/50';
+        default: return 'bg-espresso/50';
     }
 };
 
@@ -43,7 +43,7 @@ const TechCard: React.FC<TechCardProps> = ({
       {/* Header */}
       {title && (
           <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/5">
-              {icon && <div className={`w-4 h-4 ${variant === 'active' ? 'text-brand-red-400' : 'text-secondary'}`}>{icon}</div>}
+              {icon && <div className={`w-4 h-4 ${variant === 'active' ? 'text-primary-400' : 'text-latte'}`}>{icon}</div>}
               <h3 className="text-xs font-bold uppercase tracking-wider text-cream">{title}</h3>
           </div>
       )}
@@ -55,10 +55,10 @@ const TechCard: React.FC<TechCardProps> = ({
 
       {/* Decorative Corner */}
       <div className={`absolute -top-1 -right-1 w-3 h-3 border-t border-r ${
-          variant === 'active' ? 'border-brand-red' : 'border-brass'
+          variant === 'active' ? 'border-primary' : 'border-brass'
       } opacity-50`} />
       <div className={`absolute -bottom-1 -left-1 w-3 h-3 border-b border-l ${
-           variant === 'active' ? 'border-brand-red' : 'border-brass'
+           variant === 'active' ? 'border-primary' : 'border-brass'
       } opacity-50`} />
     </div>
   );

@@ -90,24 +90,24 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl bg-surface shadow-sm p-6 relative border border-default">
+      <div className="w-full max-w-md rounded-2xl bg-cream shadow-sm p-6 relative border border-hairline">
         {/* Close Button */}
         <button
           onClick={handleClose}
-          className="absolute top-4 left-4 p-1 rounded-lg text-secondary hover:text-primary hover:bg-surface-elevated transition-colors"
+          className="absolute top-4 left-4 p-1 rounded-lg text-latte hover:text-primary hover:bg-cream-2 transition-colors"
         >
           <XMarkIcon className="w-5 h-5" />
         </button>
 
         {isSuccess ? (
           <div className="text-center py-4">
-            <div className="w-14 h-14 bg-surface-elevated rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-14 h-14 bg-cream-2 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircleIcon className="w-7 h-7 text-leaf-500" />
             </div>
-            <h2 className="text-xl font-bold text-primary mb-2">
+            <h2 className="text-xl font-bold text-ink mb-2">
               تحقق من بريدك الإلكتروني
             </h2>
-            <p className="text-sm text-secondary mb-6">
+            <p className="text-sm text-latte mb-6">
               لقد أرسلنا رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.
             </p>
             <Button
@@ -121,32 +121,32 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
           <>
             {/* Header */}
             <div className="text-center mb-6">
-              <div className="w-14 h-14 bg-surface-elevated rounded-full flex items-center justify-center mx-auto mb-4">
-                <EnvelopeIcon className="w-7 h-7 text-brand-red" />
+              <div className="w-14 h-14 bg-cream-2 rounded-full flex items-center justify-center mx-auto mb-4">
+                <EnvelopeIcon className="w-7 h-7 text-primary" />
               </div>
-              <h2 className="text-xl font-bold text-primary mb-2">
+              <h2 className="text-xl font-bold text-ink mb-2">
                 إعادة تعيين كلمة المرور
               </h2>
             </div>
 
-            <p className="text-sm text-secondary text-center mb-4">
+            <p className="text-sm text-latte text-center mb-4">
               أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.
             </p>
 
             {error && (
-              <div className="mb-4 p-3 rounded-lg border border-brand-red/30 bg-ember-500/20 text-sm text-ember-700 text-center">
+              <div className="mb-4 p-3 rounded-lg border border-primary/30 bg-ember-500/20 text-sm text-ember-700 text-center">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-primary mb-2 text-right">
+                <label className="block text-sm font-medium text-ink mb-2 text-right">
                   البريد الإلكتروني
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <EnvelopeIcon className="w-5 h-5 text-secondary" />
+                    <EnvelopeIcon className="w-5 h-5 text-latte" />
                   </div>
                   <input
                     type="email"
@@ -155,7 +155,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                     placeholder="example@email.com"
                     autoCapitalize="none"
                     autoCorrect="off"
-                    className="w-full pr-10 pl-4 py-3 rounded-lg bg-surface-elevated border border-default text-primary focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 text-right"
+                    className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream-2 border border-hairline text-ink focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-right"
                     dir="ltr"
                   />
                 </div>
@@ -237,13 +237,13 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-paper flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Back Button */}
         {onBack && (
           <button
             onClick={onBack}
-            className="mb-6 flex items-center gap-2 text-secondary hover:text-primary transition-colors"
+            className="mb-6 flex items-center gap-2 text-latte hover:text-primary transition-colors"
           >
             <ArrowLeftIcon className="w-5 h-5" />
             <span>العودة للتطبيق الرئيسي</span>
@@ -251,27 +251,27 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
         )}
 
         {/* Login Card */}
-        <div className="bg-surface border border-default rounded-2xl shadow-xl p-8">
+        <div className="bg-cream border border-hairline rounded-2xl shadow-xl p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-surface-elevated rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-cream-2 rounded-full flex items-center justify-center mx-auto mb-4">
               {contactType === "email" ? (
-                <EnvelopeIcon className="w-8 h-8 text-brand-red" />
+                <EnvelopeIcon className="w-8 h-8 text-primary" />
               ) : (
-                <PhoneIcon className="w-8 h-8 text-brand-red" />
+                <PhoneIcon className="w-8 h-8 text-primary" />
               )}
             </div>
-            <h1 className="text-2xl font-bold text-primary mb-2">
+            <h1 className="text-2xl font-bold text-ink mb-2">
               {ar.login.title}
             </h1>
-            <p className="text-secondary">
+            <p className="text-latte">
               {ar.login.subtitle}
             </p>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-ember-500/20 border border-brand-red/30 rounded-lg">
+            <div className="mb-6 p-4 bg-ember-500/20 border border-primary/30 rounded-lg">
               <p className="text-sm text-ember-700 text-center">
                 {error}
               </p>
@@ -282,17 +282,17 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Contact Type Toggle */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-primary mb-2 text-center">
+              <label className="block text-sm font-medium text-ink mb-2 text-center">
                 البريد الإلكتروني أو الهاتف
               </label>
-              <div className="flex rounded-lg bg-surface-elevated p-1">
+              <div className="flex rounded-lg bg-cream-2 p-1">
                 <button
                   type="button"
                   onClick={() => setContactType("email")}
                   className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${
                     contactType === "email"
-                      ? "bg-surface text-brand-red shadow-sm"
-                      : "text-secondary hover:text-primary"
+                      ? "bg-cream text-ink shadow-sm"
+                      : "text-latte hover:text-primary"
                   }`}
                 >
                   <EnvelopeIcon className="w-4 h-4" />
@@ -303,8 +303,8 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                   onClick={() => setContactType("phone")}
                   className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${
                     contactType === "phone"
-                      ? "bg-surface text-brand-red shadow-sm"
-                      : "text-secondary hover:text-primary"
+                      ? "bg-cream text-ink shadow-sm"
+                      : "text-latte hover:text-primary"
                   }`}
                 >
                   <PhoneIcon className="w-4 h-4" />
@@ -315,15 +315,15 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
 
             {/* Email/Phone Field */}
             <div>
-              <label className="block text-sm font-medium text-primary mb-2">
+              <label className="block text-sm font-medium text-ink mb-2">
                 {contactType === "email" ? "البريد الإلكتروني" : "رقم الهاتف"}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                   {contactType === "email" ? (
-                    <EnvelopeIcon className="h-5 w-5 text-secondary" />
+                    <EnvelopeIcon className="h-5 w-5 text-latte" />
                   ) : (
-                    <PhoneIcon className="h-5 w-5 text-secondary" />
+                    <PhoneIcon className="h-5 w-5 text-latte" />
                   )}
                 </div>
                 <input
@@ -340,7 +340,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                   placeholder={contactType === "email" ? "example@email.com" : "01xxxxxxxxx"}
                   autoCapitalize="none"
                   autoCorrect="off"
-                  className="block w-full pr-10 pl-4 py-3 bg-surface text-primary rounded-lg border border-default focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 transition-all text-right"
+                  className="block w-full pr-10 pl-4 py-3 bg-cream text-ink rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-right"
                   dir="ltr"
                 />
               </div>
@@ -348,19 +348,19 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
 
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-medium text-primary mb-2">
+              <label className="block text-sm font-medium text-ink mb-2">
                 {ar.login.passwordLabel}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <LockClosedIcon className="h-5 w-5 text-secondary" />
+                  <LockClosedIcon className="h-5 w-5 text-latte" />
                 </div>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={ar.login.passwordPlaceholder}
-                  className="block w-full pr-10 pl-4 py-3 bg-surface text-primary rounded-lg border border-default focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 transition-all text-right"
+                  className="block w-full pr-10 pl-4 py-3 bg-cream text-ink rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-right"
                   dir="rtl"
                 />
               </div>
@@ -381,7 +381,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
-                  className="text-sm text-brand-red hover:text-brand-red transition-colors"
+                  className="text-sm text-primary hover:text-primary transition-colors"
                 >
                   نسيت كلمة المرور؟
                 </button>
@@ -391,15 +391,15 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
         </div>
 
         {/* Footer */}
-        <p className="text-center mt-6 text-sm text-secondary">
+        <p className="text-center mt-6 text-sm text-latte">
           بوابة خاصة بالفنيين لإدخال تقارير الصيانة
         </p>
 
         {/* Invite-Only Message */}
-        <div className="mt-4 p-3 bg-surface-elevated rounded-lg border border-default">
+        <div className="mt-4 p-3 bg-cream-2 rounded-lg border border-hairline">
           <div className="flex items-start gap-2">
-            <InformationCircleIcon className="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-secondary">
+            <InformationCircleIcon className="w-5 h-5 text-latte flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-latte">
               <p className="font-medium">إنشاء الحساب عبر رابط الدعوة فقط. تواصل مع المدير.</p>
             </div>
           </div>

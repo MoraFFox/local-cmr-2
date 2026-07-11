@@ -106,26 +106,26 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
             <div 
                 role="dialog" 
                 aria-modal="true" 
-                className="bg-surface border border-default rounded-2xl shadow-xl w-full max-w-lg my-4 sm:my-0 overflow-hidden animate-scale-in"
+                className="bg-cream border border-hairline rounded-2xl shadow-xl w-full max-w-lg my-4 sm:my-0 overflow-hidden animate-scale-in"
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-default bg-surface-elevated/50">
+                <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-hairline bg-cream-2/50">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-brand-red/10 rounded-lg">
-                            <BuildingOfficeIcon className="w-5 h-5 text-brand-red" />
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                            <BuildingOfficeIcon className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-bold text-primary">
+                            <h2 className="text-lg font-bold text-ink">
                                 تعديل الشركة
                             </h2>
-                            <p className="text-sm text-secondary">
+                            <p className="text-sm text-latte">
                                 {company.companyName || 'شركة غير مسماة'}
                             </p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 sm:p-2 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center text-secondary hover:text-primary rounded-full hover:bg-surface-elevated transition-colors"
+                        className="p-2 sm:p-2 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center text-latte hover:text-ink rounded-full hover:bg-cream-2 transition-colors"
                         aria-label="إغلاق النافذة"
                     >
                         <XMarkIcon className="w-5 h-5" />
@@ -183,10 +183,10 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                 </div>
 
                 {/* Footer Actions */}
-                <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-4 sm:px-6 py-4 pb-safe border-t border-default bg-surface-muted/30">
+                <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-4 sm:px-6 py-4 pb-safe border-t border-hairline bg-cream/30">
                     <button
                         onClick={onClose}
-                        className="w-full sm:w-auto px-4 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 text-secondary hover:text-primary font-medium rounded-lg hover:bg-surface-elevated transition-colors"
+                        className="w-full sm:w-auto px-4 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 text-latte hover:text-ink font-medium rounded-lg hover:bg-cream-2 transition-colors"
                         disabled={isSaving}
                     >
                         إلغاء

@@ -47,8 +47,8 @@ function RadioGroup<T extends string | boolean>({ name, label, options, value, o
         }
     }, [disabled, options, value, onChange]);
 
-    const selectedClasses = 'border-brand-red bg-brand-red/10 text-brand-red dark:text-brand-red-400';
-    const unselectedClasses = 'border-default bg-surface text-primary hover:border-brand-red/30';
+    const selectedClasses = 'border-primary bg-primary/10 text-brand-red dark:text-primary/80';
+    const unselectedClasses = 'border-hairline bg-cream text-ink hover:border-primary/30';
 
     const commonButtonClasses = `
         relative flex items-center gap-3 rounded-xl border-2 transition-all duration-200
@@ -76,17 +76,17 @@ function RadioGroup<T extends string | boolean>({ name, label, options, value, o
                 <div className={`
                     rounded-full border-2 flex items-center justify-center transition-colors
                     ${inline ? 'w-5 h-5' : 'w-6 h-6 flex-shrink-0'}
-                    ${isSelected ? 'border-brand-red bg-brand-red' : 'border-default'}
+                    ${isSelected ? 'border-primary bg-primary' : 'border-hairline'}
                 `}>
                     {isSelected && <div className={`rounded-full bg-white ${inline ? 'w-2 h-2' : 'w-2.5 h-2.5'}`} />}
                 </div>
 
                 <div className={`flex-1 min-w-0 ${inline ? '' : ''}`}>
-                    <div className={`font-semibold ${isSelected ? 'text-brand-red dark:text-brand-red-400' : 'text-primary'}`}>
+                    <div className={`font-semibold ${isSelected ? 'text-brand-red dark:text-primary/80' : 'text-ink'}`}>
                         {option.label}
                     </div>
                     {option.description && !inline && (
-                        <div className="text-sm text-secondary mt-0.5">
+                        <div className="text-sm text-latte mt-0.5">
                             {option.description}
                         </div>
                     )}
@@ -107,7 +107,7 @@ function RadioGroup<T extends string | boolean>({ name, label, options, value, o
             onKeyDown={handleKeyDown}
             className={disabled ? 'opacity-60' : ''}
         >
-            {label && <label className="text-sm font-medium text-primary block mb-3">{label}</label>}
+            {label && <label className="text-sm font-medium text-ink block mb-3">{label}</label>}
             <div className={inline ? 'flex flex-wrap gap-3' : 'space-y-2'}>
                 {options.map((option) => renderOption(option, value === option.value))}
             </div>

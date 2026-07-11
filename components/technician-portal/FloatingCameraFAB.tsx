@@ -29,7 +29,7 @@ const FloatingCameraFAB: React.FC<FloatingCameraFABProps> = ({
         fixed right-4 bottom-28 z-40
         w-14 h-14 rounded-full
         flex items-center justify-center
-        bg-brand-red hover:bg-brand-red-light
+        bg-primary hover:bg-hover
         text-white shadow-lg
         transition-all duration-150 ease-out
         active:scale-95

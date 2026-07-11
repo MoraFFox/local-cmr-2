@@ -135,11 +135,11 @@ const InfoRow = ({
   if (!value && value !== 0) return null;
   return (
     <div className='flex items-start gap-2 text-sm py-1'>
-      {Icon && <Icon className='w-4 h-4 text-secondary mt-0.5 shrink-0' />}
-      <span className='font-medium text-secondary shrink-0'>
+      {Icon && <Icon className='w-4 h-4 text-latte mt-0.5 shrink-0' />}
+      <span className='font-medium text-latte shrink-0'>
         {label}:
       </span>
-      <span className='text-primary break-all'>
+      <span className='text-ink break-all'>
         {value}
       </span>
     </div>
@@ -148,26 +148,26 @@ const InfoRow = ({
 
 const ContactList = ({ contacts }: { contacts: Contact[] }) => {
   if (!contacts || contacts.length === 0)
-    return <p className='text-xs text-secondary italic'>No contacts listed.</p>;
+    return <p className='text-xs text-latte italic'>No contacts listed.</p>;
   return (
     <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2'>
       {contacts.map((c) => (
         <div
           key={c.id}
-          className='bg-surface-elevated p-2 rounded border border-default'
+          className='bg-cream-2 p-2 rounded border border-hairline'
         >
-          <p className='font-bold text-primary text-sm'>
+          <p className='font-bold text-ink text-sm'>
             {c.name}
           </p>
-          <p className='text-xs text-secondary uppercase font-semibold mb-1'>
+          <p className='text-xs text-latte uppercase font-semibold mb-1'>
             {c.position === "custom" ? c.customPosition : c.position}
           </p>
           {c.phoneNumbers.map((p) => (
             <div
               key={p.id}
-              className='flex items-center gap-1 text-xs text-primary'
+              className='flex items-center gap-1 text-xs text-ink'
             >
-              <PhoneIcon className='w-3 h-3 text-secondary' />
+              <PhoneIcon className='w-3 h-3 text-latte' />
               {p.number}
             </div>
           ))}
@@ -187,7 +187,7 @@ const renderPhotoGroup = (
 
   return (
     <div className="mb-3">
-      <span className="text-sm font-medium text-secondary">{label}</span>
+      <span className="text-sm font-medium text-latte">{label}</span>
       <div className="grid grid-cols-4 gap-2 mt-1">
         {filtered.map((photo, i) => (
           <a
@@ -200,7 +200,7 @@ const renderPhotoGroup = (
             <img
               src={photo.url}
               alt={`${label} photo ${i + 1}`}
-              className="w-full h-20 object-cover rounded border border-default group-hover:ring-2 group-hover:ring-brand-red transition-all"
+              className="w-full h-20 object-cover rounded border border-hairline group-hover:ring-2 group-hover:ring-primary transition-all"
             />
           </a>
         ))}
@@ -213,13 +213,13 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
   record,
 }) => {
   return (
-    <div className='border-r-2 border-brand-red pr-4 py-3 mb-4 bg-surface-elevated rounded-l-md'>
+    <div className='border-r-2 border-primary pr-4 py-3 mb-4 bg-cream-2 rounded-l-md'>
       {/* Header Row */}
       <div className='flex flex-wrap justify-between items-start gap-y-3 gap-x-4'>
         {/* Right side (start of RTL flow): Date, Badges, Next Visit */}
         <div className='flex flex-col gap-1.5'>
           <div className='flex flex-wrap items-center gap-2'>
-            <span className='font-bold text-primary' dir="ltr">
+            <span className='font-bold text-ink' dir="ltr">
               {record.maintenanceDate}
             </span>
             {record.dailyLeaseCost && (
@@ -228,13 +228,13 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
                 {record.dailyLeaseCost} ج.م.
               </span>
             )}
-            <span className='text-xs bg-brand-red/10 px-1.5 py-0.5 rounded text-brand-red border border-brand-red/20'>
+            <span className='text-xs bg-primary/10 px-1.5 py-0.5 rounded text-primary border border-primary/20'>
               جهة الدفع: {getPaidByLabel(record.paidBy)}
             </span>
           </div>
           
-          <div className='flex flex-wrap items-center gap-1.5 text-xs text-secondary'>
-            <span className='bg-surface px-1.5 rounded border border-default'>
+          <div className='flex flex-wrap items-center gap-1.5 text-xs text-latte'>
+            <span className='bg-cream px-1.5 rounded border border-hairline'>
               <bdi>{record.type}</bdi>
             </span>
             {record.visitZone && (
@@ -246,7 +246,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
           </div>
           
           {record.nextVisitDate && (
-            <div className='text-xs text-brand-red flex items-center gap-1 mt-0.5'>
+            <div className='text-xs text-primary flex items-center gap-1 mt-0.5'>
               <CalendarIcon className="w-3.5 h-3.5" />
               <span>الزيارة القادمة: <bdi>{record.nextVisitDate}</bdi></span>
             </div>
@@ -256,8 +256,8 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
         {/* Left side (end of RTL flow): Staff Badge */}
         {record.baristaName && (
           <div className='shrink-0'>
-            <span className='text-xs bg-surface px-2.5 py-1.5 border border-default rounded text-primary flex items-center gap-1.5'>
-              <UserIcon className="w-4 h-4 text-secondary" />
+            <span className='text-xs bg-cream px-2.5 py-1.5 border border-hairline rounded text-ink flex items-center gap-1.5'>
+              <UserIcon className="w-4 h-4 text-latte" />
               <span className='font-bold'>{record.baristaName}</span>
             </span>
           </div>
@@ -268,14 +268,14 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
       <div className='mt-5 text-sm space-y-4'>
         {record.machines && record.machines.length > 0 && (
           <div>
-            <div className='font-semibold text-primary flex items-center gap-1.5 mb-1.5'>
-              <WrenchScrewdriverIcon className="w-4 h-4 text-secondary" />
+            <div className='font-semibold text-ink flex items-center gap-1.5 mb-1.5'>
+              <WrenchScrewdriverIcon className="w-4 h-4 text-latte" />
               الماكينات
             </div>
-            <div className='space-y-1 text-primary'>
+            <div className='space-y-1 text-ink'>
               {record.machines.map((m) => (
                 <div key={m.id} className="flex items-start gap-1.5">
-                  <span className="text-secondary mt-0.5">•</span>
+                  <span className="text-latte mt-0.5">•</span>
                   <div className="flex-1 min-w-0" dir="ltr">
                     <div className="text-right w-full">{m.count}x {m.name}</div>
                   </div>
@@ -287,7 +287,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
         
         {record.problems && record.problems.length > 0 && (
           <div>
-            <div className='font-semibold text-primary flex items-center gap-1.5 mb-2'>
+            <div className='font-semibold text-ink flex items-center gap-1.5 mb-2'>
               <ExclamationCircleIcon className="w-4 h-4 text-amber-500" />
               المشاكل
             </div>
@@ -310,10 +310,10 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
               <CubeIcon className="w-4 h-4" />
               قطع الغيار المستبدلة
             </div>
-            <div className='space-y-1 text-primary dark:text-secondary/70'>
+            <div className='space-y-1 text-ink dark:text-latte/70'>
               {record.partsReplaced.map((p, i) => (
                 <div key={i} className="flex items-start gap-1.5">
-                  <span className="text-secondary mt-0.5">•</span>
+                  <span className="text-latte mt-0.5">•</span>
                   <div className="flex-1 flex flex-wrap items-center gap-x-2 gap-y-1" dir="rtl">
                     <div dir="ltr" className="text-right">{p.count}x {p.name}</div>
                     {p.paidByClient && (
@@ -334,10 +334,10 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
               <ClipboardDocumentListIcon className="w-4 h-4" />
               الخدمات المقدمة
             </div>
-            <div className='space-y-1 text-primary dark:text-secondary/70'>
+            <div className='space-y-1 text-ink dark:text-latte/70'>
               {record.servicesPerformed.map((s, i) => (
                 <div key={i} className="flex items-start gap-1.5">
-                  <span className="text-secondary mt-0.5">•</span>
+                  <span className="text-latte mt-0.5">•</span>
                   <div className="flex-1 flex flex-wrap items-center gap-x-2 gap-y-1" dir="rtl">
                     <div dir="ltr" className="text-right">{s.count}x {s.name}</div>
                     {s.paidByClient && (
@@ -353,8 +353,8 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
         )}
         
         {record.notes && (
-          <div className='mt-3 bg-white/50 dark:bg-black/20 p-3 rounded-lg border border-default'>
-            <p className='italic text-primary dark:text-secondary break-words leading-relaxed'>
+          <div className='mt-3 bg-white/50 dark:bg-black/20 p-3 rounded-lg border border-hairline'>
+            <p className='italic text-ink dark:text-latte break-words leading-relaxed'>
               "{record.notes}"
             </p>
           </div>
@@ -363,9 +363,9 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
 
       {/* Photos Section */}
       {record.photos && record.photos.length > 0 && (
-        <div className="mt-5 p-3 bg-white/50 dark:bg-black/20 border border-default rounded-lg">
-          <h4 className="text-sm font-semibold mb-3 text-primary dark:text-secondary/70 flex items-center gap-1.5">
-            <CameraIcon className="w-4 h-4 text-secondary" />
+        <div className="mt-5 p-3 bg-white/50 dark:bg-black/20 border border-hairline rounded-lg">
+          <h4 className="text-sm font-semibold mb-3 text-ink dark:text-latte/70 flex items-center gap-1.5">
+            <CameraIcon className="w-4 h-4 text-latte" />
             الصور
           </h4>
           {renderPhotoGroup(record.photos, "before", "Before")}
@@ -376,8 +376,8 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
 
       {/* Recursively show follow-ups */}
       {record.followUpVisits && record.followUpVisits.length > 0 && (
-        <div className='mt-5 pr-3 border-r-2 border-default pt-2'>
-          <p className='text-xs font-bold text-secondary mb-3 flex items-center gap-1.5'>
+        <div className='mt-5 pr-3 border-r-2 border-hairline pt-2'>
+          <p className='text-xs font-bold text-latte mb-3 flex items-center gap-1.5'>
             <ArrowUturnLeftIcon className="w-4 h-4" />
             زيارات المتابعة
           </p>
@@ -397,7 +397,7 @@ const PrintSection: React.FC<{ title: string; children: React.ReactNode }> = ({
   children,
 }) => (
   <div className='mb-6 break-inside-avoid'>
-    <h3 className='text-xs font-bold uppercase tracking-widest text-secondary border-b border-default pb-1 mb-3'>
+    <h3 className='text-xs font-bold uppercase tracking-widest text-latte border-b border-hairline pb-1 mb-3'>
       {title}
     </h3>
     {children}
@@ -409,10 +409,10 @@ const PrintField: React.FC<{ label: string; value: React.ReactNode }> = ({
   value,
 }) => (
   <div className='flex flex-col mb-2 break-inside-avoid'>
-    <span className='text-[10px] uppercase text-secondary font-semibold'>
+    <span className='text-[10px] uppercase text-latte font-semibold'>
       {label}
     </span>
-    <span className='text-sm text-primary font-medium'>{value || "-"}</span>
+    <span className='text-sm text-ink font-medium'>{value || "-"}</span>
   </div>
 );
 
@@ -421,15 +421,15 @@ const MaintenanceTable: React.FC<{
   hideCosts?: boolean;
 }> = ({ records, hideCosts }) => {
   if (!records || records.length === 0)
-    return <p className='text-xs text-secondary italic'>No records found.</p>;
+    return <p className='text-xs text-latte italic'>No records found.</p>;
 
   return (
-    <table className='w-full text-left text-xs border border-default mb-4 break-inside-auto'>
-      <thead className='bg-surface text-primary uppercase font-bold'>
+    <table className='w-full text-left text-xs border border-hairline mb-4 break-inside-auto'>
+      <thead className='bg-cream text-ink uppercase font-bold'>
         <tr>
-          <th className='px-2 py-1.5 border-b border-default w-24'>Date</th>
-          <th className='px-2 py-1.5 border-b border-default w-32'>Staff</th>
-          <th className='px-2 py-1.5 border-b border-default'>
+          <th className='px-2 py-1.5 border-b border-hairline w-24'>Date</th>
+          <th className='px-2 py-1.5 border-b border-hairline w-32'>Staff</th>
+          <th className='px-2 py-1.5 border-b border-hairline'>
             Work Details
           </th>
         </tr>
@@ -440,11 +440,11 @@ const MaintenanceTable: React.FC<{
             <tr className='break-inside-avoid'>
               <td className='px-2 py-2 align-top'>
                 <div>{rec.maintenanceDate}</div>
-                <div className='text-[10px] text-secondary mt-0.5'>
+                <div className='text-[10px] text-latte mt-0.5'>
                   {rec.type}
                 </div>
                 {rec.nextVisitDate && (
-                  <div className='text-[10px] text-brand-red mt-1 font-semibold'>
+                  <div className='text-[10px] text-primary mt-1 font-semibold'>
                     Next: {rec.nextVisitDate}
                   </div>
                 )}
@@ -494,16 +494,16 @@ const MaintenanceTable: React.FC<{
                   </div>
                 )}
                 {rec.notes && (
-                  <div className='italic text-primary mt-1'>
+                  <div className='italic text-ink mt-1'>
                     "{rec.notes}"
                   </div>
                 )}
               </td>
             </tr>
             {rec.followUpVisits && rec.followUpVisits.length > 0 && (
-              <tr className='bg-surface'>
-                <td colSpan={3} className='px-4 py-1 border-t border-default'>
-                  <div className='text-[10px] font-bold uppercase text-secondary my-1'>
+              <tr className='bg-cream'>
+                <td colSpan={3} className='px-4 py-1 border-t border-hairline'>
+                  <div className='text-[10px] font-bold uppercase text-latte my-1'>
                     Follow-ups
                   </div>
                   <MaintenanceTable
@@ -527,18 +527,18 @@ const DetailedRecordPrint: React.FC<{
 }> = ({ record, depth = 0, hideCosts }) => {
   return (
     <div
-      className={`mb-6 break-inside-avoid border border-default rounded-lg overflow-hidden ${depth > 0 ? "ml-6 border-l-4 border-l-slate-400 bg-surface" : "bg-white shadow-sm"}`}
+      className={`mb-6 break-inside-avoid border border-hairline rounded-lg overflow-hidden ${depth > 0 ? "ml-6 border-l-4 border-l-slate-400 bg-cream" : "bg-white shadow-sm"}`}
     >
-      <div className='bg-surface px-4 py-2 border-b border-default flex justify-between items-center'>
+      <div className='bg-cream px-4 py-2 border-b border-hairline flex justify-between items-center'>
         <div className='flex items-center gap-3'>
-          <span className='font-bold text-sm text-primary'>
+          <span className='font-bold text-sm text-ink'>
             {record.maintenanceDate}
           </span>
-          <span className='text-xs text-secondary uppercase font-semibold tracking-wider bg-white border border-default px-2 py-0.5 rounded-full'>
+          <span className='text-xs text-latte uppercase font-semibold tracking-wider bg-white border border-hairline px-2 py-0.5 rounded-full'>
             {record.type} Visit
           </span>
           {record.visitZone && (
-            <span className='text-xs text-brand-red bg-surface-elevated border border-brand-red/30 px-2 py-0.5 rounded-full capitalize'>
+            <span className='text-xs text-ink bg-cream-2 border border-hairline px-2 py-0.5 rounded-full capitalize'>
               {record.visitZone.replace("_", " ")}
             </span>
           )}
@@ -550,10 +550,10 @@ const DetailedRecordPrint: React.FC<{
               Next: {record.nextVisitDate}
             </span>
           )}
-          <div className='flex items-center gap-1.5 text-xs font-semibold text-primary bg-white border border-default px-2 py-1 rounded shadow-sm'>
-            <UserIcon className='w-3.5 h-3.5 text-secondary' />
+          <div className='flex items-center gap-1.5 text-xs font-semibold text-ink bg-white border border-hairline px-2 py-1 rounded shadow-sm'>
+            <UserIcon className='w-3.5 h-3.5 text-latte' />
             Performed by:{" "}
-            <span className='text-primary font-bold'>
+            <span className='text-ink font-bold'>
               {record.baristaName || "Unknown"}
             </span>
           </div>
@@ -583,17 +583,17 @@ const DetailedRecordPrint: React.FC<{
 
           {/* Machines Section - Highlighted */}
           {record.machines && record.machines.length > 0 ? (
-            <div className='flex gap-2 p-2 bg-surface rounded border border-default'>
-              <span className='font-bold text-primary w-20 uppercase text-[10px] tracking-wider pt-0.5'>
+            <div className='flex gap-2 p-2 bg-cream rounded border border-hairline'>
+              <span className='font-bold text-ink w-20 uppercase text-[10px] tracking-wider pt-0.5'>
                 Machines
               </span>
               <div className='flex-1 flex flex-wrap gap-2'>
                 {record.machines.map((m, i) => (
                   <span
                     key={i}
-                    className='inline-flex items-center bg-white border border-default px-2 py-1 rounded font-bold text-primary shadow-sm'
+                    className='inline-flex items-center bg-white border border-hairline px-2 py-1 rounded font-bold text-ink shadow-sm'
                   >
-                    <CubeIcon className='w-3 h-3 text-secondary mr-1' />
+                    <CubeIcon className='w-3 h-3 text-latte mr-1' />
                     {m.count > 1 ? `${m.count}x ` : ""}
                     {m.name}
                   </span>
@@ -602,10 +602,10 @@ const DetailedRecordPrint: React.FC<{
             </div>
           ) : (
             <div className='flex gap-2'>
-              <span className='font-bold text-secondary w-20 uppercase text-[10px] tracking-wider pt-0.5'>
+              <span className='font-bold text-latte w-20 uppercase text-[10px] tracking-wider pt-0.5'>
                 Machines
               </span>
-              <span className='text-secondary italic'>No machines listed</span>
+              <span className='text-latte italic'>No machines listed</span>
             </div>
           )}
 
@@ -623,20 +623,20 @@ const DetailedRecordPrint: React.FC<{
           {(record.partsWereReplaced ||
             record.servicesPerformed.length > 0) && (
             <div className='flex gap-2'>
-              <span className='font-bold text-primary w-20 uppercase text-[10px] tracking-wider pt-0.5'>
+              <span className='font-bold text-ink w-20 uppercase text-[10px] tracking-wider pt-0.5'>
                 Work Done
               </span>
               <div className='flex-1 space-y-1'>
                 {record.partsReplaced?.map((p, i) => (
                   <div key={`p-${i}`} className='flex items-center gap-1'>
-                    <WrenchScrewdriverIcon className='w-3 h-3 text-secondary' />
+                    <WrenchScrewdriverIcon className='w-3 h-3 text-latte' />
                     <span>
                       Replaced:{" "}
                       <b>
                         {p.count}x {p.name}
                       </b>{" "}
                       {p.paidByClient ? (
-                        <span className='text-[10px] text-brand-red border border-brand-red/30 px-1 rounded bg-surface-elevated'>
+                        <span className='text-[10px] text-ink border border-hairline px-1 rounded bg-cream-2'>
                           (Client Paid)
                         </span>
                       ) : (
@@ -647,7 +647,7 @@ const DetailedRecordPrint: React.FC<{
                 ))}
                 {record.servicesPerformed?.map((s, i) => (
                   <div key={`s-${i}`} className='flex items-center gap-1'>
-                    <CheckBadgeIcon className='w-3 h-3 text-secondary' />
+                    <CheckBadgeIcon className='w-3 h-3 text-latte' />
                     <span>
                       Service:{" "}
                       <b>
@@ -661,51 +661,51 @@ const DetailedRecordPrint: React.FC<{
           )}
 
           {record.recommendations && (
-            <div className='flex gap-2 mt-2 pt-2 border-t border-default'>
-              <span className='font-bold text-primary w-20 uppercase text-[10px] tracking-wider'>
+            <div className='flex gap-2 mt-2 pt-2 border-t border-hairline'>
+              <span className='font-bold text-ink w-20 uppercase text-[10px] tracking-wider'>
                 Recs
               </span>
-              <div className='italic text-primary bg-yellow-50/50 p-1 rounded'>
+              <div className='italic text-ink bg-yellow-50/50 p-1 rounded'>
                 {record.recommendations}
               </div>
             </div>
           )}
           {record.notes && (
             <div className='flex gap-2'>
-              <span className='font-bold text-primary w-20 uppercase text-[10px] tracking-wider'>
+              <span className='font-bold text-ink w-20 uppercase text-[10px] tracking-wider'>
                 Notes
               </span>
-              <div className='italic text-primary'>{record.notes}</div>
+              <div className='italic text-ink'>{record.notes}</div>
             </div>
           )}
         </div>
 
         {/* Right Col: Supervisors */}
         <div className='col-span-4 pl-4 flex flex-col'>
-          <div className='bg-white p-3 rounded-lg border-2 border-dashed border-default h-full flex flex-col justify-between'>
+          <div className='bg-white p-3 rounded-lg border-2 border-dashed border-hairline h-full flex flex-col justify-between'>
             <div>
-              <p className='font-bold text-secondary uppercase tracking-wider text-[10px] mb-3 text-center border-b border-default pb-1'>
+              <p className='font-bold text-latte uppercase tracking-wider text-[10px] mb-3 text-center border-b border-hairline pb-1'>
                 Supervisors
               </p>
               {record.supervisors && record.supervisors.length > 0 ? (
                 <div className='space-y-2'>
                   {record.supervisors.map((s) => (
-                    <div key={s.id} className='text-center p-2 bg-surface rounded'>
-                      <p className='font-bold text-[11px] text-primary uppercase'>
+                    <div key={s.id} className='text-center p-2 bg-cream rounded'>
+                      <p className='font-bold text-[11px] text-ink uppercase'>
                         {s.name}
                       </p>
-                      <p className='text-[9px] text-secondary'>{s.phone}</p>
+                      <p className='text-[9px] text-latte'>{s.phone}</p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className='h-24 flex flex-col items-center justify-center text-secondary/70 italic text-center'>
+                <div className='h-24 flex flex-col items-center justify-center text-latte/70 italic text-center'>
                   <UserIcon className='w-6 h-6 mb-1 opacity-50' />
                   <span>No supervisors</span>
                 </div>
               )}
             </div>
-            <div className='text-[9px] text-center text-secondary/70 mt-2'>
+            <div className='text-[9px] text-center text-latte/70 mt-2'>
               Verified & Approved
             </div>
           </div>
@@ -714,8 +714,8 @@ const DetailedRecordPrint: React.FC<{
 
       {/* Recursion for Follow-ups */}
       {record.followUpVisits && record.followUpVisits.length > 0 && (
-        <div className='bg-surface px-4 py-3 border-t border-default'>
-          <p className='text-[10px] font-bold uppercase text-secondary mb-3 flex items-center gap-1'>
+        <div className='bg-cream px-4 py-3 border-t border-hairline'>
+          <p className='text-[10px] font-bold uppercase text-latte mb-3 flex items-center gap-1'>
             <ArrowLeftIcon className='w-3 h-3 rotate-180' /> Follow-up Visits
           </p>
           {record.followUpVisits.map((fu) => (
@@ -745,7 +745,7 @@ const BranchPrintableDocument: React.FC<{
       className='hidden print:block font-sans text-black force-daylight bg-white w-full max-w-[210mm] mx-auto p-8'
     >
       {/* Header */}
-      <div className='flex justify-between items-start mb-8 border-b-2 border-default pb-6'>
+      <div className='flex justify-between items-start mb-8 border-b-2 border-hairline pb-6'>
         <div className='flex items-center gap-4'>
           <img
             src='/logo.svg'
@@ -753,87 +753,87 @@ const BranchPrintableDocument: React.FC<{
             className='h-16 w-auto object-contain'
           />
           <div>
-            <h1 className='text-2xl font-bold text-primary tracking-tight leading-none'>
+            <h1 className='text-2xl font-bold text-ink tracking-tight leading-none'>
               {companyName}
             </h1>
-            <h2 className='text-lg text-primary mt-1 font-medium'>
+            <h2 className='text-lg text-ink mt-1 font-medium'>
               {branch.branchName || "Branch Report"}
             </h2>
           </div>
         </div>
         <div className='text-right'>
           <div className='text-3xl font-bold text-cream'>BRANCH REPORT</div>
-          <p className='text-xs text-secondary mt-1'>
+          <p className='text-xs text-latte mt-1'>
             Generated: {new Date().toLocaleDateString()}
           </p>
-          <p className='text-xs text-secondary'>{branch.location}</p>
+          <p className='text-xs text-latte'>{branch.location}</p>
         </div>
       </div>
 
       {/* Branch Summary & Staff Grid */}
       <div className='grid grid-cols-12 gap-6 mb-8'>
         {/* Info Card */}
-        <div className='col-span-8 bg-surface border border-default rounded-lg p-4'>
+        <div className='col-span-8 bg-cream border border-hairline rounded-lg p-4'>
           <div className='grid grid-cols-2 gap-x-8 gap-y-4 text-sm'>
             <div>
-              <span className='text-xs font-bold text-secondary uppercase block mb-0.5'>
+              <span className='text-xs font-bold text-latte uppercase block mb-0.5'>
                 Email
               </span>
-              <span className='font-medium text-primary'>
+              <span className='font-medium text-ink'>
                 {branch.email || "-"}
               </span>
             </div>
             <div>
-              <span className='text-xs font-bold text-secondary uppercase block mb-0.5'>
+              <span className='text-xs font-bold text-latte uppercase block mb-0.5'>
                 Tax ID
               </span>
-              <span className='font-medium text-primary'>
+              <span className='font-medium text-ink'>
                 {branch.taxNumber || "-"}
               </span>
             </div>
             <div>
-              <span className='text-xs font-bold text-secondary uppercase block mb-0.5'>
+              <span className='text-xs font-bold text-latte uppercase block mb-0.5'>
                 Machine Ownership
               </span>
-              <span className='font-medium text-primary'>
+              <span className='font-medium text-ink'>
                 {getMachineOwnershipStatus(branch, hideCosts)}
               </span>
             </div>
             <div>
-              <span className='text-xs font-bold text-secondary uppercase block mb-0.5'>
+              <span className='text-xs font-bold text-latte uppercase block mb-0.5'>
                 Total Visits
               </span>
-              <span className='font-medium text-primary'>
+              <span className='font-medium text-ink'>
                 {stats.visitCount}
               </span>
             </div>
           </div>
 
-          <div className='mt-4 pt-4 border-t border-default'>
-            <span className='text-[10px] font-bold text-secondary uppercase block mb-2'>
+          <div className='mt-4 pt-4 border-t border-hairline'>
+            <span className='text-[10px] font-bold text-latte uppercase block mb-2'>
               Key Contacts
             </span>
             {branch.contacts.length > 0 ? (
               <div className='grid grid-cols-2 gap-2'>
                 {branch.contacts.map((c) => (
                   <div key={c.id} className='text-xs'>
-                    <span className='font-bold text-primary'>{c.name}</span>
-                    <span className='text-secondary mx-1'>•</span>
-                    <span className='text-primary'>
+                    <span className='font-bold text-ink'>{c.name}</span>
+                    <span className='text-latte mx-1'>•</span>
+                    <span className='text-ink'>
                       {c.phoneNumbers[0]?.number}
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <span className='text-xs text-secondary italic'>No contacts</span>
+              <span className='text-xs text-latte italic'>No contacts</span>
             )}
           </div>
         </div>
 
         {/* Assigned Staff Card - NEW */}
-        <div className='col-span-4 border border-default rounded-lg p-4 flex flex-col'>
-          <h4 className='text-xs font-bold uppercase text-secondary border-b border-default pb-2 mb-2 flex items-center gap-1'>
+        <div className='col-span-4 border border-hairline rounded-lg p-4 flex flex-col'>
+          <h4 className='text-xs font-bold uppercase text-latte border-b border-hairline pb-2 mb-2 flex items-center gap-1'>
             <UserGroupIcon className='w-4 h-4' /> Assigned Staff
           </h4>
           {branch.baristas && branch.baristas.length > 0 ? (
@@ -841,9 +841,9 @@ const BranchPrintableDocument: React.FC<{
               {branch.baristas.map((b) => (
                 <div
                   key={b.id}
-                  className='flex justify-between items-center text-xs p-1.5 bg-surface rounded'
+                  className='flex justify-between items-center text-xs p-1.5 bg-cream rounded'
                 >
-                  <span className='font-semibold text-primary truncate'>
+                  <span className='font-semibold text-ink truncate'>
                     {b.name}
                   </span>
                   <div className='flex items-center gap-1'>
@@ -854,7 +854,7 @@ const BranchPrintableDocument: React.FC<{
               ))}
             </div>
           ) : (
-            <div className='flex-1 flex items-center justify-center text-secondary text-xs italic'>
+            <div className='flex-1 flex items-center justify-center text-latte text-xs italic'>
               No baristas assigned
             </div>
           )}
@@ -863,7 +863,7 @@ const BranchPrintableDocument: React.FC<{
 
       {/* Detailed Maintenance History */}
       <div>
-        <div className='flex items-center gap-2 mb-4 bg-chrome text-white p-2 rounded'>
+        <div className='flex items-center gap-2 mb-4 bg-espresso text-white p-2 rounded'>
           <ClipboardDocumentCheckIcon className='w-5 h-5' />
           <h3 className='text-sm font-bold uppercase tracking-wider'>
             Maintenance History Log
@@ -881,9 +881,9 @@ const BranchPrintableDocument: React.FC<{
             ))}
           </div>
         ) : (
-          <div className='p-12 text-center border-2 border-dashed border-default rounded-lg'>
-            <WrenchScrewdriverIcon className='w-10 h-10 text-secondary/70 mx-auto mb-2' />
-            <p className='text-secondary italic'>
+          <div className='p-12 text-center border-2 border-dashed border-hairline rounded-lg'>
+            <WrenchScrewdriverIcon className='w-10 h-10 text-latte/70 mx-auto mb-2' />
+            <p className='text-latte italic'>
               No maintenance records found for this branch.
             </p>
           </div>
@@ -891,7 +891,7 @@ const BranchPrintableDocument: React.FC<{
       </div>
 
       {/* Footer */}
-      <div className='mt-12 pt-4 border-t border-default text-center text-[10px] text-secondary'>
+      <div className='mt-12 pt-4 border-t border-hairline text-center text-[10px] text-latte'>
         <p>CONFIDENTIAL - Internal Use Only • Mido for Distribution</p>
       </div>
     </div>
@@ -917,16 +917,16 @@ const PrintableDocument: React.FC<{
       </div>
 
       {/* Document Header */}
-      <div className='flex justify-between items-end border-b-2 border-default pb-4 mb-8'>
+      <div className='flex justify-between items-end border-b-2 border-hairline pb-4 mb-8'>
         <div>
-          <h1 className='text-3xl font-bold text-primary tracking-tight'>
+          <h1 className='text-3xl font-bold text-ink tracking-tight'>
             {data.companyName}
           </h1>
-          <p className='text-sm text-primary mt-1'>
+          <p className='text-sm text-ink mt-1'>
             Comprehensive Maintenance Report
           </p>
         </div>
-        <div className='text-right text-xs text-secondary'>
+        <div className='text-right text-xs text-latte'>
           <p>Report Date: {new Date().toLocaleDateString()}</p>
           <p>Submission ID: {data.id ? data.id : "Pending"}</p>
         </div>
@@ -948,16 +948,16 @@ const PrintableDocument: React.FC<{
 
         {data.contacts.length > 0 && (
           <div className='mt-2'>
-            <h4 className='text-[10px] uppercase text-secondary font-semibold mb-1'>
+            <h4 className='text-[10px] uppercase text-latte font-semibold mb-1'>
               Key Contacts
             </h4>
             <ul className='text-sm list-disc pl-4 space-y-0.5'>
               {data.contacts.map((c) => (
                 <li key={c.id}>
                   <span className='font-semibold'>{c.name}</span>
-                  <span className='text-primary'> — {c.position}</span>
+                  <span className='text-ink'> — {c.position}</span>
                   {c.phoneNumbers.length > 0 && (
-                    <span className='text-secondary text-xs ml-2'>
+                    <span className='text-latte text-xs ml-2'>
                       ({c.phoneNumbers.map((p) => p.number).join(", ")})
                     </span>
                   )}
@@ -981,7 +981,7 @@ const PrintableDocument: React.FC<{
       {/* Branches Section */}
       {data.hasBranches && (
         <div className='mt-8'>
-          <h2 className='text-lg font-bold text-primary border-b-2 border-default pb-1 mb-4'>
+          <h2 className='text-lg font-bold text-ink border-b-2 border-hairline pb-1 mb-4'>
             Branch Details & Maintenance
           </h2>
 
@@ -989,11 +989,11 @@ const PrintableDocument: React.FC<{
             const stats = getBranchStats(branch.maintenanceHistory);
             return (
               <div key={branch.id} className='mb-8 break-inside-avoid-page'>
-                <div className='bg-surface p-2 border-l-4 border-default mb-3 flex justify-between items-baseline'>
-                  <h3 className='font-bold text-base text-primary'>
+                <div className='bg-cream p-2 border-l-4 border-hairline mb-3 flex justify-between items-baseline'>
+                  <h3 className='font-bold text-base text-ink'>
                     {branch.branchName || `Branch ${idx + 1}`}
                   </h3>
-                  <span className='text-xs text-primary font-normal'>
+                  <span className='text-xs text-ink font-normal'>
                     {branch.location}
                   </span>
                 </div>
@@ -1017,23 +1017,23 @@ const PrintableDocument: React.FC<{
                 {/* Financials & Stats Row */}
                 {((!hideCosts && branch.dailyLeaseCost) ||
                   Object.keys(stats.partsMap).length > 0) && (
-                  <div className='mb-4 px-2 py-2 bg-surface border border-default rounded text-xs flex flex-wrap gap-x-8 gap-y-2'>
+                  <div className='mb-4 px-2 py-2 bg-cream border border-hairline rounded text-xs flex flex-wrap gap-x-8 gap-y-2'>
                     {!hideCosts && branch.dailyLeaseCost && (
                       <div>
-                        <span className='uppercase text-secondary font-bold mr-2'>
+                        <span className='uppercase text-latte font-bold mr-2'>
                           Daily Lease:
                         </span>
-                        <span className='font-bold text-primary'>
+                        <span className='font-bold text-ink'>
                           {branch.dailyLeaseCost} EGP
                         </span>
                       </div>
                     )}
                     {Object.keys(stats.partsMap).length > 0 && (
                       <div>
-                        <span className='uppercase text-secondary font-bold mr-2'>
+                        <span className='uppercase text-latte font-bold mr-2'>
                           Parts Replaced:
                         </span>
-                        <span className='text-primary'>
+                        <span className='text-ink'>
                           {Object.entries(stats.partsMap)
                             .map(([name, count]) => `${count}x ${name}`)
                             .join(", ")}
@@ -1045,17 +1045,17 @@ const PrintableDocument: React.FC<{
 
                 {branch.contacts.length > 0 && (
                   <div className='mb-4 px-2'>
-                    <p className='text-[10px] uppercase text-secondary font-semibold mb-1'>
+                    <p className='text-[10px] uppercase text-latte font-semibold mb-1'>
                       Contacts
                     </p>
-                    <div className='text-xs text-primary'>
+                    <div className='text-xs text-ink'>
                       {branch.contacts.map((c) => c.name).join(", ")}
                     </div>
                   </div>
                 )}
 
                 <div className='px-2'>
-                  <p className='text-[10px] uppercase text-secondary font-semibold mb-2'>
+                  <p className='text-[10px] uppercase text-latte font-semibold mb-2'>
                     Maintenance Records
                   </p>
                   <MaintenanceTable
@@ -1095,7 +1095,7 @@ const PrintDropdown: React.FC<{
           toggle();
         }}
         disabled={disabled}
-        className='flex items-center gap-2 bg-brand-red text-primary font-bold py-2 px-4 rounded-lg hover:bg-brand-red-light transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-red disabled:opacity-50 disabled:cursor-not-allowed'
+        className='flex items-center gap-2 bg-primary text-ink font-bold py-2 px-4 rounded-lg hover:bg-hover transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed'
       >
         <PrinterIcon className='w-5 h-5' />
         {label}
@@ -1105,27 +1105,27 @@ const PrintDropdown: React.FC<{
       {isOpen && createPortal(
         <div
           ref={contentRef}
-          className='fixed w-56 rounded-md shadow-lg bg-surface border border-default focus:outline-none z-[9999] overflow-hidden'
+          className='fixed w-56 rounded-md shadow-lg bg-cream border border-hairline focus:outline-none z-[9999] overflow-hidden'
           style={style}
         >
           <div className='py-1' role='menu' aria-orientation='vertical'>
             <button
               onClick={() => handleSelect("internal")}
-              className='block w-full text-left px-4 py-3 text-sm text-primary hover:bg-surface-elevated'
+              className='block w-full text-left px-4 py-3 text-sm text-ink hover:bg-cream-2'
               role='menuitem'
             >
               <span className='font-bold'>Internal Report</span>
-              <span className='block text-xs text-secondary mt-0.5'>
+              <span className='block text-xs text-latte mt-0.5'>
                 Includes all costs & financial data
               </span>
             </button>
             <button
               onClick={() => handleSelect("client")}
-              className='block w-full text-left px-4 py-3 text-sm text-primary hover:bg-surface-elevated border-t border-default'
+              className='block w-full text-left px-4 py-3 text-sm text-ink hover:bg-cream-2 border-t border-hairline'
               role='menuitem'
             >
               <span className='font-bold'>Client Report</span>
-              <span className='block text-xs text-secondary mt-0.5'>
+              <span className='block text-xs text-latte mt-0.5'>
                 Hides all cost information
               </span>
             </button>
@@ -1267,7 +1267,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
         <div className='flex flex-wrap items-center justify-between gap-3 mb-6'>
           <button
             onClick={onBack}
-            className='flex items-center gap-2 text-secondary hover:text-primary transition-colors min-h-[44px] py-1'
+            className='flex items-center gap-2 text-latte hover:text-primary transition-colors min-h-[44px] py-1'
           >
             <ArrowLeftIcon className='w-5 h-5' /> Back to History
           </button>
@@ -1283,7 +1283,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isParsingPDF || !onUpdate}
-              className='flex items-center gap-2 bg-surface-elevated text-primary font-bold py-2 px-4 rounded-lg hover:bg-surface-3 transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-red disabled:opacity-50 disabled:cursor-not-allowed'
+              className='flex items-center gap-2 bg-cream-2 text-ink font-bold py-2 px-4 rounded-lg hover:bg-cream-3 transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed'
             >
               <DocumentArrowUpIcon className='w-5 h-5' />
               {isParsingPDF ? "جاري الاستيراد..." : "رفع PDF مكتمل"}
@@ -1291,7 +1291,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
             <button
               onClick={() => handleGenerateMissingDataPDF("company")}
               disabled={isGeneratingPDF}
-              className='flex items-center gap-2 bg-brand-red text-primary font-bold py-2 px-4 rounded-lg hover:bg-brand-red-light transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-red disabled:opacity-50 disabled:cursor-not-allowed'
+              className='flex items-center gap-2 bg-primary text-ink font-bold py-2 px-4 rounded-lg hover:bg-hover transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed'
             >
               <DocumentArrowDownIcon className='w-5 h-5' />
               استكمال بيانات ناقصة
@@ -1305,9 +1305,9 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
         </div>
 
         {/* Local Date Range Filter */}
-        <div className='bg-surface p-4 rounded-xl shadow-sm border border-default mb-6 flex flex-col sm:flex-row items-center justify-between gap-4'>
-          <div className='flex items-center gap-2 text-primary font-semibold text-sm'>
-            <CalendarIcon className='w-5 h-5 text-brand-red' />
+        <div className='bg-cream p-4 rounded-xl shadow-sm border border-hairline mb-6 flex flex-col sm:flex-row items-center justify-between gap-4'>
+          <div className='flex items-center gap-2 text-ink font-semibold text-sm'>
+            <CalendarIcon className='w-5 h-5 text-primary' />
             <span>Filter History by Date:</span>
           </div>
           <div className='flex items-center gap-2'>
@@ -1315,14 +1315,14 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
               type='date'
               value={filterStartDate}
               onChange={(e) => setFilterStartDate(e.target.value)}
-              className='px-3 py-1.5 rounded-lg border-default bg-surface text-primary text-sm focus:ring-brand-red focus:border-brand-red'
+              className='px-3 py-1.5 rounded-lg border-hairline bg-cream text-ink text-sm focus:ring-primary focus:border-primary'
             />
-            <span className='text-secondary'>-</span>
+            <span className='text-latte'>-</span>
             <input
               type='date'
               value={filterEndDate}
               onChange={(e) => setFilterEndDate(e.target.value)}
-              className='px-3 py-1.5 rounded-lg border-default bg-surface text-primary text-sm focus:ring-brand-red focus:border-brand-red'
+              className='px-3 py-1.5 rounded-lg border-hairline bg-cream text-ink text-sm focus:ring-primary focus:border-primary'
             />
             {(filterStartDate || filterEndDate) && (
               <button
@@ -1330,7 +1330,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                   setFilterStartDate("");
                   setFilterEndDate("");
                 }}
-                className='ml-2 p-1.5 text-secondary hover:text-brand-red hover:bg-brand-red/10 rounded-full transition-colors'
+                className='ml-2 p-1.5 text-latte hover:text-primary hover:bg-primary/10 rounded-full transition-colors'
                 title='Clear Dates'
               >
                 <XMarkIcon className='w-5 h-5' />
@@ -1339,12 +1339,12 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
           </div>
         </div>
 
-        <div className='bg-surface rounded-xl shadow-lg overflow-hidden border border-default'>
+        <div className='bg-cream rounded-xl shadow-lg overflow-hidden border border-hairline'>
           {/* Screen View Content */}
-          <div className='p-6 sm:p-8 bg-surface-elevated/20 border-b border-default'>
+          <div className='p-6 sm:p-8 bg-cream-2/20 border-b border-hairline'>
             <div className='flex flex-col sm:flex-row justify-between items-start gap-4'>
               <div className='flex items-center gap-4'>
-                <div className='h-16 w-16 bg-surface-elevated rounded-lg border border-default flex items-center justify-center p-2 shadow-sm shrink-0'>
+                <div className='h-16 w-16 bg-cream-2 rounded-lg border border-hairline flex items-center justify-center p-2 shadow-sm shrink-0'>
                   <img
                     src='/logo.svg'
                     alt='Logo'
@@ -1352,10 +1352,10 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                   />
                 </div>
                 <div>
-                  <h1 className='text-2xl sm:text-3xl font-bold text-primary mb-1 break-words'>
+                  <h1 className='text-2xl sm:text-3xl font-bold text-ink mb-1 break-words'>
                     {submission.companyName}
                   </h1>
-                  <div className='flex flex-wrap gap-x-4 gap-y-1 text-sm text-secondary'>
+                  <div className='flex flex-wrap gap-x-4 gap-y-1 text-sm text-latte'>
                     {submission.created_at && (
                       <span>
                         Submitted:{" "}
@@ -1371,11 +1371,11 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                   </div>
                 </div>
               </div>
-              <div className='bg-surface p-3 rounded-lg border border-default shadow-sm self-start'>
-                <div className='text-xs text-secondary uppercase font-semibold'>
+              <div className='bg-cream p-3 rounded-lg border border-hairline shadow-sm self-start'>
+                <div className='text-xs text-latte uppercase font-semibold'>
                   Status
                 </div>
-                <div className='font-bold text-brand-red'>
+                <div className='font-bold text-ink'>
                   {submission.pendingSync ? "Offline (Pending Sync)" : "Synced"}
                 </div>
               </div>
@@ -1383,7 +1383,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
 
             <div className='mt-6 grid grid-cols-1 md:grid-cols-2 gap-6'>
               <div>
-                <h3 className='text-sm font-bold uppercase text-secondary mb-2'>
+                <h3 className='text-sm font-bold uppercase text-latte mb-2'>
                   Company Details
                 </h3>
                 <div className='space-y-1'>
@@ -1417,7 +1417,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                 </div>
               </div>
               <div>
-                <h3 className='text-sm font-bold uppercase text-secondary mb-2'>
+                <h3 className='text-sm font-bold uppercase text-latte mb-2'>
                   Main Contacts
                 </h3>
                 <ContactList contacts={submission.contacts} />
@@ -1426,8 +1426,8 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
 
             {/* Main Office Maintenance */}
             {filteredMainHistory.length > 0 && (
-              <div className='mt-6 pt-6 border-t border-default'>
-                <h3 className='text-md font-bold text-primary mb-3 flex items-center gap-2'>
+              <div className='mt-6 pt-6 border-t border-hairline'>
+                <h3 className='text-md font-bold text-ink mb-3 flex items-center gap-2'>
                   <WrenchScrewdriverIcon className='w-5 h-5' /> Main Office
                   Maintenance
                 </h3>
@@ -1438,8 +1438,8 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
             )}
             {submission.maintenanceHistory.length > 0 &&
               filteredMainHistory.length === 0 && (
-                <div className='mt-6 pt-6 border-t border-default text-center py-8'>
-                  <p className='text-secondary italic'>
+                <div className='mt-6 pt-6 border-t border-hairline text-center py-8'>
+                  <p className='text-latte italic'>
                     No maintenance records match the selected date range.
                   </p>
                 </div>
@@ -1448,9 +1448,9 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
 
           {/* Branches List Screen View */}
           {submission.hasBranches && (
-            <div className='p-6 sm:p-8 bg-background'>
-              <h2 className='text-xl font-bold text-primary mb-4 flex items-center gap-2 border-b border-default pb-2'>
-                <BuildingStorefrontIcon className='w-6 h-6 text-brand-red' />
+            <div className='p-6 sm:p-8 bg-paper'>
+              <h2 className='text-xl font-bold text-ink mb-4 flex items-center gap-2 border-b border-hairline pb-2'>
+                <BuildingStorefrontIcon className='w-6 h-6 text-primary' />
                 Branches & Maintenance
               </h2>
 
@@ -1486,7 +1486,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                               <button
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={isParsingPDF || !onUpdate}
-                                className='flex items-center gap-1 bg-surface-elevated text-primary hover:bg-surface-3 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm border border-default'
+                                className='flex items-center gap-1 bg-cream-2 text-ink hover:bg-cream-3 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm border border-hairline'
                               >
                                 <DocumentArrowUpIcon className='w-4 h-4' />
                                 {isParsingPDF ? "جاري الاستيراد..." : "رفع PDF مكتمل"}
@@ -1494,7 +1494,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                               <button
                                 onClick={() => handleGenerateMissingDataPDF("branch", branch.id)}
                                 disabled={isGeneratingPDF}
-                                className='flex items-center gap-1 bg-brand-red/10 text-brand-red hover:bg-brand-red/20 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed'
+                                className='flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed'
                               >
                                 <DocumentArrowDownIcon className='w-4 h-4' />
                                 استكمال
@@ -1518,7 +1518,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                             <button
                               onClick={() => fileInputRef.current?.click()}
                               disabled={isParsingPDF || !onUpdate}
-                              className='flex items-center justify-center gap-2 bg-surface-elevated text-primary hover:bg-surface-3 font-bold py-2 px-4 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm border border-default w-full'
+                              className='flex items-center justify-center gap-2 bg-cream-2 text-ink hover:bg-cream-3 font-bold py-2 px-4 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm border border-hairline w-full'
                             >
                               <DocumentArrowUpIcon className='w-4 h-4' />
                               {isParsingPDF ? "جاري الاستيراد..." : "رفع PDF مكتمل"}
@@ -1526,7 +1526,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                             <button
                               onClick={() => handleGenerateMissingDataPDF("branch", branch.id)}
                               disabled={isGeneratingPDF}
-                              className='flex items-center justify-center gap-2 bg-brand-red/10 text-brand-red hover:bg-brand-red/20 font-bold py-2 px-4 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed w-full'
+                              className='flex items-center justify-center gap-2 bg-primary/10 text-primary hover:bg-primary/20 font-bold py-2 px-4 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed w-full'
                             >
                               <DocumentArrowDownIcon className='w-4 h-4' />
                               استكمال
@@ -1543,7 +1543,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
 
                           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                             <div>
-                              <h4 className='text-xs font-bold uppercase text-secondary mb-2'>
+                              <h4 className='text-xs font-bold uppercase text-latte mb-2'>
                                 Branch Info
                               </h4>
                               <InfoRow
@@ -1573,7 +1573,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                               />
                             </div>
                             <div>
-                              <h4 className='text-xs font-bold uppercase text-secondary mb-2'>
+                              <h4 className='text-xs font-bold uppercase text-latte mb-2'>
                                 Contacts
                               </h4>
                               <ContactList contacts={branch.contacts} />
@@ -1581,13 +1581,13 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                           </div>
 
                           {/* Branch Stats Summary */}
-                          <div className='bg-surface rounded-lg p-3 border border-default flex flex-wrap gap-4 text-sm'>
+                          <div className='bg-cream rounded-lg p-3 border border-hairline flex flex-wrap gap-4 text-sm'>
                             <div className='flex items-center gap-2'>
-                              <ClipboardDocumentCheckIcon className='w-4 h-4 text-secondary' />
-                              <span className='text-secondary font-medium'>
+                              <ClipboardDocumentCheckIcon className='w-4 h-4 text-latte' />
+                              <span className='text-latte font-medium'>
                                 Total Visits:
                               </span>
-                              <span className='font-bold text-primary'>
+                              <span className='font-bold text-ink'>
                                 {stats.visitCount}
                               </span>
                             </div>
@@ -1595,8 +1595,8 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                             {/* Machine Status */}
                             {branch.usesOurMachines && (
                               <div className='flex items-center gap-2'>
-                                <WrenchScrewdriverIcon className='w-4 h-4 text-secondary' />
-                                <span className='text-secondary font-medium'>
+                                <WrenchScrewdriverIcon className='w-4 h-4 text-latte' />
+                                <span className='text-latte font-medium'>
                                   Machines:
                                 </span>
                                 <span
@@ -1611,27 +1611,27 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
 
                             {branch.dailyLeaseCost && (
                               <div className='flex items-center gap-2'>
-                                <BanknotesIcon className='w-4 h-4 text-secondary' />
-                                <span className='text-secondary font-medium'>
+                                <BanknotesIcon className='w-4 h-4 text-latte' />
+                                <span className='text-latte font-medium'>
                                   Daily Lease:
                                 </span>
-                                <span className='font-bold text-primary'>
+                                <span className='font-bold text-ink'>
                                   {branch.dailyLeaseCost} EGP
                                 </span>
                               </div>
                             )}
                             {Object.keys(stats.partsMap).length > 0 && (
-                              <div className='flex items-start gap-2 w-full pt-2 border-t border-default'>
-                                <CubeIcon className='w-4 h-4 text-secondary mt-0.5' />
+                              <div className='flex items-start gap-2 w-full pt-2 border-t border-hairline'>
+                                <CubeIcon className='w-4 h-4 text-latte mt-0.5' />
                                 <div className='flex flex-wrap gap-x-3 gap-y-1'>
-                                  <span className='text-secondary font-medium'>
+                                  <span className='text-latte font-medium'>
                                     Parts Summary:
                                   </span>
                                   {Object.entries(stats.partsMap).map(
                                     ([name, count]) => (
                                       <span
                                         key={name}
-                                        className='inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-surface-elevated border border-default text-primary'
+                                        className='inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-cream-2 border border-hairline text-ink'
                                       >
                                         <span className='font-bold mr-1'>
                                           {count}x
@@ -1647,14 +1647,14 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
 
                           {branch.baristas && branch.baristas.length > 0 && (
                             <div>
-                              <h4 className='text-xs font-bold uppercase text-secondary mb-2 flex items-center gap-1'>
+                              <h4 className='text-xs font-bold uppercase text-latte mb-2 flex items-center gap-1'>
                                 <UserGroupIcon className='w-4 h-4' /> Baristas
                               </h4>
                               <div className='flex flex-wrap gap-2'>
                                 {branch.baristas.map((b) => (
                                   <span
                                     key={b.id}
-                                    className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-elevated text-primary'
+                                    className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream-2 text-ink'
                                   >
                                     {b.name} ({b.rating}★)
                                   </span>
@@ -1664,7 +1664,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                           )}
 
                           <div>
-                            <h4 className='text-sm font-bold text-primary flex items-center gap-2 border-t pt-3 border-default sticky top-0 sm:static bg-surface dark:bg-chrome z-10 -mx-4 px-4 py-3'>
+                            <h4 className='text-sm font-bold text-ink flex items-center gap-2 border-t pt-3 border-hairline sticky top-0 sm:static bg-cream dark:bg-espresso z-10 -mx-4 px-4 py-3'>
                               <WrenchScrewdriverIcon className='w-4 h-4' />{" "}
                               Maintenance History
                             </h4>
@@ -1673,7 +1673,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                                 <MaintenanceRecordView key={r.id} record={r} />
                               ))
                             ) : (
-                              <p className='text-sm text-secondary italic'>
+                              <p className='text-sm text-latte italic'>
                                 No maintenance records match filter.
                               </p>
                             )}

@@ -70,7 +70,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
-        <div className="flex justify-end gap-3 p-4 bg-surface-muted/30">
+        <div className="flex justify-end gap-3 p-4 bg-cream-2/30">
           <Button variant="secondary" onClick={handleClose}>
             {cancelLabel}
           </Button>

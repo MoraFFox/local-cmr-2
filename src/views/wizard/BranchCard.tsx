@@ -51,11 +51,11 @@ export const BranchCard: React.FC<BranchCardProps> = ({
         <div className="marquee-container w-full">
           <div className="inline-flex items-center gap-x-2 md:truncate md:animate-none lg:hover:animate-none animate-marquee-rtl pr-8">
             <span className="font-bold text-base whitespace-nowrap">{companyName || "الشركة"}</span>
-            <span className="text-secondary shrink-0">-</span>
+            <span className="text-latte shrink-0">-</span>
             <span className="text-base whitespace-nowrap">{branch.branchName || "فرع جديد"}</span>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-secondary mt-1.5">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-latte mt-1.5">
           {branch.location && (
             <span className="flex items-center gap-1 truncate max-w-full" title={branch.location}>
               <MapPinIcon className="w-3.5 h-3.5 shrink-0" />
@@ -100,7 +100,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
             options={[{ label: "نعم", value: true }, { label: "لا", value: false }]} inline
           />
           {branch.usesOurMachines === true && (
-            <div className="pl-6 mt-4 border-l-2 border-default">
+            <div className="pl-6 mt-4 border-l-2 border-hairline">
               <RadioGroup label="كيف تم الحصول على الماكينة؟" name={`machineOwnershipType-${branch.id}`}
                 value={branch.machineOwnershipType}
                 onChange={(val) => actions.handleListItemChange(
@@ -123,9 +123,9 @@ export const BranchCard: React.FC<BranchCardProps> = ({
     </div>
 
     {/* Branch Contacts */}
-    <div className="mt-6 pt-6 border-t border-default">
+    <div className="mt-6 pt-6 border-t border-hairline">
       <div className="flex justify-between items-center mb-4">
-        <h4 className="text-lg font-bold text-primary tracking-tight">جهات الاتصال</h4>
+        <h4 className="text-lg font-bold text-ink tracking-tight">جهات الاتصال</h4>
         <Button onClick={() => actions.addContact(`branch-${index}`)}>
           <PlusCircleIcon className="w-4 h-4" /><span>إضافة جهة اتصال</span>
         </Button>
@@ -144,9 +144,9 @@ export const BranchCard: React.FC<BranchCardProps> = ({
     />
 
     {/* Branch Client Baristas */}
-    <div className="mt-6 pt-6 border-t border-default">
+    <div className="mt-6 pt-6 border-t border-hairline">
       <div className="flex justify-between items-center mb-4">
-        <h4 className="text-lg font-bold text-primary tracking-tight">باريستا العميل</h4>
+        <h4 className="text-lg font-bold text-ink tracking-tight">باريستا العميل</h4>
         <Button onClick={() => actions.addNestedListItem(index, "clientBaristas")}>
           <PlusCircleIcon className="w-4 h-4" /> إضافة باريستا عميل
         </Button>
@@ -169,7 +169,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-primary mb-2">ملاحظات</label>
+                  <label className="block text-sm font-medium text-ink mb-2">ملاحظات</label>
                   <textarea name="notes" value={cb.notes || ""}
                     onChange={(e) => actions.handleNestedListItemChange(e, index, "clientBaristas", cbi)}
                     rows={3} className={CLASSES.textArea}
@@ -188,9 +188,9 @@ export const BranchCard: React.FC<BranchCardProps> = ({
     </div>
 
     {/* Branch Maintenance */}
-    <div className="mt-6 pt-6 border-t border-default">
+    <div className="mt-6 pt-6 border-t border-hairline">
       <div className="flex justify-between items-center mb-4">
-        <h4 className="text-lg font-bold text-primary tracking-tight">سجل الصيانة</h4>
+        <h4 className="text-lg font-bold text-ink tracking-tight">سجل الصيانة</h4>
         <Button onClick={() => actions.addNestedListItem(index, "maintenanceHistory")}>
           <PlusCircleIcon className="w-4 h-4" /> إضافة سجل
         </Button>

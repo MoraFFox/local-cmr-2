@@ -17,17 +17,17 @@ const TechInput: React.FC<TechInputProps> = ({
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-xs font-bold uppercase tracking-wider text-secondary mb-2 ml-1">
+        <label className="block text-xs font-bold uppercase tracking-wider text-latte mb-2 ml-1">
           {label}
         </label>
       )}
 
       <div className={`
-        relative flex items-center bg-chrome-light/50 border rounded-xl overflow-hidden transition-all duration-200 px-4
-        ${disabled ? 'opacity-50 cursor-not-allowed border-default' : 'border-default hover:border-brass focus-within:border-brand-red/50 focus-within:ring-2 focus-within:ring-brand-red/20'}
+        relative flex items-center bg-espresso-light/50 border rounded-xl overflow-hidden transition-all duration-200 px-4
+        ${disabled ? 'opacity-50 cursor-not-allowed border-hairline' : 'border-hairline hover:border-brass focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20'}
       `}>
         {icon && (
-          <div className="text-secondary shrink-0">
+          <div className="text-latte shrink-0">
             {icon}
           </div>
         )}

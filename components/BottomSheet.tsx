@@ -85,7 +85,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
             <div
                 role="dialog"
                 aria-modal="true"
-                className={`relative w-full bg-chrome dark:bg-chrome rounded-t-3xl shadow-sm transition-transform duration-300 ease-out transform pb-safe ${
+                className={`relative w-full bg-espresso dark:bg-espresso rounded-t-3xl shadow-sm transition-transform duration-300 ease-out transform pb-safe ${
                     isVisible ? 'translate-y-0' : 'translate-y-full'
                 }`}
                 style={{ 
@@ -117,7 +117,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                         <button
                             onClick={onClose}
                             aria-label="إغلاق"
-                            className="p-2 -mr-2 text-secondary hover:text-cream dark:hover:text-cream rounded-full hover:bg-chrome-light dark:hover:bg-chrome-light transition-colors"
+                            className="p-2 -mr-2 text-latte hover:text-cream dark:hover:text-cream rounded-full hover:bg-espresso-light dark:hover:bg-espresso-light transition-colors"
                         >
                             <XMarkIcon className="w-6 h-6" />
                         </button>

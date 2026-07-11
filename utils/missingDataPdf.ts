@@ -14,16 +14,16 @@ import {
 
 // Brand colors from DESIGN.md (Brass & Cream)
 const COLORS = {
-  espresso: [36, 27, 22] as [number, number, number],
-  espressoLight: [61, 44, 36] as [number, number, number],
-  cream: [241, 234, 219] as [number, number, number],
-  cream2: [232, 223, 204] as [number, number, number],
-  paper: [250, 246, 239] as [number, number, number],
-  copper: [184, 115, 51] as [number, number, number],
-  brass: [201, 168, 106] as [number, number, number],
-  ink: [61, 44, 36] as [number, number, number],
-  latte: [138, 116, 104] as [number, number, number],
-  hairline: [217, 207, 184] as [number, number, number],
+  espresso: [34, 34, 34] as [number, number, number],
+  espressoLight: [34, 34, 34] as [number, number, number],
+  cream: [248, 249, 250] as [number, number, number],
+  cream2: [240, 240, 240] as [number, number, number],
+  paper: [255, 255, 255] as [number, number, number],
+  copper: [182, 30, 36] as [number, number, number],
+  brass: [212, 160, 23] as [number, number, number],
+  ink: [34, 34, 34] as [number, number, number],
+  latte: [100, 100, 100] as [number, number, number],
+  hairline: [220, 220, 220] as [number, number, number],
   white: [255, 255, 255] as [number, number, number],
 };
 

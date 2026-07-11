@@ -158,30 +158,30 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
             <div 
                 role="dialog"
                 aria-modal="true"
-                className="bg-surface border border-default rounded-2xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col animate-scale-in"
+                className="bg-cream border border-hairline rounded-2xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col animate-scale-in"
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-default bg-surface-elevated/50">
-                    <h2 className="text-xl font-bold text-primary">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-hairline bg-cream-2/50">
+                    <h2 className="text-xl font-bold text-ink">
                         Import / Export
                     </h2>
 
                     <button
                         onClick={onClose}
-                        className="p-2 text-secondary hover:text-primary rounded-full hover:bg-surface-elevated transition-colors"
+                        className="p-2 text-latte hover:text-ink rounded-full hover:bg-cream-2 transition-colors"
                     >
                         <XMarkIcon className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b border-default bg-surface">
+                <div className="flex border-b border-hairline bg-cream">
                     <button
                         onClick={() => setActiveTab('export')}
                         className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                             activeTab === 'export'
-                                ? 'text-brand-red border-b-2 border-brand-red bg-brand-red/10'
-                                : 'text-secondary hover:text-primary'
+                                ? 'text-primary border-b-2 border-primary bg-primary/10'
+                                : 'text-latte hover:text-ink'
                         }`}
                     >
                         <div className="flex items-center justify-center gap-2">
@@ -194,8 +194,8 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                         onClick={() => setActiveTab('import')}
                         className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                             activeTab === 'import'
-                                ? 'text-brand-red border-b-2 border-brand-red bg-brand-red/10'
-                                : 'text-secondary hover:text-primary'
+                                ? 'text-primary border-b-2 border-primary bg-primary/10'
+                                : 'text-latte hover:text-ink'
                         }`}
                     >
                         <div className="flex items-center justify-center gap-2">
@@ -206,20 +206,20 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6 bg-background">
+                <div className="flex-1 overflow-y-auto p-6 bg-paper">
                     {activeTab === 'export' ? (
                         <div className="space-y-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <button
                                     onClick={handleExportJSON}
-                                    className="flex flex-col items-center gap-3 p-6 bg-surface rounded-xl border-2 border-default hover:border-brand-red transition-colors group"
+                                    className="flex flex-col items-center gap-3 p-6 bg-cream rounded-xl border-2 border-hairline hover:border-primary transition-colors group"
                                 >
-                                    <div className="p-3 bg-surface-elevated rounded-xl group-hover:bg-brand-red/20 transition-colors">
-                                        <CodeBracketIcon className="w-8 h-8 text-primary group-hover:text-brand-red" />
+                                    <div className="p-3 bg-cream-2 rounded-xl group-hover:bg-primary/20 transition-colors">
+                                        <CodeBracketIcon className="w-8 h-8 text-ink group-hover:text-primary" />
                                     </div>
                                     <div className="text-center">
-                                        <h3 className="font-semibold text-primary">Export as JSON</h3>
-                                        <p className="text-sm text-secondary mt-1">
+                                        <h3 className="font-semibold text-ink">Export as JSON</h3>
+                                        <p className="text-sm text-latte mt-1">
                                             Complete data with all details
                                         </p>
                                     </div>
@@ -227,14 +227,14 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
 
                                 <button
                                     onClick={handleExportCSV}
-                                    className="flex flex-col items-center gap-3 p-6 bg-surface rounded-xl border-2 border-default hover:border-brand-red transition-colors group"
+                                    className="flex flex-col items-center gap-3 p-6 bg-cream rounded-xl border-2 border-hairline hover:border-primary transition-colors group"
                                 >
-                                    <div className="p-3 bg-surface-elevated rounded-xl group-hover:bg-brand-red/20 transition-colors">
-                                        <TableCellsIcon className="w-8 h-8 text-primary group-hover:text-brand-red" />
+                                    <div className="p-3 bg-cream-2 rounded-xl group-hover:bg-primary/20 transition-colors">
+                                        <TableCellsIcon className="w-8 h-8 text-ink group-hover:text-primary" />
                                     </div>
                                     <div className="text-center">
-                                        <h3 className="font-semibold text-primary">Export as CSV</h3>
-                                        <p className="text-sm text-secondary mt-1">
+                                        <h3 className="font-semibold text-ink">Export as CSV</h3>
+                                        <p className="text-sm text-latte mt-1">
                                             Maintenance records only
                                         </p>
                                     </div>
@@ -242,14 +242,14 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
 
                                 <button
                                     onClick={handleExportSummary}
-                                    className="flex flex-col items-center gap-3 p-6 bg-surface rounded-xl border-2 border-default hover:border-brand-red transition-colors group sm:col-span-2"
+                                    className="flex flex-col items-center gap-3 p-6 bg-cream rounded-xl border-2 border-hairline hover:border-primary transition-colors group sm:col-span-2"
                                 >
-                                    <div className="p-3 bg-surface-elevated rounded-xl group-hover:bg-brand-red/20 transition-colors">
-                                        <DocumentTextIcon className="w-8 h-8 text-primary group-hover:text-brand-red" />
+                                    <div className="p-3 bg-cream-2 rounded-xl group-hover:bg-primary/20 transition-colors">
+                                        <DocumentTextIcon className="w-8 h-8 text-ink group-hover:text-primary" />
                                     </div>
                                     <div className="text-center">
-                                        <h3 className="font-semibold text-primary">Export Summary Report</h3>
-                                        <p className="text-sm text-secondary mt-1">
+                                        <h3 className="font-semibold text-ink">Export Summary Report</h3>
+                                        <p className="text-sm text-latte mt-1">
                                             Overview of all companies with counts
                                         </p>
                                     </div>
@@ -262,12 +262,12 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                             <div
                                 className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
                                     importStatus === 'loading'
-                                        ? 'border-brand-red bg-brand-red/10'
+                                        ? 'border-primary bg-primary/10'
                                         : importStatus === 'success'
                                         ? 'border-leaf-500 bg-leaf-500/10'
                                         : importStatus === 'error'
                                         ? 'border-ember-500 bg-ember-500/10'
-                                        : 'border-default hover:border-brand-red'
+                                        : 'border-hairline hover:border-primary'
                                 }`}
                             >
                                 <input
@@ -286,14 +286,14 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                                     <DocumentArrowUpIcon className={`w-12 h-12 mx-auto mb-3 ${
                                         importStatus === 'success' ? 'text-leaf-500' :
                                         importStatus === 'error' ? 'text-ember-300' :
-                                        'text-secondary'
+                                        'text-latte'
                                     }`} />
 
-                                    <p className="font-medium text-primary">
+                                    <p className="font-medium text-ink">
                                         {importStatus === 'loading' ? 'جاري المعالجة...' : 'اضغط لرفع الملف'}
                                     </p>
 
-                                    <p className="text-sm text-secondary mt-1">
+                                    <p className="text-sm text-latte mt-1">
                                         JSON or CSV format
                                     </p>
                                 </button>
@@ -304,7 +304,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                                 <div className={`flex items-center gap-2 p-3 rounded-lg border ${
                                     importStatus === 'success' ? 'bg-leaf-500/10 text-leaf-600 border-leaf-500/20' :
                                     importStatus === 'error' ? 'bg-ember-500/10 text-ember-700 border-ember-500/20' :
-                                    'bg-brand-red/10 text-brand-red border-brand-red/20'
+                                    'bg-primary/10 text-primary border-primary/20'
                                 }`}>
                                     {importStatus === 'success' ? (
                                         <CheckCircleIcon className="w-5 h-5" />
@@ -318,7 +318,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                             {/* Validation Results */}
                             {importedData.length > 0 && (
                                 <div className="space-y-2">
-                                    <h4 className="font-medium text-primary">
+                                    <h4 className="font-medium text-ink">
                                         Validation Results
                                     </h4>
                                     
@@ -338,7 +338,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                                                     <ExclamationCircleIcon className="w-5 h-5 text-ember-500" />
                                                 )}
                                                 
-                                                <span className="font-medium text-primary">
+                                                <span className="font-medium text-ink">
                                                     {item.original.companyName || `Company ${index + 1}`}
                                                 </span>
                                             </div>
@@ -360,7 +360,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
 
                 {/* Footer */}
                 {activeTab === 'import' && importedData.some((item: any) => item.validation.isValid) && (
-                    <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-6 py-4 pb-safe border-t border-default bg-surface-muted/30">
+                    <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-6 py-4 pb-safe border-t border-hairline bg-cream/30">
                         <Button
                             variant="secondary"
                             onClick={() => {

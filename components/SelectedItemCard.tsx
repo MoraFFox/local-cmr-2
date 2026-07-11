@@ -27,7 +27,7 @@ const SelectedItemCard: React.FC<SelectedItemCardProps> = ({
 }) => {
   const borderColorClass = paidByClient
     ? 'border-amber-500/30 bg-amber-500/5'
-    : 'border-brand-red/30 bg-brand-red/5';
+    : 'border-primary/30 bg-primary/5';
 
   const handleDecrement = () => {
     onQuantityChange(quantity - 1);
@@ -56,7 +56,7 @@ const SelectedItemCard: React.FC<SelectedItemCardProps> = ({
             <button
                 type="button"
                 onClick={onRemove}
-                className="absolute top-2 right-2 p-1.5 text-secondary hover:text-ember-300 hover:bg-ember-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                className="absolute top-2 right-2 p-1.5 text-latte hover:text-ember-300 hover:bg-ember-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
             >
                 <TrashIcon className="w-4 h-4" />
             </button>
@@ -69,7 +69,7 @@ const SelectedItemCard: React.FC<SelectedItemCardProps> = ({
             type="text"
             value={name}
             onChange={handleNameChange}
-            className="w-full bg-chrome/50 text-cream px-3 py-1.5 rounded-lg border border-espresso-light focus:border-brand-red focus:ring-1 focus:ring-brand-red/50 outline-none transition-all placeholder-latte"
+            className="w-full bg-espresso/50 text-cream px-3 py-1.5 rounded-lg border border-espresso-light focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none transition-all placeholder-latte"
             placeholder="Item name..."
           />
         ) : (
@@ -83,19 +83,19 @@ const SelectedItemCard: React.FC<SelectedItemCardProps> = ({
       <div className={`flex items-center ${viewMode === 'list' ? 'gap-3' : 'justify-between w-full'}`}>
         
         {/* Quantity Controls */}
-        <div className="flex items-center bg-chrome/50 rounded-lg border border-espresso-light p-1">
+        <div className="flex items-center bg-espresso/50 rounded-lg border border-espresso-light p-1">
           <button
             onClick={handleDecrement}
-            className="p-1.5 text-secondary hover:text-cream hover:bg-chrome-light rounded-md transition-colors"
+            className="p-1.5 text-latte hover:text-cream hover:bg-espresso-light rounded-md transition-colors"
           >
             <MinusIcon className="w-3.5 h-3.5" />
           </button>
-          <span className="w-8 text-center font-mono font-bold text-brand-red-400">
+          <span className="w-8 text-center font-mono font-bold text-primary-400">
             {quantity}
           </span>
           <button
             onClick={handleIncrement}
-            className="p-1.5 text-secondary hover:text-cream hover:bg-chrome-light rounded-md transition-colors"
+            className="p-1.5 text-latte hover:text-cream hover:bg-espresso-light rounded-md transition-colors"
           >
             <PlusIcon className="w-3.5 h-3.5" />
           </button>
@@ -112,7 +112,7 @@ const SelectedItemCard: React.FC<SelectedItemCardProps> = ({
             <button
                 type="button"
                 onClick={onRemove}
-                className="p-2 text-secondary hover:text-ember-300 hover:bg-ember-500/10 rounded-lg transition-colors"
+                className="p-2 text-latte hover:text-ember-300 hover:bg-ember-500/10 rounded-lg transition-colors"
             >
                 <TrashIcon className="w-4 h-4" />
             </button>

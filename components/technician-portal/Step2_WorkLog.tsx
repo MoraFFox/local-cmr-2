@@ -158,9 +158,9 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
          </div>
 
          {data.visitType === 'scheduled' && (
-            <div className="mt-4 p-4 bg-brand-red/10 border border-brand-red/30 rounded-xl flex items-center gap-3 animate-in fade-in">
-                <CheckCircleIcon className="w-6 h-6 text-brand-red" />
-                <div className="text-sm text-primary">
+            <div className="mt-4 p-4 bg-primary/10 border border-primary/30 rounded-xl flex items-center gap-3 animate-in fade-in">
+                <CheckCircleIcon className="w-6 h-6 text-primary" />
+                <div className="text-sm text-ink">
                     <p className="font-bold">{ar.portal.routineMaintenance}</p>
                     <p className="opacity-80">{ar.portal.routineHint}</p>
                 </div>
@@ -192,16 +192,16 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
       {/* 4. Equipment Replacement (If Problem Visit) */}
       {data.visitType === 'problem' && (
         <TechCard title={ar.tactical.partsReplacement} icon={<WrenchScrewdriverIcon />} variant="warning">
-            <div className="bg-chrome p-1 rounded-xl flex mb-4 border border-default">
+            <div className="bg-espresso p-1 rounded-xl flex mb-4 border border-hairline">
                 <button
                     onClick={() => handlePartsWereReplacedChange(true)}
-                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${data.partsWereReplaced ? 'bg-brand-red text-white shadow-lg' : 'text-secondary hover:text-primary'}`}
+                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${data.partsWereReplaced ? 'bg-primary text-white shadow-lg' : 'text-latte hover:text-ink'}`}
                 >
                     {ar.step2.partsReplacedYes}
                 </button>
                 <button
                     onClick={() => handlePartsWereReplacedChange(false)}
-                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${!data.partsWereReplaced ? 'bg-chrome-light text-cream' : 'text-secondary hover:text-primary'}`}
+                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${!data.partsWereReplaced ? 'bg-espresso-light text-cream' : 'text-latte hover:text-ink'}`}
                 >
                     {ar.step2.partsReplacedNo}
                 </button>
@@ -222,17 +222,17 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
       {/* 5. Mission Outcome (If Problem Visit) */}
       {data.visitType === 'problem' && (
          <TechCard title={ar.tactical.missionOutcome} icon={<CheckCircleIcon />} variant="primary">
-            <div className="bg-chrome p-1 rounded-xl flex border border-default">
+            <div className="bg-espresso p-1 rounded-xl flex border border-hairline">
                 <button
                     onClick={() => handleProblemSolvedChange(true)}
-                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${data.problemSolved ? 'bg-leaf-500 text-white shadow-lg shadow-leaf-500/20' : 'text-secondary hover:text-primary'}`}
+                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${data.problemSolved ? 'bg-leaf-500 text-white shadow-lg shadow-leaf-500/20' : 'text-latte hover:text-ink'}`}
                 >
                     <CheckCircleIcon className="w-5 h-5" />
                     {ar.step2.problemSolvedYes}
                 </button>
                 <button
                     onClick={() => handleProblemSolvedChange(false)}
-                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${!data.problemSolved ? 'bg-ember-500 text-white shadow-lg shadow-ember-500/20' : 'text-secondary hover:text-primary'}`}
+                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${!data.problemSolved ? 'bg-ember-500 text-white shadow-lg shadow-ember-500/20' : 'text-latte hover:text-ink'}`}
                 >
                     <ExclamationTriangleIcon className="w-5 h-5" />
                     {ar.step2.problemSolvedNo}
@@ -247,14 +247,14 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
             {/* Before Photos */}
             <div>
                 <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-secondary">{ar.portal.beforeMaintenance}</span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-latte">{ar.portal.beforeMaintenance}</span>
                     <span className={`text-[10px] px-2 py-0.5 rounded-full ${beforePhotos.length > 0 ? 'bg-leaf-500/20 text-leaf-600' : 'bg-ember-500/20 text-ember-700'}`}>
                         {beforePhotos.length > 0 ? `${beforePhotos.length} صور` : 'مطلوب'}
                     </span>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                     {beforePhotos.map((photo) => (
-                        <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden border border-default group">
+                        <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden border border-hairline group">
                             <img src={photo.preview} alt={ar.portal.beforeMaintenance} className="w-full h-full object-cover" />
                             <button onClick={() => handleRemovePhoto(photo.id)} className="absolute top-1 right-1 p-1 bg-ember-500 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity" aria-label="حذف الصورة">
                                 <TrashIcon className="w-3 h-3" />
@@ -263,11 +263,11 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
                     ))}
                     <button
                         onClick={onCameraOpen}
-                        className="aspect-square rounded-lg border-2 border-dashed border-default bg-surface-elevated/30 hover:bg-surface-3 hover:border-leaf-500/50 transition-colors flex flex-col items-center justify-center gap-1"
+                        className="aspect-square rounded-lg border-2 border-dashed border-hairline bg-cream-2/30 hover:bg-cream-3 hover:border-leaf-500/50 transition-colors flex flex-col items-center justify-center gap-1"
                         aria-label={`${ar.portal.capturePhoto} - ${ar.portal.beforeMaintenance}`}
                     >
                         <CameraIcon className="w-6 h-6 text-leaf-600" />
-                        <span className="text-[10px] text-secondary">{ar.tactical.tapToCapture}</span>
+                        <span className="text-[10px] text-latte">{ar.tactical.tapToCapture}</span>
                     </button>
                 </div>
             </div>
@@ -275,14 +275,14 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
             {/* After Photos */}
             <div>
                 <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-secondary">{ar.portal.afterMaintenance}</span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-latte">{ar.portal.afterMaintenance}</span>
                     <span className={`text-[10px] px-2 py-0.5 rounded-full ${afterPhotos.length > 0 ? 'bg-leaf-500/20 text-leaf-600' : 'bg-ember-500/20 text-ember-700'}`}>
                         {afterPhotos.length > 0 ? `${afterPhotos.length} صور` : 'مطلوب'}
                     </span>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                     {afterPhotos.map((photo) => (
-                        <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden border border-default group">
+                        <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden border border-hairline group">
                             <img src={photo.preview} alt={ar.portal.afterMaintenance} className="w-full h-full object-cover" />
                             <button onClick={() => handleRemovePhoto(photo.id)} className="absolute top-1 right-1 p-1 bg-ember-500 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity" aria-label="حذف الصورة">
                                 <TrashIcon className="w-3 h-3" />
@@ -291,11 +291,11 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
                     ))}
                     <button
                         onClick={onCameraOpen}
-                        className="aspect-square rounded-lg border-2 border-dashed border-default bg-surface-elevated/30 hover:bg-surface-3 hover:border-leaf-500/50 transition-colors flex flex-col items-center justify-center gap-1"
+                        className="aspect-square rounded-lg border-2 border-dashed border-hairline bg-cream-2/30 hover:bg-cream-3 hover:border-leaf-500/50 transition-colors flex flex-col items-center justify-center gap-1"
                         aria-label={`${ar.portal.capturePhoto} - ${ar.portal.afterMaintenance}`}
                     >
                         <CameraIcon className="w-6 h-6 text-leaf-600" />
-                        <span className="text-[10px] text-secondary">{ar.tactical.tapToCapture}</span>
+                        <span className="text-[10px] text-latte">{ar.tactical.tapToCapture}</span>
                     </button>
                 </div>
             </div>
@@ -330,7 +330,7 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
             onChange={(e) => handleNotesChange(e.target.value)}
             placeholder={ar.step3.notesPlaceholder}
             rows={4}
-            className="w-full bg-surface text-primary p-4 rounded-xl border border-default focus:border-brand-red focus:ring-1 focus:ring-brand-red/20 outline-none resize-none placeholder-latte"
+            className="w-full bg-cream text-ink p-4 rounded-xl border border-hairline focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none resize-none placeholder-latte"
          />
       </TechCard>
 

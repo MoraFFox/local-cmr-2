@@ -132,7 +132,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
 
     return (
       <div className="space-y-3">
-        <h4 className="text-sm font-medium text-primary dark:text-cream">
+        <h4 className="text-sm font-medium text-ink dark:text-cream">
           {title}
         </h4>
 
@@ -142,7 +142,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
             {typePhotos.map((photo) => (
               <div
                 key={photo.id}
-                className="relative aspect-square rounded-lg overflow-hidden border border-default dark:border-default bg-surface dark:bg-chrome-light"
+                className="relative aspect-square rounded-lg overflow-hidden border border-hairline dark:border-hairline bg-cream dark:bg-chrome-light"
               >
                 <img
                   src={photo.preview}
@@ -178,9 +178,9 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
 
         {/* Add Photo Button */}
         {typePhotos.length < maxPerType && (
-          <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-default dark:border-default rounded-lg cursor-pointer hover:border-brand-red hover:bg-brand-red/5 dark:hover:bg-brand-red/10 transition-all">
-            <CameraIcon className="w-5 h-5 text-secondary" />
-            <span className="text-sm text-primary dark:text-cream">
+          <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-hairline dark:border-hairline rounded-lg cursor-pointer hover:border-brand-red hover:bg-brand-red/5 dark:hover:bg-brand-red/10 transition-all">
+            <CameraIcon className="w-5 h-5 text-latte" />
+            <span className="text-sm text-ink dark:text-cream">
               {ar.step3.addPhoto}
             </span>
             <input
@@ -199,12 +199,12 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-2 text-primary dark:text-cream">
+      <div className="flex items-center gap-2 text-ink dark:text-cream">
         <PhotoIcon className="w-5 h-5" />
         <span className="font-medium">{ar.step3.photosLabel}</span>
       </div>
 
-      <p className="text-sm text-secondary dark:text-cream/70">
+      <p className="text-sm text-latte dark:text-cream/70">
         {ar.step3.photosHint}
       </p>
 

@@ -34,7 +34,7 @@ const PayerSegmentedControl: React.FC<PayerSegmentedControlProps> = ({
   return (
     <div
       role="radiogroup"
-      className={`inline-flex rounded-xl bg-chrome p-1 border border-espresso-light ${
+      className={`inline-flex rounded-xl bg-espresso p-1 border border-espresso-light ${
         disabled ? 'opacity-50 cursor-not-allowed' : ''
       }`}
     >
@@ -46,8 +46,8 @@ const PayerSegmentedControl: React.FC<PayerSegmentedControlProps> = ({
         disabled={disabled}
         className={`rounded-lg transition-all duration-300 font-bold tracking-wide ${sizeClasses[size]} ${
           !paidByClient
-            ? 'bg-brand-red/20 text-brand-red-400 shadow-[0_0_15px_rgba(184,115,51,0.3)] border border-brand-red/50'
-            : 'bg-transparent text-secondary hover:text-cream'
+            ? 'bg-primary/20 text-primary-400 shadow-[0_0_15px_rgba(184,115,51,0.3)] border border-primary/50'
+            : 'bg-transparent text-latte hover:text-cream'
         }`}
       >
         {ar.payerFirstUI.midosPays}
@@ -61,7 +61,7 @@ const PayerSegmentedControl: React.FC<PayerSegmentedControlProps> = ({
         className={`rounded-lg transition-all duration-300 font-bold tracking-wide ${sizeClasses[size]} ${
           paidByClient
             ? 'bg-amber-500/20 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.3)] border border-amber-500/50'
-            : 'bg-transparent text-secondary hover:text-cream'
+            : 'bg-transparent text-latte hover:text-cream'
         }`}
       >
         {ar.payerFirstUI.clientPays}

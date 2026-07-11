@@ -23,16 +23,16 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, 
             onClick={onClose}
         >
             <div
-                className="bg-surface dark:bg-chrome-light rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md m-4 transform transition-all duration-300 scale-95 opacity-0 animate-fade-in-scale"
+                className="bg-cream dark:bg-espresso-light rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md m-4 transform transition-all duration-300 scale-95 opacity-0 animate-fade-in-scale"
                 onClick={(e) => e.stopPropagation()}
             >
-                <h2 id="modal-title" className="text-xl font-bold text-primary dark:text-cream">{title}</h2>
-                <p className="mt-2 text-secondary dark:text-cream/70">{message}</p>
+                <h2 id="modal-title" className="text-xl font-bold text-ink dark:text-cream">{title}</h2>
+                <p className="mt-2 text-latte dark:text-cream/70">{message}</p>
                 <div className="mt-8 flex justify-end space-x-3">
                     <button
                         onClick={onClose}
                         disabled={isConfirming}
-                        className="px-5 py-2.5 text-sm font-semibold text-primary dark:text-cream bg-surface dark:bg-chrome-light border border-default rounded-lg hover:bg-surface-elevated dark:hover:bg-chrome-light/50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-red/30 disabled:opacity-50 transform active:scale-95"
+                        className="px-5 py-2.5 text-sm font-semibold text-ink dark:text-cream bg-cream dark:bg-espresso-light border border-hairline rounded-lg hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary/30 disabled:opacity-50 transform active:scale-95"
                     >
                         No
                     </button>
