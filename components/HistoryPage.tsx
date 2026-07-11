@@ -284,7 +284,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                         <div className="w-full shrink-0">
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className={`flex items-center gap-2 px-4 h-[50px] rounded-lg border text-sm font-semibold w-full justify-center transition-colors ${showFilters || activeFiltersCount > 0 ? 'bg-primary/10 border-primary text-primary' : 'bg-cream border-hairline text-latte hover:bg-cream-2'}`}
+                                className={`flex items-center gap-2 px-4 h-[50px] rounded-lg border text-sm font-semibold w-full justify-center transition-colors ${showFilters || activeFiltersCount > 0 ? 'bg-primary/10 border-primary text-primary' : 'bg-cream border-hairline text-latte hover:bg-surface-elevated'}`}
                             >
                                 <FunnelIcon className="w-5 h-5" />
                                 {showFilters ? 'إخفاء الفلاتر' : 'فلاتر متقدمة'}
@@ -318,7 +318,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
 
                             {/* Toggles */}
                             <div className="w-full sm:w-auto shrink-0">
-                                <label className={`flex items-center justify-center gap-2 h-[50px] px-6 rounded-lg cursor-pointer border transition-colors select-none ${showOnlyProblems ? 'bg-primary/10 border-primary text-primary' : 'bg-cream border-hairline text-latte hover:bg-cream-2'}`}>
+                                <label className={`flex items-center justify-center gap-2 h-[50px] px-6 rounded-lg cursor-pointer border transition-colors select-none ${showOnlyProblems ? 'bg-primary/10 border-primary text-primary' : 'bg-cream border-hairline text-latte hover:bg-surface-elevated'}`}>
                                     <input
                                         type="checkbox"
                                         checked={showOnlyProblems}
@@ -518,7 +518,7 @@ const RowEllipsisMenu: React.FC<{
       <button
         ref={triggerRef as React.RefObject<HTMLButtonElement>}
         onClick={() => onOpenChange(!isOpen)}
-        className="p-2 rounded-lg text-latte hover:text-primary hover:bg-cream-2 transition-colors"
+        className="p-2 rounded-lg text-latte hover:text-primary hover:bg-surface-elevated transition-colors"
         aria-label="المزيد من الإجراءات"
         aria-expanded={isOpen}
       >
@@ -534,21 +534,21 @@ const RowEllipsisMenu: React.FC<{
           <button
             onClick={() => { onDownload(sub); onOpenChange(false); }}
             disabled={!!sub.pendingSync}
-            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-cream-2 disabled:opacity-50"
+            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-surface-elevated disabled:opacity-50"
           >
             <ArrowDownTrayIcon className="h-4 w-4" />
             تنزيل JSON
           </button>
           <button
             onClick={() => { onQuickEdit(sub); onOpenChange(false); }}
-            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-cream-2"
+            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-surface-elevated"
           >
             <BuildingOfficeIcon className="h-4 w-4" />
             تعديل سريع
           </button>
           <button
             onClick={() => { onEdit(sub); onOpenChange(false); }}
-            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-cream-2"
+            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-surface-elevated"
           >
             <PencilIcon className="h-4 w-4" />
             تعديل كامل
@@ -556,7 +556,7 @@ const RowEllipsisMenu: React.FC<{
           {onEditMaintenance && (
             <button
               onClick={() => { onEditMaintenance(sub); onOpenChange(false); }}
-              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-cream-2"
+              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-surface-elevated"
             >
               <WrenchScrewdriverIcon className="h-4 w-4" />
               تعديل الصيانة
@@ -565,7 +565,7 @@ const RowEllipsisMenu: React.FC<{
           {onRequestMissingData && (
             <button
               onClick={() => { onRequestMissingData(sub); onOpenChange(false); }}
-              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-cream-2"
+              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-surface-elevated"
             >
               <DocumentArrowDownIcon className="h-4 w-4" />
               استكمال بيانات

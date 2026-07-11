@@ -152,7 +152,7 @@
     border-color: var(--border-default);
   }
   .surface-elevated {
-    background-color: var(--bg-cream-2);
+    background-color: var(--bg-surface-elevated);
     border-color: var(--border-default);
   }
   /* Dark chrome surfaces (sidebar, mobile header) */
@@ -185,7 +185,7 @@
     border: 1px solid var(--border-hairline);
   }
   .btn-secondary:hover {
-    background-color: var(--bg-cream-2);
+    background-color: var(--bg-surface-elevated);
   }
   /* Danger: ember */
   .btn-danger {
