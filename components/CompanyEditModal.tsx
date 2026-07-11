@@ -115,7 +115,7 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                             <BuildingOfficeIcon className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-bold text-ink">
+                            <h2 className="text-lg font-bold text-primary">
                                 تعديل الشركة
                             </h2>
                             <p className="text-sm text-latte">
@@ -125,7 +125,7 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 sm:p-2 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center text-latte hover:text-ink rounded-full hover:bg-cream-2 transition-colors"
+                        className="p-2 sm:p-2 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center text-latte hover:text-primary rounded-full hover:bg-cream-2 transition-colors"
                         aria-label="إغلاق النافذة"
                     >
                         <XMarkIcon className="w-5 h-5" />
@@ -186,7 +186,7 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                 <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-4 sm:px-6 py-4 pb-safe border-t border-hairline bg-cream/30">
                     <button
                         onClick={onClose}
-                        className="w-full sm:w-auto px-4 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 text-latte hover:text-ink font-medium rounded-lg hover:bg-cream-2 transition-colors"
+                        className="w-full sm:w-auto px-4 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 text-latte hover:text-primary font-medium rounded-lg hover:bg-cream-2 transition-colors"
                         disabled={isSaving}
                     >
                         إلغاء

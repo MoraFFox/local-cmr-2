@@ -16,7 +16,7 @@ const LoadingFallback = () => (
   <div className="min-h-screen bg-paper  flex items-center justify-center p-4">
     <div className="text-center">
       <div className="mx-auto mb-4 h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      <p className="text-ink dark:text-cream font-medium">
+      <p className="text-primary dark:text-cream font-medium">
         جاري التحميل...
       </p>
     </div>
@@ -366,7 +366,7 @@ const AppRouter: React.FC = () => {
       <div className="min-h-screen bg-paper  flex items-center justify-center p-4">
         <div className="text-center">
           <div className="mx-auto mb-4 h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-ink dark:text-cream font-medium">
+          <p className="text-primary dark:text-cream font-medium">
             Redirecting...
           </p>
         </div>
@@ -395,7 +395,7 @@ const AppRouter: React.FC = () => {
       <div className="min-h-screen bg-paper  flex items-center justify-center p-4">
         <div className="text-center">
           <div className="mx-auto mb-4 h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-ink dark:text-cream font-medium">
+          <p className="text-primary dark:text-cream font-medium">
             Redirecting...
           </p>
         </div>
@@ -444,7 +444,7 @@ const AppRouter: React.FC = () => {
       <div className="min-h-screen bg-paper  flex items-center justify-center p-4">
         <div className="text-center">
           <div className="mx-auto mb-4 h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-ink dark:text-cream font-medium">
+          <p className="text-primary dark:text-cream font-medium">
             Checking access...
           </p>
         </div>

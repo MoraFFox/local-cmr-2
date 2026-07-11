@@ -49,7 +49,7 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
   const renderDataRow = (label: string, value: string | React.ReactNode) => (
     <div className="flex justify-between items-start py-2 border-b border-dashed border-hairline last:border-0">
       <span className="text-sm text-latte">{label}</span>
-      <span className="text-sm font-medium text-ink text-right max-w-[60%] break-words">
+      <span className="text-sm font-medium text-primary text-right max-w-[60%] break-words">
         {value}
       </span>
     </div>
@@ -114,7 +114,7 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
                     <div className="bg-cream-2/50 rounded-lg p-2 border border-hairline space-y-2">
                         {step2Data.servicesPerformed.map((s, idx) => (
                             <div key={idx} className="flex justify-between text-sm">
-                                <span className="text-ink">{s.name}</span>
+                                <span className="text-primary">{s.name}</span>
                                 <span className="text-leaf-600 font-mono">x{s.count}</span>
                             </div>
                         ))}
@@ -129,7 +129,7 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
                    <div className="bg-cream-2/50 rounded-lg p-2 border border-hairline space-y-2">
                        {step2Data.partsReplaced.map((p, idx) => (
                            <div key={idx} className="flex justify-between text-sm">
-                               <span className="text-ink">{p.name}</span>
+                               <span className="text-primary">{p.name}</span>
                                <span className="text-primary font-mono">x{p.count}</span>
                            </div>
                        ))}
@@ -164,7 +164,7 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
              {/* Problem Solved Toggle (Quick Edit) */}
              {step2Data.visitType === 'problem' && (
                  <div className="flex items-center justify-between p-3 bg-cream-2 border border-hairline rounded-xl">
-                     <span className="text-sm font-medium text-ink">{ar.step2.problemSolvedLabel}</span>
+                     <span className="text-sm font-medium text-primary">{ar.step2.problemSolvedLabel}</span>
                      <div className="flex items-center gap-2">
                          <button
                             onClick={() => onUpdateProblemSolved(true)}
@@ -186,7 +186,7 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
              {step1Data.clientBaristaName && (
                  <div className="p-3 bg-cream-2 border border-hairline rounded-xl">
                      <div className="flex justify-between items-center mb-2">
-                         <span className="text-sm font-medium text-ink">{step1Data.clientBaristaName}</span>
+                         <span className="text-sm font-medium text-primary">{step1Data.clientBaristaName}</span>
                          <span className="text-xs text-latte">{ar.tactical.clientContact}</span>
                      </div>
                      <CompactStarRating 
@@ -200,7 +200,7 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
              {step2Data.notes && (
                  <div className="p-3 bg-cream-2 border border-hairline rounded-xl">
                      <h4 className="text-xs font-bold uppercase text-latte mb-1">{ar.tactical.fieldNotes}</h4>
-                     <p className="text-sm text-ink italic">"{step2Data.notes}"</p>
+                     <p className="text-sm text-primary italic">"{step2Data.notes}"</p>
                  </div>
              )}
          </div>

@@ -81,12 +81,12 @@
   .dark .ring-cream { --tw-ring-color: #262626 !important; }
   .dark .ring-cream-2 { --tw-ring-color: #333333 !important; }
 
-    .dark .text-text { color: #F8F9FA !important; }
+  .dark .text-text { color: #F8F9FA !important; }
   .dark .text-text-secondary { color: #A0A0A0 !important; }
-.dark .text-ink { color: #F8F9FA !important; }
-  .dark .text-ink\/70 { color: #F8F9FAB3 !important; }
-  .dark .text-ink\/80 { color: #F8F9FACC !important; }
-  .dark .text-ink\/90 { color: #F8F9FAE6 !important; }
+  .dark .text-primary { color: #F8F9FA !important; }
+  .dark .text-primary\/70 { color: #F8F9FAB3 !important; }
+  .dark .text-primary\/80 { color: #F8F9FACC !important; }
+  .dark .text-primary\/90 { color: #F8F9FAE6 !important; }
   .dark .text-latte { color: #A0A0A0 !important; }
   .dark .text-latte\/60 { color: #A0A0A099 !important; }
   .dark .text-latte\/70 { color: #A0A0A0B3 !important; }
@@ -120,10 +120,10 @@
   /* ── Print / Light-Forced Contexts ──
      Printable documents must always render with dark text on white backgrounds,
      even when the app is in Dark Mode. */
-  .force-daylight .text-ink { color: #222222 !important; }
-  .force-daylight .text-ink\/70 { color: #222222B3 !important; }
-  .force-daylight .text-ink\/80 { color: #222222CC !important; }
-  .force-daylight .text-ink\/90 { color: #222222E6 !important; }
+  .force-daylight .text-primary { color: #222222 !important; }
+  .force-daylight .text-primary\/70 { color: #222222B3 !important; }
+  .force-daylight .text-primary\/80 { color: #222222CC !important; }
+  .force-daylight .text-primary\/90 { color: #222222E6 !important; }
   .force-daylight .text-latte { color: #6B6B6B !important; }
   .force-daylight .text-latte\/60 { color: #6B6B6B99 !important; }
   .force-daylight .text-latte\/70 { color: #6B6B6BB3 !important; }
@@ -171,7 +171,7 @@
 
   /* ── Input ── */
   .input-base {
-    @apply block w-full rounded-lg px-4 h-[50px] text-ink shadow-sm transition-colors placeholder:text-latte focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply block w-full rounded-lg px-4 h-[50px] text-primary shadow-sm transition-colors placeholder:text-latte focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed;
     background-color: var(--bg-body);
     border: 1px solid var(--border-hairline);
   }
@@ -188,7 +188,7 @@
   }
   /* Secondary: section surface with default border */
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-ink shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-primary shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
     background-color: var(--bg-body);
     border: 1px solid var(--border-hairline);
   }

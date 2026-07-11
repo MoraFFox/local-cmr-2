@@ -155,13 +155,13 @@ const MaintenanceSummary: React.FC<{ record: MaintenanceRecord }> = ({
 
   return (
     <div className="flex flex-wrap items-center gap-3 text-sm">
-      <div className="flex items-center gap-1.5 text-ink dark:text-latte">
+      <div className="flex items-center gap-1.5 text-primary dark:text-latte">
         <CalendarIcon className="w-4 h-4" />
         <span>{record.maintenanceDate || "No date"}</span>
       </div>
 
       {record.baristaName && (
-        <div className="flex items-center gap-1.5 text-ink dark:text-latte">
+        <div className="flex items-center gap-1.5 text-primary dark:text-latte">
           <UserIcon className="w-4 h-4" />
           <span className="truncate max-w-[120px]">{record.baristaName}</span>
         </div>
@@ -170,7 +170,7 @@ const MaintenanceSummary: React.FC<{ record: MaintenanceRecord }> = ({
       {record.visitRating > 0 && (
         <div className="flex items-center gap-0.5">
           <StarIconSolid className="w-4 h-4 text-yellow-400" />
-          <span className="text-ink dark:text-latte">
+          <span className="text-primary dark:text-latte">
             {record.visitRating}/5
           </span>
         </div>
@@ -417,7 +417,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
   };
 
   const textAreaClasses =
-    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-white dark:bg-espresso text-ink dark:text-white rounded-lg placeholder-latte dark:placeholder-latte focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus:border-primary focus:ring-2 focus:ring-primary/20 border border-hairline dark:border-hairline shadow-sm";
+    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-white dark:bg-espresso text-primary dark:text-white rounded-lg placeholder-latte dark:placeholder-latte focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus:border-primary focus:ring-2 focus:ring-primary/20 border border-hairline dark:border-hairline shadow-sm";
   const selectClasses =
     "input-base px-4 py-3 sm:px-5 sm:py-4";
 
@@ -431,7 +431,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
       <div className="space-y-6">
         {/* Basic Info Section */}
         <div className="bg-white dark:bg-espresso rounded-xl p-4 space-y-4 border border-hairline dark:border-hairline">
-          <h4 className="text-sm font-semibold text-ink dark:text-cream flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-primary dark:text-cream flex items-center gap-2">
             <CalendarIcon className="w-4 h-4 text-primary" />
             المعلومات الأساسية
           </h4>
@@ -454,7 +454,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
 
             {/* Staff Selector */}
             <div className="flex flex-col">
-              <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
+              <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
                 فني الصيانة
               </label>
               <div className="flex gap-2 relative">
@@ -519,7 +519,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
 
             {/* Client Barista Selector - unified responsive */}
             <div className="flex flex-col">
-              <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
+              <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
                 باريستا العميل
               </label>
               <div className="flex gap-2 relative">
@@ -565,7 +565,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
 
             {/* Rating */}
             <div className="flex flex-col">
-              <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
+              <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
                 تقييم الأداء
               </label>
               <div className="flex items-center gap-1 h-full bg-cream dark:bg-espresso rounded-lg px-3 border border-hairline dark:border-hairline">
@@ -623,7 +623,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
         {/* Problem Section */}
         <div className="bg-white dark:bg-espresso rounded-xl p-4 space-y-4 border border-ember-500/30 dark:border-ember-500/30">
           <div className="flex items-center justify-between">
-            <h4 className="text-sm font-semibold text-ink dark:text-cream flex items-center gap-2">
+            <h4 className="text-sm font-semibold text-primary dark:text-cream flex items-center gap-2">
               <WrenchIcon className="w-4 h-4 text-ember-500" />
               المشكلة والخدمات
             </h4>
@@ -638,7 +638,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               />
               <label
                 htmlFor={`hadProblem-${record.id}`}
-                className="font-medium text-ink dark:text-cream"
+                className="font-medium text-primary dark:text-cream"
               >
                 هل كانت هناك مشكلة؟
               </label>
@@ -683,7 +683,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                 />
                 <label
                   htmlFor={`partsWereReplaced-${record.id}`}
-                  className="font-medium text-ink dark:text-cream"
+                  className="font-medium text-primary dark:text-cream"
                 >
                   هل تم تغيير قطع غيار؟
                 </label>
@@ -716,7 +716,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                 />
                 <label
                   htmlFor={`problemSolved-${record.id}`}
-                  className="font-medium text-ink dark:text-cream"
+                  className="font-medium text-primary dark:text-cream"
                 >
                   هل تم حل المشكلة؟
                 </label>
@@ -726,7 +726,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               {!record.problemSolved && !isFollowUp && (
                 <div className="pt-4 border-t border-hairline dark:border-hairline">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-semibold text-ink dark:text-cream flex items-center gap-2">
+                    <h4 className="font-semibold text-primary dark:text-cream flex items-center gap-2">
                       <ClipboardDocumentListIcon className="w-4 h-4 text-primary" />
                       زيارات المتابعة
                     </h4>
@@ -904,7 +904,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
 
         {/* Notes Section */}
         <div className="pt-4 border-t border-hairline dark:border-hairline">
-          <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
+          <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
             ملاحظات (اختياري)
           </label>
           <textarea

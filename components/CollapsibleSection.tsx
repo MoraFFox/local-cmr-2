@@ -18,7 +18,7 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, children
                 onClick={() => setIsOpen(!isOpen)}
                 aria-expanded={isOpen}
             >
-                <h5 className="font-semibold text-ink dark:text-latte/70">{title}</h5>
+                <h5 className="font-semibold text-primary dark:text-latte/70">{title}</h5>
                 <ChevronUpIcon className={`w-5 h-5 text-latte transform transition-transform duration-300 ${isOpen ? '' : 'rotate-180'}`} />
             </button>
             <div

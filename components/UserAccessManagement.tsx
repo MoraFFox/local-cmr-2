@@ -504,7 +504,7 @@ const UserAccessManagement: React.FC = () => {
         );
       case 'expired':
         return (
-          <span className="inline-flex items-center rounded-full bg-cream-2 dark:bg-espresso-light px-2.5 py-0.5 text-xs font-medium text-ink dark:text-latte/70">
+          <span className="inline-flex items-center rounded-full bg-cream-2 dark:bg-espresso-light px-2.5 py-0.5 text-xs font-medium text-primary dark:text-latte/70">
             {t.expired}
           </span>
         );
@@ -548,7 +548,7 @@ const UserAccessManagement: React.FC = () => {
         );
       default:
         return (
-          <span className="inline-flex items-center rounded-full bg-cream-2 dark:bg-espresso-light px-2.5 py-0.5 text-xs font-medium text-ink dark:text-latte/70">
+          <span className="inline-flex items-center rounded-full bg-cream-2 dark:bg-espresso-light px-2.5 py-0.5 text-xs font-medium text-primary dark:text-latte/70">
             {role}
           </span>
         );
@@ -595,10 +595,10 @@ const UserAccessManagement: React.FC = () => {
       <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <div className="flex items-center gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-ink dark:text-white">
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary dark:text-white">
               {t.title}
             </h1>
-            <p className="text-ink dark:text-latte/70 mt-1 sm:mt-2">
+            <p className="text-primary dark:text-latte/70 mt-1 sm:mt-2">
               {activeTab === 'invitations' ? t.manageInvitations : activeTab === 'users' ? t.manageUsers : t.legacyRecordsDesc}
             </p>
           </div>
@@ -634,7 +634,7 @@ const UserAccessManagement: React.FC = () => {
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'invitations'
               ? 'border-primary text-primary'
-              : 'border-transparent text-latte hover:text-ink'
+              : 'border-transparent text-latte hover:text-primary'
           }`}
         >
           <EnvelopeIcon className="w-5 h-5" />
@@ -645,7 +645,7 @@ const UserAccessManagement: React.FC = () => {
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'users'
               ? 'border-primary text-primary'
-              : 'border-transparent text-latte hover:text-ink'
+              : 'border-transparent text-latte hover:text-primary'
           }`}
         >
           <UsersIcon className="w-5 h-5" />
@@ -656,7 +656,7 @@ const UserAccessManagement: React.FC = () => {
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'legacy'
               ? 'border-primary text-primary'
-              : 'border-transparent text-latte hover:text-ink'
+              : 'border-transparent text-latte hover:text-primary'
           }`}
         >
           <DocumentTextIcon className="w-5 h-5" />
@@ -673,13 +673,13 @@ const UserAccessManagement: React.FC = () => {
           {/* Create Invitation Form */}
           {showForm && (
             <div className="bg-cream rounded-xl shadow-sm border border-hairline p-6 mb-6 animate-item-fade-in-down">
-              <h2 className="text-lg font-semibold text-ink mb-4">
+              <h2 className="text-lg font-semibold text-primary mb-4">
                 {t.sendNewInvitation}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Role Selector */}
                 <div>
-                  <label className="block text-sm font-medium text-ink mb-2">
+                  <label className="block text-sm font-medium text-primary mb-2">
                     {t.role}
                   </label>
                   <div className="flex gap-3">
@@ -710,7 +710,7 @@ const UserAccessManagement: React.FC = () => {
 
                 {/* Expiry Selector */}
                 <div>
-                  <label className="block text-sm font-medium text-ink mb-2">
+                  <label className="block text-sm font-medium text-primary mb-2">
                     {t.expiresIn}
                   </label>
                   <div className="flex gap-3">
@@ -734,7 +734,7 @@ const UserAccessManagement: React.FC = () => {
                 {/* Created Link Display */}
                 {createdLink && (
                   <div className="bg-primary/10 rounded-lg p-4 border border-primary/20">
-                    <label className="block text-sm font-medium text-ink mb-2">
+                    <label className="block text-sm font-medium text-primary mb-2">
                       {t.invitationLink}
                     </label>
                     <div className="flex gap-2">
@@ -742,7 +742,7 @@ const UserAccessManagement: React.FC = () => {
                         type="text"
                         value={createdLink}
                         readOnly
-                        className="flex-1 rounded-lg border-primary/30 bg-cream py-2 px-3 text-sm text-ink"
+                        className="flex-1 rounded-lg border-primary/30 bg-cream py-2 px-3 text-sm text-primary"
                       />
                       <Button
                         type="button"
@@ -800,7 +800,7 @@ const UserAccessManagement: React.FC = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as InvitationStatus | 'all')}
-                className="rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-ink focus:border-primary focus:ring-primary"
+                className="rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-primary focus:border-primary focus:ring-primary"
               >
                 <option value="all">{t.allStatuses}</option>
                 <option value="pending">{t.filterPending}</option>
@@ -810,7 +810,7 @@ const UserAccessManagement: React.FC = () => {
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value as InviteRole | 'all')}
-                className="rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-ink focus:border-primary focus:ring-primary"
+                className="rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-primary focus:border-primary focus:ring-primary"
               >
                 <option value="all">{t.allRoles}</option>
                 <option value="admin">{t.admin}</option>
@@ -823,7 +823,7 @@ const UserAccessManagement: React.FC = () => {
           {filteredInvitations.length === 0 ? (
             <div className="text-center bg-cream/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-hairline">
               <UserPlusIcon className="mx-auto h-12 w-12 text-latte" />
-              <h2 className="mt-4 text-lg font-semibold text-ink">
+              <h2 className="mt-4 text-lg font-semibold text-primary">
                 {t.noInvitations}
               </h2>
               <p className="text-latte mt-2">
@@ -866,7 +866,7 @@ const UserAccessManagement: React.FC = () => {
                         </div>
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-semibold text-ink">
+                            <h4 className="font-semibold text-primary">
                               {inviteTitle}
                             </h4>
                             {getRoleBadge(invitation.role)}
@@ -945,7 +945,7 @@ const UserAccessManagement: React.FC = () => {
           ) : legacyBuckets.length === 0 ? (
             <div className="text-center bg-cream/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-hairline">
               <DocumentTextIcon className="mx-auto h-12 w-12 text-latte" />
-              <h2 className="mt-4 text-lg font-semibold text-ink">
+              <h2 className="mt-4 text-lg font-semibold text-primary">
                 {t.noLegacyRecords}
               </h2>
               <p className="text-latte mt-2">
@@ -967,7 +967,7 @@ const UserAccessManagement: React.FC = () => {
                   <ArrowLeftIcon className="w-4 h-4" />
                   {t.backToBuckets}
                 </Button>
-                <h2 className="text-lg font-semibold text-ink">
+                <h2 className="text-lg font-semibold text-primary">
                   {selectedBucket.display_name}
                 </h2>
                 <span className="inline-flex items-center rounded-full bg-cream-2 px-2.5 py-0.5 text-xs font-medium text-latte">
@@ -978,14 +978,14 @@ const UserAccessManagement: React.FC = () => {
               {selectedSubmissionIds.length > 0 && (
                 <div className="mb-4 p-4 bg-cream-2/50 rounded-lg border border-hairline">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <p className="text-sm text-ink">
+                    <p className="text-sm text-primary">
                       {selectedSubmissionIds.length} {t.selectRecords}
                     </p>
                     <div className="flex items-center gap-3">
                       <select
                         value={selectedTechnicianId}
                         onChange={(e) => setSelectedTechnicianId(e.target.value)}
-                        className="rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-ink focus:border-primary focus:ring-primary"
+                        className="rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-primary focus:border-primary focus:ring-primary"
                       >
                         <option value="">{t.selectTechnician}</option>
                         {technicians.map((tech) => (
@@ -994,7 +994,7 @@ const UserAccessManagement: React.FC = () => {
                           </option>
                         ))}
                       </select>
-                      <label className="flex items-center gap-2 text-sm text-ink">
+                      <label className="flex items-center gap-2 text-sm text-primary">
                         <input
                           type="checkbox"
                           checked={rewriteDisplayName}
@@ -1067,13 +1067,13 @@ const UserAccessManagement: React.FC = () => {
                             className="rounded border-hairline bg-cream text-primary focus:ring-primary"
                           />
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-ink">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-primary">
                           {candidate.maintenance_date || '—'}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-ink">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-primary">
                           {candidate.company_name || '—'}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-ink">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-primary">
                           {selectedBucket.display_name}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
@@ -1095,7 +1095,7 @@ const UserAccessManagement: React.FC = () => {
             /* Bucket List View */
             <div>
               <div className="bg-cream rounded-xl shadow-sm border border-hairline p-6 mb-6">
-                <h2 className="text-lg font-semibold text-ink mb-2">
+                <h2 className="text-lg font-semibold text-primary mb-2">
                   {t.transferRecords}
                 </h2>
                 <p className="text-sm text-latte mb-4">
@@ -1103,13 +1103,13 @@ const UserAccessManagement: React.FC = () => {
                 </p>
                 <div className="flex flex-wrap gap-3 items-end">
                   <div className="flex-1 min-w-[200px]">
-                    <label className="block text-sm font-medium text-ink mb-1">
+                    <label className="block text-sm font-medium text-primary mb-1">
                       {t.sourceTechnician}
                     </label>
                     <select
                       value={sourceTechnicianId}
                       onChange={(e) => setSourceTechnicianId(e.target.value)}
-                      className="w-full rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-ink focus:border-primary focus:ring-primary"
+                      className="w-full rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-primary focus:border-primary focus:ring-primary"
                     >
                       <option value="">{t.selectTechnician}</option>
                       {technicians.map((tech) => (
@@ -1121,13 +1121,13 @@ const UserAccessManagement: React.FC = () => {
                   </div>
                   <ArrowRightIcon className="w-5 h-5 text-latte" />
                   <div className="flex-1 min-w-[200px]">
-                    <label className="block text-sm font-medium text-ink mb-1">
+                    <label className="block text-sm font-medium text-primary mb-1">
                       {t.targetTechnician}
                     </label>
                     <select
                       value={targetTechnicianId}
                       onChange={(e) => setTargetTechnicianId(e.target.value)}
-                      className="w-full rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-ink focus:border-primary focus:ring-primary"
+                      className="w-full rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-primary focus:border-primary focus:ring-primary"
                     >
                       <option value="">{t.selectTechnician}</option>
                       {technicians.map((tech) => (
@@ -1162,7 +1162,7 @@ const UserAccessManagement: React.FC = () => {
                         </div>
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-semibold text-ink">
+                            <h4 className="font-semibold text-primary">
                               {bucket.display_name}
                             </h4>
                             <span className="inline-flex items-center rounded-full bg-cream-2 px-2.5 py-0.5 text-xs font-medium text-latte">
@@ -1217,7 +1217,7 @@ const UserAccessManagement: React.FC = () => {
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
               <div className="bg-cream rounded-xl shadow-xl border border-hairline p-6 w-full max-w-md animate-item-fade-in-down">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-ink">
+                  <h3 className="text-lg font-semibold text-primary">
                     {t.assignAll}
                   </h3>
                   <button
@@ -1225,7 +1225,7 @@ const UserAccessManagement: React.FC = () => {
                       setShowAssignModal(false);
                       setAssigningBucket(null);
                     }}
-                    className="p-1 text-latte hover:text-ink"
+                    className="p-1 text-latte hover:text-primary"
                   >
                     <XMarkIcon className="w-5 h-5" />
                   </button>
@@ -1233,13 +1233,13 @@ const UserAccessManagement: React.FC = () => {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-ink mb-2">
+                    <label className="block text-sm font-medium text-primary mb-2">
                       {t.selectTechnician}
                     </label>
                     <select
                       value={selectedTechnicianId}
                       onChange={(e) => setSelectedTechnicianId(e.target.value)}
-                      className="w-full rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-ink focus:border-primary focus:ring-primary"
+                      className="w-full rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-primary focus:border-primary focus:ring-primary"
                     >
                       <option value="">{t.selectTechnician}</option>
                       {technicians.map((tech) => (
@@ -1251,7 +1251,7 @@ const UserAccessManagement: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="flex items-center gap-2 text-sm text-ink">
+                    <label className="flex items-center gap-2 text-sm text-primary">
                       <input
                         type="checkbox"
                         checked={rewriteDisplayName}
@@ -1298,15 +1298,15 @@ const UserAccessManagement: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <div className="bg-cream dark:bg-espresso-light rounded-lg p-4 border border-hairline">
               <div className="text-2xl font-bold text-slate-900 dark:text-white">{users.length}</div>
-              <div className="text-sm text-ink dark:text-latte/70">{t.totalUsers}</div>
+              <div className="text-sm text-primary dark:text-latte/70">{t.totalUsers}</div>
             </div>
             <div className="bg-cream dark:bg-espresso-light rounded-lg p-4 border border-hairline">
               <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{adminCount}</div>
-              <div className="text-sm text-ink dark:text-latte/70">{t.adminUsers}</div>
+              <div className="text-sm text-primary dark:text-latte/70">{t.adminUsers}</div>
             </div>
             <div className="bg-cream dark:bg-espresso-light rounded-lg p-4 border border-hairline">
               <div className="text-2xl font-bold text-primary dark:text-primary/80">{technicianCount}</div>
-              <div className="text-sm text-ink dark:text-latte/70">{t.technicianUsers}</div>
+              <div className="text-sm text-primary dark:text-latte/70">{t.technicianUsers}</div>
             </div>
           </div>
 
@@ -1314,7 +1314,7 @@ const UserAccessManagement: React.FC = () => {
           {users.length === 0 ? (
             <div className="text-center bg-cream/80 backdrop-blur-sm p-12 rounded-2xl shadow-xl border border-hairline">
               <UsersIcon className="mx-auto h-12 w-12 text-latte" />
-              <h2 className="mt-4 text-lg font-semibold text-ink">
+              <h2 className="mt-4 text-lg font-semibold text-primary">
                 {t.noUsers}
               </h2>
             </div>
@@ -1347,7 +1347,7 @@ const UserAccessManagement: React.FC = () => {
                         <td className="px-4 py-3 whitespace-nowrap">
                           {getUserRoleBadge(user.role)}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-ink">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-primary">
                           <div className="flex items-center gap-2">
                             {user.email && (
                               <span className="flex items-center gap-1">
@@ -1366,7 +1366,7 @@ const UserAccessManagement: React.FC = () => {
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-ink">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-primary">
                           {user.name || <span className="text-latte">—</span>}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm">

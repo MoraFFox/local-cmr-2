@@ -67,7 +67,7 @@ const getStatusBadge = (rec: MaintenanceRecord) => {
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream text-ink dark:bg-espresso-light dark:text-latte/70">
+    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream text-primary dark:bg-espresso-light dark:text-latte/70">
       <WrenchIcon className="w-3 h-3" />
       Routine
     </span>
@@ -111,7 +111,7 @@ const MaintenanceRecordRow = React.memo(({
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center gap-2">
           <CalendarIcon className="w-4 h-4 text-latte" />
-          <span className="text-sm text-ink dark:text-white">
+          <span className="text-sm text-primary dark:text-white">
             {formatDate(record.maintenanceDate)}
           </span>
         </div>
@@ -120,14 +120,14 @@ const MaintenanceRecordRow = React.memo(({
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center gap-2">
           <UserIcon className="w-4 h-4 text-latte" />
-          <span className="text-sm text-ink dark:text-white">
+          <span className="text-sm text-primary dark:text-white">
             {record.baristaName || '-'}
           </span>
         </div>
       </td>
 
       <td className="px-6 py-4 whitespace-nowrap">
-        <span className="text-sm text-ink dark:text-white">
+        <span className="text-sm text-primary dark:text-white">
           {record.clientBaristaName || '-'}
         </span>
       </td>
@@ -141,7 +141,7 @@ const MaintenanceRecordRow = React.memo(({
       </td>
       
       <td className="px-6 py-4">
-        <div className="text-sm text-ink dark:text-latte">
+        <div className="text-sm text-primary dark:text-latte">
           {record.servicesPerformed.length > 0 ? (
             <span>{record.servicesPerformed.length} service(s)</span>
           ) : (
@@ -186,7 +186,7 @@ const MaintenanceRecordCardMobile: React.FC<MaintenanceRecordRowProps> = ({
     <div className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-2 min-w-0">
         <CalendarIcon className="w-4 h-4 text-latte shrink-0" />
-        <span className="text-sm font-medium text-ink dark:text-white truncate">
+        <span className="text-sm font-medium text-primary dark:text-white truncate">
           {formatDate(record.maintenanceDate)}
         </span>
       </div>
@@ -197,12 +197,12 @@ const MaintenanceRecordCardMobile: React.FC<MaintenanceRecordRowProps> = ({
     <div className="mt-3 flex items-center gap-2 text-sm">
       <div className="flex items-center gap-1.5 min-w-0">
         <UserIcon className="w-4 h-4 text-latte shrink-0" />
-        <span className="text-ink dark:text-white truncate">
+        <span className="text-primary dark:text-white truncate">
           {record.baristaName || '-'}
         </span>
       </div>
       <span className="text-latte shrink-0">→</span>
-      <span className="text-ink dark:text-white truncate min-w-0">
+      <span className="text-primary dark:text-white truncate min-w-0">
         {record.clientBaristaName || '-'}
       </span>
     </div>
@@ -287,7 +287,7 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
     <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline">
       <div className="px-6 py-4 border-b border-hairline dark:border-hairline bg-cream dark:bg-espresso/50 rounded-t-[0.75rem]">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h3 className="text-lg font-semibold text-ink dark:text-white">
+          <h3 className="text-lg font-semibold text-primary dark:text-white">
             {branchName}
           </h3>
 
@@ -301,7 +301,7 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
                   className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
                     sortBy === field
                       ? 'bg-primary/10 text-primary-800 dark:bg-primary/10 dark:text-primary-400'
-                      : 'text-ink dark:text-latte hover:bg-cream dark:hover:bg-espresso-light/50'
+                      : 'text-primary dark:text-latte hover:bg-cream dark:hover:bg-espresso-light/50'
                   }`}
                 >
                   {field.charAt(0).toUpperCase() + field.slice(1)}
@@ -411,7 +411,7 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="p-2 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-ink dark:text-latte hover:bg-cream-2 dark:hover:bg-espresso-light/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="p-2 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-latte hover:bg-cream-2 dark:hover:bg-espresso-light/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeftIcon className="w-5 h-5" />
               </button>
@@ -424,7 +424,7 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
                     className={`min-w-[40px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                       currentPage === page
                         ? 'bg-hover text-white'
-                        : 'bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-ink dark:text-latte hover:bg-cream-2 dark:hover:bg-espresso-light/50'
+                        : 'bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-latte hover:bg-cream-2 dark:hover:bg-espresso-light/50'
                     }`}
                   >
                     {page}
@@ -435,7 +435,7 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="p-2 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-ink dark:text-latte hover:bg-cream-2 dark:hover:bg-espresso-light/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="p-2 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-latte hover:bg-cream-2 dark:hover:bg-espresso-light/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronRightIcon className="w-5 h-5" />
               </button>

@@ -84,8 +84,8 @@ const aggregateCosts = (formData: FormData, partsList: Part[], servicesList: Ser
 
 const CostDetail: React.FC<{ label: React.ReactNode; value: string | number; isSubItem?: boolean }> = ({ label, value, isSubItem = false }) => (
     <div className={`flex justify-between items-center py-1 ${isSubItem ? 'pl-4 text-xs' : 'text-sm'}`}>
-        <span className={isSubItem ? "text-latte dark:text-latte" : "text-ink dark:text-latte/70"}>{label}</span>
-        <span className="font-medium text-ink dark:text-cream">{typeof value === 'number' ? formatCurrency(value) : value}</span>
+        <span className={isSubItem ? "text-latte dark:text-latte" : "text-primary dark:text-latte/70"}>{label}</span>
+        <span className="font-medium text-primary dark:text-cream">{typeof value === 'number' ? formatCurrency(value) : value}</span>
     </div>
 );
 
@@ -112,7 +112,7 @@ const CostBreakdownModal: React.FC<CostBreakdownModalProps> = ({ isOpen, onClose
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center mb-4 pb-4 border-b border-hairline dark:border-hairline">
-                    <h2 id="modal-title" className="text-xl font-bold text-ink dark:text-white">Aggregated Cost Summary</h2>
+                    <h2 id="modal-title" className="text-xl font-bold text-primary dark:text-white">Aggregated Cost Summary</h2>
                     <button onClick={onClose} className="p-1 rounded-full text-latte dark:text-latte hover:bg-cream dark:hover:bg-espresso-light/50">
                         <XMarkIcon className="h-6 w-6" />
                     </button>

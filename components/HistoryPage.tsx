@@ -204,7 +204,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
         <div className="w-full max-w-6xl mx-auto">
              <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                  <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-ink">سجل الإرسالات</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-primary">سجل الإرسالات</h1>
                     <p className="text-latte mt-1 sm:mt-2">عرض أو تعديل أو حذف الإرسالات السابقة.</p>
                  </div>
                  <div className="flex items-center gap-x-2 sm:gap-x-3">
@@ -226,19 +226,19 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
             {(activeFiltersCount > 0 || searchTerm) && (
                 <div className="flex flex-wrap items-center gap-2 mb-4">
                     {searchTerm && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-cream-2 text-ink">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-cream-2 text-primary">
                             <MagnifyingGlassIcon className="w-3 h-3" />
                             {searchTerm}
                         </span>
                     )}
                     {startDate && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-cream-2 text-ink">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-cream-2 text-primary">
                             <CalendarIcon className="w-3 h-3" />
                             من {startDate}
                         </span>
                     )}
                     {endDate && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-cream-2 text-ink">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-cream-2 text-primary">
                             <CalendarIcon className="w-3 h-3" />
                             إلى {endDate}
                         </span>
@@ -394,7 +394,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center flex-wrap gap-2">
-                                        <h3 className="font-bold text-lg text-ink truncate">{sub.companyName || 'شركة بدون اسم'}</h3>
+                                        <h3 className="font-bold text-lg text-primary truncate">{sub.companyName || 'شركة بدون اسم'}</h3>
                                         {sub.pendingSync && (
                                             <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-500 border border-amber-500/20">
                                                 <CloudIcon className="w-3.5 h-3.5 mr-1" />
@@ -534,21 +534,21 @@ const RowEllipsisMenu: React.FC<{
           <button
             onClick={() => { onDownload(sub); onOpenChange(false); }}
             disabled={!!sub.pendingSync}
-            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-cream-2 disabled:opacity-50"
+            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-cream-2 disabled:opacity-50"
           >
             <ArrowDownTrayIcon className="h-4 w-4" />
             تنزيل JSON
           </button>
           <button
             onClick={() => { onQuickEdit(sub); onOpenChange(false); }}
-            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-cream-2"
+            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-cream-2"
           >
             <BuildingOfficeIcon className="h-4 w-4" />
             تعديل سريع
           </button>
           <button
             onClick={() => { onEdit(sub); onOpenChange(false); }}
-            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-cream-2"
+            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-cream-2"
           >
             <PencilIcon className="h-4 w-4" />
             تعديل كامل
@@ -556,7 +556,7 @@ const RowEllipsisMenu: React.FC<{
           {onEditMaintenance && (
             <button
               onClick={() => { onEditMaintenance(sub); onOpenChange(false); }}
-              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-cream-2"
+              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-cream-2"
             >
               <WrenchScrewdriverIcon className="h-4 w-4" />
               تعديل الصيانة
@@ -565,7 +565,7 @@ const RowEllipsisMenu: React.FC<{
           {onRequestMissingData && (
             <button
               onClick={() => { onRequestMissingData(sub); onOpenChange(false); }}
-              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-cream-2"
+              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-cream-2"
             >
               <DocumentArrowDownIcon className="h-4 w-4" />
               استكمال بيانات

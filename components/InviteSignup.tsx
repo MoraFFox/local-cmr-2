@@ -310,7 +310,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
             <div className="w-16 h-16 bg-ember-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <ExclamationCircleIcon className="w-8 h-8 text-ember-500" />
             </div>
-            <h1 className="text-xl font-bold text-ink mb-2">
+            <h1 className="text-xl font-bold text-primary mb-2">
               {copy[lang].invalidInvite}
             </h1>
             {validationError && (
@@ -386,7 +386,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                 <WrenchScrewdriverIcon className="w-8 h-8 text-primary" />
               )}
             </div>
-            <h1 className="text-2xl font-bold text-ink mb-2">
+            <h1 className="text-2xl font-bold text-primary mb-2">
               {copy[lang].title}
             </h1>
             <p className="text-latte flex items-center justify-center gap-2 flex-wrap">
@@ -398,13 +398,13 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
           {(inviteData.email || inviteData.phone) ? (
             <div className="mb-6 p-4 bg-cream-2/50 rounded-lg space-y-2">
               {inviteData.email && (
-                <div className="flex items-center gap-2 text-sm text-ink">
+                <div className="flex items-center gap-2 text-sm text-primary">
                   <EnvelopeIcon className="w-4 h-4 text-latte" />
                   <span dir="ltr">{inviteData.email}</span>
                 </div>
               )}
               {inviteData.phone && (
-                <div className="flex items-center gap-2 text-sm text-ink">
+                <div className="flex items-center gap-2 text-sm text-primary">
                   <PhoneIcon className="w-4 h-4 text-latte" />
                   <span dir="ltr">{inviteData.phone}</span>
                 </div>
@@ -417,7 +417,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
           )}
 
           {/* Form Title */}
-          <h2 className="text-lg font-semibold text-ink mb-4">
+          <h2 className="text-lg font-semibold text-primary mb-4">
             {copy[lang].formTitle}
           </h2>
 
@@ -434,7 +434,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
           <form onSubmit={handleSubmit} className="space-y-5" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
             {/* Name Field */}
             <div>
-              <label className="block text-sm font-medium text-ink mb-2">
+              <label className="block text-sm font-medium text-primary mb-2">
                 {copy[lang].nameLabel}
               </label>
               <div className="relative">
@@ -446,7 +446,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={copy[lang].namePlaceholder}
-                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-cream text-ink rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all`}
+                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all`}
                   dir={lang === 'ar' ? 'rtl' : 'ltr'}
                 />
               </div>
@@ -455,7 +455,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
             {/* Email Field for Generic Invites */}
             {!inviteData.email && !inviteData.phone && (
               <div>
-                <label className="block text-sm font-medium text-ink mb-2">
+                <label className="block text-sm font-medium text-primary mb-2">
                   {copy[lang].emailLabel}
                 </label>
                 <div className="relative">
@@ -467,7 +467,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="email@example.com"
-                    className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-cream text-ink rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all`}
+                    className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all`}
                     dir="ltr"
                   />
                 </div>
@@ -476,7 +476,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
 
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-medium text-ink mb-2">
+              <label className="block text-sm font-medium text-primary mb-2">
                 {copy[lang].passwordLabel}
               </label>
               <div className="relative">
@@ -488,7 +488,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={copy[lang].passwordPlaceholder}
-                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-cream text-ink rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all`}
+                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all`}
                   dir="ltr"
                 />
               </div>
@@ -497,7 +497,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
 
             {/* Confirm Password Field */}
             <div>
-              <label className="block text-sm font-medium text-ink mb-2">
+              <label className="block text-sm font-medium text-primary mb-2">
                 {copy[lang].confirmPasswordLabel}
               </label>
               <div className="relative">
@@ -513,7 +513,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder={copy[lang].confirmPasswordPlaceholder}
-                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-cream text-ink rounded-lg border ${
+                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-cream text-primary rounded-lg border ${
                     password && confirmPassword && password !== confirmPassword
                       ? 'border-ember-500'
                       : 'border-hairline'

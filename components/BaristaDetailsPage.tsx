@@ -100,7 +100,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
     return (
       <div className='text-center py-20'>
         <UserIcon className='w-16 h-16 text-latte/70 mx-auto mb-4' />
-        <h2 className='text-2xl font-bold text-ink dark:text-white'>
+        <h2 className='text-2xl font-bold text-primary dark:text-white'>
           Barista Not Found
         </h2>
         <button
@@ -119,12 +119,12 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
       <div className='flex items-center gap-4'>
         <button
           onClick={onBack}
-          className='p-2 rounded-full bg-cream dark:bg-espresso-light shadow-sm border border-hairline text-ink dark:text-latte/70 hover:text-primary dark:hover:text-primary-400 transition-colors'
+          className='p-2 rounded-full bg-cream dark:bg-espresso-light shadow-sm border border-hairline text-primary dark:text-latte/70 hover:text-primary dark:hover:text-primary-400 transition-colors'
         >
           <ArrowLeftIcon className='w-5 h-5' />
         </button>
         <div>
-          <h1 className='text-2xl font-bold text-ink dark:text-white'>
+          <h1 className='text-2xl font-bold text-primary dark:text-white'>
             Staff Details
           </h1>
           <p className='text-sm text-latte'>
@@ -143,7 +143,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
 
           <div className='flex-grow space-y-4'>
             <div className='flex flex-col md:flex-row md:items-center gap-2 md:gap-4'>
-              <h2 className='text-3xl font-black text-ink dark:text-white tracking-tight'>
+              <h2 className='text-3xl font-black text-primary dark:text-white tracking-tight'>
                 {baristaName}
               </h2>
               {baristaProfile.isAutoDetected && (
@@ -172,7 +172,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
               </div>
               <div className='h-6 w-px bg-cream-2 dark:bg-espresso-light hidden sm:block'></div>
               <div className='flex items-center gap-2'>
-                <span className='text-xl font-bold text-ink dark:text-white'>
+                <span className='text-xl font-bold text-primary dark:text-white'>
                   {baristaProfile.visitCount}
                 </span>
                 <span className='text-latte text-sm'>Total Visits</span>
@@ -184,7 +184,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                 <p className='text-[10px] font-bold text-latte uppercase tracking-widest'>
                   Main Office / Last Client
                 </p>
-                <p className='font-semibold text-ink dark:text-latte/70 truncate'>
+                <p className='font-semibold text-primary dark:text-latte/70 truncate'>
                   {baristaProfile.companyName}
                 </p>
               </div>
@@ -212,7 +212,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
       {/* Visit History Section */}
       <div className='bg-cream dark:bg-espresso-light rounded-2xl shadow-lg border border-hairline overflow-hidden'>
         <div className='p-6 border-b border-hairline flex flex-col lg:flex-row lg:items-center justify-between gap-4'>
-          <h3 className='text-lg font-bold text-ink dark:text-white flex items-center gap-2'>
+          <h3 className='text-lg font-bold text-primary dark:text-white flex items-center gap-2'>
             <WrenchScrewdriverIcon className='w-5 h-5 text-primary' />
             Detailed Visit History
           </h3>
@@ -226,13 +226,13 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                 placeholder='Search machines, notes...'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className='pl-9 pr-3 py-1.5 text-xs rounded-full border-hairline bg-slate-50 dark:bg-slate-900 text-ink dark:text-white focus:ring-primary focus:border-primary'
+                className='pl-9 pr-3 py-1.5 text-xs rounded-full border-hairline bg-slate-50 dark:bg-slate-900 text-primary dark:text-white focus:ring-primary focus:border-primary'
               />
             </div>
             <select
               value={filterClient}
               onChange={(e) => setFilterClient(e.target.value)}
-              className='text-xs rounded-full border-hairline bg-slate-50 dark:bg-slate-900 text-ink dark:text-latte/70 py-1.5 focus:ring-primary'
+              className='text-xs rounded-full border-hairline bg-slate-50 dark:bg-slate-900 text-primary dark:text-latte/70 py-1.5 focus:ring-primary'
             >
               <option value='all'>All Clients</option>
               {clientsList.map((c) => (
@@ -244,7 +244,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className='text-xs rounded-full border-hairline bg-slate-50 dark:bg-slate-900 text-ink dark:text-latte/70 py-1.5 focus:ring-primary'
+              className='text-xs rounded-full border-hairline bg-slate-50 dark:bg-slate-900 text-primary dark:text-latte/70 py-1.5 focus:ring-primary'
             >
               <option value='all'>All Types</option>
               <option value='scheduled'>Scheduled</option>
@@ -276,13 +276,13 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                     <td className='px-6 py-4 whitespace-nowrap'>
                       <div className='flex items-center gap-2'>
                         <CalendarIcon className='w-4 h-4 text-latte/70' />
-                        <span className='text-sm text-ink dark:text-latte/70 font-medium'>
+                        <span className='text-sm text-primary dark:text-latte/70 font-medium'>
                           {rec.maintenanceDate}
                         </span>
                       </div>
                     </td>
                     <td className='px-6 py-4'>
-                      <div className='text-sm font-bold text-ink dark:text-white'>
+                      <div className='text-sm font-bold text-primary dark:text-white'>
                         {rec.companyName}
                       </div>
                       <div className='text-[10px] text-latte flex items-center gap-1'>
@@ -317,7 +317,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                     <td className='px-6 py-4 text-center'>
                       {rec.visitRating ? (
                         <div className='flex justify-center items-center gap-1'>
-                          <span className='text-sm font-semibold text-ink dark:text-latte/70'>
+                          <span className='text-sm font-semibold text-primary dark:text-latte/70'>
                             {rec.visitRating}
                           </span>
                           <StarIconSolid className='w-3.5 h-3.5 text-amber-400' />
@@ -381,7 +381,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
             >
               Previous
             </button>
-            <span className='font-bold text-ink dark:text-white'>1</span>
+            <span className='font-bold text-primary dark:text-white'>1</span>
             <button
               className='px-3 py-1 bg-cream dark:bg-espresso-light border border-hairline rounded-md disabled:opacity-50'
               disabled
@@ -399,7 +399,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
             {/* Modal Header */}
             <div className='px-6 py-4 border-b border-hairline flex items-center justify-between bg-cream/50 dark:bg-espresso/50'>
               <div>
-                <h4 className='font-bold text-ink dark:text-white'>
+                <h4 className='font-bold text-primary dark:text-white'>
                   Visit Details
                 </h4>
                 <p className='text-xs text-latte'>
@@ -433,7 +433,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                           className='flex items-center gap-2 bg-cream-2 dark:bg-espresso-light px-3 py-1.5 rounded-lg border border-hairline'
                         >
                           <WrenchScrewdriverIcon className='w-4 h-4 text-primary' />
-                          <span className='text-sm font-semibold text-ink dark:text-latte/70'>
+                          <span className='text-sm font-semibold text-primary dark:text-latte/70'>
                             {m.name}
                           </span>
                           <span className='text-xs bg-cream-2 dark:bg-espresso-light px-1.5 py-0.5 rounded text-latte'>
@@ -459,7 +459,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                             key={i}
                             className='flex items-center justify-between text-sm p-2 bg-cream dark:bg-espresso/50 rounded-md border border-hairline'
                           >
-                            <span className='text-ink dark:text-latte/70'>
+                            <span className='text-primary dark:text-latte/70'>
                               {s.name}
                             </span>
                             <span className='text-xs font-bold text-primary'>
@@ -484,7 +484,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                             key={i}
                             className='flex items-center justify-between text-sm p-2 bg-amber-50 dark:bg-amber-900/20 rounded-md border border-amber-100 dark:border-amber-700/50'
                           >
-                            <span className='text-ink dark:text-latte/70'>
+                            <span className='text-primary dark:text-latte/70'>
                               {p.name}
                             </span>
                             <span className='text-xs font-bold text-amber-600'>
@@ -527,7 +527,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                     <p className='text-xs font-bold text-latte mb-2'>
                       Maintenance Notes:
                     </p>
-                    <div className='text-sm text-ink dark:text-latte/70 bg-cream-2 dark:bg-espresso p-4 rounded-xl italic'>
+                    <div className='text-sm text-primary dark:text-latte/70 bg-cream-2 dark:bg-espresso p-4 rounded-xl italic'>
                       "{selectedRecord.notes}"
                     </div>
                   </div>
@@ -562,7 +562,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                   <p className='text-[10px] font-bold text-latte uppercase mb-1'>
                     Visit Rating
                   </p>
-                  <p className='text-sm font-bold text-ink dark:text-white'>
+                  <p className='text-sm font-bold text-primary dark:text-white'>
                     {selectedRecord.visitRating
                       ? `${selectedRecord.visitRating} / 5`
                       : "Not Rated"}

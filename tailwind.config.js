@@ -57,10 +57,10 @@ export default {
          * referencing an old token name renders the new colors instead.
          * Do NOT use these in new code — prefer the semantic tokens above.
          */
-        paper: '#FFFFFF',
+        paper: 'var(--bg-body)',
         cream: {
-          DEFAULT: '#F8F9FA',
-          2: '#F0F1F3',
+          DEFAULT: 'var(--bg-surface)',
+          2: 'var(--bg-surface-elevated)',
           3: '#E9EAEC',
         },
         espresso: {
@@ -68,8 +68,8 @@ export default {
           light: '#2E2E2E',
           lighter: '#3D3D3D',
         },
-        ink: '#222222',
-        latte: '#6B6B6B',
+        ink: 'var(--text-primary)',
+        latte: 'var(--text-secondary)',
         hairline: '#E5E7EB',
         brass: '#D4A017',
         copper: {

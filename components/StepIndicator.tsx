@@ -108,7 +108,7 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ steps, currentStep }) => 
                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-xs font-bold">
                             {currentIndex + 1}
                         </span>
-                        <span className="text-sm font-bold text-ink">
+                        <span className="text-sm font-bold text-primary">
                             {steps[currentIndex]?.name}
                         </span>
                     </div>

@@ -70,7 +70,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
       />
       <div className="pt-8 mt-8 border-t border-hairline">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-ink tracking-tight">جهات الاتصال</h3>
+          <h3 className="text-xl font-bold text-primary tracking-tight">جهات الاتصال</h3>
           <Button onClick={() => actions.addContact("main")}>
             <PlusCircleIcon className="w-5 h-5" />
             <span>إضافة جهة اتصال</span>

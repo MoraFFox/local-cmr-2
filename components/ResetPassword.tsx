@@ -124,7 +124,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
       <div className="min-h-screen bg-paper flex items-center justify-center p-4">
         <div className="text-center">
           <div className="mx-auto mb-4 h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-ink font-medium">
+          <p className="text-primary font-medium">
             جاري التحقق من الرابط...
           </p>
         </div>
@@ -141,7 +141,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
             <div className="w-16 h-16 bg-ember-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <ExclamationCircleIcon className="w-8 h-8 text-ember-500" />
             </div>
-            <h1 className="text-2xl font-bold text-ink mb-2">
+            <h1 className="text-2xl font-bold text-primary mb-2">
               رابط غير صالح أو منتهي الصلاحية
             </h1>
             <p className="text-latte mb-6">
@@ -168,7 +168,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
             <div className="w-16 h-16 bg-cream-2 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircleIcon className="w-8 h-8 text-leaf-500" />
             </div>
-            <h1 className="text-2xl font-bold text-ink mb-2">
+            <h1 className="text-2xl font-bold text-primary mb-2">
               تم إعادة تعيين كلمة المرور بنجاح!
             </h1>
             <p className="text-latte mb-6">
@@ -206,7 +206,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
           <div className="w-16 h-16 bg-cream-2 rounded-full flex items-center justify-center mx-auto mb-4">
             <LockClosedIcon className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-ink mb-2">
+          <h1 className="text-2xl font-bold text-primary mb-2">
             إعادة تعيين كلمة المرور
           </h1>
         </div>
@@ -219,7 +219,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-ink mb-2">
+            <label className="block text-sm font-medium text-primary mb-2">
               كلمة المرور الجديدة
             </label>
             <div className="relative">
@@ -231,14 +231,14 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream border border-hairline text-ink focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream border border-hairline text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 dir="ltr"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-ink mb-2">
+            <label className="block text-sm font-medium text-primary mb-2">
               تأكيد كلمة المرور الجديدة
             </label>
             <div className="relative">
@@ -250,7 +250,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream border border-hairline text-ink focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream border border-hairline text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 dir="ltr"
               />
             </div>

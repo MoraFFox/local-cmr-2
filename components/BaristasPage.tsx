@@ -151,7 +151,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
       {/* Header Section */}
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div>
-          <h1 className='text-2xl sm:text-3xl font-bold text-ink'>
+          <h1 className='text-2xl sm:text-3xl font-bold text-primary'>
             أداء الباريستا
           </h1>
           <p className='text-latte mt-1'>
@@ -189,7 +189,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
               type='search'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='block w-full rounded-lg border-hairline bg-cream py-2.5 pl-10 pr-3 text-ink placeholder:text-latte focus:border-primary focus:ring-primary sm:text-sm shadow-sm transition-colors'
+              className='block w-full rounded-lg border-hairline bg-cream py-2.5 pl-10 pr-3 text-primary placeholder:text-latte focus:border-primary focus:ring-primary sm:text-sm shadow-sm transition-colors'
               placeholder='Search baristas...'
             />
           </div>
@@ -249,20 +249,20 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
             <p className='text-xs font-bold uppercase text-latte'>
               Total Staff
             </p>
-            <p className='text-2xl font-bold text-ink'>
+            <p className='text-2xl font-bold text-primary'>
               {filteredBaristas.length}
             </p>
           </div>
         </div>
         <div className='bg-cream p-4 rounded-xl shadow-sm border border-hairline flex items-center gap-4'>
-          <div className='p-3 bg-cream-2 text-ink rounded-full'>
+          <div className='p-3 bg-cream-2 text-primary rounded-full'>
             <WrenchScrewdriverIcon className='w-6 h-6' />
           </div>
           <div>
             <p className='text-xs font-bold uppercase text-latte'>
               Total Visits
             </p>
-            <p className='text-2xl font-bold text-ink'>
+            <p className='text-2xl font-bold text-primary'>
               {totalVisits}
             </p>
           </div>
@@ -276,7 +276,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
               Total Company Paid
             </p>
             <p
-              className='text-xl font-bold text-ink truncate'
+              className='text-xl font-bold text-primary truncate'
               title={formatCurrency(totalCompanyCost)}
             >
               {new Intl.NumberFormat("en-US", {
@@ -314,7 +314,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                 <div className='flex items-center gap-3'>
                   <Avatar name={barista.name} />
                   <div>
-                    <h3 className='font-bold text-ink dark:text-white text-lg group-hover:text-primary dark:group-hover:text-primary-400 transition-colors'>
+                    <h3 className='font-bold text-primary dark:text-white text-lg group-hover:text-primary dark:group-hover:text-primary-400 transition-colors'>
                       {barista.name}
                     </h3>
                     <div className='flex flex-col gap-0.5 mt-0.5'>
@@ -398,7 +398,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                     <div className='flex items-start gap-2 text-sm mb-1'>
                       <BriefcaseIcon className='w-4 h-4 text-latte mt-0.5 shrink-0' />
                       <span
-                        className='font-semibold text-ink dark:text-latte/70 line-clamp-1'
+                        className='font-semibold text-primary dark:text-latte/70 line-clamp-1'
                         title={barista.companyName}
                       >
                         {barista.companyName}
@@ -499,7 +499,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
             onClick={(e) => e.stopPropagation()}
           >
             <div className='flex justify-between items-center mb-4'>
-              <h3 className='text-lg font-bold text-ink'>
+              <h3 className='text-lg font-bold text-primary'>
                 تعديل التفاصيل
               </h3>
               <button
@@ -512,7 +512,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
 
             <div className='space-y-4'>
               <div>
-                <label className='block text-sm font-medium text-ink mb-1'>
+                <label className='block text-sm font-medium text-primary mb-1'>
                   Name
                 </label>
                 <input
@@ -521,11 +521,11 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                   onChange={(e) =>
                     setEditForm({ ...editForm, name: e.target.value })
                   }
-                  className='w-full rounded-lg border-hairline bg-cream p-2.5 text-ink focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none'
+                  className='w-full rounded-lg border-hairline bg-cream p-2.5 text-primary focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none'
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium text-ink mb-1'>
+                <label className='block text-sm font-medium text-primary mb-1'>
                   Phone
                 </label>
                 <input
@@ -534,7 +534,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                   onChange={(e) =>
                     setEditForm({ ...editForm, phone: e.target.value })
                   }
-                  className='w-full rounded-lg border-hairline bg-cream p-2.5 text-ink focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none'
+                  className='w-full rounded-lg border-hairline bg-cream p-2.5 text-primary focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none'
                 />
               </div>
 
@@ -549,7 +549,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
               <div className='flex gap-3 pt-4 border-t border-hairline mt-6'>
                 <button
                   onClick={() => setEditingBarista(null)}
-                  className='flex-1 py-2.5 border border-hairline text-ink rounded-lg font-semibold hover:bg-cream-2 transition-colors'
+                  className='flex-1 py-2.5 border border-hairline text-primary rounded-lg font-semibold hover:bg-cream-2 transition-colors'
                 >
                   إلغاء
                 </button>

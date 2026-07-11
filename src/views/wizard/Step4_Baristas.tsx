@@ -24,7 +24,7 @@ export const Step4_Baristas: React.FC<WizardStepProps> = ({
 }) => (
   <Card title="الفريق / الباريستا (المكتب الرئيسي)">
     <div className="flex justify-between items-center mb-6">
-      <h3 className="text-xl font-bold text-ink tracking-tight">الباريستا</h3>
+      <h3 className="text-xl font-bold text-primary tracking-tight">الباريستا</h3>
       <Button onClick={() => actions.addListItem("baristas")}>
         <PlusCircleIcon className="w-5 h-5" /> إضافة باريستا
       </Button>
@@ -56,7 +56,7 @@ export const Step4_Baristas: React.FC<WizardStepProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-ink dark:text-latte mb-2">ملاحظات</label>
+                <label className="block text-sm font-medium text-primary mb-2">ملاحظات</label>
                 <textarea
                   name="notes"
                   value={barista.notes || ""}

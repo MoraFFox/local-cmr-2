@@ -29,7 +29,7 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ titleContent, childre
                 onClick={() => setIsOpen(!isOpen)}
                 aria-expanded={isOpen}
             >
-                <div className="flex-1 min-w-0 font-semibold text-ink relative text-right">
+                <div className="flex-1 min-w-0 font-semibold text-primary relative text-right">
                     {titleContent}
                 </div>
                 <div className="flex items-center shrink-0 gap-3 pt-1 sm:pt-0">

@@ -162,13 +162,13 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
             >
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-hairline bg-cream-2/50">
-                    <h2 className="text-xl font-bold text-ink">
+                    <h2 className="text-xl font-bold text-primary">
                         Import / Export
                     </h2>
 
                     <button
                         onClick={onClose}
-                        className="p-2 text-latte hover:text-ink rounded-full hover:bg-cream-2 transition-colors"
+                        className="p-2 text-latte hover:text-primary rounded-full hover:bg-cream-2 transition-colors"
                     >
                         <XMarkIcon className="w-5 h-5" />
                     </button>
@@ -181,7 +181,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                         className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                             activeTab === 'export'
                                 ? 'text-primary border-b-2 border-primary bg-primary/10'
-                                : 'text-latte hover:text-ink'
+                                : 'text-latte hover:text-primary'
                         }`}
                     >
                         <div className="flex items-center justify-center gap-2">
@@ -195,7 +195,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                         className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                             activeTab === 'import'
                                 ? 'text-primary border-b-2 border-primary bg-primary/10'
-                                : 'text-latte hover:text-ink'
+                                : 'text-latte hover:text-primary'
                         }`}
                     >
                         <div className="flex items-center justify-center gap-2">
@@ -215,10 +215,10 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                                     className="flex flex-col items-center gap-3 p-6 bg-cream rounded-xl border-2 border-hairline hover:border-primary transition-colors group"
                                 >
                                     <div className="p-3 bg-cream-2 rounded-xl group-hover:bg-primary/20 transition-colors">
-                                        <CodeBracketIcon className="w-8 h-8 text-ink group-hover:text-primary" />
+                                        <CodeBracketIcon className="w-8 h-8 text-primary group-hover:text-primary" />
                                     </div>
                                     <div className="text-center">
-                                        <h3 className="font-semibold text-ink">Export as JSON</h3>
+                                        <h3 className="font-semibold text-primary">Export as JSON</h3>
                                         <p className="text-sm text-latte mt-1">
                                             Complete data with all details
                                         </p>
@@ -230,10 +230,10 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                                     className="flex flex-col items-center gap-3 p-6 bg-cream rounded-xl border-2 border-hairline hover:border-primary transition-colors group"
                                 >
                                     <div className="p-3 bg-cream-2 rounded-xl group-hover:bg-primary/20 transition-colors">
-                                        <TableCellsIcon className="w-8 h-8 text-ink group-hover:text-primary" />
+                                        <TableCellsIcon className="w-8 h-8 text-primary group-hover:text-primary" />
                                     </div>
                                     <div className="text-center">
-                                        <h3 className="font-semibold text-ink">Export as CSV</h3>
+                                        <h3 className="font-semibold text-primary">Export as CSV</h3>
                                         <p className="text-sm text-latte mt-1">
                                             Maintenance records only
                                         </p>
@@ -245,10 +245,10 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                                     className="flex flex-col items-center gap-3 p-6 bg-cream rounded-xl border-2 border-hairline hover:border-primary transition-colors group sm:col-span-2"
                                 >
                                     <div className="p-3 bg-cream-2 rounded-xl group-hover:bg-primary/20 transition-colors">
-                                        <DocumentTextIcon className="w-8 h-8 text-ink group-hover:text-primary" />
+                                        <DocumentTextIcon className="w-8 h-8 text-primary group-hover:text-primary" />
                                     </div>
                                     <div className="text-center">
-                                        <h3 className="font-semibold text-ink">Export Summary Report</h3>
+                                        <h3 className="font-semibold text-primary">Export Summary Report</h3>
                                         <p className="text-sm text-latte mt-1">
                                             Overview of all companies with counts
                                         </p>
@@ -289,7 +289,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                                         'text-latte'
                                     }`} />
 
-                                    <p className="font-medium text-ink">
+                                    <p className="font-medium text-primary">
                                         {importStatus === 'loading' ? 'جاري المعالجة...' : 'اضغط لرفع الملف'}
                                     </p>
 
@@ -318,7 +318,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                             {/* Validation Results */}
                             {importedData.length > 0 && (
                                 <div className="space-y-2">
-                                    <h4 className="font-medium text-ink">
+                                    <h4 className="font-medium text-primary">
                                         Validation Results
                                     </h4>
                                     
@@ -338,7 +338,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                                                     <ExclamationCircleIcon className="w-5 h-5 text-ember-500" />
                                                 )}
                                                 
-                                                <span className="font-medium text-ink">
+                                                <span className="font-medium text-primary">
                                                     {item.original.companyName || `Company ${index + 1}`}
                                                 </span>
                                             </div>

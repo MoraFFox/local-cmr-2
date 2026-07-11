@@ -50,12 +50,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             key={toast.id}
             className={`px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px] max-w-[500px] animate-toast-slide-in border ${
               toast.type === 'success'
-                ? 'bg-cream-2 text-ink border-hairline/50'
+                ? 'bg-cream-2 text-primary border-hairline/50'
                 : toast.type === 'error'
-                ? 'bg-ember-500/20 text-ink border-ember-500/30'
+                ? 'bg-ember-500/20 text-primary border-ember-500/30'
                 : toast.type === 'warning'
-                ? 'bg-cream text-ink border-primary/30'
-                : 'bg-cream text-ink border-hairline'
+                ? 'bg-cream text-primary border-primary/30'
+                : 'bg-cream text-primary border-hairline'
             }`}
             role={toast.type === 'error' ? 'alert' : 'status'}
           >

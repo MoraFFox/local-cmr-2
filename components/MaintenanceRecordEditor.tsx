@@ -312,7 +312,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
     >
       <div className="flex items-center gap-3">
         <span className="text-latte dark:text-latte">{icon}</span>
-        <span className="font-semibold text-ink dark:text-white">{title}</span>
+        <span className="font-semibold text-primary dark:text-white">{title}</span>
         {badge}
       </div>
       {expandedSections.has(section) ? (
@@ -341,7 +341,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Date */}
               <div>
-                <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
+                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
                   Maintenance Date *
                 </label>
                 <div className="relative">
@@ -351,7 +351,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                     name="maintenanceDate"
                     value={editedRecord.maintenanceDate}
                     onChange={handleFieldChange}
-                    className={`w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${
+                    className={`w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${
                       errors.maintenanceDate 
                         ? 'border-ember-500 focus:ring-ember-500' 
                         : 'border-hairline dark:border-hairline'
@@ -365,7 +365,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
 
               {/* Last Visit Info */}
               <div>
-                <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
+                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
                   Last Visit
                 </label>
                 <div className="relative">
@@ -373,7 +373,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                     <div className="flex items-center gap-3 p-3 bg-cream dark:bg-espresso-light rounded-lg border border-hairline dark:border-hairline">
                       <CalendarIcon className="w-5 h-5 text-primary" />
                       <div>
-                        <div className="text-ink dark:text-white font-medium">
+                        <div className="text-primary dark:text-white font-medium">
                           {lastVisitDate.toLocaleDateString('en-GB', { 
                             day: 'numeric', 
                             month: 'short', 
@@ -398,7 +398,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
 
               {/* Barista */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
+                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
                   My Technician *
                 </label>
                 <div className="relative">
@@ -408,7 +408,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       name="baristaName"
                       value={editedRecord.baristaName}
                       onChange={handleFieldChange}
-                      className={`w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${
+                      className={`w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${
                         errors.baristaName 
                           ? 'border-ember-500 focus:ring-ember-500' 
                           : 'border-hairline dark:border-hairline'
@@ -426,7 +426,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       value={editedRecord.baristaName}
                       onChange={handleFieldChange}
                       placeholder="أدخل اسم الباريستا"
-                      className={`w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${
+                      className={`w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${
                         errors.baristaName 
                           ? 'border-ember-500 focus:ring-ember-500' 
                           : 'border-hairline dark:border-hairline'
@@ -441,7 +441,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
 
               {/* Client Barista */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
+                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
                   Client Barista
                 </label>
                 <div className="relative">
@@ -451,7 +451,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       name="clientBaristaName"
                       value={editedRecord.clientBaristaName || ''}
                       onChange={handleFieldChange}
-                      className="w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
+                      className="w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
                     >
                       <option value="">Select Client Barista</option>
                       {clientBaristas.map(barista => (
@@ -465,7 +465,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       value={editedRecord.clientBaristaName || ''}
                       onChange={handleFieldChange}
                       placeholder="أدخل اسم باريستا العميل"
-                      className="w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
+                      className="w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
                     />
                   )}
                 </div>
@@ -473,7 +473,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
 
               {/* Client Barista Performance Rating */}
               <div>
-                <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
+                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
                   Client Barista Performance Rating
                 </label>
                 <div className="flex items-center gap-1 sm:gap-2">
@@ -496,7 +496,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
 
               {/* Visit Zone */}
               <div>
-                <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
+                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
                   Visit Zone
                 </label>
                 <div className="relative">
@@ -505,7 +505,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                     name="visitZone"
                     value={editedRecord.visitZone || ''}
                     onChange={handleFieldChange}
-                    className="w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
+                    className="w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
                   >
                     <option value="">Select Zone</option>
                     <option value="cairo">Cairo (500 EGP)</option>
@@ -544,7 +544,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 onChange={handleFieldChange}
                 className="w-5 h-5 text-primary rounded focus:ring-primary"
               />
-              <label htmlFor="hadProblem" className="text-ink dark:text-latte/70">
+              <label htmlFor="hadProblem" className="text-primary dark:text-latte/70">
                 Was there a problem?
               </label>
             </div>
@@ -568,7 +568,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       onChange={handleFieldChange}
                       className="w-5 h-5 text-primary rounded focus:ring-primary"
                     />
-                    <label htmlFor="problemSolved" className="text-ink dark:text-latte/70 flex items-center gap-2">
+                    <label htmlFor="problemSolved" className="text-primary dark:text-latte/70 flex items-center gap-2">
                       {editedRecord.problemSolved ? (
                         <>
                           <CheckCircleIcon className="w-5 h-5 text-leaf-500" />
@@ -637,7 +637,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 onChange={handleFieldChange}
                 className="w-5 h-5 text-primary rounded focus:ring-primary"
               />
-              <label htmlFor="partsWereReplaced" className="text-ink dark:text-latte/70">
+              <label htmlFor="partsWereReplaced" className="text-primary dark:text-latte/70">
                 Were parts replaced?
               </label>
             </div>
@@ -678,7 +678,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
               />
 
               <div>
-                <label className="text-sm font-medium text-ink dark:text-latte/70 block mb-3">Paid By</label>
+                <label className="text-sm font-medium text-primary dark:text-latte/70 block mb-3">Paid By</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
                     type="button"
@@ -687,7 +687,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200
                       ${editedRecord.paidBy === 'company'
                         ? 'border-primary bg-cream-2 dark:bg-primary/10 text-primary-900 dark:text-primary-300'
-                        : 'border-hairline dark:border-hairline bg-cream dark:bg-espresso text-ink dark:text-latte/70 hover:border-hairline dark:hover:border-hairline'
+                        : 'border-hairline dark:border-hairline bg-cream dark:bg-espresso text-primary dark:text-latte/70 hover:border-hairline dark:hover:border-hairline'
                       }
                     `}
                   >
@@ -695,7 +695,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold
                       ${editedRecord.paidBy === 'company'
                         ? 'bg-primary text-white'
-                        : 'bg-cream-2 dark:bg-espresso-light text-ink dark:text-latte'
+                        : 'bg-cream-2 dark:bg-espresso-light text-primary dark:text-latte'
                       }
                     `}>
                       M
@@ -720,7 +720,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200
                       ${editedRecord.paidBy === 'client'
                         ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-900 dark:text-amber-100'
-                        : 'border-hairline dark:border-hairline bg-cream dark:bg-espresso text-ink dark:text-latte/70 hover:border-hairline dark:hover:border-hairline'
+                        : 'border-hairline dark:border-hairline bg-cream dark:bg-espresso text-primary dark:text-latte/70 hover:border-hairline dark:hover:border-hairline'
                       }
                     `}
                   >
@@ -728,7 +728,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold
                       ${editedRecord.paidBy === 'client'
                         ? 'bg-amber-500 text-white'
-                        : 'bg-cream-2 dark:bg-espresso-light text-ink dark:text-latte'
+                        : 'bg-cream-2 dark:bg-espresso-light text-primary dark:text-latte'
                       }
                     `}>
                       C
@@ -775,7 +775,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             {(editedRecord.supervisors || []).map((supervisor, index) => (
               <div key={supervisor.id} className="p-4 bg-cream dark:bg-espresso-light/50 rounded-lg border border-hairline dark:border-hairline">
                 <div className="flex justify-between items-center mb-3">
-                  <h4 className="font-semibold text-ink dark:text-latte/70">Supervisor {index + 1}</h4>
+                  <h4 className="font-semibold text-primary dark:text-latte/70">Supervisor {index + 1}</h4>
                   {(editedRecord.supervisors || []).length > 1 && (
                     <button
                       type="button"
@@ -788,12 +788,12 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">Name *</label>
+                    <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">Name *</label>
                     <input
                       type="text"
                       value={supervisor.name}
                       onChange={(e) => updateSupervisor(index, 'name', e.target.value)}
-                      className="w-full px-3 py-2 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg border border-hairline dark:border-hairline focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg border border-hairline dark:border-hairline focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="اسم المشرف"
                     />
                     {errors[`supervisor-${index}-name`] && (
@@ -801,12 +801,12 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">Phone</label>
+                    <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">Phone</label>
                     <input
                       type="text"
                       value={supervisor.phone}
                       onChange={(e) => updateSupervisor(index, 'phone', e.target.value)}
-                      className="w-full px-3 py-2 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg border border-hairline dark:border-hairline focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg border border-hairline dark:border-hairline focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="رقم الهاتف"
                     />
                   </div>
@@ -830,7 +830,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
           section="notes"
           icon={<DocumentTextIcon className="w-5 h-5" />}
           badge={editedRecord.notes && (
-            <span className="px-2 py-0.5 bg-cream dark:bg-espresso-light text-ink dark:text-latte text-xs rounded-full">
+            <span className="px-2 py-0.5 bg-cream dark:bg-espresso-light text-primary dark:text-latte text-xs rounded-full">
               Has notes
             </span>
           )}
@@ -839,7 +839,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         {expandedSections.has('notes') && (
           <div className="p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
+              <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
                 Notes
               </label>
               <textarea
@@ -848,12 +848,12 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 onChange={handleFieldChange}
                 rows={4}
                 placeholder="أضف أي ملاحظات إضافية..."
-                className="w-full px-4 py-3 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline resize-none"
+                className="w-full px-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline resize-none"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
+              <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
                 Recommendations
               </label>
               <textarea
@@ -862,7 +862,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 onChange={handleFieldChange}
                 rows={3}
                 placeholder="أضف توصيات للزيارات القادمة..."
-                className="w-full px-4 py-3 bg-cream dark:bg-espresso-light text-ink dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline resize-none"
+                className="w-full px-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline resize-none"
               />
             </div>
           </div>
@@ -898,7 +898,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             {/* Before Photos */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <span className="font-medium text-ink dark:text-latte/70">Before Photos</span>
+                <span className="font-medium text-primary dark:text-latte/70">Before Photos</span>
                 <label className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg cursor-pointer transition-colors ${
                   uploadingPhotos 
                     ? 'bg-cream dark:bg-espresso-light text-latte dark:text-latte cursor-not-allowed' 
@@ -947,7 +947,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             {/* After Photos */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <span className="font-medium text-ink dark:text-latte/70">After Photos</span>
+                <span className="font-medium text-primary dark:text-latte/70">After Photos</span>
                 <label className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg cursor-pointer transition-colors ${
                   uploadingPhotos 
                     ? 'bg-cream dark:bg-espresso-light text-latte dark:text-latte cursor-not-allowed' 
@@ -997,7 +997,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             {editedRecord.photos && editedRecord.photos.filter(p => p.type === "legacy").length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="font-medium text-ink dark:text-latte/70">Legacy Photos</span>
+                  <span className="font-medium text-primary dark:text-latte/70">Legacy Photos</span>
                   <span className="text-xs text-latte dark:text-latte">Imported from previous records</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -1033,7 +1033,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
           <div className="flex items-center justify-between gap-3">
             <button
               onClick={onCancel}
-              className="flex items-center justify-center gap-2 min-h-[44px] px-4 sm:px-5 py-2.5 text-ink dark:text-latte font-medium hover:text-ink dark:hover:text-white hover:bg-cream dark:hover:bg-espresso-light/50 rounded-lg transition-colors"
+              className="flex items-center justify-center gap-2 min-h-[44px] px-4 sm:px-5 py-2.5 text-primary dark:text-latte font-medium hover:text-primary dark:hover:text-white hover:bg-cream dark:hover:bg-espresso-light/50 rounded-lg transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

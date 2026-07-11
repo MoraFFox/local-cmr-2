@@ -47,8 +47,8 @@ function RadioGroup<T extends string | boolean>({ name, label, options, value, o
         }
     }, [disabled, options, value, onChange]);
 
-    const selectedClasses = 'border-primary bg-primary/10 text-brand-red dark:text-primary/80';
-    const unselectedClasses = 'border-hairline bg-cream text-ink hover:border-primary/30';
+    const selectedClasses = 'border-primary bg-primary/10 text-primary dark:text-primary/80';
+    const unselectedClasses = 'border-hairline bg-cream text-primary hover:border-primary/30';
 
     const commonButtonClasses = `
         relative flex items-center gap-3 rounded-xl border-2 transition-all duration-200
@@ -82,7 +82,7 @@ function RadioGroup<T extends string | boolean>({ name, label, options, value, o
                 </div>
 
                 <div className={`flex-1 min-w-0 ${inline ? '' : ''}`}>
-                    <div className={`font-semibold ${isSelected ? 'text-brand-red dark:text-primary/80' : 'text-ink'}`}>
+                    <div className={`font-semibold ${isSelected ? 'text-primary dark:text-primary/80' : 'text-primary'}`}>
                         {option.label}
                     </div>
                     {option.description && !inline && (
@@ -93,7 +93,7 @@ function RadioGroup<T extends string | boolean>({ name, label, options, value, o
                 </div>
 
                 {isSelected && !inline && (
-                    <CheckCircleIcon className="w-6 h-6 text-brand-red flex-shrink-0" />
+                    <CheckCircleIcon className="w-6 h-6 text-primary flex-shrink-0" />
                 )}
             </button>
         );
@@ -107,7 +107,7 @@ function RadioGroup<T extends string | boolean>({ name, label, options, value, o
             onKeyDown={handleKeyDown}
             className={disabled ? 'opacity-60' : ''}
         >
-            {label && <label className="text-sm font-medium text-ink block mb-3">{label}</label>}
+            {label && <label className="text-sm font-medium text-primary block mb-3">{label}</label>}
             <div className={inline ? 'flex flex-wrap gap-3' : 'space-y-2'}>
                 {options.map((option) => renderOption(option, value === option.value))}
             </div>

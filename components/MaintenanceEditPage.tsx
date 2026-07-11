@@ -469,12 +469,12 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
               </button>
               <div className="flex items-center gap-4">
                 {averageDaysBetweenMaintenance && (
-                  <div className="flex items-center gap-2 text-sm text-ink dark:text-latte">
+                  <div className="flex items-center gap-2 text-sm text-primary dark:text-latte">
                     <ClockIcon className="w-4 h-4 text-primary" />
                     Average: {averageDaysBetweenMaintenance} days between visits
                   </div>
                 )}
-                <span className="text-sm font-medium text-ink dark:text-latte/70 px-3 py-1 bg-cream dark:bg-espresso-light rounded-full">
+                <span className="text-sm font-medium text-primary dark:text-latte/70 px-3 py-1 bg-cream dark:bg-espresso-light rounded-full">
                   {selectedBranch.maintenanceHistory.length} records
                 </span>
                 <button
@@ -505,7 +505,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
           </div>
         ) : (
           <div className="space-y-6">
-            <h2 className="text-xl font-bold text-ink dark:text-white">
+            <h2 className="text-xl font-bold text-primary dark:text-white">
               Select a Branch
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -523,7 +523,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-ink dark:text-white truncate">
+                    <h3 className="font-semibold text-primary dark:text-white truncate">
                       {branch.branchName || 'Unnamed Branch'}
                     </h3>
                     <p className="text-sm text-latte dark:text-latte mt-1">

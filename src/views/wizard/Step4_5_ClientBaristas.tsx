@@ -18,7 +18,7 @@ export const Step4_5_ClientBaristas: React.FC<WizardStepProps> = ({
 }) => (
   <Card title="باريستا العميل (المكتب الرئيسي)">
     <div className="flex justify-between items-center mb-6">
-      <h3 className="text-xl font-bold text-ink tracking-tight">باريستا العميل</h3>
+      <h3 className="text-xl font-bold text-primary tracking-tight">باريستا العميل</h3>
       <Button onClick={() => actions.addBlankClientBarista(null)}>
         <PlusCircleIcon className="w-5 h-5" /> إضافة باريستا عميل
       </Button>
@@ -46,7 +46,7 @@ export const Step4_5_ClientBaristas: React.FC<WizardStepProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-ink dark:text-latte mb-2">ملاحظات</label>
+                <label className="block text-sm font-medium text-primary mb-2">ملاحظات</label>
                 <textarea name="notes" value={cb.notes || ""}
                   onChange={(e) => actions.handleClientBaristaChange(e, null, index)}
                   rows={3} className={CLASSES.textArea}

@@ -23,7 +23,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
                 <div className="text-latte mb-3">
                     {React.cloneElement(icon as React.ReactElement, { className: 'w-8 h-8' })}
                 </div>
-                <h4 className="text-sm font-semibold text-ink">{title}</h4>
+                <h4 className="text-sm font-semibold text-primary">{title}</h4>
                 {message && <p className="mt-1 text-xs text-latte max-w-sm">{message}</p>}
                 {children && <div className="mt-4">{children}</div>}
             </div>
@@ -39,7 +39,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
                         {React.cloneElement(icon as React.ReactElement, { className: 'w-8 h-8' })}
                     </div>
                 </div>
-                <h4 className="text-lg font-bold text-ink">{title}</h4>
+                <h4 className="text-lg font-bold text-primary">{title}</h4>
                 {message && <p className="mt-2 text-sm text-latte max-w-md mx-auto leading-relaxed">{message}</p>}
                 {children && <div className="mt-6">{children}</div>}
             </div>
@@ -55,7 +55,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
                     {React.cloneElement(icon as React.ReactElement, { className: 'w-10 h-10' })}
                 </div>
             </div>
-            <h4 className="text-xl font-bold text-ink">{title}</h4>
+            <h4 className="text-xl font-bold text-primary">{title}</h4>
             {message && <p className="mt-2 text-sm text-latte max-w-sm mx-auto leading-relaxed">{message}</p>}
             {children && <div className="mt-8">{children}</div>}
         </div>

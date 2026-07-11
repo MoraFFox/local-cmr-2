@@ -48,7 +48,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
             initiallyOpen={contact.id === newlyAddedId}
             onRemove={() => actions.removeContact(path, contactIndex)}
             titleContent={
-              <span className="font-semibold text-ink dark:text-cream">
+              <span className="font-semibold text-primary">
                 {contact.name || "جهة اتصال جديدة"}
               </span>
             }
@@ -63,7 +63,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                   icon={<UserIcon />}
                 />
                 <div>
-                  <label className="block text-sm font-medium text-ink mb-1.5">المسمى الوظيفي</label>
+                  <label className="block text-sm font-medium text-primary mb-1.5">المسمى الوظيفي</label>
                   <div className="relative group focus-within:text-primary">
                     <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-latte">
                       <BriefcaseIcon className="w-4 h-4" aria-hidden="true" />
@@ -72,7 +72,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                       name="position"
                       value={contact.position}
                       onChange={(e) => actions.handleContactChange(e, path, contactIndex)}
-                      className="block w-full pr-10 h-[50px] bg-cream text-ink rounded-lg placeholder-latte focus:outline-none focus:ring-2 border border-hairline focus:border-primary focus:ring-primary/20 transition-colors appearance-none"
+                      className="block w-full pr-10 h-[50px] bg-cream text-primary rounded-lg placeholder-latte focus:outline-none focus:ring-2 border border-hairline focus:border-primary focus:ring-primary/20 transition-colors appearance-none"
                     >
                       {contactPositions.map((pos) => (
                         <option key={pos.value} value={pos.value}>
@@ -94,7 +94,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                 )}
               </div>
               <div className="pt-4 border-t border-hairline dark:border-hairline">
-                <h5 className="text-sm font-semibold text-ink dark:text-latte mb-2">أرقام الهواتف</h5>
+                <h5 className="text-sm font-semibold text-primary mb-2">أرقام الهواتف</h5>
                 <div className="space-y-2">
                   {contact.phoneNumbers.map((phone, phoneIndex) => (
                     <div key={phone.id} className="flex items-center gap-2">

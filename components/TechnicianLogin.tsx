@@ -104,7 +104,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
             <div className="w-14 h-14 bg-cream-2 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircleIcon className="w-7 h-7 text-leaf-500" />
             </div>
-            <h2 className="text-xl font-bold text-ink mb-2">
+            <h2 className="text-xl font-bold text-primary mb-2">
               تحقق من بريدك الإلكتروني
             </h2>
             <p className="text-sm text-latte mb-6">
@@ -124,7 +124,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
               <div className="w-14 h-14 bg-cream-2 rounded-full flex items-center justify-center mx-auto mb-4">
                 <EnvelopeIcon className="w-7 h-7 text-primary" />
               </div>
-              <h2 className="text-xl font-bold text-ink mb-2">
+              <h2 className="text-xl font-bold text-primary mb-2">
                 إعادة تعيين كلمة المرور
               </h2>
             </div>
@@ -141,7 +141,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-ink mb-2 text-right">
+                <label className="block text-sm font-medium text-primary mb-2 text-right">
                   البريد الإلكتروني
                 </label>
                 <div className="relative">
@@ -155,7 +155,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                     placeholder="example@email.com"
                     autoCapitalize="none"
                     autoCorrect="off"
-                    className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream-2 border border-hairline text-ink focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-right"
+                    className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream-2 border border-hairline text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-right"
                     dir="ltr"
                   />
                 </div>
@@ -261,7 +261,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                 <PhoneIcon className="w-8 h-8 text-primary" />
               )}
             </div>
-            <h1 className="text-2xl font-bold text-ink mb-2">
+            <h1 className="text-2xl font-bold text-primary mb-2">
               {ar.login.title}
             </h1>
             <p className="text-latte">
@@ -282,7 +282,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Contact Type Toggle */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-ink mb-2 text-center">
+              <label className="block text-sm font-medium text-primary mb-2 text-center">
                 البريد الإلكتروني أو الهاتف
               </label>
               <div className="flex rounded-lg bg-cream-2 p-1">
@@ -291,7 +291,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                   onClick={() => setContactType("email")}
                   className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${
                     contactType === "email"
-                      ? "bg-cream text-ink shadow-sm"
+                      ? "bg-cream text-primary shadow-sm"
                       : "text-latte hover:text-primary"
                   }`}
                 >
@@ -303,7 +303,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                   onClick={() => setContactType("phone")}
                   className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${
                     contactType === "phone"
-                      ? "bg-cream text-ink shadow-sm"
+                      ? "bg-cream text-primary shadow-sm"
                       : "text-latte hover:text-primary"
                   }`}
                 >
@@ -315,7 +315,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
 
             {/* Email/Phone Field */}
             <div>
-              <label className="block text-sm font-medium text-ink mb-2">
+              <label className="block text-sm font-medium text-primary mb-2">
                 {contactType === "email" ? "البريد الإلكتروني" : "رقم الهاتف"}
               </label>
               <div className="relative">
@@ -340,7 +340,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                   placeholder={contactType === "email" ? "example@email.com" : "01xxxxxxxxx"}
                   autoCapitalize="none"
                   autoCorrect="off"
-                  className="block w-full pr-10 pl-4 py-3 bg-cream text-ink rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-right"
+                  className="block w-full pr-10 pl-4 py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-right"
                   dir="ltr"
                 />
               </div>
@@ -348,7 +348,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
 
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-medium text-ink mb-2">
+              <label className="block text-sm font-medium text-primary mb-2">
                 {ar.login.passwordLabel}
               </label>
               <div className="relative">
@@ -360,7 +360,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={ar.login.passwordPlaceholder}
-                  className="block w-full pr-10 pl-4 py-3 bg-cream text-ink rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-right"
+                  className="block w-full pr-10 pl-4 py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-right"
                   dir="rtl"
                 />
               </div>

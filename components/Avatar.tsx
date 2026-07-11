@@ -38,7 +38,7 @@ const Avatar: React.FC<AvatarProps> = ({ name }) => {
     }
 
     const bgColor = stringToColor(name || 'Default');
-    const textColor = isColorLight(bgColor) ? 'text-ink' : 'text-white';
+    const textColor = isColorLight(bgColor) ? 'text-primary' : 'text-white';
 
 
     return (

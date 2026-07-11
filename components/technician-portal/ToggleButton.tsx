@@ -16,10 +16,10 @@ interface ToggleButtonProps {
 }
 
 const activeMap = {
-  teal: 'border-brand-red bg-brand-red/10 dark:bg-brand-red/20 text-brand-red dark:text-brand-red-light shadow-sm',
+  teal: 'border-primary bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary shadow-sm',
   red: 'border-ember-500 bg-ember-500/10 dark:bg-ember-500/20 text-ember-700 dark:text-ember-300 shadow-sm',
-  blue: 'border-brand-red bg-brand-red/10 dark:bg-brand-red/20 text-brand-red dark:text-brand-red-light shadow-sm',
-  amber: 'border-brand-red bg-brand-red/10 dark:bg-brand-red/20 text-brand-red dark:text-brand-red-light shadow-sm',
+  blue: 'border-primary bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary shadow-sm',
+  amber: 'border-primary bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary shadow-sm',
 };
 
 const ToggleButton: React.FC<ToggleButtonProps> = ({

@@ -24,24 +24,24 @@ const accentBorderMap = {
 };
 
 const iconBgMap = {
-  teal: 'bg-brand-red/10 dark:bg-brand-red/20 text-brand-red dark:text-brand-red-light',
+  teal: 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary',
   red: 'bg-ember-500/10 dark:bg-ember-500/20 text-ember-700 dark:text-ember-300',
-  blue: 'bg-brand-red/10 dark:bg-brand-red/20 text-brand-red dark:text-brand-red-light',
-  amber: 'bg-brand-red/10 dark:bg-brand-red/20 text-brand-red dark:text-brand-red-light',
-  slate: 'bg-cream-2 dark:bg-chrome-light text-latte dark:text-cream/70',
+  blue: 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary',
+  amber: 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary',
+  slate: 'bg-cream-2 dark:bg-espresso-light text-latte dark:text-cream/70',
 };
 
 const badgeBgMap = {
-  teal: 'bg-brand-red/10 dark:bg-brand-red/20 text-brand-red dark:text-brand-red-light',
+  teal: 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary',
   red: 'bg-ember-500/10 dark:bg-ember-500/20 text-ember-700 dark:text-ember-300',
-  blue: 'bg-brand-red/10 dark:bg-brand-red/20 text-brand-red dark:text-brand-red-light',
-  amber: 'bg-brand-red/10 dark:bg-brand-red/20 text-brand-red dark:text-brand-red-light',
-  slate: 'bg-cream-2 dark:bg-chrome-light text-ink dark:text-cream',
+  blue: 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary',
+  amber: 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary',
+  slate: 'bg-cream-2 dark:bg-espresso-light text-primary dark:text-cream',
 };
 
 const variantStyles = {
-  primary: 'bg-cream dark:bg-chrome-light/80 p-6 shadow-lg border-l-4 rounded-2xl',
-  secondary: 'bg-cream dark:bg-chrome-light/50 p-4 rounded-xl',
+  primary: 'bg-cream dark:bg-espresso-light/80 p-6 shadow-lg border-l-4 rounded-2xl',
+  secondary: 'bg-cream dark:bg-espresso-light/50 p-4 rounded-xl',
   tertiary: 'py-3',
 };
 
@@ -95,7 +95,7 @@ const SectionContainer: React.FC<SectionContainerProps> = ({
 
         <div className="flex items-center gap-2 flex-1 min-w-0">
           {title && (
-            <h3 className="text-base font-semibold text-ink dark:text-cream truncate">
+            <h3 className="text-base font-semibold text-primary dark:text-cream truncate">
               {title}
             </h3>
           )}

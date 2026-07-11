@@ -117,7 +117,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
 
       {/* Bottom Sheet */}
       <div className="fixed inset-x-0 bottom-0 z-50 animate-slide-up" dir="rtl">
-        <div className="bg-cream dark:bg-chrome-light rounded-t-2xl shadow-sm max-w-lg mx-auto">
+        <div className="bg-cream dark:bg-espresso-light rounded-t-2xl shadow-sm max-w-lg mx-auto">
           {/* Drag Handle */}
           <div className="flex justify-center pt-3 pb-2">
             <div className="w-10 h-1 rounded-full bg-hairline dark:bg-hairline" />
@@ -125,7 +125,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
 
           {/* Header */}
           <div className="flex items-center justify-between px-5 pb-4">
-            <h3 className="text-lg font-semibold text-ink dark:text-cream">
+            <h3 className="text-lg font-semibold text-primary dark:text-cream">
               {ar.portal.capturePhoto}
             </h3>
             <button
@@ -145,7 +145,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
                 <div className="w-12 h-12 rounded-full bg-ember-500/10 dark:bg-ember-500/20 flex items-center justify-center mb-3">
                   <TrashIcon className="w-6 h-6 text-ember-700 dark:text-ember-300" />
                 </div>
-                <h4 className="text-lg font-semibold text-ink dark:text-cream mb-1">
+                <h4 className="text-lg font-semibold text-primary dark:text-cream mb-1">
                   {ar.portal.resetPhotos}?
                 </h4>
                 <p className="text-sm text-latte dark:text-cream/70">
@@ -156,7 +156,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setConfirmView(false)}
-                  className="py-3 px-4 rounded-xl border border-hairline text-ink dark:text-cream font-semibold text-sm hover:bg-cream-2 dark:hover:bg-chrome-light/50 transition-colors"
+                  className="py-3 px-4 rounded-xl border border-hairline text-primary dark:text-cream font-semibold text-sm hover:bg-cream-2 dark:hover:bg-chrome-light/50 transition-colors"
                 >
                   {ar.common.cancel}
                 </button>
@@ -172,7 +172,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
             <>
               {/* Photo Type Selector */}
               <div className="px-5 pb-5">
-                <label className="block text-sm font-medium text-ink dark:text-cream mb-3">
+                <label className="block text-sm font-medium text-primary dark:text-cream mb-3">
                   {ar.portal.photoType}
                 </label>
                 <div className="grid grid-cols-2 gap-3">
@@ -182,8 +182,8 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
                     disabled={!canAddBefore}
                     className={`py-3 px-4 min-h-[48px] rounded-xl border-2 transition-all text-sm font-semibold ${
                       photoType === 'before'
-                        ? 'border-brand-red bg-primary/10 dark:bg-primary/20 text-brand-red dark:text-brand-red-light'
-                        : 'border-hairline text-ink dark:text-cream'
+                        ? 'border-primary bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary'
+                        : 'border-hairline text-primary dark:text-cream'
                     } ${!canAddBefore ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {ar.portal.beforeMaintenance}
@@ -197,8 +197,8 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
                     disabled={!canAddAfter}
                     className={`py-3 px-4 min-h-[48px] rounded-xl border-2 transition-all text-sm font-semibold ${
                       photoType === 'after'
-                        ? 'border-brand-red bg-primary/10 dark:bg-primary/20 text-brand-red dark:text-brand-red-light'
-                        : 'border-hairline text-ink dark:text-cream'
+                        ? 'border-primary bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary'
+                        : 'border-hairline text-primary dark:text-cream'
                     } ${!canAddAfter ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {ar.portal.afterMaintenance}
@@ -243,7 +243,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
                   type="button"
                   onClick={() => galleryInputRef.current?.click()}
                   disabled={!canAdd || isProcessing}
-                  className="w-full flex items-center justify-center gap-3 py-4 px-4 min-h-[56px] bg-cream dark:bg-chrome-light hover:bg-cream-2 dark:hover:bg-chrome-light/50 disabled:opacity-50 disabled:cursor-not-allowed text-ink dark:text-cream rounded-xl font-semibold text-base transition-all active:scale-[0.98]"
+                  className="w-full flex items-center justify-center gap-3 py-4 px-4 min-h-[56px] bg-cream dark:bg-espresso-light hover:bg-cream-2 dark:hover:bg-chrome-light/50 disabled:opacity-50 disabled:cursor-not-allowed text-primary dark:text-cream rounded-xl font-semibold text-base transition-all active:scale-[0.98]"
                 >
                   <PhotoIcon className="w-6 h-6" />
                   {ar.portal.chooseFromGallery}

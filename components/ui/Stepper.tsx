@@ -105,7 +105,7 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                         <CheckIcon className="h-5 w-5 text-white animate-pop-in" aria-hidden="true" />
                       ) : (
                         <span className={`text-xs font-bold transition-colors ${
-                          isCurrent ? 'text-white' : 'text-latte/70 group-hover:text-ink'
+                          isCurrent ? 'text-white' : 'text-latte/70 group-hover:text-primary'
                         }`}>
                           {index + 1}
                         </span>
@@ -118,8 +118,8 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                     isCurrent 
                       ? 'text-primary dark:text-primary/80 font-bold scale-105' 
                       : isCompleted 
-                      ? 'text-ink/90 group-hover:text-ink' 
-                      : 'text-latte/70 group-hover:text-ink/80'
+                      ? 'text-primary/90 group-hover:text-primary' 
+                      : 'text-latte/70 group-hover:text-primary/80'
                   }`}>
                     {step.name}
                   </span>
@@ -223,7 +223,7 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                         className={`text-xs font-semibold ${
                           isCurrent ? 'text-white' : 'text-latte/70'
                         } ${
-                          isHovered && isClickable && !isCurrent ? 'text-ink' : ''
+                          isHovered && isClickable && !isCurrent ? 'text-primary' : ''
                         } ${
                           isCurrent ? 'scale-110' : ''
                         }`}
@@ -239,9 +239,9 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                   <p
                     className={`text-sm font-semibold truncate transition-all duration-200 ${
                       isCurrent
-                        ? 'text-ink'
+                        ? 'text-primary'
                         : isCompleted
-                        ? 'text-ink/90'
+                        ? 'text-primary/90'
                         : 'text-latte/70'
                     }`}
                   >

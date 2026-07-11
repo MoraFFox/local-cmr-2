@@ -12,14 +12,14 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, err
   return (
     <div className={className}>
       {label && (
-        <label htmlFor={inputId} className="block text-sm font-medium text-ink mb-1.5">
+        <label htmlFor={inputId} className="block text-sm font-medium text-primary mb-1.5">
           {label}
-          {required && <span className="text-brand-red mr-1">*</span>}
+          {required && <span className="text-primary mr-1">*</span>}
         </label>
       )}
-      <div className="relative group focus-within:text-brand-red">
+      <div className="relative group focus-within:text-primary">
         {icon && (
-          <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-latte group-focus-within:text-brand-red transition-colors">
+          <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-latte group-focus-within:text-primary transition-colors">
             {React.cloneElement(icon as React.ReactElement, {
               className: 'w-4 h-4',
               'aria-hidden': 'true',
@@ -32,7 +32,7 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, err
           aria-invalid={error ? 'true' : undefined}
           aria-describedby={error ? `${inputId}-error` : undefined}
           {...props}
-          className={`block w-full ${icon ? 'pr-10 pl-4' : 'px-4'} h-[50px] bg-cream text-ink rounded-lg placeholder-latte focus:outline-none focus:ring-2 border transition-colors ${
+          className={`block w-full ${icon ? 'pr-10 pl-4' : 'px-4'} h-[50px] bg-cream text-primary rounded-lg placeholder-latte focus:outline-none focus:ring-2 border transition-colors ${
             error
               ? 'border-ember-500 focus:border-primary focus:ring-primary/20 animate-shake'
               : 'border-hairline focus:border-primary focus:ring-primary/20'

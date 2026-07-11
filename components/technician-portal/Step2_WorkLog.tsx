@@ -160,7 +160,7 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
          {data.visitType === 'scheduled' && (
             <div className="mt-4 p-4 bg-primary/10 border border-primary/30 rounded-xl flex items-center gap-3 animate-in fade-in">
                 <CheckCircleIcon className="w-6 h-6 text-primary" />
-                <div className="text-sm text-ink">
+                <div className="text-sm text-primary">
                     <p className="font-bold">{ar.portal.routineMaintenance}</p>
                     <p className="opacity-80">{ar.portal.routineHint}</p>
                 </div>
@@ -195,13 +195,13 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
             <div className="bg-espresso p-1 rounded-xl flex mb-4 border border-hairline">
                 <button
                     onClick={() => handlePartsWereReplacedChange(true)}
-                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${data.partsWereReplaced ? 'bg-primary text-white shadow-lg' : 'text-latte hover:text-ink'}`}
+                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${data.partsWereReplaced ? 'bg-primary text-white shadow-lg' : 'text-latte hover:text-primary'}`}
                 >
                     {ar.step2.partsReplacedYes}
                 </button>
                 <button
                     onClick={() => handlePartsWereReplacedChange(false)}
-                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${!data.partsWereReplaced ? 'bg-espresso-light text-cream' : 'text-latte hover:text-ink'}`}
+                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${!data.partsWereReplaced ? 'bg-espresso-light text-cream' : 'text-latte hover:text-primary'}`}
                 >
                     {ar.step2.partsReplacedNo}
                 </button>
@@ -225,14 +225,14 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
             <div className="bg-espresso p-1 rounded-xl flex border border-hairline">
                 <button
                     onClick={() => handleProblemSolvedChange(true)}
-                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${data.problemSolved ? 'bg-leaf-500 text-white shadow-lg shadow-leaf-500/20' : 'text-latte hover:text-ink'}`}
+                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${data.problemSolved ? 'bg-leaf-500 text-white shadow-lg shadow-leaf-500/20' : 'text-latte hover:text-primary'}`}
                 >
                     <CheckCircleIcon className="w-5 h-5" />
                     {ar.step2.problemSolvedYes}
                 </button>
                 <button
                     onClick={() => handleProblemSolvedChange(false)}
-                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${!data.problemSolved ? 'bg-ember-500 text-white shadow-lg shadow-ember-500/20' : 'text-latte hover:text-ink'}`}
+                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${!data.problemSolved ? 'bg-ember-500 text-white shadow-lg shadow-ember-500/20' : 'text-latte hover:text-primary'}`}
                 >
                     <ExclamationTriangleIcon className="w-5 h-5" />
                     {ar.step2.problemSolvedNo}
@@ -330,7 +330,7 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
             onChange={(e) => handleNotesChange(e.target.value)}
             placeholder={ar.step3.notesPlaceholder}
             rows={4}
-            className="w-full bg-cream text-ink p-4 rounded-xl border border-hairline focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none resize-none placeholder-latte"
+            className="w-full bg-cream text-primary p-4 rounded-xl border border-hairline focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none resize-none placeholder-latte"
          />
       </TechCard>
 

@@ -154,7 +154,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-hairline bg-cream-2/50">
                     <div>
-                        <h2 className="text-xl font-bold text-ink">
+                        <h2 className="text-xl font-bold text-primary">
                             Batch Edit Maintenance Records
                         </h2>
                         <p className="text-sm text-latte mt-1">
@@ -176,7 +176,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                         <div className="flex items-center justify-between p-4 border-b border-hairline bg-cream-2">
                             <button
                                 onClick={toggleAll}
-                                className="flex items-center gap-2 text-sm font-medium text-ink"
+                                className="flex items-center gap-2 text-sm font-medium text-primary"
                             >
                                 {selectedIds.size === records.length ? (
                                     <><CheckCircleIcon className="w-5 h-5 text-primary" /> Deselect All</>
@@ -211,7 +211,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
 
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                            <span className="font-medium text-ink">
+                                            <span className="font-medium text-primary">
                                                 {record.maintenanceDate || 'No Date'}
                                             </span>
                                             {record.problemSolved && (
@@ -232,7 +232,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                     {/* Right Panel - Operations */}
                     <div className="w-1/2 flex flex-col">
                         <div className="p-4 border-b border-hairline">
-                            <h3 className="font-semibold text-ink mb-4">
+                            <h3 className="font-semibold text-primary mb-4">
                                 Choose Operation
                             </h3>
 
@@ -248,14 +248,14 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                             className="w-4 h-4"
                                         />
                                         <CalendarIcon className="w-4 h-4 text-latte" />
-                                        <span className="font-medium text-ink">Change Date</span>
+                                        <span className="font-medium text-primary">Change Date</span>
                                     </label>
                                     {operation?.field === 'maintenanceDate' && (
                                         <input
                                             type="date"
                                             value={operation.value}
                                             onChange={(e) => setOperation({ ...operation, value: e.target.value })}
-                                            className="w-full px-3 py-2 bg-cream text-ink border border-hairline rounded-lg focus:border-primary focus:ring-1 focus:ring-primary"
+                                            className="w-full px-3 py-2 bg-cream text-primary border border-hairline rounded-lg focus:border-primary focus:ring-1 focus:ring-primary"
                                         />
                                     )}
                                 </div>
@@ -271,13 +271,13 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                             className="w-4 h-4"
                                         />
                                         <UserIcon className="w-4 h-4 text-latte" />
-                                        <span className="font-medium text-ink">Assign Staff</span>
+                                        <span className="font-medium text-primary">Assign Staff</span>
                                     </label>
                                     {operation?.field === 'baristaName' && (
                                         <select
                                             value={operation.value}
                                             onChange={(e) => setOperation({ ...operation, value: e.target.value })}
-                                            className="w-full px-3 py-2 bg-cream text-ink border border-hairline rounded-lg focus:border-primary focus:ring-1 focus:ring-primary"
+                                            className="w-full px-3 py-2 bg-cream text-primary border border-hairline rounded-lg focus:border-primary focus:ring-1 focus:ring-primary"
                                         >
                                             <option value="">Select Staff</option>
                                             {baristas.map(b => (
@@ -298,13 +298,13 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                             className="w-4 h-4"
                                         />
                                         <WrenchIcon className="w-4 h-4 text-latte" />
-                                        <span className="font-medium text-ink">Change Type</span>
+                                        <span className="font-medium text-primary">Change Type</span>
                                     </label>
                                     {operation?.field === 'type' && (
                                         <select
                                             value={operation.value}
                                             onChange={(e) => setOperation({ ...operation, value: e.target.value })}
-                                            className="w-full px-3 py-2 bg-cream text-ink border border-hairline rounded-lg focus:border-primary focus:ring-1 focus:ring-primary"
+                                            className="w-full px-3 py-2 bg-cream text-primary border border-hairline rounded-lg focus:border-primary focus:ring-1 focus:ring-primary"
                                         >
                                             <option value="scheduled">Scheduled</option>
                                             <option value="requested">Requested</option>
@@ -323,13 +323,13 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                             className="w-4 h-4"
                                         />
                                         <ArrowPathIcon className="w-4 h-4 text-latte" />
-                                        <span className="font-medium text-ink">Mark Status</span>
+                                        <span className="font-medium text-primary">Mark Status</span>
                                     </label>
                                     {operation?.field === 'problemSolved' && (
                                         <select
                                             value={operation.value.toString()}
                                             onChange={(e) => setOperation({ ...operation, value: e.target.value === 'true' })}
-                                            className="w-full px-3 py-2 bg-cream text-ink border border-hairline rounded-lg focus:border-primary focus:ring-1 focus:ring-primary"
+                                            className="w-full px-3 py-2 bg-cream text-primary border border-hairline rounded-lg focus:border-primary focus:ring-1 focus:ring-primary"
                                         >
                                             <option value="true">تم الحل</option>
                                             <option value="false">Not Solved</option>
@@ -357,7 +357,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 pb-safe border-t border-hairline bg-cream-muted/30 gap-4">
+                <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 pb-safe border-t border-hairline bg-cream-2/30 gap-4">
                     <div className="flex items-center gap-2 w-full sm:w-auto">
                         {operation && selectedIds.size > 0 && (
                             <>

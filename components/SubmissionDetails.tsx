@@ -139,7 +139,7 @@ const InfoRow = ({
       <span className='font-medium text-latte shrink-0'>
         {label}:
       </span>
-      <span className='text-ink break-all'>
+      <span className='text-primary break-all'>
         {value}
       </span>
     </div>
@@ -156,7 +156,7 @@ const ContactList = ({ contacts }: { contacts: Contact[] }) => {
           key={c.id}
           className='bg-cream-2 p-2 rounded border border-hairline'
         >
-          <p className='font-bold text-ink text-sm'>
+          <p className='font-bold text-primary text-sm'>
             {c.name}
           </p>
           <p className='text-xs text-latte uppercase font-semibold mb-1'>
@@ -165,7 +165,7 @@ const ContactList = ({ contacts }: { contacts: Contact[] }) => {
           {c.phoneNumbers.map((p) => (
             <div
               key={p.id}
-              className='flex items-center gap-1 text-xs text-ink'
+              className='flex items-center gap-1 text-xs text-primary'
             >
               <PhoneIcon className='w-3 h-3 text-latte' />
               {p.number}
@@ -219,7 +219,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
         {/* Right side (start of RTL flow): Date, Badges, Next Visit */}
         <div className='flex flex-col gap-1.5'>
           <div className='flex flex-wrap items-center gap-2'>
-            <span className='font-bold text-ink' dir="ltr">
+            <span className='font-bold text-primary' dir="ltr">
               {record.maintenanceDate}
             </span>
             {record.dailyLeaseCost && (
@@ -256,7 +256,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
         {/* Left side (end of RTL flow): Staff Badge */}
         {record.baristaName && (
           <div className='shrink-0'>
-            <span className='text-xs bg-cream px-2.5 py-1.5 border border-hairline rounded text-ink flex items-center gap-1.5'>
+            <span className='text-xs bg-cream px-2.5 py-1.5 border border-hairline rounded text-primary flex items-center gap-1.5'>
               <UserIcon className="w-4 h-4 text-latte" />
               <span className='font-bold'>{record.baristaName}</span>
             </span>
@@ -268,11 +268,11 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
       <div className='mt-5 text-sm space-y-4'>
         {record.machines && record.machines.length > 0 && (
           <div>
-            <div className='font-semibold text-ink flex items-center gap-1.5 mb-1.5'>
+            <div className='font-semibold text-primary flex items-center gap-1.5 mb-1.5'>
               <WrenchScrewdriverIcon className="w-4 h-4 text-latte" />
               الماكينات
             </div>
-            <div className='space-y-1 text-ink'>
+            <div className='space-y-1 text-primary'>
               {record.machines.map((m) => (
                 <div key={m.id} className="flex items-start gap-1.5">
                   <span className="text-latte mt-0.5">•</span>
@@ -287,7 +287,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
         
         {record.problems && record.problems.length > 0 && (
           <div>
-            <div className='font-semibold text-ink flex items-center gap-1.5 mb-2'>
+            <div className='font-semibold text-primary flex items-center gap-1.5 mb-2'>
               <ExclamationCircleIcon className="w-4 h-4 text-amber-500" />
               المشاكل
             </div>
@@ -310,7 +310,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
               <CubeIcon className="w-4 h-4" />
               قطع الغيار المستبدلة
             </div>
-            <div className='space-y-1 text-ink dark:text-latte/70'>
+            <div className='space-y-1 text-primary dark:text-latte/70'>
               {record.partsReplaced.map((p, i) => (
                 <div key={i} className="flex items-start gap-1.5">
                   <span className="text-latte mt-0.5">•</span>
@@ -334,7 +334,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
               <ClipboardDocumentListIcon className="w-4 h-4" />
               الخدمات المقدمة
             </div>
-            <div className='space-y-1 text-ink dark:text-latte/70'>
+            <div className='space-y-1 text-primary dark:text-latte/70'>
               {record.servicesPerformed.map((s, i) => (
                 <div key={i} className="flex items-start gap-1.5">
                   <span className="text-latte mt-0.5">•</span>
@@ -354,7 +354,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
         
         {record.notes && (
           <div className='mt-3 bg-white/50 dark:bg-black/20 p-3 rounded-lg border border-hairline'>
-            <p className='italic text-ink dark:text-latte break-words leading-relaxed'>
+            <p className='italic text-primary dark:text-latte break-words leading-relaxed'>
               "{record.notes}"
             </p>
           </div>
@@ -364,7 +364,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
       {/* Photos Section */}
       {record.photos && record.photos.length > 0 && (
         <div className="mt-5 p-3 bg-white/50 dark:bg-black/20 border border-hairline rounded-lg">
-          <h4 className="text-sm font-semibold mb-3 text-ink dark:text-latte/70 flex items-center gap-1.5">
+          <h4 className="text-sm font-semibold mb-3 text-primary dark:text-latte/70 flex items-center gap-1.5">
             <CameraIcon className="w-4 h-4 text-latte" />
             الصور
           </h4>
@@ -412,7 +412,7 @@ const PrintField: React.FC<{ label: string; value: React.ReactNode }> = ({
     <span className='text-[10px] uppercase text-latte font-semibold'>
       {label}
     </span>
-    <span className='text-sm text-ink font-medium'>{value || "-"}</span>
+    <span className='text-sm text-primary font-medium'>{value || "-"}</span>
   </div>
 );
 
@@ -425,7 +425,7 @@ const MaintenanceTable: React.FC<{
 
   return (
     <table className='w-full text-left text-xs border border-hairline mb-4 break-inside-auto'>
-      <thead className='bg-cream text-ink uppercase font-bold'>
+      <thead className='bg-cream text-primary uppercase font-bold'>
         <tr>
           <th className='px-2 py-1.5 border-b border-hairline w-24'>Date</th>
           <th className='px-2 py-1.5 border-b border-hairline w-32'>Staff</th>
@@ -494,7 +494,7 @@ const MaintenanceTable: React.FC<{
                   </div>
                 )}
                 {rec.notes && (
-                  <div className='italic text-ink mt-1'>
+                  <div className='italic text-primary mt-1'>
                     "{rec.notes}"
                   </div>
                 )}
@@ -531,14 +531,14 @@ const DetailedRecordPrint: React.FC<{
     >
       <div className='bg-cream px-4 py-2 border-b border-hairline flex justify-between items-center'>
         <div className='flex items-center gap-3'>
-          <span className='font-bold text-sm text-ink'>
+          <span className='font-bold text-sm text-primary'>
             {record.maintenanceDate}
           </span>
           <span className='text-xs text-latte uppercase font-semibold tracking-wider bg-white border border-hairline px-2 py-0.5 rounded-full'>
             {record.type} Visit
           </span>
           {record.visitZone && (
-            <span className='text-xs text-ink bg-cream-2 border border-hairline px-2 py-0.5 rounded-full capitalize'>
+            <span className='text-xs text-primary bg-cream-2 border border-hairline px-2 py-0.5 rounded-full capitalize'>
               {record.visitZone.replace("_", " ")}
             </span>
           )}
@@ -550,10 +550,10 @@ const DetailedRecordPrint: React.FC<{
               Next: {record.nextVisitDate}
             </span>
           )}
-          <div className='flex items-center gap-1.5 text-xs font-semibold text-ink bg-white border border-hairline px-2 py-1 rounded shadow-sm'>
+          <div className='flex items-center gap-1.5 text-xs font-semibold text-primary bg-white border border-hairline px-2 py-1 rounded shadow-sm'>
             <UserIcon className='w-3.5 h-3.5 text-latte' />
             Performed by:{" "}
-            <span className='text-ink font-bold'>
+            <span className='text-primary font-bold'>
               {record.baristaName || "Unknown"}
             </span>
           </div>
@@ -584,14 +584,14 @@ const DetailedRecordPrint: React.FC<{
           {/* Machines Section - Highlighted */}
           {record.machines && record.machines.length > 0 ? (
             <div className='flex gap-2 p-2 bg-cream rounded border border-hairline'>
-              <span className='font-bold text-ink w-20 uppercase text-[10px] tracking-wider pt-0.5'>
+              <span className='font-bold text-primary w-20 uppercase text-[10px] tracking-wider pt-0.5'>
                 Machines
               </span>
               <div className='flex-1 flex flex-wrap gap-2'>
                 {record.machines.map((m, i) => (
                   <span
                     key={i}
-                    className='inline-flex items-center bg-white border border-hairline px-2 py-1 rounded font-bold text-ink shadow-sm'
+                    className='inline-flex items-center bg-white border border-hairline px-2 py-1 rounded font-bold text-primary shadow-sm'
                   >
                     <CubeIcon className='w-3 h-3 text-latte mr-1' />
                     {m.count > 1 ? `${m.count}x ` : ""}
@@ -623,7 +623,7 @@ const DetailedRecordPrint: React.FC<{
           {(record.partsWereReplaced ||
             record.servicesPerformed.length > 0) && (
             <div className='flex gap-2'>
-              <span className='font-bold text-ink w-20 uppercase text-[10px] tracking-wider pt-0.5'>
+              <span className='font-bold text-primary w-20 uppercase text-[10px] tracking-wider pt-0.5'>
                 Work Done
               </span>
               <div className='flex-1 space-y-1'>
@@ -636,7 +636,7 @@ const DetailedRecordPrint: React.FC<{
                         {p.count}x {p.name}
                       </b>{" "}
                       {p.paidByClient ? (
-                        <span className='text-[10px] text-ink border border-hairline px-1 rounded bg-cream-2'>
+                        <span className='text-[10px] text-primary border border-hairline px-1 rounded bg-cream-2'>
                           (Client Paid)
                         </span>
                       ) : (
@@ -662,20 +662,20 @@ const DetailedRecordPrint: React.FC<{
 
           {record.recommendations && (
             <div className='flex gap-2 mt-2 pt-2 border-t border-hairline'>
-              <span className='font-bold text-ink w-20 uppercase text-[10px] tracking-wider'>
+              <span className='font-bold text-primary w-20 uppercase text-[10px] tracking-wider'>
                 Recs
               </span>
-              <div className='italic text-ink bg-yellow-50/50 p-1 rounded'>
+              <div className='italic text-primary bg-yellow-50/50 p-1 rounded'>
                 {record.recommendations}
               </div>
             </div>
           )}
           {record.notes && (
             <div className='flex gap-2'>
-              <span className='font-bold text-ink w-20 uppercase text-[10px] tracking-wider'>
+              <span className='font-bold text-primary w-20 uppercase text-[10px] tracking-wider'>
                 Notes
               </span>
-              <div className='italic text-ink'>{record.notes}</div>
+              <div className='italic text-primary'>{record.notes}</div>
             </div>
           )}
         </div>
@@ -691,7 +691,7 @@ const DetailedRecordPrint: React.FC<{
                 <div className='space-y-2'>
                   {record.supervisors.map((s) => (
                     <div key={s.id} className='text-center p-2 bg-cream rounded'>
-                      <p className='font-bold text-[11px] text-ink uppercase'>
+                      <p className='font-bold text-[11px] text-primary uppercase'>
                         {s.name}
                       </p>
                       <p className='text-[9px] text-latte'>{s.phone}</p>
@@ -753,10 +753,10 @@ const BranchPrintableDocument: React.FC<{
             className='h-16 w-auto object-contain'
           />
           <div>
-            <h1 className='text-2xl font-bold text-ink tracking-tight leading-none'>
+            <h1 className='text-2xl font-bold text-primary tracking-tight leading-none'>
               {companyName}
             </h1>
-            <h2 className='text-lg text-ink mt-1 font-medium'>
+            <h2 className='text-lg text-primary mt-1 font-medium'>
               {branch.branchName || "Branch Report"}
             </h2>
           </div>
@@ -779,7 +779,7 @@ const BranchPrintableDocument: React.FC<{
               <span className='text-xs font-bold text-latte uppercase block mb-0.5'>
                 Email
               </span>
-              <span className='font-medium text-ink'>
+              <span className='font-medium text-primary'>
                 {branch.email || "-"}
               </span>
             </div>
@@ -787,7 +787,7 @@ const BranchPrintableDocument: React.FC<{
               <span className='text-xs font-bold text-latte uppercase block mb-0.5'>
                 Tax ID
               </span>
-              <span className='font-medium text-ink'>
+              <span className='font-medium text-primary'>
                 {branch.taxNumber || "-"}
               </span>
             </div>
@@ -795,7 +795,7 @@ const BranchPrintableDocument: React.FC<{
               <span className='text-xs font-bold text-latte uppercase block mb-0.5'>
                 Machine Ownership
               </span>
-              <span className='font-medium text-ink'>
+              <span className='font-medium text-primary'>
                 {getMachineOwnershipStatus(branch, hideCosts)}
               </span>
             </div>
@@ -803,7 +803,7 @@ const BranchPrintableDocument: React.FC<{
               <span className='text-xs font-bold text-latte uppercase block mb-0.5'>
                 Total Visits
               </span>
-              <span className='font-medium text-ink'>
+              <span className='font-medium text-primary'>
                 {stats.visitCount}
               </span>
             </div>
@@ -817,9 +817,9 @@ const BranchPrintableDocument: React.FC<{
               <div className='grid grid-cols-2 gap-2'>
                 {branch.contacts.map((c) => (
                   <div key={c.id} className='text-xs'>
-                    <span className='font-bold text-ink'>{c.name}</span>
+                    <span className='font-bold text-primary'>{c.name}</span>
                     <span className='text-latte mx-1'>•</span>
-                    <span className='text-ink'>
+                    <span className='text-primary'>
                       {c.phoneNumbers[0]?.number}
                     </span>
                   </div>
@@ -843,7 +843,7 @@ const BranchPrintableDocument: React.FC<{
                   key={b.id}
                   className='flex justify-between items-center text-xs p-1.5 bg-cream rounded'
                 >
-                  <span className='font-semibold text-ink truncate'>
+                  <span className='font-semibold text-primary truncate'>
                     {b.name}
                   </span>
                   <div className='flex items-center gap-1'>
@@ -919,10 +919,10 @@ const PrintableDocument: React.FC<{
       {/* Document Header */}
       <div className='flex justify-between items-end border-b-2 border-hairline pb-4 mb-8'>
         <div>
-          <h1 className='text-3xl font-bold text-ink tracking-tight'>
+          <h1 className='text-3xl font-bold text-primary tracking-tight'>
             {data.companyName}
           </h1>
-          <p className='text-sm text-ink mt-1'>
+          <p className='text-sm text-primary mt-1'>
             Comprehensive Maintenance Report
           </p>
         </div>
@@ -955,7 +955,7 @@ const PrintableDocument: React.FC<{
               {data.contacts.map((c) => (
                 <li key={c.id}>
                   <span className='font-semibold'>{c.name}</span>
-                  <span className='text-ink'> — {c.position}</span>
+                  <span className='text-primary'> — {c.position}</span>
                   {c.phoneNumbers.length > 0 && (
                     <span className='text-latte text-xs ml-2'>
                       ({c.phoneNumbers.map((p) => p.number).join(", ")})
@@ -981,7 +981,7 @@ const PrintableDocument: React.FC<{
       {/* Branches Section */}
       {data.hasBranches && (
         <div className='mt-8'>
-          <h2 className='text-lg font-bold text-ink border-b-2 border-hairline pb-1 mb-4'>
+          <h2 className='text-lg font-bold text-primary border-b-2 border-hairline pb-1 mb-4'>
             Branch Details & Maintenance
           </h2>
 
@@ -990,10 +990,10 @@ const PrintableDocument: React.FC<{
             return (
               <div key={branch.id} className='mb-8 break-inside-avoid-page'>
                 <div className='bg-cream p-2 border-l-4 border-hairline mb-3 flex justify-between items-baseline'>
-                  <h3 className='font-bold text-base text-ink'>
+                  <h3 className='font-bold text-base text-primary'>
                     {branch.branchName || `Branch ${idx + 1}`}
                   </h3>
-                  <span className='text-xs text-ink font-normal'>
+                  <span className='text-xs text-primary font-normal'>
                     {branch.location}
                   </span>
                 </div>
@@ -1023,7 +1023,7 @@ const PrintableDocument: React.FC<{
                         <span className='uppercase text-latte font-bold mr-2'>
                           Daily Lease:
                         </span>
-                        <span className='font-bold text-ink'>
+                        <span className='font-bold text-primary'>
                           {branch.dailyLeaseCost} EGP
                         </span>
                       </div>
@@ -1033,7 +1033,7 @@ const PrintableDocument: React.FC<{
                         <span className='uppercase text-latte font-bold mr-2'>
                           Parts Replaced:
                         </span>
-                        <span className='text-ink'>
+                        <span className='text-primary'>
                           {Object.entries(stats.partsMap)
                             .map(([name, count]) => `${count}x ${name}`)
                             .join(", ")}
@@ -1048,7 +1048,7 @@ const PrintableDocument: React.FC<{
                     <p className='text-[10px] uppercase text-latte font-semibold mb-1'>
                       Contacts
                     </p>
-                    <div className='text-xs text-ink'>
+                    <div className='text-xs text-primary'>
                       {branch.contacts.map((c) => c.name).join(", ")}
                     </div>
                   </div>
@@ -1095,7 +1095,7 @@ const PrintDropdown: React.FC<{
           toggle();
         }}
         disabled={disabled}
-        className='flex items-center gap-2 bg-primary text-ink font-bold py-2 px-4 rounded-lg hover:bg-hover transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed'
+        className='flex items-center gap-2 bg-primary text-primary font-bold py-2 px-4 rounded-lg hover:bg-hover transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed'
       >
         <PrinterIcon className='w-5 h-5' />
         {label}
@@ -1111,7 +1111,7 @@ const PrintDropdown: React.FC<{
           <div className='py-1' role='menu' aria-orientation='vertical'>
             <button
               onClick={() => handleSelect("internal")}
-              className='block w-full text-left px-4 py-3 text-sm text-ink hover:bg-cream-2'
+              className='block w-full text-left px-4 py-3 text-sm text-primary hover:bg-cream-2'
               role='menuitem'
             >
               <span className='font-bold'>Internal Report</span>
@@ -1121,7 +1121,7 @@ const PrintDropdown: React.FC<{
             </button>
             <button
               onClick={() => handleSelect("client")}
-              className='block w-full text-left px-4 py-3 text-sm text-ink hover:bg-cream-2 border-t border-hairline'
+              className='block w-full text-left px-4 py-3 text-sm text-primary hover:bg-cream-2 border-t border-hairline'
               role='menuitem'
             >
               <span className='font-bold'>Client Report</span>
@@ -1283,7 +1283,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isParsingPDF || !onUpdate}
-              className='flex items-center gap-2 bg-cream-2 text-ink font-bold py-2 px-4 rounded-lg hover:bg-cream-3 transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed'
+              className='flex items-center gap-2 bg-cream-2 text-primary font-bold py-2 px-4 rounded-lg hover:bg-cream-3 transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed'
             >
               <DocumentArrowUpIcon className='w-5 h-5' />
               {isParsingPDF ? "جاري الاستيراد..." : "رفع PDF مكتمل"}
@@ -1291,7 +1291,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
             <button
               onClick={() => handleGenerateMissingDataPDF("company")}
               disabled={isGeneratingPDF}
-              className='flex items-center gap-2 bg-primary text-ink font-bold py-2 px-4 rounded-lg hover:bg-hover transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed'
+              className='flex items-center gap-2 bg-primary text-primary font-bold py-2 px-4 rounded-lg hover:bg-hover transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed'
             >
               <DocumentArrowDownIcon className='w-5 h-5' />
               استكمال بيانات ناقصة
@@ -1306,7 +1306,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
 
         {/* Local Date Range Filter */}
         <div className='bg-cream p-4 rounded-xl shadow-sm border border-hairline mb-6 flex flex-col sm:flex-row items-center justify-between gap-4'>
-          <div className='flex items-center gap-2 text-ink font-semibold text-sm'>
+          <div className='flex items-center gap-2 text-primary font-semibold text-sm'>
             <CalendarIcon className='w-5 h-5 text-primary' />
             <span>Filter History by Date:</span>
           </div>
@@ -1315,14 +1315,14 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
               type='date'
               value={filterStartDate}
               onChange={(e) => setFilterStartDate(e.target.value)}
-              className='px-3 py-1.5 rounded-lg border-hairline bg-cream text-ink text-sm focus:ring-primary focus:border-primary'
+              className='px-3 py-1.5 rounded-lg border-hairline bg-cream text-primary text-sm focus:ring-primary focus:border-primary'
             />
             <span className='text-latte'>-</span>
             <input
               type='date'
               value={filterEndDate}
               onChange={(e) => setFilterEndDate(e.target.value)}
-              className='px-3 py-1.5 rounded-lg border-hairline bg-cream text-ink text-sm focus:ring-primary focus:border-primary'
+              className='px-3 py-1.5 rounded-lg border-hairline bg-cream text-primary text-sm focus:ring-primary focus:border-primary'
             />
             {(filterStartDate || filterEndDate) && (
               <button
@@ -1352,7 +1352,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                   />
                 </div>
                 <div>
-                  <h1 className='text-2xl sm:text-3xl font-bold text-ink mb-1 break-words'>
+                  <h1 className='text-2xl sm:text-3xl font-bold text-primary mb-1 break-words'>
                     {submission.companyName}
                   </h1>
                   <div className='flex flex-wrap gap-x-4 gap-y-1 text-sm text-latte'>
@@ -1375,7 +1375,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                 <div className='text-xs text-latte uppercase font-semibold'>
                   Status
                 </div>
-                <div className='font-bold text-ink'>
+                <div className='font-bold text-primary'>
                   {submission.pendingSync ? "Offline (Pending Sync)" : "Synced"}
                 </div>
               </div>
@@ -1427,7 +1427,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
             {/* Main Office Maintenance */}
             {filteredMainHistory.length > 0 && (
               <div className='mt-6 pt-6 border-t border-hairline'>
-                <h3 className='text-md font-bold text-ink mb-3 flex items-center gap-2'>
+                <h3 className='text-md font-bold text-primary mb-3 flex items-center gap-2'>
                   <WrenchScrewdriverIcon className='w-5 h-5' /> Main Office
                   Maintenance
                 </h3>
@@ -1449,7 +1449,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
           {/* Branches List Screen View */}
           {submission.hasBranches && (
             <div className='p-6 sm:p-8 bg-paper'>
-              <h2 className='text-xl font-bold text-ink mb-4 flex items-center gap-2 border-b border-hairline pb-2'>
+              <h2 className='text-xl font-bold text-primary mb-4 flex items-center gap-2 border-b border-hairline pb-2'>
                 <BuildingStorefrontIcon className='w-6 h-6 text-primary' />
                 Branches & Maintenance
               </h2>
@@ -1486,7 +1486,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                               <button
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={isParsingPDF || !onUpdate}
-                                className='flex items-center gap-1 bg-cream-2 text-ink hover:bg-cream-3 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm border border-hairline'
+                                className='flex items-center gap-1 bg-cream-2 text-primary hover:bg-cream-3 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm border border-hairline'
                               >
                                 <DocumentArrowUpIcon className='w-4 h-4' />
                                 {isParsingPDF ? "جاري الاستيراد..." : "رفع PDF مكتمل"}
@@ -1518,7 +1518,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                             <button
                               onClick={() => fileInputRef.current?.click()}
                               disabled={isParsingPDF || !onUpdate}
-                              className='flex items-center justify-center gap-2 bg-cream-2 text-ink hover:bg-cream-3 font-bold py-2 px-4 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm border border-hairline w-full'
+                              className='flex items-center justify-center gap-2 bg-cream-2 text-primary hover:bg-cream-3 font-bold py-2 px-4 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm border border-hairline w-full'
                             >
                               <DocumentArrowUpIcon className='w-4 h-4' />
                               {isParsingPDF ? "جاري الاستيراد..." : "رفع PDF مكتمل"}
@@ -1587,7 +1587,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                               <span className='text-latte font-medium'>
                                 Total Visits:
                               </span>
-                              <span className='font-bold text-ink'>
+                              <span className='font-bold text-primary'>
                                 {stats.visitCount}
                               </span>
                             </div>
@@ -1615,7 +1615,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                                 <span className='text-latte font-medium'>
                                   Daily Lease:
                                 </span>
-                                <span className='font-bold text-ink'>
+                                <span className='font-bold text-primary'>
                                   {branch.dailyLeaseCost} EGP
                                 </span>
                               </div>
@@ -1631,7 +1631,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                                     ([name, count]) => (
                                       <span
                                         key={name}
-                                        className='inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-cream-2 border border-hairline text-ink'
+                                        className='inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-cream-2 border border-hairline text-primary'
                                       >
                                         <span className='font-bold mr-1'>
                                           {count}x
@@ -1654,7 +1654,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                                 {branch.baristas.map((b) => (
                                   <span
                                     key={b.id}
-                                    className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream-2 text-ink'
+                                    className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream-2 text-primary'
                                   >
                                     {b.name} ({b.rating}★)
                                   </span>
@@ -1664,7 +1664,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                           )}
 
                           <div>
-                            <h4 className='text-sm font-bold text-ink flex items-center gap-2 border-t pt-3 border-hairline sticky top-0 sm:static bg-cream dark:bg-espresso z-10 -mx-4 px-4 py-3'>
+                            <h4 className='text-sm font-bold text-primary flex items-center gap-2 border-t pt-3 border-hairline sticky top-0 sm:static bg-cream dark:bg-espresso z-10 -mx-4 px-4 py-3'>
                               <WrenchScrewdriverIcon className='w-4 h-4' />{" "}
                               Maintenance History
                             </h4>

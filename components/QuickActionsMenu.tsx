@@ -89,12 +89,12 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
               {record.problemSolved ? (
                 <>
                   <XCircleIcon className="w-5 h-5 text-ember-500" />
-                  <span className="text-sm text-ink dark:text-cream">Mark as Unsolved</span>
+                  <span className="text-sm text-primary dark:text-cream">Mark as Unsolved</span>
                 </>
               ) : (
                 <>
                   <CheckCircleIcon className="w-5 h-5 text-leaf-500" />
-                  <span className="text-sm text-ink dark:text-cream">Mark as Solved</span>
+                  <span className="text-sm text-primary dark:text-cream">Mark as Solved</span>
                 </>
               )}
             </button>
@@ -108,7 +108,7 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
                 className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
               >
                 <StarIcon className="w-5 h-5 text-yellow-500" />
-                <span className="text-sm text-ink dark:text-cream">Change Rating</span>
+                <span className="text-sm text-primary dark:text-cream">Change Rating</span>
               </button>
 
               {showRatingPicker && (
@@ -141,7 +141,7 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
                 className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
               >
                 <CalendarIcon className="w-5 h-5 text-primary" />
-                <span className="text-sm text-ink dark:text-cream">Change Date</span>
+                <span className="text-sm text-primary dark:text-cream">Change Date</span>
               </button>
 
               {showDatePicker && (
@@ -150,7 +150,7 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
                     type="date"
                     value={record.maintenanceDate}
                     onChange={handleDateChange}
-                    className="w-full px-3 py-2 bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline rounded-lg text-sm text-ink dark:text-cream focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full px-3 py-2 bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline rounded-lg text-sm text-primary dark:text-cream focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
               )}
@@ -190,7 +190,7 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
                         </button>
                         <button
                           onClick={() => setShowDeleteConfirm(false)}
-                          className="flex-1 px-3 py-2 bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-ink dark:text-cream text-sm font-medium rounded-lg hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
+                          className="flex-1 px-3 py-2 bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-cream text-sm font-medium rounded-lg hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
                         >
                           Cancel
                         </button>

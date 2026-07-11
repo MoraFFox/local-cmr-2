@@ -21,11 +21,11 @@ const TechButton: React.FC<TechButtonProps> = ({
             case 'primary':
                 return 'btn-primary';
             case 'secondary':
-                return 'bg-cream border border-hairline text-ink hover:bg-cream-2 active:bg-cream-3';
+                return 'bg-cream border border-hairline text-primary hover:bg-cream-2 active:bg-cream-3';
             case 'danger':
                 return 'bg-ember-500/10 text-ember-700 border border-ember-500/50 hover:bg-ember-500/20 active:bg-ember-500/30';
             case 'ghost':
-                return 'bg-transparent text-latte hover:text-ink active:bg-primary/5';
+                return 'bg-transparent text-latte hover:text-primary active:bg-primary/5';
         }
     };
 

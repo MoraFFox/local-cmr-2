@@ -26,7 +26,7 @@ const TechnicianLayout: React.FC<TechnicianLayoutProps> = ({
       <div className="fixed inset-0 z-0 opacity-[0.03] pointer-events-none dark-grid" />
 
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-espresso/80 backdrop-blur-sm border-b border-hairline/50">
+      <header className="sticky top-0 z-40 bg-chrome/80 backdrop-blur-sm border-b border-hairline/50">
         <div className="max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
             <div className="flex items-center gap-3">
                 {onBack ? (

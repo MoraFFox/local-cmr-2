@@ -125,7 +125,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
     {/* Branch Contacts */}
     <div className="mt-6 pt-6 border-t border-hairline">
       <div className="flex justify-between items-center mb-4">
-        <h4 className="text-lg font-bold text-ink tracking-tight">جهات الاتصال</h4>
+        <h4 className="text-lg font-bold text-primary tracking-tight">جهات الاتصال</h4>
         <Button onClick={() => actions.addContact(`branch-${index}`)}>
           <PlusCircleIcon className="w-4 h-4" /><span>إضافة جهة اتصال</span>
         </Button>
@@ -146,7 +146,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
     {/* Branch Client Baristas */}
     <div className="mt-6 pt-6 border-t border-hairline">
       <div className="flex justify-between items-center mb-4">
-        <h4 className="text-lg font-bold text-ink tracking-tight">باريستا العميل</h4>
+        <h4 className="text-lg font-bold text-primary tracking-tight">باريستا العميل</h4>
         <Button onClick={() => actions.addNestedListItem(index, "clientBaristas")}>
           <PlusCircleIcon className="w-4 h-4" /> إضافة باريستا عميل
         </Button>
@@ -169,7 +169,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-ink mb-2">ملاحظات</label>
+                  <label className="block text-sm font-medium text-primary mb-2">ملاحظات</label>
                   <textarea name="notes" value={cb.notes || ""}
                     onChange={(e) => actions.handleNestedListItemChange(e, index, "clientBaristas", cbi)}
                     rows={3} className={CLASSES.textArea}
@@ -190,7 +190,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
     {/* Branch Maintenance */}
     <div className="mt-6 pt-6 border-t border-hairline">
       <div className="flex justify-between items-center mb-4">
-        <h4 className="text-lg font-bold text-ink tracking-tight">سجل الصيانة</h4>
+        <h4 className="text-lg font-bold text-primary tracking-tight">سجل الصيانة</h4>
         <Button onClick={() => actions.addNestedListItem(index, "maintenanceHistory")}>
           <PlusCircleIcon className="w-4 h-4" /> إضافة سجل
         </Button>

@@ -94,7 +94,7 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
             case 'delete':
                 return 'text-ember-700 bg-ember-50 dark:bg-ember-500/10 dark:text-ember-300';
             default:
-                return 'text-ink bg-cream dark:bg-espresso-light dark:text-latte';
+                return 'text-primary bg-cream dark:bg-espresso-light dark:text-latte';
         }
     };
 
@@ -131,7 +131,7 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
                             <ClockIcon className="w-5 h-5 text-primary dark:text-primary-400" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-ink dark:text-white">
+                            <h2 className="text-xl font-bold text-primary dark:text-white">
                                 History & Versions
                             </h2>
                             <p className="text-sm text-latte dark:text-latte">
@@ -154,8 +154,8 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
                         onClick={() => setActiveTab('history')}
                         className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                             activeTab === 'history'
-                                ? 'text-primary border-b-2 border-primary-light bg-cream-2 dark:bg-primary/10'
-                                : 'text-ink dark:text-latte hover:text-primary dark:hover:text-cream'
+                                ? 'text-primary border-b-2 border-primary bg-cream-2 dark:bg-primary/10'
+                                : 'text-primary dark:text-latte hover:text-primary dark:hover:text-cream'
                         }`}
                     >
                         Activity History ({history.length})
@@ -165,8 +165,8 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
                         onClick={() => setActiveTab('snapshots')}
                         className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                             activeTab === 'snapshots'
-                                ? 'text-primary border-b-2 border-primary-light bg-cream-2 dark:bg-primary/10'
-                                : 'text-ink dark:text-latte hover:text-primary dark:hover:text-cream'
+                                ? 'text-primary border-b-2 border-primary bg-cream-2 dark:bg-primary/10'
+                                : 'text-primary dark:text-latte hover:text-primary dark:hover:text-cream'
                         }`}
                     >
                         Saved Versions ({snapshots.length})
@@ -193,7 +193,7 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
                                         </div>
                                         
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-ink dark:text-cream">
+                                            <p className="text-sm font-medium text-primary dark:text-cream">
                                                 {entry.description}
                                             </p>
                                             
@@ -244,7 +244,7 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
                                         </div>
                                         
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-ink dark:text-cream">
+                                            <p className="text-sm font-medium text-primary dark:text-cream">
                                                 {snapshot.description}
                                             </p>
                                             
@@ -289,12 +289,12 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
                             <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
                                 <ExclamationTriangleIcon className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                             </div>
-                            <h3 className="text-lg font-bold text-ink dark:text-white">
+                            <h3 className="text-lg font-bold text-primary dark:text-white">
                                 Restore Version?
                             </h3>
                         </div>
 
-                        <p className="text-ink dark:text-latte mb-6">
+                        <p className="text-primary dark:text-latte mb-6">
                             This will replace your current data with the version from{' '}
                             <strong>{formatTimestamp(selectedSnapshot.timestamp)}</strong>.{' '}
                             This action cannot be undone.
@@ -303,7 +303,7 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
                         <div className="flex gap-3 justify-end">
                             <button
                                 onClick={() => setShowConfirmRestore(false)}
-                                className="px-4 py-2 text-ink dark:text-latte/70 font-medium rounded-lg hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
+                                className="px-4 py-2 text-primary dark:text-latte/70 font-medium rounded-lg hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
                             >
                                 Cancel
                             </button>
