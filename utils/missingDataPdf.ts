@@ -16,10 +16,10 @@ import {
 const COLORS = {
   espresso: [34, 34, 34] as [number, number, number],
   espressoLight: [34, 34, 34] as [number, number, number],
-  cream: [248, 249, 250] as [number, number, number],
-  cream2: [240, 240, 240] as [number, number, number],
+  cream: [245, 245, 245] as [number, number, number],
+  cream2: [248, 249, 250] as [number, number, number],
   paper: [255, 255, 255] as [number, number, number],
-  copper: [182, 30, 36] as [number, number, number],
+  primary: [182, 30, 36] as [number, number, number],
   brass: [212, 160, 23] as [number, number, number],
   ink: [34, 34, 34] as [number, number, number],
   latte: [100, 100, 100] as [number, number, number],
@@ -84,14 +84,14 @@ const addTextField = (
   const rightEdge = layout.x + layout.width;
   doc.setFontSize(7);
   doc.setFont("Amiri", "bold");
-  doc.setTextColor(...COLORS.latte);
+  doc.setTextColor(...COLORS.ink);
   doc.text(reshapeArabic(label, true), rightEdge, labelY, { align: "right" });
 
   if (required) {
     const labelWidth = doc.getTextWidth(reshapeArabic(label, true));
-    doc.setTextColor(220, 53, 69);
+    doc.setTextColor(182, 30, 36);
     doc.text("*", rightEdge - labelWidth - 1, labelY);
-    doc.setTextColor(...COLORS.latte);
+    doc.setTextColor(...COLORS.ink);
   }
 
   const fieldY = layout.y + 2;
@@ -127,7 +127,7 @@ const addBinaryCheckboxField = (
   const rightEdge = layout.x + layout.width;
   doc.setFontSize(7);
   doc.setFont("Amiri", "bold");
-  doc.setTextColor(...COLORS.latte);
+  doc.setTextColor(...COLORS.ink);
   doc.text(reshapeArabic(label, true), rightEdge, labelY, { align: "right" });
 
   const boxSize = 4;
@@ -170,7 +170,7 @@ const addNumberField = (
   const rightEdge = layout.x + layout.width;
   doc.setFontSize(7);
   doc.setFont("Amiri", "bold");
-  doc.setTextColor(...COLORS.latte);
+  doc.setTextColor(...COLORS.ink);
   doc.text(reshapeArabic(label, true), rightEdge, labelY, { align: "right" });
 
   const fieldY = layout.y + 2;
