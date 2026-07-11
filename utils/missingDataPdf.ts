@@ -89,7 +89,7 @@ const addTextField = (
   required = false
 ): number => {
   const labelY = layout.y;
-  doc.setFontSize(8);
+  doc.setFontSize(7);
   doc.setFont("Amiri", "bold");
   doc.setTextColor(...COLORS.latte);
   doc.text(reshapeArabic(label), layout.x, labelY);
@@ -101,12 +101,12 @@ const addTextField = (
     doc.setTextColor(...COLORS.latte);
   }
 
-  const fieldY = layout.y + 4;
-  const fieldHeight = 9;
+  const fieldY = layout.y + 2;
+  const fieldHeight = 6;
 
   doc.setDrawColor(...COLORS.hairline);
   doc.setFillColor(...COLORS.white);
-  doc.roundedRect(layout.x, fieldY, layout.width, fieldHeight, 2, 2, "FD");
+  doc.roundedRect(layout.x, fieldY, layout.width, fieldHeight, 1.5, 1.5, "FD");
 
   const textField = new jsPDF.AcroForm.TextField();
   textField.x = layout.x + 1;
@@ -131,14 +131,14 @@ const addBinaryCheckboxField = (
   layout: FieldLayout
 ): number => {
   const labelY = layout.y;
-  doc.setFontSize(8);
+  doc.setFontSize(7);
   doc.setFont("Amiri", "bold");
   doc.setTextColor(...COLORS.latte);
   doc.text(reshapeArabic(label), layout.x, labelY);
 
-  const boxSize = 5;
-  const startY = layout.y + 4;
-  const optionSpacing = Math.min(45, layout.width / 2);
+  const boxSize = 4;
+  const startY = layout.y + 2;
+  const optionSpacing = Math.min(40, layout.width / 2);
 
   options.forEach((option, index) => {
     const x = layout.x + index * optionSpacing;
@@ -155,7 +155,7 @@ const addBinaryCheckboxField = (
     doc.roundedRect(x, startY, boxSize, boxSize, 1, 1, "FD");
 
     doc.setFont("Amiri", "normal");
-    doc.setFontSize(9);
+    doc.setFontSize(8);
     doc.setTextColor(...COLORS.ink);
     doc.text(reshapeArabic(option), x + boxSize + 2, startY + boxSize - 0.5);
   });
@@ -171,17 +171,17 @@ const addNumberField = (
   value?: number
 ): number => {
   const labelY = layout.y;
-  doc.setFontSize(8);
+  doc.setFontSize(7);
   doc.setFont("Amiri", "bold");
   doc.setTextColor(...COLORS.latte);
   doc.text(reshapeArabic(label), layout.x, labelY);
 
-  const fieldY = layout.y + 4;
-  const fieldHeight = 9;
+  const fieldY = layout.y + 2;
+  const fieldHeight = 6;
 
   doc.setDrawColor(...COLORS.hairline);
   doc.setFillColor(...COLORS.white);
-  doc.roundedRect(layout.x, fieldY, layout.width, fieldHeight, 2, 2, "FD");
+  doc.roundedRect(layout.x, fieldY, layout.width, fieldHeight, 1.5, 1.5, "FD");
 
   const textField = new jsPDF.AcroForm.TextField();
   textField.x = layout.x + 1;
@@ -235,9 +235,9 @@ const getLogoDimensions = (dataUrl: string): Promise<{ width: number; height: nu
 };
 
 const drawHeader = async (doc: jsPDF, data: FormData, pageWidth: number, margin: number, assets?: LogoAssets): Promise<number> => {
-  const headerHeight = 42;
-  const maxLogoWidth = 40;
-  const targetLogoHeight = 18;
+  const headerHeight = 24;
+  const maxLogoWidth = 28;
+  const targetLogoHeight = 12;
   let logoWidth = 0;
   let logoHeight = 0;
 
@@ -260,17 +260,17 @@ const drawHeader = async (doc: jsPDF, data: FormData, pageWidth: number, margin:
 
   // Brass accent line
   doc.setFillColor(...COLORS.brass);
-  doc.rect(0, headerHeight, pageWidth, 2, "F");
+  doc.rect(0, headerHeight, pageWidth, 1.5, "F");
 
   // Logo or initials badge on the right side of the header (RTL convention)
-  const badgeSize = 20;
+  const badgeSize = 14;
   const badgeX = pageWidth - margin - badgeSize;
-  const badgeY = 11;
+  const badgeY = 7;
 
   if (assets?.logo && logoWidth > 0 && logoHeight > 0) {
     try {
       const logoX = pageWidth - margin - logoWidth;
-      const logoY = 8 + (22 - logoHeight) / 2;
+      const logoY = 7 + (14 - logoHeight) / 2;
       doc.addImage(assets.logo, assets.logoFormat, logoX, logoY, logoWidth, logoHeight);
     } catch (e) {
       logger.warn("Failed to add logo to missing-data PDF", e, "pdf");
@@ -282,29 +282,19 @@ const drawHeader = async (doc: jsPDF, data: FormData, pageWidth: number, margin:
   }
 
   // Title block (right-aligned within the left side of the header for proper RTL)
-  const textBlockRightEdge = pageWidth - margin - logoWidth - 6;
-  doc.setFontSize(16);
+  const textBlockRightEdge = pageWidth - margin - logoWidth - 4;
+  doc.setFontSize(13);
   doc.setFont("Amiri", "bold");
   doc.setTextColor(...COLORS.cream);
-  doc.text(reshapeArabic("طلب استكمال بيانات"), textBlockRightEdge, 18, { align: "right" });
+  doc.text(reshapeArabic("طلب استكمال بيانات"), textBlockRightEdge, 14, { align: "right" });
 
   // Company name
-  doc.setFontSize(10);
+  doc.setFontSize(9);
   doc.setFont("Amiri", "normal");
   doc.setTextColor(...COLORS.cream);
-  doc.text(reshapeArabic(`الشركة: ${data.companyName || "غير مسماة"}`), textBlockRightEdge, 27, { align: "right" });
+  doc.text(reshapeArabic(`الشركة: ${data.companyName || "غير مسماة"}`), textBlockRightEdge, 19, { align: "right" });
 
-  // Date
-  const createdAt = new Date().toLocaleDateString("fr-FR");
-  doc.setFontSize(8);
-  doc.setTextColor(...COLORS.latte);
-  const dateLabel = reshapeArabic("تاريخ الإنشاء:");
-  doc.text(dateLabel, textBlockRightEdge, 34, { align: "right" });
-  const dateLabelWidth = doc.getTextWidth(dateLabel);
-  doc.setTextColor(...COLORS.cream);
-  doc.text(createdAt, textBlockRightEdge - dateLabelWidth - 2, 34, { align: "right" });
-
-  return headerHeight + 8;
+  return headerHeight + 5;
 };
 
 const drawInitialsBadge = (
@@ -336,48 +326,31 @@ const drawInitialsBadge = (
 const drawSectionHeader = (doc: jsPDF, title: string, x: number, y: number, pageWidth: number): number => {
   doc.setFillColor(...COLORS.cream2);
   doc.setDrawColor(...COLORS.hairline);
-  doc.roundedRect(x, y, pageWidth - x * 2, 10, 2, 2, "FD");
+  doc.roundedRect(x, y, pageWidth - x * 2, 7, 1.5, 1.5, "FD");
 
-  doc.setFontSize(11);
+  doc.setFontSize(9);
   doc.setFont("Amiri", "bold");
   doc.setTextColor(...COLORS.espresso);
-  doc.text(reshapeArabic(title), x + 4, y + 6.5);
+  doc.text(reshapeArabic(title), x + 4, y + 4.5);
 
-  return y + 14;
+  return y + 10;
 };
 
 const drawInstructionsBox = (doc: jsPDF, x: number, y: number, pageWidth: number): number => {
   const margin = x;
   const boxWidth = pageWidth - margin * 2;
-  const lineHeight = 5;
-  const instructions = [
-    "يرجى ملء الحقول التالية بالبيانات المطلوبة.",
-    "يمكنك ملء هذا الملف مباشرة إذا كان برنامج قراءة PDF يدعم الحقول التفاعلية.",
-    "للأسئلة ذات الخيارين، يرجى تحديد خيار واحد فقط.",
-    "بعد الانتهاء، يرجى إرسال الملف مرة أخرى.",
-  ];
-
-  doc.setFontSize(8);
-  doc.setFont("Amiri", "bold");
-  doc.setTextColor(...COLORS.espresso);
-  const title = reshapeArabic("تعليمات:");
-  const titleWidth = doc.getTextWidth(title);
-
-  const boxHeight = 14 + instructions.length * lineHeight;
 
   doc.setFillColor(...COLORS.cream);
   doc.setDrawColor(...COLORS.brass);
-  doc.roundedRect(margin, y, boxWidth, boxHeight, 3, 3, "FD");
+  doc.roundedRect(margin, y, boxWidth, 6, 1.5, 1.5, "FD");
 
-  doc.text(title, margin + 4, y + 6);
+  doc.setFontSize(7);
+  doc.setFont("Amiri", "bold");
+  doc.setTextColor(...COLORS.espresso);
+  const instructionText = reshapeArabic("تعليمات: يرجى ملء الحقول التفاعلية التالية بالبيانات المطلوبة وإعادة إرسال الملف.");
+  doc.text(instructionText, pageWidth - margin - 2, y + 4, { align: "right" });
 
-  doc.setFont("Amiri", "normal");
-  doc.setTextColor(...COLORS.ink);
-  instructions.forEach((line, index) => {
-    doc.text(reshapeArabic(line), margin + 8 + titleWidth, y + 6 + index * lineHeight);
-  });
-
-  return y + boxHeight + 6;
+  return y + 9;
 };
 
 /** Find the first contact with a specific position, or return undefined */
@@ -395,7 +368,7 @@ const getContactPhone = (contact?: Contact): string | undefined => {
   return phone;
 };
 
-/** Build missing fields for a contact role (name, email, phone) */
+/** Build missing fields for a contact role (name, phone on one row; email full-width) */
 const getRoleContactFields = (
   contacts: Contact[],
   position: string,
@@ -413,18 +386,18 @@ const getRoleContactFields = (
       required: true,
     });
   }
-  if (!contact || isMissing(contact.email)) {
-    fields.push({
-      key: `${prefix}.${position}.email`,
-      label: `بريد ${roleTitle}`,
-      type: "text",
-      required: true,
-    });
-  }
   if (!contact || isMissing(getContactPhone(contact))) {
     fields.push({
       key: `${prefix}.${position}.phone`,
       label: `موبايل ${roleTitle}`,
+      type: "text",
+      required: true,
+    });
+  }
+  if (!contact || isMissing(contact.email)) {
+    fields.push({
+      key: `${prefix}.${position}.email`,
+      label: `بريد ${roleTitle}`,
       type: "text",
       required: true,
     });
@@ -512,8 +485,8 @@ const getDynamicCompanyFields = (data: FormData): MissingField[] => {
     });
   }
 
-  // 13. Coffee consumption
-  if (data.coffeeConsumptionKg === undefined || data.coffeeConsumptionKg === null) {
+  // 13. Coffee consumption (treat 0 as missing since it's not a valid consumption value)
+  if (data.coffeeConsumptionKg === undefined || data.coffeeConsumptionKg === null || data.coffeeConsumptionKg === 0) {
     fields.push({
       key: "company.coffeeConsumptionKg",
       label: "استهلاك القهوة بالكيلو",
@@ -570,8 +543,8 @@ const getDynamicBranchFields = (branch: Branch, prefix: string): MissingField[] 
     });
   }
 
-  // Coffee consumption
-  if (branch.coffeeConsumptionKg === undefined || branch.coffeeConsumptionKg === null) {
+  // Coffee consumption (treat 0 as missing since it's not a valid consumption value)
+  if (branch.coffeeConsumptionKg === undefined || branch.coffeeConsumptionKg === null || branch.coffeeConsumptionKg === 0) {
     fields.push({
       key: `${prefix}.coffeeConsumptionKg`,
       label: "استهلاك القهوة بالكيلو",
@@ -782,16 +755,6 @@ export const getMissingFields = (
   return result;
 };
 
-/** Check if two fields are a name+phone pair that should sit on the same row */
-const arePairedFields = (a: MissingField, b: MissingField): boolean => {
-  const aParts = a.key.split(".");
-  const bParts = b.key.split(".");
-  if (aParts.length !== bParts.length) return false;
-  if (aParts[aParts.length - 1] !== "name") return false;
-  if (bParts[bParts.length - 1] !== "phone") return false;
-  return aParts.slice(0, -1).join(".") === bParts.slice(0, -1).join(".");
-};
-
 interface FieldRow {
   fields: MissingField[];
 }
@@ -810,15 +773,21 @@ const buildFieldRows = (fields: MissingField[]): FieldRow[] => {
       continue;
     }
 
-    // Try to pair current field with the next one if they are name+phone
-    const next = fields[i + 1];
-    if (next && arePairedFields(current, next)) {
-      rows.push({ fields: [current, next] });
+    // Group up to 3 consecutive non-select fields to maximize compaction
+    const next1 = fields[i + 1];
+    const next2 = fields[i + 2];
+    if (next1 && !(next1.type === "select" && next1.options)) {
+      if (next2 && !(next2.type === "select" && next2.options)) {
+        rows.push({ fields: [current, next1, next2] });
+        i += 3;
+        continue;
+      }
+      rows.push({ fields: [current, next1] });
       i += 2;
       continue;
     }
 
-    // Default: single field (full-width or will occupy one column)
+    // Default: single field (full-width)
     rows.push({ fields: [current] });
     i++;
   }
@@ -833,50 +802,36 @@ const renderFieldsGrid = (
   pageWidth: number,
   margin: number
 ): number => {
-  const gap = 8;
-  const colWidth = (pageWidth - margin * 2 - gap) / 2;
+  const gap = 3;
   const rows = buildFieldRows(fields);
   let yPos = startY;
 
   for (const row of rows) {
-    const isPaired = row.fields.length === 2;
+    const colCount = row.fields.length;
+    const colWidth = (pageWidth - margin * 2 - gap * (colCount - 1)) / colCount;
     const rowStartY = yPos;
-    let leftBottom = rowStartY;
-    let rightBottom = rowStartY;
+    let bottomY = rowStartY;
 
-    // Render left field
-    const leftLayout: FieldLayout = {
-      x: margin,
-      y: rowStartY,
-      width: isPaired ? colWidth : colWidth * 2 + gap,
-    };
-
-    const leftField = row.fields[0];
-    if (leftField.type === "select" && leftField.options) {
-      leftBottom = addBinaryCheckboxField(doc, leftField.key, leftField.label, leftField.options, leftLayout);
-    } else if (leftField.type === "number") {
-      leftBottom = addNumberField(doc, leftField.key, leftField.label, leftLayout, leftField.required);
-    } else {
-      leftBottom = addTextField(doc, leftField.key, leftField.label, leftLayout, leftField.value, leftField.required);
-    }
-
-    // Render right field if paired
-    if (isPaired && row.fields[1]) {
-      const rightField = row.fields[1];
-      const rightLayout: FieldLayout = {
-        x: margin + colWidth + gap,
+    row.fields.forEach((field, index) => {
+      const layout: FieldLayout = {
+        x: margin + index * (colWidth + gap),
         y: rowStartY,
         width: colWidth,
       };
 
-      if (rightField.type === "number") {
-        rightBottom = addNumberField(doc, rightField.key, rightField.label, rightLayout, rightField.required);
+      let fieldBottom = rowStartY;
+      if (field.type === "select" && field.options) {
+        fieldBottom = addBinaryCheckboxField(doc, field.key, field.label, field.options, layout);
+      } else if (field.type === "number") {
+        fieldBottom = addNumberField(doc, field.key, field.label, layout, undefined);
       } else {
-        rightBottom = addTextField(doc, rightField.key, rightField.label, rightLayout, rightField.value, rightField.required);
+        fieldBottom = addTextField(doc, field.key, field.label, layout, field.value, field.required);
       }
-    }
 
-    yPos = Math.max(leftBottom, rightBottom);
+      bottomY = Math.max(bottomY, fieldBottom);
+    });
+
+    yPos = bottomY;
 
     // Page break when running out of space
     if (yPos > doc.internal.pageSize.height - margin - 20) {
@@ -907,7 +862,7 @@ export const generateMissingDataPDF = async (
   // Ensure Amiri font is registered so AcroForm fields can render Arabic text
   const assets = await loadFonts(doc);
   const pageWidth = doc.internal.pageSize.getWidth();
-  const margin = 14;
+  const margin = 8;
 
   // Header
   let yPos = await drawHeader(doc, data, pageWidth, margin, assets);
@@ -929,7 +884,7 @@ export const generateMissingDataPDF = async (
     yPos = checkPageBreak(doc, yPos, margin);
     yPos += 4;
     const branchName = data.branches[Number(branchIndex)]?.branchName || `فرع ${Number(branchIndex) + 1}`;
-    yPos = drawSectionHeader(doc, `بيانات ${branchName}`, margin, yPos, pageWidth);
+    yPos = drawSectionHeader(doc, `بيانات فرع ${branchName}`, margin, yPos, pageWidth);
     yPos = renderFieldsGrid(doc, fields, yPos, pageWidth, margin);
   });
 
@@ -940,21 +895,16 @@ export const generateMissingDataPDF = async (
 
     // Espresso footer bar
     doc.setFillColor(...COLORS.espresso);
-    doc.rect(0, doc.internal.pageSize.getHeight() - 14, pageWidth, 14, "F");
+    doc.rect(0, doc.internal.pageSize.getHeight() - 10, pageWidth, 10, "F");
 
     // Brass accent line
     doc.setFillColor(...COLORS.brass);
-    doc.rect(0, doc.internal.pageSize.getHeight() - 16, pageWidth, 2, "F");
+    doc.rect(0, doc.internal.pageSize.getHeight() - 12, pageWidth, 2, "F");
 
     doc.setFont("Amiri", "normal");
     doc.setFontSize(8);
     doc.setTextColor(...COLORS.cream);
-    doc.text(
-      reshapeArabic(`صفحة ${i} من ${pageCount}`),
-      pageWidth - margin,
-      doc.internal.pageSize.getHeight() - 8,
-      { align: "right" }
-    );
+    doc.text(reshapeArabic(`صفحة ${i} من ${pageCount}`), pageWidth - margin, doc.internal.pageSize.getHeight() - 5, { align: "right" });
   }
 
   return doc;
