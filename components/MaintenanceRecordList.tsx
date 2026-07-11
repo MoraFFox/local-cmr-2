@@ -159,7 +159,7 @@ const MaintenanceRecordRow = React.memo(({
           />
           <button
             onClick={() => onEdit(record, actualIndex)}
-            className="p-2 text-secondary hover:text-brand-red dark:hover:text-brand-red-400 hover:bg-surface-elevated dark:hover:bg-copper-500/10 rounded-lg transition-colors"
+            className="p-2 text-secondary hover:text-brand-red dark:hover:text-brand-red-400 hover:bg-surface-elevated dark:hover:bg-brand-red/10 rounded-lg transition-colors"
             title="تعديل السجل"
           >
             <PencilIcon className="w-5 h-5" />
@@ -225,7 +225,7 @@ const MaintenanceRecordCardMobile: React.FC<MaintenanceRecordRowProps> = ({
         />
         <button
           onClick={() => onEdit(record, actualIndex)}
-          className="p-2 text-secondary hover:text-brand-red dark:hover:text-brand-red-400 hover:bg-surface-elevated dark:hover:bg-copper-500/10 rounded-lg transition-colors"
+          className="p-2 text-secondary hover:text-brand-red dark:hover:text-brand-red-400 hover:bg-surface-elevated dark:hover:bg-brand-red/10 rounded-lg transition-colors"
           title="تعديل السجل"
           aria-label="Edit record"
         >
@@ -300,7 +300,7 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
                   onClick={() => handleSort(field)}
                   className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
                     sortBy === field
-                      ? 'bg-copper-500/10 text-brand-red-800 dark:bg-copper-500/10 dark:text-brand-red-400'
+                      ? 'bg-brand-red/10 text-brand-red-800 dark:bg-brand-red/10 dark:text-brand-red-400'
                       : 'text-primary dark:text-secondary hover:bg-surface dark:hover:bg-chrome-light/50'
                   }`}
                 >
@@ -423,7 +423,7 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
                     onClick={() => setCurrentPage(page)}
                     className={`min-w-[40px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                       currentPage === page
-                        ? 'bg-copper-600 text-white'
+                        ? 'bg-brand-red-light text-white'
                         : 'bg-surface dark:bg-chrome-light border border-default dark:border-default text-primary dark:text-secondary hover:bg-surface-elevated dark:hover:bg-chrome-light/50'
                     }`}
                   >

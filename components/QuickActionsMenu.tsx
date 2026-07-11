@@ -69,7 +69,7 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
       <button
         ref={triggerRef as React.RefObject<HTMLButtonElement>}
         onClick={toggle}
-        className="p-2 text-secondary hover:text-brand-red dark:hover:text-brand-red-400 hover:bg-copper-500/10 dark:hover:bg-copper-500/20 rounded-lg transition-colors"
+        className="p-2 text-secondary hover:text-brand-red dark:hover:text-brand-red-400 hover:bg-brand-red/10 dark:hover:bg-brand-red/20 rounded-lg transition-colors"
         title="إجراءات سريعة"
       >
         <BoltIcon className="w-5 h-5" />

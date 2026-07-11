@@ -242,7 +242,7 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ isOpen: externalIsOpen, onToggl
 
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('MOCK_TECHNICIAN_DATA'))}
-            className="px-2 py-0.5 rounded border border-copper-500/30 bg-copper-500/10 text-brand-red-400 text-[10px] cursor-pointer hover:bg-copper-500/20 font-bold ml-2"
+            className="px-2 py-0.5 rounded border border-brand-red/30 bg-brand-red/10 text-brand-red-400 text-[10px] cursor-pointer hover:bg-brand-red/20 font-bold ml-2"
             title="Mock Technician Flow Data"
           >
             🔧 Mock Tech

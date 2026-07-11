@@ -27,7 +27,7 @@ const SelectedItemCard: React.FC<SelectedItemCardProps> = ({
 }) => {
   const borderColorClass = paidByClient
     ? 'border-amber-500/30 bg-amber-500/5'
-    : 'border-copper-500/30 bg-copper-500/5';
+    : 'border-brand-red/30 bg-brand-red/5';
 
   const handleDecrement = () => {
     onQuantityChange(quantity - 1);
@@ -69,7 +69,7 @@ const SelectedItemCard: React.FC<SelectedItemCardProps> = ({
             type="text"
             value={name}
             onChange={handleNameChange}
-            className="w-full bg-chrome/50 text-cream px-3 py-1.5 rounded-lg border border-espresso-light focus:border-copper-500 focus:ring-1 focus:ring-brand-red/50 outline-none transition-all placeholder-latte"
+            className="w-full bg-chrome/50 text-cream px-3 py-1.5 rounded-lg border border-espresso-light focus:border-brand-red focus:ring-1 focus:ring-brand-red/50 outline-none transition-all placeholder-latte"
             placeholder="Item name..."
           />
         ) : (

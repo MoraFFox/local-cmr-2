@@ -134,7 +134,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
             </p>
 
             {error && (
-              <div className="mb-4 p-3 rounded-lg border border-copper-500/30 bg-ember-500/20 text-sm text-ember-700 text-center">
+              <div className="mb-4 p-3 rounded-lg border border-brand-red/30 bg-ember-500/20 text-sm text-ember-700 text-center">
                 {error}
               </div>
             )}
@@ -155,7 +155,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                     placeholder="example@email.com"
                     autoCapitalize="none"
                     autoCorrect="off"
-                    className="w-full pr-10 pl-4 py-3 rounded-lg bg-surface-elevated border border-default text-primary focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-brand-red/20 text-right"
+                    className="w-full pr-10 pl-4 py-3 rounded-lg bg-surface-elevated border border-default text-primary focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 text-right"
                     dir="ltr"
                   />
                 </div>
@@ -271,7 +271,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-ember-500/20 border border-copper-500/30 rounded-lg">
+            <div className="mb-6 p-4 bg-ember-500/20 border border-brand-red/30 rounded-lg">
               <p className="text-sm text-ember-700 text-center">
                 {error}
               </p>
@@ -340,7 +340,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                   placeholder={contactType === "email" ? "example@email.com" : "01xxxxxxxxx"}
                   autoCapitalize="none"
                   autoCorrect="off"
-                  className="block w-full pr-10 pl-4 py-3 bg-surface text-primary rounded-lg border border-default focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-brand-red/20 transition-all text-right"
+                  className="block w-full pr-10 pl-4 py-3 bg-surface text-primary rounded-lg border border-default focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 transition-all text-right"
                   dir="ltr"
                 />
               </div>
@@ -360,7 +360,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={ar.login.passwordPlaceholder}
-                  className="block w-full pr-10 pl-4 py-3 bg-surface text-primary rounded-lg border border-default focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-brand-red/20 transition-all text-right"
+                  className="block w-full pr-10 pl-4 py-3 bg-surface text-primary rounded-lg border border-default focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 transition-all text-right"
                   dir="rtl"
                 />
               </div>

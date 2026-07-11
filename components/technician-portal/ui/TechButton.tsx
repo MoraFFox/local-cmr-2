@@ -25,7 +25,7 @@ const TechButton: React.FC<TechButtonProps> = ({
             case 'danger':
                 return 'bg-ember-500/10 text-ember-700 border border-ember-500/50 hover:bg-ember-500/20 active:bg-ember-500/30';
             case 'ghost':
-                return 'bg-transparent text-secondary hover:text-primary active:bg-copper-500/5';
+                return 'bg-transparent text-secondary hover:text-primary active:bg-brand-red/5';
         }
     };
 

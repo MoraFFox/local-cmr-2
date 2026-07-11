@@ -197,7 +197,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                     onClick={() => toggleSelection(record.id)}
                                     className={`flex items-center gap-3 p-4 border-b border-default/50 cursor-pointer transition-colors ${
                                         selectedIds.has(record.id)
-                                            ? 'bg-copper-500/10'
+                                            ? 'bg-brand-red/10'
                                             : 'hover:bg-surface-elevated'
                                     }`}
                                 >
@@ -238,7 +238,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
 
                             <div className="space-y-3">
                                 {/* Date Operation */}
-                                <div className={`p-3 rounded-lg border ${operation?.field === 'maintenanceDate' ? 'border-copper-500 bg-copper-500/10' : 'border-default'}`}>
+                                <div className={`p-3 rounded-lg border ${operation?.field === 'maintenanceDate' ? 'border-brand-red bg-brand-red/10' : 'border-default'}`}>
                                     <label className="flex items-center gap-2 mb-2">
                                         <input
                                             type="radio"
@@ -255,13 +255,13 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                             type="date"
                                             value={operation.value}
                                             onChange={(e) => setOperation({ ...operation, value: e.target.value })}
-                                            className="w-full px-3 py-2 bg-surface text-primary border border-default rounded-lg focus:border-copper-500 focus:ring-1 focus:ring-brand-red"
+                                            className="w-full px-3 py-2 bg-surface text-primary border border-default rounded-lg focus:border-brand-red focus:ring-1 focus:ring-brand-red"
                                         />
                                     )}
                                 </div>
 
                                 {/* Staff Operation */}
-                                <div className={`p-3 rounded-lg border ${operation?.field === 'baristaName' ? 'border-copper-500 bg-copper-500/10' : 'border-default'}`}>
+                                <div className={`p-3 rounded-lg border ${operation?.field === 'baristaName' ? 'border-brand-red bg-brand-red/10' : 'border-default'}`}>
                                     <label className="flex items-center gap-2 mb-2">
                                         <input
                                             type="radio"
@@ -277,7 +277,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                         <select
                                             value={operation.value}
                                             onChange={(e) => setOperation({ ...operation, value: e.target.value })}
-                                            className="w-full px-3 py-2 bg-surface text-primary border border-default rounded-lg focus:border-copper-500 focus:ring-1 focus:ring-brand-red"
+                                            className="w-full px-3 py-2 bg-surface text-primary border border-default rounded-lg focus:border-brand-red focus:ring-1 focus:ring-brand-red"
                                         >
                                             <option value="">Select Staff</option>
                                             {baristas.map(b => (
@@ -288,7 +288,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                 </div>
 
                                 {/* Type Operation */}
-                                <div className={`p-3 rounded-lg border ${operation?.field === 'type' ? 'border-copper-500 bg-copper-500/10' : 'border-default'}`}>
+                                <div className={`p-3 rounded-lg border ${operation?.field === 'type' ? 'border-brand-red bg-brand-red/10' : 'border-default'}`}>
                                     <label className="flex items-center gap-2 mb-2">
                                         <input
                                             type="radio"
@@ -304,7 +304,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                         <select
                                             value={operation.value}
                                             onChange={(e) => setOperation({ ...operation, value: e.target.value })}
-                                            className="w-full px-3 py-2 bg-surface text-primary border border-default rounded-lg focus:border-copper-500 focus:ring-1 focus:ring-brand-red"
+                                            className="w-full px-3 py-2 bg-surface text-primary border border-default rounded-lg focus:border-brand-red focus:ring-1 focus:ring-brand-red"
                                         >
                                             <option value="scheduled">Scheduled</option>
                                             <option value="requested">Requested</option>
@@ -313,7 +313,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                 </div>
 
                                 {/* Mark Solved Operation */}
-                                <div className={`p-3 rounded-lg border ${operation?.field === 'problemSolved' ? 'border-copper-500 bg-copper-500/10' : 'border-default'}`}>
+                                <div className={`p-3 rounded-lg border ${operation?.field === 'problemSolved' ? 'border-brand-red bg-brand-red/10' : 'border-default'}`}>
                                     <label className="flex items-center gap-2 mb-2">
                                         <input
                                             type="radio"
@@ -329,7 +329,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                         <select
                                             value={operation.value.toString()}
                                             onChange={(e) => setOperation({ ...operation, value: e.target.value === 'true' })}
-                                            className="w-full px-3 py-2 bg-surface text-primary border border-default rounded-lg focus:border-copper-500 focus:ring-1 focus:ring-brand-red"
+                                            className="w-full px-3 py-2 bg-surface text-primary border border-default rounded-lg focus:border-brand-red focus:ring-1 focus:ring-brand-red"
                                         >
                                             <option value="true">تم الحل</option>
                                             <option value="false">Not Solved</option>

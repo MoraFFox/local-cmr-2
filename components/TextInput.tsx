@@ -34,8 +34,8 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, err
           {...props}
           className={`block w-full ${icon ? 'pr-10 pl-4' : 'px-4'} h-[50px] bg-surface text-primary rounded-lg placeholder-latte focus:outline-none focus:ring-2 border transition-colors ${
             error
-              ? 'border-ember-500 focus:border-copper-500 focus:ring-brand-red/20 animate-shake'
-              : 'border-default focus:border-copper-500 focus:ring-brand-red/20'
+              ? 'border-ember-500 focus:border-brand-red focus:ring-brand-red/20 animate-shake'
+              : 'border-default focus:border-brand-red focus:ring-brand-red/20'
           }`}
         />
       </div>

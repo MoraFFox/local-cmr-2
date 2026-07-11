@@ -179,7 +179,7 @@ const SidebarContent = React.memo(({
                 <div
                   key={draft.id}
                   onClick={() => handleLoadDraft(draft)}
-                  className={`group flex items-center justify-between p-2 rounded-md text-sm cursor-pointer transition-colors ${currentDraftId === draft.id ? "bg-chrome-light border-r-2 border-copper-500 text-cream" : "text-cream/60 hover:bg-chrome-light/40 hover:text-cream"}`}
+                  className={`group flex items-center justify-between p-2 rounded-md text-sm cursor-pointer transition-colors ${currentDraftId === draft.id ? "bg-chrome-light border-r-2 border-brand-red text-cream" : "text-cream/60 hover:bg-chrome-light/40 hover:text-cream"}`}
                 >
                   <div className="flex flex-col truncate">
                     <span className="font-medium truncate">

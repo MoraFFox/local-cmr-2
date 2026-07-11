@@ -92,7 +92,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                             onClick={() => setActiveTab('suggested')}
                             className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                                 activeTab === 'suggested'
-                                    ? 'text-brand-red border-b-2 border-copper-700 bg-copper-500/10'
+                                    ? 'text-brand-red border-b-2 border-copper-700 bg-brand-red/10'
                                     : 'text-secondary hover:text-primary'
                             }`}
                         >
@@ -102,7 +102,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                             onClick={() => setActiveTab('all')}
                             className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                                 activeTab === 'all'
-                                    ? 'text-brand-red border-b-2 border-copper-700 bg-copper-500/10'
+                                    ? 'text-brand-red border-b-2 border-copper-700 bg-brand-red/10'
                                     : 'text-secondary hover:text-primary'
                             }`}
                         >
@@ -124,13 +124,13 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                                     onClick={() => handleSelectTemplate(template.id)}
                                     className={`relative p-4 rounded-xl border-2 text-left transition-all ${
                                         isSelected
-                                            ? 'border-copper-500 bg-copper-500/10'
-                                            : 'border-default hover:border-copper-500/50 hover:bg-surface-elevated'
+                                            ? 'border-brand-red bg-brand-red/10'
+                                            : 'border-default hover:border-brand-red/50 hover:bg-surface-elevated'
                                     }`}
                                 >
                                     {isSelected && (
                                         <div className="absolute top-3 right-3">
-                                            <div className="bg-copper-500 text-white rounded-full p-1">
+                                            <div className="bg-brand-red text-white rounded-full p-1">
                                                 <CheckIcon className="w-3 h-3" />
                                             </div>
                                         </div>
@@ -139,7 +139,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                                     <div className="flex items-start gap-3">
                                         <div className={`p-2 rounded-lg ${
                                             isSelected
-                                                ? 'bg-copper-500/20 text-brand-red'
+                                                ? 'bg-brand-red/20 text-brand-red'
                                                 : 'bg-surface-elevated text-secondary'
                                         }`}>
                                             <IconComponent className="w-5 h-5" />
@@ -197,7 +197,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                     <button
                         onClick={handleApplyTemplate}
                         disabled={!selectedTemplateId}
-                        className="px-6 py-2 bg-copper-500 text-white font-semibold rounded-lg hover:bg-copper-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        className="px-6 py-2 bg-brand-red text-white font-semibold rounded-lg hover:bg-brand-red-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
                         Apply Template
                     </button>

@@ -123,7 +123,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-10 w-10 border-4 border-copper-500 border-t-transparent rounded-full animate-spin" />
+          <div className="mx-auto mb-4 h-10 w-10 border-4 border-brand-red border-t-transparent rounded-full animate-spin" />
           <p className="text-primary font-medium">
             جاري التحقق من الرابط...
           </p>
@@ -212,7 +212,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 rounded-lg border border-copper-500/30 bg-ember-500/20 text-sm text-ember-700 text-center">
+          <div className="mb-6 p-4 rounded-lg border border-brand-red/30 bg-ember-500/20 text-sm text-ember-700 text-center">
             {error}
           </div>
         )}
@@ -231,7 +231,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pr-10 pl-4 py-3 rounded-lg bg-surface border border-default text-primary focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-brand-red/20"
+                className="w-full pr-10 pl-4 py-3 rounded-lg bg-surface border border-default text-primary focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20"
                 dir="ltr"
               />
             </div>
@@ -250,7 +250,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pr-10 pl-4 py-3 rounded-lg bg-surface border border-default text-primary focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-brand-red/20"
+                className="w-full pr-10 pl-4 py-3 rounded-lg bg-surface border border-default text-primary focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20"
                 dir="ltr"
               />
             </div>

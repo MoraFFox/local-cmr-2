@@ -180,7 +180,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                         onClick={() => setActiveTab('export')}
                         className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                             activeTab === 'export'
-                                ? 'text-brand-red border-b-2 border-copper-500 bg-copper-500/10'
+                                ? 'text-brand-red border-b-2 border-brand-red bg-brand-red/10'
                                 : 'text-secondary hover:text-primary'
                         }`}
                     >
@@ -194,7 +194,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                         onClick={() => setActiveTab('import')}
                         className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                             activeTab === 'import'
-                                ? 'text-brand-red border-b-2 border-copper-500 bg-copper-500/10'
+                                ? 'text-brand-red border-b-2 border-brand-red bg-brand-red/10'
                                 : 'text-secondary hover:text-primary'
                         }`}
                     >
@@ -212,9 +212,9 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <button
                                     onClick={handleExportJSON}
-                                    className="flex flex-col items-center gap-3 p-6 bg-surface rounded-xl border-2 border-default hover:border-copper-500 transition-colors group"
+                                    className="flex flex-col items-center gap-3 p-6 bg-surface rounded-xl border-2 border-default hover:border-brand-red transition-colors group"
                                 >
-                                    <div className="p-3 bg-surface-elevated rounded-xl group-hover:bg-copper-500/20 transition-colors">
+                                    <div className="p-3 bg-surface-elevated rounded-xl group-hover:bg-brand-red/20 transition-colors">
                                         <CodeBracketIcon className="w-8 h-8 text-primary group-hover:text-brand-red" />
                                     </div>
                                     <div className="text-center">
@@ -227,9 +227,9 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
 
                                 <button
                                     onClick={handleExportCSV}
-                                    className="flex flex-col items-center gap-3 p-6 bg-surface rounded-xl border-2 border-default hover:border-copper-500 transition-colors group"
+                                    className="flex flex-col items-center gap-3 p-6 bg-surface rounded-xl border-2 border-default hover:border-brand-red transition-colors group"
                                 >
-                                    <div className="p-3 bg-surface-elevated rounded-xl group-hover:bg-copper-500/20 transition-colors">
+                                    <div className="p-3 bg-surface-elevated rounded-xl group-hover:bg-brand-red/20 transition-colors">
                                         <TableCellsIcon className="w-8 h-8 text-primary group-hover:text-brand-red" />
                                     </div>
                                     <div className="text-center">
@@ -242,9 +242,9 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
 
                                 <button
                                     onClick={handleExportSummary}
-                                    className="flex flex-col items-center gap-3 p-6 bg-surface rounded-xl border-2 border-default hover:border-copper-500 transition-colors group sm:col-span-2"
+                                    className="flex flex-col items-center gap-3 p-6 bg-surface rounded-xl border-2 border-default hover:border-brand-red transition-colors group sm:col-span-2"
                                 >
-                                    <div className="p-3 bg-surface-elevated rounded-xl group-hover:bg-copper-500/20 transition-colors">
+                                    <div className="p-3 bg-surface-elevated rounded-xl group-hover:bg-brand-red/20 transition-colors">
                                         <DocumentTextIcon className="w-8 h-8 text-primary group-hover:text-brand-red" />
                                     </div>
                                     <div className="text-center">
@@ -262,12 +262,12 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                             <div
                                 className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
                                     importStatus === 'loading'
-                                        ? 'border-copper-500 bg-copper-500/10'
+                                        ? 'border-brand-red bg-brand-red/10'
                                         : importStatus === 'success'
                                         ? 'border-leaf-500 bg-leaf-500/10'
                                         : importStatus === 'error'
                                         ? 'border-ember-500 bg-ember-500/10'
-                                        : 'border-default hover:border-copper-500'
+                                        : 'border-default hover:border-brand-red'
                                 }`}
                             >
                                 <input
@@ -304,7 +304,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                                 <div className={`flex items-center gap-2 p-3 rounded-lg border ${
                                     importStatus === 'success' ? 'bg-leaf-500/10 text-leaf-600 border-leaf-500/20' :
                                     importStatus === 'error' ? 'bg-ember-500/10 text-ember-700 border-ember-500/20' :
-                                    'bg-copper-500/10 text-brand-red border-copper-500/20'
+                                    'bg-brand-red/10 text-brand-red border-brand-red/20'
                                 }`}>
                                     {importStatus === 'success' ? (
                                         <CheckCircleIcon className="w-5 h-5" />

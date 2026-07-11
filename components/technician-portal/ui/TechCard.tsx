@@ -21,7 +21,7 @@ const TechCard: React.FC<TechCardProps> = ({
       switch (variant) {
           case 'alert': return 'border-ember-500/50';
           case 'success': return 'border-leaf-500/50';
-          case 'active': return 'border-copper-500/50';
+          case 'active': return 'border-brand-red/50';
           default: return 'border-default';
       }
   };
@@ -55,10 +55,10 @@ const TechCard: React.FC<TechCardProps> = ({
 
       {/* Decorative Corner */}
       <div className={`absolute -top-1 -right-1 w-3 h-3 border-t border-r ${
-          variant === 'active' ? 'border-copper-500' : 'border-brass'
+          variant === 'active' ? 'border-brand-red' : 'border-brass'
       } opacity-50`} />
       <div className={`absolute -bottom-1 -left-1 w-3 h-3 border-b border-l ${
-           variant === 'active' ? 'border-copper-500' : 'border-brass'
+           variant === 'active' ? 'border-brand-red' : 'border-brass'
       } opacity-50`} />
     </div>
   );

@@ -173,7 +173,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                     
                     <button 
                         onClick={handleAddCustomProblem} 
-                        className="w-full py-3 border-2 border-dashed border-espresso-lighter rounded-lg text-secondary hover:text-cream hover:border-copper-500 hover:bg-chrome-light transition-all flex items-center justify-center gap-2 font-medium"
+                        className="w-full py-3 border-2 border-dashed border-espresso-lighter rounded-lg text-secondary hover:text-cream hover:border-brand-red hover:bg-chrome-light transition-all flex items-center justify-center gap-2 font-medium"
                     >
                         <PlusCircleIcon className="w-5 h-5"/>
                         {ar.selectors.addCustomProblem}

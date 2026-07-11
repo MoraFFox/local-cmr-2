@@ -659,7 +659,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                   </div>
                 ),
             )}
-            <div className="mt-4 p-4 rounded-lg bg-surface-elevated/50 dark:bg-copper-500/10">
+            <div className="mt-4 p-4 rounded-lg bg-surface-elevated/50 dark:bg-brand-red/10">
               <div className="py-2 sm:grid sm:grid-cols-3 sm:gap-4 items-center">
                 <dt className="text-sm font-medium text-secondary">
                   Total Maintenance Cost

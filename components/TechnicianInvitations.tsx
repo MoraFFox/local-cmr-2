@@ -164,7 +164,7 @@ const TechnicianInvitations: React.FC = () => {
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="block w-full rounded-lg border-default dark:border-default bg-surface dark:bg-chrome py-2.5 px-3 text-primary dark:text-white placeholder:text-secondary focus:border-copper-500 focus:ring-brand-red sm:text-sm"
+                className="block w-full rounded-lg border-default dark:border-default bg-surface dark:bg-chrome py-2.5 px-3 text-primary dark:text-white placeholder:text-secondary focus:border-brand-red focus:ring-brand-red sm:text-sm"
                 placeholder="e.g., Ahmed Mohamed"
                 required
               />
@@ -180,7 +180,7 @@ const TechnicianInvitations: React.FC = () => {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="block w-full rounded-lg border-default dark:border-default bg-surface dark:bg-chrome py-2.5 px-3 text-primary dark:text-white placeholder:text-secondary focus:border-copper-500 focus:ring-brand-red sm:text-sm"
+                  className="block w-full rounded-lg border-default dark:border-default bg-surface dark:bg-chrome py-2.5 px-3 text-primary dark:text-white placeholder:text-secondary focus:border-brand-red focus:ring-brand-red sm:text-sm"
                   placeholder="e.g., ahmed@example.com"
                 />
               </div>
@@ -193,7 +193,7 @@ const TechnicianInvitations: React.FC = () => {
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="block w-full rounded-lg border-default dark:border-default bg-surface dark:bg-chrome py-2.5 px-3 text-primary dark:text-white placeholder:text-secondary focus:border-copper-500 focus:ring-brand-red sm:text-sm"
+                  className="block w-full rounded-lg border-default dark:border-default bg-surface dark:bg-chrome py-2.5 px-3 text-primary dark:text-white placeholder:text-secondary focus:border-brand-red focus:ring-brand-red sm:text-sm"
                   placeholder="e.g., 0100-123-4567"
                 />
               </div>
@@ -267,7 +267,7 @@ const TechnicianInvitations: React.FC = () => {
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex items-start gap-3">
-                      <div className="h-10 w-10 rounded-full bg-surface-elevated dark:bg-copper-500/20 flex items-center justify-center">
+                      <div className="h-10 w-10 rounded-full bg-surface-elevated dark:bg-brand-red/20 flex items-center justify-center">
                         <UserPlusIcon className="h-5 w-5 text-brand-red dark:text-brand-red-400" />
                       </div>
                       <div>
@@ -287,7 +287,7 @@ const TechnicianInvitations: React.FC = () => {
                     <div className="flex items-center gap-2 sm:gap-3">
                       <button
                         onClick={() => handleCopyLink(invite)}
-                        className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-brand-red dark:text-brand-red-400 bg-surface-elevated dark:bg-copper-500/10 rounded-lg hover:bg-surface-3 dark:hover:bg-copper-500/20 transition-colors"
+                        className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-brand-red dark:text-brand-red-400 bg-surface-elevated dark:bg-brand-red/10 rounded-lg hover:bg-surface-3 dark:hover:bg-brand-red/20 transition-colors"
                       >
                         {copiedId === invite.id ? (
                           <>

@@ -523,7 +523,7 @@ const UserAccessManagement: React.FC = () => {
         );
       case 'technician':
         return (
-          <span className="inline-flex items-center rounded-full bg-surface-elevated dark:bg-copper-500/20 px-2.5 py-0.5 text-xs font-medium text-brand-red dark:text-brand-red-400">
+          <span className="inline-flex items-center rounded-full bg-surface-elevated dark:bg-brand-red/20 px-2.5 py-0.5 text-xs font-medium text-brand-red dark:text-brand-red-400">
             {t.technician}
           </span>
         );
@@ -542,7 +542,7 @@ const UserAccessManagement: React.FC = () => {
         );
       case 'technician':
         return (
-          <span className="inline-flex items-center rounded-full bg-surface-elevated dark:bg-copper-500/20 px-2.5 py-0.5 text-xs font-medium text-brand-red dark:text-brand-red-400">
+          <span className="inline-flex items-center rounded-full bg-surface-elevated dark:bg-brand-red/20 px-2.5 py-0.5 text-xs font-medium text-brand-red dark:text-brand-red-400">
             {t.technician}
           </span>
         );
@@ -633,7 +633,7 @@ const UserAccessManagement: React.FC = () => {
           onClick={() => setActiveTab('invitations')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'invitations'
-              ? 'border-copper-500 text-brand-red'
+              ? 'border-brand-red text-brand-red'
               : 'border-transparent text-secondary hover:text-primary'
           }`}
         >
@@ -644,7 +644,7 @@ const UserAccessManagement: React.FC = () => {
           onClick={() => setActiveTab('users')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'users'
-              ? 'border-copper-500 text-brand-red'
+              ? 'border-brand-red text-brand-red'
               : 'border-transparent text-secondary hover:text-primary'
           }`}
         >
@@ -655,7 +655,7 @@ const UserAccessManagement: React.FC = () => {
           onClick={() => setActiveTab('legacy')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'legacy'
-              ? 'border-copper-500 text-brand-red'
+              ? 'border-brand-red text-brand-red'
               : 'border-transparent text-secondary hover:text-primary'
           }`}
         >
@@ -699,7 +699,7 @@ const UserAccessManagement: React.FC = () => {
                       onClick={() => setFormData({ ...formData, role: 'technician' })}
                       className={`flex-1 py-2.5 px-4 rounded-lg border text-sm font-medium transition-colors ${
                         formData.role === 'technician'
-                          ? 'bg-copper-500/10 border-copper-500 text-brand-red'
+                          ? 'bg-brand-red/10 border-brand-red text-brand-red'
                           : 'bg-surface border-default text-secondary hover:bg-surface-elevated'
                       }`}
                     >
@@ -721,7 +721,7 @@ const UserAccessManagement: React.FC = () => {
                         onClick={() => setFormData({ ...formData, expiry: hours as 24 | 48 | 168 })}
                         className={`py-2 px-4 rounded-lg border text-sm font-medium transition-colors ${
                           formData.expiry === hours
-                            ? 'bg-copper-500/10 border-copper-500 text-brand-red'
+                            ? 'bg-brand-red/10 border-brand-red text-brand-red'
                             : 'bg-surface border-default text-secondary hover:bg-surface-elevated'
                         }`}
                       >
@@ -733,7 +733,7 @@ const UserAccessManagement: React.FC = () => {
 
                 {/* Created Link Display */}
                 {createdLink && (
-                  <div className="bg-copper-500/10 rounded-lg p-4 border border-copper-500/20">
+                  <div className="bg-brand-red/10 rounded-lg p-4 border border-brand-red/20">
                     <label className="block text-sm font-medium text-brand-red mb-2">
                       {t.invitationLink}
                     </label>
@@ -742,7 +742,7 @@ const UserAccessManagement: React.FC = () => {
                         type="text"
                         value={createdLink}
                         readOnly
-                        className="flex-1 rounded-lg border-copper-500/30 bg-surface py-2 px-3 text-sm text-primary"
+                        className="flex-1 rounded-lg border-brand-red/30 bg-surface py-2 px-3 text-sm text-primary"
                       />
                       <Button
                         type="button"
@@ -800,7 +800,7 @@ const UserAccessManagement: React.FC = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as InvitationStatus | 'all')}
-                className="rounded-lg border-default bg-surface py-2 px-3 text-sm text-primary focus:border-copper-500 focus:ring-brand-red"
+                className="rounded-lg border-default bg-surface py-2 px-3 text-sm text-primary focus:border-brand-red focus:ring-brand-red"
               >
                 <option value="all">{t.allStatuses}</option>
                 <option value="pending">{t.filterPending}</option>
@@ -810,7 +810,7 @@ const UserAccessManagement: React.FC = () => {
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value as InviteRole | 'all')}
-                className="rounded-lg border-default bg-surface py-2 px-3 text-sm text-primary focus:border-copper-500 focus:ring-brand-red"
+                className="rounded-lg border-default bg-surface py-2 px-3 text-sm text-primary focus:border-brand-red focus:ring-brand-red"
               >
                 <option value="all">{t.allRoles}</option>
                 <option value="admin">{t.admin}</option>
@@ -851,7 +851,7 @@ const UserAccessManagement: React.FC = () => {
                       <div className="flex items-start gap-3">
                         <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
                           invitation.status === 'pending'
-                            ? 'bg-copper-500/10'
+                            ? 'bg-brand-red/10'
                             : invitation.status === 'accepted'
                             ? 'bg-leaf-500/10'
                             : 'bg-surface-elevated'
@@ -985,7 +985,7 @@ const UserAccessManagement: React.FC = () => {
                       <select
                         value={selectedTechnicianId}
                         onChange={(e) => setSelectedTechnicianId(e.target.value)}
-                        className="rounded-lg border-default bg-surface py-2 px-3 text-sm text-primary focus:border-copper-500 focus:ring-brand-red"
+                        className="rounded-lg border-default bg-surface py-2 px-3 text-sm text-primary focus:border-brand-red focus:ring-brand-red"
                       >
                         <option value="">{t.selectTechnician}</option>
                         {technicians.map((tech) => (
@@ -1079,7 +1079,7 @@ const UserAccessManagement: React.FC = () => {
                         <td className="px-4 py-3 whitespace-nowrap">
                           <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                             candidate.confidence >= 0.70
-                              ? 'bg-copper-500/10 text-brand-red'
+                              ? 'bg-brand-red/10 text-brand-red'
                               : 'bg-amber-500/10 text-amber-500'
                           }`}>
                             {Math.round(candidate.confidence * 100)}% ({candidate.confidence >= 0.70 ? t.highConfidence : t.lowConfidence})
@@ -1109,7 +1109,7 @@ const UserAccessManagement: React.FC = () => {
                     <select
                       value={sourceTechnicianId}
                       onChange={(e) => setSourceTechnicianId(e.target.value)}
-                      className="w-full rounded-lg border-default bg-surface py-2 px-3 text-sm text-primary focus:border-copper-500 focus:ring-brand-red"
+                      className="w-full rounded-lg border-default bg-surface py-2 px-3 text-sm text-primary focus:border-brand-red focus:ring-brand-red"
                     >
                       <option value="">{t.selectTechnician}</option>
                       {technicians.map((tech) => (
@@ -1127,7 +1127,7 @@ const UserAccessManagement: React.FC = () => {
                     <select
                       value={targetTechnicianId}
                       onChange={(e) => setTargetTechnicianId(e.target.value)}
-                      className="w-full rounded-lg border-default bg-surface py-2 px-3 text-sm text-primary focus:border-copper-500 focus:ring-brand-red"
+                      className="w-full rounded-lg border-default bg-surface py-2 px-3 text-sm text-primary focus:border-brand-red focus:ring-brand-red"
                     >
                       <option value="">{t.selectTechnician}</option>
                       {technicians.map((tech) => (
@@ -1170,7 +1170,7 @@ const UserAccessManagement: React.FC = () => {
                             </span>
                             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                               bucket.confidence_level === 'high'
-                                ? 'bg-copper-500/10 text-brand-red'
+                                ? 'bg-brand-red/10 text-brand-red'
                                 : 'bg-amber-500/10 text-amber-500'
                             }`}>
                               {bucket.confidence_level === 'high' ? t.highConfidence : t.lowConfidence}
@@ -1239,7 +1239,7 @@ const UserAccessManagement: React.FC = () => {
                     <select
                       value={selectedTechnicianId}
                       onChange={(e) => setSelectedTechnicianId(e.target.value)}
-                      className="w-full rounded-lg border-default bg-surface py-2 px-3 text-sm text-primary focus:border-copper-500 focus:ring-brand-red"
+                      className="w-full rounded-lg border-default bg-surface py-2 px-3 text-sm text-primary focus:border-brand-red focus:ring-brand-red"
                     >
                       <option value="">{t.selectTechnician}</option>
                       {technicians.map((tech) => (

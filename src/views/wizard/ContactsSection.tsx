@@ -72,7 +72,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                       name="position"
                       value={contact.position}
                       onChange={(e) => actions.handleContactChange(e, path, contactIndex)}
-                      className="block w-full pr-10 h-[50px] bg-surface text-primary rounded-lg placeholder-latte focus:outline-none focus:ring-2 border border-default focus:border-copper-500 focus:ring-brand-red/20 transition-colors appearance-none"
+                      className="block w-full pr-10 h-[50px] bg-surface text-primary rounded-lg placeholder-latte focus:outline-none focus:ring-2 border border-default focus:border-brand-red focus:ring-brand-red/20 transition-colors appearance-none"
                     >
                       {contactPositions.map((pos) => (
                         <option key={pos.value} value={pos.value}>
@@ -125,7 +125,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                 </div>
                 <button
                   onClick={() => actions.addPhoneNumber(path, contactIndex)}
-                  className="mt-3 w-full justify-center flex items-center gap-1.5 text-sm font-semibold text-brand-red dark:text-brand-red-400 hover:bg-copper-500/10 dark:hover:bg-copper-500/10 rounded-md py-2 transition-colors transform active:scale-95"
+                  className="mt-3 w-full justify-center flex items-center gap-1.5 text-sm font-semibold text-brand-red dark:text-brand-red-400 hover:bg-brand-red/10 dark:hover:bg-brand-red/10 rounded-md py-2 transition-colors transform active:scale-95"
                 >
                   <PlusCircleIcon className="w-5 h-5" />
                   إضافة رقم هاتف

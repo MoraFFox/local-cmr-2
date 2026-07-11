@@ -46,7 +46,7 @@ const PayerSegmentedControl: React.FC<PayerSegmentedControlProps> = ({
         disabled={disabled}
         className={`rounded-lg transition-all duration-300 font-bold tracking-wide ${sizeClasses[size]} ${
           !paidByClient
-            ? 'bg-copper-500/20 text-brand-red-400 shadow-[0_0_15px_rgba(184,115,51,0.3)] border border-copper-500/50'
+            ? 'bg-brand-red/20 text-brand-red-400 shadow-[0_0_15px_rgba(184,115,51,0.3)] border border-brand-red/50'
             : 'bg-transparent text-secondary hover:text-cream'
         }`}
       >

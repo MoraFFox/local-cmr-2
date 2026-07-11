@@ -284,11 +284,11 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                         <div className="w-full shrink-0">
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className={`flex items-center gap-2 px-4 h-[50px] rounded-lg border text-sm font-semibold w-full justify-center transition-colors ${showFilters || activeFiltersCount > 0 ? 'bg-copper-500/10 border-copper-500 text-brand-red' : 'bg-surface border-default text-secondary hover:bg-surface-elevated'}`}
+                                className={`flex items-center gap-2 px-4 h-[50px] rounded-lg border text-sm font-semibold w-full justify-center transition-colors ${showFilters || activeFiltersCount > 0 ? 'bg-brand-red/10 border-brand-red text-brand-red' : 'bg-surface border-default text-secondary hover:bg-surface-elevated'}`}
                             >
                                 <FunnelIcon className="w-5 h-5" />
                                 {showFilters ? 'إخفاء الفلاتر' : 'فلاتر متقدمة'}
-                                {activeFiltersCount > 0 && <span className="bg-copper-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center ml-1">{activeFiltersCount}</span>}
+                                {activeFiltersCount > 0 && <span className="bg-brand-red text-white text-xs rounded-full w-5 h-5 flex items-center justify-center ml-1">{activeFiltersCount}</span>}
                             </button>
                         </div>
                     </div>
@@ -318,7 +318,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
 
                             {/* Toggles */}
                             <div className="w-full sm:w-auto shrink-0">
-                                <label className={`flex items-center justify-center gap-2 h-[50px] px-6 rounded-lg cursor-pointer border transition-colors select-none ${showOnlyProblems ? 'bg-copper-500/10 border-copper-500 text-brand-red' : 'bg-surface border-default text-secondary hover:bg-surface-elevated'}`}>
+                                <label className={`flex items-center justify-center gap-2 h-[50px] px-6 rounded-lg cursor-pointer border transition-colors select-none ${showOnlyProblems ? 'bg-brand-red/10 border-brand-red text-brand-red' : 'bg-surface border-default text-secondary hover:bg-surface-elevated'}`}>
                                     <input
                                         type="checkbox"
                                         checked={showOnlyProblems}
@@ -339,7 +339,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                     <button
                                         onClick={clearFilters}
                                         disabled={activeFiltersCount === 0 && !searchTerm}
-                                        className="flex items-center justify-center gap-2 h-[50px] px-6 text-secondary hover:text-brand-red transition-colors text-sm font-medium rounded-lg hover:bg-copper-500/10 disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed border border-transparent hover:border-copper-500/30"
+                                        className="flex items-center justify-center gap-2 h-[50px] px-6 text-secondary hover:text-brand-red transition-colors text-sm font-medium rounded-lg hover:bg-brand-red/10 disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed border border-transparent hover:border-brand-red/30"
                                     >
                                         <XMarkIcon className="w-5 h-5" /> مسح الفلاتر
                                     </button>

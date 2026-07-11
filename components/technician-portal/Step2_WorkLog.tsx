@@ -158,7 +158,7 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
          </div>
 
          {data.visitType === 'scheduled' && (
-            <div className="mt-4 p-4 bg-copper-500/10 border border-copper-500/30 rounded-xl flex items-center gap-3 animate-in fade-in">
+            <div className="mt-4 p-4 bg-brand-red/10 border border-brand-red/30 rounded-xl flex items-center gap-3 animate-in fade-in">
                 <CheckCircleIcon className="w-6 h-6 text-brand-red" />
                 <div className="text-sm text-primary">
                     <p className="font-bold">{ar.portal.routineMaintenance}</p>
@@ -195,7 +195,7 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
             <div className="bg-chrome p-1 rounded-xl flex mb-4 border border-default">
                 <button
                     onClick={() => handlePartsWereReplacedChange(true)}
-                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${data.partsWereReplaced ? 'bg-copper-500 text-white shadow-lg' : 'text-secondary hover:text-primary'}`}
+                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${data.partsWereReplaced ? 'bg-brand-red text-white shadow-lg' : 'text-secondary hover:text-primary'}`}
                 >
                     {ar.step2.partsReplacedYes}
                 </button>
@@ -330,7 +330,7 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
             onChange={(e) => handleNotesChange(e.target.value)}
             placeholder={ar.step3.notesPlaceholder}
             rows={4}
-            className="w-full bg-surface text-primary p-4 rounded-xl border border-default focus:border-copper-500 focus:ring-1 focus:ring-brand-red/20 outline-none resize-none placeholder-latte"
+            className="w-full bg-surface text-primary p-4 rounded-xl border border-default focus:border-brand-red focus:ring-1 focus:ring-brand-red/20 outline-none resize-none placeholder-latte"
          />
       </TechCard>
 

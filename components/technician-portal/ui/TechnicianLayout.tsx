@@ -21,7 +21,7 @@ const TechnicianLayout: React.FC<TechnicianLayoutProps> = ({
   totalSteps,
 }) => {
   return (
-    <div className="min-h-screen bg-chrome text-cream font-sans selection:bg-copper-500/30">
+    <div className="min-h-screen bg-chrome text-cream font-sans selection:bg-brand-red/30">
       {/* Background Grid Pattern (Subtle) */}
       <div className="fixed inset-0 z-0 opacity-[0.03] pointer-events-none dark-grid" />
 
@@ -63,7 +63,7 @@ const TechnicianLayout: React.FC<TechnicianLayoutProps> = ({
         {step && totalSteps && (
             <div className="h-1 w-full bg-chrome-light">
                 <div
-                    className="h-full bg-copper-500 transition-all duration-500 ease-out"
+                    className="h-full bg-brand-red transition-all duration-500 ease-out"
                     style={{ width: `${(step / totalSteps) * 100}%` }}
                 />
             </div>

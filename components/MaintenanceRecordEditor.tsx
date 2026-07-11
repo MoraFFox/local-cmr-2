@@ -686,7 +686,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                     className={`
                       relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200
                       ${editedRecord.paidBy === 'company'
-                        ? 'border-copper-500 bg-surface-elevated dark:bg-copper-500/10 text-brand-red-900 dark:text-brand-red-300'
+                        ? 'border-brand-red bg-surface-elevated dark:bg-brand-red/10 text-brand-red-900 dark:text-brand-red-300'
                         : 'border-default dark:border-default bg-surface dark:bg-chrome text-primary dark:text-secondary/70 hover:border-default dark:hover:border-default'
                       }
                     `}
@@ -694,7 +694,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                     <div className={`
                       w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold
                       ${editedRecord.paidBy === 'company'
-                        ? 'bg-copper-500 text-white'
+                        ? 'bg-brand-red text-white'
                         : 'bg-surface-elevated dark:bg-chrome-light text-primary dark:text-secondary'
                       }
                     `}>
@@ -705,7 +705,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       <div className="text-xs text-secondary dark:text-secondary">Company pays</div>
                     </div>                    
                     {editedRecord.paidBy === 'company' && (
-                      <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-copper-500 flex items-center justify-center">
+                      <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-brand-red flex items-center justify-center">
                         <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
@@ -816,7 +816,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             <button
               type="button"
               onClick={addSupervisor}
-              className="flex items-center gap-2 px-4 py-2 text-brand-red dark:text-brand-red-400 font-medium hover:bg-surface-elevated dark:hover:bg-copper-500/10 rounded-lg border border-copper-500/30 dark:border-copper-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-brand-red dark:text-brand-red-400 font-medium hover:bg-surface-elevated dark:hover:bg-brand-red/10 rounded-lg border border-brand-red/30 dark:border-copper-700 transition-colors"
             >
               <PlusCircleIcon className="w-5 h-5" /> Add Supervisor
             </button>
@@ -876,7 +876,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
           section="photos"
           icon={<CameraIcon className="w-5 h-5" />}
           badge={editedRecord.photos && editedRecord.photos.length > 0 && (
-            <span className="px-2 py-0.5 bg-copper-500/10 dark:bg-copper-500/10 text-brand-red dark:text-brand-red-400 text-xs rounded-full">
+            <span className="px-2 py-0.5 bg-brand-red/10 dark:bg-brand-red/10 text-brand-red dark:text-brand-red-400 text-xs rounded-full">
               {editedRecord.photos.length} photo(s)
             </span>
           )}
@@ -886,7 +886,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
           <div className="p-6 space-y-6">
             {/* Upload Progress Indicator */}
             {uploadingPhotos && (
-              <div className="flex items-center gap-3 p-4 bg-surface-elevated dark:bg-copper-500/10 rounded-lg border border-copper-500/30 dark:border-copper-500/30">
+              <div className="flex items-center gap-3 p-4 bg-surface-elevated dark:bg-brand-red/10 rounded-lg border border-brand-red/30 dark:border-brand-red/30">
                 <svg className="animate-spin w-5 h-5 text-brand-red" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -902,7 +902,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 <label className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg cursor-pointer transition-colors ${
                   uploadingPhotos 
                     ? 'bg-surface dark:bg-chrome-light text-secondary dark:text-secondary cursor-not-allowed' 
-                    : 'bg-surface-elevated dark:bg-copper-500/10 text-brand-red dark:text-brand-red-400 hover:bg-copper-500/10 dark:hover:bg-copper-500/10 border border-copper-500/30 dark:border-copper-500/30'
+                    : 'bg-surface-elevated dark:bg-brand-red/10 text-brand-red dark:text-brand-red-400 hover:bg-brand-red/10 dark:hover:bg-brand-red/10 border border-brand-red/30 dark:border-brand-red/30'
                 }`}>
                   <ArrowUpTrayIcon className="w-4 h-4" />
                   <span>Upload Before</span>
@@ -951,7 +951,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 <label className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg cursor-pointer transition-colors ${
                   uploadingPhotos 
                     ? 'bg-surface dark:bg-chrome-light text-secondary dark:text-secondary cursor-not-allowed' 
-                    : 'bg-surface-elevated dark:bg-copper-500/10 text-brand-red dark:text-brand-red-400 hover:bg-copper-500/10 dark:hover:bg-copper-500/10 border border-copper-500/30 dark:border-copper-500/30'
+                    : 'bg-surface-elevated dark:bg-brand-red/10 text-brand-red dark:text-brand-red-400 hover:bg-brand-red/10 dark:hover:bg-brand-red/10 border border-brand-red/30 dark:border-brand-red/30'
                 }`}>
                   <ArrowUpTrayIcon className="w-4 h-4" />
                   <span>Upload After</span>

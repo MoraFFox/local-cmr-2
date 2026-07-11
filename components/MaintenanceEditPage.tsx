@@ -513,7 +513,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                 <button
                   key={branch.id}
                   onClick={() => handleBranchSelect(branch.id)}
-                  className="flex items-start gap-4 p-6 bg-surface dark:bg-chrome rounded-xl border border-default dark:border-default hover:border-copper-500 dark:hover:border-copper-500 hover:shadow-xl transition-all text-left group"
+                  className="flex items-start gap-4 p-6 bg-surface dark:bg-chrome rounded-xl border border-default dark:border-default hover:border-brand-red dark:hover:border-brand-red hover:shadow-xl transition-all text-left group"
                 >
                   <div className="p-3 bg-gradient-to-br from-copper-500 to-copper-600 rounded-lg group-hover:from-copper-400 group-hover:to-copper-500 transition-colors shadow-lg">
                     {branch.isMainOffice ? (

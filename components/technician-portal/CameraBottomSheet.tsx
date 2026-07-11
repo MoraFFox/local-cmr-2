@@ -182,7 +182,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
                     disabled={!canAddBefore}
                     className={`py-3 px-4 min-h-[48px] rounded-xl border-2 transition-all text-sm font-semibold ${
                       photoType === 'before'
-                        ? 'border-copper-500 bg-copper-500/10 dark:bg-copper-500/20 text-brand-red dark:text-brand-red-400'
+                        ? 'border-brand-red bg-brand-red/10 dark:bg-brand-red/20 text-brand-red dark:text-brand-red-400'
                         : 'border-default text-primary dark:text-cream'
                     } ${!canAddBefore ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
@@ -197,7 +197,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
                     disabled={!canAddAfter}
                     className={`py-3 px-4 min-h-[48px] rounded-xl border-2 transition-all text-sm font-semibold ${
                       photoType === 'after'
-                        ? 'border-copper-500 bg-copper-500/10 dark:bg-copper-500/20 text-brand-red dark:text-brand-red-400'
+                        ? 'border-brand-red bg-brand-red/10 dark:bg-brand-red/20 text-brand-red dark:text-brand-red-400'
                         : 'border-default text-primary dark:text-cream'
                     } ${!canAddAfter ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
@@ -229,7 +229,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
                   type="button"
                   onClick={() => cameraInputRef.current?.click()}
                   disabled={!canAdd || isProcessing}
-                  className="w-full flex items-center justify-center gap-3 py-4 px-4 min-h-[56px] bg-copper-600 hover:bg-copper-700 disabled:bg-surface-3 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-base transition-all active:scale-[0.98]"
+                  className="w-full flex items-center justify-center gap-3 py-4 px-4 min-h-[56px] bg-brand-red-light hover:bg-copper-700 disabled:bg-surface-3 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-base transition-all active:scale-[0.98]"
                 >
                   {isProcessing ? (
                     <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />

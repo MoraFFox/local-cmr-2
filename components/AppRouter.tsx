@@ -15,7 +15,7 @@ const ResetPassword = lazy(() => import("./ResetPassword.tsx"));
 const LoadingFallback = () => (
   <div className="min-h-screen bg-background dark:bg-[#1A1210] flex items-center justify-center p-4">
     <div className="text-center">
-      <div className="mx-auto mb-4 h-10 w-10 border-4 border-copper-500 border-t-transparent rounded-full animate-spin" />
+      <div className="mx-auto mb-4 h-10 w-10 border-4 border-brand-red border-t-transparent rounded-full animate-spin" />
       <p className="text-primary dark:text-cream font-medium">
         جاري التحميل...
       </p>
@@ -365,7 +365,7 @@ const AppRouter: React.FC = () => {
     return (
       <div className="min-h-screen bg-background dark:bg-[#1A1210] flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-10 w-10 border-4 border-copper-500 border-t-transparent rounded-full animate-spin" />
+          <div className="mx-auto mb-4 h-10 w-10 border-4 border-brand-red border-t-transparent rounded-full animate-spin" />
           <p className="text-primary dark:text-cream font-medium">
             Redirecting...
           </p>
@@ -394,7 +394,7 @@ const AppRouter: React.FC = () => {
     return (
       <div className="min-h-screen bg-background dark:bg-[#1A1210] flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-10 w-10 border-4 border-copper-500 border-t-transparent rounded-full animate-spin" />
+          <div className="mx-auto mb-4 h-10 w-10 border-4 border-brand-red border-t-transparent rounded-full animate-spin" />
           <p className="text-primary dark:text-cream font-medium">
             Redirecting...
           </p>
@@ -443,7 +443,7 @@ const AppRouter: React.FC = () => {
     return (
       <div className="min-h-screen bg-background dark:bg-[#1A1210] flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-10 w-10 border-4 border-copper-500 border-t-transparent rounded-full animate-spin" />
+          <div className="mx-auto mb-4 h-10 w-10 border-4 border-brand-red border-t-transparent rounded-full animate-spin" />
           <p className="text-primary dark:text-cream font-medium">
             Checking access...
           </p>

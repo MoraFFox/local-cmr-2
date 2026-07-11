@@ -97,9 +97,9 @@ export const getNewMaintenanceRecord = (id: number): MaintenanceRecord => ({
 // ── Shared CSS Class Strings ───────────────────────────────────
 export const CLASSES = {
   textArea:
-    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-surface dark:bg-chrome-light text-primary dark:text-cream rounded-lg placeholder-latte dark:placeholder-latte focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-brand-red/20 border border-default dark:border-default shadow-sm",
+    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-surface dark:bg-chrome-light text-primary dark:text-cream rounded-lg placeholder-latte dark:placeholder-latte focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 border border-default dark:border-default shadow-sm",
   select:
-    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-surface dark:bg-chrome-light text-primary dark:text-cream rounded-lg placeholder-latte dark:placeholder-latte focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-brand-red/20 border border-default dark:border-default shadow-sm",
+    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-surface dark:bg-chrome-light text-primary dark:text-cream rounded-lg placeholder-latte dark:placeholder-latte focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 border border-default dark:border-default shadow-sm",
 } as const;
 
 // ── View-to-Title Mapping ──────────────────────────────────────

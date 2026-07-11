@@ -226,7 +226,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                 placeholder='Search machines, notes...'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className='pl-9 pr-3 py-1.5 text-xs rounded-full border-default bg-slate-50 dark:bg-slate-900 text-primary dark:text-white focus:ring-brand-red focus:border-copper-500'
+                className='pl-9 pr-3 py-1.5 text-xs rounded-full border-default bg-slate-50 dark:bg-slate-900 text-primary dark:text-white focus:ring-brand-red focus:border-brand-red'
               />
             </div>
             <select
@@ -350,7 +350,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                     <td className='px-6 py-4 text-right'>
                       <button
                         onClick={() => setSelectedRecord(rec)}
-                        className='text-secondary group-hover:text-brand-red transition-colors p-2 rounded-full hover:bg-surface-elevated dark:hover:bg-copper-500/10'
+                        className='text-secondary group-hover:text-brand-red transition-colors p-2 rounded-full hover:bg-surface-elevated dark:hover:bg-brand-red/10'
                         title='View Details'
                       >
                         <MagnifyingGlassIcon className='w-5 h-5' />

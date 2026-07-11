@@ -178,7 +178,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
 
         {/* Add Photo Button */}
         {typePhotos.length < maxPerType && (
-          <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-default dark:border-default rounded-lg cursor-pointer hover:border-copper-500 hover:bg-copper-500/5 dark:hover:bg-copper-500/10 transition-all">
+          <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-default dark:border-default rounded-lg cursor-pointer hover:border-brand-red hover:bg-brand-red/5 dark:hover:bg-brand-red/10 transition-all">
             <CameraIcon className="w-5 h-5 text-secondary" />
             <span className="text-sm text-primary dark:text-cream">
               {ar.step3.addPhoto}

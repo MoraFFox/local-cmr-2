@@ -213,7 +213,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
   record,
 }) => {
   return (
-    <div className='border-r-2 border-copper-500 pr-4 py-3 mb-4 bg-surface-elevated rounded-l-md'>
+    <div className='border-r-2 border-brand-red pr-4 py-3 mb-4 bg-surface-elevated rounded-l-md'>
       {/* Header Row */}
       <div className='flex flex-wrap justify-between items-start gap-y-3 gap-x-4'>
         {/* Right side (start of RTL flow): Date, Badges, Next Visit */}
@@ -228,7 +228,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
                 {record.dailyLeaseCost} ج.م.
               </span>
             )}
-            <span className='text-xs bg-copper-500/10 px-1.5 py-0.5 rounded text-brand-red border border-copper-500/20'>
+            <span className='text-xs bg-brand-red/10 px-1.5 py-0.5 rounded text-brand-red border border-brand-red/20'>
               جهة الدفع: {getPaidByLabel(record.paidBy)}
             </span>
           </div>
@@ -538,7 +538,7 @@ const DetailedRecordPrint: React.FC<{
             {record.type} Visit
           </span>
           {record.visitZone && (
-            <span className='text-xs text-brand-red bg-surface-elevated border border-copper-500/30 px-2 py-0.5 rounded-full capitalize'>
+            <span className='text-xs text-brand-red bg-surface-elevated border border-brand-red/30 px-2 py-0.5 rounded-full capitalize'>
               {record.visitZone.replace("_", " ")}
             </span>
           )}
@@ -636,7 +636,7 @@ const DetailedRecordPrint: React.FC<{
                         {p.count}x {p.name}
                       </b>{" "}
                       {p.paidByClient ? (
-                        <span className='text-[10px] text-brand-red border border-copper-500/30 px-1 rounded bg-surface-elevated'>
+                        <span className='text-[10px] text-brand-red border border-brand-red/30 px-1 rounded bg-surface-elevated'>
                           (Client Paid)
                         </span>
                       ) : (
@@ -1095,7 +1095,7 @@ const PrintDropdown: React.FC<{
           toggle();
         }}
         disabled={disabled}
-        className='flex items-center gap-2 bg-copper-500 text-primary font-bold py-2 px-4 rounded-lg hover:bg-copper-600 transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-red disabled:opacity-50 disabled:cursor-not-allowed'
+        className='flex items-center gap-2 bg-brand-red text-primary font-bold py-2 px-4 rounded-lg hover:bg-brand-red-light transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-red disabled:opacity-50 disabled:cursor-not-allowed'
       >
         <PrinterIcon className='w-5 h-5' />
         {label}
@@ -1291,7 +1291,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
             <button
               onClick={() => handleGenerateMissingDataPDF("company")}
               disabled={isGeneratingPDF}
-              className='flex items-center gap-2 bg-copper-500 text-primary font-bold py-2 px-4 rounded-lg hover:bg-copper-600 transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-red disabled:opacity-50 disabled:cursor-not-allowed'
+              className='flex items-center gap-2 bg-brand-red text-primary font-bold py-2 px-4 rounded-lg hover:bg-brand-red-light transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-red disabled:opacity-50 disabled:cursor-not-allowed'
             >
               <DocumentArrowDownIcon className='w-5 h-5' />
               استكمال بيانات ناقصة
@@ -1315,14 +1315,14 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
               type='date'
               value={filterStartDate}
               onChange={(e) => setFilterStartDate(e.target.value)}
-              className='px-3 py-1.5 rounded-lg border-default bg-surface text-primary text-sm focus:ring-brand-red focus:border-copper-500'
+              className='px-3 py-1.5 rounded-lg border-default bg-surface text-primary text-sm focus:ring-brand-red focus:border-brand-red'
             />
             <span className='text-secondary'>-</span>
             <input
               type='date'
               value={filterEndDate}
               onChange={(e) => setFilterEndDate(e.target.value)}
-              className='px-3 py-1.5 rounded-lg border-default bg-surface text-primary text-sm focus:ring-brand-red focus:border-copper-500'
+              className='px-3 py-1.5 rounded-lg border-default bg-surface text-primary text-sm focus:ring-brand-red focus:border-brand-red'
             />
             {(filterStartDate || filterEndDate) && (
               <button
@@ -1330,7 +1330,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                   setFilterStartDate("");
                   setFilterEndDate("");
                 }}
-                className='ml-2 p-1.5 text-secondary hover:text-brand-red hover:bg-copper-500/10 rounded-full transition-colors'
+                className='ml-2 p-1.5 text-secondary hover:text-brand-red hover:bg-brand-red/10 rounded-full transition-colors'
                 title='Clear Dates'
               >
                 <XMarkIcon className='w-5 h-5' />
@@ -1494,7 +1494,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                               <button
                                 onClick={() => handleGenerateMissingDataPDF("branch", branch.id)}
                                 disabled={isGeneratingPDF}
-                                className='flex items-center gap-1 bg-copper-500/10 text-brand-red hover:bg-copper-500/20 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed'
+                                className='flex items-center gap-1 bg-brand-red/10 text-brand-red hover:bg-brand-red/20 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed'
                               >
                                 <DocumentArrowDownIcon className='w-4 h-4' />
                                 استكمال
@@ -1526,7 +1526,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                             <button
                               onClick={() => handleGenerateMissingDataPDF("branch", branch.id)}
                               disabled={isGeneratingPDF}
-                              className='flex items-center justify-center gap-2 bg-copper-500/10 text-brand-red hover:bg-copper-500/20 font-bold py-2 px-4 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed w-full'
+                              className='flex items-center justify-center gap-2 bg-brand-red/10 text-brand-red hover:bg-brand-red/20 font-bold py-2 px-4 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed w-full'
                             >
                               <DocumentArrowDownIcon className='w-4 h-4' />
                               استكمال

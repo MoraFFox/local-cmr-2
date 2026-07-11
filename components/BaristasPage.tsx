@@ -189,7 +189,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
               type='search'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='block w-full rounded-lg border-default bg-surface py-2.5 pl-10 pr-3 text-primary placeholder:text-secondary focus:border-copper-500 focus:ring-brand-red sm:text-sm shadow-sm transition-colors'
+              className='block w-full rounded-lg border-default bg-surface py-2.5 pl-10 pr-3 text-primary placeholder:text-secondary focus:border-brand-red focus:ring-brand-red sm:text-sm shadow-sm transition-colors'
               placeholder='Search baristas...'
             />
           </div>
@@ -242,7 +242,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
       {/* Stats Cards */}
       <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
         <div className='bg-surface p-4 rounded-xl shadow-sm border border-default flex items-center gap-4'>
-          <div className='p-3 bg-copper-500/10 text-brand-red rounded-full'>
+          <div className='p-3 bg-brand-red/10 text-brand-red rounded-full'>
             <UserIcon className='w-6 h-6' />
           </div>
           <div>
@@ -297,7 +297,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
             <div
               key={`${barista.id}-${barista.name}`}
               onClick={() => onViewDetails(barista.name)}
-              className='bg-surface rounded-xl shadow-md border border-default overflow-hidden flex flex-col hover:shadow-lg hover:border-copper-500/50 cursor-pointer transition-all duration-300 relative group'
+              className='bg-surface rounded-xl shadow-md border border-default overflow-hidden flex flex-col hover:shadow-lg hover:border-brand-red/50 cursor-pointer transition-all duration-300 relative group'
             >
               {/* Auto Detected Badge */}
               {barista.isAutoDetected && (
@@ -368,7 +368,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                 </div>
                 <div className='flex flex-col items-end gap-2'>
                   <span
-                    className={`text-xs px-2 py-1 rounded-full font-bold uppercase tracking-wider ${barista.visitCount > 0 ? "bg-surface-elevated text-brand-red dark:bg-copper-500/20 dark:text-brand-red-400" : "bg-surface text-secondary dark:bg-chrome-light dark:text-secondary/70"}`}
+                    className={`text-xs px-2 py-1 rounded-full font-bold uppercase tracking-wider ${barista.visitCount > 0 ? "bg-surface-elevated text-brand-red dark:bg-brand-red/20 dark:text-brand-red-400" : "bg-surface text-secondary dark:bg-chrome-light dark:text-secondary/70"}`}
                   >
                     {barista.visitCount} Visit
                     {barista.visitCount !== 1 ? "s" : ""}
@@ -377,7 +377,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                     className={`text-[9px] px-1.5 py-0.5 rounded border font-bold uppercase tracking-tighter ${
                       barista.isAutoDetected
                         ? "border-blue-200 text-blue-600 bg-blue-50 dark:border-blue-900/50 dark:text-blue-400 dark:bg-blue-900/20"
-                        : "border-copper-500/30 text-brand-red bg-surface-elevated dark:border-copper-500/30 dark:text-brand-red-400 dark:bg-copper-500/10"
+                        : "border-brand-red/30 text-brand-red bg-surface-elevated dark:border-brand-red/30 dark:text-brand-red-400 dark:bg-brand-red/10"
                     }`}
                     title={
                       barista.isAutoDetected
@@ -417,7 +417,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                   <div className='flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity pl-2'>
                     <button
                       onClick={(e) => startEdit(e, barista)}
-                      className='p-1.5 text-secondary hover:text-brand-red hover:bg-surface-elevated dark:hover:bg-copper-500/20 rounded-lg transition-colors'
+                      className='p-1.5 text-secondary hover:text-brand-red hover:bg-surface-elevated dark:hover:bg-brand-red/20 rounded-lg transition-colors'
                       title='Edit Details'
                     >
                       <PencilIcon className='w-5 h-5' />
@@ -521,7 +521,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                   onChange={(e) =>
                     setEditForm({ ...editForm, name: e.target.value })
                   }
-                  className='w-full rounded-lg border-default bg-surface p-2.5 text-primary focus:border-copper-500 focus:ring-1 focus:ring-brand-red transition-colors outline-none'
+                  className='w-full rounded-lg border-default bg-surface p-2.5 text-primary focus:border-brand-red focus:ring-1 focus:ring-brand-red transition-colors outline-none'
                 />
               </div>
               <div>
@@ -534,7 +534,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                   onChange={(e) =>
                     setEditForm({ ...editForm, phone: e.target.value })
                   }
-                  className='w-full rounded-lg border-default bg-surface p-2.5 text-primary focus:border-copper-500 focus:ring-1 focus:ring-brand-red transition-colors outline-none'
+                  className='w-full rounded-lg border-default bg-surface p-2.5 text-primary focus:border-brand-red focus:ring-1 focus:ring-brand-red transition-colors outline-none'
                 />
               </div>
 

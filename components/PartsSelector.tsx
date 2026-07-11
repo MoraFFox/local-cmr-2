@@ -119,7 +119,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
       <button
         key={option.value}
         onClick={() => handleAddPart(option.value)}
-        className={`group border border-espresso-light/50 bg-chrome-light/50 hover:bg-chrome-light hover:border-copper-500/50 rounded-xl p-4 flex transition-all duration-200 text-left ${viewMode === 'grid' ? gridClasses : listClasses}`}
+        className={`group border border-espresso-light/50 bg-chrome-light/50 hover:bg-chrome-light hover:border-brand-red/50 rounded-xl p-4 flex transition-all duration-200 text-left ${viewMode === 'grid' ? gridClasses : listClasses}`}
       >
         <div>
           <p className="font-semibold text-cream group-hover:text-white transition-colors">
@@ -127,7 +127,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
           </p>
         </div>
         <div className={`mt-3 ${viewMode === 'list' && 'mt-0 ml-4'}`}>
-            <div className="w-8 h-8 rounded-full bg-chrome-light flex items-center justify-center text-brand-red-400 group-hover:bg-copper-500 group-hover:text-white transition-all">
+            <div className="w-8 h-8 rounded-full bg-chrome-light flex items-center justify-center text-brand-red-400 group-hover:bg-brand-red group-hover:text-white transition-all">
                 <PlusIcon className="w-5 h-5" />
             </div>
         </div>
@@ -139,8 +139,8 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
     const isMidos = payer === 'client' ? false : true;
     const summary = isMidos ? payerGroupSummary.midos : payerGroupSummary.client;
     
-    const headerBorderColor = isMidos ? 'border-copper-500/30' : 'border-amber-500/30';
-    const headerBgColor = isMidos ? 'bg-copper-500/10' : 'bg-amber-500/10';
+    const headerBorderColor = isMidos ? 'border-brand-red/30' : 'border-amber-500/30';
+    const headerBgColor = isMidos ? 'bg-brand-red/10' : 'bg-amber-500/10';
     const textColor = isMidos ? 'text-brand-red-400' : 'text-amber-400';
 
     return (
@@ -225,7 +225,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
         >
             <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
                 SELECTED PARTS
-                {totalSelectedCount > 0 && <span className="bg-copper-500 text-espresso px-1.5 py-0.5 rounded text-[10px]">{totalSelectedCount}</span>}
+                {totalSelectedCount > 0 && <span className="bg-brand-red text-espresso px-1.5 py-0.5 rounded text-[10px]">{totalSelectedCount}</span>}
             </span>
             {isSelectedSectionExpanded ? <ChevronUpIcon className="w-4 h-4"/> : <ChevronDownIcon className="w-4 h-4"/>}
         </button>
@@ -237,7 +237,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
                 
                 <button
                     onClick={handleAddCustomPart}
-                    className="w-full py-3 border border-dashed border-espresso-lighter rounded-xl text-secondary hover:text-brand-red-400 hover:border-copper-500/50 hover:bg-chrome transition-all flex items-center justify-center gap-2 font-medium"
+                    className="w-full py-3 border border-dashed border-espresso-lighter rounded-xl text-secondary hover:text-brand-red-400 hover:border-brand-red/50 hover:bg-chrome transition-all flex items-center justify-center gap-2 font-medium"
                 >
                     <PlusCircleIcon className="w-5 h-5" />
                     {ar.selectors.addCustomPart}
@@ -255,7 +255,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
             {/* Frequent */}
             {frequentlyReplaced.length > 0 && (
                 <section>
-                    <h4 className="text-sm font-semibold text-brand-red-400/80 mb-3 border-b border-copper-500/10 pb-2">
+                    <h4 className="text-sm font-semibold text-brand-red-400/80 mb-3 border-b border-brand-red/10 pb-2">
                         Common
                     </h4>
                     <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'flex flex-col gap-2'}`}>

@@ -47,8 +47,8 @@ function RadioGroup<T extends string | boolean>({ name, label, options, value, o
         }
     }, [disabled, options, value, onChange]);
 
-    const selectedClasses = 'border-copper-500 bg-copper-500/10 text-brand-red dark:text-brand-red-400';
-    const unselectedClasses = 'border-default bg-surface text-primary hover:border-copper-500/30';
+    const selectedClasses = 'border-brand-red bg-brand-red/10 text-brand-red dark:text-brand-red-400';
+    const unselectedClasses = 'border-default bg-surface text-primary hover:border-brand-red/30';
 
     const commonButtonClasses = `
         relative flex items-center gap-3 rounded-xl border-2 transition-all duration-200
@@ -76,7 +76,7 @@ function RadioGroup<T extends string | boolean>({ name, label, options, value, o
                 <div className={`
                     rounded-full border-2 flex items-center justify-center transition-colors
                     ${inline ? 'w-5 h-5' : 'w-6 h-6 flex-shrink-0'}
-                    ${isSelected ? 'border-copper-500 bg-copper-500' : 'border-default'}
+                    ${isSelected ? 'border-brand-red bg-brand-red' : 'border-default'}
                 `}>
                     {isSelected && <div className={`rounded-full bg-white ${inline ? 'w-2 h-2' : 'w-2.5 h-2.5'}`} />}
                 </div>

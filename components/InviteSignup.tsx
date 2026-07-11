@@ -292,7 +292,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="animate-spin h-12 w-12 border-4 border-copper-500 border-t-transparent rounded-full mx-auto mb-4" />
+          <div className="animate-spin h-12 w-12 border-4 border-brand-red border-t-transparent rounded-full mx-auto mb-4" />
           <p className="text-secondary">{copy[lang].validating}</p>
         </div>
       </div>
@@ -342,7 +342,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
         className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
           isAdmin
             ? 'bg-purple-900/30 text-purple-300'
-            : 'bg-copper-500/10 text-brand-red'
+            : 'bg-brand-red/10 text-brand-red'
         }`}
       >
         {isAdmin ? (
@@ -423,7 +423,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
 
           {/* Error Message */}
           {formError && (
-            <div className="mb-6 p-4 bg-ember-500/20 border border-copper-500/30 rounded-lg">
+            <div className="mb-6 p-4 bg-ember-500/20 border border-brand-red/30 rounded-lg">
               <p className="text-sm text-ember-700 text-center">
                 {formError}
               </p>
@@ -446,7 +446,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={copy[lang].namePlaceholder}
-                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-surface text-primary rounded-lg border border-default focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-brand-red/20 transition-all`}
+                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-surface text-primary rounded-lg border border-default focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 transition-all`}
                   dir={lang === 'ar' ? 'rtl' : 'ltr'}
                 />
               </div>
@@ -467,7 +467,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="email@example.com"
-                    className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-surface text-primary rounded-lg border border-default focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-brand-red/20 transition-all`}
+                    className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-surface text-primary rounded-lg border border-default focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 transition-all`}
                     dir="ltr"
                   />
                 </div>
@@ -488,7 +488,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={copy[lang].passwordPlaceholder}
-                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-surface text-primary rounded-lg border border-default focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-brand-red/20 transition-all`}
+                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-surface text-primary rounded-lg border border-default focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 transition-all`}
                   dir="ltr"
                 />
               </div>
@@ -517,7 +517,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                     password && confirmPassword && password !== confirmPassword
                       ? 'border-ember-500'
                       : 'border-default'
-                  } focus:outline-none focus:border-copper-500 focus:ring-2 focus:ring-brand-red/20 transition-all`}
+                  } focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 transition-all`}
                   dir="ltr"
                 />
               </div>

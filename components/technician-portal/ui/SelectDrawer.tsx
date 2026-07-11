@@ -94,7 +94,7 @@ const SelectDrawer: React.FC<SelectDrawerProps> = ({
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 placeholder="Search..."
-                                className="w-full bg-chrome-light text-cream rounded-lg pl-10 pr-4 py-3 border border-default focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-red focus:border-copper-500 transition-colors"
+                                className="w-full bg-chrome-light text-cream rounded-lg pl-10 pr-4 py-3 border border-default focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-red focus:border-brand-red transition-colors"
                             />
                         </div>
                     )}
@@ -108,7 +108,7 @@ const SelectDrawer: React.FC<SelectDrawerProps> = ({
                                     className={`
                                         w-full flex items-center justify-between p-4 rounded-xl border transition-all text-right
                                         ${String(value) === String(opt.value)
-                                            ? 'bg-copper-500/10 border-copper-500/50 text-cream'
+                                            ? 'bg-brand-red/10 border-brand-red/50 text-cream'
                                             : 'bg-chrome-light/30 border-default text-cream hover:bg-chrome-light hover:border-brass'
                                         }
                                     `}
@@ -126,7 +126,7 @@ const SelectDrawer: React.FC<SelectDrawerProps> = ({
                                     </div>
 
                                     {String(value) === String(opt.value) && (
-                                        <div className="w-6 h-6 rounded-full bg-copper-500 flex items-center justify-center">
+                                        <div className="w-6 h-6 rounded-full bg-brand-red flex items-center justify-center">
                                             <CheckIcon className="w-4 h-4 text-white" />
                                         </div>
                                     )}

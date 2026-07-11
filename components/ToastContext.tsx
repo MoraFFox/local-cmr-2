@@ -54,7 +54,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 : toast.type === 'error'
                 ? 'bg-ember-500/20 text-primary border-ember-500/30'
                 : toast.type === 'warning'
-                ? 'bg-surface text-primary border-copper-500/30'
+                ? 'bg-surface text-primary border-brand-red/30'
                 : 'bg-surface text-primary border-default'
             }`}
             role={toast.type === 'error' ? 'alert' : 'status'}

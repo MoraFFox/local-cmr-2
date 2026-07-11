@@ -417,7 +417,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
   };
 
   const textAreaClasses =
-    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-white dark:bg-chrome text-primary dark:text-white rounded-lg placeholder-latte dark:placeholder-latte focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-red focus:border-copper-500 focus:ring-2 focus:ring-brand-red/20 border border-default dark:border-default shadow-sm";
+    "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-white dark:bg-chrome text-primary dark:text-white rounded-lg placeholder-latte dark:placeholder-latte focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-red focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 border border-default dark:border-default shadow-sm";
   const selectClasses =
     "input-base px-4 py-3 sm:px-5 sm:py-4";
 

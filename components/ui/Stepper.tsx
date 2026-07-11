@@ -58,7 +58,7 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                     <div className="absolute inset-0 bg-hairline/40" />
                     <div
                       className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-                        isCompleted ? 'bg-gradient-to-l from-copper-500 to-copper-400' : 'bg-copper-500/0'
+                        isCompleted ? 'bg-gradient-to-l from-copper-500 to-copper-400' : 'bg-brand-red/0'
                       }`}
                       style={{
                         transformOrigin: 'right',
@@ -85,7 +85,7 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                     {/* Active/Completed background glow */}
                     {(isCurrent || isCompleted) && (
                       <span className={`absolute -inset-2 rounded-full transition-all duration-500 ${
-                        isCurrent ? 'bg-copper-500/20 animate-pulse-glow' : 'bg-leaf-500/10 group-hover:bg-leaf-500/20'
+                        isCurrent ? 'bg-brand-red/20 animate-pulse-glow' : 'bg-leaf-500/10 group-hover:bg-leaf-500/20'
                       }`} />
                     )}
                     
@@ -96,10 +96,10 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
 
                     <span className={`relative flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-300 ${
                       isCurrent
-                        ? 'border-copper-500 bg-copper-500 shadow-[0_0_12px_rgba(184,115,51,0.4)] scale-110'
+                        ? 'border-brand-red bg-brand-red shadow-[0_0_12px_rgba(184,115,51,0.4)] scale-110'
                         : isCompleted
                         ? 'border-leaf-500 bg-leaf-500 text-white shadow-sm group-hover:shadow-md group-hover:scale-105'
-                        : 'border-default bg-surface-elevated group-hover:border-copper-500/40 group-hover:bg-surface-3'
+                        : 'border-default bg-surface-elevated group-hover:border-brand-red/40 group-hover:bg-surface-3'
                     }`}>
                       {isCompleted ? (
                         <CheckIcon className="h-5 w-5 text-white animate-pop-in" aria-hidden="true" />
@@ -155,7 +155,7 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                     className={`absolute inset-0 rounded-full transition-all duration-700 ease-out ${
                       isCompleted
                         ? 'bg-gradient-to-b from-copper-500 to-copper-400'
-                        : 'bg-copper-500/0'
+                        : 'bg-brand-red/0'
                     }`}
                     style={{
                       transformOrigin: 'top',
@@ -194,7 +194,7 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                     <span
                       className={`absolute -inset-1.5 rounded-full animate-pulse-glow ${
                         isCurrent
-                          ? 'bg-copper-500/20'
+                          ? 'bg-brand-red/20'
                           : 'bg-leaf-500/10'
                       }`}
                     />
@@ -203,13 +203,13 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                   <span
                     className={`relative flex h-8 w-8 items-center justify-center rounded-full border-2 transition-colors duration-300 ${
                       isCurrent
-                        ? 'border-copper-500 bg-copper-500 shadow-[0_0_12px_rgba(184,115,51,0.3)]'
+                        ? 'border-brand-red bg-brand-red shadow-[0_0_12px_rgba(184,115,51,0.3)]'
                         : isCompleted
                         ? 'border-leaf-500 bg-leaf-500 text-white shadow-sm'
                         : 'border-default bg-surface-elevated'
                     } ${
                       isHovered && isClickable && !isCurrent && !isCompleted
-                        ? 'border-copper-500/50 bg-surface-3'
+                        ? 'border-brand-red/50 bg-surface-3'
                         : ''
                     }`}
                   >
@@ -249,7 +249,7 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                   </p>
                   {isCurrent && (
                     <p className="text-[11px] text-brand-red/80 dark:text-brand-red-400 mt-0.5 font-medium flex items-center gap-1">
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-copper-500 animate-pulse" />
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-brand-red animate-pulse" />
                       الخطوة الحالية
                     </p>
                   )}

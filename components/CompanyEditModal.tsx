@@ -111,7 +111,7 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                 {/* Header */}
                 <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-default bg-surface-elevated/50">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-copper-500/10 rounded-lg">
+                        <div className="p-2 bg-brand-red/10 rounded-lg">
                             <BuildingOfficeIcon className="w-5 h-5 text-brand-red" />
                         </div>
                         <div>

@@ -24,18 +24,18 @@ const accentBorderMap = {
 };
 
 const iconBgMap = {
-  teal: 'bg-copper-500/10 dark:bg-copper-500/20 text-brand-red dark:text-brand-red-400',
+  teal: 'bg-brand-red/10 dark:bg-brand-red/20 text-brand-red dark:text-brand-red-400',
   red: 'bg-ember-500/10 dark:bg-ember-500/20 text-ember-700 dark:text-ember-300',
-  blue: 'bg-copper-500/10 dark:bg-copper-500/20 text-brand-red dark:text-brand-red-400',
-  amber: 'bg-copper-500/10 dark:bg-copper-500/20 text-brand-red dark:text-brand-red-400',
+  blue: 'bg-brand-red/10 dark:bg-brand-red/20 text-brand-red dark:text-brand-red-400',
+  amber: 'bg-brand-red/10 dark:bg-brand-red/20 text-brand-red dark:text-brand-red-400',
   slate: 'bg-surface-elevated dark:bg-chrome-light text-secondary dark:text-cream/70',
 };
 
 const badgeBgMap = {
-  teal: 'bg-copper-500/10 dark:bg-copper-500/20 text-brand-red dark:text-brand-red-400',
+  teal: 'bg-brand-red/10 dark:bg-brand-red/20 text-brand-red dark:text-brand-red-400',
   red: 'bg-ember-500/10 dark:bg-ember-500/20 text-ember-700 dark:text-ember-300',
-  blue: 'bg-copper-500/10 dark:bg-copper-500/20 text-brand-red dark:text-brand-red-400',
-  amber: 'bg-copper-500/10 dark:bg-copper-500/20 text-brand-red dark:text-brand-red-400',
+  blue: 'bg-brand-red/10 dark:bg-brand-red/20 text-brand-red dark:text-brand-red-400',
+  amber: 'bg-brand-red/10 dark:bg-brand-red/20 text-brand-red dark:text-brand-red-400',
   slate: 'bg-surface-elevated dark:bg-chrome-light text-primary dark:text-cream',
 };
 

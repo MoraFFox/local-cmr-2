@@ -94,7 +94,7 @@ const PrintableWorkOrder: React.FC<PrintableWorkOrderProps> = ({ onBack, partsLi
             <div className="fixed bottom-4 left-4 z-30 flex flex-col gap-3 print:hidden">
                 <button
                     onClick={() => window.print()}
-                    className="flex items-center gap-2 bg-copper-600 text-white font-bold py-3 px-5 rounded-full hover:bg-copper-700 transition-colors shadow-lg transform active:scale-95"
+                    className="flex items-center gap-2 bg-brand-red-light text-white font-bold py-3 px-5 rounded-full hover:bg-copper-700 transition-colors shadow-lg transform active:scale-95"
                 >
                     <PrinterIcon className="w-6 h-6"/>
                     <span>Print</span>

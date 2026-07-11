@@ -50,8 +50,8 @@ const EmptyState: React.FC<EmptyStateProps> = ({
     return (
         <div className={`flex flex-col items-center justify-center py-16 px-4 text-center rounded-2xl bg-surface border-2 border-dashed border-default animate-content-fade-in ${className}`}>
             <div className="relative mb-6 group">
-                <div className="absolute inset-0 bg-copper-500/10 rounded-full scale-150 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="relative bg-copper-500/10 w-20 h-20 rounded-full flex items-center justify-center text-brand-red ring-8 ring-cream transition-transform duration-500 group-hover:scale-110">
+                <div className="absolute inset-0 bg-brand-red/10 rounded-full scale-150 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative bg-brand-red/10 w-20 h-20 rounded-full flex items-center justify-center text-brand-red ring-8 ring-cream transition-transform duration-500 group-hover:scale-110">
                     {React.cloneElement(icon as React.ReactElement, { className: 'w-10 h-10' })}
                 </div>
             </div>
