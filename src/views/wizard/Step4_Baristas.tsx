@@ -64,20 +64,6 @@ export const Step4_Baristas: React.FC<WizardStepProps> = ({
                   rows={3}
                   className={CLASSES.textArea}
                 />
-                <button
-                  onClick={async () => {
-                    const notes = await actions.suggestBaristaNotes(barista.name);
-                    if (notes) {
-                      const updated = [...formData.baristas];
-                      updated[index] = { ...updated[index], notes };
-                      actions.replaceBaristas(updated);
-                    }
-                  }}
-                  disabled={isSubmitting}
-                  className="mt-2 text-sm text-primary dark:text-primary-400 font-semibold disabled:opacity-50 transform active:scale-95 transition-transform"
-                >
-                  {isSubmitting ? "جاري الإنشاء..." : "✨ اقتراح بالذكاء الاصطناعي"}
-                </button>
               </div>
             </div>
           </CollapsibleCard>

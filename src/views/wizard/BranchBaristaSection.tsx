@@ -26,7 +26,6 @@ interface BranchBaristaSectionProps {
     listName: string,
     itemIndex: number,
   ) => void;
-  suggestNotes: (baristaName: string) => Promise<string | null>;
   isSubmitting: boolean;
   onAiNotesApplied: (baristaIndex: number, notes: string) => void;
 }
@@ -38,7 +37,6 @@ export const BranchBaristaSection: React.FC<BranchBaristaSectionProps> = ({
   onAddNested,
   onRemoveNested,
   onNestedChange,
-  suggestNotes,
   isSubmitting,
   onAiNotesApplied,
 }) => (
@@ -84,18 +82,6 @@ export const BranchBaristaSection: React.FC<BranchBaristaSectionProps> = ({
                   rows={3}
                   className={CLASSES.textArea}
                 />
-                <button
-                  onClick={async () => {
-                    const notes = await suggestNotes(barista.name);
-                    if (notes) {
-                      onAiNotesApplied(baristaIndex, notes);
-                    }
-                  }}
-                  disabled={isSubmitting}
-                  className="mt-2 text-sm text-primary dark:text-primary-400 font-semibold disabled:opacity-50 transform active:scale-95 transition-transform"
-                >
-                  {isSubmitting ? "جاري الإنشاء..." : "✨ اقتراح بالذكاء الاصطناعي"}
-                </button>
               </div>
             </div>
           </CollapsibleCard>

@@ -139,7 +139,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
       onAddNested={actions.addNestedListItem}
       onRemoveNested={(li, ii) => actions.removeNestedListItem(index, li, ii)}
       onNestedChange={(e, li, ii) => actions.handleNestedListItemChange(e, index, li as "baristas" | "clientBaristas", ii)}
-      suggestNotes={actions.suggestBaristaNotes} isSubmitting={isSubmitting}
+       isSubmitting={isSubmitting}
       onAiNotesApplied={(baristaIndex, notes) => actions.onBranchAiNotesApplied(index, baristaIndex, notes)}
     />
 

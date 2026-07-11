@@ -357,8 +357,6 @@ export const ar = {
       baristaCount_one: 'باريستا',
       baristaCount_other: 'باريستا',
       // AI suggestion
-      aiSuggesting: 'جاري الإنشاء...',
-      aiSuggest: '✨ اقتراح بالذكاء الاصطناعي',
       aiOffline: '⚠ الذكاء الاصطناعي غير متاح دون اتصال',
     },
     // Empty states

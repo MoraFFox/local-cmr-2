@@ -25,7 +25,6 @@ export interface WizardStepActions {
   handleClientBaristaChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, branchIndex: number | null, index: number) => void;
   handleQuickAddClientBarista: (name: string, branchIndex: number | null) => void;
   removeClientBarista: (branchIndex: number | null, index: number) => void;
-  suggestBaristaNotes: (baristaName: string) => Promise<string | null>;
   /** Add a blank client barista (used by Step 4.5) */
   addBlankClientBarista: (branchIndex: number | null) => void;
   /** Replace main office baristas (used by AI notes in step 4) */

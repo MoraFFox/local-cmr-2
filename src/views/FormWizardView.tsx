@@ -23,7 +23,6 @@ import {
   initialFormData, steps, getNewMaintenanceRecord,
 } from "../../utils/sharedConstants";
 import { formatPhoneNumber } from "../../utils/mappers";
-import { useAiNotes } from "../../hooks/useAiNotes";
 
 import { Step1_CompanyInfo } from "./wizard/Step1_CompanyInfo";
 import { Step2_Branches } from "./wizard/Step2_Branches";
@@ -201,7 +200,6 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
   }, [formData, createSubmission, refreshSubmissions, setView, setCurrentStep, setFormData]);
 
   // ── AI Notes ──
-  const { suggestBaristaNotes } = useAiNotes();
 
   // ── List item CRUD ──
   const addListItem = useCallback((ln: "branches" | "baristas" | "maintenanceHistory") => {
@@ -289,7 +287,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
     addListItem, removeListItem, handleListItemChange,
     addNestedListItem, removeNestedListItem, handleNestedListItemChange,
     handleClientBaristaChange, handleQuickAddClientBarista, removeClientBarista,
-    suggestBaristaNotes,
+    
     addBlankClientBarista: (bi: number | null) => {
       const ncb: ClientBarista = { id: Date.now(), name: "", phone: "", notes: "" };
       if (bi === null) setFormData((prev) => ({ ...prev, clientBaristas: [...(prev.clientBaristas || []), ncb] }));
@@ -317,7 +315,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
     addListItem, removeListItem, handleListItemChange,
     addNestedListItem, removeNestedListItem, handleNestedListItemChange,
     handleClientBaristaChange, handleQuickAddClientBarista, removeClientBarista,
-    suggestBaristaNotes, setFormData, formData.branches, formData.maintenanceHistory,
+     setFormData, formData.branches, formData.maintenanceHistory,
   ]);
 
   // ── Step props ──
