@@ -112,8 +112,8 @@ const Step1_Context: React.FC<Step1ContextProps> = ({
                   onChange={(e) => onChange({ ...data, clientBaristaName: e.target.value })}
               />
               
-              <div className="bg-cream-2 p-4 rounded-xl border border-hairline">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-latte mb-3 ml-1">
+              <div className="bg-surface-elevated p-4 rounded-xl border border-default">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-secondary mb-3 ml-1">
                       {ar.step1.ratingLabel}
                   </label>
                   <div className="flex justify-between items-center px-2">
@@ -124,7 +124,7 @@ const Step1_Context: React.FC<Step1ContextProps> = ({
                               className={`p-2 transition-all duration-200 active:scale-90 ${
                                   star <= data.clientBaristaRating
                                   ? 'text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]'
-                                  : 'text-latte'
+                                  : 'text-secondary'
                               }`}
                           >
                               <StarIcon className="w-8 h-8 fill-current" />

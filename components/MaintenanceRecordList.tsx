@@ -67,7 +67,7 @@ const getStatusBadge = (rec: MaintenanceRecord) => {
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream text-ink dark:bg-espresso-light dark:text-latte/70">
+    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface text-primary dark:bg-chrome-light dark:text-secondary/70">
       <WrenchIcon className="w-3 h-3" />
       Routine
     </span>
@@ -75,7 +75,7 @@ const getStatusBadge = (rec: MaintenanceRecord) => {
 };
 
 const renderStars = (rating: number | undefined) => {
-  if (!rating) return <span className="text-latte dark:text-latte text-sm">-</span>;
+  if (!rating) return <span className="text-secondary dark:text-secondary text-sm">-</span>;
 
   return (
     <div className="flex items-center gap-0.5">
@@ -83,7 +83,7 @@ const renderStars = (rating: number | undefined) => {
         star <= rating ? (
           <StarIconSolid key={star} className="w-4 h-4 text-yellow-400" />
         ) : (
-          <StarIcon key={star} className="w-4 h-4 text-latte/70 dark:text-ink" />
+          <StarIcon key={star} className="w-4 h-4 text-secondary/70 dark:text-primary" />
         )
       ))}
     </div>
@@ -107,11 +107,11 @@ const MaintenanceRecordRow = React.memo(({
   onDelete
 }: MaintenanceRecordRowProps) => {
   return (
-    <tr className="hover:bg-cream dark:hover:bg-espresso-light/50/50 transition-colors">
+    <tr className="hover:bg-surface dark:hover:bg-chrome-light/50/50 transition-colors">
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center gap-2">
-          <CalendarIcon className="w-4 h-4 text-latte" />
-          <span className="text-sm text-ink dark:text-white">
+          <CalendarIcon className="w-4 h-4 text-secondary" />
+          <span className="text-sm text-primary dark:text-white">
             {formatDate(record.maintenanceDate)}
           </span>
         </div>
@@ -119,15 +119,15 @@ const MaintenanceRecordRow = React.memo(({
       
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center gap-2">
-          <UserIcon className="w-4 h-4 text-latte" />
-          <span className="text-sm text-ink dark:text-white">
+          <UserIcon className="w-4 h-4 text-secondary" />
+          <span className="text-sm text-primary dark:text-white">
             {record.baristaName || '-'}
           </span>
         </div>
       </td>
 
       <td className="px-6 py-4 whitespace-nowrap">
-        <span className="text-sm text-ink dark:text-white">
+        <span className="text-sm text-primary dark:text-white">
           {record.clientBaristaName || '-'}
         </span>
       </td>
@@ -141,11 +141,11 @@ const MaintenanceRecordRow = React.memo(({
       </td>
       
       <td className="px-6 py-4">
-        <div className="text-sm text-ink dark:text-latte">
+        <div className="text-sm text-primary dark:text-secondary">
           {record.servicesPerformed.length > 0 ? (
             <span>{record.servicesPerformed.length} service(s)</span>
           ) : (
-            <span className="text-latte">No services</span>
+            <span className="text-secondary">No services</span>
           )}
         </div>
       </td>
@@ -159,7 +159,7 @@ const MaintenanceRecordRow = React.memo(({
           />
           <button
             onClick={() => onEdit(record, actualIndex)}
-            className="p-2 text-latte hover:text-copper-600 dark:hover:text-copper-400 hover:bg-cream-2 dark:hover:bg-copper-500/10 rounded-lg transition-colors"
+            className="p-2 text-secondary hover:text-brand-red dark:hover:text-brand-red-400 hover:bg-surface-elevated dark:hover:bg-copper-500/10 rounded-lg transition-colors"
             title="تعديل السجل"
           >
             <PencilIcon className="w-5 h-5" />
@@ -181,12 +181,12 @@ const MaintenanceRecordCardMobile: React.FC<MaintenanceRecordRowProps> = ({
   onQuickUpdate,
   onDelete
 }) => (
-  <div className="bg-cream dark:bg-espresso-light rounded-xl border border-hairline dark:border-hairline p-4 shadow-sm">
+  <div className="bg-surface dark:bg-chrome-light rounded-xl border border-default dark:border-default p-4 shadow-sm">
     {/* Top row: date + status */}
     <div className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-2 min-w-0">
-        <CalendarIcon className="w-4 h-4 text-latte shrink-0" />
-        <span className="text-sm font-medium text-ink dark:text-white truncate">
+        <CalendarIcon className="w-4 h-4 text-secondary shrink-0" />
+        <span className="text-sm font-medium text-primary dark:text-white truncate">
           {formatDate(record.maintenanceDate)}
         </span>
       </div>
@@ -196,13 +196,13 @@ const MaintenanceRecordCardMobile: React.FC<MaintenanceRecordRowProps> = ({
     {/* Middle: technician → client */}
     <div className="mt-3 flex items-center gap-2 text-sm">
       <div className="flex items-center gap-1.5 min-w-0">
-        <UserIcon className="w-4 h-4 text-latte shrink-0" />
-        <span className="text-ink dark:text-white truncate">
+        <UserIcon className="w-4 h-4 text-secondary shrink-0" />
+        <span className="text-primary dark:text-white truncate">
           {record.baristaName || '-'}
         </span>
       </div>
-      <span className="text-latte shrink-0">→</span>
-      <span className="text-ink dark:text-white truncate min-w-0">
+      <span className="text-secondary shrink-0">→</span>
+      <span className="text-primary dark:text-white truncate min-w-0">
         {record.clientBaristaName || '-'}
       </span>
     </div>
@@ -211,7 +211,7 @@ const MaintenanceRecordCardMobile: React.FC<MaintenanceRecordRowProps> = ({
     <div className="mt-3 flex items-center justify-between gap-3">
       <div className="flex items-center gap-3 min-w-0">
         {renderStars(record.visitRating)}
-        <span className="text-xs text-latte dark:text-latte truncate">
+        <span className="text-xs text-secondary dark:text-secondary truncate">
           {record.servicesPerformed.length > 0
             ? `${record.servicesPerformed.length} service(s)`
             : 'No services'}
@@ -225,7 +225,7 @@ const MaintenanceRecordCardMobile: React.FC<MaintenanceRecordRowProps> = ({
         />
         <button
           onClick={() => onEdit(record, actualIndex)}
-          className="p-2 text-latte hover:text-copper-600 dark:hover:text-copper-400 hover:bg-cream-2 dark:hover:bg-copper-500/10 rounded-lg transition-colors"
+          className="p-2 text-secondary hover:text-brand-red dark:hover:text-brand-red-400 hover:bg-surface-elevated dark:hover:bg-copper-500/10 rounded-lg transition-colors"
           title="تعديل السجل"
           aria-label="Edit record"
         >
@@ -284,15 +284,15 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
   };
 
   return (
-    <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline">
-      <div className="px-6 py-4 border-b border-hairline dark:border-hairline bg-cream dark:bg-espresso/50 rounded-t-[0.75rem]">
+    <div className="bg-surface dark:bg-chrome rounded-xl border border-default dark:border-default">
+      <div className="px-6 py-4 border-b border-default dark:border-default bg-surface dark:bg-chrome/50 rounded-t-[0.75rem]">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h3 className="text-lg font-semibold text-ink dark:text-white">
+          <h3 className="text-lg font-semibold text-primary dark:text-white">
             {branchName}
           </h3>
 
           <div className="flex items-center gap-2">
-            <span className="text-sm text-latte dark:text-latte">Sort by:</span>
+            <span className="text-sm text-secondary dark:text-secondary">Sort by:</span>
             <div className="flex items-center gap-1">
               {(['date', 'status', 'rating'] as const).map((field) => (
                 <button
@@ -300,8 +300,8 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
                   onClick={() => handleSort(field)}
                   className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
                     sortBy === field
-                      ? 'bg-copper-500/10 text-copper-800 dark:bg-copper-500/10 dark:text-copper-400'
-                      : 'text-ink dark:text-latte hover:bg-cream dark:hover:bg-espresso-light/50'
+                      ? 'bg-copper-500/10 text-brand-red-800 dark:bg-copper-500/10 dark:text-brand-red-400'
+                      : 'text-primary dark:text-secondary hover:bg-surface dark:hover:bg-chrome-light/50'
                   }`}
                 >
                   {field.charAt(0).toUpperCase() + field.slice(1)}
@@ -344,34 +344,34 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
       {/* Desktop: 7-column table (hidden on phones). */}
       <div className="hidden sm:block overflow-x-auto invisible-scrollbar">
         <table className="w-full">
-          <thead className="bg-cream dark:bg-espresso/50">
+          <thead className="bg-surface dark:bg-chrome/50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-secondary dark:text-secondary uppercase tracking-wider">
                 Date
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-secondary dark:text-secondary uppercase tracking-wider">
                 My Technician
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-secondary dark:text-secondary uppercase tracking-wider">
                 Client Barista
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-secondary dark:text-secondary uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-secondary dark:text-secondary uppercase tracking-wider">
                 Rating
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-secondary dark:text-secondary uppercase tracking-wider">
                 Services
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
+              <th className="px-6 py-3 text-right text-xs font-medium text-secondary dark:text-secondary uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
             {paginatedRecords.length === 0 ? (
-              <tr className="border-b border-hairline dark:border-hairline/50">
+              <tr className="border-b border-default dark:border-default/50">
                 <td colSpan={7} className="py-8">
                   <EmptyState 
                     icon={<WrenchScrewdriverIcon className="w-8 h-8" />} 
@@ -401,9 +401,9 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
       </div>
 
       {totalPages > 1 && (
-        <div className="px-6 py-4 border-t border-hairline dark:border-hairline bg-cream dark:bg-espresso/50">
+        <div className="px-6 py-4 border-t border-default dark:border-default bg-surface dark:bg-chrome/50">
           <div className="flex items-center justify-between">
-            <div className="text-sm text-latte dark:text-latte">
+            <div className="text-sm text-secondary dark:text-secondary">
               Showing {startIndex + 1} to {Math.min(startIndex + ITEMS_PER_PAGE, sortedRecords.length)} of {sortedRecords.length} records
             </div>
             
@@ -411,7 +411,7 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="p-2 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-ink dark:text-latte hover:bg-cream-2 dark:hover:bg-espresso-light/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="p-2 rounded-lg bg-surface dark:bg-chrome-light border border-default dark:border-default text-primary dark:text-secondary hover:bg-surface-elevated dark:hover:bg-chrome-light/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeftIcon className="w-5 h-5" />
               </button>
@@ -424,7 +424,7 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
                     className={`min-w-[40px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                       currentPage === page
                         ? 'bg-copper-600 text-white'
-                        : 'bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-ink dark:text-latte hover:bg-cream-2 dark:hover:bg-espresso-light/50'
+                        : 'bg-surface dark:bg-chrome-light border border-default dark:border-default text-primary dark:text-secondary hover:bg-surface-elevated dark:hover:bg-chrome-light/50'
                     }`}
                   >
                     {page}
@@ -435,7 +435,7 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="p-2 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-ink dark:text-latte hover:bg-cream-2 dark:hover:bg-espresso-light/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="p-2 rounded-lg bg-surface dark:bg-chrome-light border border-default dark:border-default text-primary dark:text-secondary hover:bg-surface-elevated dark:hover:bg-chrome-light/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronRightIcon className="w-5 h-5" />
               </button>

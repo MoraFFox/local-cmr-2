@@ -4,7 +4,7 @@ import { FormData, Branch, Contact, Barista, ClientBarista } from "../types";
 import { logger } from "./logger";
 import jsPDF from "jspdf";
 import { loadFonts } from "./pdfGenerator";
-import ArabicReshaper from "arabic-persian-reshaper";
+import { reshapeArabic } from "./arabicText";
 import {
   PDFDocument,
   PDFTextField,
@@ -57,15 +57,7 @@ export interface MissingFieldsResult {
   hasMissing: boolean;
 }
 
-/** Prepare Arabic text for jsPDF by applying shaping and RTL reversal */
-const reshapeArabic = (text: string): string => {
-  try {
-    const reshaped = ArabicReshaper.convertArabic(text);
-    return reshaped.split("").reverse().join("");
-  } catch {
-    return text;
-  }
-};
+
 
 const isMissing = (value: unknown): boolean => {
   if (value === null || value === undefined) return true;
@@ -89,15 +81,16 @@ const addTextField = (
   required = false
 ): number => {
   const labelY = layout.y;
+  const rightEdge = layout.x + layout.width;
   doc.setFontSize(7);
   doc.setFont("Amiri", "bold");
   doc.setTextColor(...COLORS.latte);
-  doc.text(reshapeArabic(label), layout.x, labelY);
+  doc.text(reshapeArabic(label, true), rightEdge, labelY, { align: "right" });
 
   if (required) {
-    const labelWidth = doc.getTextWidth(reshapeArabic(label));
+    const labelWidth = doc.getTextWidth(reshapeArabic(label, true));
     doc.setTextColor(220, 53, 69);
-    doc.text("*", layout.x + labelWidth + 1, labelY);
+    doc.text("*", rightEdge - labelWidth - 1, labelY);
     doc.setTextColor(...COLORS.latte);
   }
 
@@ -131,17 +124,19 @@ const addBinaryCheckboxField = (
   layout: FieldLayout
 ): number => {
   const labelY = layout.y;
+  const rightEdge = layout.x + layout.width;
   doc.setFontSize(7);
   doc.setFont("Amiri", "bold");
   doc.setTextColor(...COLORS.latte);
-  doc.text(reshapeArabic(label), layout.x, labelY);
+  doc.text(reshapeArabic(label, true), rightEdge, labelY, { align: "right" });
 
   const boxSize = 4;
   const startY = layout.y + 2;
   const optionSpacing = Math.min(40, layout.width / 2);
 
   options.forEach((option, index) => {
-    const x = layout.x + index * optionSpacing;
+    // RTL: first option on the right, subsequent options to the left
+    const x = rightEdge - boxSize - index * optionSpacing;
     const checkBox = new jsPDF.AcroForm.CheckBox();
     checkBox.x = x;
     checkBox.y = startY;
@@ -157,7 +152,8 @@ const addBinaryCheckboxField = (
     doc.setFont("Amiri", "normal");
     doc.setFontSize(8);
     doc.setTextColor(...COLORS.ink);
-    doc.text(reshapeArabic(option), x + boxSize + 2, startY + boxSize - 0.5);
+    const optionText = reshapeArabic(option, true);
+    doc.text(optionText, x - 2, startY + boxSize - 0.5, { align: "right" });
   });
 
   return startY + boxSize + 4;
@@ -171,10 +167,11 @@ const addNumberField = (
   value?: number
 ): number => {
   const labelY = layout.y;
+  const rightEdge = layout.x + layout.width;
   doc.setFontSize(7);
   doc.setFont("Amiri", "bold");
   doc.setTextColor(...COLORS.latte);
-  doc.text(reshapeArabic(label), layout.x, labelY);
+  doc.text(reshapeArabic(label, true), rightEdge, labelY, { align: "right" });
 
   const fieldY = layout.y + 2;
   const fieldHeight = 6;
@@ -286,13 +283,13 @@ const drawHeader = async (doc: jsPDF, data: FormData, pageWidth: number, margin:
   doc.setFontSize(13);
   doc.setFont("Amiri", "bold");
   doc.setTextColor(...COLORS.cream);
-  doc.text(reshapeArabic("طلب استكمال بيانات"), textBlockRightEdge, 14, { align: "right" });
+  doc.text(reshapeArabic("طلب استكمال بيانات", true), textBlockRightEdge, 14, { align: "right" });
 
   // Company name
   doc.setFontSize(9);
   doc.setFont("Amiri", "normal");
   doc.setTextColor(...COLORS.cream);
-  doc.text(reshapeArabic(`الشركة: ${data.companyName || "غير مسماة"}`), textBlockRightEdge, 19, { align: "right" });
+  doc.text(reshapeArabic(`الشركة: ${data.companyName || "غير مسماة"}`, true), textBlockRightEdge, 19, { align: "right" });
 
   return headerHeight + 5;
 };
@@ -331,7 +328,7 @@ const drawSectionHeader = (doc: jsPDF, title: string, x: number, y: number, page
   doc.setFontSize(9);
   doc.setFont("Amiri", "bold");
   doc.setTextColor(...COLORS.espresso);
-  doc.text(reshapeArabic(title), x + 4, y + 4.5);
+  doc.text(reshapeArabic(title, true), pageWidth - x - 4, y + 4.5, { align: "right" });
 
   return y + 10;
 };
@@ -347,7 +344,7 @@ const drawInstructionsBox = (doc: jsPDF, x: number, y: number, pageWidth: number
   doc.setFontSize(7);
   doc.setFont("Amiri", "bold");
   doc.setTextColor(...COLORS.espresso);
-  const instructionText = reshapeArabic("تعليمات: يرجى ملء الحقول التفاعلية التالية بالبيانات المطلوبة وإعادة إرسال الملف.");
+  const instructionText = reshapeArabic("تعليمات: يرجى ملء الحقول التفاعلية التالية بالبيانات المطلوبة وإعادة إرسال الملف.", true);
   doc.text(instructionText, pageWidth - margin - 2, y + 4, { align: "right" });
 
   return y + 9;
@@ -814,7 +811,8 @@ const renderFieldsGrid = (
 
     row.fields.forEach((field, index) => {
       const layout: FieldLayout = {
-        x: margin + index * (colWidth + gap),
+        // RTL: place columns from right to left
+        x: pageWidth - margin - (index + 1) * colWidth - index * gap,
         y: rowStartY,
         width: colWidth,
       };
@@ -904,7 +902,7 @@ export const generateMissingDataPDF = async (
     doc.setFont("Amiri", "normal");
     doc.setFontSize(8);
     doc.setTextColor(...COLORS.cream);
-    doc.text(reshapeArabic(`صفحة ${i} من ${pageCount}`), pageWidth - margin, doc.internal.pageSize.getHeight() - 5, { align: "right" });
+    doc.text(reshapeArabic(`صفحة ${i} من ${pageCount}`, true), pageWidth - margin, doc.internal.pageSize.getHeight() - 5, { align: "right" });
   }
 
   return doc;

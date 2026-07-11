@@ -13,10 +13,10 @@ const InviteSignup = lazy(() => import("./InviteSignup.tsx"));
 const ResetPassword = lazy(() => import("./ResetPassword.tsx"));
 
 const LoadingFallback = () => (
-  <div className="min-h-screen bg-paper dark:bg-[#1A1210] flex items-center justify-center p-4">
+  <div className="min-h-screen bg-background dark:bg-[#1A1210] flex items-center justify-center p-4">
     <div className="text-center">
       <div className="mx-auto mb-4 h-10 w-10 border-4 border-copper-500 border-t-transparent rounded-full animate-spin" />
-      <p className="text-ink dark:text-cream font-medium">
+      <p className="text-primary dark:text-cream font-medium">
         جاري التحميل...
       </p>
     </div>
@@ -363,10 +363,10 @@ const AppRouter: React.FC = () => {
   if (isRecoveryRouteWithoutKey()) {
     window.location.replace("/");
     return (
-      <div className="min-h-screen bg-paper dark:bg-[#1A1210] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background dark:bg-[#1A1210] flex items-center justify-center p-4">
         <div className="text-center">
           <div className="mx-auto mb-4 h-10 w-10 border-4 border-copper-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-ink dark:text-cream font-medium">
+          <p className="text-primary dark:text-cream font-medium">
             Redirecting...
           </p>
         </div>
@@ -392,10 +392,10 @@ const AppRouter: React.FC = () => {
     const path = window.location.pathname;
     window.location.replace(path.startsWith("/admin") ? "/" : "/technician");
     return (
-      <div className="min-h-screen bg-paper dark:bg-[#1A1210] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background dark:bg-[#1A1210] flex items-center justify-center p-4">
         <div className="text-center">
           <div className="mx-auto mb-4 h-10 w-10 border-4 border-copper-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-ink dark:text-cream font-medium">
+          <p className="text-primary dark:text-cream font-medium">
             Redirecting...
           </p>
         </div>
@@ -441,10 +441,10 @@ const AppRouter: React.FC = () => {
 
   if (adminAccessState === "checking") {
     return (
-      <div className="min-h-screen bg-paper dark:bg-[#1A1210] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background dark:bg-[#1A1210] flex items-center justify-center p-4">
         <div className="text-center">
           <div className="mx-auto mb-4 h-10 w-10 border-4 border-copper-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-ink dark:text-cream font-medium">
+          <p className="text-primary dark:text-cream font-medium">
             Checking access...
           </p>
         </div>

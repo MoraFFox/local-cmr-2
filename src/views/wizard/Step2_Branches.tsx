@@ -24,7 +24,7 @@ export const Step2_Branches: React.FC<WizardStepProps> = ({
   return (
     <Card title="تفاصيل الفرع">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-bold text-ink tracking-tight">الفروع</h3>
+        <h3 className="text-xl font-bold text-primary tracking-tight">الفروع</h3>
         <Button onClick={() => actions.addListItem("branches")}>
           <PlusCircleIcon className="w-5 h-5" /> إضافة فرع
         </Button>

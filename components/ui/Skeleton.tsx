@@ -2,7 +2,7 @@ import React from 'react';
 
 export const Skeleton: React.FC<{ className?: string }> = ({ className = '' }) => {
   return (
-    <div className={`bg-cream-2 dark:bg-espresso-light animate-pulse rounded-lg ${className}`} />
+    <div className={`bg-surface-elevated dark:bg-chrome-light animate-pulse rounded-lg ${className}`} />
   );
 };
 
@@ -18,7 +18,7 @@ export const SkeletonText: React.FC<{ lines?: number; className?: string }> = ({
 
 export const SkeletonCard: React.FC<{ className?: string }> = ({ className = '' }) => {
   return (
-    <div className={`bg-cream border border-hairline rounded-xl p-4 space-y-4 ${className}`}>
+    <div className={`bg-surface border border-default rounded-xl p-4 space-y-4 ${className}`}>
       <div className="flex items-center gap-3">
         <Skeleton className="h-10 w-10 rounded-full" />
         <div className="flex-1 space-y-2">

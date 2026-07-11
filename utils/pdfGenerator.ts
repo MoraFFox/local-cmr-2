@@ -4,6 +4,13 @@ import { FormData, MaintenanceRecord, Branch, MaintenancePhoto } from "../types"
 import { logger } from "./logger";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { reshapeArabic } from "./arabicText";
+
+/** Helper to reshape dynamic Arabic text for LTR jsPDF rendering. */
+const rtl = (text: string | number | null | undefined): string => {
+  if (text === null || text === undefined) return "";
+  return reshapeArabic(String(text), false);
+};
 
 interface PDFOptions {
   includeCosts: boolean;
@@ -377,7 +384,7 @@ export const generateCompanyPDF = async (
 
   doc.setFontSize(20);
   doc.setFont("Amiri", "bold");
-  doc.text(data.companyName, pageWidth / 2, yPos, { align: "center" });
+  doc.text(rtl(data.companyName), pageWidth / 2, yPos, { align: "center" });
 
   yPos += 10;
   doc.setFontSize(10);
@@ -511,9 +518,9 @@ export const generateCompanyPDF = async (
     locationUrl?.startsWith("http") || locationUrl?.startsWith("www");
 
   const companyInfo = [
-    ["Location", isLocationUrl ? "View Location" : locationUrl || "-"],
-    ["Email", data.email || "-"],
-    ["Tax Number", data.taxNumber || "-"],
+    ["Location", isLocationUrl ? "View Location" : rtl(locationUrl) || "-"],
+    ["Email", rtl(data.email) || "-"],
+    ["Tax Number", rtl(data.taxNumber) || "-"],
     ["Total Visits", stats.totalVisits.toString()],
     ["Parts Changed", stats.totalPartsCount.toString()],
   ];
@@ -558,15 +565,15 @@ export const generateCompanyPDF = async (
   const insightsData = [
     [
       "Most Frequent Issue",
-      `${stats.insights.topIssue.name} (${stats.insights.topIssue.count})`,
+      `${rtl(stats.insights.topIssue.name)} (${stats.insights.topIssue.count})`,
     ],
     [
       "Most Consumed Part",
-      `${stats.insights.topPart.name} (${stats.insights.topPart.count})`,
+      `${rtl(stats.insights.topPart.name)} (${stats.insights.topPart.count})`,
     ],
     [
       "Busiest Branch",
-      `${stats.insights.topBranch.name} (${stats.insights.topBranch.count} visits)`,
+      `${rtl(stats.insights.topBranch.name)} (${stats.insights.topBranch.count} visits)`,
     ],
   ];
 
@@ -590,8 +597,8 @@ export const generateCompanyPDF = async (
     yPos += 6;
 
     const contactRows = data.contacts.map((c) => [
-      c.name,
-      c.position === "custom" ? c.customPosition || c.position : c.position,
+      rtl(c.name),
+      rtl(c.position === "custom" ? c.customPosition || c.position : c.position),
       c.phoneNumbers.map((p) => p.number).join(", "),
     ]);
 
@@ -623,27 +630,27 @@ export const generateCompanyPDF = async (
     ).map((r) => {
       const row: any[] = [
         r.maintenanceDate,
-        r.baristaName || "-",
+        rtl(r.baristaName) || "-",
         getPaidByLabel(r.paidBy),
       ];
 
       const details: string[] = [];
       if (r.machines && r.machines.length > 0) {
         details.push(
-          `Machines: ${r.machines.map((m) => `${m.count || 1}x ${m.name}`).join(", ")}`,
+          `Machines: ${r.machines.map((m) => `${m.count || 1}x ${rtl(m.name)}`).join(", ")}`,
         );
       }
       if (r.hadProblem && r.problems) {
-        details.push(`Issues: ${r.problems.join(", ")}`);
+        details.push(`Issues: ${r.problems.map((p) => rtl(p)).join(", ")}`);
       }
       if (r.partsReplaced && r.partsReplaced.length > 0) {
         details.push(
-          `Parts: ${r.partsReplaced.map((p) => `${p.count || 1}x ${p.name}`).join(", ")}`,
+          `Parts: ${r.partsReplaced.map((p) => `${p.count || 1}x ${rtl(p.name)}`).join(", ")}`,
         );
       }
       if (r.servicesPerformed && r.servicesPerformed.length > 0) {
         details.push(
-          `Services: ${r.servicesPerformed.map((s) => `${s.count || 1}x ${s.name}`).join(", ")}`,
+          `Services: ${r.servicesPerformed.map((s) => `${s.count || 1}x ${rtl(s.name)}`).join(", ")}`,
         );
       }
 
@@ -704,9 +711,9 @@ export const generateCompanyPDF = async (
         yPos = 20;
       }
 
-      doc.setFontSize(14);
+      doc.setFontSize( 14);
       doc.setFont("Amiri", "bold");
-      doc.text(`${branch.branchName || `Branch ${idx + 1}`}`, 14, yPos);
+      doc.text(rtl(branch.branchName || `Branch ${idx + 1}`), 14, yPos);
       yPos += 8;
 
       doc.setFontSize(9);
@@ -718,13 +725,13 @@ export const generateCompanyPDF = async (
       const branchInfo = [
         [
           "Location",
-          isLocationUrl ? "View Location" : locationUrl || "-",
+          isLocationUrl ? "View Location" : rtl(locationUrl) || "-",
           "Email",
-          branch.email || "-",
+          rtl(branch.email) || "-",
         ],
         [
           "Tax ID",
-          branch.taxNumber || "-",
+          rtl(branch.taxNumber) || "-",
           "Machine Status",
           getMachineStatus(branch, !options.includeCosts),
         ],
@@ -770,7 +777,7 @@ export const generateCompanyPDF = async (
         yPos += 5;
 
         const contactRows = branch.contacts.map((c) => [
-          c.name,
+          rtl(c.name),
           c.phoneNumbers[0]?.number || "-",
         ]);
 
@@ -792,7 +799,7 @@ export const generateCompanyPDF = async (
         yPos += 5;
 
         const baristaRows = branch.baristas.map((b) => [
-          b.name,
+          rtl(b.name),
           b.phone || "-",
         ]);
 
@@ -818,27 +825,27 @@ export const generateCompanyPDF = async (
         ).map((r) => {
           const row: any[] = [
             r.maintenanceDate,
-            r.baristaName || "-",
+            rtl(r.baristaName) || "-",
             getPaidByLabel(r.paidBy),
           ];
 
           const details: string[] = [];
           if (r.machines && r.machines.length > 0) {
             details.push(
-              `Machines: ${r.machines.map((m) => `${m.count || 1}x ${m.name}`).join(", ")}`,
+              `Machines: ${r.machines.map((m) => `${m.count || 1}x ${rtl(m.name)}`).join(", ")}`,
             );
           }
           if (r.hadProblem && r.problems) {
-            details.push(`Issues: ${r.problems.join(", ")}`);
+            details.push(`Issues: ${r.problems.map((p) => rtl(p)).join(", ")}`);
           }
           if (r.partsReplaced && r.partsReplaced.length > 0) {
             details.push(
-              `Parts: ${r.partsReplaced.map((p) => `${p.count || 1}x ${p.name}`).join(", ")}`,
+              `Parts: ${r.partsReplaced.map((p) => `${p.count || 1}x ${rtl(p.name)}`).join(", ")}`,
             );
           }
           if (r.servicesPerformed && r.servicesPerformed.length > 0) {
             details.push(
-              `Services: ${r.servicesPerformed.map((s) => `${s.count || 1}x ${s.name}`).join(", ")}`,
+              `Services: ${r.servicesPerformed.map((s) => `${s.count || 1}x ${rtl(s.name)}`).join(", ")}`,
             );
           }
 
@@ -928,11 +935,11 @@ export const generateBranchPDF = async (
 
   doc.setFontSize(18);
   doc.setFont("Amiri", "bold");
-  doc.text(companyName, pageWidth / 2, yPos, { align: "center" });
+  doc.text(rtl(companyName), pageWidth / 2, yPos, { align: "center" });
 
   yPos += 8;
   doc.setFontSize(14);
-  doc.text(branch.branchName || "Branch Report", pageWidth / 2, yPos, {
+  doc.text(rtl(branch.branchName || "Branch Report"), pageWidth / 2, yPos, {
     align: "center",
   });
 
@@ -957,12 +964,10 @@ export const generateBranchPDF = async (
 
   const locationUrl = branch.location;
   const isLocationUrl =
-    locationUrl?.startsWith("http") || locationUrl?.startsWith("www");
-
-  const branchInfo = [
-    ["Location", isLocationUrl ? "View Location" : locationUrl || "-"],
-    ["Email", branch.email || "-"],
-    ["Tax ID", branch.taxNumber || "-"],
+    locationUrl?.startsWith("http") || locationUrl?.startsWith("www");    const branchInfo = [
+    ["Location", isLocationUrl ? "View Location" : rtl(locationUrl) || "-"],
+    ["Email", rtl(branch.email) || "-"],
+    ["Tax ID", rtl(branch.taxNumber) || "-"],
     ["Machine Status", getMachineStatus(branch, !options.includeCosts)],
   ];
 
@@ -997,8 +1002,8 @@ export const generateBranchPDF = async (
     yPos += 6;
 
     const contactRows = branch.contacts.map((c) => [
-      c.name,
-      c.position === "custom" ? c.customPosition || c.position : c.position,
+      rtl(c.name),
+      rtl(c.position === "custom" ? c.customPosition || c.position : c.position),
       c.phoneNumbers.map((p) => p.number).join(", "),
     ]);
 
@@ -1026,9 +1031,9 @@ export const generateBranchPDF = async (
     yPos += 6;
 
     const baristaRows = branch.baristas.map((b) => [
-      b.name,
+      rtl(b.name),
       b.phone || "-",
-      b.notes || "-",
+      rtl(b.notes) || "-",
     ]);
 
     autoTable(doc, {
@@ -1086,7 +1091,7 @@ export const generateBranchPDF = async (
       // Staff & Supervisor
       doc.setFontSize(9);
       doc.setFont("Amiri", "normal");
-      const staffText = `Staff: ${r.baristaName}`;
+      const staffText = `Staff: ${rtl(r.baristaName)}`;
       doc.text(staffText, 14, yPos);
       yPos += 6;
 
@@ -1109,7 +1114,7 @@ export const generateBranchPDF = async (
         doc.text("Machines:", 14, yPos);
         doc.setFont("Amiri", "normal");
         const machinesText = r.machines
-          .map((m) => `${m.count || 1}x ${m.name}`)
+          .map((m) => `${m.count || 1}x ${rtl(m.name)}`)
           .join(", ");
         const splitMachines = doc.splitTextToSize(machinesText, pageWidth - 40);
         doc.text(splitMachines, 35, yPos);
@@ -1121,7 +1126,7 @@ export const generateBranchPDF = async (
         doc.setFont("Amiri", "bold");
         doc.text("Issues:", 14, yPos);
         doc.setFont("Amiri", "normal");
-        const issuesText = r.problems.join(", ");
+        const issuesText = r.problems.map((p) => rtl(p)).join(", ");
         const splitIssues = doc.splitTextToSize(issuesText, pageWidth - 40);
         doc.text(splitIssues, 35, yPos);
         yPos += splitIssues.length * 5 + 2;
@@ -1130,7 +1135,7 @@ export const generateBranchPDF = async (
       // Parts Replaced Table
       if (r.partsReplaced && r.partsReplaced.length > 0) {
         const partsBody = r.partsReplaced.map((p) => {
-          const row = [p.name, p.count.toString()];
+          const row = [rtl(p.name), p.count.toString()];
           if (options.includeCosts) {
             row.push(formatCurrency(p.cost || 0));
           }
@@ -1159,7 +1164,7 @@ export const generateBranchPDF = async (
       // Services Performed Table
       if (r.servicesPerformed && r.servicesPerformed.length > 0) {
         const servicesBody = r.servicesPerformed.map((s) => {
-          const row = [s.name, s.count.toString()];
+          const row = [rtl(s.name), s.count.toString()];
           if (options.includeCosts) {
             row.push(formatCurrency(s.cost || 0));
           }
@@ -1190,7 +1195,7 @@ export const generateBranchPDF = async (
         doc.setFont("Amiri", "bold");
         doc.text("Notes:", 14, yPos);
         doc.setFont("Amiri", "normal");
-        const splitNotes = doc.splitTextToSize(r.notes, pageWidth - 30);
+        const splitNotes = doc.splitTextToSize(rtl(r.notes), pageWidth - 30);
         doc.text(splitNotes, 14, yPos + 5);
         yPos += splitNotes.length * 5 + 5;
       }
@@ -1201,7 +1206,7 @@ export const generateBranchPDF = async (
         doc.text("Recommendations:", 14, yPos);
         doc.setFont("Amiri", "normal");
         const splitRecs = doc.splitTextToSize(
-          r.recommendations,
+          rtl(r.recommendations),
           pageWidth - 30,
         );
         doc.text(splitRecs, 14, yPos + 5);

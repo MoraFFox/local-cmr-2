@@ -133,7 +133,7 @@ const SidebarContent = React.memo(({
               className={`group relative flex items-center w-full gap-3 p-2.5 rounded-lg text-sm font-medium transition-all duration-300 overflow-hidden ${
                 isActive
                   ? "text-cream bg-gradient-to-l from-copper-500/15 to-transparent shadow-[inset_-3px_0_0_0_#B87333]"
-                  : "text-cream/60 hover:bg-espresso-light/40 hover:text-cream"
+                  : "text-cream/60 hover:bg-chrome-light/40 hover:text-cream"
               } ${!isSidebarExpanded && "justify-center"}`}
               title={item.label}
             >
@@ -145,7 +145,7 @@ const SidebarContent = React.memo(({
               <Icon 
                 className={`h-5 w-5 shrink-0 transition-transform duration-300 ${
                   isActive 
-                    ? "text-copper-400 scale-110 drop-shadow-[0_0_8px_rgba(184,115,51,0.5)]" 
+                    ? "text-brand-red-400 scale-110 drop-shadow-[0_0_8px_rgba(184,115,51,0.5)]" 
                     : "group-hover:scale-110 group-hover:text-cream/90"
                 }`} 
               />
@@ -169,7 +169,7 @@ const SidebarContent = React.memo(({
           <div className={`mb-4 ${!isSidebarExpanded && "hidden"}`}>
             <div className="relative flex items-center py-2">
               <div className="flex-grow border-t border-brass/20"></div>
-              <span className="flex-shrink-0 mx-2 text-xs font-semibold text-latte uppercase tracking-wider stamp-id">
+              <span className="flex-shrink-0 mx-2 text-xs font-semibold text-secondary uppercase tracking-wider stamp-id">
                 المسودات
               </span>
               <div className="flex-grow border-t border-brass/20"></div>
@@ -179,7 +179,7 @@ const SidebarContent = React.memo(({
                 <div
                   key={draft.id}
                   onClick={() => handleLoadDraft(draft)}
-                  className={`group flex items-center justify-between p-2 rounded-md text-sm cursor-pointer transition-colors ${currentDraftId === draft.id ? "bg-espresso-light border-r-2 border-copper-500 text-cream" : "text-cream/60 hover:bg-espresso-light/40 hover:text-cream"}`}
+                  className={`group flex items-center justify-between p-2 rounded-md text-sm cursor-pointer transition-colors ${currentDraftId === draft.id ? "bg-chrome-light border-r-2 border-copper-500 text-cream" : "text-cream/60 hover:bg-chrome-light/40 hover:text-cream"}`}
                 >
                   <div className="flex flex-col truncate">
                     <span className="font-medium truncate">
@@ -239,7 +239,7 @@ const SidebarContent = React.memo(({
         )}
         <button
           onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
-          className={`w-full hidden lg:flex items-center p-2 rounded-md text-sm font-medium text-cream/40 hover:text-cream/70 hover:bg-espresso-light/30 transition-colors overflow-hidden ${!isSidebarExpanded && "justify-center"}`}
+          className={`w-full hidden lg:flex items-center p-2 rounded-md text-sm font-medium text-cream/40 hover:text-cream/70 hover:bg-chrome-light/30 transition-colors overflow-hidden ${!isSidebarExpanded && "justify-center"}`}
           aria-label={isSidebarExpanded ? "طي الشريط الجانبي" : "فتح الشريط الجانبي"}
           title={isSidebarExpanded ? "طي" : "فتح"}
         >

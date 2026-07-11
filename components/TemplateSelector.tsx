@@ -65,21 +65,21 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-            <div className="bg-cream rounded-2xl shadow-sm w-full max-w-2xl max-h-[80vh] flex flex-col animate-scale-in">
+            <div className="bg-surface rounded-2xl shadow-sm w-full max-w-2xl max-h-[80vh] flex flex-col animate-scale-in">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-hairline">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-default">
                     <div>
-                        <h2 className="text-xl font-bold text-ink">
+                        <h2 className="text-xl font-bold text-primary">
                             Maintenance Templates
                         </h2>
-                        <p className="text-sm text-latte mt-1">
+                        <p className="text-sm text-secondary mt-1">
                             Choose a template to quickly fill in common maintenance scenarios
                         </p>
                     </div>
                     
                     <button
                         onClick={handleClose}
-                        className="p-2 text-latte hover:text-ink hover:bg-cream-2 rounded-full transition-colors"
+                        className="p-2 text-secondary hover:text-primary hover:bg-surface-elevated rounded-full transition-colors"
                     >
                         <XMarkIcon className="w-5 h-5" />
                     </button>
@@ -87,13 +87,13 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
 
                 {/* Tabs */}
                 {suggestedTemplates.length > 0 && (
-                    <div className="flex border-b border-hairline">
+                    <div className="flex border-b border-default">
                         <button
                             onClick={() => setActiveTab('suggested')}
                             className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                                 activeTab === 'suggested'
-                                    ? 'text-copper-700 border-b-2 border-copper-700 bg-copper-500/10'
-                                    : 'text-latte hover:text-ink'
+                                    ? 'text-brand-red border-b-2 border-copper-700 bg-copper-500/10'
+                                    : 'text-secondary hover:text-primary'
                             }`}
                         >
                             Suggested ({suggestedTemplates.length})
@@ -102,8 +102,8 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                             onClick={() => setActiveTab('all')}
                             className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                                 activeTab === 'all'
-                                    ? 'text-copper-700 border-b-2 border-copper-700 bg-copper-500/10'
-                                    : 'text-latte hover:text-ink'
+                                    ? 'text-brand-red border-b-2 border-copper-700 bg-copper-500/10'
+                                    : 'text-secondary hover:text-primary'
                             }`}
                         >
                             All Templates
@@ -125,7 +125,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                                     className={`relative p-4 rounded-xl border-2 text-left transition-all ${
                                         isSelected
                                             ? 'border-copper-500 bg-copper-500/10'
-                                            : 'border-hairline hover:border-copper-500/50 hover:bg-cream-2'
+                                            : 'border-default hover:border-copper-500/50 hover:bg-surface-elevated'
                                     }`}
                                 >
                                     {isSelected && (
@@ -139,8 +139,8 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                                     <div className="flex items-start gap-3">
                                         <div className={`p-2 rounded-lg ${
                                             isSelected
-                                                ? 'bg-copper-500/20 text-copper-700'
-                                                : 'bg-cream-2 text-latte'
+                                                ? 'bg-copper-500/20 text-brand-red'
+                                                : 'bg-surface-elevated text-secondary'
                                         }`}>
                                             <IconComponent className="w-5 h-5" />
                                         </div>
@@ -148,13 +148,13 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                                         <div className="flex-1">
                                             <h3 className={`font-semibold ${
                                                 isSelected
-                                                    ? 'text-copper-700'
-                                                    : 'text-ink'
+                                                    ? 'text-brand-red'
+                                                    : 'text-primary'
                                             }`}>
                                                 {template.name}
                                             </h3>
                                             
-                                            <p className="text-sm text-latte mt-1">
+                                            <p className="text-sm text-secondary mt-1">
                                                 {template.description}
                                             </p>
                                             
@@ -186,10 +186,10 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-hairline bg-cream-2">
+                <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-default bg-surface-elevated">
                     <button
                         onClick={handleClose}
-                        className="px-4 py-2 text-ink font-medium rounded-lg hover:bg-cream-3 transition-colors"
+                        className="px-4 py-2 text-primary font-medium rounded-lg hover:bg-surface-3 transition-colors"
                     >
                         Cancel
                     </button>

@@ -24,7 +24,7 @@ export const Step4_Baristas: React.FC<WizardStepProps> = ({
 }) => (
   <Card title="الفريق / الباريستا (المكتب الرئيسي)">
     <div className="flex justify-between items-center mb-6">
-      <h3 className="text-xl font-bold text-ink tracking-tight">الباريستا</h3>
+      <h3 className="text-xl font-bold text-primary tracking-tight">الباريستا</h3>
       <Button onClick={() => actions.addListItem("baristas")}>
         <PlusCircleIcon className="w-5 h-5" /> إضافة باريستا
       </Button>
@@ -56,7 +56,7 @@ export const Step4_Baristas: React.FC<WizardStepProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-ink dark:text-latte mb-2">ملاحظات</label>
+                <label className="block text-sm font-medium text-primary dark:text-secondary mb-2">ملاحظات</label>
                 <textarea
                   name="notes"
                   value={barista.notes || ""}
@@ -74,7 +74,7 @@ export const Step4_Baristas: React.FC<WizardStepProps> = ({
                     }
                   }}
                   disabled={isSubmitting}
-                  className="mt-2 text-sm text-copper-700 dark:text-copper-400 font-semibold disabled:opacity-50 transform active:scale-95 transition-transform"
+                  className="mt-2 text-sm text-brand-red dark:text-brand-red-400 font-semibold disabled:opacity-50 transform active:scale-95 transition-transform"
                 >
                   {isSubmitting ? "جاري الإنشاء..." : "✨ اقتراح بالذكاء الاصطناعي"}
                 </button>

@@ -321,7 +321,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
 
   if (editingRecord && selectedBranch) {
     return (
-      <div className="min-h-screen bg-cream dark:bg-espresso">
+      <div className="min-h-screen bg-surface dark:bg-chrome">
         {/* Redesigned Header */}
         <div className="sticky top-0 z-50 rounded-lg bg-gradient-to-r from-espresso-light to-espresso dark:from-espresso dark:to-black border-1 border-brass shadow-lg">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -335,15 +335,15 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                   <span className="hidden sm:inline font-medium">Back</span>
                 </button>
                 
-                <div className="hidden sm:block h-8 w-px bg-espresso-light" />
+                <div className="hidden sm:block h-8 w-px bg-chrome-light" />
                 
                 <div>
                   <h1 className="text-xl font-bold text-white">
                     {localSubmission.companyName}
                   </h1>
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-latte/70">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-secondary/70">
                     <span>{selectedBranch.branchName}</span>
-                    <span className="text-latte">•</span>
+                    <span className="text-secondary">•</span>
                     <span className="flex items-center gap-1">
                       <CalendarIcon className="w-4 h-4" />
                       {stagingNewRecord ? (
@@ -354,7 +354,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                     </span>
                     {stagingNewRecord && (
                       <>
-                        <span className="text-latte">•</span>
+                        <span className="text-secondary">•</span>
                         <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded-full text-xs font-medium">
                           New (Unsaved)
                         </span>
@@ -362,8 +362,8 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                     )}
                     {averageDaysBetweenMaintenance && (
                       <>
-                        <span className="text-latte">•</span>
-                        <span className="flex items-center gap-1 text-copper-400">
+                        <span className="text-secondary">•</span>
+                        <span className="flex items-center gap-1 text-brand-red-400">
                           <ClockIcon className="w-4 h-4" />
                           Avg: {averageDaysBetweenMaintenance} days
                         </span>
@@ -394,7 +394,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                   <ChevronRightIcon className="w-5 h-5" />
                 </button>
                 
-                <div className="hidden sm:block h-8 w-px bg-espresso-light" />
+                <div className="hidden sm:block h-8 w-px bg-chrome-light" />
                 
                 <button
                   onClick={handleAddNewRecord}
@@ -430,7 +430,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-cream dark:bg-espresso">
+    <div className="min-h-screen bg-surface dark:bg-chrome">
       <div className="sticky top-0 z-50 bg-gradient-to-r from-espresso-light to-espresso dark:from-espresso dark:to-black border-b border-brass shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-4">
@@ -442,13 +442,13 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
               <span className="hidden sm:inline font-medium">Back</span>
             </button>
             
-            <div className="h-8 w-px bg-espresso-light" />
+            <div className="h-8 w-px bg-chrome-light" />
             
             <div>
               <h1 className="text-xl font-bold text-white">
                 Edit Maintenance Records
               </h1>
-              <p className="text-sm text-latte/70">
+              <p className="text-sm text-secondary/70">
                 {localSubmission.companyName}
               </p>
             </div>
@@ -459,22 +459,22 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {selectedBranch ? (
           <div className="space-y-6">
-            <div className="flex items-center justify-between bg-cream dark:bg-espresso rounded-xl p-4 border border-hairline dark:border-hairline">
+            <div className="flex items-center justify-between bg-surface dark:bg-chrome rounded-xl p-4 border border-default dark:border-default">
               <button
                 onClick={() => setSelectedBranchId(null)}
-                className="flex items-center gap-2 text-copper-600 dark:text-copper-400 hover:text-copper-700 dark:hover:text-copper-400 font-medium transition-colors"
+                className="flex items-center gap-2 text-brand-red dark:text-brand-red-400 hover:text-brand-red dark:hover:text-brand-red-400 font-medium transition-colors"
               >
                 <ArrowLeftIcon className="w-4 h-4" />
                 Select Different Branch
               </button>
               <div className="flex items-center gap-4">
                 {averageDaysBetweenMaintenance && (
-                  <div className="flex items-center gap-2 text-sm text-ink dark:text-latte">
-                    <ClockIcon className="w-4 h-4 text-copper-500" />
+                  <div className="flex items-center gap-2 text-sm text-primary dark:text-secondary">
+                    <ClockIcon className="w-4 h-4 text-brand-red" />
                     Average: {averageDaysBetweenMaintenance} days between visits
                   </div>
                 )}
-                <span className="text-sm font-medium text-ink dark:text-latte/70 px-3 py-1 bg-cream dark:bg-espresso-light rounded-full">
+                <span className="text-sm font-medium text-primary dark:text-secondary/70 px-3 py-1 bg-surface dark:bg-chrome-light rounded-full">
                   {selectedBranch.maintenanceHistory.length} records
                 </span>
                 <button
@@ -505,7 +505,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
           </div>
         ) : (
           <div className="space-y-6">
-            <h2 className="text-xl font-bold text-ink dark:text-white">
+            <h2 className="text-xl font-bold text-primary dark:text-white">
               Select a Branch
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -513,7 +513,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                 <button
                   key={branch.id}
                   onClick={() => handleBranchSelect(branch.id)}
-                  className="flex items-start gap-4 p-6 bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline hover:border-copper-500 dark:hover:border-copper-500 hover:shadow-xl transition-all text-left group"
+                  className="flex items-start gap-4 p-6 bg-surface dark:bg-chrome rounded-xl border border-default dark:border-default hover:border-copper-500 dark:hover:border-copper-500 hover:shadow-xl transition-all text-left group"
                 >
                   <div className="p-3 bg-gradient-to-br from-copper-500 to-copper-600 rounded-lg group-hover:from-copper-400 group-hover:to-copper-500 transition-colors shadow-lg">
                     {branch.isMainOffice ? (
@@ -523,13 +523,13 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-ink dark:text-white truncate">
+                    <h3 className="font-semibold text-primary dark:text-white truncate">
                       {branch.branchName || 'Unnamed Branch'}
                     </h3>
-                    <p className="text-sm text-latte dark:text-latte mt-1">
+                    <p className="text-sm text-secondary dark:text-secondary mt-1">
                       {branch.maintenanceHistory.length} maintenance records
                     </p>
-                    <p className="text-xs text-latte dark:text-latte mt-2 truncate">
+                    <p className="text-xs text-secondary dark:text-secondary mt-2 truncate">
                       {branch.location}
                     </p>
                   </div>

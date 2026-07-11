@@ -46,7 +46,7 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ steps, currentStep }) => 
                                                     ? 'border-copper-500 bg-copper-500 text-white shadow-[0_0_14px_rgba(184,115,51,0.35)] scale-110'
                                                     : isCompleted
                                                     ? 'border-copper-500 bg-copper-500 text-white shadow-[0_0_10px_rgba(184,115,51,0.25)]'
-                                                    : 'border-hairline bg-cream-2 text-latte'
+                                                    : 'border-default bg-surface-elevated text-secondary'
                                             }`}
                                             aria-current={isCurrent ? 'step' : undefined}
                                         >
@@ -57,7 +57,7 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ steps, currentStep }) => 
                                                     <span className="w-2.5 h-2.5 rounded-full bg-white" />
                                                 </span>
                                             ) : (
-                                                <span className="text-sm font-bold text-latte/60">
+                                                <span className="text-sm font-bold text-secondary/60">
                                                     {index + 1}
                                                 </span>
                                             )}
@@ -68,10 +68,10 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ steps, currentStep }) => 
                                     <p
                                         className={`mt-2 text-xs text-center transition-all duration-300 px-1 ${
                                             isCurrent
-                                                ? 'font-bold text-ink'
+                                                ? 'font-bold text-primary'
                                                 : isCompleted
-                                                ? 'font-semibold text-ink/80'
-                                                : 'font-medium text-latte/50'
+                                                ? 'font-semibold text-primary/80'
+                                                : 'font-medium text-secondary/50'
                                         }`}
                                     >
                                         {step.name}
@@ -108,11 +108,11 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ steps, currentStep }) => 
                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-copper-500 text-white text-xs font-bold">
                             {currentIndex + 1}
                         </span>
-                        <span className="text-sm font-bold text-ink">
+                        <span className="text-sm font-bold text-primary">
                             {steps[currentIndex]?.name}
                         </span>
                     </div>
-                    <span className="text-xs text-latte font-mono">
+                    <span className="text-xs text-secondary font-mono">
                         {currentIndex + 1}/{steps.length}
                     </span>
                 </div>

@@ -22,7 +22,7 @@ const TechCard: React.FC<TechCardProps> = ({
           case 'alert': return 'border-ember-500/50';
           case 'success': return 'border-leaf-500/50';
           case 'active': return 'border-copper-500/50';
-          default: return 'border-hairline';
+          default: return 'border-default';
       }
   };
 
@@ -31,7 +31,7 @@ const TechCard: React.FC<TechCardProps> = ({
         case 'alert': return 'from-espresso to-ember-500/10';
         case 'success': return 'from-espresso to-leaf-500/10';
         case 'active': return 'from-espresso to-copper-500/10';
-        default: return 'bg-espresso/50';
+        default: return 'bg-chrome/50';
     }
 };
 
@@ -43,7 +43,7 @@ const TechCard: React.FC<TechCardProps> = ({
       {/* Header */}
       {title && (
           <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/5">
-              {icon && <div className={`w-4 h-4 ${variant === 'active' ? 'text-copper-400' : 'text-latte'}`}>{icon}</div>}
+              {icon && <div className={`w-4 h-4 ${variant === 'active' ? 'text-brand-red-400' : 'text-secondary'}`}>{icon}</div>}
               <h3 className="text-xs font-bold uppercase tracking-wider text-cream">{title}</h3>
           </div>
       )}

@@ -91,7 +91,7 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                     
                     {/* Hover focus ring */}
                     {!isFuture && isClickable && !isCurrent && (
-                      <span className="absolute -inset-1 rounded-full bg-cream-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                      <span className="absolute -inset-1 rounded-full bg-surface-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                     )}
 
                     <span className={`relative flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-300 ${
@@ -99,13 +99,13 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                         ? 'border-copper-500 bg-copper-500 shadow-[0_0_12px_rgba(184,115,51,0.4)] scale-110'
                         : isCompleted
                         ? 'border-leaf-500 bg-leaf-500 text-white shadow-sm group-hover:shadow-md group-hover:scale-105'
-                        : 'border-hairline bg-cream-2 group-hover:border-copper-500/40 group-hover:bg-cream-3'
+                        : 'border-default bg-surface-elevated group-hover:border-copper-500/40 group-hover:bg-surface-3'
                     }`}>
                       {isCompleted ? (
                         <CheckIcon className="h-5 w-5 text-white animate-pop-in" aria-hidden="true" />
                       ) : (
                         <span className={`text-xs font-bold transition-colors ${
-                          isCurrent ? 'text-white' : 'text-latte/70 group-hover:text-ink'
+                          isCurrent ? 'text-white' : 'text-secondary/70 group-hover:text-primary'
                         }`}>
                           {index + 1}
                         </span>
@@ -116,10 +116,10 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                   {/* Label under circle */}
                   <span className={`text-[11px] font-semibold text-center leading-tight truncate px-1 transition-all duration-300 ${
                     isCurrent 
-                      ? 'text-copper-700 dark:text-copper-400 font-bold scale-105' 
+                      ? 'text-brand-red dark:text-brand-red-400 font-bold scale-105' 
                       : isCompleted 
-                      ? 'text-ink/90 group-hover:text-ink' 
-                      : 'text-latte/70 group-hover:text-ink/80'
+                      ? 'text-primary/90 group-hover:text-primary' 
+                      : 'text-secondary/70 group-hover:text-primary/80'
                   }`}>
                     {step.name}
                   </span>
@@ -181,7 +181,7 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                     : 'cursor-pointer'
                 } ${
                   isHovered && isClickable && !isFuture
-                    ? 'bg-cream-2 shadow-sm'
+                    ? 'bg-surface-elevated shadow-sm'
                     : ''
                 }`}
                 aria-current={isCurrent ? 'step' : undefined}
@@ -206,10 +206,10 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                         ? 'border-copper-500 bg-copper-500 shadow-[0_0_12px_rgba(184,115,51,0.3)]'
                         : isCompleted
                         ? 'border-leaf-500 bg-leaf-500 text-white shadow-sm'
-                        : 'border-hairline bg-cream-2'
+                        : 'border-default bg-surface-elevated'
                     } ${
                       isHovered && isClickable && !isCurrent && !isCompleted
-                        ? 'border-copper-500/50 bg-cream-3'
+                        ? 'border-copper-500/50 bg-surface-3'
                         : ''
                     }`}
                   >
@@ -221,9 +221,9 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                     ) : (
                       <span
                         className={`text-xs font-semibold ${
-                          isCurrent ? 'text-white' : 'text-latte/70'
+                          isCurrent ? 'text-white' : 'text-secondary/70'
                         } ${
-                          isHovered && isClickable && !isCurrent ? 'text-ink' : ''
+                          isHovered && isClickable && !isCurrent ? 'text-primary' : ''
                         } ${
                           isCurrent ? 'scale-110' : ''
                         }`}
@@ -239,16 +239,16 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                   <p
                     className={`text-sm font-semibold truncate transition-all duration-200 ${
                       isCurrent
-                        ? 'text-ink'
+                        ? 'text-primary'
                         : isCompleted
-                        ? 'text-ink/90'
-                        : 'text-latte/70'
+                        ? 'text-primary/90'
+                        : 'text-secondary/70'
                     }`}
                   >
                     {step.name}
                   </p>
                   {isCurrent && (
-                    <p className="text-[11px] text-copper-600/80 dark:text-copper-400 mt-0.5 font-medium flex items-center gap-1">
+                    <p className="text-[11px] text-brand-red/80 dark:text-brand-red-400 mt-0.5 font-medium flex items-center gap-1">
                       <span className="inline-block w-1.5 h-1.5 rounded-full bg-copper-500 animate-pulse" />
                       الخطوة الحالية
                     </p>
@@ -262,7 +262,7 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
 
                 {/* Step number badge */}
                 {!isCurrent && !isCompleted && (
-                  <span className="text-[10px] text-latte/40 font-mono mt-1.5 ml-1">
+                  <span className="text-[10px] text-secondary/40 font-mono mt-1.5 ml-1">
                     {String(index + 1).padStart(2, '0')}
                   </span>
                 )}

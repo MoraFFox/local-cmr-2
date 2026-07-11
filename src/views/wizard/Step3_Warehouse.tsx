@@ -24,9 +24,9 @@ export const Step3_Warehouse: React.FC<WizardStepProps> = ({
         onChange={actions.handleChange}
         icon={<MapPinIcon />}
       />
-      <div className="pt-8 mt-8 border-t dark:border-hairline">
+      <div className="pt-8 mt-8 border-t dark:border-default">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-ink tracking-tight">جهات اتصال المخزن</h3>
+          <h3 className="text-xl font-bold text-primary tracking-tight">جهات اتصال المخزن</h3>
           <Button onClick={() => actions.addContact("warehouse")}>
             <PlusCircleIcon className="w-5 h-5" />
             <span>إضافة جهة اتصال</span>

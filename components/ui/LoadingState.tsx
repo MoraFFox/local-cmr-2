@@ -15,10 +15,10 @@ export const LoadingState: React.FC<LoadingStateProps> = ({ label = 'جاري ا
   }
 
   return (
-    <div className="min-h-screen bg-paper dark:bg-espresso flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background dark:bg-chrome flex items-center justify-center p-4">
       <div className="text-center animate-content-fade-in">
         <div className="mx-auto mb-4 h-10 w-10 border-4 border-copper-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-ink dark:text-cream font-medium">
+        <p className="text-primary dark:text-cream font-medium">
           {label}
         </p>
       </div>

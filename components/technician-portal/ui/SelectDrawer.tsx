@@ -49,7 +49,7 @@ const SelectDrawer: React.FC<SelectDrawerProps> = ({
 
     return (
         <div className="w-full">
-            <label className="block text-xs font-bold uppercase tracking-wider text-latte mb-2 ml-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-secondary mb-2 ml-1">
                 {label}
             </label>
 
@@ -59,23 +59,23 @@ const SelectDrawer: React.FC<SelectDrawerProps> = ({
                 disabled={disabled}
                 className={`
                     w-full flex items-center justify-between px-4 py-3.5
-                    bg-espresso-light/50 border rounded-xl text-left transition-all
-                    ${disabled ? 'opacity-50 cursor-not-allowed border-hairline' : 'border-hairline hover:border-brass active:bg-espresso-light'}
-                    ${value ? 'text-cream' : 'text-latte'}
+                    bg-chrome-light/50 border rounded-xl text-left transition-all
+                    ${disabled ? 'opacity-50 cursor-not-allowed border-default' : 'border-default hover:border-brass active:bg-chrome-light'}
+                    ${value ? 'text-cream' : 'text-secondary'}
                 `}
             >
                 <div className="flex items-center gap-3 overflow-hidden">
-                    {icon && <span className="text-latte">{icon}</span>}
+                    {icon && <span className="text-secondary">{icon}</span>}
                     <div className="flex flex-col truncate">
                         <span className="truncate font-medium">
                             {selectedOption ? selectedOption.label : placeholder}
                         </span>
                         {selectedOption?.description && (
-                            <span className="text-xs text-latte truncate">{selectedOption.description}</span>
+                            <span className="text-xs text-secondary truncate">{selectedOption.description}</span>
                         )}
                     </div>
                 </div>
-                <ChevronDownIcon className="w-5 h-5 text-latte flex-shrink-0" />
+                <ChevronDownIcon className="w-5 h-5 text-secondary flex-shrink-0" />
             </button>
 
             <BottomSheet
@@ -85,16 +85,16 @@ const SelectDrawer: React.FC<SelectDrawerProps> = ({
                 maxHeight="85vh"
                 contentClassName="flex flex-col h-full"
             >
-                <div className="p-4 bg-espresso h-full flex flex-col overflow-hidden">
+                <div className="p-4 bg-chrome h-full flex flex-col overflow-hidden">
                     {searchable && (
                         <div className="mb-4 relative flex-shrink-0">
-                            <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-latte" />
+                            <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-secondary" />
                             <input
                                 type="text"
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 placeholder="Search..."
-                                className="w-full bg-espresso-light text-cream rounded-lg pl-10 pr-4 py-3 border border-hairline focus:outline-none focus-visible:ring-2 focus-visible:ring-copper-500 focus:border-copper-500 transition-colors"
+                                className="w-full bg-chrome-light text-cream rounded-lg pl-10 pr-4 py-3 border border-default focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-red focus:border-copper-500 transition-colors"
                             />
                         </div>
                     )}
@@ -109,18 +109,18 @@ const SelectDrawer: React.FC<SelectDrawerProps> = ({
                                         w-full flex items-center justify-between p-4 rounded-xl border transition-all text-right
                                         ${String(value) === String(opt.value)
                                             ? 'bg-copper-500/10 border-copper-500/50 text-cream'
-                                            : 'bg-espresso-light/30 border-hairline text-cream hover:bg-espresso-light hover:border-brass'
+                                            : 'bg-chrome-light/30 border-default text-cream hover:bg-chrome-light hover:border-brass'
                                         }
                                     `}
                                 >
                                     <div className="flex items-center gap-3 text-left">
                                         {opt.icon && <span className="text-2xl">{opt.icon}</span>}
                                         <div className="flex flex-col">
-                                            <span className={`font-semibold ${String(value) === String(opt.value) ? 'text-copper-400' : 'text-cream'}`}>
+                                            <span className={`font-semibold ${String(value) === String(opt.value) ? 'text-brand-red-400' : 'text-cream'}`}>
                                                 {opt.label}
                                             </span>
                                             {opt.description && (
-                                                <span className="text-xs text-latte">{opt.description}</span>
+                                                <span className="text-xs text-secondary">{opt.description}</span>
                                             )}
                                         </div>
                                     </div>
@@ -133,13 +133,13 @@ const SelectDrawer: React.FC<SelectDrawerProps> = ({
                                 </button>
                             ))
                         ) : (
-                            <div className="text-center py-8 text-latte">
+                            <div className="text-center py-8 text-secondary">
                                 No options found.
                             </div>
                         )}
                     </div>
 
-                     <div className="pt-4 pb-8 border-t border-hairline mt-auto bg-espresso flex-shrink-0">
+                     <div className="pt-4 pb-8 border-t border-default mt-auto bg-chrome flex-shrink-0">
                          <TechButton variant="secondary" fullWidth onClick={() => setIsOpen(false)}>
                              Cancel
                          </TechButton>

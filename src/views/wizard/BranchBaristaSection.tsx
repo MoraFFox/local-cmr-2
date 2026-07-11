@@ -42,9 +42,9 @@ export const BranchBaristaSection: React.FC<BranchBaristaSectionProps> = ({
   isSubmitting,
   onAiNotesApplied,
 }) => (
-  <div className="mt-6 pt-6 border-t border-hairline">
+  <div className="mt-6 pt-6 border-t border-default">
     <div className="flex justify-between items-center mb-4">
-      <h4 className="text-lg font-bold text-ink tracking-tight">الباريستا</h4>
+      <h4 className="text-lg font-bold text-primary tracking-tight">الباريستا</h4>
       <Button onClick={() => onAddNested(index, "baristas")}>
         <PlusCircleIcon className="w-4 h-4" /> إضافة باريستا
       </Button>
@@ -76,7 +76,7 @@ export const BranchBaristaSection: React.FC<BranchBaristaSectionProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-ink mb-2">ملاحظات</label>
+                <label className="block text-sm font-medium text-primary mb-2">ملاحظات</label>
                 <textarea
                   name="notes"
                   value={barista.notes || ""}
@@ -92,7 +92,7 @@ export const BranchBaristaSection: React.FC<BranchBaristaSectionProps> = ({
                     }
                   }}
                   disabled={isSubmitting}
-                  className="mt-2 text-sm text-copper-700 dark:text-copper-400 font-semibold disabled:opacity-50 transform active:scale-95 transition-transform"
+                  className="mt-2 text-sm text-brand-red dark:text-brand-red-400 font-semibold disabled:opacity-50 transform active:scale-95 transition-transform"
                 >
                   {isSubmitting ? "جاري الإنشاء..." : "✨ اقتراح بالذكاء الاصطناعي"}
                 </button>

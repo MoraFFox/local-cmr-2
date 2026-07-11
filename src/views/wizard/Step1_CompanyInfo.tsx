@@ -68,9 +68,9 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
         placeholder="مثال: 50"
         icon={<ScaleIcon />}
       />
-      <div className="pt-8 mt-8 border-t border-hairline">
+      <div className="pt-8 mt-8 border-t border-default">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-ink tracking-tight">جهات الاتصال</h3>
+          <h3 className="text-xl font-bold text-primary tracking-tight">جهات الاتصال</h3>
           <Button onClick={() => actions.addContact("main")}>
             <PlusCircleIcon className="w-5 h-5" />
             <span>إضافة جهة اتصال</span>
@@ -95,7 +95,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
         inline
       />
       {formData.hasBranches === false && (
-        <div className="pt-6 mt-6 border-t border-hairline space-y-6">
+        <div className="pt-6 mt-6 border-t border-default space-y-6">
           <RadioGroup
             label="هل يستخدمون ماكيناتنا؟"
             name="usesOurMachines"
@@ -108,7 +108,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
             inline
           />
           {formData.usesOurMachines === true && (
-            <div className="pl-6 border-l-2 border-hairline">
+            <div className="pl-6 border-l-2 border-default">
               <RadioGroup
                 label="كيف تم الحصول على الماكينة؟"
                 name="machineOwnershipType"

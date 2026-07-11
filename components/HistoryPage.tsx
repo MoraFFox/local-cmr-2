@@ -204,8 +204,8 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
         <div className="w-full max-w-6xl mx-auto">
              <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                  <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-ink">سجل الإرسالات</h1>
-                    <p className="text-latte mt-1 sm:mt-2">عرض أو تعديل أو حذف الإرسالات السابقة.</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-primary">سجل الإرسالات</h1>
+                    <p className="text-secondary mt-1 sm:mt-2">عرض أو تعديل أو حذف الإرسالات السابقة.</p>
                  </div>
                  <div className="flex items-center gap-x-2 sm:gap-x-3">
                     <Button variant="secondary" onClick={onPrint}>
@@ -226,19 +226,19 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
             {(activeFiltersCount > 0 || searchTerm) && (
                 <div className="flex flex-wrap items-center gap-2 mb-4">
                     {searchTerm && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-cream-2 text-ink">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-surface-elevated text-primary">
                             <MagnifyingGlassIcon className="w-3 h-3" />
                             {searchTerm}
                         </span>
                     )}
                     {startDate && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-cream-2 text-ink">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-surface-elevated text-primary">
                             <CalendarIcon className="w-3 h-3" />
                             من {startDate}
                         </span>
                     )}
                     {endDate && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-cream-2 text-ink">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-surface-elevated text-primary">
                             <CalendarIcon className="w-3 h-3" />
                             إلى {endDate}
                         </span>
@@ -251,7 +251,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                     )}
                     <button
                         onClick={clearFilters}
-                        className="text-xs font-medium text-latte hover:text-ink underline transition-colors"
+                        className="text-xs font-medium text-secondary hover:text-primary underline transition-colors"
                     >
                         مسح جميع الفلاتر
                     </button>
@@ -259,15 +259,15 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
             )}
 
             {/* Advanced Search Panel */}
-            <div className="bg-cream rounded-xl shadow-sm border border-hairline p-4 mb-6">
+            <div className="bg-surface rounded-xl shadow-sm border border-default p-4 mb-6">
                 <div className="flex flex-col gap-4 w-full">
                     {/* Top Row: Search & Toggle */}
                     <div className="grid grid-cols-1 sm:grid-cols-[1fr_180px] gap-4 items-end w-full">
                         <div className="w-full">
-                            <label htmlFor="submission-search" className="block text-xs font-bold uppercase text-latte mb-1">بحث نصي</label>
+                            <label htmlFor="submission-search" className="block text-xs font-bold uppercase text-secondary mb-1">بحث نصي</label>
                             <div className="relative rounded-md shadow-sm">
                                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                    <MagnifyingGlassIcon className="h-5 w-5 text-latte" aria-hidden="true" />
+                                    <MagnifyingGlassIcon className="h-5 w-5 text-secondary" aria-hidden="true" />
                                 </div>
                                 <input
                                     type="search"
@@ -284,7 +284,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                         <div className="w-full shrink-0">
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className={`flex items-center gap-2 px-4 h-[50px] rounded-lg border text-sm font-semibold w-full justify-center transition-colors ${showFilters || activeFiltersCount > 0 ? 'bg-copper-500/10 border-copper-500 text-copper-700' : 'bg-cream border-hairline text-latte hover:bg-cream-2'}`}
+                                className={`flex items-center gap-2 px-4 h-[50px] rounded-lg border text-sm font-semibold w-full justify-center transition-colors ${showFilters || activeFiltersCount > 0 ? 'bg-copper-500/10 border-copper-500 text-brand-red' : 'bg-surface border-default text-secondary hover:bg-surface-elevated'}`}
                             >
                                 <FunnelIcon className="w-5 h-5" />
                                 {showFilters ? 'إخفاء الفلاتر' : 'فلاتر متقدمة'}
@@ -295,10 +295,10 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
 
                     {/* Filters Section (Collapsible) */}
                     {showFilters && (
-                        <div className="flex flex-wrap items-end gap-4 pt-4 mt-2 border-t border-hairline animate-fade-in w-full">
+                        <div className="flex flex-wrap items-end gap-4 pt-4 mt-2 border-t border-default animate-fade-in w-full">
                             {/* Date Range */}
                             <div className="w-full sm:w-auto flex-1 sm:flex-none">
-                                <label className="block text-xs font-bold uppercase text-latte mb-1">من تاريخ</label>
+                                <label className="block text-xs font-bold uppercase text-secondary mb-1">من تاريخ</label>
                                 <input
                                     type="date"
                                     value={startDate}
@@ -307,7 +307,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                 />
                             </div>
                             <div className="w-full sm:w-auto flex-1 sm:flex-none">
-                                <label className="block text-xs font-bold uppercase text-latte mb-1">إلى تاريخ</label>
+                                <label className="block text-xs font-bold uppercase text-secondary mb-1">إلى تاريخ</label>
                                 <input
                                     type="date"
                                     value={endDate}
@@ -318,7 +318,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
 
                             {/* Toggles */}
                             <div className="w-full sm:w-auto shrink-0">
-                                <label className={`flex items-center justify-center gap-2 h-[50px] px-6 rounded-lg cursor-pointer border transition-colors select-none ${showOnlyProblems ? 'bg-copper-500/10 border-copper-500 text-copper-700' : 'bg-cream border-hairline text-latte hover:bg-cream-2'}`}>
+                                <label className={`flex items-center justify-center gap-2 h-[50px] px-6 rounded-lg cursor-pointer border transition-colors select-none ${showOnlyProblems ? 'bg-copper-500/10 border-copper-500 text-brand-red' : 'bg-surface border-default text-secondary hover:bg-surface-elevated'}`}>
                                     <input
                                         type="checkbox"
                                         checked={showOnlyProblems}
@@ -339,7 +339,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                     <button
                                         onClick={clearFilters}
                                         disabled={activeFiltersCount === 0 && !searchTerm}
-                                        className="flex items-center justify-center gap-2 h-[50px] px-6 text-latte hover:text-copper-500 transition-colors text-sm font-medium rounded-lg hover:bg-copper-500/10 disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed border border-transparent hover:border-copper-500/30"
+                                        className="flex items-center justify-center gap-2 h-[50px] px-6 text-secondary hover:text-brand-red transition-colors text-sm font-medium rounded-lg hover:bg-copper-500/10 disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed border border-transparent hover:border-copper-500/30"
                                     >
                                         <XMarkIcon className="w-5 h-5" /> مسح الفلاتر
                                     </button>
@@ -389,12 +389,12 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                     {filteredSubmissions.map(sub => (
                         <div
                             key={sub.id}
-                            className={`bg-cream rounded-xl p-4 sm:p-5 flex flex-col gap-4 transition-all hover:shadow-md border ${sub.pendingSync ? 'border-amber-500/30 bg-amber-500/10' : 'border-hairline'}`}
+                            className={`bg-surface rounded-xl p-4 sm:p-5 flex flex-col gap-4 transition-all hover:shadow-md border ${sub.pendingSync ? 'border-amber-500/30 bg-amber-500/10' : 'border-default'}`}
                         >
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center flex-wrap gap-2">
-                                        <h3 className="font-bold text-lg text-ink truncate">{sub.companyName || 'شركة بدون اسم'}</h3>
+                                        <h3 className="font-bold text-lg text-primary truncate">{sub.companyName || 'شركة بدون اسم'}</h3>
                                         {sub.pendingSync && (
                                             <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-500 border border-amber-500/20">
                                                 <CloudIcon className="w-3.5 h-3.5 mr-1" />
@@ -402,7 +402,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                             </span>
                                         )}
                                     </div>
-                                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-latte">
+                                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-secondary">
                                         <span>أُرسلت: {new Date(sub.created_at).toLocaleDateString()}</span>
                                         <span className="hidden sm:inline">•</span>
                                         <span>{sub.hasBranches ? `${sub.branches.length} فروع` : 'لا فروع'}</span>
@@ -518,7 +518,7 @@ const RowEllipsisMenu: React.FC<{
       <button
         ref={triggerRef as React.RefObject<HTMLButtonElement>}
         onClick={() => onOpenChange(!isOpen)}
-        className="p-2 rounded-lg text-latte hover:text-ink hover:bg-cream-2 transition-colors"
+        className="p-2 rounded-lg text-secondary hover:text-primary hover:bg-surface-elevated transition-colors"
         aria-label="المزيد من الإجراءات"
         aria-expanded={isOpen}
       >
@@ -528,27 +528,27 @@ const RowEllipsisMenu: React.FC<{
       {isOpen && createPortal(
         <div
           ref={contentRef}
-          className="fixed w-48 bg-cream rounded-lg shadow-lg border border-hairline py-1 z-[9999] overflow-hidden animate-scale-in"
+          className="fixed w-48 bg-surface rounded-lg shadow-lg border border-default py-1 z-[9999] overflow-hidden animate-scale-in"
           style={style}
         >
           <button
             onClick={() => { onDownload(sub); onOpenChange(false); }}
             disabled={!!sub.pendingSync}
-            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-cream-2 disabled:opacity-50"
+            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-surface-elevated disabled:opacity-50"
           >
             <ArrowDownTrayIcon className="h-4 w-4" />
             تنزيل JSON
           </button>
           <button
             onClick={() => { onQuickEdit(sub); onOpenChange(false); }}
-            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-cream-2"
+            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-surface-elevated"
           >
             <BuildingOfficeIcon className="h-4 w-4" />
             تعديل سريع
           </button>
           <button
             onClick={() => { onEdit(sub); onOpenChange(false); }}
-            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-cream-2"
+            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-surface-elevated"
           >
             <PencilIcon className="h-4 w-4" />
             تعديل كامل
@@ -556,7 +556,7 @@ const RowEllipsisMenu: React.FC<{
           {onEditMaintenance && (
             <button
               onClick={() => { onEditMaintenance(sub); onOpenChange(false); }}
-              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-cream-2"
+              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-surface-elevated"
             >
               <WrenchScrewdriverIcon className="h-4 w-4" />
               تعديل الصيانة
@@ -565,13 +565,13 @@ const RowEllipsisMenu: React.FC<{
           {onRequestMissingData && (
             <button
               onClick={() => { onRequestMissingData(sub); onOpenChange(false); }}
-              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ink hover:bg-cream-2"
+              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-surface-elevated"
             >
               <DocumentArrowDownIcon className="h-4 w-4" />
               استكمال بيانات
             </button>
           )}
-          <div className="border-t border-hairline my-1" />
+          <div className="border-t border-default my-1" />
           <button
             onClick={() => { onDelete(sub.id!); onOpenChange(false); }}
             className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ember-500 hover:bg-ember-500/10"

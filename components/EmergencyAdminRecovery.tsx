@@ -156,21 +156,21 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
         <div className="flex justify-end mb-4">
           <button
             onClick={() => setLang(lang === "ar" ? "en" : "ar")}
-            className="text-sm text-latte dark:text-latte/70 hover:text-ink dark:hover:text-latte transition-colors"
+            className="text-sm text-secondary dark:text-secondary/70 hover:text-primary dark:hover:text-secondary transition-colors"
           >
             {lang === "ar" ? "English" : "العربية"}
           </button>
         </div>
 
-        <div className="rounded-2xl bg-cream/90 dark:bg-espresso-light/90 backdrop-blur-sm border border-black/5 dark:border-white/10 shadow-sm p-8">
+        <div className="rounded-2xl bg-surface/90 dark:bg-chrome-light/90 backdrop-blur-sm border border-black/5 dark:border-white/10 shadow-sm p-8">
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-ember-50 dark:bg-ember-500/30 rounded-full flex items-center justify-center mx-auto mb-4">
               <ShieldCheckIcon className="w-8 h-8 text-ember-700 dark:text-ember-300" />
             </div>
-            <h1 className="text-2xl font-bold text-ink dark:text-white mb-2">
+            <h1 className="text-2xl font-bold text-primary dark:text-white mb-2">
               {t.title}
             </h1>
-            <p className="text-ink dark:text-latte/70">{t.subtitle}</p>
+            <p className="text-primary dark:text-secondary/70">{t.subtitle}</p>
           </div>
 
           {error && (
@@ -188,12 +188,12 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
+              <label className="block text-sm font-medium text-primary dark:text-secondary/70 mb-2">
                 {t.email}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <UserIcon className="w-5 h-5 text-latte" />
+                  <UserIcon className="w-5 h-5 text-secondary" />
                 </div>
                 <input
                   type="email"
@@ -202,64 +202,64 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
                   placeholder="admin@example.com"
                   autoCapitalize="none"
                   autoCorrect="off"
-                  className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-ink dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
+                  className="w-full pr-10 pl-4 py-3 rounded-lg bg-surface dark:bg-chrome-light border border-default dark:border-default text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
                   dir="ltr"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
+              <label className="block text-sm font-medium text-primary dark:text-secondary/70 mb-2">
                 {t.name}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <UserIcon className="w-5 h-5 text-latte" />
+                  <UserIcon className="w-5 h-5 text-secondary" />
                 </div>
                 <input
                   type="text"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   placeholder="اسم المدير"
-                  className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-ink dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
+                  className="w-full pr-10 pl-4 py-3 rounded-lg bg-surface dark:bg-chrome-light border border-default dark:border-default text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
                   dir={lang === "ar" ? "rtl" : "ltr"}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
+              <label className="block text-sm font-medium text-primary dark:text-secondary/70 mb-2">
                 {t.password}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <LockClosedIcon className="w-5 h-5 text-latte" />
+                  <LockClosedIcon className="w-5 h-5 text-secondary" />
                 </div>
                 <input
                   type="password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="••••••••"
-                  className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-ink dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
+                  className="w-full pr-10 pl-4 py-3 rounded-lg bg-surface dark:bg-chrome-light border border-default dark:border-default text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
                   dir="ltr"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-ink dark:text-latte/70 mb-2">
+              <label className="block text-sm font-medium text-primary dark:text-secondary/70 mb-2">
                 {t.confirmPassword}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <LockClosedIcon className="w-5 h-5 text-latte" />
+                  <LockClosedIcon className="w-5 h-5 text-secondary" />
                 </div>
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={(event) => setConfirmPassword(event.target.value)}
                   placeholder="••••••••"
-                  className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-ink dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
+                  className="w-full pr-10 pl-4 py-3 rounded-lg bg-surface dark:bg-chrome-light border border-default dark:border-default text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
                   dir="ltr"
                 />
               </div>
@@ -268,7 +268,7 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="btn-primary w-full py-3 rounded-lg font-semibold disabled:bg-espresso-light disabled:cursor-not-allowed transition-colors"
+              className="btn-primary w-full py-3 rounded-lg font-semibold disabled:bg-chrome-light disabled:cursor-not-allowed transition-colors"
             >
               {isSubmitting ? t.loading : t.submit}
             </button>
@@ -276,7 +276,7 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
 
           <button
             onClick={onBack}
-            className="mt-6 flex items-center justify-center gap-2 text-sm text-ink dark:text-latte/70 hover:text-ink dark:hover:text-white transition-colors mx-auto"
+            className="mt-6 flex items-center justify-center gap-2 text-sm text-primary dark:text-secondary/70 hover:text-primary dark:hover:text-white transition-colors mx-auto"
           >
             <ArrowLeftIcon className="w-4 h-4" />
             {t.back}

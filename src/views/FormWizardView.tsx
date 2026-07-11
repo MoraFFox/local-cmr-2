@@ -343,14 +343,14 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
   };
 
   return (
-    <div className="flex flex-col min-h-full w-full bg-paper">
+    <div className="flex flex-col min-h-full w-full bg-background">
       <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 relative flex-1 p-4 lg:p-6 pb-32">
         <aside className="hidden lg:block w-64 shrink-0">
-          <div className="sticky top-6 bg-cream border border-hairline rounded-xl p-4 shadow-sm">
+          <div className="sticky top-6 bg-surface border border-default rounded-xl p-4 shadow-sm">
             <Stepper steps={visibleSteps} currentStep={currentStep} completedSteps={completedSteps} />
           </div>
         </aside>
-        <div className="lg:hidden mb-4 bg-cream border border-hairline rounded-xl py-3 px-1 shadow-sm overflow-hidden">
+        <div className="lg:hidden mb-4 bg-surface border border-default rounded-xl py-3 px-1 shadow-sm overflow-hidden">
           <Stepper steps={visibleSteps} currentStep={currentStep} completedSteps={completedSteps} onChange={setCurrentStep} layout="horizontal" />
         </div>
         <div className={`flex-1 transition-all duration-300 ${showPreview ? "lg:w-1/2" : "w-full"}`}>
@@ -363,25 +363,25 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
           <div key={currentStep} className="animate-step-in-right">{renderStepContent()}</div>
         </div>
         {showPreview && (
-          <div className="hidden lg:block w-1/2 border-r border-hairline pr-6 h-[calc(100vh-140px)] overflow-y-auto sticky top-4 animate-item-fade-in-down custom-scrollbar">
-            <div className="sticky top-0 bg-paper pt-2 pb-4 z-10 border-b border-hairline mb-4">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-latte flex items-center gap-2"><EyeIcon className="w-4 h-4" /> معاينة حية</h3>
+          <div className="hidden lg:block w-1/2 border-r border-default pr-6 h-[calc(100vh-140px)] overflow-y-auto sticky top-4 animate-item-fade-in-down custom-scrollbar">
+            <div className="sticky top-0 bg-background pt-2 pb-4 z-10 border-b border-default mb-4">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-secondary flex items-center gap-2"><EyeIcon className="w-4 h-4" /> معاينة حية</h3>
             </div>
             <div className="pb-10"><ReviewStep formData={formData} partsList={partsList} servicesList={servicesList} embedded={true} /></div>
           </div>
         )}
         {showPreview && (
-          <div className="lg:hidden fixed inset-0 z-50 bg-paper overflow-y-auto animate-content-fade-in">
-            <div className="sticky top-0 bg-cream p-4 border-b border-hairline flex justify-between items-center shadow-md">
-              <h3 className="text-lg font-bold text-ink flex items-center gap-2"><EyeIcon className="w-5 h-5 text-copper-500" /> معاينة حية</h3>
-              <button onClick={() => setShowPreview(false)} className="p-2 bg-cream-2 rounded-full text-latte hover:text-ink transition-colors"><XMarkIcon className="w-6 h-6" /></button>
+          <div className="lg:hidden fixed inset-0 z-50 bg-background overflow-y-auto animate-content-fade-in">
+            <div className="sticky top-0 bg-surface p-4 border-b border-default flex justify-between items-center shadow-md">
+              <h3 className="text-lg font-bold text-primary flex items-center gap-2"><EyeIcon className="w-5 h-5 text-brand-red" /> معاينة حية</h3>
+              <button onClick={() => setShowPreview(false)} className="p-2 bg-surface-elevated rounded-full text-secondary hover:text-primary transition-colors"><XMarkIcon className="w-6 h-6" /></button>
             </div>
             <div className="p-4 pb-20"><ReviewStep formData={formData} partsList={partsList} servicesList={servicesList} embedded={true} /></div>
           </div>
         )}
       </div>
       <footer className="fixed lg:absolute bottom-6 left-0 right-0 z-30 w-[90%] mx-auto pointer-events-none flex justify-center">
-        <div className="bg-cream rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-hairline/20 pointer-events-auto max-w-4xl w-full">
+        <div className="bg-surface rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-default/20 pointer-events-auto max-w-4xl w-full">
           <div className="w-full p-4">
             <NavigationButtons currentStep={currentStep} onPrev={handlePrev} onNext={currentStep === 6 ? handleSubmit : handleNext} isLastStep={currentStep === 6} isSubmitting={isSubmitting} />
           </div>
