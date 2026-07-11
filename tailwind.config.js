@@ -25,15 +25,16 @@ export default {
         mono: ['IBM Plex Mono', 'Cascadia Code', 'Consolas', 'monospace'],
       },
       colors: {
-        /* ── Brass & Cream — coffee-service palette ──
-         * Dark chrome (espresso) for sidebar/header rail,
-         * warm paper for content area,
-         * copper accent for primary CTAs,
-         * brass for signature hairlines,
-         * leaf-green for success/sync,
-         * ember for danger.
-         * Kept: lava + success scales for backward compat during migration;
-         *        prefer the new named tokens going forward.
+        // New Semantic Colors (Crimson & Off-White)
+        'brand-red': '#AF2025',
+        'brand-red-light': '#D6454A',
+        'brand-offwhite': '#FFFFFE',
+        'brand-espresso': '#3D2C24',
+        'dark-bg': '#111827',
+        'dark-surface': '#1F2937',
+
+        /* ── Legacy tokens (being phased out) ──
+         * TODO: Deprecate legacy "Brass & Cream" and other tokens after component migration
          */
         paper: '#FAF6EF',
         cream: {
@@ -86,8 +87,6 @@ export default {
           800: '#6a1c14',
           900: '#4c1310',
         },
-
-        /* ── Legacy tokens (being phased out) ── */
         midnight: '#081619',
         deep: '#102A30',
         sea: '#1A434C',
