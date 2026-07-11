@@ -42,6 +42,7 @@ export interface Contact {
   name: string;
   position: string;
   customPosition?: string;
+  email?: string;
   phoneNumbers: { id: number; number: string }[];
 }
 
@@ -57,6 +58,8 @@ export interface Branch {
   usesOurMachines: boolean | null;
   machineOwnershipType?: "bought" | "leased";
   dailyLeaseCost?: number;
+  allowedMaintenanceTimes?: string;
+  coffeeConsumptionKg?: number;
   maintenanceHistory: MaintenanceRecord[];
 }
 
@@ -127,6 +130,8 @@ export interface FormData {
   usesOurMachines: boolean | null;
   machineOwnershipType?: "bought" | "leased";
   dailyLeaseCost?: number;
+  allowedMaintenanceTimes?: string;
+  coffeeConsumptionKg?: number;
   branchCount: number;
   branches: Branch[];
   warehouse: Warehouse;

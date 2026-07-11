@@ -13,6 +13,7 @@ import {
   DocumentTextIcon,
   MapPinIcon,
   CurrencyDollarIcon,
+  ScaleIcon,
   PlusCircleIcon,
 } from "@heroicons/react/24/outline";
 import { ContactsSection } from "./ContactsSection";
@@ -57,6 +58,15 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
         onChange={actions.handleChange}
         placeholder="مثال: شارع التحرير، القاهرة"
         icon={<MapPinIcon />}
+      />
+      <TextInput
+        label="استهلاك القهوة بالكيلو (كجم/شهر)"
+        name="coffeeConsumptionKg"
+        type="number"
+        value={formData.coffeeConsumptionKg || ""}
+        onChange={actions.handleChange}
+        placeholder="مثال: 50"
+        icon={<ScaleIcon />}
       />
       <div className="pt-8 mt-8 border-t border-hairline">
         <div className="flex justify-between items-center mb-4">

@@ -14,7 +14,7 @@ import { ContactsSection } from "./ContactsSection";
 import { BranchBaristaSection } from "./BranchBaristaSection";
 import {
   BuildingStorefrontIcon, EnvelopeIcon, DocumentTextIcon, MapPinIcon,
-  CurrencyDollarIcon, PlusCircleIcon, UserGroupIcon, WrenchScrewdriverIcon,
+  CurrencyDollarIcon, ScaleIcon, PlusCircleIcon, UserGroupIcon, WrenchScrewdriverIcon,
   PhoneIcon, UserIcon,
 } from "@heroicons/react/24/outline";
 import { partsList, servicesList, problemCategories } from "../../../constants";
@@ -86,6 +86,11 @@ export const BranchCard: React.FC<BranchCardProps> = ({
         <TextInput label="الموقع" name="location" value={branch.location}
           onChange={(e) => actions.handleListItemChange(e, "branches", index)}
           className="md:col-span-2" icon={<MapPinIcon />}
+        />
+        <TextInput label="استهلاك القهوة بالكيلو (كجم/شهر)" name="coffeeConsumptionKg" type="number"
+          value={branch.coffeeConsumptionKg || ""}
+          onChange={(e) => actions.handleListItemChange(e, "branches", index)}
+          placeholder="مثال: 50" icon={<ScaleIcon />}
         />
         <div className="md:col-span-2">
           <RadioGroup label="هل يستخدمون ماكيناتنا؟" name={`usesOurMachines-${branch.id}`}

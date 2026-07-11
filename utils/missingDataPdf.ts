@@ -32,6 +32,8 @@ export interface MissingDataOptions {
   scope: "company" | "branch";
   /** When scope is "branch", the branch id to focus on */
   branchId?: number;
+  /** When "dynamic", only the 12 specified fields are checked */
+  mode?: "dynamic" | "full";
   /** Include contacts section */
   includeContacts?: boolean;
   /** Include baristas section */
@@ -46,6 +48,7 @@ export interface MissingField {
   value?: string;
   type: "text" | "select" | "checkbox" | "number";
   options?: string[];
+  required?: boolean;
 }
 
 export interface MissingFieldsResult {
@@ -82,13 +85,21 @@ const addTextField = (
   key: string,
   label: string,
   layout: FieldLayout,
-  value?: string
+  value?: string,
+  required = false
 ): number => {
   const labelY = layout.y;
   doc.setFontSize(8);
   doc.setFont("Amiri", "bold");
   doc.setTextColor(...COLORS.latte);
   doc.text(reshapeArabic(label), layout.x, labelY);
+
+  if (required) {
+    const labelWidth = doc.getTextWidth(reshapeArabic(label));
+    doc.setTextColor(220, 53, 69);
+    doc.text("*", layout.x + labelWidth + 1, labelY);
+    doc.setTextColor(...COLORS.latte);
+  }
 
   const fieldY = layout.y + 4;
   const fieldHeight = 9;
@@ -369,6 +380,209 @@ const drawInstructionsBox = (doc: jsPDF, x: number, y: number, pageWidth: number
   return y + boxHeight + 6;
 };
 
+/** Find the first contact with a specific position, or return undefined */
+const findContactByPosition = (
+  contacts: Contact[],
+  position: string
+): Contact | undefined => {
+  return contacts.find((c) => c.position === position);
+};
+
+/** Get the first non-empty phone number from a contact */
+const getContactPhone = (contact?: Contact): string | undefined => {
+  if (!contact) return undefined;
+  const phone = contact.phoneNumbers.find((p) => !isMissing(p.number))?.number;
+  return phone;
+};
+
+/** Build missing fields for a contact role (name, email, phone) */
+const getRoleContactFields = (
+  contacts: Contact[],
+  position: string,
+  roleTitle: string,
+  prefix: string
+): MissingField[] => {
+  const fields: MissingField[] = [];
+  const contact = findContactByPosition(contacts, position);
+
+  if (!contact || isMissing(contact.name)) {
+    fields.push({
+      key: `${prefix}.${position}.name`,
+      label: `اسم ${roleTitle}`,
+      type: "text",
+      required: true,
+    });
+  }
+  if (!contact || isMissing(contact.email)) {
+    fields.push({
+      key: `${prefix}.${position}.email`,
+      label: `بريد ${roleTitle}`,
+      type: "text",
+      required: true,
+    });
+  }
+  if (!contact || isMissing(getContactPhone(contact))) {
+    fields.push({
+      key: `${prefix}.${position}.phone`,
+      label: `موبايل ${roleTitle}`,
+      type: "text",
+      required: true,
+    });
+  }
+
+  return fields;
+};
+
+/** Build exactly 3 barista slots; first 2 required, 3rd optional */
+const getBaristaDynamicFields = (
+  baristas: Barista[],
+  prefix: string
+): MissingField[] => {
+  const fields: MissingField[] = [];
+
+  for (let i = 0; i < 3; i++) {
+    const barista = baristas[i];
+    const required = i < 2;
+
+    if (!barista || isMissing(barista.name)) {
+      fields.push({
+        key: `${prefix}.${i}.name`,
+        label: `باريستا ${i + 1} - الاسم`,
+        type: "text",
+        required,
+      });
+    }
+    if (!barista || isMissing(barista.phone)) {
+      fields.push({
+        key: `${prefix}.${i}.phone`,
+        label: `باريستا ${i + 1} - رقم الموبايل`,
+        type: "text",
+        required,
+      });
+    }
+  }
+
+  return fields;
+};
+
+/** Build dynamic missing fields for the company level */
+const getDynamicCompanyFields = (data: FormData): MissingField[] => {
+  const fields: MissingField[] = [];
+
+  // 1. Company head (CEO)
+  fields.push(...getRoleContactFields(data.contacts, "chief", "مدير الشركه", "company.contacts"));
+
+  // 2. Company location
+  if (isMissing(data.location)) {
+    fields.push({
+      key: "company.location",
+      label: "لوكشن الشركة",
+      type: "text",
+      required: true,
+    });
+  }
+
+  // 3. Head of sales
+  fields.push(...getRoleContactFields(data.contacts, "sales", "مدير المبيعات", "company.contacts"));
+
+  // 4. Head of accounting
+  fields.push(...getRoleContactFields(data.contacts, "accounting", "مدير الحسابات", "company.contacts"));
+
+  // 5. Ops manager
+  fields.push(...getRoleContactFields(data.contacts, "ops_manager", "مدير التشغيل", "company.contacts"));
+
+  // 6. Branches
+  if (data.hasBranches === null || data.hasBranches === undefined) {
+    fields.push({
+      key: "company.hasBranches",
+      label: "هل لدى الشركة فروع؟",
+      type: "select",
+      options: ["نعم", "لا"],
+      required: true,
+    });
+  }
+
+  // 12. Allowed maintenance times (company level)
+  if (isMissing(data.allowedMaintenanceTimes)) {
+    fields.push({
+      key: "company.allowedMaintenanceTimes",
+      label: "مواعيد الصيانة المسموح بها",
+      type: "text",
+      required: false,
+    });
+  }
+
+  // 13. Coffee consumption
+  if (data.coffeeConsumptionKg === undefined || data.coffeeConsumptionKg === null) {
+    fields.push({
+      key: "company.coffeeConsumptionKg",
+      label: "استهلاك القهوة بالكيلو",
+      type: "number",
+      required: false,
+    });
+  }
+
+  // Baristas for single-location companies
+  if (data.hasBranches === false) {
+    fields.push(...getBaristaDynamicFields(data.baristas, "company.baristas"));
+  }
+
+  return fields;
+};
+
+/** Build dynamic missing fields for a single branch */
+const getDynamicBranchFields = (branch: Branch, prefix: string): MissingField[] => {
+  const fields: MissingField[] = [];
+
+  // Branch name
+  if (isMissing(branch.branchName)) {
+    fields.push({
+      key: `${prefix}.branchName`,
+      label: "اسم الفرع",
+      type: "text",
+      required: true,
+    });
+  }
+
+  // Branch location
+  if (isMissing(branch.location)) {
+    fields.push({
+      key: `${prefix}.location`,
+      label: "لوكشن الفرع",
+      type: "text",
+      required: true,
+    });
+  }
+
+  // Branch manager
+  fields.push(...getRoleContactFields(branch.contacts, "manager", "مدير الفرع", `${prefix}.contacts`));
+
+  // Baristas (always 3 slots)
+  fields.push(...getBaristaDynamicFields(branch.baristas, `${prefix}.baristas`));
+
+  // Allowed maintenance times
+  if (isMissing(branch.allowedMaintenanceTimes)) {
+    fields.push({
+      key: `${prefix}.allowedMaintenanceTimes`,
+      label: "مواعيد الصيانة المسموح بها",
+      type: "text",
+      required: false,
+    });
+  }
+
+  // Coffee consumption
+  if (branch.coffeeConsumptionKg === undefined || branch.coffeeConsumptionKg === null) {
+    fields.push({
+      key: `${prefix}.coffeeConsumptionKg`,
+      label: "استهلاك القهوة بالكيلو",
+      type: "number",
+      required: false,
+    });
+  }
+
+  return fields;
+};
+
 const getCompanyProfileFields = (data: FormData): MissingField[] => {
   const fields: MissingField[] = [];
 
@@ -518,31 +732,46 @@ export const getMissingFields = (
   options: MissingDataOptions
 ): MissingFieldsResult => {
   const result: MissingFieldsResult = { company: [], branches: {}, hasMissing: false };
+  const isDynamic = options.mode === "dynamic";
 
   if (options.scope === "company") {
-    result.company = getCompanyProfileFields(data);
-    result.company.push(...getContactMissingFields(data.contacts, "company.contacts"));
+    if (isDynamic) {
+      result.company = getDynamicCompanyFields(data);
+    } else {
+      result.company = getCompanyProfileFields(data);
+      result.company.push(...getContactMissingFields(data.contacts, "company.contacts"));
 
-    if (!data.hasBranches) {
-      result.company.push(...getBaristaMissingFields(data.baristas, "company.baristas", "باريستا"));
-      result.company.push(...getBaristaMissingFields((data.clientBaristas || []) as Barista[], "company.clientBaristas", "باريستا العميل"));
+      if (!data.hasBranches) {
+        result.company.push(...getBaristaMissingFields(data.baristas, "company.baristas", "باريستا"));
+        result.company.push(...getBaristaMissingFields((data.clientBaristas || []) as Barista[], "company.clientBaristas", "باريستا العميل"));
+      }
     }
 
     data.branches.forEach((branch, index) => {
-      const branchFields = getBranchProfileFields(branch, `branch.${index}`);
-      branchFields.push(...getContactMissingFields(branch.contacts, `branch.${index}.contacts`));
-      branchFields.push(...getBaristaMissingFields(branch.baristas, `branch.${index}.baristas`, "باريستا"));
-      branchFields.push(...getBaristaMissingFields((branch.clientBaristas || []) as Barista[], `branch.${index}.clientBaristas`, "باريستا العميل"));
+      let branchFields: MissingField[];
+      if (isDynamic) {
+        branchFields = getDynamicBranchFields(branch, `branch.${index}`);
+      } else {
+        branchFields = getBranchProfileFields(branch, `branch.${index}`);
+        branchFields.push(...getContactMissingFields(branch.contacts, `branch.${index}.contacts`));
+        branchFields.push(...getBaristaMissingFields(branch.baristas, `branch.${index}.baristas`, "باريستا"));
+        branchFields.push(...getBaristaMissingFields((branch.clientBaristas || []) as Barista[], `branch.${index}.clientBaristas`, "باريستا العميل"));
+      }
       result.branches[index] = branchFields;
     });
   } else if (options.branchId !== undefined) {
     const branchIndex = data.branches.findIndex((b) => b.id === options.branchId);
     if (branchIndex >= 0) {
       const branch = data.branches[branchIndex];
-      const branchFields = getBranchProfileFields(branch, `branch.${branchIndex}`);
-      branchFields.push(...getContactMissingFields(branch.contacts, `branch.${branchIndex}.contacts`));
-      branchFields.push(...getBaristaMissingFields(branch.baristas, `branch.${branchIndex}.baristas`, "باريستا"));
-      branchFields.push(...getBaristaMissingFields((branch.clientBaristas || []) as Barista[], `branch.${branchIndex}.clientBaristas`, "باريستا العميل"));
+      let branchFields: MissingField[];
+      if (isDynamic) {
+        branchFields = getDynamicBranchFields(branch, `branch.${branchIndex}`);
+      } else {
+        branchFields = getBranchProfileFields(branch, `branch.${branchIndex}`);
+        branchFields.push(...getContactMissingFields(branch.contacts, `branch.${branchIndex}.contacts`));
+        branchFields.push(...getBaristaMissingFields(branch.baristas, `branch.${branchIndex}.baristas`, "باريستا"));
+        branchFields.push(...getBaristaMissingFields((branch.clientBaristas || []) as Barista[], `branch.${branchIndex}.clientBaristas`, "باريستا العميل"));
+      }
       result.branches[branchIndex] = branchFields;
     }
   }
@@ -626,9 +855,9 @@ const renderFieldsGrid = (
     if (leftField.type === "select" && leftField.options) {
       leftBottom = addBinaryCheckboxField(doc, leftField.key, leftField.label, leftField.options, leftLayout);
     } else if (leftField.type === "number") {
-      leftBottom = addNumberField(doc, leftField.key, leftField.label, leftLayout);
+      leftBottom = addNumberField(doc, leftField.key, leftField.label, leftLayout, leftField.required);
     } else {
-      leftBottom = addTextField(doc, leftField.key, leftField.label, leftLayout);
+      leftBottom = addTextField(doc, leftField.key, leftField.label, leftLayout, leftField.value, leftField.required);
     }
 
     // Render right field if paired
@@ -641,9 +870,9 @@ const renderFieldsGrid = (
       };
 
       if (rightField.type === "number") {
-        rightBottom = addNumberField(doc, rightField.key, rightField.label, rightLayout);
+        rightBottom = addNumberField(doc, rightField.key, rightField.label, rightLayout, rightField.required);
       } else {
-        rightBottom = addTextField(doc, rightField.key, rightField.label, rightLayout);
+        rightBottom = addTextField(doc, rightField.key, rightField.label, rightLayout, rightField.value, rightField.required);
       }
     }
 
@@ -805,6 +1034,22 @@ export const parseMissingDataPDF = async (
   }
 };
 
+/** Find or create a contact by position; returns its index */
+const findOrCreateContactByPosition = (
+  contacts: Contact[],
+  position: string
+): number => {
+  const index = contacts.findIndex((c) => c.position === position);
+  if (index >= 0) return index;
+  contacts.push({
+    id: Date.now() + contacts.length,
+    name: "",
+    position,
+    phoneNumbers: [{ id: Date.now(), number: "" }],
+  });
+  return contacts.length - 1;
+};
+
 export const applyParsedMissingData = (
   data: FormData,
   parsed: ParsedMissingData
@@ -819,8 +1064,13 @@ export const applyParsedMissingData = (
     try {
       if (parts[0] === "company") {
         if (parts[1] === "contacts") {
-          const index = Number(parts[2]);
+          const positionOrIndex = parts[2];
           const field = parts[3];
+          const isPosition = Number.isNaN(Number(positionOrIndex));
+          const index = isPosition
+            ? findOrCreateContactByPosition(updated.contacts, positionOrIndex)
+            : Number(positionOrIndex);
+
           if (!updated.contacts[index]) {
             updated.contacts[index] = {
               id: Date.now() + index,
@@ -831,6 +1081,7 @@ export const applyParsedMissingData = (
           }
           if (field === "name") updated.contacts[index].name = value;
           if (field === "position") updated.contacts[index].position = value;
+          if (field === "email") updated.contacts[index].email = value;
           if (field === "phone") {
             updated.contacts[index].phoneNumbers[0] = {
               id: updated.contacts[index].phoneNumbers[0]?.id || Date.now(),
@@ -864,6 +1115,8 @@ export const applyParsedMissingData = (
             (updated as any)[field] = value === "شراء" ? "bought" : value === "إيجار" ? "leased" : undefined;
           } else if (field === "dailyLeaseCost") {
             (updated as any)[field] = Number(value) || undefined;
+          } else if (field === "coffeeConsumptionKg") {
+            (updated as any)[field] = Number(value) || undefined;
           } else {
             (updated as any)[field] = value;
           }
@@ -875,8 +1128,13 @@ export const applyParsedMissingData = (
         const branch = updated.branches[branchIndex];
 
         if (parts[2] === "contacts") {
-          const index = Number(parts[3]);
+          const positionOrIndex = parts[3];
           const field = parts[4];
+          const isPosition = Number.isNaN(Number(positionOrIndex));
+          const index = isPosition
+            ? findOrCreateContactByPosition(branch.contacts, positionOrIndex)
+            : Number(positionOrIndex);
+
           if (!branch.contacts[index]) {
             branch.contacts[index] = {
               id: Date.now() + index,
@@ -887,6 +1145,7 @@ export const applyParsedMissingData = (
           }
           if (field === "name") branch.contacts[index].name = value;
           if (field === "position") branch.contacts[index].position = value;
+          if (field === "email") branch.contacts[index].email = value;
           if (field === "phone") {
             branch.contacts[index].phoneNumbers[0] = {
               id: branch.contacts[index].phoneNumbers[0]?.id || Date.now(),
@@ -918,6 +1177,8 @@ export const applyParsedMissingData = (
             branch.machineOwnershipType = value === "شراء" ? "bought" : value === "إيجار" ? "leased" : undefined;
           } else if (field === "dailyLeaseCost") {
             branch.dailyLeaseCost = Number(value) || undefined;
+          } else if (field === "coffeeConsumptionKg") {
+            branch.coffeeConsumptionKg = Number(value) || undefined;
           } else {
             (branch as any)[field] = value;
           }

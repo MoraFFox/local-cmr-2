@@ -212,6 +212,7 @@ export const contactPositions = [
   { label: "مدير العمليات", value: "ops_manager" },
   { label: "العلاقات العامة", value: "pr" },
   { label: "المبيعات", value: "sales" },
+  { label: "الحسابات", value: "accounting" },
   { label: "الرئيس التنفيذي", value: "chief" },
   { label: "المالك", value: "owner" },
   { label: "مخصص", value: "custom" },

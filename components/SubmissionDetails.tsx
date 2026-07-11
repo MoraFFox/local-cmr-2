@@ -48,6 +48,7 @@ import {
   CameraIcon,
   DocumentArrowUpIcon,
   DocumentArrowDownIcon,
+  ScaleIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
 
@@ -1194,6 +1195,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
       const doc = await generateMissingDataPDF(submission, {
         scope,
         branchId,
+        mode: "dynamic",
       });
       if (!doc) {
         showToast("لا توجد بيانات ناقصة لاستكمالها.", "info");
@@ -1400,6 +1402,11 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                     label='Location'
                     value={submission.location}
                   />
+                  <InfoRow
+                    icon={ScaleIcon}
+                    label='Coffee Consumption'
+                    value={submission.coffeeConsumptionKg ? `${submission.coffeeConsumptionKg} kg/month` : undefined}
+                  />
                   {submission.hasBranches === false && (
                     <InfoRow
                       icon={WrenchScrewdriverIcon}
@@ -1477,6 +1484,14 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                             {/* Desktop Dropdown for Branch */}
                             <div className='hidden sm:flex items-center gap-2'>
                               <button
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={isParsingPDF || !onUpdate}
+                                className='flex items-center gap-1 bg-cream-2 text-ink hover:bg-cream-3 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm border border-hairline'
+                              >
+                                <DocumentArrowUpIcon className='w-4 h-4' />
+                                {isParsingPDF ? "جاري الاستيراد..." : "رفع PDF مكتمل"}
+                              </button>
+                              <button
                                 onClick={() => handleGenerateMissingDataPDF("branch", branch.id)}
                                 disabled={isGeneratingPDF}
                                 className='flex items-center gap-1 bg-copper-500/10 text-copper-700 hover:bg-copper-500/20 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed'
@@ -1498,8 +1513,24 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                         initiallyOpen={false}
                       >
                         <div className='space-y-6'>
-                          {/* Mobile only print button */}
-                          <div className='sm:hidden mb-4'>
+                          {/* Mobile only buttons */}
+                          <div className='sm:hidden mb-4 flex flex-col gap-2'>
+                            <button
+                              onClick={() => fileInputRef.current?.click()}
+                              disabled={isParsingPDF || !onUpdate}
+                              className='flex items-center justify-center gap-2 bg-cream-2 text-ink hover:bg-cream-3 font-bold py-2 px-4 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm border border-hairline w-full'
+                            >
+                              <DocumentArrowUpIcon className='w-4 h-4' />
+                              {isParsingPDF ? "جاري الاستيراد..." : "رفع PDF مكتمل"}
+                            </button>
+                            <button
+                              onClick={() => handleGenerateMissingDataPDF("branch", branch.id)}
+                              disabled={isGeneratingPDF}
+                              className='flex items-center justify-center gap-2 bg-copper-500/10 text-copper-700 hover:bg-copper-500/20 font-bold py-2 px-4 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed w-full'
+                            >
+                              <DocumentArrowDownIcon className='w-4 h-4' />
+                              استكمال
+                            </button>
                             <PrintDropdown
                               label='Print Branch Report'
                               onPrint={(mode) =>
@@ -1534,6 +1565,11 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                                 icon={WrenchScrewdriverIcon}
                                 label='Machines'
                                 value={getMachineOwnershipStatus(branch)}
+                              />
+                              <InfoRow
+                                icon={ScaleIcon}
+                                label='Coffee Consumption'
+                                value={branch.coffeeConsumptionKg ? `${branch.coffeeConsumptionKg} kg/month` : undefined}
                               />
                             </div>
                             <div>
