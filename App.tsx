@@ -584,13 +584,13 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
             <button
               aria-label="القائمة"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 -mr-2 rounded-md text-cream/70 hover:text-cream hover:bg-espresso-light transition-colors shrink-0"
+              className="p-2 -mr-2 rounded-md text-on-chrome/70 hover:text-on-chrome hover:bg-espresso-light transition-colors shrink-0"
             >
               <Bars3Icon className="h-6 w-6" />
             </button>
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-md text-cream/70 hover:text-cream hover:bg-espresso-light transition-colors shrink-0"
+              className="p-2 rounded-md text-on-chrome/70 hover:text-on-chrome hover:bg-espresso-light transition-colors shrink-0"
               aria-label={
                 theme === "light" ? "الوضع الليلي" : "الوضع النهاري"
               }
@@ -607,7 +607,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
           </div>
 
           <div className="flex-1 flex items-center justify-center overflow-hidden">
-            <h1 className="text-lg font-bold text-cream truncate">
+            <h1 className="text-lg font-bold text-on-chrome truncate">
               {mobileTitle}
             </h1>
           </div>
