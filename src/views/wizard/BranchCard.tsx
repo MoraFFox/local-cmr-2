@@ -209,7 +209,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
               newlyAddedId={newlyAddedId}
               baristas={branch.baristas}
               clientBaristas={branch.clientBaristas}
-              onAddBarista={(name) => actions.handleQuickAddClientBarista(name, index)}
+              onAddBarista={(name) => actions.handleQuickAddBarista(name, index)}
               onAddClientBarista={(name) => actions.handleQuickAddClientBarista(name, index)}
               suggestedNames={allKnownBaristaNames}
             />

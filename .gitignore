@@ -55,3 +55,8 @@ FIX_PLAN.md
 *.png
 playwright-report/
 nul
+
+# Local MCP config
+.mcp.json
+.agents/
+page-snapshot

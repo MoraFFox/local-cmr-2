@@ -24,6 +24,7 @@ export interface WizardStepActions {
   handleNestedListItemChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, branchIndex: number, listName: "baristas" | "clientBaristas", itemIndex: number) => void;
   handleClientBaristaChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, branchIndex: number | null, index: number) => void;
   handleQuickAddClientBarista: (name: string, branchIndex: number | null) => void;
+  handleQuickAddBarista: (name: string, branchIndex: number | null) => void;
   removeClientBarista: (branchIndex: number | null, index: number) => void;
   /** Add a blank client barista (used by Step 4.5) */
   addBlankClientBarista: (branchIndex: number | null) => void;

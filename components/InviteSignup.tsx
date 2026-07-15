@@ -411,7 +411,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
               )}
             </div>
           ) : (
-            <div className="mb-6 p-4 bg-amber-500/10 rounded-lg border border-amber-500/20 text-sm text-amber-500">
+            <div className="mb-6 p-4 bg-amber-500/15 rounded-lg border border-amber-500/30 text-sm text-amber-700 dark:text-amber-400">
               {copy[lang].genericInviteNotice}
             </div>
           )}

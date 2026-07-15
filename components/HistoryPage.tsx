@@ -396,7 +396,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                     <div className="flex items-center flex-wrap gap-2">
                                         <h3 className="font-bold text-lg text-text truncate">{sub.companyName || 'شركة بدون اسم'}</h3>
                                         {sub.pendingSync && (
-                                            <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-500 border border-amber-500/20">
+                                            <span className="inline-flex items-center rounded-md bg-amber-500/15 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-400 border border-amber-500/30">
                                                 <CloudIcon className="w-3.5 h-3.5 mr-1" />
                                                 بانتظار المزامنة
                                             </span>

@@ -268,7 +268,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
           </div>
         </div>
         <div className='bg-cream p-4 rounded-xl shadow-sm border border-hairline flex items-center gap-4'>
-          <div className='p-3 bg-amber-500/10 text-amber-500 rounded-full'>
+          <div className='p-3 bg-amber-500/15 text-amber-700 dark:text-amber-400 rounded-full'>
             <BanknotesIcon className='w-6 h-6' />
           </div>
           <div>
@@ -539,7 +539,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
               </div>
 
               {editingBarista.sources && editingBarista.sources.length > 1 && (
-                <div className='p-3 bg-amber-500/10 text-amber-500 text-xs rounded-lg border border-amber-500/20'>
+                <div className='p-3 bg-amber-500/15 text-amber-700 dark:text-amber-400 text-xs rounded-lg border border-amber-500/30'>
                   <span className='font-bold'>Note:</span> This barista appears
                   in {editingBarista.sources.length} locations. Updating here
                   will update all records.

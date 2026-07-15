@@ -69,11 +69,11 @@ const SelectedItemCard: React.FC<SelectedItemCardProps> = ({
             type="text"
             value={name}
             onChange={handleNameChange}
-            className="w-full bg-espresso/50 text-cream px-3 py-1.5 rounded-lg border border-espresso-light focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none transition-all placeholder-latte"
+            className="w-full bg-cream text-text px-3 py-1.5 rounded-lg border border-hairline focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none transition-all placeholder-latte"
             placeholder="Item name..."
           />
         ) : (
-          <h4 className="font-bold text-cream text-sm leading-snug break-words">
+          <h4 className="font-bold text-text text-sm leading-snug break-words">
             {name}
           </h4>
         )}
@@ -81,21 +81,21 @@ const SelectedItemCard: React.FC<SelectedItemCardProps> = ({
 
       {/* Controls Container */}
       <div className={`flex items-center ${viewMode === 'list' ? 'gap-3' : 'justify-between w-full'}`}>
-        
+
         {/* Quantity Controls */}
-        <div className="flex items-center bg-espresso/50 rounded-lg border border-espresso-light p-1">
+        <div className="flex items-center bg-cream rounded-lg border border-hairline p-1">
           <button
             onClick={handleDecrement}
-            className="p-1.5 text-latte hover:text-cream hover:bg-espresso-light rounded-md transition-colors"
+            className="p-1.5 text-latte hover:text-text hover:bg-cream-2 rounded-md transition-colors"
           >
             <MinusIcon className="w-3.5 h-3.5" />
           </button>
-          <span className="w-8 text-center font-mono font-bold text-primary-400">
+          <span className="w-8 text-center font-mono font-bold text-primary dark:text-copper-300">
             {quantity}
           </span>
           <button
             onClick={handleIncrement}
-            className="p-1.5 text-latte hover:text-cream hover:bg-espresso-light rounded-md transition-colors"
+            className="p-1.5 text-latte hover:text-text hover:bg-cream-2 rounded-md transition-colors"
           >
             <PlusIcon className="w-3.5 h-3.5" />
           </button>

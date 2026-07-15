@@ -221,11 +221,13 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
 
   const handleListItemChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, ln: "branches" | "baristas", i: number) => {
     const { name, value, type } = e.target; const checked = (e.target as HTMLInputElement).checked;
-    const list = [...formData[ln]] as Record<string, unknown>[];
-    list[i] = { ...list[i], [name]: type === "checkbox" ? checked : value };
-    if (ln === "branches") { const item = list[i] as Record<string, unknown>; if (name === "usesOurMachines" && value === false) { delete item.machineOwnershipType; delete item.dailyLeaseCost; } if (name === "machineOwnershipType" && value !== "leased") { delete item.dailyLeaseCost; } }
-    setFormData((prev) => ({ ...prev, [ln]: list }));
-  }, [formData, setFormData]);
+    setFormData((prev) => {
+      const list = [...prev[ln]] as Record<string, unknown>[];
+      list[i] = { ...list[i], [name]: type === "checkbox" ? checked : value };
+      if (ln === "branches") { const item = list[i] as Record<string, unknown>; if (name === "usesOurMachines" && value === false) { delete item.machineOwnershipType; delete item.dailyLeaseCost; } if (name === "machineOwnershipType" && value !== "leased") { delete item.dailyLeaseCost; } }
+      return { ...prev, [ln]: list };
+    });
+  }, [setFormData]);
 
   const addNestedListItem = useCallback((bi: number, ln: "baristas" | "maintenanceHistory" | "clientBaristas") => {
     const nid = Date.now(); setNewlyAddedId(nid);
@@ -249,7 +251,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
     const { name, value } = e.target;
     setFormData((prev) => {
       const nb = [...prev.branches]; const br = { ...nb[bi] };
-      const list = br[ln] as Record<string, unknown>[];
+      const list = [...(br[ln] as Record<string, unknown>[])];
       list[ii] = { ...list[ii], [name]: value }; br[ln] = list; nb[bi] = br;
       return { ...prev, branches: nb };
     });
@@ -293,19 +295,30 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
       if (bi === null) setFormData((prev) => ({ ...prev, clientBaristas: [...(prev.clientBaristas || []), ncb] }));
       else setFormData((prev) => { const nb = [...prev.branches]; nb[bi] = { ...nb[bi], clientBaristas: [...nb[bi].clientBaristas, ncb] }; return { ...prev, branches: nb }; });
     },
+    handleQuickAddBarista: (name: string, bi: number | null) => {
+      const nb: Barista = { id: Date.now(), name, phone: "", notes: "Added from maintenance record" };
+      if (bi === null) setFormData((prev) => ({ ...prev, baristas: [...prev.baristas, nb] }));
+      else setFormData((prev) => { const nbr = [...prev.branches]; nbr[bi] = { ...nbr[bi], baristas: [...nbr[bi].baristas, nb] }; return { ...prev, branches: nbr }; });
+    },
     replaceBaristas: (baristas: Barista[]) => setFormData((prev) => ({ ...prev, baristas })),
     onMainOfficeMaintenanceChange: (i: number, r: MaintenanceRecord) => {
-      const nl = [...formData.maintenanceHistory]; nl[i] = r; setFormData((prev) => ({ ...prev, maintenanceHistory: nl }));
+      setFormData((prev) => {
+        const nl = [...prev.maintenanceHistory]; nl[i] = r; return { ...prev, maintenanceHistory: nl };
+      });
     },
     onBranchMaintenanceChange: (bi: number, ri: number, r: MaintenanceRecord) => {
-      const nb = [...formData.branches]; const br = { ...nb[bi] };
-      br.maintenanceHistory = [...br.maintenanceHistory]; br.maintenanceHistory[ri] = r;
-      nb[bi] = br; setFormData((prev) => ({ ...prev, branches: nb }));
+      setFormData((prev) => {
+        const nb = [...prev.branches]; const br = { ...nb[bi] };
+        br.maintenanceHistory = [...br.maintenanceHistory]; br.maintenanceHistory[ri] = r;
+        nb[bi] = br; return { ...prev, branches: nb };
+      });
     },
     onBranchAiNotesApplied: (bi: number, bari: number, notes: string) => {
-      const nb = [...formData.branches]; const br = { ...nb[bi] };
-      const baristas = [...br.baristas]; baristas[bari] = { ...baristas[bari], notes };
-      br.baristas = baristas; nb[bi] = br; setFormData((prev) => ({ ...prev, branches: nb }));
+      setFormData((prev) => {
+        const nb = [...prev.branches]; const br = { ...nb[bi] };
+        const baristas = [...br.baristas]; baristas[bari] = { ...baristas[bari], notes };
+        br.baristas = baristas; nb[bi] = br; return { ...prev, branches: nb };
+      });
     },
     setNewlyAddedId,
   }), [
@@ -315,7 +328,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
     addListItem, removeListItem, handleListItemChange,
     addNestedListItem, removeNestedListItem, handleNestedListItemChange,
     handleClientBaristaChange, handleQuickAddClientBarista, removeClientBarista,
-     setFormData, formData.branches, formData.maintenanceHistory,
+     setFormData,
   ]);
 
   // ── Step props ──

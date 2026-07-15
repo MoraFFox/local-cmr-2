@@ -47,24 +47,24 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       aria-describedby="confirm-message"
     >
       <div
-        className="bg-deep border border-sea rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-scale-in"
+        className="bg-cream dark:bg-espresso border border-hairline rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start gap-4 p-5 border-b border-sea">
+        <div className="flex items-start gap-4 p-5 border-b border-hairline">
           <div className="p-2 bg-lava-500/10 rounded-lg">
             <ExclamationTriangleIcon className="w-6 h-6 text-lava-500" />
           </div>
           <div className="flex-1">
-            <h3 id="confirm-title" className="text-lg font-bold text-onyx">
+            <h3 id="confirm-title" className="text-lg font-bold text-text">
               {title}
             </h3>
-            <p id="confirm-message" className="text-sm text-sage mt-1">
+            <p id="confirm-message" className="text-sm text-latte mt-1">
               {message}
             </p>
           </div>
           <button
             onClick={handleClose}
-            className="p-1 text-sage hover:text-onyx hover:bg-sea rounded-full transition-colors"
+            className="p-1 text-latte hover:text-text hover:bg-cream-2 rounded-full transition-colors"
             aria-label="إغلاق"
           >
             <XMarkIcon className="w-5 h-5" />
