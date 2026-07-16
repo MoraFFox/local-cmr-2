@@ -92,6 +92,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
       baristas: localSubmission.baristas,
       clientBaristas: localSubmission.clientBaristas || [],
       usesOurMachines: localSubmission.usesOurMachines,
+      machines: localSubmission.machines || [],
       machineOwnershipType: localSubmission.machineOwnershipType,
       dailyLeaseCost: localSubmission.dailyLeaseCost,
       maintenanceHistory: localSubmission.maintenanceHistory,

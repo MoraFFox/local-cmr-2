@@ -16,6 +16,7 @@ function createBranch(overrides: Partial<Branch> = {}): Branch {
     location: "Cairo",
     contacts: [],
     usesOurMachines: null,
+    machines: [],
     baristas: [],
     clientBaristas: [],
     maintenanceHistory: [],

@@ -50,6 +50,7 @@ export function useFloatingMenu(opts: FloatingMenuOptions = {}): FloatingMenuRes
   const triggerRef = useRef<HTMLElement | null>(null);
   const contentRef = useRef<HTMLElement | null>(null);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const lastWidthRef = useRef<number>(window.innerWidth);
 
   const compute = useCallback(() => {
     if (!triggerRef.current) {
@@ -87,12 +88,20 @@ export function useFloatingMenu(opts: FloatingMenuOptions = {}): FloatingMenuRes
     }
     compute();
     const raf = requestAnimationFrame(compute); // recompute after paint with real height
-    window.addEventListener('scroll', compute, true);
-    window.addEventListener('resize', compute);
+    const handleScroll = compute;
+    const handleResize = () => {
+      // Ignore height-only resize events (e.g. mobile on-screen keyboard)
+      // to prevent re-renders that steal focus from inputs.
+      if (window.innerWidth === lastWidthRef.current) return;
+      lastWidthRef.current = window.innerWidth;
+      compute();
+    };
+    window.addEventListener('scroll', handleScroll, true);
+    window.addEventListener('resize', handleResize);
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener('scroll', compute, true);
-      window.removeEventListener('resize', compute);
+      window.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', handleResize);
     };
   }, [open, compute]);
 

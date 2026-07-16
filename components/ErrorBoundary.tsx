@@ -13,9 +13,14 @@ interface ErrorBoundaryState {
 }
 
 class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  state: ErrorBoundaryState;
+  props: ErrorBoundaryProps;
+  setState: React.Component<ErrorBoundaryProps, ErrorBoundaryState>['setState'];
+
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null, errorInfo: null };
+    this.props = props;
   }
 
   static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {

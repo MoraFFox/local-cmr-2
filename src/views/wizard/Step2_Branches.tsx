@@ -16,10 +16,13 @@ export const Step2_Branches: React.FC<WizardStepProps> = ({
   formData,
   actions,
   newlyAddedId,
-  isSubmitting,
+  isSubmitting = false,
   allKnownBaristaNames,
+  allKnownMachineNames = [],
+  allKnownMachineTypes = [],
+  allKnownMachineOptions = [],
 }) => {
-  if (!formData.hasBranches) return null;
+  if (formData.hasBranches !== true) return null;
 
   return (
     <Card title="تفاصيل الفرع">
@@ -42,6 +45,9 @@ export const Step2_Branches: React.FC<WizardStepProps> = ({
               newlyAddedId={newlyAddedId}
               isSubmitting={isSubmitting}
               allKnownBaristaNames={allKnownBaristaNames}
+              allKnownMachineNames={allKnownMachineNames}
+              allKnownMachineTypes={allKnownMachineTypes}
+              allKnownMachineOptions={allKnownMachineOptions}
             />
           ))
         ) : (

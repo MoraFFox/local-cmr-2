@@ -22,11 +22,11 @@ export const Step4_Baristas: React.FC<WizardStepProps> = ({
   newlyAddedId,
   isSubmitting,
 }) => (
-  <Card title="الفريق / الباريستا (المكتب الرئيسي)">
+  <Card title="فريق Midoe's (المكتب الرئيسي)">
     <div className="flex justify-between items-center mb-6">
-      <h3 className="text-xl font-bold text-primary tracking-tight">الباريستا</h3>
+      <h3 className="text-xl font-bold text-primary tracking-tight">أفراد صيانة Midoe's</h3>
       <Button onClick={() => actions.addListItem("baristas")}>
-        <PlusCircleIcon className="w-5 h-5" /> إضافة باريستا
+        <PlusCircleIcon className="w-5 h-5" /> إضافة فرد صيانة (Midoe's)
       </Button>
     </div>
     <div className="space-y-4">
@@ -36,7 +36,7 @@ export const Step4_Baristas: React.FC<WizardStepProps> = ({
             key={barista.id}
             initiallyOpen={barista.id === newlyAddedId}
             onRemove={() => actions.removeListItem("baristas", index)}
-            titleContent={<span className="font-semibold">{barista.name || "باريستا جديد"}</span>}
+            titleContent={<span className="font-semibold">{barista.name || "فرد صيانة جديد"}</span>}
           >
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -72,11 +72,11 @@ export const Step4_Baristas: React.FC<WizardStepProps> = ({
         <EmptyState
           variant="inline"
           icon={<UserGroupIcon />}
-          title="لا يوجد باريستا"
-          message="أضف الباريستا الذين يعملون في المكتب الرئيسي."
+          title="لا يوجد فريق صيانة"
+          message="أضف أفراد صيانة Midoe's الذين يعملون في المكتب الرئيسي."
         >
           <Button variant="secondary" onClick={() => actions.addListItem("baristas")}>
-            <PlusCircleIcon className="w-4 h-4" /> إضافة باريستا
+            <PlusCircleIcon className="w-4 h-4" /> إضافة فرد صيانة (Midoe's)
           </Button>
         </EmptyState>
       )}

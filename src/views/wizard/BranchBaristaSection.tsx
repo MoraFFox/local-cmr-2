@@ -42,9 +42,9 @@ export const BranchBaristaSection: React.FC<BranchBaristaSectionProps> = ({
 }) => (
   <div className="mt-6 pt-6 border-t border-hairline">
     <div className="flex justify-between items-center mb-4">
-      <h4 className="text-lg font-bold text-primary tracking-tight">الباريستا</h4>
+      <h4 className="text-lg font-bold text-primary tracking-tight">أفراد صيانة Midoe's</h4>
       <Button onClick={() => onAddNested(index, "baristas")}>
-        <PlusCircleIcon className="w-4 h-4" /> إضافة باريستا
+        <PlusCircleIcon className="w-4 h-4" /> إضافة فرد صيانة (Midoe's)
       </Button>
     </div>
     <div className="space-y-3">
@@ -54,7 +54,7 @@ export const BranchBaristaSection: React.FC<BranchBaristaSectionProps> = ({
             key={barista.id}
             initiallyOpen={barista.id === newlyAddedId}
             onRemove={() => onRemoveNested("baristas", baristaIndex)}
-            titleContent={<span className="font-semibold">{barista.name || "باريستا جديد"}</span>}
+            titleContent={<span className="font-semibold">{barista.name || "فرد صيانة جديد"}</span>}
           >
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
@@ -89,8 +89,8 @@ export const BranchBaristaSection: React.FC<BranchBaristaSectionProps> = ({
       ) : (
         <EmptyState
           icon={<UserGroupIcon className="w-8 h-8" />}
-          title="لا يوجد باريستا"
-          message="أضف الباريستا الذين يعملون في هذا الفرع."
+          title="لا يوجد فريق صيانة"
+          message="أضف أفراد صيانة Midoe's الذين يعملون في هذا الفرع."
         />
       )}
     </div>

@@ -46,6 +46,15 @@ export interface Contact {
   phoneNumbers: { id: number; number: string }[];
 }
 
+export interface Machine {
+  id: string | number;
+  machineName?: string;
+  machineType?: string;
+  machineOption?: string;
+  machineOwnershipType?: "leased" | "consumption";
+  dailyLeaseCost?: number;
+}
+
 export interface Branch {
   id: number;
   branchName?: string;
@@ -56,7 +65,8 @@ export interface Branch {
   baristas: Barista[];
   clientBaristas: ClientBarista[];
   usesOurMachines: boolean | null;
-  machineOwnershipType?: "bought" | "leased";
+  machines: Machine[];
+  machineOwnershipType?: "leased" | "consumption" | "bought";
   dailyLeaseCost?: number;
   allowedMaintenanceTimes?: string;
   coffeeConsumptionKg?: number;
@@ -128,7 +138,8 @@ export interface FormData {
   location: string;
   hasBranches: boolean | null;
   usesOurMachines: boolean | null;
-  machineOwnershipType?: "bought" | "leased";
+  machines: Machine[];
+  machineOwnershipType?: "leased" | "consumption" | "bought";
   dailyLeaseCost?: number;
   allowedMaintenanceTimes?: string;
   coffeeConsumptionKg?: number;

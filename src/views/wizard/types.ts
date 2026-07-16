@@ -16,12 +16,12 @@ export interface WizardStepActions {
   addPhoneNumber: (path: ContactPath, contactIndex: number) => void;
   removePhoneNumber: (path: ContactPath, contactIndex: number, phoneIndex: number) => void;
   handlePhoneNumberChange: (e: React.ChangeEvent<HTMLInputElement>, path: ContactPath, contactIndex: number, phoneIndex: number) => void;
-  addListItem: (listName: "branches" | "baristas" | "maintenanceHistory") => void;
-  removeListItem: (listName: "branches" | "baristas" | "maintenanceHistory", index: number) => void;
-  handleListItemChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, listName: "branches" | "baristas", index: number) => void;
-  addNestedListItem: (branchIndex: number, listName: "baristas" | "maintenanceHistory" | "clientBaristas") => void;
-  removeNestedListItem: (branchIndex: number, listName: "baristas" | "maintenanceHistory" | "clientBaristas", itemIndex: number) => void;
-  handleNestedListItemChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, branchIndex: number, listName: "baristas" | "clientBaristas", itemIndex: number) => void;
+  addListItem: (listName: "branches" | "baristas" | "maintenanceHistory" | "machines") => void;
+  removeListItem: (listName: "branches" | "baristas" | "maintenanceHistory" | "machines", index: number) => void;
+  handleListItemChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, listName: "branches" | "baristas" | "machines", index: number) => void;
+  addNestedListItem: (branchIndex: number, listName: "baristas" | "maintenanceHistory" | "clientBaristas" | "machines") => void;
+  removeNestedListItem: (branchIndex: number, listName: "baristas" | "maintenanceHistory" | "clientBaristas" | "machines", itemIndex: number) => void;
+  handleNestedListItemChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, branchIndex: number, listName: "baristas" | "clientBaristas" | "machines", itemIndex: number) => void;
   handleClientBaristaChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, branchIndex: number | null, index: number) => void;
   handleQuickAddClientBarista: (name: string, branchIndex: number | null) => void;
   handleQuickAddBarista: (name: string, branchIndex: number | null) => void;
@@ -44,6 +44,9 @@ export interface WizardStepProps {
   formData: FormData;
   actions: WizardStepActions;
   newlyAddedId: number | string | null;
-  isSubmitting: boolean;
+  isSubmitting?: boolean;
   allKnownBaristaNames: string[];
+  allKnownMachineNames?: string[];
+  allKnownMachineTypes?: string[];
+  allKnownMachineOptions?: string[];
 }

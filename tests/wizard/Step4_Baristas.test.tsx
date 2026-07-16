@@ -90,56 +90,6 @@ describe("Step4_Baristas", () => {
     expect(screen.getByDisplayValue("Test note")).toBeInTheDocument();
   });
 
-  it("shows AI suggestion button when barista card is open", () => {
-    const actions = createMockActions();
-    render(
-      <Step4_Baristas
-        formData={createFormData({
-          baristas: [{ id: 1, name: "Ahmed", phone: "0111111111", notes: "" }],
-        })}
-        actions={actions}
-        newlyAddedId={1}
-      />,
-    );
-
-    expect(screen.getByText("✨ اقتراح بالذكاء الاصطناعي")).toBeInTheDocument();
-  });
-
-  it("clicking AI button calls suggestBaristaNotes", () => {
-    const actions = createMockActions({
-      suggestBaristaNotes: vi.fn().mockResolvedValue("Generated notes"),
-    });
-    render(
-      <Step4_Baristas
-        formData={createFormData({
-          baristas: [{ id: 1, name: "Ahmed", phone: "0111111111", notes: "" }],
-        })}
-        actions={actions}
-        newlyAddedId={1}
-      />,
-    );
-
-    fireEvent.click(screen.getByText("✨ اقتراح بالذكاء الاصطناعي"));
-    expect(actions.suggestBaristaNotes).toHaveBeenCalledWith("Ahmed");
-  });
-
-  it("shows loading text on AI button when isSubmitting is true", () => {
-    const actions = createMockActions();
-    render(
-      <Step4_Baristas
-        formData={createFormData({
-          baristas: [{ id: 1, name: "Ahmed", phone: "", notes: "" }],
-        })}
-        actions={actions}
-        newlyAddedId={1}
-        isSubmitting={true}
-      />,
-    );
-
-    expect(screen.getByText("جاري الإنشاء...")).toBeInTheDocument();
-    expect(screen.queryByText("✨ اقتراح بالذكاء الاصطناعي")).not.toBeInTheDocument();
-  });
-
   it("empty state add button calls addListItem", () => {
     const actions = createMockActions();
     render(

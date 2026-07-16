@@ -3,7 +3,7 @@
 import { FormData, Branch, Contact, Barista, ClientBarista } from "../types";
 import { logger } from "./logger";
 import jsPDF from "jspdf";
-import { loadFonts } from "./pdfGenerator";
+import { loadFonts, type LogoAssets } from "./pdfGenerator";
 import { reshapeArabic } from "./arabicText";
 import {
   PDFDocument,
@@ -101,7 +101,7 @@ const addTextField = (
   doc.setFillColor(...COLORS.white);
   doc.roundedRect(layout.x, fieldY, layout.width, fieldHeight, 1.5, 1.5, "FD");
 
-  const textField = new jsPDF.AcroForm.TextField();
+  const textField = new (jsPDF as any).AcroForm.TextField();
   textField.x = layout.x + 1;
   textField.y = fieldY + 1;
   textField.width = layout.width - 2;
@@ -137,7 +137,7 @@ const addBinaryCheckboxField = (
   options.forEach((option, index) => {
     // RTL: first option on the right, subsequent options to the left
     const x = rightEdge - boxSize - index * optionSpacing;
-    const checkBox = new jsPDF.AcroForm.CheckBox();
+    const checkBox = new (jsPDF as any).AcroForm.CheckBox();
     checkBox.x = x;
     checkBox.y = startY;
     checkBox.width = boxSize;
@@ -180,7 +180,7 @@ const addNumberField = (
   doc.setFillColor(...COLORS.white);
   doc.roundedRect(layout.x, fieldY, layout.width, fieldHeight, 1.5, 1.5, "FD");
 
-  const textField = new jsPDF.AcroForm.TextField();
+  const textField = new (jsPDF as any).AcroForm.TextField();
   textField.x = layout.x + 1;
   textField.y = fieldY + 1;
   textField.width = layout.width - 2;
@@ -202,11 +202,6 @@ const checkPageBreak = (doc: jsPDF, y: number, margin: number): number => {
   }
   return y;
 };
-
-interface LogoAssets {
-  logo: string | null;
-  logoFormat: "PNG" | "JPEG";
-}
 
 export const getInitials = (companyName: string): string => {
   if (!companyName) return "?";
@@ -853,7 +848,7 @@ export const generateMissingDataPDF = async (
 
   const doc = new jsPDF();
 
-  if (!jsPDF.AcroForm?.TextField || !jsPDF.AcroForm?.CheckBox) {
+  if (!(jsPDF as any).AcroForm?.TextField || !(jsPDF as any).AcroForm?.CheckBox) {
     throw new Error("AcroForm support is not available in this jsPDF build.");
   }
 

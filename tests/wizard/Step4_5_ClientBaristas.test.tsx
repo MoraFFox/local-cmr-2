@@ -98,7 +98,6 @@ describe("Step4_5_ClientBaristas", () => {
     const actions = createMockActions();
     // clientBaristas omitted entirely from overrides
     const formData = createFormData();
-    // @ts-expect-error - testing edge case where clientBaristas is undefined
     delete (formData as any).clientBaristas;
 
     render(

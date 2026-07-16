@@ -78,11 +78,14 @@ const ContactReview: React.FC<{ contacts: Contact[] }> = ({ contacts }) => {
   );
 };
 
-const getMachineOwnershipStatus = (entity: {
-  usesOurMachines: boolean | null;
-  machineOwnershipType?: "bought" | "leased";
-  dailyLeaseCost?: number;
-}) => {
+export const getMachineOwnershipStatus = (
+  entity: {
+    usesOurMachines: boolean | null;
+    machineOwnershipType?: "leased" | "consumption";
+    dailyLeaseCost?: number;
+  },
+  hideCosts = false,
+) => {
   if (
     entity.usesOurMachines === null ||
     typeof entity.usesOurMachines === "undefined"
@@ -98,7 +101,12 @@ const getMachineOwnershipStatus = (entity: {
         entity.machineOwnershipType.charAt(0).toUpperCase() +
         entity.machineOwnershipType.slice(1);
       let status = `Yes (${type})`;
-      if (entity.machineOwnershipType === "leased" && entity.dailyLeaseCost) {
+      if (
+        !hideCosts &&
+        (entity.machineOwnershipType === "leased" ||
+          entity.machineOwnershipType === "consumption") &&
+        entity.dailyLeaseCost != null
+      ) {
         status += ` - ${new Intl.NumberFormat("ar-EG", { style: "currency", currency: "EGP" }).format(entity.dailyLeaseCost)} / day`;
       }
       return status;

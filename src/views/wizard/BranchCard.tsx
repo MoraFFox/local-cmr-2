@@ -42,6 +42,9 @@ export const BranchCard: React.FC<BranchCardProps> = ({
   newlyAddedId,
   isSubmitting,
   allKnownBaristaNames,
+  allKnownMachineNames = [],
+  allKnownMachineTypes = [],
+  allKnownMachineOptions = [],
 }) => (
   <CollapsibleCard
     initiallyOpen={branch.id === newlyAddedId}
@@ -100,21 +103,84 @@ export const BranchCard: React.FC<BranchCardProps> = ({
             options={[{ label: "نعم", value: true }, { label: "لا", value: false }]} inline
           />
           {branch.usesOurMachines === true && (
-            <div className="pl-6 mt-4 border-l-2 border-hairline">
-              <RadioGroup label="كيف تم الحصول على الماكينة؟" name={`machineOwnershipType-${branch.id}`}
-                value={branch.machineOwnershipType}
-                onChange={(val) => actions.handleListItemChange(
-                  { target: { name: "machineOwnershipType", value: val } } as React.ChangeEvent<HTMLInputElement>, "branches", index)}
-                options={[{ label: "شراء", value: "bought" }, { label: "إيجار", value: "leased" }]} inline
-              />
-              {branch.machineOwnershipType === "leased" && (
-                <div className="mt-4">
-                  <TextInput label="قيمة الإيجار اليومي (ج.م)" name="dailyLeaseCost" type="number"
-                    value={branch.dailyLeaseCost || ""}
-                    onChange={(e) => actions.handleListItemChange(e, "branches", index)}
-                    placeholder="0.00" icon={<CurrencyDollarIcon />}
-                  />
-                </div>
+            <div className="mt-4 space-y-4">
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="text-lg font-bold text-primary tracking-tight">الماكينات</h4>
+                <Button onClick={() => actions.addNestedListItem(index, "machines")} variant="secondary">
+                  <PlusCircleIcon className="w-4 h-4" /> إضافة ماكينة
+                </Button>
+              </div>
+
+              {branch.machines && branch.machines.length > 0 ? (
+                branch.machines.map((machine, idx) => (
+                  <CollapsibleCard
+                    key={machine.id}
+                    initiallyOpen={machine.id === newlyAddedId}
+                    onRemove={() => actions.removeNestedListItem(index, "machines", idx)}
+                    titleContent={<span className="font-semibold">{machine.machineName || "ماكينة جديدة"}</span>}
+                  >
+                    <div className="space-y-4">
+                      <TextInput
+                        label="اسم الماكينة (اختياري)"
+                        name="machineName"
+                        value={machine.machineName || ""}
+                        onChange={(e) => actions.handleNestedListItemChange(e, index, "machines", idx)}
+                        placeholder="مثال: La Marzocco"
+                        suggestions={allKnownMachineNames}
+                      />
+                      <TextInput
+                        label="نوع الماكينة (اختياري)"
+                        name="machineType"
+                        value={machine.machineType || ""}
+                        onChange={(e) => actions.handleNestedListItemChange(e, index, "machines", idx)}
+                        placeholder="مثال: Linea Classic"
+                        suggestions={allKnownMachineTypes}
+                      />
+                      <TextInput
+                        label="نظام تشغيل الماكينة (اختياري)"
+                        name="machineOption"
+                        value={machine.machineOption || ""}
+                        onChange={(e) => actions.handleNestedListItemChange(e, index, "machines", idx)}
+                        placeholder="مثال: Manual, Automatic..."
+                        suggestions={allKnownMachineOptions}
+                      />
+                      <div>
+                        <label className="block text-sm font-medium text-primary mb-2">كيف تم الحصول على الماكينة؟</label>
+                        <select
+                          name="machineOwnershipType"
+                          value={machine.machineOwnershipType || "leased"}
+                          onChange={(e) => actions.handleNestedListItemChange(e, index, "machines", idx)}
+                          className="w-full pl-3 pr-10 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
+                        >
+                          <option value="leased">إيجار</option>
+                          <option value="consumption">مقابل الاستهلاك</option>
+                        </select>
+                      </div>
+                      {(machine.machineOwnershipType === "leased" || machine.machineOwnershipType === "consumption") && (
+                        <TextInput
+                          label={machine.machineOwnershipType === "leased" ? "قيمة الإيجار اليومي (ج.م)" : "القيمة اليومية (ج.م)"}
+                          name="dailyLeaseCost"
+                          type="number"
+                          value={machine.dailyLeaseCost || ""}
+                          onChange={(e) => actions.handleNestedListItemChange(e, index, "machines", idx)}
+                          placeholder="0.00"
+                          icon={<CurrencyDollarIcon />}
+                        />
+                      )}
+                    </div>
+                  </CollapsibleCard>
+                ))
+              ) : (
+                <EmptyState
+                  variant="inline"
+                  icon={<WrenchScrewdriverIcon />}
+                  title="لا توجد ماكينات"
+                  message="أضف الماكينات الموجودة في هذا الفرع."
+                >
+                  <Button variant="secondary" onClick={() => actions.addNestedListItem(index, "machines")}>
+                    <PlusCircleIcon className="w-4 h-4" /> إضافة ماكينة
+                  </Button>
+                </EmptyState>
               )}
             </div>
           )}

@@ -12,6 +12,43 @@ const rtl = (text: string | number | null | undefined): string => {
   return reshapeArabic(String(text), false);
 };
 
+/** Format maintenance record details as clean bullet-point text for PDF tables. */
+const formatMaintenanceDetails = (r: MaintenanceRecord): string => {
+  const sections: string[] = [];
+
+  if (r.machines && r.machines.length > 0) {
+    const items = r.machines
+      .map((m) => `  • ${m.count || 1}x ${rtl(m.name)}`)
+      .join("\n");
+    sections.push(`Machines:\n${items}`);
+  }
+
+  if (r.hadProblem && r.problems && r.problems.length > 0) {
+    const items = r.problems.map((p) => `  • ${rtl(p)}`).join("\n");
+    sections.push(`Issues:\n${items}`);
+  }
+
+  if (r.partsReplaced && r.partsReplaced.length > 0) {
+    const items = r.partsReplaced
+      .map((p) => {
+        const paidBy =
+          p.paidByClient === true ? "Client" : p.paidByClient === false ? "Mido's" : "-";
+        return `  • ${p.count || 1}x ${rtl(p.name)} (${paidBy})`;
+      })
+      .join("\n");
+    sections.push(`Parts:\n${items}`);
+  }
+
+  if (r.servicesPerformed && r.servicesPerformed.length > 0) {
+    const items = r.servicesPerformed
+      .map((s) => `  • ${s.count || 1}x ${rtl(s.name)}`)
+      .join("\n");
+    sections.push(`Services:\n${items}`);
+  }
+
+  return sections.join("\n");
+};
+
 interface PDFOptions {
   includeCosts: boolean;
 }
@@ -215,20 +252,31 @@ const getPaidByLabel = (val: string) =>
 const getMachineStatus = (
   entity: {
     usesOurMachines: boolean | null;
-    machineOwnershipType?: "bought" | "leased";
+    machineOwnershipType?: "leased" | "consumption" | "bought";
     dailyLeaseCost?: number;
   },
   hideCosts = false,
 ) => {
   if (!entity.usesOurMachines) return "No";
-  const type = entity.machineOwnershipType === "leased" ? "Leased" : "Bought";
+
+  const type =
+    entity.machineOwnershipType === "leased"
+      ? "Leased"
+      : entity.machineOwnershipType === "consumption"
+      ? "Consumption"
+      : entity.machineOwnershipType === "bought"
+      ? "Bought"
+      : "-";
+
   if (
     !hideCosts &&
-    entity.machineOwnershipType === "leased" &&
-    entity.dailyLeaseCost
+    (entity.machineOwnershipType === "leased" ||
+      entity.machineOwnershipType === "consumption") &&
+    entity.dailyLeaseCost != null
   ) {
     return `${type} (${formatCurrency(entity.dailyLeaseCost)}/day)`;
   }
+
   return type;
 };
 
@@ -248,7 +296,12 @@ const flattenMaintenanceRecords = (
   return result;
 };
 
-export const loadFonts = async (doc: jsPDF) => {
+export interface LogoAssets {
+  logo: string | null;
+  logoFormat: "PNG" | "JPEG";
+}
+
+export const loadFonts = async (doc: jsPDF): Promise<LogoAssets> => {
   const toBase64 = (buffer: ArrayBuffer) => {
     let binary = "";
     const bytes = new Uint8Array(buffer);
@@ -417,6 +470,7 @@ export const generateCompanyPDF = async (
   const getDashboardStats = (data: FormData) => {
     let totalVisits = 0;
     let totalPartsCount = 0;
+    let totalIssuesCount = 0;
 
     // Financials
     let totalLeaseCost = 0;
@@ -426,24 +480,22 @@ export const generateCompanyPDF = async (
     // Insights
     const issueCounts: Record<string, number> = {};
     const partCounts: Record<string, number> = {};
-    const branchVisitCounts: Record<string, number> = {};
+    const branchVisitSummary: Array<{
+      name: string;
+      requested: number;
+      scheduled: number;
+    }> = [];
 
-    const processRecords = (
-      records: MaintenanceRecord[],
-      branchName?: string,
-    ) => {
+    const processRecords = (records: MaintenanceRecord[]) => {
       records.forEach((r) => {
         totalVisits++;
-        if (branchName) {
-          branchVisitCounts[branchName] =
-            (branchVisitCounts[branchName] || 0) + 1;
-        }
 
         // Financials
         if (r.dailyLeaseCost) totalLeaseCost += Number(r.dailyLeaseCost);
 
         // Issues
-        if (r.problems) {
+        if (r.problems && r.problems.length > 0) {
+          totalIssuesCount += r.problems.length;
           r.problems.forEach((p) => {
             issueCounts[p] = (issueCounts[p] || 0) + 1;
           });
@@ -467,19 +519,30 @@ export const generateCompanyPDF = async (
           });
         }
 
-        if (r.followUpVisits) processRecords(r.followUpVisits, branchName);
+        if (r.followUpVisits) processRecords(r.followUpVisits);
       });
     };
 
     // Main Office
-    processRecords(data.maintenanceHistory || [], "Main Office");
+    processRecords(data.maintenanceHistory || []);
 
     // Branches
-    data.branches?.forEach((b) => {
-      processRecords(
-        b.maintenanceHistory || [],
-        b.branchName || "Unnamed Branch",
-      );
+    data.branches?.forEach((b, index) => {
+      const branchName = b.branchName || `Branch ${index + 1}`;
+      const summary = { requested: 0, scheduled: 0 };
+      const countVisitTypes = (records: MaintenanceRecord[]) => {
+        records.forEach((r) => {
+          if (r.type === "requested") {
+            summary.requested++;
+          } else {
+            summary.scheduled++;
+          }
+          if (r.followUpVisits) countVisitTypes(r.followUpVisits);
+        });
+      };
+      countVisitTypes(b.maintenanceHistory || []);
+      branchVisitSummary.push({ name: branchName, ...summary });
+      processRecords(b.maintenanceHistory || []);
     });
 
     // Top Computation
@@ -495,9 +558,15 @@ export const generateCompanyPDF = async (
       return { name, count: max };
     };
 
+    const sortBreakdown = (record: Record<string, number>) =>
+      Object.entries(record)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count);
+
     return {
       totalVisits,
       totalPartsCount,
+      totalIssuesCount,
       financials: {
         totalLeaseCost,
         totalPartsCost,
@@ -507,8 +576,12 @@ export const generateCompanyPDF = async (
       insights: {
         topIssue: getTop(issueCounts),
         topPart: getTop(partCounts),
-        topBranch: getTop(branchVisitCounts),
       },
+      breakdown: {
+        issues: sortBreakdown(issueCounts),
+        parts: sortBreakdown(partCounts),
+      },
+      branchVisitSummary,
     };
   };
 
@@ -522,12 +595,13 @@ export const generateCompanyPDF = async (
     ["Email", rtl(data.email) || "-"],
     ["Tax Number", rtl(data.taxNumber) || "-"],
     ["Total Visits", stats.totalVisits.toString()],
+    ["Total Issues", stats.totalIssuesCount.toString()],
     ["Parts Changed", stats.totalPartsCount.toString()],
   ];
 
   if (!data.hasBranches) {
     companyInfo.push([
-      "Machine Status",
+      "Machine Ownership",
       getMachineStatus(data, !options.includeCosts),
     ]);
   }
@@ -564,6 +638,14 @@ export const generateCompanyPDF = async (
 
   const insightsData = [
     [
+      "Total Issues",
+      stats.totalIssuesCount.toString(),
+    ],
+    [
+      "Total Parts Consumed",
+      stats.totalPartsCount.toString(),
+    ],
+    [
       "Most Frequent Issue",
       `${rtl(stats.insights.topIssue.name)} (${stats.insights.topIssue.count})`,
     ],
@@ -571,10 +653,7 @@ export const generateCompanyPDF = async (
       "Most Consumed Part",
       `${rtl(stats.insights.topPart.name)} (${stats.insights.topPart.count})`,
     ],
-    [
-      "Busiest Branch",
-      `${rtl(stats.insights.topBranch.name)} (${stats.insights.topBranch.count} visits)`,
-    ],
+
   ];
 
   autoTable(doc, {
@@ -589,22 +668,128 @@ export const generateCompanyPDF = async (
 
   yPos = (doc as any).lastAutoTable.finalY + 10;
 
-  // Contacts
-  if (data.contacts.length > 0) {
-    doc.setFontSize(10);
+  // --- Visit Summary by Branch ---
+  if (stats.branchVisitSummary.length > 0) {
+    if (yPos > 220) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    doc.setFontSize(12);
     doc.setFont("Amiri", "bold");
-    doc.text("Key Contacts", 14, yPos);
+    doc.text("Visit Summary by Branch", 14, yPos);
     yPos += 6;
 
-    const contactRows = data.contacts.map((c) => [
-      rtl(c.name),
-      rtl(c.position === "custom" ? c.customPosition || c.position : c.position),
-      c.phoneNumbers.map((p) => p.number).join(", "),
+    const summaryRows = stats.branchVisitSummary.map((b) => [
+      rtl(b.name),
+      b.requested.toString(),
+      b.scheduled.toString(),
+      (b.requested + b.scheduled).toString(),
     ]);
 
     autoTable(doc, {
       startY: yPos,
-      head: [["Name", "Position", "Phone"]],
+      head: [["Branch", "Requested", "Scheduled", "Total"]],
+      body: summaryRows,
+      theme: "striped",
+      styles: { fontSize: 8, font: "Amiri", halign: "left" },
+      headStyles: { fillColor: [50, 60, 70] },
+      columnStyles: {
+        0: { cellWidth: "auto" },
+        1: { cellWidth: 30, halign: "center" },
+        2: { cellWidth: 30, halign: "center" },
+        3: { cellWidth: 30, halign: "center" },
+      },
+    });
+
+    yPos = (doc as any).lastAutoTable.finalY + 10;
+  }
+
+  // --- Issues & Parts Breakdown ---
+  if (
+    stats.breakdown.issues.length > 0 ||
+    stats.breakdown.parts.length > 0
+  ) {
+    if (yPos > 220) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    doc.setFontSize(12);
+    doc.setFont("Amiri", "bold");
+    doc.text("Issues & Parts Breakdown", 14, yPos);
+    yPos += 6;
+
+    const breakdownRows: (string | number)[][] = [];
+    const maxRows = Math.max(
+      stats.breakdown.issues.length,
+      stats.breakdown.parts.length,
+    );
+
+    for (let i = 0; i < maxRows; i++) {
+      const issue = stats.breakdown.issues[i];
+      const part = stats.breakdown.parts[i];
+      breakdownRows.push([
+        issue ? rtl(issue.name) : "",
+        issue ? issue.count : "",
+        part ? rtl(part.name) : "",
+        part ? part.count : "",
+      ]);
+    }
+
+    autoTable(doc, {
+      startY: yPos,
+      head: [["Issue", "Count", "Part", "Qty"]],
+      body: breakdownRows,
+      theme: "striped",
+      styles: { fontSize: 8, font: "Amiri", halign: "left" },
+      headStyles: { fillColor: [50, 60, 70] },
+      columnStyles: {
+        0: { cellWidth: "auto" },
+        1: { cellWidth: 20, halign: "center" },
+        2: { cellWidth: "auto" },
+        3: { cellWidth: 20, halign: "center" },
+      },
+    });
+
+    yPos = (doc as any).lastAutoTable.finalY + 10;
+  }
+
+  // Managers' Contacts
+  const managerPositions = new Set([
+    "manager",
+    "chief",
+    "ops_manager",
+    "sales",
+    "accounting",
+  ]);
+  const managerContacts = (data.contacts || []).filter(
+    (c) => c.position === "manager" || managerPositions.has(c.position),
+  );
+
+  if (managerContacts.length > 0) {
+    if (yPos > 250) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    doc.setFontSize(10);
+    doc.setFont("Amiri", "bold");
+    doc.text("Managers' Contacts", 14, yPos);
+    yPos += 6;
+
+    const contactRows = managerContacts.map((c) => [
+      rtl(c.name),
+      rtl(
+        c.position === "custom" ? c.customPosition || c.position : c.position,
+      ),
+      rtl(c.email) || "-",
+      c.phoneNumbers?.map((p) => p.number).join(", ") || "-",
+    ]);
+
+    autoTable(doc, {
+      startY: yPos,
+      head: [["Name", "Position", "Email", "Phone"]],
       body: contactRows,
       theme: "striped",
       styles: { fontSize: 8, font: "Amiri" },
@@ -630,31 +815,13 @@ export const generateCompanyPDF = async (
     ).map((r) => {
       const row: any[] = [
         r.maintenanceDate,
+        r.type === "requested" ? "Requested" : "Scheduled",
+        r.type === "requested" ? rtl(r.clientBaristaName) || "-" : "-",
         rtl(r.baristaName) || "-",
         getPaidByLabel(r.paidBy),
       ];
 
-      const details: string[] = [];
-      if (r.machines && r.machines.length > 0) {
-        details.push(
-          `Machines: ${r.machines.map((m) => `${m.count || 1}x ${rtl(m.name)}`).join(", ")}`,
-        );
-      }
-      if (r.hadProblem && r.problems) {
-        details.push(`Issues: ${r.problems.map((p) => rtl(p)).join(", ")}`);
-      }
-      if (r.partsReplaced && r.partsReplaced.length > 0) {
-        details.push(
-          `Parts: ${r.partsReplaced.map((p) => `${p.count || 1}x ${rtl(p.name)}`).join(", ")}`,
-        );
-      }
-      if (r.servicesPerformed && r.servicesPerformed.length > 0) {
-        details.push(
-          `Services: ${r.servicesPerformed.map((s) => `${s.count || 1}x ${rtl(s.name)}`).join(", ")}`,
-        );
-      }
-
-      row.push(details.join("\n"));
+      row.push(formatMaintenanceDetails(r));
 
       if (options.includeCosts && r.dailyLeaseCost) {
         row.push(formatCurrency(r.dailyLeaseCost));
@@ -663,7 +830,7 @@ export const generateCompanyPDF = async (
       return row;
     });
 
-    const headers = ["Date", "Staff", "Paid By", "Details"];
+    const headers = ["Date", "Type", "Requested By", "Staff", "Paid By", "Details"];
     if (options.includeCosts) headers.push("Lease Cost");
 
     autoTable(doc, {
@@ -678,7 +845,7 @@ export const generateCompanyPDF = async (
         halign: "left",
       },
       headStyles: { fillColor: [20, 184, 166], fontStyle: "bold" },
-      columnStyles: { 3: { cellWidth: "auto" } },
+      columnStyles: { 5: { cellWidth: "auto" } },
     });
 
     yPos = (doc as any).lastAutoTable.finalY + 10;
@@ -706,15 +873,15 @@ export const generateCompanyPDF = async (
   if (data.hasBranches && data.branches.length > 0) {
     for (let idx = 0; idx < data.branches.length; idx++) {
       const branch = data.branches[idx];
-      if (yPos > 250 || idx > 0) {
+      if (yPos > 250) {
         doc.addPage();
         yPos = 20;
       }
 
-      doc.setFontSize( 14);
+      doc.setFontSize(12);
       doc.setFont("Amiri", "bold");
       doc.text(rtl(branch.branchName || `Branch ${idx + 1}`), 14, yPos);
-      yPos += 8;
+      yPos += 5;
 
       doc.setFontSize(9);
       doc.setFont("Amiri", "normal");
@@ -732,7 +899,7 @@ export const generateCompanyPDF = async (
         [
           "Tax ID",
           rtl(branch.taxNumber) || "-",
-          "Machine Status",
+          "Machine Ownership",
           getMachineStatus(branch, !options.includeCosts),
         ],
       ];
@@ -768,7 +935,7 @@ export const generateCompanyPDF = async (
         },
       } as any);
 
-      yPos = (doc as any).lastAutoTable.finalY + 8;
+      yPos = (doc as any).lastAutoTable.finalY + 5;
 
       if (branch.contacts.length > 0) {
         doc.setFontSize(9);
@@ -789,7 +956,7 @@ export const generateCompanyPDF = async (
           styles: { fontSize: 7, font: "Amiri" },
         });
 
-        yPos = (doc as any).lastAutoTable.finalY + 8;
+        yPos = (doc as any).lastAutoTable.finalY + 5;
       }
 
       if (branch.baristas && branch.baristas.length > 0) {
@@ -811,7 +978,7 @@ export const generateCompanyPDF = async (
           styles: { fontSize: 7, font: "Amiri" },
         });
 
-        yPos = (doc as any).lastAutoTable.finalY + 8;
+        yPos = (doc as any).lastAutoTable.finalY + 5;
       }
 
       if (branch.maintenanceHistory.length > 0) {
@@ -825,36 +992,18 @@ export const generateCompanyPDF = async (
         ).map((r) => {
           const row: any[] = [
             r.maintenanceDate,
+            r.type === "requested" ? "Requested" : "Scheduled",
+            r.type === "requested" ? rtl(r.clientBaristaName) || "-" : "-",
             rtl(r.baristaName) || "-",
             getPaidByLabel(r.paidBy),
           ];
 
-          const details: string[] = [];
-          if (r.machines && r.machines.length > 0) {
-            details.push(
-              `Machines: ${r.machines.map((m) => `${m.count || 1}x ${rtl(m.name)}`).join(", ")}`,
-            );
-          }
-          if (r.hadProblem && r.problems) {
-            details.push(`Issues: ${r.problems.map((p) => rtl(p)).join(", ")}`);
-          }
-          if (r.partsReplaced && r.partsReplaced.length > 0) {
-            details.push(
-              `Parts: ${r.partsReplaced.map((p) => `${p.count || 1}x ${rtl(p.name)}`).join(", ")}`,
-            );
-          }
-          if (r.servicesPerformed && r.servicesPerformed.length > 0) {
-            details.push(
-              `Services: ${r.servicesPerformed.map((s) => `${s.count || 1}x ${rtl(s.name)}`).join(", ")}`,
-            );
-          }
-
-          row.push(details.join("\n"));
+          row.push(formatMaintenanceDetails(r));
 
           return row;
         });
 
-        const headers = ["Date", "Staff", "Paid By", "Details"];
+        const headers = ["Date", "Type", "Requested By", "Staff", "Paid By", "Details"];
 
         autoTable(doc, {
           startY: yPos,
@@ -868,10 +1017,10 @@ export const generateCompanyPDF = async (
             halign: "left",
           },
           headStyles: { fillColor: [20, 184, 166], fontStyle: "bold" },
-          columnStyles: { 3: { cellWidth: "auto" } },
+          columnStyles: { 5: { cellWidth: "auto" } },
         });
 
-        yPos = (doc as any).lastAutoTable.finalY + 10;
+        yPos = (doc as any).lastAutoTable.finalY + 5;
 
         // Render photos for branch maintenance records
         const allBranchRecords = flattenMaintenanceRecords(branch.maintenanceHistory);
@@ -968,7 +1117,7 @@ export const generateBranchPDF = async (
     ["Location", isLocationUrl ? "View Location" : rtl(locationUrl) || "-"],
     ["Email", rtl(branch.email) || "-"],
     ["Tax ID", rtl(branch.taxNumber) || "-"],
-    ["Machine Status", getMachineStatus(branch, !options.includeCosts)],
+    ["Machine Ownership", getMachineStatus(branch, !options.includeCosts)],
   ];
 
   autoTable(doc, {
@@ -1094,6 +1243,13 @@ export const generateBranchPDF = async (
       const staffText = `Staff: ${rtl(r.baristaName)}`;
       doc.text(staffText, 14, yPos);
       yPos += 6;
+
+      // Requested By
+      if (r.type === "requested") {
+        const requestedByText = `Requested By: ${rtl(r.clientBaristaName) || "-"}`;
+        doc.text(requestedByText, 14, yPos);
+        yPos += 6;
+      }
 
       // Paid By & Lease Cost
       const paidByText = `Paid By: ${getPaidByLabel(r.paidBy)}`;

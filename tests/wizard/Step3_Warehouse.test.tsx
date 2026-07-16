@@ -52,7 +52,7 @@ describe("Step3_Warehouse", () => {
           warehouse: {
             location: "",
             contacts: [
-              { id: 1, name: "Warehouse Manager", role: "Manager", phoneNumbers: [{ id: 1, number: "0100000000" }] },
+              { id: 1, name: "Warehouse Manager", position: "Manager", phoneNumbers: [{ id: 1, number: "0100000000" }] },
             ],
           },
         })}

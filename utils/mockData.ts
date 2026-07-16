@@ -13,19 +13,20 @@ export const generateMockWizardData = (): FormData => {
     machineOwnershipType: "leased",
     dailyLeaseCost: 150,
     branchCount: 2,
+    machines: [],
     branches: [
       {
         id: Date.now() + 1,
         branchName: "الفرع الرئيسي (التجمع)",
         email: "tagamoa@sabahcoffee.com",
         location: "التجمع الخامس، شارع التسعين",
-        baristaCount: 2,
         usesOurMachines: true,
         machineOwnershipType: "leased",
         dailyLeaseCost: 100,
+        machines: [],
         baristas: [
-          { id: Date.now() + 2, name: "أحمد محمد (باريستا)", phone: "01011112222", rating: 4, notes: "ممتاز في اللاتيه آرت والمشروبات الباردة" },
-          { id: Date.now() + 3, name: "محمود علي (مساعد)", phone: "01033334444", rating: 3, notes: "يحتاج تدريب على معايرة الطاحونة وضبط الاستخلاص" }
+          { id: Date.now() + 2, name: "أحمد محمد (باريستا)", phone: "01011112222", notes: "ممتاز في اللاتيه آرت والمشروبات الباردة" },
+          { id: Date.now() + 3, name: "محمود علي (مساعد)", phone: "01033334444", notes: "يحتاج تدريب على معايرة الطاحونة وضبط الاستخلاص" }
         ],
         clientBaristas: [
           { id: Date.now() + 4, name: "يوسف العميل", phone: "01199998888", notes: "مسؤول الشفت المسائي" }
@@ -49,11 +50,11 @@ export const generateMockWizardData = (): FormData => {
             notes: "زيارة دورية: غسيل الماكينة وتغيير جوانات وقائية.",
             recommendations: "يفضل تركيب فلتر مياه جديد الزيارة القادمة",
             servicesPerformed: [
-              { name: servicesList[0]?.name || "دورة غسيل الجروبات (أول مرة)", count: 2 },
+              { name: servicesList[0]?.label || "دورة غسيل الجروبات (أول مرة)", count: 2 },
               { name: "خدمة مخصصة: تنظيف مطحنة خارجي", count: 1, cost: 200, paidByClient: true }
             ],
             partsReplaced: [
-              { name: partsList[0]?.name || "جوان", count: 2 },
+              { name: partsList[0]?.label || "جوان", count: 2 },
               { name: "قطعة مخصصة: شبكة جروب", count: 1, cost: 450, paidByClient: true }
             ],
             supervisors: [
@@ -70,9 +71,9 @@ export const generateMockWizardData = (): FormData => {
         branchName: "فرع الزمالك",
         email: "zamalek@sabahcoffee.com",
         location: "الزمالك، شارع 26 يوليو",
-        baristaCount: 1,
         usesOurMachines: false,
         machineOwnershipType: "bought",
+        machines: [],
         baristas: [],
         clientBaristas: [
           { id: Date.now() + 11, name: "كريم حسن", phone: "01055556666", notes: "يمتلك ماكينته الخاصة" }
@@ -138,16 +139,16 @@ export const generateMockTechnicianStep2 = () => {
   return {
     visitType: 'problem' as const,
     hadProblem: true,
-    problems: [problemCategories[0]?.id || "water_leak", problemCategories[2]?.id || "pressure_issue"],
+    problems: ["water_leak", "pressure_issue"],
     servicesPerformed: [
-      { name: servicesList[0]?.name || "دورة غسيل الجروبات (أول مرة)", count: 2 },
-      { name: servicesList[5]?.name || "تظبيط measure", count: 1 },
+      { name: servicesList[0]?.label || "دورة غسيل الجروبات (أول مرة)", count: 2 },
+      { name: servicesList[5]?.label || "تظبيط measure", count: 1 },
       { name: "خدمة مخصصة إضافية", count: 1, cost: 150, paidByClient: true }
     ],
     partsWereReplaced: true,
     partsReplaced: [
-      { name: partsList[0]?.name || "جوان", count: 2 },
-      { name: partsList[2]?.name || "حساس", count: 1 },
+      { name: partsList[0]?.label || "جوان", count: 2 },
+      { name: partsList[2]?.label || "حساس", count: 1 },
       { name: "طرمبة ضغط عالي مخصصة", count: 1, cost: 2500, paidByClient: true }
     ],
     machineMaintained: [

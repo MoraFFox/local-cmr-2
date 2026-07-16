@@ -49,15 +49,19 @@ export interface FormWizardViewProps {
   setCurrentDraftId: React.Dispatch<React.SetStateAction<string | null>>;
   drafts: Draft[];
   setDrafts: React.Dispatch<React.SetStateAction<Draft[]>>;
-  setView: React.Dispatch<React.SetStateAction<string>>;
+  setView: (view: any) => void;
   setSubmissions: React.Dispatch<React.SetStateAction<any[]>>;
-  refreshSubmissions: () => void;
+  refreshSubmissions: () => Promise<void>;
   createSubmission: (formData: FormData) => Promise<boolean>;
+  allKnownMachineNames?: string[];
+  allKnownMachineTypes?: string[];
+  allKnownMachineOptions?: string[];
 }
 
 const FormWizardView: React.FC<FormWizardViewProps> = ({
-  formData, setFormData, currentStep, setCurrentStep,
-  setView, refreshSubmissions, createSubmission,
+  formData, setFormData, currentStep, setCurrentStep, currentDraftId, setCurrentDraftId,
+  drafts, setDrafts, setView, refreshSubmissions, createSubmission,
+  allKnownMachineNames = [], allKnownMachineTypes = [], allKnownMachineOptions = [],
 }) => {
   const [newlyAddedId, setNewlyAddedId] = useState<number | string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -116,10 +120,9 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
       const newState = { ...prev, [name]: value } as FormData;
       if (name === "hasBranches" && value === true) {
         newState.baristas = []; newState.maintenanceHistory = [];
-        newState.usesOurMachines = null; newState.machineOwnershipType = undefined; newState.dailyLeaseCost = undefined;
+        newState.usesOurMachines = null; newState.machines = [];
       } else if (name === "hasBranches") { newState.branches = []; newState.branchCount = 0; }
-      if (name === "usesOurMachines" && value === false) { newState.machineOwnershipType = undefined; newState.dailyLeaseCost = undefined; }
-      if (name === "machineOwnershipType" && value !== "leased") { newState.dailyLeaseCost = undefined; }
+      if (name === "usesOurMachines" && value === false) { newState.machines = []; }
       return newState;
     });
   }, [setFormData]);
@@ -202,57 +205,62 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
   // ── AI Notes ──
 
   // ── List item CRUD ──
-  const addListItem = useCallback((ln: "branches" | "baristas" | "maintenanceHistory") => {
+  const addListItem = useCallback((ln: "branches" | "baristas" | "maintenanceHistory" | "machines") => {
     const nid = Date.now(); setNewlyAddedId(nid);
     setFormData((prev) => {
       let ni: unknown;
       switch (ln) {
-        case "branches": ni = { id: nid, branchName: `Branch ${prev.branches.length + 1}`, contacts: [], email: prev.email, location: prev.location, taxNumber: prev.taxNumber, usesOurMachines: null, baristas: [], clientBaristas: [], maintenanceHistory: [] }; break;
+        case "branches": ni = { id: nid, branchName: `Branch ${prev.branches.length + 1}`, contacts: [], email: prev.email, location: prev.location, taxNumber: prev.taxNumber, usesOurMachines: null, machines: [], baristas: [], clientBaristas: [], maintenanceHistory: [] }; break;
         case "baristas": ni = { id: nid, name: "", phone: "", notes: "" }; break;
         case "maintenanceHistory": ni = getNewMaintenanceRecord(nid); break;
+        case "machines": ni = { id: nid, machineName: "", machineType: "", machineOption: "", machineOwnershipType: "leased", dailyLeaseCost: 0 }; break;
       }
       return { ...prev, [ln]: [...prev[ln], ni] };
     });
   }, [setFormData]);
 
-  const removeListItem = useCallback((ln: "branches" | "baristas" | "maintenanceHistory", i: number) => {
+  const removeListItem = useCallback((ln: "branches" | "baristas" | "maintenanceHistory" | "machines", i: number) => {
     setFormData((prev) => ({ ...prev, [ln]: prev[ln].filter((_, ii) => ii !== i) }));
   }, [setFormData]);
 
-  const handleListItemChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, ln: "branches" | "baristas", i: number) => {
+  const handleListItemChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>, ln: "branches" | "baristas" | "machines", i: number) => {
     const { name, value, type } = e.target; const checked = (e.target as HTMLInputElement).checked;
     setFormData((prev) => {
       const list = [...prev[ln]] as Record<string, unknown>[];
       list[i] = { ...list[i], [name]: type === "checkbox" ? checked : value };
-      if (ln === "branches") { const item = list[i] as Record<string, unknown>; if (name === "usesOurMachines" && value === false) { delete item.machineOwnershipType; delete item.dailyLeaseCost; } if (name === "machineOwnershipType" && value !== "leased") { delete item.dailyLeaseCost; } }
+      if (ln === "branches") { const item = list[i] as Record<string, unknown>; if (name === "usesOurMachines" && value === false) { item.machines = []; } }
+      if (ln === "machines" && name === "machineOwnershipType" && value !== "leased") { delete list[i].dailyLeaseCost; }
       return { ...prev, [ln]: list };
     });
   }, [setFormData]);
 
-  const addNestedListItem = useCallback((bi: number, ln: "baristas" | "maintenanceHistory" | "clientBaristas") => {
+  const addNestedListItem = useCallback((bi: number, ln: "baristas" | "maintenanceHistory" | "clientBaristas" | "machines") => {
     const nid = Date.now(); setNewlyAddedId(nid);
     setFormData((prev) => {
       const nb = [...prev.branches]; const br = { ...nb[bi] };
       if (ln === "baristas") { (br as Branch & { baristas: Barista[] }).baristas = [...br.baristas, { id: nid, name: "", phone: "", notes: "" }]; }
       else if (ln === "clientBaristas") { (br as Branch & { clientBaristas: ClientBarista[] }).clientBaristas = [...br.clientBaristas, { id: nid, name: "", phone: "", notes: "" }]; }
+      else if (ln === "machines") { br.machines = [...(br.machines || []), { id: nid, machineName: "", machineType: "", machineOption: "", machineOwnershipType: "leased", dailyLeaseCost: 0 }]; }
       else { br.maintenanceHistory = [...br.maintenanceHistory, getNewMaintenanceRecord(nid)]; }
       nb[bi] = br; return { ...prev, branches: nb };
     });
   }, [setFormData]);
 
-  const removeNestedListItem = useCallback((bi: number, ln: "baristas" | "maintenanceHistory" | "clientBaristas", ii: number) => {
+  const removeNestedListItem = useCallback((bi: number, ln: "baristas" | "maintenanceHistory" | "clientBaristas" | "machines", ii: number) => {
     setFormData((prev) => {
       const nb = [...prev.branches]; const br = { ...nb[bi] };
       br[ln] = br[ln].filter((_: unknown, i: number) => i !== ii); nb[bi] = br; return { ...prev, branches: nb };
     });
   }, [setFormData]);
 
-  const handleNestedListItemChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, bi: number, ln: "baristas" | "clientBaristas", ii: number) => {
+  const handleNestedListItemChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>, bi: number, ln: "baristas" | "clientBaristas" | "machines", ii: number) => {
     const { name, value } = e.target;
     setFormData((prev) => {
       const nb = [...prev.branches]; const br = { ...nb[bi] };
       const list = [...(br[ln] as Record<string, unknown>[])];
-      list[ii] = { ...list[ii], [name]: value }; br[ln] = list; nb[bi] = br;
+      list[ii] = { ...list[ii], [name]: value }; 
+      if (ln === "machines" && name === "machineOwnershipType" && value !== "leased") { delete list[ii].dailyLeaseCost; }
+      br[ln] = list; nb[bi] = br;
       return { ...prev, branches: nb };
     });
   }, [setFormData]);
@@ -332,9 +340,10 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
   ]);
 
   // ── Step props ──
-  const stepProps: WizardStepProps = useMemo(() => ({
+  const stepProps = useMemo(() => ({
     formData, actions, newlyAddedId, isSubmitting, allKnownBaristaNames,
-  }), [formData, actions, newlyAddedId, isSubmitting, allKnownBaristaNames]);
+    allKnownMachineNames, allKnownMachineTypes, allKnownMachineOptions,
+  }), [formData, actions, newlyAddedId, isSubmitting, allKnownBaristaNames, allKnownMachineNames, allKnownMachineTypes, allKnownMachineOptions]);
 
   // ── Completed steps for stepper ──
   const completedSteps = useMemo(() => steps.filter((s) => s.id < currentStep).map((s) => s.id), [currentStep]);

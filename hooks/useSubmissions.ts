@@ -55,11 +55,52 @@ export function useSubmissions(isOnline: boolean) {
           showToast("خطأ في جلب بيانات الشركات", "error");
         } else {
           serverData =
-            companies?.map((d) => ({
-              ...d.form_data,
-              id: d.id,
-              created_at: d.created_at,
-            })) || [];
+            companies?.map((d) => {
+              const fd = d.form_data;
+              if (fd.machineName || fd.machineType || fd.machineOption) {
+                fd.machines = [{
+                  id: Date.now() + Math.random(),
+                  machineName: fd.machineName,
+                  machineType: fd.machineType,
+                  machineOption: fd.machineOption,
+                  machineOwnershipType: fd.machineOwnershipType,
+                  dailyLeaseCost: fd.dailyLeaseCost,
+                }];
+                delete fd.machineName;
+                delete fd.machineType;
+                delete fd.machineOption;
+                delete fd.machineOwnershipType;
+                delete fd.dailyLeaseCost;
+              }
+              if (!fd.machines) fd.machines = [];
+              
+              if (fd.branches && Array.isArray(fd.branches)) {
+                fd.branches.forEach((br: any) => {
+                  if (br.machineName || br.machineType || br.machineOption) {
+                    br.machines = [{
+                      id: Date.now() + Math.random(),
+                      machineName: br.machineName,
+                      machineType: br.machineType,
+                      machineOption: br.machineOption,
+                      machineOwnershipType: br.machineOwnershipType,
+                      dailyLeaseCost: br.dailyLeaseCost,
+                    }];
+                    delete br.machineName;
+                    delete br.machineType;
+                    delete br.machineOption;
+                    delete br.machineOwnershipType;
+                    delete br.dailyLeaseCost;
+                  }
+                  if (!br.machines) br.machines = [];
+                });
+              }
+
+              return {
+                ...fd,
+                id: d.id,
+                created_at: d.created_at,
+              };
+            }) || [];
         }
 
         const { data: portalData, error: subsError } = await supabase

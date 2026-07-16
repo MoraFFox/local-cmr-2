@@ -14,5 +14,3 @@ export { useTechnicians } from "./useTechnicians";
 export { useSubmissions } from "./useSubmissions";
 
 export { useOfflineQueue } from "./useOfflineQueue";
-
-export { useAiNotes } from "./useAiNotes";

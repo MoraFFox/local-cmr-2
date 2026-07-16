@@ -23,30 +23,48 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ titleContent, childre
 
     return (
         <div className={`border border-hairline rounded-xl bg-cream shadow-md transition-shadow duration-300 ${isOpen ? 'shadow-lg' : 'shadow-md'}`}>
-            <button
-                type="button"
+            <div
+                role="button"
+                tabIndex={0}
                 className={`w-full flex justify-between items-start sm:items-center p-4 cursor-pointer rounded-t-xl ${!isOpen ? 'rounded-b-xl' : ''} focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 gap-4`}
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={(e) => {
+                    // Prevent toggling if a nested interactive element is clicked
+                    if ((e.target as HTMLElement).closest('button, input, textarea, select, a')) return;
+                    setIsOpen(!isOpen);
+                }}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        if ((e.target as HTMLElement).closest('button, input, textarea, select, a')) return;
+                        setIsOpen(!isOpen);
+                    }
+                }}
                 aria-expanded={isOpen}
             >
-                <div className="flex-1 min-w-0 font-semibold text-primary relative text-right">
+                <div className="flex-1 min-w-0 font-semibold text-primary relative text-right pointer-events-auto">
                     {titleContent}
                 </div>
-                <div className="flex items-center shrink-0 gap-3 pt-1 sm:pt-0">
+                <div className="flex items-center shrink-0 gap-3 pt-1 sm:pt-0 pointer-events-auto">
                     {onRemove && (
                         <span
                             role="button"
-                            tabIndex={-1}
+                            tabIndex={0}
                             onClick={(e) => { e.stopPropagation(); onRemove(); }}
-                            className="text-xs font-semibold text-latte hover:text-ember-600 transition-colors"
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); onRemove(); } }}
+                            className="text-xs font-semibold text-latte hover:text-ember-600 transition-colors cursor-pointer"
                             aria-label={removeLabel}
                         >
                             حذف
                         </span>
                     )}
-                    <ChevronUpIcon className={`w-5 h-5 text-latte transform transition-transform duration-300 ${isOpen ? '' : 'rotate-180'}`} />
+                    <div 
+                        className="cursor-pointer"
+                        onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
+                    >
+                        <ChevronUpIcon className={`w-5 h-5 text-latte transform transition-transform duration-300 ${isOpen ? '' : 'rotate-180'}`} />
+                    </div>
                 </div>
-            </button>
+            </div>
             <div
                 className={`transition-[grid-template-rows,opacity] duration-300 ease-in-out grid ${
                     isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'

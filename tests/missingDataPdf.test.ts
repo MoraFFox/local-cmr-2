@@ -18,6 +18,7 @@ const createBaseFormData = (overrides: Partial<FormData> = {}): FormData => ({
   clientBaristas: [],
   maintenanceHistory: [],
   contacts: [],
+  machines: [],
   ...overrides,
 });
 
@@ -47,6 +48,7 @@ const createBranch = (overrides: Partial<Branch> = {}): Branch => ({
   clientBaristas: [],
   usesOurMachines: true,
   machineOwnershipType: 'bought',
+  machines: [],
   maintenanceHistory: [],
   ...overrides,
 });
@@ -655,7 +657,7 @@ describe('parseMissingDataPDF', () => {
     }
 
     const pdfBytes = await pdfDoc.save();
-    return pdfBytes.buffer.slice(pdfBytes.byteOffset, pdfBytes.byteOffset + pdfBytes.byteLength);
+    return pdfBytes.buffer.slice(pdfBytes.byteOffset, pdfBytes.byteOffset + pdfBytes.byteLength) as ArrayBuffer;
   };
 
   it('maps checked yes checkbox to "نعم"', async () => {

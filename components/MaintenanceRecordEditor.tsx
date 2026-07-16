@@ -414,7 +414,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                           : 'border-hairline dark:border-hairline'
                       }`}
                     >
-                      <option value="">Select Barista</option>
+                      <option value="">Select Technician</option>
                       {baristas.map(barista => (
                         <option key={barista.id} value={barista.name}>{barista.name}</option>
                       ))}
@@ -425,7 +425,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       name="baristaName"
                       value={editedRecord.baristaName}
                       onChange={handleFieldChange}
-                      placeholder="أدخل اسم الباريستا"
+                      placeholder="أدخل اسم فرد صيانة (Midoe's)"
                       className={`w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${
                         errors.baristaName 
                           ? 'border-ember-500 focus:ring-ember-500' 

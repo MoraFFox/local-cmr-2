@@ -14,6 +14,7 @@ import {
 import CollapsibleCard from "./CollapsibleCard";
 import Avatar from "./Avatar";
 import { generateCompanyPDF, generateBranchPDF } from "../utils/pdfGenerator";
+import { getMachineOwnershipStatus } from "./ReviewStep";
 import {
   generateMissingDataPDF,
   parseMissingDataPDF,
@@ -81,41 +82,58 @@ const getBranchStats = (records: MaintenanceRecord[]) => {
   return { visitCount, partsMap };
 };
 
-const getMachineOwnershipStatus = (
+const MachineList = ({
+  entity,
+  hideCosts = false,
+}: {
   entity: {
     usesOurMachines: boolean | null;
-    machineOwnershipType?: "bought" | "leased";
-    dailyLeaseCost?: number;
-  },
-  hideCosts = false,
-) => {
+    machines?: any[];
+  };
+  hideCosts?: boolean;
+}) => {
   if (
     entity.usesOurMachines === null ||
     typeof entity.usesOurMachines === "undefined"
   ) {
-    return "Not specified";
+    return <span>Not specified</span>;
   }
   if (entity.usesOurMachines === false) {
-    return "No";
+    return <span>No</span>;
   }
-  if (entity.usesOurMachines === true) {
-    if (entity.machineOwnershipType) {
-      const type =
-        entity.machineOwnershipType.charAt(0).toUpperCase() +
-        entity.machineOwnershipType.slice(1);
-      let status = `Yes (${type})`;
-      if (
-        !hideCosts &&
-        entity.machineOwnershipType === "leased" &&
-        entity.dailyLeaseCost
-      ) {
-        status += ` - ${new Intl.NumberFormat("ar-EG", { style: "currency", currency: "EGP" }).format(entity.dailyLeaseCost)} / day`;
-      }
-      return status;
-    }
-    return "Yes (Acquisition type not specified)";
+
+  if (!entity.machines || entity.machines.length === 0) {
+    return <span>Yes (No machines added)</span>;
   }
-  return "Not specified";
+
+  return (
+    <div className="space-y-2 mt-1 w-full">
+      {entity.machines.map((m, idx) => {
+        let typeStr = "Acquisition type not specified";
+        if (m.machineOwnershipType) {
+          typeStr = m.machineOwnershipType.charAt(0).toUpperCase() + m.machineOwnershipType.slice(1);
+        }
+        
+        let costStr = "";
+        if (!hideCosts && (m.machineOwnershipType === "leased" || m.machineOwnershipType === "consumption") && m.dailyLeaseCost) {
+          costStr = ` - ${new Intl.NumberFormat("ar-EG", { style: "currency", currency: "EGP" }).format(m.dailyLeaseCost)} / day`;
+        }
+
+        const extras = [m.machineName, m.machineType, m.machineOption].filter(Boolean);
+        let extrasStr = "";
+        if (extras.length > 0) {
+          extrasStr = ` | ${extras.join(" - ")}`;
+        }
+
+        return (
+          <div key={idx} className="text-sm bg-cream-2 border border-hairline p-2 rounded w-full">
+            <div className="font-semibold text-primary">{typeStr}{costStr}</div>
+            {extrasStr && <div className="text-latte mt-1">{extrasStr.replace(" | ", "")}</div>}
+          </div>
+        );
+      })}
+    </div>
+  );
 };
 
 const getPaidByLabel = (val: string) =>
@@ -1408,11 +1426,13 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                     value={submission.coffeeConsumptionKg ? `${submission.coffeeConsumptionKg} kg/month` : undefined}
                   />
                   {submission.hasBranches === false && (
-                    <InfoRow
-                      icon={WrenchScrewdriverIcon}
-                      label='Machines'
-                      value={getMachineOwnershipStatus(submission)}
-                    />
+                    <div className="mt-2">
+                      <div className="flex items-center gap-2 text-latte text-sm font-bold uppercase mb-1">
+                        <WrenchScrewdriverIcon className="w-4 h-4" />
+                        <span>Machines</span>
+                      </div>
+                      <MachineList entity={submission} />
+                    </div>
                   )}
                 </div>
               </div>
@@ -1594,30 +1614,14 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
 
                             {/* Machine Status */}
                             {branch.usesOurMachines && (
-                              <div className='flex items-center gap-2'>
-                                <WrenchScrewdriverIcon className='w-4 h-4 text-latte' />
-                                <span className='text-latte font-medium'>
-                                  Machines:
-                                </span>
-                                <span
-                                  className={`font-bold ${branch.machineOwnershipType === "leased" ? "text-amber-500" : "text-leaf-500"}`}
-                                >
-                                  {branch.machineOwnershipType === "leased"
-                                    ? "Leased"
-                                    : "Bought"}
-                                </span>
-                              </div>
-                            )}
-
-                            {branch.dailyLeaseCost && (
-                              <div className='flex items-center gap-2'>
-                                <BanknotesIcon className='w-4 h-4 text-latte' />
-                                <span className='text-latte font-medium'>
-                                  Daily Lease:
-                                </span>
-                                <span className='font-bold text-text'>
-                                  {branch.dailyLeaseCost} EGP
-                                </span>
+                              <div className='w-full'>
+                                <div className='flex items-center gap-2 mb-2'>
+                                  <WrenchScrewdriverIcon className='w-4 h-4 text-latte' />
+                                  <span className='text-latte font-medium'>
+                                    Machines:
+                                  </span>
+                                </div>
+                                <MachineList entity={branch} hideCosts={false} />
                               </div>
                             )}
                             {Object.keys(stats.partsMap).length > 0 && (

@@ -168,12 +168,42 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   // ── Aggregated barista names for auto-suggest ──
   const allKnownBaristaNames = useMemo(() => {
     const names = new Set<string>();
-    formData.baristas.forEach((b) => names.add(b.name));
-    formData.branches.forEach((br) =>
-      br.baristas.forEach((b) => names.add(b.name)),
-    );
-    return Array.from(names);
-  }, [formData.baristas, formData.branches]);
+    submissions.forEach((sub) => {
+      sub.baristas?.forEach((b) => names.add(b.name));
+      sub.branches?.forEach((br) =>
+        br.baristas?.forEach((b) => names.add(b.name)),
+      );
+    });
+    return Array.from(names).sort((a, b) => a.localeCompare(b));
+  }, [submissions]);
+
+  const { allKnownMachineNames, allKnownMachineTypes, allKnownMachineOptions } = useMemo(() => {
+    const names = new Set<string>();
+    const types = new Set<string>();
+    const options = new Set<string>(["Manual", "Automatic", "Semi-Auto"]);
+
+    submissions.forEach(sub => {
+      sub.machines?.forEach(m => {
+        if (m.machineName) names.add(m.machineName);
+        if (m.machineType) types.add(m.machineType);
+        if (m.machineOption) options.add(m.machineOption);
+      });
+
+      sub.branches?.forEach(br => {
+        br.machines?.forEach(m => {
+          if (m.machineName) names.add(m.machineName);
+          if (m.machineType) types.add(m.machineType);
+          if (m.machineOption) options.add(m.machineOption);
+        });
+      });
+    });
+
+    return {
+      allKnownMachineNames: Array.from(names).sort(),
+      allKnownMachineTypes: Array.from(types).sort(),
+      allKnownMachineOptions: Array.from(options).sort()
+    };
+  }, [submissions]);
 
   // ── Draft actions ──
   const handleLoadDraft = useCallback((draft: Draft) => {
@@ -512,6 +542,9 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
             setSubmissions={setSubmissions}
             refreshSubmissions={fetchSubmissions}
             createSubmission={createSubmission}
+            allKnownMachineNames={allKnownMachineNames}
+            allKnownMachineTypes={allKnownMachineTypes}
+            allKnownMachineOptions={allKnownMachineOptions}
           />
         );
     }

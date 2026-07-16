@@ -7,6 +7,8 @@ import Card from "../../../components/Card";
 import TextInput from "../../../components/TextInput";
 import RadioGroup from "../../../components/RadioGroup";
 import Button from "../../../components/ui/Button";
+import CollapsibleCard from "../../../components/CollapsibleCard";
+import EmptyState from "../../../components/EmptyState";
 import {
   BuildingOfficeIcon,
   EnvelopeIcon,
@@ -15,6 +17,7 @@ import {
   CurrencyDollarIcon,
   ScaleIcon,
   PlusCircleIcon,
+  WrenchScrewdriverIcon,
 } from "@heroicons/react/24/outline";
 import { ContactsSection } from "./ContactsSection";
 import type { WizardStepProps } from "./types";
@@ -23,6 +26,9 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
   formData,
   actions,
   newlyAddedId,
+  allKnownMachineNames = [],
+  allKnownMachineTypes = [],
+  allKnownMachineOptions = [],
 }) => (
   <Card title="معلومات الشركة">
     <div className="space-y-6">
@@ -108,30 +114,84 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
             inline
           />
           {formData.usesOurMachines === true && (
-            <div className="pl-6 border-l-2 border-hairline">
-              <RadioGroup
-                label="كيف تم الحصول على الماكينة؟"
-                name="machineOwnershipType"
-                value={formData.machineOwnershipType}
-                onChange={(val) => actions.handleRadioChange("machineOwnershipType", val)}
-                options={[
-                  { label: "شراء", value: "bought" },
-                  { label: "إيجار", value: "leased" },
-                ]}
-                inline
-              />
-              {formData.machineOwnershipType === "leased" && (
-                <div className="mt-4">
-                  <TextInput
-                    label="قيمة الإيجار اليومي (ج.م)"
-                    name="dailyLeaseCost"
-                    type="number"
-                    value={formData.dailyLeaseCost || ""}
-                    onChange={actions.handleChange}
-                    placeholder="0.00"
-                    icon={<CurrencyDollarIcon />}
-                  />
-                </div>
+            <div className="mt-4 space-y-4">
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="text-lg font-bold text-primary tracking-tight">الماكينات</h4>
+                <Button onClick={() => actions.addListItem("machines")} variant="secondary">
+                  <PlusCircleIcon className="w-4 h-4" /> إضافة ماكينة
+                </Button>
+              </div>
+
+              {formData.machines && formData.machines.length > 0 ? (
+                formData.machines.map((machine, idx) => (
+                  <CollapsibleCard
+                    key={machine.id}
+                    initiallyOpen={machine.id === newlyAddedId}
+                    onRemove={() => actions.removeListItem("machines", idx)}
+                    titleContent={<span className="font-semibold">{machine.machineName || "ماكينة جديدة"}</span>}
+                  >
+                    <div className="space-y-4">
+                      <TextInput
+                        label="اسم الماكينة (اختياري)"
+                        name="machineName"
+                        value={machine.machineName || ""}
+                        onChange={(e) => actions.handleListItemChange(e, "machines", idx)}
+                        placeholder="مثال: La Marzocco"
+                        suggestions={allKnownMachineNames}
+                      />
+                      <TextInput
+                        label="نوع الماكينة (اختياري)"
+                        name="machineType"
+                        value={machine.machineType || ""}
+                        onChange={(e) => actions.handleListItemChange(e, "machines", idx)}
+                        placeholder="مثال: Linea Classic"
+                        suggestions={allKnownMachineTypes}
+                      />
+                      <TextInput
+                        label="نظام تشغيل الماكينة (اختياري)"
+                        name="machineOption"
+                        value={machine.machineOption || ""}
+                        onChange={(e) => actions.handleListItemChange(e, "machines", idx)}
+                        placeholder="مثال: Manual, Automatic..."
+                        suggestions={allKnownMachineOptions}
+                      />
+                      <div>
+                        <label className="block text-sm font-medium text-primary mb-2">كيف تم الحصول على الماكينة؟</label>
+                        <select
+                          name="machineOwnershipType"
+                          value={machine.machineOwnershipType || "leased"}
+                          onChange={(e) => actions.handleListItemChange(e, "machines", idx)}
+                          className="w-full pl-3 pr-10 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
+                        >
+                          <option value="leased">إيجار</option>
+                          <option value="consumption">مقابل الاستهلاك</option>
+                        </select>
+                      </div>
+                      {(machine.machineOwnershipType === "leased" || machine.machineOwnershipType === "consumption") && (
+                        <TextInput
+                          label={machine.machineOwnershipType === "leased" ? "قيمة الإيجار اليومي (ج.م)" : "القيمة اليومية (ج.م)"}
+                          name="dailyLeaseCost"
+                          type="number"
+                          value={machine.dailyLeaseCost || ""}
+                          onChange={(e) => actions.handleListItemChange(e, "machines", idx)}
+                          placeholder="0.00"
+                          icon={<CurrencyDollarIcon />}
+                        />
+                      )}
+                    </div>
+                  </CollapsibleCard>
+                ))
+              ) : (
+                <EmptyState
+                  variant="inline"
+                  icon={<WrenchScrewdriverIcon />}
+                  title="لا توجد ماكينات"
+                  message="أضف الماكينات الموجودة في المكتب الرئيسي."
+                >
+                  <Button variant="secondary" onClick={() => actions.addListItem("machines")}>
+                    <PlusCircleIcon className="w-4 h-4" /> إضافة ماكينة
+                  </Button>
+                </EmptyState>
               )}
             </div>
           )}
