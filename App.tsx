@@ -607,8 +607,8 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
 
       {/* Main Content */}
       <div
-        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out lg:${
-          isSidebarExpanded ? "mr-64" : "mr-20"
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${
+          isSidebarExpanded ? "lg:mr-64" : "lg:mr-20"
         }`}
       >
         {/* Mobile Header */}

@@ -1028,7 +1028,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       </div>
 
       {/* Action Bar */}
-      <div className={`fixed bottom-0 left-0 right-0 ${isSidebarExpanded ? 'lg:left-64' : 'lg:left-20'} bg-cream/90 dark:bg-espresso/90 backdrop-blur-lg border-t border-hairline dark:border-hairline shadow-lg z-50 transition-all duration-300`}>
+      <div className={`fixed bottom-0 left-0 right-0 ${isSidebarExpanded ? 'lg:right-64' : 'lg:right-20'} bg-cream/90 dark:bg-espresso/90 backdrop-blur-lg border-t border-hairline dark:border-hairline shadow-lg z-50 transition-all duration-300`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-3">
             <button
