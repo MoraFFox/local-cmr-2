@@ -117,6 +117,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                                         >
                                             <input
                                                 type="checkbox"
+                                                data-value={option.value}
                                                 checked={isSelected}
                                                 onChange={() => handleCheckboxChange(option.value)}
                                                 className="sr-only"

@@ -257,6 +257,14 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ isOpen: externalIsOpen, onToggl
           </button>
 
           <button
+            onClick={() => window.dispatchEvent(new CustomEvent('MOCK_MAINTENANCE_RECORD'))}
+            className="px-2 py-0.5 rounded border border-amber-500/30 bg-amber-500/10 text-amber-400 text-[10px] cursor-pointer hover:bg-amber-500/20 font-bold"
+            title="Fill current maintenance record with realistic random data"
+          >
+            🔧 Mock Maint
+          </button>
+
+          <button
             onClick={() => navigator.clipboard.writeText(JSON.stringify(context, null, 2))}
             className="px-2 py-0.5 rounded border border-slate-600/20 bg-transparent text-slate-500 text-[10px] cursor-pointer hover:text-slate-300"
             title="Copy context to clipboard"

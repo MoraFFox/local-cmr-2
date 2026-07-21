@@ -1,4 +1,5 @@
 import React from 'react';
+import { SafeModal } from './form-ui/SafeModal';
 
 interface ConfirmationModalProps {
     isOpen: boolean;
@@ -9,26 +10,43 @@ interface ConfirmationModalProps {
     isConfirming?: boolean;
 }
 
-const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, onConfirm, title, message, isConfirming = false }) => {
-    if (!isOpen) {
-        return null;
-    }
-
+/**
+ * ConfirmationModal — a simple Yes/No confirmation dialog.
+ *
+ * Migrated to SafeModal for consistent focus-trap, ESC handling, and
+ * safe backdrop behavior across all modals (audit issue #16).
+ *
+ * Behavior:
+ * - type="alert" → backdrop click closes (a confirm dialog is safe to dismiss)
+ * - ESC closes
+ * - Focus trap keeps keyboard focus inside the dialog while open
+ * - No unsaved-changes protection (this IS the unsaved-changes confirmation)
+ */
+const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
+    isOpen,
+    onClose,
+    onConfirm,
+    title,
+    message,
+    isConfirming = false
+}) => {
     return (
-        <div 
-            className="fixed inset-0 bg-black bg-opacity-60 dark:bg-opacity-80 z-50 flex justify-center items-center transition-opacity duration-300"
-            aria-labelledby="modal-title"
-            role="dialog"
-            aria-modal="true"
-            onClick={onClose}
-        >
-            <div
-                className="bg-cream dark:bg-espresso-light rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md m-4 transform transition-all duration-300 scale-95 opacity-0 animate-fade-in-scale"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <h2 id="modal-title" className="text-xl font-bold text-primary dark:text-cream">{title}</h2>
-                <p className="mt-2 text-latte dark:text-cream/70">{message}</p>
-                <div className="mt-8 flex justify-end space-x-3">
+        <SafeModal
+            isOpen={isOpen}
+            onClose={onClose}
+            title={title}
+            // type="alert" is semantically correct (a Yes/No confirmation),
+            // but we explicitly allow backdrop dismissal to preserve the
+            // original behavior: clicking outside the dialog = "No" (the
+            // action is cancelled, onConfirm never fires).
+            type="alert"
+            closeOnBackdropClick={true}
+            size="sm"
+            ariaLabel={title}
+            // Footer holds the No / Yes buttons. Rendered in SafeModal's
+            // flex-shrink-0 footer slot so it stays pinned below the message.
+            renderFooter={() => (
+                <div className="flex justify-end space-x-3 px-6 py-4 border-t border-hairline dark:border-hairline bg-cream-2/30 dark:bg-espresso-light/20">
                     <button
                         onClick={onClose}
                         disabled={isConfirming}
@@ -44,17 +62,10 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, 
                         {isConfirming ? 'Deleting...' : 'Yes, Delete'}
                     </button>
                 </div>
-            </div>
-            <style>{`
-                @keyframes fade-in-scale {
-                    from { transform: scale(0.95); opacity: 0; }
-                    to { transform: scale(1); opacity: 1; }
-                }
-                .animate-fade-in-scale {
-                    animation: fade-in-scale 0.2s ease-out forwards;
-                }
-            `}</style>
-        </div>
+            )}
+        >
+            <p className="mt-2 text-latte dark:text-cream/70">{message}</p>
+        </SafeModal>
     );
 };
 

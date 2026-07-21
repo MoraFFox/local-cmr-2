@@ -1,5 +1,176 @@
-import { FormData, Branch, Barista, Contact, MaintenanceRecord } from '../types';
+import { FormData, Branch, Barista, Contact, MaintenanceRecord, PartRecord, ServiceRecord, Supervisor, MachineMaintained } from '../types';
 import { partsList, servicesList, problemCategories } from '../constants';
+
+// Reusable pools of realistic Arabic dummy values
+const technicianNames = [
+  "أحمد محمود", "محمد علي", "خالد عمر", "سامي حسن", "طارق سالم",
+  "وليد فؤاد", "ياسر عبد الله", "إبراهيم نور", "هيثم رفعت", "كريم سعيد"
+];
+
+const clientBaristaNames = [
+  "محمد العميل", "أحمد العميل", "يوسف العميل", "كريم العميل", "خالد العميل",
+  "عمرو العميل", "سامح العميل", "نادر العميل"
+];
+
+const machineNames = [
+  "La Marzocco Linea PB", "La Marzocco GS3", "Nuova Simonelli Appia II",
+  "Victoria Arduino Eagle One", "Mazzer Robur S", "Mazzer Major E"
+];
+
+const recommendationTexts = [
+  "يفضل تغيير فلتر المياه خلال الزيارة القادمة.",
+  "ضبط الطحنة مرة أخرى بعد أسبوع.",
+  "مراجعة ضغط البويلر باستمرار.",
+  "تنظيف الشاورات بشكل دوري.",
+  "تغيير جوانات الجروب كل 3 أشهر.",
+  "الماكينة تحتاج صيانة دورية متقدمة.",
+];
+
+const notesTexts = [
+  "زيارة دورية: غسيل وتعقيم الماكينة.",
+  "تم فحص الماكينة وإجراء الضبط اللازم.",
+  "العميل أبلغ عن بطء في التسخين.",
+  "تم تغيير القطع التالفة واختبار الماكينة.",
+  "المشكلة ظاهرية وتم حلها.",
+  "تحتاج متابعة بالزيارة القادمة.",
+];
+
+function pickRandom<T>(arr: T[], count: number = 1): T[] {
+  const shuffled = [...arr].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, Math.min(count, shuffled.length));
+}
+
+function randomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function randomBoolean(chance: number = 0.5): boolean {
+  return Math.random() < chance;
+}
+
+function randomDateInPast(daysBack: number = 90): string {
+  const date = new Date();
+  date.setDate(date.getDate() - randomInt(1, daysBack));
+  return date.toISOString().split('T')[0];
+}
+
+function randomDateInFuture(daysForward: number = 90): string {
+  const date = new Date();
+  date.setDate(date.getDate() + randomInt(1, daysForward));
+  return date.toISOString().split('T')[0];
+}
+
+/**
+ * Generate a fully populated, realistic maintenance record.
+ * Useful for development / QA when adding a new record.
+ */
+export const generateMockMaintenanceRecord = (
+  id: number | string,
+  opts: {
+    partsList?: { label: string; value: string; cost: number }[];
+    servicesList?: { label: string; value: string; cost: number }[];
+    problemCategories?: { title: string; options: { label: string; value: string }[] }[];
+    availableBaristas?: { name: string }[];
+    availableClientBaristas?: { name: string }[];
+  } = {}
+): MaintenanceRecord => {
+  const parts = opts.partsList && opts.partsList.length > 0 ? opts.partsList : [];
+  const services = opts.servicesList && opts.servicesList.length > 0 ? opts.servicesList : [];
+  const allProblems = (opts.problemCategories || problemCategories)
+    .flatMap((cat) => cat.options)
+    .map((o) => o.value);
+
+  const hadProblem = randomBoolean(0.6);
+  const problems = hadProblem ? pickRandom(allProblems, randomInt(1, 3)) : [];
+  const problemSolved = hadProblem ? randomBoolean(0.7) : false;
+  const partsWereReplaced = randomBoolean(0.5);
+  const servicesCount = randomInt(1, 4);
+  const servicesPerformed: ServiceRecord[] = pickRandom(services, servicesCount).map((s) => ({
+    name: s.value,
+    count: randomInt(1, 3),
+    cost: s.cost,
+    paidByClient: randomBoolean(0.3),
+  }));
+
+  const partsReplaced: PartRecord[] = partsWereReplaced
+    ? pickRandom(parts, randomInt(1, 3)).map((p) => ({
+        name: p.value,
+        count: randomInt(1, 3),
+        cost: p.cost,
+        paidByClient: randomBoolean(0.3),
+      }))
+    : [];
+
+  const baristaName =
+    opts.availableBaristas && opts.availableBaristas.length > 0
+      ? pickRandom(opts.availableBaristas, 1)[0].name
+      : pickRandom(technicianNames, 1)[0];
+
+  const clientBaristaName =
+    opts.availableClientBaristas && opts.availableClientBaristas.length > 0
+      ? pickRandom(opts.availableClientBaristas, 1)[0].name
+      : pickRandom(clientBaristaNames, 1)[0];
+
+  const zones: Array<"cairo" | "outside_cairo" | "el_sahel" | null> = [
+    "cairo",
+    "outside_cairo",
+    "el_sahel",
+    null,
+  ];
+  const visitZone = pickRandom(zones, 1)[0];
+  const paidBy = randomBoolean(0.5) ? "company" : "client";
+
+  const supervisors: Supervisor[] = [
+    {
+      id: Date.now(),
+      name: pickRandom(technicianNames, 1)[0],
+      phone: `01${randomInt(100000000, 999999999)}`,
+    },
+  ];
+
+  const machines: MachineMaintained[] = pickRandom(machineNames, randomInt(1, 2)).map(
+    (name, idx) => ({
+      id: Date.now() + idx,
+      name,
+      count: randomInt(1, 2),
+    })
+  );
+
+  const photoCount = randomInt(0, 2);
+  const photos = pickRandom(
+    [
+      { url: 'https://placehold.co/600x400?text=Before', type: 'before' as const },
+      { url: 'https://placehold.co/600x400?text=After', type: 'after' as const },
+      { url: 'https://placehold.co/600x400?text=Legacy', type: 'legacy' as const },
+    ],
+    photoCount
+  );
+
+  return {
+    id,
+    maintenanceDate: randomDateInPast(60),
+    notes: pickRandom(notesTexts, 1)[0],
+    type: randomBoolean(0.5) ? "scheduled" : "requested",
+    hadProblem,
+    partsWereReplaced,
+    problemSolved,
+    partsReplaced,
+    paidBy,
+    baristaName,
+    clientBaristaName,
+    visitRating: randomInt(1, 5),
+    recommendations: pickRandom(recommendationTexts, 1)[0],
+    problems,
+    visitZone,
+    servicesPerformed,
+    followUpVisits: [],
+    machines,
+    supervisors,
+    dailyLeaseCost: randomBoolean(0.5) ? randomInt(100, 300) : undefined,
+    nextVisitDate: randomBoolean(0.4) ? randomDateInFuture(60) : undefined,
+    photos,
+  };
+};
 
 // Deep mock generator targeting edge-case coverage
 export const generateMockWizardData = (): FormData => {

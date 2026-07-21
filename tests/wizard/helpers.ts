@@ -3,7 +3,7 @@
  */
 import { vi } from "vitest";
 import { initialFormData } from "../../utils/sharedConstants";
-import type { FormData } from "../../types";
+import type { FormData, Machine } from "../../types";
 import type { WizardStepActions } from "../../src/views/wizard/types";
 
 export function createMockActions(
@@ -40,4 +40,16 @@ export function createMockActions(
 
 export function createFormData(overrides: Partial<FormData> = {}): FormData {
   return { ...structuredClone(initialFormData), ...overrides };
+}
+
+export function createMachine(overrides: Partial<Machine> = {}): Machine {
+  return {
+    id: 1,
+    machineName: "",
+    machineType: "",
+    machineOption: "",
+    machineOwnershipType: "leased",
+    dailyLeaseCost: 0,
+    ...overrides,
+  };
 }

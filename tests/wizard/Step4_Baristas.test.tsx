@@ -19,9 +19,9 @@ describe("Step4_Baristas", () => {
       />,
     );
 
-    expect(screen.getByText("الباريستا")).toBeInTheDocument();
+    expect(screen.getByText("فريق Midoe's (المكتب الرئيسي)")).toBeInTheDocument();
     // Only the header's add button renders (no empty state)
-    expect(screen.getByText("إضافة باريستا")).toBeInTheDocument();
+    expect(screen.getByText("إضافة فرد صيانة (Midoe's)")).toBeInTheDocument();
   });
 
   it("shows empty state when no baristas exist", () => {
@@ -34,7 +34,7 @@ describe("Step4_Baristas", () => {
       />,
     );
 
-    expect(screen.getByText("لا يوجد باريستا")).toBeInTheDocument();
+    expect(screen.getByText("لا يوجد فريق صيانة")).toBeInTheDocument();
   });
 
   it("header add button calls addListItem", () => {
@@ -47,7 +47,7 @@ describe("Step4_Baristas", () => {
       />,
     );
 
-    fireEvent.click(screen.getByText("إضافة باريستا"));
+    fireEvent.click(screen.getByText("إضافة فرد صيانة (Midoe's)"));
     expect(actions.addListItem).toHaveBeenCalledWith("baristas");
   });
 
@@ -100,9 +100,9 @@ describe("Step4_Baristas", () => {
       />,
     );
 
-    // When baristas is empty, both header and empty state render "إضافة باريستا"
-    // The empty state one is the last rendered
-    const addBtns = screen.getAllByText("إضافة باريستا");
+    // When baristas is empty, the header and empty state both render add buttons.
+    // The empty state button is the last rendered.
+    const addBtns = screen.getAllByText("إضافة فرد صيانة (Midoe's)");
     fireEvent.click(addBtns[addBtns.length - 1]);
     expect(actions.addListItem).toHaveBeenCalledWith("baristas");
   });

@@ -1,24 +1,28 @@
 import React from 'react';
+import { RequiredFieldBadge } from '../../form-ui/RequiredFieldBadge';
 
 interface TechInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   icon?: React.ReactNode;
   rightElement?: React.ReactNode;
+  required?: boolean;
 }
 
-const TechInput: React.FC<TechInputProps> = ({ 
-    label, 
-    icon, 
-    rightElement, 
-    className = "", 
+const TechInput: React.FC<TechInputProps> = ({
+    label,
+    icon,
+    rightElement,
+    className = "",
     disabled,
-    ...props 
-}) => {
+    required,
+    ...props
+  }) => {
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-xs font-bold uppercase tracking-wider text-latte mb-2 ml-1">
+        <label className="block text-xs font-bold uppercase tracking-wider text-latte mb-2 ml-1 flex items-center gap-1">
           {label}
+          {required && <RequiredFieldBadge size="sm" />}
         </label>
       )}
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useFloatingMenu } from "../hooks/useFloatingMenu";
 import {
@@ -32,6 +32,8 @@ import {
   ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
+// NEW: Context-aware suggestions based on reported problems
+import { getSuggestedServices, getSuggestedParts } from "../utils/problemSuggestions";
 
 const visitZoneFees: Record<"cairo" | "outside_cairo" | "el_sahel", number> = {
   cairo: 500,
@@ -240,6 +242,17 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
   });
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(),
+  );
+
+  // NEW: Context-aware suggestions — compute relevant services/parts based on
+  // the problems the technician reported for this record.
+  const suggestedServices = useMemo(
+    () => getSuggestedServices(record.problems || []),
+    [record.problems],
+  );
+  const suggestedParts = useMemo(
+    () => getSuggestedParts(record.problems || []),
+    [record.problems],
   );
 
   useEffect(() => {
@@ -669,6 +682,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                       target: { name: "servicesPerformed", value: selected },
                     } as any)
                   }
+                  suggestedValues={suggestedServices}
                 />
               </CollapsibleSection>
 
@@ -700,6 +714,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                           target: { name: "partsReplaced", value: selected },
                         } as any)
                       }
+                      suggestedValues={suggestedParts}
                     />
                   </CollapsibleSection>
                 </div>

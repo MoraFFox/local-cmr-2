@@ -114,6 +114,7 @@ const SidebarContent = React.memo(({
             }}
             className="btn-primary w-full flex items-center gap-2 p-2 text-sm font-bold"
             title="إضافة شركة جديدة"
+            data-testid="add-company-button"
           >
             <PlusCircleIcon className="h-5 w-5 shrink-0" />
             <span className={`truncate ${!isSidebarExpanded && "lg:hidden"}`}>

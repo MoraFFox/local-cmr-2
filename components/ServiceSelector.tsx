@@ -3,31 +3,42 @@ import { ar } from '../utils/arabicTranslations';
 import { Service, ServiceRecord } from '../types';
 import {
   MagnifyingGlassIcon,
-  PlusIcon,
   PlusCircleIcon,
   Squares2X2Icon,
   ListBulletIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  SquaresPlusIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 import SelectedItemCard from './SelectedItemCard';
 import TechInput from './technician-portal/ui/TechInput';
+// NEW: Phase 2 UX improvements (audit issues #10, #11, #21)
+import { SelectorAvailableItem } from './form-ui/SelectorAvailableItem';
+import { SelectorSelectedChips } from './form-ui/SelectorSelectedChips';
 
 interface ServiceSelectorProps {
   options: Service[];
   selectedValues: ServiceRecord[];
   onChange: (selected: ServiceRecord[]) => void;
+  /** Services suggested based on the problems/issues the technician
+   *  reported. Rendered in a dedicated "Suggested" section at the top
+   *  with a badge, so the most relevant options are surfaced first. */
+  suggestedValues?: Service[];
 }
 
 const ServiceSelector: React.FC<ServiceSelectorProps> = ({
   options,
   selectedValues,
   onChange,
+  suggestedValues = [],
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isSelectedSectionExpanded, setIsSelectedSectionExpanded] = useState(true);
   const [customServices, setCustomServices] = useState<ServiceRecord[]>([]);
+  // NEW: compact chips view toggle (audit issue #11) and bulk payer edit (audit issue #21)
+  const [selectedViewMode, setSelectedViewMode] = useState<'cards' | 'chips'>('cards');
 
   const predefinedServiceValues = useMemo(
     () => new Set(options.map((o) => o.value)),
@@ -67,13 +78,32 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
     return options.filter((o) => !selectedNames.has(o.value));
   }, [options, selectedValues]);
 
+  // NEW: Suggested values as a Set for O(1) badge lookup and dedup filtering.
+  // Declared before filteredOptions/availableSuggestions so it's in scope.
+  const suggestedValueSet = useMemo(
+    () => new Set(suggestedValues.map((s) => s.value)),
+    [suggestedValues]
+  );
+
+  // NEW: Suggested options that haven't been selected yet. Surfaced in a
+  // dedicated section at the top so the most relevant options (based on the
+  // reported problems) are one click away.
+  const availableSuggestions = useMemo(() => {
+    if (suggestedValues.length === 0) return [];
+    const selectedNames = new Set(selectedValues.map((s) => s.name));
+    return suggestedValues.filter((s) => !selectedNames.has(s.value));
+  }, [suggestedValues, selectedValues]);
+
   const filteredOptions = useMemo(() => {
+    // Exclude items already shown in the "Suggested" section so they
+    // aren't double-rendered in the regular available section too.
     return availableOptions.filter(
       (option) =>
-        option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        option.category.toLowerCase().includes(searchTerm.toLowerCase())
+        (option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        option.category.toLowerCase().includes(searchTerm.toLowerCase())) &&
+        !suggestedValueSet.has(option.value)
     );
-  }, [availableOptions, searchTerm]);
+  }, [availableOptions, searchTerm, suggestedValueSet]);
 
   const categories = useMemo(() => {
     const grouped: { [key: string]: Service[] } = {};
@@ -84,8 +114,16 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
     return grouped;
   }, [filteredOptions]);
 
-  const handleAddService = useCallback((serviceValue: string) => {
-    onChange([...selectedValues, { name: serviceValue, count: 1, paidByClient: false }]);
+  // NEW: handleAddService now accepts an optional quantity (audit issue #10 —
+  // inline quantity selector on the add button means a single action per item
+  // instead of add → find → adjust).
+  const handleAddService = useCallback((serviceValue: string, quantity: number = 1) => {
+    onChange([...selectedValues, { name: serviceValue, count: quantity, paidByClient: false }]);
+  }, [selectedValues, onChange]);
+
+  // NEW: Bulk payer change — set all selected items' payer at once (audit issue #21).
+  const handleBulkPayerChange = useCallback((paidByClient: boolean) => {
+    onChange(selectedValues.map((s) => ({ ...s, paidByClient })));
   }, [selectedValues, onChange]);
 
   const handleRemoveService = useCallback((serviceName: string) => {
@@ -112,32 +150,19 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
     }
   }, [customServices, selectedValues, onChange]);
 
-  const renderAvailableService = (option: Service) => {
-    const gridClasses = 'flex-col justify-between';
-    const listClasses = 'flex-row justify-between items-center';
-    
+  // NEW: renderAvailableService now uses SelectorAvailableItem with inline
+  // quantity stepper (audit issue #10). Pass `isSuggested` when the option
+  // is in the suggested set (context-aware badge).
+  const renderAvailableService = (option: Service, isSuggested = false) => {
     return (
-      <button
+      <SelectorAvailableItem
         key={option.value}
-        onClick={() => handleAddService(option.value)}
-        className={`group border border-hairline bg-cream hover:bg-cream-2 hover:border-primary/50 rounded-xl p-4 flex transition-all duration-200 text-left ${viewMode === 'grid' ? gridClasses : listClasses}`}
-      >
-        <div>
-          <p className="font-semibold text-text group-hover:text-primary transition-colors">
-            {option.label}
-          </p>
-          {option.description && (
-            <p className="text-xs text-latte mt-1 line-clamp-2">
-              {option.description}
-            </p>
-          )}
-        </div>
-        <div className={`mt-3 ${viewMode === 'list' && 'mt-0 ml-4'}`}>
-            <div className="w-8 h-8 rounded-full bg-cream-2 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
-                <PlusIcon className="w-5 h-5" />
-            </div>
-        </div>
-      </button>
+        label={option.label}
+        description={option.description}
+        viewMode={viewMode}
+        isSuggested={isSuggested || suggestedValueSet.has(option.value)}
+        onAdd={(quantity) => handleAddService(option.value, quantity)}
+      />
     );
   };
 
@@ -223,6 +248,24 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
         </div>
       </div>
 
+      {/* NEW: Suggested Section (context-aware, based on reported problems) */}
+      {availableSuggestions.length > 0 && (
+        <div data-testid="suggested-services" className="bg-primary/5 border border-primary/30 rounded-2xl p-4 md:p-6 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center gap-2 mb-4">
+            <SparklesIcon className="w-4 h-4 text-primary dark:text-copper-300" />
+            <h3 className="text-xs font-bold uppercase tracking-widest text-primary dark:text-copper-300">
+              Suggested for your issues
+            </h3>
+            <span className="text-[10px] bg-primary/20 text-primary dark:text-copper-300 px-1.5 py-0.5 rounded-full font-bold">
+              {availableSuggestions.length}
+            </span>
+          </div>
+          <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'flex flex-col gap-2'}`}>
+            {availableSuggestions.map((option) => renderAvailableService(option, true))}
+          </div>
+        </div>
+      )}
+
       {/* Available Section */}
       <div className="bg-cream-2 border border-hairline rounded-2xl p-4 md:p-6">
         <h3 className="text-xs font-bold uppercase tracking-widest text-latte mb-4">Available Protocols</h3>
@@ -245,25 +288,102 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
              <p>{searchTerm ? ar.selectors.noServicesMatch : ar.payerFirstUI.noAvailableItems}</p>
           </div>
         )}
-      </div>
-
-      {/* Selected Section */}
+      </div>        {/* Selected Section */}
       <div className="space-y-4">
-        <button
-            onClick={() => setIsSelectedSectionExpanded(!isSelectedSectionExpanded)}
-            className="w-full flex items-center justify-between text-latte hover:text-text transition-colors py-2 group"
-        >
-            <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                SELECTED OPS
-                {totalSelectedCount > 0 && <span className="bg-primary text-white px-1.5 py-0.5 rounded text-[10px]">{totalSelectedCount}</span>}
-            </span>
-            {isSelectedSectionExpanded ? <ChevronUpIcon className="w-4 h-4"/> : <ChevronDownIcon className="w-4 h-4"/>}
-        </button>
+        <div className="flex items-center justify-between">
+          <button
+              onClick={() => setIsSelectedSectionExpanded(!isSelectedSectionExpanded)}
+              className="flex items-center gap-2 text-latte hover:text-text transition-colors py-2 group"
+          >
+              <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                  SELECTED OPS
+                  {totalSelectedCount > 0 && <span className="bg-primary text-white px-1.5 py-0.5 rounded text-[10px]">{totalSelectedCount}</span>}
+              </span>
+              {isSelectedSectionExpanded ? <ChevronUpIcon className="w-4 h-4"/> : <ChevronDownIcon className="w-4 h-4"/>}
+          </button>
+
+          {/* NEW: Cards/Chips view toggle (audit issue #11) + bulk payer edit (audit issue #21) */}
+          {totalSelectedCount > 0 && isSelectedSectionExpanded && (
+            <div className="flex items-center gap-2">
+              {/* Bulk payer edit */}
+              <div className="flex items-center gap-1 text-xs">
+                <span className="text-latte">Set all:</span>
+                <button
+                  type="button"
+                  onClick={() => handleBulkPayerChange(false)}
+                  className="px-2 py-1 rounded-md font-bold bg-primary/15 text-primary dark:text-copper-300 border border-primary/40 hover:bg-primary/25 transition-colors"
+                >
+                  {ar.payerFirstUI.midosPays}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleBulkPayerChange(true)}
+                  className="px-2 py-1 rounded-md font-bold bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/40 hover:bg-amber-500/25 transition-colors"
+                >
+                  {ar.payerFirstUI.clientPays}
+                </button>
+              </div>
+
+              {/* Cards/Chips toggle */}
+              <div className="flex bg-cream-2 rounded-lg p-0.5 border border-hairline">
+                <button
+                  onClick={() => setSelectedViewMode('cards')}
+                  className={`p-1.5 rounded-md transition-all ${selectedViewMode === 'cards' ? 'bg-cream-3 text-text shadow-sm' : 'text-latte hover:text-text'}`}
+                  title="Card view (detailed)"
+                  aria-label="Switch to card view"
+                >
+                  <Squares2X2Icon className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setSelectedViewMode('chips')}
+                  className={`p-1.5 rounded-md transition-all ${selectedViewMode === 'chips' ? 'bg-cream-3 text-text shadow-sm' : 'text-latte hover:text-text'}`}
+                  title="Chips view (compact)"
+                  aria-label="Switch to compact chips view"
+                >
+                  <SquaresPlusIcon className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
         {isSelectedSectionExpanded && (
             <div className="grid grid-cols-1 gap-4 animate-in fade-in slide-in-from-top-2">
-                {renderPayerGroup('midos', selectedByPayer.midos)}
-                {renderPayerGroup('client', selectedByPayer.client)}
+                {/* NEW: Compact chips view (audit issue #11) */}
+                {selectedViewMode === 'chips' && totalSelectedCount > 0 && (
+                  <SelectorSelectedChips
+                    items={selectedValues.map(s => ({
+                      name: s.name,
+                      count: s.count,
+                      paidByClient: s.paidByClient,
+                      isCustom: !predefinedServiceValues.has(s.name),
+                    }))}
+                    onRemove={handleRemoveService}
+                    onQuantityChange={handleCountChange}
+                    onPayerChange={handlePayerChange}
+                    onNameChange={(idx, newName) => {
+                      // idx is the index in the chips items array, which is a
+                      // 1:1 .map() of selectedValues (order preserved), so it
+                      // equals the index in selectedValues. Look up and update
+                      // by selectedValues index directly — NOT customServices,
+                      // which is a filtered subset with different indices.
+                      const item = selectedValues[idx];
+                      if (item && !predefinedServiceValues.has(item.name)) {
+                        onChange(selectedValues.map((s, i) => i === idx ? { ...s, name: newName } : s));
+                      }
+                    }}
+                    midosLabel={ar.payerFirstUI.midosPays}
+                    clientLabel={ar.payerFirstUI.clientPays}
+                  />
+                )}
+
+                {/* Detailed card view (default) */}
+                {selectedViewMode === 'cards' && (
+                  <>
+                    {renderPayerGroup('midos', selectedByPayer.midos)}
+                    {renderPayerGroup('client', selectedByPayer.client)}
+                  </>
+                )}
 
                 <button
                     onClick={handleAddCustomService}

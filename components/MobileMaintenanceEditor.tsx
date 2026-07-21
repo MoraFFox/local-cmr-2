@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 import { MaintenanceRecord, Part, Service, Barista } from "../types";
 import BottomSheet from "./BottomSheet";
+// NEW: Import auto-save and validation hooks
+import { useAutoSave } from './forms/hooks/useAutoSave';
+import { useFormValidation } from './forms/hooks/useFormValidation';
+// NEW: Import UI components
+import { AutoSaveIndicator } from './form-ui/AutoSaveIndicator';
+import { ValidationSummary } from './form-ui/ValidationSummary';
+import { RequiredFieldBadge } from './form-ui/RequiredFieldBadge';
+import { DatePresetButtons } from './form-ui/EnhancedInput';
 import {
   CalendarIcon,
   UserIcon,
@@ -51,6 +59,36 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
   const selectedRecord =
     selectedRecordIndex !== null ? records[selectedRecordIndex] : null;
 
+  // NEW: Auto-save hook - saves form automatically after each change
+  const autoSave = useAutoSave(
+    selectedRecord ? `mobile-maintenance-record-${selectedRecord.id}` : '',
+    selectedRecord,
+    {
+      debounceMs: 30000, // 30 seconds
+      onSave: (data) => {
+        console.log('Auto-saved mobile maintenance record', { id: data.id });
+      },
+      onSaveError: (error) => {
+        console.error('Auto-save failed', error);
+      },
+      enabled: !!selectedRecord
+    }
+  );
+
+  // NEW: Validation hook with rules
+  const validation = useFormValidation(
+    selectedRecord,
+    {
+      maintenanceDate: { required: true },
+      baristaName: { required: true, minLength: 2 }
+    },
+    {
+      mode: 'onBlur',
+      showSummary: true,
+      validateOnMount: false
+    }
+  );
+
   const handleAddRecord = () => {
     const newId = Date.now();
     const newRecord: MaintenanceRecord = {
@@ -83,6 +121,15 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
     const newRecords = [...records];
     newRecords[selectedRecordIndex] = updatedRecord;
     onChange(newRecords);
+
+    // Clear validation errors for the field that changed
+    if (validation.errors) {
+      Object.keys(validation.errors).forEach(key => {
+        if (updatedRecord[key as keyof MaintenanceRecord] !== selectedRecord![key as keyof MaintenanceRecord]) {
+          validation.clearError(key);
+        }
+      });
+    }
   };
 
   const handleOpenEditor = (index: number) => {
@@ -117,6 +164,30 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
 
   return (
     <div className="space-y-4">
+      {/* NEW: Auto-save indicator */}
+      {selectedRecord && (
+        <AutoSaveIndicator
+          isSaving={autoSave.isSaving}
+          lastSaved={autoSave.lastSaved}
+          hasUnsavedChanges={autoSave.hasUnsavedChanges}
+          onSaveNow={autoSave.saveNow}
+          variant="compact"
+        />
+      )}
+
+      {/* NEW: Validation summary (shows when there are errors) */}
+      {selectedRecord && validation.hasErrors && (
+        <ValidationSummary
+          errors={validation.allErrors}
+          onJumpToError={(fieldName) => {
+            const element = document.querySelector(`[name="${fieldName}"]`) as HTMLInputElement;
+            element?.focus();
+            element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }}
+          title="Please fix the following errors"
+        />
+      )}
+
       {/* Record List */}
       <div className="space-y-3">
         {records.map((record, index) => (
@@ -219,11 +290,25 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
               {activeSection === "basic" && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Date
+                      <RequiredFieldBadge />
                     </label>
+                    {/* Quick-select presets (audit issue #13) */}
+                    <DatePresetButtons
+                      value={selectedRecord.maintenanceDate}
+                      onChange={(date) =>
+                        handleUpdateRecord({
+                          ...selectedRecord,
+                          maintenanceDate: date,
+                        })
+                      }
+                      variant="slate"
+                      className="mb-2"
+                    />
                     <input
                       type="date"
+                      name="maintenanceDate"
                       value={selectedRecord.maintenanceDate}
                       onChange={(e) =>
                         handleUpdateRecord({
@@ -231,15 +316,24 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
                           maintenanceDate: e.target.value,
                         })
                       }
-                      className="w-full px-3 py-3 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg"
+                      className={`w-full px-3 py-3 bg-slate-100 dark:bg-slate-700 border rounded-lg ${
+                        validation.errors.maintenanceDate
+                          ? 'border-red-500 focus:ring-red-500'
+                          : 'border-slate-300 dark:border-slate-600'
+                      }`}
                     />
+                    {validation.errors.maintenanceDate && (
+                      <p className="mt-1 text-sm text-red-600">{validation.errors.maintenanceDate}</p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Staff
+                      <RequiredFieldBadge />
                     </label>
                     <select
+                      name="baristaName"
                       value={selectedRecord.baristaName}
                       onChange={(e) =>
                         handleUpdateRecord({
@@ -247,7 +341,11 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
                           baristaName: e.target.value,
                         })
                       }
-                      className="w-full px-3 py-3 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg"
+                      className={`w-full px-3 py-3 bg-slate-100 dark:bg-slate-700 border rounded-lg ${
+                        validation.errors.baristaName
+                          ? 'border-red-500 focus:ring-red-500'
+                          : 'border-slate-300 dark:border-slate-600'
+                      }`}
                     >
                       <option value="">Select Staff</option>
                       {baristas.map((b) => (
@@ -256,6 +354,9 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
                         </option>
                       ))}
                     </select>
+                    {validation.errors.baristaName && (
+                      <p className="mt-1 text-sm text-red-600">{validation.errors.baristaName}</p>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-4">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { MaintenanceRecord, Part, Service, Barista, ClientBarista, MaintenancePhoto } from '../types';
 import {
   CalendarIcon,
@@ -30,6 +30,16 @@ import { useToast } from './ToastContext';
 import { compressImage, validateImageFile } from '../utils/imageCompression';
 import { logger } from '../utils/logger';
 import { ConfirmDialog } from './ui/ConfirmDialog';
+// NEW: Import auto-save and validation hooks
+import { useAutoSave } from './forms/hooks/useAutoSave';
+import { useFormValidation, ValidationPatterns } from './forms/hooks/useFormValidation';
+// NEW: Import UI components
+import { AutoSaveIndicator } from './form-ui/AutoSaveIndicator';
+import { ValidationSummary } from './form-ui/ValidationSummary';
+import { RequiredFieldBadge } from './form-ui/RequiredFieldBadge';
+import { DatePresetButtons } from './form-ui/EnhancedInput';
+// NEW: Context-aware suggestions based on reported problems
+import { getSuggestedServices, getSuggestedParts } from '../utils/problemSuggestions';
 
 interface MaintenanceRecordEditorProps {
   record: MaintenanceRecord;
@@ -45,6 +55,35 @@ interface MaintenanceRecordEditorProps {
   averageDays?: number | null;
   isSidebarExpanded?: boolean;
 }
+
+interface SectionHeaderProps {
+  title: string;
+  section: string;
+  icon: React.ReactNode;
+  badge?: React.ReactNode;
+  isExpanded: boolean;
+  onClick: (section: string) => void;
+}
+
+const SectionHeader: React.FC<SectionHeaderProps> = ({ title, section, icon, badge, isExpanded, onClick }) => (
+  <button
+    type="button"
+    data-testid={`section-${section}`}
+    onClick={() => onClick(section)}
+    className="w-full flex items-center justify-between p-4 bg-cream dark:bg-espresso/50 hover:bg-cream dark:hover:bg-espresso-light/50 transition-colors rounded-t-lg"
+  >
+    <div className="flex items-center gap-3">
+      <span className="text-latte dark:text-latte">{icon}</span>
+      <span className="font-semibold text-primary dark:text-white">{title}</span>
+      {badge}
+    </div>
+    {isExpanded ? (
+      <ChevronUpIcon className="w-5 h-5 text-latte" />
+    ) : (
+      <ChevronDownIcon className="w-5 h-5 text-latte" />
+    )}
+  </button>
+);
 
 const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
   record,
@@ -75,7 +114,49 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [confirmPhotoDelete, setConfirmPhotoDelete] = useState<{isOpen: boolean; url: string; category: string} | null>(null);
 
-  // Sync state when record prop changes (e.g., when navigating between records)
+  // NEW: Auto-save hook - saves form automatically after each change
+  const autoSave = useAutoSave(
+    `maintenance-record-${record.id}`,
+    editedRecord,
+    {
+      debounceMs: 30000, // 30 seconds
+      onSave: (data) => {
+        logger.info('Auto-saved maintenance record', { id: data.id }, 'autosave');
+      },
+      onSaveError: (error) => {
+        logger.error('Auto-save failed', error, 'autosave');
+      },
+      enabled: true
+    }
+  );
+
+  // NEW: Validation hook with rules
+  const validation = useFormValidation(
+    editedRecord,
+    {
+      maintenanceDate: { required: true },
+      baristaName: { required: true, minLength: 2 },
+      supervisors: {
+        custom: (value) => {
+          if (!Array.isArray(value) || value.length === 0) {
+            return 'At least one supervisor is required';
+          }
+          const hasEmptyName = value.some((s: any) => !s.name?.trim());
+          return hasEmptyName ? 'All supervisor names are required' : null;
+        }
+      }
+    },
+    {
+      mode: 'onBlur',
+      showSummary: true,
+      validateOnMount: false
+    }
+  );
+
+  // Sync state when record prop changes (e.g., when navigating between records
+  // or when the parent replaces the record with mock data).
+  // Note: the parent is expected to keep the `record` reference stable; this
+  // effect re-syncs only when the object identity changes.
   useEffect(() => {
     setEditedRecord(record);
     setErrors({});
@@ -87,9 +168,9 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
     if (record.notes) newExpanded.add('notes');
     if (record.photos && record.photos.length > 0) newExpanded.add('photos');
     setExpandedSections(newExpanded);
-  }, [record.id]); // Only re-sync when record ID changes (navigation)
+  }, [record]); // Re-sync whenever the parent passes a different record object
 
-  const toggleSection = (section: string) => {
+  const toggleSection = useCallback((section: string) => {
     setExpandedSections(prev => {
       const newSet = new Set(prev);
       if (newSet.has(section)) {
@@ -99,7 +180,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       }
       return newSet;
     });
-  };
+  }, []);
 
   const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -147,6 +228,18 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
   const handleProblemsChange = (problems: string[]) => {
     setEditedRecord(prev => ({ ...prev, problems }));
   };
+
+  // NEW: Context-aware suggestions — compute relevant services/parts based on
+  // the problems the technician reported. Memoized so it only recomputes when
+  // the problems list actually changes.
+  const suggestedServices = useMemo(
+    () => getSuggestedServices(editedRecord.problems || []),
+    [editedRecord.problems]
+  );
+  const suggestedParts = useMemo(
+    () => getSuggestedParts(editedRecord.problems || []),
+    [editedRecord.problems]
+  );
 
   const handleRadioChange = (name: string, value: any) => {
     setEditedRecord(prev => ({ ...prev, [name]: value }));
@@ -269,71 +362,66 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
     }
   };
 
+  // NEW: Enhanced validate function using validation hook
   const validate = (): boolean => {
-    const newErrors: Record<string, string> = {};
+    // Run validation hook's validateAll
+    const isValid = validation.validateAll();
 
-    if (!editedRecord.maintenanceDate) {
-      newErrors.maintenanceDate = 'التاريخ مطلوب';
-    }
+    // Also update legacy errors state for backward compatibility
+    setErrors(validation.errors);
 
-    if (!editedRecord.baristaName.trim()) {
-      newErrors.baristaName = 'اسم الباريستا مطلوب';
-    }
-
-    if (!editedRecord.supervisors || editedRecord.supervisors.length === 0) {
-      newErrors.supervisors = 'مطلوب مشرف واحد على الأقل';
-    } else {
-      editedRecord.supervisors.forEach((supervisor, index) => {
-        if (!supervisor.name.trim()) {
-          newErrors[`supervisor-${index}-name`] = 'اسم المشرف مطلوب';
-        }
-      });
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return isValid;
   };
 
+  // NEW: Enhanced handleSave using validation hook's handleSubmit
   const handleSave = () => {
-    if (validate()) {
-      onSave(editedRecord);
-    }
+    validation.handleSubmit(
+      // onValid
+      () => {
+        onSave(editedRecord);
+        showToast("تم حفظ السجل بنجاح", "success");
+      },
+      // onInvalid
+      () => {
+        showToast("يرجى تصحيح الأخطاء قبل الحفظ", "error");
+        // Scroll to first error
+        validation.focusNextError();
+      }
+    )();
   };
-
-  const SectionHeader: React.FC<{ 
-    title: string; 
-    section: string; 
-    icon: React.ReactNode;
-    badge?: React.ReactNode;
-  }> = ({ title, section, icon, badge }) => (
-    <button
-      onClick={() => toggleSection(section)}
-      className="w-full flex items-center justify-between p-4 bg-cream dark:bg-espresso/50 hover:bg-cream dark:hover:bg-espresso-light/50/50 transition-colors rounded-t-lg"
-    >
-      <div className="flex items-center gap-3">
-        <span className="text-latte dark:text-latte">{icon}</span>
-        <span className="font-semibold text-primary dark:text-white">{title}</span>
-        {badge}
-      </div>
-      {expandedSections.has(section) ? (
-        <ChevronUpIcon className="w-5 h-5 text-latte" />
-      ) : (
-        <ChevronDownIcon className="w-5 h-5 text-latte" />
-      )}
-    </button>
-  );
 
   return (
     <div className="space-y-6">
+      {/* NEW: Auto-save indicator */}
+      <AutoSaveIndicator
+        isSaving={autoSave.isSaving}
+        lastSaved={autoSave.lastSaved}
+        hasUnsavedChanges={autoSave.hasUnsavedChanges}
+        onSaveNow={autoSave.saveNow}
+        variant="full"
+      />
+
+      {/* NEW: Validation summary (shows when there are errors) */}
+      {validation.hasErrors && (
+        <ValidationSummary
+          errors={validation.allErrors}
+          onJumpToError={(fieldName) => {
+            const element = document.querySelector(`[name="${fieldName}"]`) as HTMLInputElement;
+            element?.focus();
+            element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }}
+          title="Please fix the following errors before saving"
+        />
+      )}
+
       {/* Basic Info Section */}
       <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden">
         <SectionHeader
           title="المعلومات الأساسية"
           section="basic"
           icon={<DocumentTextIcon className="w-5 h-5" />}
-
-
-
+          isExpanded={expandedSections.has('basic')}
+          onClick={toggleSection}
         />
         
         {expandedSections.has('basic') && (
@@ -341,9 +429,32 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Date */}
               <div>
-                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
-                  Maintenance Date *
+                <label className="flex items-center gap-2 text-sm font-medium text-primary dark:text-latte/70 mb-2">
+                  Maintenance Date
+                  <RequiredFieldBadge />
                 </label>
+                {/* Quick-select presets (audit issue #13) */}
+                <DatePresetButtons
+                  value={editedRecord.maintenanceDate}
+                  onChange={(date) => {
+                    setEditedRecord(prev => ({ ...prev, maintenanceDate: date }));
+                    // Clear the legacy inline error for this field (handleFieldChange
+                    // would do this, but presets bypass it since they pass a raw
+                    // date string instead of a ChangeEvent).
+                    if (errors.maintenanceDate) {
+                      setErrors(prev => ({ ...prev, maintenanceDate: '' }));
+                    }
+                    // Also clear the validation hook's error so the ValidationSummary
+                    // entry disappears immediately (parity with the mobile/split-pane
+                    // editors which use validation.clearError / touchField).
+                    // Guarded to avoid an unnecessary re-render when there's no error.
+                    if (validation.errors.maintenanceDate) {
+                      validation.clearError('maintenanceDate');
+                    }
+                  }}
+                  variant="cream"
+                  className="mb-2"
+                />
                 <div className="relative">
                   <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
                   <input
@@ -398,8 +509,9 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
 
               {/* Barista */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
-                  My Technician *
+                <label className="flex items-center gap-2 text-sm font-medium text-primary dark:text-latte/70 mb-2">
+                  My Technician
+                  <RequiredFieldBadge />
                 </label>
                 <div className="relative">
                   <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
@@ -530,6 +642,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
               {editedRecord.problems.length} problems
             </span>
           )}
+          isExpanded={expandedSections.has('problems')}
+          onClick={toggleSection}
         />
         
         {expandedSections.has('problems') && (
@@ -600,6 +714,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
               {editedRecord.servicesPerformed.length} services
             </span>
           )}
+          isExpanded={expandedSections.has('services')}
+          onClick={toggleSection}
         />
         
         {expandedSections.has('services') && (
@@ -608,6 +724,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
               options={servicesList}
               selectedValues={editedRecord.servicesPerformed}
               onChange={handleServicesChange}
+              suggestedValues={suggestedServices}
             />
           </div>
         )}
@@ -624,6 +741,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
               {editedRecord.partsReplaced.length} parts
             </span>
           )}
+          isExpanded={expandedSections.has('parts')}
+          onClick={toggleSection}
         />
         
         {expandedSections.has('parts') && (
@@ -648,6 +767,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                   options={partsList}
                   selectedValues={editedRecord.partsReplaced}
                   onChange={handlePartsChange}
+                  suggestedValues={suggestedParts}
                 />
               </div>
             )}
@@ -661,6 +781,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
           title="نوع الزيارة والدفع"
           section="payment"
           icon={<CurrencyDollarIcon className="w-5 h-5" />}
+          isExpanded={expandedSections.has('payment')}
+          onClick={toggleSection}
         />
         
         {expandedSections.has('payment') && (
@@ -769,6 +891,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
               </span>
             )
           }
+          isExpanded={expandedSections.has('supervisor')}
+          onClick={toggleSection}
         />
         {expandedSections.has('supervisor') && (
           <div className="p-6 space-y-4">
@@ -834,6 +958,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
               Has notes
             </span>
           )}
+          isExpanded={expandedSections.has('notes')}
+          onClick={toggleSection}
         />
         
         {expandedSections.has('notes') && (
@@ -880,6 +1006,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
               {editedRecord.photos.length} photo(s)
             </span>
           )}
+          isExpanded={expandedSections.has('photos')}
+          onClick={toggleSection}
         />
         
         {expandedSections.has('photos') && (

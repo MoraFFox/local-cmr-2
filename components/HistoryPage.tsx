@@ -389,6 +389,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                     {filteredSubmissions.map(sub => (
                         <div
                             key={sub.id}
+                            data-testid={`company-card-${sub.id}`}
                             className={`bg-cream rounded-xl p-4 sm:p-5 flex flex-col gap-4 transition-all hover:shadow-md border ${sub.pendingSync ? 'border-amber-500/30 bg-amber-500/10' : 'border-hairline'}`}
                         >
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">

@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { logger } from '../utils/logger';
 import { FormData, Branch, MaintenanceRecord } from '../types';
 import {
   ArrowLeftIcon,
@@ -9,11 +10,13 @@ import {
   CalendarIcon,
   ClockIcon,
   PlusIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  SwatchIcon
 } from '@heroicons/react/24/outline';
 import MaintenanceRecordList from './MaintenanceRecordList';
 import MaintenanceRecordEditor from './MaintenanceRecordEditor';
 import { getNewMaintenanceRecord } from './MaintenanceRecordCard';
+import { generateMockMaintenanceRecord } from '../utils/mockData';
 
 /**
  * Generate a collision-resistant record id.
@@ -115,6 +118,33 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
     if (selectedBranchId === null) return null;
     return branches.find(b => b.id === selectedBranchId) || null;
   }, [selectedBranchId, branches]);
+
+  const handleFillMockData = useCallback(() => {
+    if (!editingRecord) return;
+
+    const mockRecord = generateMockMaintenanceRecord(editingRecord.id, {
+      partsList,
+      servicesList,
+      problemCategories,
+      availableBaristas: selectedBranch?.baristas || [],
+      availableClientBaristas: selectedBranch?.clientBaristas || [],
+    });
+
+    setEditingRecord(mockRecord);
+  }, [editingRecord, selectedBranch, partsList, servicesList, problemCategories]);
+
+  // Listen for the dev-only mock-maintenance event from the debug panel.
+  useEffect(() => {
+    const handler = () => {
+      if (editingRecord) {
+        handleFillMockData();
+      } else {
+        logger.info('Mock maintenance event ignored: open a maintenance record first', undefined, 'debug');
+      }
+    };
+    window.addEventListener('MOCK_MAINTENANCE_RECORD', handler);
+    return () => window.removeEventListener('MOCK_MAINTENANCE_RECORD', handler);
+  }, [editingRecord, handleFillMockData]);
 
   // Calculate average days between maintenance for the selected branch
   const averageDaysBetweenMaintenance = useMemo(() => {
@@ -395,9 +425,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                   <ChevronRightIcon className="w-5 h-5" />
                 </button>
                 
-                <div className="hidden sm:block h-8 w-px bg-espresso-light" />
-                
-                <button
+                <div className="hidden sm:block h-8 w-px bg-espresso-light" />                <button
                   onClick={handleAddNewRecord}
                   className="btn-primary rounded-lg shadow-lg backdrop-blur-sm"
                   title="إضافة سجل صيانة جديد لهذا الفرع"
@@ -405,9 +433,20 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                   <PlusIcon className="w-5 h-5" />
                   <span className="hidden sm:inline font-medium">Add Record</span>
                 </button>
+
+                {editingRecord && (
+                  <button
+                    onClick={handleFillMockData}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-100 border border-amber-400/30 transition-colors backdrop-blur-sm"
+                    title="Fill the current record with random realistic data (dev only)"
+                  >
+                    <SwatchIcon className="w-5 h-5" />
+                    <span className="hidden sm:inline font-medium">Mock</span>
+                  </button>
+                )}
               </div>
             </div>
-          </div>
+        </div>
         </div>
         
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

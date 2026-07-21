@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MaintenanceRecord, Part, Service, Barista } from "../types";
 import {
   ChevronLeftIcon,
@@ -13,6 +13,14 @@ import {
   ArrowUpIcon,
   ArrowDownIcon,
 } from "@heroicons/react/24/outline";
+// NEW: Import auto-save and validation hooks
+import { useAutoSave } from './forms/hooks/useAutoSave';
+import { useFormValidation } from './forms/hooks/useFormValidation';
+// NEW: Import UI components
+import { AutoSaveIndicator } from './form-ui/AutoSaveIndicator';
+import { ValidationSummary } from './form-ui/ValidationSummary';
+import { RequiredFieldBadge } from './form-ui/RequiredFieldBadge';
+import { DatePresetButtons } from './form-ui/EnhancedInput';
 
 interface SplitPaneMaintenanceEditorProps {
   records: MaintenanceRecord[];
@@ -44,6 +52,37 @@ const SplitPaneMaintenanceEditor: React.FC<SplitPaneMaintenanceEditorProps> = ({
   const [isPaneOpen, setIsPaneOpen] = useState<boolean>(true);
 
   const selectedRecord = records[selectedRecordIndex];
+
+  // NEW: Auto-save hook - saves form automatically after each change
+  const autoSave = useAutoSave(
+    `splitpane-maintenance-record-${selectedRecord?.id || 'new'}`,
+    selectedRecord || ({} as MaintenanceRecord),
+    {
+      debounceMs: 30000, // 30 seconds
+      onSave: (data) => {
+        // Auto-save to localStorage only
+        // Actual save happens via onChange callback
+      },
+      onSaveError: (error) => {
+        console.error('Auto-save failed:', error);
+      },
+      enabled: !!selectedRecord
+    }
+  );
+
+  // NEW: Validation hook with rules
+  const validation = useFormValidation(
+    selectedRecord || ({} as MaintenanceRecord),
+    {
+      maintenanceDate: { required: true },
+      baristaName: { required: true, minLength: 2 }
+    },
+    {
+      mode: 'onBlur',
+      showSummary: true,
+      validateOnMount: false
+    }
+  );
 
   const handleRecordSelect = (index: number) => {
     setSelectedRecordIndex(index);
@@ -251,25 +290,49 @@ const SplitPaneMaintenanceEditor: React.FC<SplitPaneMaintenanceEditorProps> = ({
         {selectedRecord ? (
           <>
             {/* Editor Header */}
-            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
-              <div className="flex items-center gap-3">
-                <span className="text-lg font-semibold text-slate-800 dark:text-slate-200">
-                  Visit #{selectedRecordIndex + 1}
-                </span>
-                <span
-                  className={`text-sm px-3 py-1 rounded-full ${getStatusColor(selectedRecord)}`}
+            <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-lg font-semibold text-slate-800 dark:text-slate-200">
+                    Visit #{selectedRecordIndex + 1}
+                  </span>
+                  <span
+                    className={`text-sm px-3 py-1 rounded-full ${getStatusColor(selectedRecord)}`}
+                  >
+                    {getStatusText(selectedRecord)}
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => handleRemoveRecord(selectedRecordIndex)}
+                  className="flex items-center gap-2 px-3 py-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                 >
-                  {getStatusText(selectedRecord)}
-                </span>
+                  <TrashIcon className="w-4 h-4" />
+                  Delete
+                </button>
               </div>
 
-              <button
-                onClick={() => handleRemoveRecord(selectedRecordIndex)}
-                className="flex items-center gap-2 px-3 py-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-              >
-                <TrashIcon className="w-4 h-4" />
-                Delete
-              </button>
+              {/* NEW: Auto-save indicator */}
+              <AutoSaveIndicator
+                isSaving={autoSave.isSaving}
+                lastSaved={autoSave.lastSaved}
+                hasUnsavedChanges={autoSave.hasUnsavedChanges}
+                onSaveNow={autoSave.saveNow}
+                variant="full"
+              />
+
+              {/* NEW: Validation summary (shows when there are errors) */}
+              {validation.hasErrors && (
+                <ValidationSummary
+                  errors={validation.allErrors}
+                  onJumpToError={(fieldName) => {
+                    const element = document.querySelector(`[name="${fieldName}"]`) as HTMLInputElement;
+                    element?.focus();
+                    element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }}
+                  title="Please fix the following errors before saving"
+                />
+              )}
             </div>
 
             {/* Editor Content - Placeholder for actual form */}
@@ -288,35 +351,65 @@ const SplitPaneMaintenanceEditor: React.FC<SplitPaneMaintenanceEditorProps> = ({
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Date
+                      <RequiredFieldBadge />
                     </label>
+                    {/* Quick-select presets (audit issue #13) */}
+                    <DatePresetButtons
+                      value={selectedRecord.maintenanceDate}
+                      onChange={(date) => {
+                        handleUpdateRecord({
+                          ...selectedRecord,
+                          maintenanceDate: date,
+                        });
+                        validation.touchField('maintenanceDate');
+                      }}
+                      variant="slate"
+                      className="mb-2"
+                    />
                     <input
                       type="date"
+                      name="maintenanceDate"
                       value={selectedRecord.maintenanceDate}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         handleUpdateRecord({
                           ...selectedRecord,
                           maintenanceDate: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg"
+                        });
+                        validation.touchField('maintenanceDate');
+                      }}
+                      className={`w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border rounded-lg ${
+                        validation.errors.maintenanceDate
+                          ? 'border-red-500 focus:ring-red-500'
+                          : 'border-slate-300 dark:border-slate-600'
+                      }`}
                     />
+                    {validation.errors.maintenanceDate && (
+                      <p className="mt-1 text-sm text-red-600">{validation.errors.maintenanceDate}</p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Staff
+                      <RequiredFieldBadge />
                     </label>
                     <select
+                      name="baristaName"
                       value={selectedRecord.baristaName}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         handleUpdateRecord({
                           ...selectedRecord,
                           baristaName: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg"
+                        });
+                        validation.touchField('baristaName');
+                      }}
+                      className={`w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border rounded-lg ${
+                        validation.errors.baristaName
+                          ? 'border-red-500 focus:ring-red-500'
+                          : 'border-slate-300 dark:border-slate-600'
+                      }`}
                     >
                       <option value="">Select Staff</option>
                       {baristas.map((b) => (
@@ -325,6 +418,9 @@ const SplitPaneMaintenanceEditor: React.FC<SplitPaneMaintenanceEditorProps> = ({
                         </option>
                       ))}
                     </select>
+                    {validation.errors.baristaName && (
+                      <p className="mt-1 text-sm text-red-600">{validation.errors.baristaName}</p>
+                    )}
                   </div>
                 </div>
 

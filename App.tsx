@@ -128,13 +128,13 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   // ── Network-driven data fetch + queue processing ──
   React.useEffect(() => {
     fetchSubmissions();
-  }, [isOnline, fetchSubmissions]);
+  }, [isOnline]); // fetchSubmissions already depends on isOnline, don't include both
 
   React.useEffect(() => {
     if (isOnline) {
       processOfflineQueue(() => fetchSubmissions());
     }
-  }, [isOnline, processOfflineQueue, fetchSubmissions]);
+  }, [isOnline, processOfflineQueue]); // fetchSubmissions already depends on isOnline
 
   // ── Dev mock data listener ──
   React.useEffect(() => {

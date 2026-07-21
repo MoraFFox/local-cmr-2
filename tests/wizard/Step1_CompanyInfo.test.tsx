@@ -5,7 +5,7 @@ import React from "react";
 import { describe, it, expect } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { Step1_CompanyInfo } from "../../src/views/wizard/Step1_CompanyInfo";
-import { createMockActions, createFormData } from "./helpers";
+import { createMockActions, createFormData, createMachine } from "./helpers";
 
 describe("Step1_CompanyInfo", () => {
   it("renders company name, email, tax number, and location fields", () => {
@@ -71,9 +71,13 @@ describe("Step1_CompanyInfo", () => {
     const actions = createMockActions();
     render(
       <Step1_CompanyInfo
-        formData={createFormData({ hasBranches: false, usesOurMachines: true })}
+        formData={createFormData({
+          hasBranches: false,
+          usesOurMachines: true,
+          machines: [createMachine()],
+        })}
         actions={actions}
-        newlyAddedId={null}
+        newlyAddedId={1}
       />,
     );
 
@@ -100,15 +104,31 @@ describe("Step1_CompanyInfo", () => {
         formData={createFormData({
           hasBranches: false,
           usesOurMachines: true,
-          machineOwnershipType: "leased",
-          dailyLeaseCost: 150,
+          machines: [createMachine({ dailyLeaseCost: 150 })],
+        })}
+        actions={actions}
+        newlyAddedId={1}
+      />,
+    );
+
+    expect(screen.getByLabelText("قيمة الإيجار اليومي (ج.م)")).toBeInTheDocument();
+  });
+
+  it("hides machine ownership controls when the machine card is collapsed", () => {
+    const actions = createMockActions();
+    render(
+      <Step1_CompanyInfo
+        formData={createFormData({
+          hasBranches: false,
+          usesOurMachines: true,
+          machines: [createMachine()],
         })}
         actions={actions}
         newlyAddedId={null}
       />,
     );
 
-    expect(screen.getByLabelText("قيمة الإيجار اليومي (ج.م)")).toBeInTheDocument();
+    expect(screen.queryByText("كيف تم الحصول على الماكينة؟")).not.toBeInTheDocument();
   });
 
   it("hides daily lease cost when ownership is bought", () => {

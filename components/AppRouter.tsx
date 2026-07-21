@@ -334,7 +334,7 @@ const AppRouter: React.FC = () => {
       window.removeEventListener("popstate", handlePopState);
       subscription.unsubscribe();
     };
-  }, [evaluateRootAccess]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAdminLogout = useCallback(async () => {
     await supabase.auth.signOut();

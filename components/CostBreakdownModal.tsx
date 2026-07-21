@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { FormData, MaintenanceRecord, Part, Service, PartRecord, ServiceRecord } from '../types';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import CollapsibleSection from './CollapsibleSection';
+import { SafeModal } from './form-ui/SafeModal';
 
 interface CostBreakdownModalProps {
     isOpen: boolean;
@@ -90,101 +91,94 @@ const CostDetail: React.FC<{ label: React.ReactNode; value: string | number; isS
 );
 
 const CostBreakdownModal: React.FC<CostBreakdownModalProps> = ({ isOpen, onClose, formData, partsList, servicesList }) => {
-    useEffect(() => {
-        if (isOpen) document.body.style.overflow = 'hidden';
-        else document.body.style.overflow = 'unset';
-        return () => { document.body.style.overflow = 'unset'; };
-    }, [isOpen]);
-
+    // Guard the (potentially expensive) cost aggregation so it only runs when
+    // the modal is actually open. SafeModal handles the closed state internally,
+    // so returning null here is safe and avoids unnecessary work every render.
     if (!isOpen) return null;
 
     const aggregatedData = aggregateCosts(formData, partsList, servicesList);
 
     return (
-        <div 
-            className="fixed inset-0 bg-black bg-opacity-60 dark:bg-opacity-80 z-50 flex justify-center items-center transition-opacity duration-300 p-2 sm:p-4 pt-safe"
-            onClick={onClose}
-        >
-            <div 
-                role="dialog"
-                aria-modal="true"
-                className="bg-cream dark:bg-espresso rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-2xl m-4 transform transition-all duration-300 scale-95 opacity-0 animate-fade-in-scale max-h-[90vh] flex flex-col"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div className="flex justify-between items-center mb-4 pb-4 border-b border-hairline dark:border-hairline">
+        <SafeModal
+            isOpen={isOpen}
+            onClose={onClose}
+            type="info"
+            size="lg"
+            ariaLabel="Aggregated Cost Summary"
+            bodyClassName="!p-0 !px-0 !py-0"
+            renderHeader={(handleClose) => (
+                <div className="flex justify-between items-center mb-4 pb-4 border-b border-hairline dark:border-hairline px-6 sm:px-8 pt-6 sm:pt-8">
                     <h2 id="modal-title" className="text-xl font-bold text-primary dark:text-white">Aggregated Cost Summary</h2>
-                    <button onClick={onClose} className="p-1 rounded-full text-latte dark:text-latte hover:bg-cream dark:hover:bg-espresso-light/50">
+                    <button
+                        onClick={handleClose}
+                        className="p-2 rounded-full text-latte dark:text-latte hover:bg-cream dark:hover:bg-espresso-light/50 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        aria-label="Close modal"
+                    >
                         <XMarkIcon className="h-6 w-6" />
                     </button>
                 </div>
-                <div className="overflow-y-auto pr-2 -mr-2 space-y-4 flex-grow">
-                    {aggregatedData.grandTotal > 0 ? (
-                        <>
-                            {aggregatedData.totalVisitFees > 0 && (
-                                <CollapsibleSection title={`Visit Fees Total: ${formatCurrency(aggregatedData.totalVisitFees)}`}>
-                                    <CostDetail label="إجمالي رسوم الزيارات" value={aggregatedData.totalVisitFees} />
-                                </CollapsibleSection>
-                            )}
-
-                            {aggregatedData.totalPartsCost > 0 && (
-                                <CollapsibleSection title={`Parts Cost Total: ${formatCurrency(aggregatedData.totalPartsCost)}`}>
-                                    <div className="space-y-1">
-                                        {Array.from(aggregatedData.parts.values()).map((data) => (
-                                            <CostDetail
-                                                key={`${data.name}#${data.unitCost}`}
-                                                label={
-                                                    <span>
-                                                        {data.count}x {data.name} <span className="text-latte">@ {formatCurrency(data.unitCost)}</span>
-                                                    </span>
-                                                }
-                                                value={data.totalCost}
-                                                isSubItem
-                                            />
-                                        ))}
-                                    </div>
-                                </CollapsibleSection>
-                            )}
-
-                             {aggregatedData.totalServicesCost > 0 && (
-                                <CollapsibleSection title={`Services Cost Total: ${formatCurrency(aggregatedData.totalServicesCost)}`}>
-                                    <div className="space-y-1">
-                                        {Array.from(aggregatedData.services.values()).map((data) => (
-                                            <CostDetail
-                                                key={`${data.name}#${data.unitCost}`}
-                                                label={
-                                                    <span>
-                                                        {data.count}x {data.name} <span className="text-latte">@ {formatCurrency(data.unitCost)}</span>
-                                                    </span>
-                                                }
-                                                value={data.totalCost}
-                                                isSubItem
-                                            />
-                                        ))}
-                                    </div>
-                                </CollapsibleSection>
-                             )}
-                        </>
-                    ) : (
-                        <div className="flex items-center justify-center h-full">
-                           <p className="text-latte dark:text-latte text-center py-8">No maintenance costs to display.</p>
-                        </div>
-                    )}
-                </div>
-                <div className="mt-6 pt-4 pb-safe border-t border-hairline dark:border-hairline flex justify-between items-center">
+            )}
+            renderFooter={() => (
+                <div className="mt-6 pt-4 pb-safe border-t border-hairline dark:border-hairline flex justify-between items-center px-6 sm:px-8">
                     <span className="text-sm font-medium text-latte dark:text-latte">Grand Total:</span>
                     <span className="text-xl font-bold text-primary-800 dark:text-primary-400">{formatCurrency(aggregatedData.grandTotal)}</span>
                 </div>
-                <style>{`
-                    @keyframes fade-in-scale {
-                        from { transform: scale(0.95); opacity: 0; }
-                        to { transform: scale(1); opacity: 1; }
-                    }
-                    .animate-fade-in-scale {
-                        animation: fade-in-scale 0.2s ease-out forwards;
-                    }
-                `}</style>
+            )}
+        >
+            <div className="overflow-y-auto pr-2 -mr-2 space-y-4 flex-grow px-6 sm:px-8 pb-4">
+                {aggregatedData.grandTotal > 0 ? (
+                    <>
+                        {aggregatedData.totalVisitFees > 0 && (
+                            <CollapsibleSection title={`Visit Fees Total: ${formatCurrency(aggregatedData.totalVisitFees)}`}>
+                                <CostDetail label="إجمالي رسوم الزيارات" value={aggregatedData.totalVisitFees} />
+                            </CollapsibleSection>
+                        )}
+
+                        {aggregatedData.totalPartsCost > 0 && (
+                            <CollapsibleSection title={`Parts Cost Total: ${formatCurrency(aggregatedData.totalPartsCost)}`}>
+                                <div className="space-y-1">
+                                    {Array.from(aggregatedData.parts.values()).map((data) => (
+                                        <CostDetail
+                                            key={`${data.name}#${data.unitCost}`}
+                                            label={
+                                                <span>
+                                                    {data.count}x {data.name} <span className="text-latte">@ {formatCurrency(data.unitCost)}</span>
+                                                </span>
+                                            }
+                                            value={data.totalCost}
+                                            isSubItem
+                                        />
+                                    ))}
+                                </div>
+                            </CollapsibleSection>
+                        )}
+
+                         {aggregatedData.totalServicesCost > 0 && (
+                            <CollapsibleSection title={`Services Cost Total: ${formatCurrency(aggregatedData.totalServicesCost)}`}>
+                                <div className="space-y-1">
+                                    {Array.from(aggregatedData.services.values()).map((data) => (
+                                        <CostDetail
+                                            key={`${data.name}#${data.unitCost}`}
+                                            label={
+                                                <span>
+                                                    {data.count}x {data.name} <span className="text-latte">@ {formatCurrency(data.unitCost)}</span>
+                                                </span>
+                                            }
+                                            value={data.totalCost}
+                                            isSubItem
+                                        />
+                                    ))}
+                                </div>
+                            </CollapsibleSection>
+                         )}
+                    </>
+                ) : (
+                    <div className="flex items-center justify-center h-full">
+                       <p className="text-latte dark:text-latte text-center py-8">No maintenance costs to display.</p>
+                    </div>
+                )}
             </div>
-        </div>
+        </SafeModal>
     );
 };
 

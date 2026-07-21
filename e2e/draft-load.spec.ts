@@ -3,14 +3,14 @@ import { test, expect } from '@playwright/test';
 test.describe('Draft Loading Logic', () => {
   test('loading a draft does not delete other drafts', async ({ page }) => {
     // 1. Navigate to the app and login
-    await page.goto('http://localhost:3002/');
+    await page.goto('/');
     await expect(page.getByRole('heading', { name: 'تسجيل دخول الإدارة' })).toBeVisible();
     await page.locator('input[type="email"]').fill('amrayman559@gmail.com');
     await page.locator('input[type="password"]').fill('12345678');
     await page.locator('button[type="submit"]').click();
 
     // Wait for dashboard to load
-    const addBtn = page.locator('button[title="إضافة شركة جديدة"]').first();
+    const addBtn = page.locator('[data-testid="add-company-button"]').first();
     await expect(addBtn).toBeVisible({ timeout: 10000 });
     
     // 2. We inject two mock drafts directly into localStorage to simulate existing drafts

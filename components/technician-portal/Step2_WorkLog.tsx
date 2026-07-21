@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   ExclamationTriangleIcon,
   WrenchScrewdriverIcon,
@@ -18,6 +18,8 @@ import PartsSelector from '../PartsSelector';
 import { ar } from '../../utils/arabicTranslations';
 import { Service, Part } from '../../types';
 import { problemCategories } from '../../constants';
+// NEW: Context-aware suggestions based on reported problems
+import { getSuggestedServices, getSuggestedParts } from '../../utils/problemSuggestions';
 
 export interface Step2WorkLogData {
   visitType: 'problem' | 'scheduled';
@@ -129,6 +131,18 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
   const servicesToUse = sortedServices || [];
   const partsToUse = sortedParts || [];
 
+  // NEW: Context-aware suggestions — compute relevant services/parts based on
+  // the problems the technician reported. Surfaced at the top of the selectors
+  // so the most relevant options are one tap away.
+  const suggestedServices = useMemo(
+    () => getSuggestedServices(data.problems || []),
+    [data.problems],
+  );
+  const suggestedParts = useMemo(
+    () => getSuggestedParts(data.problems || []),
+    [data.problems],
+  );
+
   const beforePhotos = data.photos.filter((p) => p.type === 'before');
   const afterPhotos = data.photos.filter((p) => p.type === 'after');
 
@@ -186,6 +200,7 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
            options={servicesToUse}
            selectedValues={data.servicesPerformed}
            onChange={handleServicesChange}
+           suggestedValues={suggestedServices}
         />
       </TechCard>
 
@@ -213,6 +228,7 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
                         options={partsToUse}
                         selectedValues={data.partsReplaced}
                         onChange={handlePartsChange}
+                        suggestedValues={suggestedParts}
                     />
                 </div>
             )}

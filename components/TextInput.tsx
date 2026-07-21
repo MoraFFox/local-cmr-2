@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import { RequiredFieldBadge } from './form-ui/RequiredFieldBadge';
 
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -44,7 +45,7 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, err
       {label && (
         <label htmlFor={inputId} className="block text-sm font-medium text-primary mb-1.5">
           {label}
-          {required && <span className="text-primary mr-1">*</span>}
+          {required && <RequiredFieldBadge />}
         </label>
       )}
       <div className="relative group focus-within:text-primary">
