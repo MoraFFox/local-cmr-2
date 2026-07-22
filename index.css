@@ -175,12 +175,12 @@
   /* ── Buttons ── */
   /* Primary: crimson gradient — reserved for the ONE main action per screen */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-white shadow-sm transition-all hover:brightness-110 focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 min-h-[44px] font-semibold text-white shadow-sm transition-all hover:brightness-110 focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
     background: var(--gradient-cta) !important;
   }
   /* Secondary: section surface with default border */
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-text shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 min-h-[44px] font-semibold text-text shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
     background-color: var(--bg-body);
     border: 1px solid var(--border-hairline);
   }
@@ -189,11 +189,11 @@
   }
   /* Danger: ember */
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-ember-500 px-4 py-2.5 font-semibold text-white shadow-sm transition-colors hover:bg-ember-600 focus-visible:ring-2 focus-visible:ring-ember-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-ember-500 px-4 py-2.5 min-h-[44px] font-semibold text-white shadow-sm transition-colors hover:bg-ember-600 focus-visible:ring-2 focus-visible:ring-ember-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
   /* Ghost: transparent, shows on hover */
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 min-h-[44px] font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
     color: var(--text-latte);
   }
   .btn-ghost:hover {

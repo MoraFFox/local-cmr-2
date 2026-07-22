@@ -10,12 +10,17 @@ import Button from "../../../components/ui/Button";
 import { UserIcon, PhoneIcon, PlusCircleIcon, UserGroupIcon } from "@heroicons/react/24/outline";
 import { CLASSES } from "../../../utils/sharedConstants";
 import type { WizardStepProps } from "./types";
+import { useT } from "../../../utils/i18n";
+import { formatEgyptianPhone } from "../../../utils/phone";
 
 export const Step4_5_ClientBaristas: React.FC<WizardStepProps> = ({
   formData,
   actions,
   newlyAddedId,
-}) => (
+}) => {
+  const t = useT();
+
+  return (
   <Card title="باريستا العميل (المكتب الرئيسي)">
     <div className="flex justify-between items-center mb-6">
       <h3 className="text-xl font-bold text-primary tracking-tight">باريستا العميل</h3>
@@ -41,8 +46,18 @@ export const Step4_5_ClientBaristas: React.FC<WizardStepProps> = ({
                 />
                 <TextInput
                   label="رقم الهاتف" name="phone" value={cb.phone}
-                  onChange={(e) => actions.handleClientBaristaChange(e, null, index)}
+                  onChange={(e) =>
+                    actions.handleClientBaristaChange(
+                      {
+                        target: { name: "phone", value: formatEgyptianPhone(e.target.value) },
+                      } as React.ChangeEvent<HTMLInputElement>,
+                      null,
+                      index,
+                    )
+                  }
                   icon={<PhoneIcon />}
+                  helpText={t.tooltips.contactPhone}
+                  dir="ltr"
                 />
               </div>
               <div>
@@ -68,3 +83,4 @@ export const Step4_5_ClientBaristas: React.FC<WizardStepProps> = ({
     </div>
   </Card>
 );
+};

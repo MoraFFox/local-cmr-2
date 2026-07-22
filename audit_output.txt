@@ -1,0 +1,375 @@
+/run/media/amr/New Volume/my projects/local-CMR-main/scripts/audit_english_strings.py:7: SyntaxWarning: "\." is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\."? A raw string is also an option.
+  - strings already using translation calls (t\.(...), ar\.(...))
+--- components/AdminLogin.tsx ---
+  [placeholder] 'admin@example.com'
+
+--- components/BaristaDetailsPage.tsx ---
+  [JSX text] 'Barista Not Found'
+  [JSX text] 'Go Back'
+  [JSX text] 'Staff Details'
+  [JSX text] 'Total Visits'
+  [JSX text] 'Main Office / Last Client'
+  [JSX text] 'Client Paid (Accumulated)'
+  [JSX text] 'Detailed Visit History'
+  [JSX text] 'All Clients'
+  [JSX text] 'All Types'
+  [JSX text] 'Requested / Emergency'
+  [JSX text] 'Client / Branch'
+  [JSX text] 'Machine / Asset'
+  [JSX text] 'N/A'
+  [JSX text] 'No records match your filters.'
+  [JSX text] 'Visit Details'
+  [JSX text] 'Machines Maintained'
+  [JSX text] 'Services Performed'
+  [JSX text] 'Parts Replaced'
+  [JSX text] 'Observations & Results'
+  [JSX text] 'Identified Issues:'
+  [JSX text] 'Maintenance Notes:'
+  [JSX text] 'Visit Rating'
+  [JSX text] 'Close Details'
+
+--- components/BaristasPage.tsx ---
+  [JSX text] 'Include Log-Only'
+  [JSX text] 'Include 0 Visits'
+  [JSX text] 'Debug: Profile Aggregation Logic'
+  [JSX text] 'Displayed Name'
+  [JSX text] 'Norm. Name Key'
+  [JSX text] 'Companies Merged'
+  [JSX text] 'Raw Names Merged'
+  [JSX text] 'Is Auto?'
+  [JSX text] 'Total Staff'
+  [JSX text] 'Total Visits'
+  [JSX text] 'Perf.'
+  [JSX text] 'No Rating Yet'
+  [JSX text] 'Client Paid (Rev)'
+  [JSX text] 'View Work History'
+  [JSX text] 'Note:'
+
+--- components/BatchEditModal.tsx ---
+  [JSX text] 'Batch Edit Maintenance Records'
+  [JSX text] 'Deselect All'
+  [JSX text] 'Select All'
+  [JSX text] 'Choose Operation'
+  [JSX text] 'Change Date'
+  [JSX text] 'Assign Staff'
+  [JSX text] 'Select Staff'
+  [JSX text] 'Change Type'
+  [JSX text] 'Mark Status'
+  [JSX text] 'Not Solved'
+  [JSX text] 'Delete Records'
+  [aria-label] 'Close modal'
+  [label] 'Close modal'
+
+--- components/CheckboxGroup.tsx ---
+  [JSX text] 'Select All'
+
+--- components/CostBreakdownModal.tsx ---
+  [JSX text] '(),\n        services: new Map'
+  [JSX text] 'Aggregated Cost Summary'
+  [JSX text] 'Grand Total:'
+  [JSX text] 'No maintenance costs to display.'
+  [aria-label] 'Close modal'
+  [label] 'Close modal'
+
+--- components/DebugPanel.tsx ---
+  [JSX text] '🐛 Debug'
+  [JSX text] '🔧 Mock Tech'
+  [JSX text] '📋 Mock Wizard'
+  [JSX text] '🔧 Mock Maint'
+  [JSX text] 'Session:'
+  [JSX text] 'User:'
+  [JSX text] 'Env:'
+  [JSX text] 'No log entries match the current filters'
+  [JSX text] 'No network activity matches the current filters'
+  [JSX text] 'Error:'
+  [JSX text] 'No response body captured'
+  [title] 'Debug Panel (Ctrl+Shift+D)'
+  [title] 'Mock Technician Flow Data'
+  [title] 'Mock Admin Wizard Data'
+  [title] 'Fill current maintenance record with realistic random data'
+  [title] 'Copy context to clipboard'
+
+--- components/EmergencyAdminRecovery.tsx ---
+  [placeholder] 'admin@example.com'
+
+--- components/HistoryPage.tsx ---
+  [JSX text] '0 || searchTerm) && ('
+  [JSX text] '0 || searchTerm) && ('
+  [JSX text] ') : submissions.length === 0 ? ('
+  [JSX text] ') : filteredSubmissions.length === 0 ? ('
+
+--- components/HistoryViewer.tsx ---
+  [JSX text] 'History & Versions'
+  [JSX text] 'Track changes and restore previous versions'
+  [JSX text] 'No activity history yet'
+  [JSX text] 'No saved versions yet'
+  [JSX text] 'Restore Version'
+  [JSX text] 'Restore Version?'
+
+--- components/ImportExportDialog.tsx ---
+  [JSX text] 'Import / Export'
+  [JSX text] '(\n                showImportFooter ? ('
+  [JSX text] 'Export as JSON'
+  [JSX text] 'Complete data with all details'
+  [JSX text] 'Export as CSV'
+  [JSX text] 'Maintenance records only'
+  [JSX text] 'Export Summary Report'
+  [JSX text] 'Overview of all companies with counts'
+  [JSX text] 'JSON or CSV format'
+  [JSX text] 'Validation Results'
+  [aria-label] 'Close modal'
+  [label] 'Close modal'
+
+--- components/InviteSignup.tsx ---
+  [JSX text] '= 12) score++;\n    if (/[A-Z]/.test(pwd)) score++;\n    if (/[a-z]/.test(pwd)) score++;\n    if (/[0-9]/.test(pwd)) score++;\n    if (/[^A-Za-z0-9]/.test(pwd)) score++;\n\n    if (score'
+
+--- components/MaintenanceEditPage.tsx ---
+  [JSX text] '= 0 &&\n  recordIndex'
+  [JSX text] 'a - b);\n    \n    if (sortedDates.length'
+  [JSX text] '= 0 && newIndex'
+  [JSX text] 'New (Unsaved)'
+  [JSX text] 'Add Record'
+  [JSX text] 'Edit Maintenance Records'
+  [JSX text] 'Select Different Branch'
+  [JSX text] 'Add Record'
+  [JSX text] 'Select a Branch'
+  [title] 'Fill the current record with random realistic data (dev only)'
+
+--- components/MaintenanceRecordCard.tsx ---
+  [JSX text] '0.6 && similarity'
+
+--- components/MaintenanceRecordList.tsx ---
+  [JSX text] '(\n        star'
+  [JSX text] 'No services'
+  [JSX text] 'Sort by:'
+  [JSX text] 'My Technician'
+  [JSX text] 'Client Barista'
+  [aria-label] 'Edit record'
+  [label] 'Edit record'
+
+--- components/PartsSelector.tsx ---
+  [JSX text] 'Suggested for your issues'
+  [JSX text] 'All Parts'
+  [JSX text] '0 && isSelectedSectionExpanded && ('
+  [JSX text] 'Set all:'
+  [aria-label] 'Switch to card view'
+  [aria-label] 'Switch to compact chips view'
+  [title] 'Card view (detailed)'
+  [title] 'Chips view (compact)'
+  [label] 'Switch to card view'
+  [label] 'Switch to compact chips view'
+
+--- components/PrintableWorkOrder.tsx ---
+  [JSX text] 'Qty:'
+  [JSX text] 'Client Paid:'
+  [JSX text] 'Custom Parts / Additional Services'
+  [JSX text] 'Paid by Client'
+  [JSX text] 'Maintenance Visit Report'
+  [JSX text] 'Internal Use Document'
+  [JSX text] 'Mido for distribution'
+  [JSX text] 'Work Performed'
+  [JSX text] 'Parts Used'
+  [JSX text] 'End of Work Order'
+  [alt] 'Mido for distribution'
+  [label] 'Visit Date'
+  [label] 'Contact Name'
+  [label] 'Contact Phone'
+
+--- components/QuickActionsMenu.tsx ---
+  [JSX text] 'Mark as Unsolved'
+  [JSX text] 'Mark as Solved'
+  [JSX text] 'Change Rating'
+  [JSX text] 'Change Date'
+  [JSX text] 'Delete Record'
+  [JSX text] 'Are you sure? This action cannot be undone.'
+  [JSX text] 'Yes, Delete'
+
+--- components/ReviewStep.tsx ---
+  [JSX text] 'Cost Breakdown for this Visit'
+  [JSX text] '(Paid by Client)'
+  [JSX text] '(Paid by Client)'
+  [JSX text] 'Baristas at this Branch:'
+  [JSX text] 'Baristas (Main Office)'
+  [JSX text] 'b.maintenanceHistory.length === 0) ? ('
+  [JSX text] 'Main Office Records'
+  [JSX text] 'Total Maintenance Cost'
+  [JSX text] 'View Details'
+  [label] 'Daily Lease Cost'
+  [label] 'Parts Replaced'
+  [label] 'Identified Issues'
+  [label] 'Machines Maintained'
+  [label] 'Visit Zone & Fee'
+  [label] 'Services Performed'
+  [label] 'Total Services Cost'
+  [label] 'Parts Used'
+  [label] 'Total Parts Cost'
+  [label] 'This Visit Total'
+  [label] 'Has Branches'
+  [label] 'Using Our Machines'
+  [label] 'Branch Specific Name'
+  [label] 'Using Our Machines'
+
+--- components/ServiceSelector.tsx ---
+  [JSX text] 'Suggested for your issues'
+  [JSX text] 'Available Protocols'
+  [JSX text] '0 && isSelectedSectionExpanded && ('
+  [JSX text] 'Set all:'
+  [aria-label] 'Switch to card view'
+  [aria-label] 'Switch to compact chips view'
+  [title] 'Card view (detailed)'
+  [title] 'Chips view (compact)'
+  [label] 'Switch to card view'
+  [label] 'Switch to compact chips view'
+
+--- components/SplitPaneMaintenanceEditor.tsx ---
+  [JSX text] 'Add Visit'
+  [JSX text] 'Add First Visit'
+
+--- components/StepIndicator.tsx ---
+  [JSX text] ') : isCurrent ? ('
+
+--- components/SubmissionDetails.tsx ---
+  [JSX text] 'Not specified'
+  [JSX text] 'Yes (No machines added)'
+  [JSX text] 'No contacts listed.'
+  [JSX text] 'No records found.'
+  [JSX text] 'Work Details'
+  [JSX text] 'Paid By:'
+  [JSX text] 'Daily Lease:'
+  [JSX text] 'Machines:'
+  [JSX text] 'Issue:'
+  [JSX text] 'Parts:'
+  [JSX text] 'Services:'
+  [JSX text] 'Paid By:'
+  [JSX text] 'Daily Lease:'
+  [JSX text] 'No machines listed'
+  [JSX text] 'Work Done'
+  [JSX text] '(Client Paid)'
+  [JSX text] 'No supervisors'
+  [JSX text] 'Verified & Approved'
+  [JSX text] 'BRANCH REPORT'
+  [JSX text] 'Tax ID'
+  [JSX text] 'Machine Ownership'
+  [JSX text] 'Total Visits'
+  [JSX text] 'Key Contacts'
+  [JSX text] 'No contacts'
+  [JSX text] 'Assigned Staff'
+  [JSX text] 'No baristas assigned'
+  [JSX text] 'Maintenance History Log'
+  [JSX text] 'No maintenance records found for this branch.'
+  [JSX text] 'CONFIDENTIAL - Internal Use Only • Mido for Distribution'
+  [JSX text] 'Comprehensive Maintenance Report'
+  [JSX text] 'Key Contacts'
+  [JSX text] 'Branch Details & Maintenance'
+  [JSX text] 'Daily Lease:'
+  [JSX text] 'Parts Replaced:'
+  [JSX text] 'Maintenance Records'
+  [JSX text] 'Internal Report'
+  [JSX text] 'Includes all costs & financial data'
+  [JSX text] 'Client Report'
+  [JSX text] 'Back to History'
+  [JSX text] 'Filter History by Date:'
+  [JSX text] 'Main Contacts'
+  [JSX text] 'Main Office\n                  Maintenance'
+  [JSX text] '0 &&\n              filteredMainHistory.length === 0 && ('
+  [JSX text] 'Branches & Maintenance'
+  [JSX text] 'Branch Info'
+  [JSX text] 'Total Visits:'
+  [JSX text] 'Machines:'
+  [JSX text] 'Parts Summary:'
+  [JSX text] 'No maintenance records match filter.'
+  [alt] "Mido's For Distribution"
+  [alt] "Mido's For Distribution"
+
+--- components/TechnicianAuthContext.tsx ---
+  [JSX text] '(promise: Promise'
+
+--- components/TechnicianInvitations.tsx ---
+  [JSX text] 'Technician Invitations'
+  [JSX text] 'New Invitation'
+  [JSX text] 'Technician Name'
+  [JSX text] 'Email (Optional)'
+  [JSX text] 'Phone (Optional)'
+  [JSX text] 'Create Invitation'
+  [JSX text] 'No invitations yet'
+  [JSX text] 'Copied!'
+  [JSX text] 'Copy Link'
+  [JSX text] 'Accepted Invitations'
+  [JSX text] 'Expired Invitations'
+  [placeholder] 'e.g., Ahmed Mohamed'
+  [placeholder] 'e.g., ahmed@example.com'
+  [placeholder] 'e.g., 0100-123-4567'
+  [title] 'Revoke invitation'
+  [title] 'Delete invitation'
+  [title] 'Delete invitation'
+  [title] 'Delete invitation'
+
+--- components/TemplateSelector.tsx ---
+  [JSX text] 'Parts Changed'
+
+--- components/UserAccessManagement.tsx ---
+  [JSX text] ") : activeTab === 'invitations' ? ("
+  [JSX text] ") : activeTab === 'legacy' ? ("
+  [JSX text] ') : legacyBuckets.length === 0 ? ('
+  [JSX text] ') : (\n            /* Bucket List View */'
+
+--- components/form-ui/AutoSaveIndicator.tsx ---
+  [JSX text] 'Save now'
+
+--- components/form-ui/EnhancedInput.tsx ---
+  [JSX text] 'maxLength * 0.9 && ('
+
+--- components/form-ui/ErrorRecovery.tsx ---
+  [JSX text] 'Error details'
+  [JSX text] 'Contact Support'
+
+--- components/form-ui/FormProgress.tsx ---
+  [JSX text] ') : isCompleted ? ('
+  [JSX text] ') : isCurrent ? ('
+  [JSX text] ') : isCompleted ? ('
+
+--- components/form-ui/HelpTooltip.tsx ---
+  [JSX text] '*   Visit Type\n *'
+
+--- components/form-ui/RequiredFieldBadge.tsx ---
+  [aria-label] 'Required field'
+  [aria-label] 'Required field'
+  [label] 'Required field'
+  [label] 'Required field'
+
+--- components/form-ui/SafeModal.tsx ---
+  [JSX text] 'Unsaved changes will be lost if you close'
+  [JSX text] 'Discard unsaved changes?'
+  [aria-label] 'Close modal'
+  [label] 'Close modal'
+
+--- components/form-ui/ValidationSummary.tsx ---
+  [JSX text] 'Fix All'
+
+--- components/forms/hooks/useFormValidation.ts ---
+  [JSX text] ';\n  touched: Record'
+  [JSX text] '(\n  formData: T,\n  validationRules: ValidationRules'
+
+--- components/technician-portal/CameraBottomSheet.tsx ---
+  [JSX text] '(\n    beforeCount'
+
+--- components/technician-portal/ui/SelectDrawer.tsx ---
+  [JSX text] 'No options found.'
+
+--- src/views/FormWizardView.tsx ---
+  [JSX text] 's.id === currentStep);\n    if (ci'
+  [JSX text] 's.id'
+  [JSX text] 'Unknown Step'
+
+--- src/views/wizard/BranchCard.tsx ---
+  [placeholder] 'مثال: La Marzocco'
+  [placeholder] 'مثال: Linea Classic'
+
+--- src/views/wizard/Step1_CompanyInfo.tsx ---
+  [placeholder] 'مثال: manager@midoes.com'
+  [placeholder] 'مثال: La Marzocco'
+  [placeholder] 'مثال: Linea Classic'
+
+--- src/views/wizard/Step6_Review.tsx ---
+  [JSX text] 'Review Your Submission'
+

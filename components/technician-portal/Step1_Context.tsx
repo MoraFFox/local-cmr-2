@@ -1,5 +1,6 @@
 import React from 'react';
-import { BuildingOfficeIcon, MapPinIcon, CalendarIcon, UserIcon, StarIcon } from '@heroicons/react/24/outline';
+import { BuildingOfficeIcon, MapPinIcon, CalendarIcon, UserIcon } from '@heroicons/react/24/outline';
+import { StarRating } from '../form-ui/StarRating';
 import TechCard from './ui/TechCard';
 import SelectDrawer from './ui/SelectDrawer';
 import TechButton from './ui/TechButton';
@@ -110,28 +111,18 @@ const Step1_Context: React.FC<Step1ContextProps> = ({
                   placeholder={ar.step1.clientBaristaPlaceholder}
                   value={data.clientBaristaName}
                   onChange={(e) => onChange({ ...data, clientBaristaName: e.target.value })}
+                  autoScroll
               />
               
-              <div className="bg-cream-2 p-4 rounded-xl border border-hairline">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-latte mb-3 ml-1">
-                      {ar.step1.ratingLabel}
-                  </label>
-                  <div className="flex justify-between items-center px-2">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                              key={star}
-                              onClick={() => onChange({ ...data, clientBaristaRating: star })}
-                              className={`p-2 transition-all duration-200 active:scale-90 ${
-                                  star <= data.clientBaristaRating
-                                  ? 'text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]'
-                                  : 'text-latte'
-                              }`}
-                          >
-                              <StarIcon className="w-8 h-8 fill-current" />
-                          </button>
-                      ))}
-                  </div>
-              </div>
+              <StarRating
+                  value={data.clientBaristaRating || 0}
+                  onChange={(v) => onChange({ ...data, clientBaristaRating: v })}
+                  size="lg"
+                  showNA
+                  showNumeric
+                  label={ar.step1.ratingLabel}
+                  className="bg-cream-2 p-4 rounded-xl border border-hairline"
+                />
           </div>
        </TechCard>
 

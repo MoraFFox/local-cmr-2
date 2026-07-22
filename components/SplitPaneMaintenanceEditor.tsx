@@ -13,14 +13,7 @@ import {
   ArrowUpIcon,
   ArrowDownIcon,
 } from "@heroicons/react/24/outline";
-// NEW: Import auto-save and validation hooks
-import { useAutoSave } from './forms/hooks/useAutoSave';
-import { useFormValidation } from './forms/hooks/useFormValidation';
-// NEW: Import UI components
-import { AutoSaveIndicator } from './form-ui/AutoSaveIndicator';
-import { ValidationSummary } from './form-ui/ValidationSummary';
-import { RequiredFieldBadge } from './form-ui/RequiredFieldBadge';
-import { DatePresetButtons } from './form-ui/EnhancedInput';
+import MaintenanceRecordEditor from './MaintenanceRecordEditor';
 
 interface SplitPaneMaintenanceEditorProps {
   records: MaintenanceRecord[];
@@ -52,37 +45,6 @@ const SplitPaneMaintenanceEditor: React.FC<SplitPaneMaintenanceEditorProps> = ({
   const [isPaneOpen, setIsPaneOpen] = useState<boolean>(true);
 
   const selectedRecord = records[selectedRecordIndex];
-
-  // NEW: Auto-save hook - saves form automatically after each change
-  const autoSave = useAutoSave(
-    `splitpane-maintenance-record-${selectedRecord?.id || 'new'}`,
-    selectedRecord || ({} as MaintenanceRecord),
-    {
-      debounceMs: 30000, // 30 seconds
-      onSave: (data) => {
-        // Auto-save to localStorage only
-        // Actual save happens via onChange callback
-      },
-      onSaveError: (error) => {
-        console.error('Auto-save failed:', error);
-      },
-      enabled: !!selectedRecord
-    }
-  );
-
-  // NEW: Validation hook with rules
-  const validation = useFormValidation(
-    selectedRecord || ({} as MaintenanceRecord),
-    {
-      maintenanceDate: { required: true },
-      baristaName: { required: true, minLength: 2 }
-    },
-    {
-      mode: 'onBlur',
-      showSummary: true,
-      validateOnMount: false
-    }
-  );
 
   const handleRecordSelect = (index: number) => {
     setSelectedRecordIndex(index);
@@ -288,180 +250,40 @@ const SplitPaneMaintenanceEditor: React.FC<SplitPaneMaintenanceEditorProps> = ({
       {/* Right Pane - Record Editor */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {selectedRecord ? (
-          <>
-            {/* Editor Header */}
-            <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-lg font-semibold text-slate-800 dark:text-slate-200">
-                    Visit #{selectedRecordIndex + 1}
-                  </span>
-                  <span
-                    className={`text-sm px-3 py-1 rounded-full ${getStatusColor(selectedRecord)}`}
-                  >
-                    {getStatusText(selectedRecord)}
-                  </span>
-                </div>
-
-                <button
-                  onClick={() => handleRemoveRecord(selectedRecordIndex)}
-                  className="flex items-center gap-2 px-3 py-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+          <div className="flex-1 overflow-y-auto p-4 bg-slate-50 dark:bg-slate-900/50">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <span className="text-lg font-semibold text-slate-800 dark:text-slate-200">
+                  Visit #{selectedRecordIndex + 1}
+                </span>
+                <span
+                  className={`text-sm px-3 py-1 rounded-full ${getStatusColor(selectedRecord)}`}
                 >
-                  <TrashIcon className="w-4 h-4" />
-                  Delete
-                </button>
+                  {getStatusText(selectedRecord)}
+                </span>
               </div>
 
-              {/* NEW: Auto-save indicator */}
-              <AutoSaveIndicator
-                isSaving={autoSave.isSaving}
-                lastSaved={autoSave.lastSaved}
-                hasUnsavedChanges={autoSave.hasUnsavedChanges}
-                onSaveNow={autoSave.saveNow}
-                variant="full"
-              />
-
-              {/* NEW: Validation summary (shows when there are errors) */}
-              {validation.hasErrors && (
-                <ValidationSummary
-                  errors={validation.allErrors}
-                  onJumpToError={(fieldName) => {
-                    const element = document.querySelector(`[name="${fieldName}"]`) as HTMLInputElement;
-                    element?.focus();
-                    element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }}
-                  title="Please fix the following errors before saving"
-                />
-              )}
+              <button
+                onClick={() => handleRemoveRecord(selectedRecordIndex)}
+                className="flex items-center gap-2 px-3 py-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors min-h-[44px]"
+              >
+                <TrashIcon className="w-4 h-4" />
+                Delete
+              </button>
             </div>
 
-            {/* Editor Content - Placeholder for actual form */}
-            <div className="flex-1 overflow-y-auto p-4">
-              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-4">
-                <p className="text-amber-800 dark:text-amber-200 text-sm">
-                  <strong>Split-Pane Editor Active</strong>
-                  <br />
-                  This is the split-pane editing interface. The full editing
-                  form would be rendered here with all the maintenance record
-                  fields. This provides a timeline view on the left and detailed
-                  editing on the right.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      Date
-                      <RequiredFieldBadge />
-                    </label>
-                    {/* Quick-select presets (audit issue #13) */}
-                    <DatePresetButtons
-                      value={selectedRecord.maintenanceDate}
-                      onChange={(date) => {
-                        handleUpdateRecord({
-                          ...selectedRecord,
-                          maintenanceDate: date,
-                        });
-                        validation.touchField('maintenanceDate');
-                      }}
-                      variant="slate"
-                      className="mb-2"
-                    />
-                    <input
-                      type="date"
-                      name="maintenanceDate"
-                      value={selectedRecord.maintenanceDate}
-                      onChange={(e) => {
-                        handleUpdateRecord({
-                          ...selectedRecord,
-                          maintenanceDate: e.target.value,
-                        });
-                        validation.touchField('maintenanceDate');
-                      }}
-                      className={`w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border rounded-lg ${
-                        validation.errors.maintenanceDate
-                          ? 'border-red-500 focus:ring-red-500'
-                          : 'border-slate-300 dark:border-slate-600'
-                      }`}
-                    />
-                    {validation.errors.maintenanceDate && (
-                      <p className="mt-1 text-sm text-red-600">{validation.errors.maintenanceDate}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      Staff
-                      <RequiredFieldBadge />
-                    </label>
-                    <select
-                      name="baristaName"
-                      value={selectedRecord.baristaName}
-                      onChange={(e) => {
-                        handleUpdateRecord({
-                          ...selectedRecord,
-                          baristaName: e.target.value,
-                        });
-                        validation.touchField('baristaName');
-                      }}
-                      className={`w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border rounded-lg ${
-                        validation.errors.baristaName
-                          ? 'border-red-500 focus:ring-red-500'
-                          : 'border-slate-300 dark:border-slate-600'
-                      }`}
-                    >
-                      <option value="">Select Staff</option>
-                      {baristas.map((b) => (
-                        <option key={b.id} value={b.name}>
-                          {b.name}
-                        </option>
-                      ))}
-                    </select>
-                    {validation.errors.baristaName && (
-                      <p className="mt-1 text-sm text-red-600">{validation.errors.baristaName}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedRecord.hadProblem}
-                      onChange={(e) =>
-                        handleUpdateRecord({
-                          ...selectedRecord,
-                          hadProblem: e.target.checked,
-                        })
-                      }
-                      className="w-4 h-4"
-                    />
-                    <span className="text-slate-700 dark:text-slate-300">
-                      Had Problem
-                    </span>
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedRecord.problemSolved}
-                      onChange={(e) =>
-                        handleUpdateRecord({
-                          ...selectedRecord,
-                          problemSolved: e.target.checked,
-                        })
-                      }
-                      className="w-4 h-4"
-                    />
-                    <span className="text-slate-700 dark:text-slate-300">
-                      Problem Solved
-                    </span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </>
+            <MaintenanceRecordEditor
+              record={selectedRecord}
+              onSave={handleUpdateRecord}
+              onCancel={() => {}}
+              partsList={partsList}
+              servicesList={servicesList}
+              problemCategories={problemCategories}
+              allPredefinedProblems={allPredefinedProblems}
+              baristas={baristas}
+              isEmbedded
+            />
+          </div>
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">

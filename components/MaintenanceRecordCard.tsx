@@ -25,15 +25,16 @@ import {
   WrenchIcon,
   CalendarIcon,
   UserIcon,
-  StarIcon,
   CurrencyDollarIcon,
   MapPinIcon,
   CheckCircleIcon,
   ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
-import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
+import { StarRating, StarRatingDisplay } from "./form-ui/StarRating";
+import { SafeModal } from "./form-ui/SafeModal";
 // NEW: Context-aware suggestions based on reported problems
 import { getSuggestedServices, getSuggestedParts } from "../utils/problemSuggestions";
+import { generateUniqueId } from "../utils/idGenerator";
 
 const visitZoneFees: Record<"cairo" | "outside_cairo" | "el_sahel", number> = {
   cairo: 500,
@@ -140,7 +141,7 @@ export const getNewMaintenanceRecord = (
   servicesPerformed: [],
   followUpVisits: [],
   machines: [],
-  supervisors: [{ id: Date.now(), name: "", phone: "" }],
+  supervisors: [{ id: generateUniqueId(), name: "", phone: "" }],
   dailyLeaseCost: parentRecord?.dailyLeaseCost,
   nextVisitDate: "",
 });
@@ -170,12 +171,7 @@ const MaintenanceSummary: React.FC<{ record: MaintenanceRecord }> = ({
       )}
 
       {record.visitRating > 0 && (
-        <div className="flex items-center gap-0.5">
-          <StarIconSolid className="w-4 h-4 text-yellow-400" />
-          <span className="text-primary dark:text-latte">
-            {record.visitRating}/5
-          </span>
-        </div>
+        <StarRatingDisplay value={record.visitRating} size="xs" />
       )}
 
       <div className="flex items-center gap-2">
@@ -243,6 +239,8 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(),
   );
+  // Quick-add modal state (replaces prompt() — audit #54)
+  const [quickAddModal, setQuickAddModal] = useState<{ type: 'barista' | 'clientBarista'; name: string } | null>(null);
 
   // NEW: Context-aware suggestions — compute relevant services/parts based on
   // the problems the technician reported for this record.
@@ -345,7 +343,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
   };
 
   const handleAddFollowUp = () => {
-    const newId = Date.now();
+    const newId = generateUniqueId();
     const newFollowUp = getNewMaintenanceRecord(newId, record);
     const newFollowUps = [...(record.followUpVisits || []), newFollowUp];
     onChange({ ...record, followUpVisits: newFollowUps });
@@ -360,7 +358,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
   };
 
   const handleAddMachine = () => {
-    const newMachine = { id: Date.now(), name: "", count: 1 };
+    const newMachine = { id: generateUniqueId(), name: "", count: 1 };
     const newMachines = [...(record.machines || []), newMachine];
     onChange({ ...record, machines: newMachines });
   };
@@ -381,7 +379,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
   };
 
   const handleAddSupervisor = () => {
-    const newSupervisor = { id: Date.now(), name: "", phone: "" };
+    const newSupervisor = { id: generateUniqueId(), name: "", phone: "" };
     const newSupervisors = [...(record.supervisors || []), newSupervisor];
     onChange({ ...record, supervisors: newSupervisors });
   };
@@ -404,16 +402,21 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
   };
 
   const handleQuickAddBarista = () => {
-    const name = prompt("Enter new staff member name:");
-    if (name && name.trim()) {
-      const trimmedName = name.trim();
-      if (onAddBarista) {
-        onAddBarista(trimmedName);
-        handleFieldChange({
-          target: { name: "baristaName", value: trimmedName },
-        } as any);
-      }
+    setQuickAddModal({ type: 'barista', name: '' });
+  };
+
+  const confirmQuickAdd = () => {
+    if (!quickAddModal || !quickAddModal.name.trim()) return;
+    const trimmedName = quickAddModal.name.trim();
+    if (quickAddModal.type === 'barista' && onAddBarista) {
+      onAddBarista(trimmedName);
+      handleFieldChange({
+        target: { name: "baristaName", value: trimmedName },
+      } as any);
+    } else if (quickAddModal.type === 'clientBarista' && onAddClientBarista) {
+      onAddClientBarista(trimmedName);
     }
+    setQuickAddModal(null);
   };
 
   const handleRatingChange = (rating: number) => {
@@ -562,10 +565,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                 {onAddClientBarista && (
                   <button
                     type="button"
-                    onClick={() => {
-                      const name = window.prompt("اسم باريستا العميل:");
-                      if (name && onAddClientBarista) onAddClientBarista(name);
-                    }}
+                    onClick={() => setQuickAddModal({ type: 'clientBarista', name: '' })}
                     className="px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors flex items-center justify-center shadow-sm active:scale-95 shrink-0"
                     title="إضافة باريستا عميل جديد"
                     aria-label="إضافة باريستا عميل جديد"
@@ -577,33 +577,14 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
             </div>
 
             {/* Rating */}
-            <div className="flex flex-col">
-              <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
-                تقييم الأداء
-              </label>
-              <div className="flex items-center gap-1 h-full bg-cream dark:bg-espresso rounded-lg px-3 border border-hairline dark:border-hairline">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => handleRatingChange(star)}
-                    className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded p-0.5 transform active:scale-110 transition-transform"
-                    aria-label={`تقييم ${star} من 5`}
-                  >
-                    {star <= (record.visitRating || 0) ? (
-                      <StarIconSolid className="w-5 h-5 text-yellow-400" />
-                    ) : (
-                      <StarIcon className="w-5 h-5 text-latte" />
-                    )}
-                  </button>
-                ))}
-                <span className="text-xs text-latte ms-2 font-semibold">
-                  {(record.visitRating || 0) > 0
-                    ? `${record.visitRating}/5`
-                    : "بدون تقييم"}
-                </span>
-              </div>
-            </div>
+            <StarRating
+              value={record.visitRating || 0}
+              onChange={handleRatingChange}
+              size="sm"
+              label="تقييم الأداء"
+              showNA
+              showNumeric
+            />
           </div>
 
           <RadioGroup
@@ -931,6 +912,41 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
           />
         </div>
       </div>
+
+      {/* Quick-add modal (replaces prompt() — audit #54) */}
+      <SafeModal
+        isOpen={quickAddModal !== null}
+        onClose={() => setQuickAddModal(null)}
+        title={quickAddModal?.type === 'barista' ? 'إضافة فني جديد' : 'إضافة باريستا عميل'}
+      >
+        <div className="space-y-4">
+          <TextInput
+            label="الاسم"
+            name="quickAddName"
+            value={quickAddModal?.name || ''}
+            onChange={(e) => setQuickAddModal(prev => prev ? { ...prev, name: e.target.value } : null)}
+            placeholder={quickAddModal?.type === 'barista' ? 'اسم الفني' : 'اسم باريستا العميل'}
+            autoFocus
+          />
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setQuickAddModal(null)}
+              className="px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"
+            >
+              إلغاء
+            </button>
+            <button
+              type="button"
+              onClick={confirmQuickAdd}
+              disabled={!quickAddModal?.name.trim()}
+              className="btn-primary px-4 py-2 text-sm font-medium rounded-lg disabled:opacity-50"
+            >
+              إضافة
+            </button>
+          </div>
+        </div>
+      </SafeModal>
     </CollapsibleCard>
   );
 };

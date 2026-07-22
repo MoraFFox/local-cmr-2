@@ -9,6 +9,8 @@ import Button from "../../../components/ui/Button";
 import { PlusCircleIcon, WrenchScrewdriverIcon } from "@heroicons/react/24/outline";
 import { partsList, servicesList, problemCategories } from "../../../constants";
 import { allPredefinedProblems } from "../../../utils/sharedConstants";
+import { HelpTooltip } from "../../../components/form-ui/HelpTooltip";
+import { useT } from "../../../utils/i18n";
 import type { WizardStepProps } from "./types";
 
 export const Step5_MaintenanceHistory: React.FC<WizardStepProps> = ({
@@ -16,10 +18,16 @@ export const Step5_MaintenanceHistory: React.FC<WizardStepProps> = ({
   actions,
   newlyAddedId,
   allKnownBaristaNames,
-}) => (
+}) => {
+  const t = useT();
+
+  return (
   <Card title="سجل الصيانة (المكتب الرئيسي)">
     <div className="flex justify-between items-center mb-6">
-      <h3 className="text-xl font-bold text-primary tracking-tight">سجلات الصيانة</h3>
+      <div className="flex items-center gap-2">
+        <h3 className="text-xl font-bold text-primary tracking-tight">سجلات الصيانة</h3>
+        <HelpTooltip text={t.tooltips.maintenanceHistory} />
+      </div>
       <Button onClick={() => actions.addListItem("maintenanceHistory")}>
         <PlusCircleIcon className="w-5 h-5" /> إضافة سجل
       </Button>
@@ -56,4 +64,5 @@ export const Step5_MaintenanceHistory: React.FC<WizardStepProps> = ({
       )}
     </div>
   </Card>
-);
+  );
+};

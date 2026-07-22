@@ -6,6 +6,7 @@ import CollapsibleCard from "../../../components/CollapsibleCard";
 import EmptyState from "../../../components/EmptyState";
 import TextInput from "../../../components/TextInput";
 import Button from "../../../components/ui/Button";
+import { HelpTooltip } from "../../../components/form-ui/HelpTooltip";
 import {
   UserIcon,
   PhoneIcon,
@@ -15,6 +16,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { contactPositions } from "../../../constants";
+import { useT } from "../../../utils/i18n";
 import type { FormData, Contact } from "../../../types";
 import type { ContactPath, WizardStepActions } from "./types";
 
@@ -31,6 +33,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
   actions,
   newlyAddedId,
 }) => {
+  const t = useT();
   let contacts: Contact[];
   if (path === "main") contacts = formData.contacts;
   else if (path === "warehouse") contacts = formData.warehouse.contacts;
@@ -63,7 +66,10 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                   icon={<UserIcon />}
                 />
                 <div>
-                  <label className="block text-sm font-medium text-primary mb-1.5">المسمى الوظيفي</label>
+                  <label className="flex items-center gap-1.5 text-sm font-medium text-primary mb-1.5">
+                    المسمى الوظيفي
+                    <HelpTooltip text={t.tooltips.contactPosition} />
+                  </label>
                   <div className="relative group focus-within:text-primary">
                     <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-latte">
                       <BriefcaseIcon className="w-4 h-4" aria-hidden="true" />
@@ -110,7 +116,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                           }
                           className="input-base pl-10"
                           placeholder="مثال: 0100-123-4567"
-                          maxLength={13}
+                          maxLength={20}
                         />
                       </div>
                       <button

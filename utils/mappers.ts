@@ -4,21 +4,14 @@
  */
 
 import { MaintenanceRecord, MaintenancePhoto, PortalSubmission } from "../types";
+import { formatEgyptianPhone } from "./phone";
 
 /**
  * Format a phone number string into a readable segmented format.
  * Cleans non-digits, then groups as XXXX-XXX-XXXX.
  */
-export const formatPhoneNumber = (value: string): string => {
-  const cleaned = value.replace(/\D/g, "");
-  if (!cleaned) return "";
-
-  const match = cleaned.match(/^(\d{0,4})(\d{0,3})(\d{0,4})$/);
-  if (match) {
-    return [match[1], match[2], match[3]].filter(Boolean).join("-");
-  }
-  return cleaned;
-};
+export const formatPhoneNumber = (value: string): string =>
+  formatEgyptianPhone(value);
 
 /**
  * Map a PortalSubmission (snake_case from Supabase) to a frontend

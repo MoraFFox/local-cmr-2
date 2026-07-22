@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { ar } from '../utils/arabicTranslations';
 import { Part, PartRecord } from '../types';
+import { announce } from '../utils/ariaAnnouncer';
 import {
   MagnifyingGlassIcon,
   PlusCircleIcon,
@@ -51,6 +52,16 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
     );
     setCustomParts(customs);
   }, [selectedValues, predefinedPartValues]);
+
+  // Announce selection count to screen readers (accessibility #42)
+  useEffect(() => {
+    const count = selectedValues.length;
+    if (count > 0) {
+      announce(`تم تحديد ${count} ${count === 1 ? 'قطعة' : 'قطع'}`);
+    }
+    // Only announce on count changes, skip initial render (count === 0)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedValues.length]);
 
   const selectedByPayer = useMemo(() => {
     const midosItems: PartRecord[] = [];
@@ -125,17 +136,22 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
     onChange(selectedValues.map((p) => ({ ...p, paidByClient })));
   }, [selectedValues, onChange]);
 
-  const handleRemovePart = useCallback((partName: string) => {
-    onChange(selectedValues.filter((p) => p.name !== partName));
+  // NEW: Bulk quantity multiply — multiply all selected items' counts (audit issue #20)
+  const handleBulkQuantityMultiply = useCallback((multiplier: number) => {
+    onChange(selectedValues.map((p) => ({ ...p, count: Math.max(1, Math.floor(p.count * multiplier)) })));
   }, [selectedValues, onChange]);
 
-  const handleCountChange = useCallback((partName: string, newCount: number) => {
-    if (newCount <= 0) handleRemovePart(partName);
-    else onChange(selectedValues.map((p) => p.name === partName ? { ...p, count: newCount } : p));
+  const handleRemovePart = useCallback((name: string) => {
+    onChange(selectedValues.filter((p) => p.name !== name));
+  }, [selectedValues, onChange]);
+
+  const handleCountChange = useCallback((name: string, newCount: number) => {
+    if (newCount <= 0) handleRemovePart(name);
+    else onChange(selectedValues.map((p) => p.name === name ? { ...p, count: newCount } : p));
   }, [selectedValues, onChange, handleRemovePart]);
 
-  const handlePayerChange = useCallback((partName: string, paidByClient: boolean) => {
-    onChange(selectedValues.map((p) => p.name === partName ? { ...p, paidByClient } : p));
+  const handlePayerChange = useCallback((name: string, paidByClient: boolean) => {
+    onChange(selectedValues.map((p) => p.name === name ? { ...p, paidByClient } : p));
   }, [selectedValues, onChange]);
 
   const handleAddCustomPart = useCallback(() => {
@@ -319,6 +335,27 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
           {/* NEW: Cards/Chips view toggle (audit issue #11) + bulk payer edit (audit issue #21) */}
           {totalSelectedCount > 0 && isSelectedSectionExpanded && (
             <div className="flex items-center gap-2">
+              {/* Bulk quantity edit (audit issue #20) */}
+              <div className="flex items-center gap-1 text-xs">
+                <span className="text-latte">Multiply all:</span>
+                <button
+                  type="button"
+                  onClick={() => handleBulkQuantityMultiply(2)}
+                  className="px-2 py-1 rounded-md font-bold bg-leaf-500/15 text-leaf-700 dark:text-leaf-400 border border-leaf-500/40 hover:bg-leaf-500/25 transition-colors"
+                  title="Double all quantities"
+                >
+                  ×2
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleBulkQuantityMultiply(0.5)}
+                  className="px-2 py-1 rounded-md font-bold bg-ember-500/15 text-ember-700 dark:text-ember-400 border border-ember-500/40 hover:bg-ember-500/25 transition-colors"
+                  title="Halve all quantities (min 1)"
+                >
+                  ÷2
+                </button>
+              </div>
+
               {/* Bulk payer edit */}
               <div className="flex items-center gap-1 text-xs">
                 <span className="text-latte">Set all:</span>

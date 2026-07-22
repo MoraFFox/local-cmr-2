@@ -5,6 +5,7 @@
 
 import { FormData, MaintenanceRecord } from "../types";
 import { problemCategories } from "../constants";
+import { generateUniqueId } from "./idGenerator";
 
 // ── Storage Keys ───────────────────────────────────────────────
 export const STORAGE_KEYS = {
@@ -89,7 +90,7 @@ export const getNewMaintenanceRecord = (id: number): MaintenanceRecord => ({
   servicesPerformed: [],
   followUpVisits: [],
   machines: [],
-  supervisors: [{ id: Date.now(), name: "", phone: "" }],
+  supervisors: [{ id: generateUniqueId(), name: "", phone: "" }],
   dailyLeaseCost: undefined,
   nextVisitDate: "",
   photos: [],
@@ -105,11 +106,12 @@ export const CLASSES = {
 
 // ── View-to-Title Mapping ──────────────────────────────────────
 export const VIEW_TITLES: Record<string, string> = {
-  form: "",
-  print: "طباعة أمر العمل",
-  details: "تفاصيل السجل",
-  baristas: "أداء فريق Midoe's",
-  "barista-details": "أداء فريق Midoe's",
-  technicians: "إدارة الفنيين",
-  history: "سجل عمليات الإرسال",
+  form: "نموذج الإرسال — ميدوز",
+  print: "طباعة أمر العمل — ميدوز",
+  details: "تفاصيل السجل — ميدوز",
+  baristas: "أداء فريق Midoe's — ميدوز",
+  "barista-details": "أداء فريق Midoe's — ميدوز",
+  technicians: "إدارة الفنيين — ميدوز",
+  history: "سجل عمليات الإرسال — ميدوز",
+  "maintenance-edit": "تحرير الصيانة — ميدوز",
 };

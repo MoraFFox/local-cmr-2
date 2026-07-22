@@ -16,6 +16,7 @@
 
 import React from 'react';
 import { ExclamationCircleIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { useT } from '../../utils/i18n';
 
 interface ValidationError {
   field: string;
@@ -42,7 +43,7 @@ interface ValidationSummaryProps {
 /**
  * Convert field name to readable label
  */
-function getFieldLabel(fieldName: string): string {
+function getFieldLabel(fieldName: string, t: ReturnType<typeof useT>): string {
   return fieldName
     .split(/(?=[A-Z])/)
     .join(' ')
@@ -77,30 +78,31 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
 }) => {
   if (!isVisible || errors.length === 0) return null;
 
+  const t = useT();
   const groupedErrors = groupErrorsBySection(errors);
   const errorCount = errors.length;
   const sectionCount = Object.keys(groupedErrors).length;
 
   return (
     <div
-      className="bg-ember-500/10 border border-ember-500/30 rounded-xl p-4 animate-fade-in"
+      className="bg-ember-50 dark:bg-ember-500/10 border border-ember-500/30 rounded-xl p-4 animate-fade-in"
       role="alert"
       aria-live="assertive"
     >
       {/* Header */}
       <div className="flex items-start gap-3 mb-4">
         <div className="p-2 bg-ember-500/20 rounded-lg flex-shrink-0">
-          <ExclamationCircleIcon className="w-5 h-5 text-ember-500" />
+          <ExclamationCircleIcon className="w-5 h-5 text-ember-700 dark:text-ember-300" />
         </div>
 
         <div className="flex-1">
-          <h3 className="font-bold text-ember-500">
-            {title || `Please fix ${errorCount} error${errorCount > 1 ? 's' : ''}`}
+          <h3 className="font-bold text-ember-700 dark:text-ember-300">
+            {title || t.ui.formProgress.pleaseFixErrors.replace('{{count}}', String(errorCount))}
           </h3>
-          <p className="text-sm text-ember-500/80 mt-1">
+          <p className="text-sm text-ember-700/70 dark:text-ember-300/80 mt-1">
             {sectionCount > 1
-              ? `Errors in ${sectionCount} sections need to be fixed`
-              : 'Some fields need attention before you can continue'}
+              ? t.ui.formProgress.errorsInSections.replace('{{count}}', String(sectionCount))
+              : t.ui.formProgress.someFieldsNeedAttention}
           </p>
         </div>
 
@@ -110,7 +112,7 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
             onClick={onFixAll}
             className="px-3 py-1.5 text-sm font-medium bg-ember-500 text-white rounded-lg hover:bg-ember-600 transition-colors flex-shrink-0"
           >
-            Fix All
+            {t.common.fixAll}
           </button>
         )}
       </div>
@@ -121,8 +123,8 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
           <div key={section}>
             {/* Section header (if multiple sections) */}
             {sectionCount > 1 && (
-              <h4 className="text-xs font-bold text-ember-500/70 uppercase tracking-wider mt-3 mb-2 first:mt-0">
-                {getFieldLabel(section)}
+              <h4 className="text-xs font-bold text-ember-700/60 dark:text-ember-300/70 uppercase tracking-wider mt-3 mb-2 first:mt-0">
+                {getFieldLabel(section, t)}
               </h4>
             )}
 
@@ -135,13 +137,13 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
                 className="w-full text-left p-2 rounded-lg hover:bg-ember-500/10 transition-colors group"
               >
                 <div className="flex items-start gap-2">
-                  <ChevronRightIcon className="w-4 h-4 text-ember-500/50 mt-0.5 group-hover:text-ember-500 transition-colors" />
+                  <ChevronRightIcon className="w-4 h-4 text-ember-500/50 mt-0.5 group-hover:text-ember-700 dark:group-hover:text-ember-300 transition-colors" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-ember-500">
-                      {getFieldLabel(error.field)}
+                    <p className="text-sm font-medium text-ember-700 dark:text-ember-300">
+                      {getFieldLabel(error.field, t)}
                     </p>
                     {!compact && (
-                      <p className="text-xs text-ember-500/70 mt-0.5">
+                      <p className="text-xs text-ember-700/60 dark:text-ember-300/70 mt-0.5">
                         {error.message}
                       </p>
                     )}
@@ -155,8 +157,8 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
 
       {/* Footer */}
       <div className="mt-4 pt-3 border-t border-ember-500/20">
-        <p className="text-xs text-ember-500/60">
-          Click on any error to jump to that field
+        <p className="text-xs text-ember-700/50 dark:text-ember-300/60">
+          {t.common.clickErrorToJump}
         </p>
       </div>
     </div>

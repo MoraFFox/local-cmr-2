@@ -9,12 +9,16 @@ import Button from "../../../components/ui/Button";
 import { MapPinIcon, PlusCircleIcon } from "@heroicons/react/24/outline";
 import { ContactsSection } from "./ContactsSection";
 import type { WizardStepProps } from "./types";
+import { useT } from "../../../utils/i18n";
 
 export const Step3_Warehouse: React.FC<WizardStepProps> = ({
   formData,
   actions,
   newlyAddedId,
-}) => (
+}) => {
+  const t = useT();
+
+  return (
   <Card title="معلومات المخزن">
     <div className="space-y-6">
       <TextInput
@@ -23,6 +27,7 @@ export const Step3_Warehouse: React.FC<WizardStepProps> = ({
         value={formData.warehouse.location}
         onChange={actions.handleChange}
         icon={<MapPinIcon />}
+        helpText={t.tooltips.warehouseLocation}
       />
       <div className="pt-8 mt-8 border-t dark:border-hairline">
         <div className="flex justify-between items-center mb-4">
@@ -42,3 +47,4 @@ export const Step3_Warehouse: React.FC<WizardStepProps> = ({
     </div>
   </Card>
 );
+};

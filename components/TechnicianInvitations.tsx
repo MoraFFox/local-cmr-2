@@ -16,6 +16,7 @@ import {
   TrashIcon as DeleteIcon,
   ClockIcon,
 } from '@heroicons/react/24/outline';
+import { ConfirmDialog } from './ui/ConfirmDialog';
 
 const TechnicianInvitations: React.FC = () => {
   const [invites, setInvites] = useState<Invite[]>([]);
@@ -26,6 +27,7 @@ const TechnicianInvitations: React.FC = () => {
     phone: ''
   });
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ type: 'revoke' | 'delete'; inviteId: string } | null>(null);
 
   useEffect(() => {
     loadInvites();
@@ -58,17 +60,22 @@ const TechnicianInvitations: React.FC = () => {
   };
 
   const handleRevoke = (inviteId: string) => {
-    if (window.confirm('Revoke this invitation? The technician will no longer be able to use this link.')) {
-      revokeInvite(inviteId);
-      loadInvites();
-    }
+    setConfirmAction({ type: 'revoke', inviteId });
   };
 
   const handleDelete = (inviteId: string) => {
-    if (window.confirm('Delete this invitation permanently?')) {
-      deleteInvite(inviteId);
-      loadInvites();
+    setConfirmAction({ type: 'delete', inviteId });
+  };
+
+  const handleConfirmAction = () => {
+    if (!confirmAction) return;
+    if (confirmAction.type === 'revoke') {
+      revokeInvite(confirmAction.inviteId);
+    } else {
+      deleteInvite(confirmAction.inviteId);
     }
+    loadInvites();
+    setConfirmAction(null);
   };
 
   const getStatusBadge = (status: string) => {
@@ -413,6 +420,17 @@ const TechnicianInvitations: React.FC = () => {
           )}
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={confirmAction !== null}
+        onClose={() => setConfirmAction(null)}
+        onConfirm={handleConfirmAction}
+        title={confirmAction?.type === 'revoke' ? 'إلغاء الدعوة' : 'حذف الدعوة'}
+        message={confirmAction?.type === 'revoke'
+          ? 'إلغاء هذه الدعوة؟ لن يتمكن الفني من استخدام هذا الرابط بعد الآن.'
+          : 'حذف هذه الدعوة بشكل دائم؟'}
+        confirmLabel={confirmAction?.type === 'revoke' ? 'نعم، إلغاء' : 'نعم، حذف'}
+      />
     </div>
   );
 };

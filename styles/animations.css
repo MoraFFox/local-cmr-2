@@ -1,3 +1,15 @@
+/* ── Global: Respect reduced motion preferences (accessibility #46) ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @keyframes contentFadeIn {
     from {
         opacity: 0;
@@ -161,6 +173,16 @@
   animation: skeleton 1.5s infinite linear;
 }
 
+/* Skeleton shimmer (polished variant for #50) */
+@keyframes skeletonShimmer {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0.4; }
+}
+.animate-skeleton-shimmer {
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
 /* Completion burst */
 @keyframes popIn {
   0% { opacity: 0; transform: scale(0.5); }
@@ -197,6 +219,104 @@
 }
 .animate-shimmer-sweep {
   animation: shimmerSweep 2s ease-in-out infinite;
+}
+
+/* Jump-to-next button: fade in + pulse when a new incomplete section appears */
+@keyframes jumpButtonPulse {
+  0% { opacity: 0; transform: scale(0.92); }
+  60% { opacity: 1; transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.animate-jump-button-pulse {
+  animation: jumpButtonPulse 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes jumpButtonGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(184, 115, 51, 0); }
+  50% { box-shadow: 0 0 0 4px rgba(184, 115, 51, 0.25); }
+}
+.animate-jump-button-glow {
+  animation: jumpButtonGlow 1.8s ease-in-out infinite;
+}
+
+/* Subtle attention ping ring around the jump button */
+@keyframes jumpButtonRing {
+  0% { box-shadow: 0 0 0 0 rgba(184, 115, 51, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(184, 115, 51, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(184, 115, 51, 0); }
+}
+.animate-jump-button-ring {
+  animation: jumpButtonRing 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Temporary highlight ring around a section that was just jumped to */
+@keyframes sectionJumpHighlight {
+  0% { box-shadow: 0 0 0 0 rgba(184, 115, 51, 0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(184, 115, 51, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(184, 115, 51, 0); }
+}
+.animate-section-jump-highlight {
+  animation: sectionJumpHighlight 1.6s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+
+/* Field-level highlight applied by useSectionJump when jumping to an error */
+.section-jump-field-highlight {
+  outline: 2px solid rgba(184, 115, 51, 0.9);
+  outline-offset: 2px;
+  animation: sectionJumpHighlight 1.6s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+
+/* Smooth collapsible section content using CSS Grid */
+.section-content-grid {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.section-content-grid.is-expanded {
+  grid-template-rows: 1fr;
+}
+
+.section-content-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Content reveal when a section is expanded by a jump */
+@keyframes sectionContentReveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-section-content-reveal {
+  animation: sectionContentReveal 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Respect reduced motion preferences for all section jump animations */
+@media (prefers-reduced-motion: reduce) {
+  .section-content-grid {
+    transition: none;
+  }
+
+  .animate-section-content-reveal {
+    animation: none;
+  }
+
+  .animate-section-jump-highlight {
+    animation: none;
+  }
+
+  .section-jump-field-highlight {
+    outline: none;
+  }
+
+  .animate-section-jump-highlight {
+    animation: none;
+  }
 }
 
 /* Infinite RTL Marquee */

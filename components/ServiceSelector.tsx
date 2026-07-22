@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { ar } from '../utils/arabicTranslations';
 import { Service, ServiceRecord } from '../types';
+import { announce } from '../utils/ariaAnnouncer';
 import {
   MagnifyingGlassIcon,
   PlusCircleIcon,
@@ -51,6 +52,16 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
     );
     setCustomServices(customs);
   }, [selectedValues, predefinedServiceValues]);
+
+  // Announce selection count to screen readers (accessibility #42)
+  useEffect(() => {
+    const count = selectedValues.length;
+    if (count > 0) {
+      announce(`تم تحديد ${count} ${count === 1 ? 'خدمة' : 'خدمات'}`);
+    }
+    // Only announce on count changes, skip initial render (count === 0)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedValues.length]);
 
   const selectedByPayer = useMemo(() => {
     const midosItems: ServiceRecord[] = [];
@@ -126,17 +137,22 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
     onChange(selectedValues.map((s) => ({ ...s, paidByClient })));
   }, [selectedValues, onChange]);
 
-  const handleRemoveService = useCallback((serviceName: string) => {
-    onChange(selectedValues.filter((s) => s.name !== serviceName));
+  // NEW: Bulk quantity multiply — multiply all selected items' counts (audit issue #20)
+  const handleBulkQuantityMultiply = useCallback((multiplier: number) => {
+    onChange(selectedValues.map((s) => ({ ...s, count: Math.max(1, Math.floor(s.count * multiplier)) })));
   }, [selectedValues, onChange]);
 
-  const handleCountChange = useCallback((serviceName: string, newCount: number) => {
-    if (newCount <= 0) handleRemoveService(serviceName);
-    else onChange(selectedValues.map((s) => s.name === serviceName ? { ...s, count: newCount } : s));
+  const handleRemoveService = useCallback((name: string) => {
+    onChange(selectedValues.filter((s) => s.name !== name));
+  }, [selectedValues, onChange]);
+
+  const handleCountChange = useCallback((name: string, newCount: number) => {
+    if (newCount <= 0) handleRemoveService(name);
+    else onChange(selectedValues.map((s) => s.name === name ? { ...s, count: newCount } : s));
   }, [selectedValues, onChange, handleRemoveService]);
 
-  const handlePayerChange = useCallback((serviceName: string, paidByClient: boolean) => {
-    onChange(selectedValues.map((s) => s.name === serviceName ? { ...s, paidByClient } : s));
+  const handlePayerChange = useCallback((name: string, paidByClient: boolean) => {
+    onChange(selectedValues.map((s) => s.name === name ? { ...s, paidByClient } : s));
   }, [selectedValues, onChange]);
 
   const handleAddCustomService = useCallback(() => {
@@ -305,6 +321,27 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
           {/* NEW: Cards/Chips view toggle (audit issue #11) + bulk payer edit (audit issue #21) */}
           {totalSelectedCount > 0 && isSelectedSectionExpanded && (
             <div className="flex items-center gap-2">
+              {/* Bulk quantity edit (audit issue #20) */}
+              <div className="flex items-center gap-1 text-xs">
+                <span className="text-latte">Multiply all:</span>
+                <button
+                  type="button"
+                  onClick={() => handleBulkQuantityMultiply(2)}
+                  className="px-2 py-1 rounded-md font-bold bg-leaf-500/15 text-leaf-700 dark:text-leaf-400 border border-leaf-500/40 hover:bg-leaf-500/25 transition-colors"
+                  title="Double all quantities"
+                >
+                  ×2
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleBulkQuantityMultiply(0.5)}
+                  className="px-2 py-1 rounded-md font-bold bg-ember-500/15 text-ember-700 dark:text-ember-400 border border-ember-500/40 hover:bg-ember-500/25 transition-colors"
+                  title="Halve all quantities (min 1)"
+                >
+                  ÷2
+                </button>
+              </div>
+
               {/* Bulk payer edit */}
               <div className="flex items-center gap-1 text-xs">
                 <span className="text-latte">Set all:</span>

@@ -15,13 +15,18 @@ import {
 } from "@heroicons/react/24/outline";
 import { CLASSES } from "../../../utils/sharedConstants";
 import type { WizardStepProps } from "./types";
+import { useT } from "../../../utils/i18n";
+import { formatEgyptianPhone } from "../../../utils/phone";
 
 export const Step4_Baristas: React.FC<WizardStepProps> = ({
   formData,
   actions,
   newlyAddedId,
   isSubmitting,
-}) => (
+}) => {
+  const t = useT();
+
+  return (
   <Card title="فريق Midoe's (المكتب الرئيسي)">
     <div className="flex justify-between items-center mb-6">
       <h3 className="text-xl font-bold text-primary tracking-tight">أفراد صيانة Midoe's</h3>
@@ -51,8 +56,18 @@ export const Step4_Baristas: React.FC<WizardStepProps> = ({
                   label="رقم الهاتف"
                   name="phone"
                   value={barista.phone}
-                  onChange={(e) => actions.handleListItemChange(e, "baristas", index)}
+                  onChange={(e) =>
+                    actions.handleListItemChange(
+                      {
+                        target: { name: "phone", value: formatEgyptianPhone(e.target.value) },
+                      } as React.ChangeEvent<HTMLInputElement>,
+                      "baristas",
+                      index,
+                    )
+                  }
                   icon={<PhoneIcon />}
+                  helpText={t.tooltips.contactPhone}
+                  dir="ltr"
                 />
               </div>
               <div>
@@ -83,3 +98,4 @@ export const Step4_Baristas: React.FC<WizardStepProps> = ({
     </div>
   </Card>
 );
+};

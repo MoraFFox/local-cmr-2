@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useFloatingMenu } from '../hooks/useFloatingMenu';
 import { MaintenanceRecord } from '../types';
+import { useT } from '../utils/i18n';
 import {
   BoltIcon,
   CheckCircleIcon,
@@ -11,12 +12,12 @@ import {
   TrashIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
-import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+import { StarRating } from './form-ui/StarRating';
 
 interface QuickActionsMenuProps {
   record: MaintenanceRecord;
-  onQuickUpdate: (recordId: number, updates: Partial<MaintenanceRecord>) => void;
-  onDelete?: (recordId: number) => void;
+  onQuickUpdate: (recordId: MaintenanceRecord['id'], updates: Partial<MaintenanceRecord>) => void;
+  onDelete?: (recordId: MaintenanceRecord['id']) => void;
 }
 
 const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
@@ -24,6 +25,7 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
   onQuickUpdate,
   onDelete
 }) => {
+  const t = useT();
   const [showRatingPicker, setShowRatingPicker] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -89,12 +91,12 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
               {record.problemSolved ? (
                 <>
                   <XCircleIcon className="w-5 h-5 text-ember-500" />
-                  <span className="text-sm text-primary dark:text-cream">Mark as Unsolved</span>
+                  <span className="text-sm text-text-primary">{t.common.markAsUnsolved}</span>
                 </>
               ) : (
                 <>
                   <CheckCircleIcon className="w-5 h-5 text-leaf-500" />
-                  <span className="text-sm text-primary dark:text-cream">Mark as Solved</span>
+                  <span className="text-sm text-text-primary">{t.common.markAsSolved}</span>
                 </>
               )}
             </button>
@@ -108,26 +110,17 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
                 className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
               >
                 <StarIcon className="w-5 h-5 text-yellow-500" />
-                <span className="text-sm text-primary dark:text-cream">Change Rating</span>
+                <span className="text-sm text-text-primary">{t.common.changeRating}</span>
               </button>
 
               {showRatingPicker && (
                 <div className="px-4 py-3 bg-cream-2 dark:bg-espresso-light/50 border-t border-hairline dark:border-hairline">
-                  <div className="flex items-center justify-center gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        onClick={() => handleRatingChange(star)}
-                        className="p-1 hover:scale-110 transition-transform"
-                      >
-                        {star <= (record.visitRating || 0) ? (
-                          <StarIconSolid className="w-6 h-6 text-yellow-400" />
-                        ) : (
-                          <StarIcon className="w-6 h-6 text-cream-3 dark:text-espresso-light" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
+                  <StarRating
+                    value={record.visitRating || 0}
+                    onChange={handleRatingChange}
+                    size="sm"
+                    showNA
+                  />
                 </div>
               )}
             </div>
@@ -140,8 +133,8 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
                 }}
                 className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
               >
-                <CalendarIcon className="w-5 h-5 text-primary" />
-                <span className="text-sm text-primary dark:text-cream">Change Date</span>
+                <CalendarIcon className="w-5 h-5 text-text-primary" />
+                <span className="text-sm text-text-primary">{t.common.changeDate}</span>
               </button>
 
               {showDatePicker && (
@@ -150,7 +143,7 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
                     type="date"
                     value={record.maintenanceDate}
                     onChange={handleDateChange}
-                    className="w-full px-3 py-2 bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline rounded-lg text-sm text-primary dark:text-cream focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full px-3 py-2 bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline rounded-lg text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
               )}
@@ -170,7 +163,7 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
                     className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-ember-500/10 dark:hover:bg-ember-500/20 transition-colors text-ember-700 dark:text-ember-300"
                   >
                     <TrashIcon className="w-5 h-5" />
-                    <span className="text-sm font-medium">Delete Record</span>
+                    <span className="text-sm font-medium">{t.common.deleteRecord}</span>
                   </button>
 
                   {showDeleteConfirm && (
@@ -178,7 +171,7 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
                       <div className="flex items-start gap-2 mb-3">
                         <ExclamationTriangleIcon className="w-5 h-5 text-ember-700 dark:text-ember-300 flex-shrink-0 mt-0.5" />
                         <p className="text-sm text-ember-700 dark:text-ember-300">
-                          Are you sure? This action cannot be undone.
+                          {t.common.areYouSure}
                         </p>
                       </div>
                       <div className="flex gap-2">
@@ -186,13 +179,13 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
                           onClick={handleDelete}
                           className="flex-1 px-3 py-2 bg-ember-600 hover:bg-ember-700 text-white text-sm font-medium rounded-lg transition-colors"
                         >
-                          Yes, Delete
+                          {t.common.yesDelete}
                         </button>
                         <button
                           onClick={() => setShowDeleteConfirm(false)}
-                          className="flex-1 px-3 py-2 bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-cream text-sm font-medium rounded-lg hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
+                          className="flex-1 px-3 py-2 bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-text-primary text-sm font-medium rounded-lg hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
                         >
-                          Cancel
+                          {t.common.cancel}
                         </button>
                       </div>
                     </div>

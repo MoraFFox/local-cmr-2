@@ -115,9 +115,15 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                     onClose();
                 }, 300);
             },
-            // onInvalid
-            () => {
-                validation.focusNextError();
+            // onInvalid — receives fresh errors from the hook so we can
+            // focus the first error field synchronously (avoids stale-state bug).
+            (errors) => {
+                const firstErrorField = Object.keys(errors).find(key => errors[key]);
+                if (firstErrorField) {
+                    const el = document.querySelector(`[name="${firstErrorField}"]`) as HTMLInputElement;
+                    el?.focus();
+                    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             }
         )();
     }, [validation, company, formData, onSave, autoSave, onClose]);

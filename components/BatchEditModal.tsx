@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MaintenanceRecord, Barista } from '../types';
 import Button from './ui/Button';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import { SafeModal } from './form-ui/SafeModal';
+import { useUndoQueue } from './UndoQueueContext';
+import { useToast } from './ToastContext';
 
 import { 
     CheckCircleIcon, 
@@ -41,11 +43,18 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
     const [operation, setOperation] = useState<BatchEditOperation | null>(null);
     const [confirmState, setConfirmState] = useState<{ open: boolean; onConfirm: () => void; message: string } | null>(null);
-
     // Track whether the user has interacted with the modal (made selections or
     // chosen an operation) so SafeModal's unsaved-changes protection can guard
     // against accidental dismissal (audit issue #16).
     const hasUnsavedChanges = selectedIds.size > 0 || operation !== null;
+
+    const { queueDelete } = useUndoQueue();
+    const { showToast } = useToast();
+
+    // Keep a live ref to the latest records so the queued delete's onCommit
+    // always filters the most recent list, even after the modal closes.
+    const recordsRef = useRef(records);
+    recordsRef.current = records;
 
     const toggleSelection = (id: number) => {
         setSelectedIds(prev => {
@@ -87,12 +96,31 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
     const executeOperation = () => {
         if (!operation || selectedIds.size === 0) return;
 
+        // NEW: Soft delete with app-level undo toast (audit issue #5)
+        if (operation.field === 'delete') {
+            const idsToDelete = new Set<number | string>(selectedIds);
+            queueDelete({
+                label: `${idsToDelete.size} record(s) marked for deletion.`,
+                onCommit: () => {
+                    const updatedRecords = recordsRef.current.filter(r => !idsToDelete.has(r.id));
+                    onUpdateRecords(updatedRecords);
+                    showToast(`${idsToDelete.size} record(s) deleted`, 'success');
+                },
+                onUndo: () => {
+                    // Records were never removed, so nothing to restore.
+                    showToast('Deletion cancelled', 'info');
+                }
+            });
+            setSelectedIds(new Set());
+            setOperation(null);
+            onClose();
+            return;
+        }
+
         const updatedRecords = records.map(record => {
             if (!selectedIds.has(record.id)) return record;
 
             switch (operation.field) {
-                case 'delete':
-                    return null;
                 case 'maintenanceDate':
                     return { ...record, maintenanceDate: operation.value };
                 case 'baristaName':
@@ -108,7 +136,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                 default:
                     return record;
             }
-        }).filter((r): r is MaintenanceRecord => r !== null);
+        });
 
         onUpdateRecords(updatedRecords);
         // Reset interaction state since the operation has been applied.

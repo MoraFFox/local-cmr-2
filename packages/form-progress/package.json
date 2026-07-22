@@ -1,0 +1,20 @@
+{
+  "name": "@local/form-progress",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Reusable, Arabic-first form progress and required-field components.",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "@heroicons/react": ">=2.0.0"
+  }
+}

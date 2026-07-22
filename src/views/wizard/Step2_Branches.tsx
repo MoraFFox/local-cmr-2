@@ -7,9 +7,9 @@ import Card from "../../../components/Card";
 import EmptyState from "../../../components/EmptyState";
 import Button from "../../../components/ui/Button";
 import { BranchCard } from "./BranchCard";
-import {
-  PlusCircleIcon, BuildingOffice2Icon,
+import { HelpTooltip } from "../../../components/form-ui/HelpTooltip";import { PlusCircleIcon, BuildingOffice2Icon,
 } from "@heroicons/react/24/outline";
+import { useT } from "../../../utils/i18n";
 import type { WizardStepProps } from "./types";
 
 export const Step2_Branches: React.FC<WizardStepProps> = ({
@@ -22,12 +22,17 @@ export const Step2_Branches: React.FC<WizardStepProps> = ({
   allKnownMachineTypes = [],
   allKnownMachineOptions = [],
 }) => {
+  const t = useT();
+
   if (formData.hasBranches !== true) return null;
 
   return (
     <Card title="تفاصيل الفرع">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-bold text-primary tracking-tight">الفروع</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-xl font-bold text-primary tracking-tight">الفروع</h3>
+          <HelpTooltip text={t.tooltips.branchDetails} />
+        </div>
         <Button onClick={() => actions.addListItem("branches")}>
           <PlusCircleIcon className="w-5 h-5" /> إضافة فرع
         </Button>

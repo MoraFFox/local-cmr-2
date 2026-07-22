@@ -19,6 +19,7 @@ interface ReviewStepProps {
   partsList: Part[];
   servicesList: Service[];
   embedded?: boolean;
+  cardTitle?: React.ReactNode;
 }
 
 const visitZoneFees: Record<"cairo" | "outside_cairo" | "el_sahel", number> = {
@@ -403,6 +404,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
   partsList,
   servicesList,
   embedded = false,
+  cardTitle = "Review Your Submission",
 }) => {
   const [isCostModalOpen, setIsCostModalOpen] = useState(false);
 
@@ -700,7 +702,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           <Content />
         </div>
       ) : (
-        <Card title="Review Your Submission">
+        <Card title={cardTitle}>
           <Content />
         </Card>
       )}

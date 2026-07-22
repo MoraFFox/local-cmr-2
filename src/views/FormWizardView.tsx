@@ -13,7 +13,9 @@ import type {
 import Stepper from "../../components/ui/Stepper";
 import Button from "../../components/ui/Button";
 import NavigationButtons from "../../components/NavigationButtons";
+import { FormProgress } from "@/packages/form-progress";
 import ReviewStep from "../../components/ReviewStep";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import {
   EyeIcon, EyeSlashIcon, XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -22,6 +24,7 @@ import { partsList, servicesList } from "../../constants";
 import {
   initialFormData, steps, getNewMaintenanceRecord,
 } from "../../utils/sharedConstants";
+import { generateUniqueId } from "../../utils/idGenerator";
 import { formatPhoneNumber } from "../../utils/mappers";
 
 import { Step1_CompanyInfo } from "./wizard/Step1_CompanyInfo";
@@ -66,6 +69,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
   const [newlyAddedId, setNewlyAddedId] = useState<number | string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   // ── Aggregated barista names ──
   const allKnownBaristaNames = useMemo(() => {
@@ -143,7 +147,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
   }, []);
 
   const addContact = useCallback((path: ContactPath) => {
-    const nc: Contact = { id: Date.now(), name: "", position: "manager", phoneNumbers: [{ id: Date.now(), number: "" }] };
+    const nc: Contact = { id: generateUniqueId(), name: "", position: "manager", phoneNumbers: [{ id: generateUniqueId(), number: "" }] };
     setNewlyAddedId(nc.id);
     setFormData((prev) => {
       if (path === "main") return { ...prev, contacts: [...prev.contacts, nc] };
@@ -171,7 +175,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
   const addPhoneNumber = useCallback((path: ContactPath, ci: number) => {
     setFormData((prev) => {
       const c = getContactsFromPath(prev, path);
-      c[ci] = { ...c[ci], phoneNumbers: [...c[ci].phoneNumbers, { id: Date.now(), number: "" }] };
+      c[ci] = { ...c[ci], phoneNumbers: [...c[ci].phoneNumbers, { id: generateUniqueId(), number: "" }] };
       return setContactsForPath(prev, path, c);
     });
   }, [setFormData, getContactsFromPath, setContactsForPath]);
@@ -194,6 +198,18 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
     });
   }, [setFormData, getContactsFromPath, setContactsForPath]);
 
+  // ── Form reset ──
+  const handleResetForm = useCallback(() => {
+    // Clean up auto-save draft from localStorage if one exists
+    if (currentDraftId) {
+      localStorage.removeItem(`auto-save-form-${currentDraftId}`);
+    }
+    setFormData(initialFormData);
+    setCurrentStep(1);
+    setCurrentDraftId(null);
+    setShowResetConfirm(false);
+  }, [currentDraftId, setFormData, setCurrentStep, setCurrentDraftId]);
+
   // ── Submission ──
   const handleSubmit = useCallback(async () => {
     setIsSubmitting(true);
@@ -206,7 +222,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
 
   // ── List item CRUD ──
   const addListItem = useCallback((ln: "branches" | "baristas" | "maintenanceHistory" | "machines") => {
-    const nid = Date.now(); setNewlyAddedId(nid);
+    const nid = generateUniqueId(); setNewlyAddedId(nid);
     setFormData((prev) => {
       let ni: unknown;
       switch (ln) {
@@ -235,7 +251,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
   }, [setFormData]);
 
   const addNestedListItem = useCallback((bi: number, ln: "baristas" | "maintenanceHistory" | "clientBaristas" | "machines") => {
-    const nid = Date.now(); setNewlyAddedId(nid);
+    const nid = generateUniqueId(); setNewlyAddedId(nid);
     setFormData((prev) => {
       const nb = [...prev.branches]; const br = { ...nb[bi] };
       if (ln === "baristas") { (br as Branch & { baristas: Barista[] }).baristas = [...br.baristas, { id: nid, name: "", phone: "", notes: "" }]; }
@@ -279,7 +295,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
   }, [setFormData]);
 
   const handleQuickAddClientBarista = useCallback((name: string, bi: number | null) => {
-    const ncb: ClientBarista = { id: Date.now(), name, phone: "", notes: "Added from maintenance record" };
+    const ncb: ClientBarista = { id: generateUniqueId(), name, phone: "", notes: "Added from maintenance record" };
     if (bi === null) setFormData((prev) => ({ ...prev, clientBaristas: [...(prev.clientBaristas || []), ncb] }));
     else setFormData((prev) => { const nb = [...prev.branches]; nb[bi] = { ...nb[bi], clientBaristas: [...nb[bi].clientBaristas, ncb] }; return { ...prev, branches: nb }; });
   }, [setFormData]);
@@ -299,12 +315,12 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
     handleClientBaristaChange, handleQuickAddClientBarista, removeClientBarista,
     
     addBlankClientBarista: (bi: number | null) => {
-      const ncb: ClientBarista = { id: Date.now(), name: "", phone: "", notes: "" };
+      const ncb: ClientBarista = { id: generateUniqueId(), name: "", phone: "", notes: "" };
       if (bi === null) setFormData((prev) => ({ ...prev, clientBaristas: [...(prev.clientBaristas || []), ncb] }));
       else setFormData((prev) => { const nb = [...prev.branches]; nb[bi] = { ...nb[bi], clientBaristas: [...nb[bi].clientBaristas, ncb] }; return { ...prev, branches: nb }; });
     },
     handleQuickAddBarista: (name: string, bi: number | null) => {
-      const nb: Barista = { id: Date.now(), name, phone: "", notes: "Added from maintenance record" };
+      const nb: Barista = { id: generateUniqueId(), name, phone: "", notes: "Added from maintenance record" };
       if (bi === null) setFormData((prev) => ({ ...prev, baristas: [...prev.baristas, nb] }));
       else setFormData((prev) => { const nbr = [...prev.branches]; nbr[bi] = { ...nbr[bi], baristas: [...nbr[bi].baristas, nb] }; return { ...prev, branches: nbr }; });
     },
@@ -348,6 +364,43 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
   // ── Completed steps for stepper ──
   const completedSteps = useMemo(() => steps.filter((s) => s.id < currentStep).map((s) => s.id), [currentStep]);
 
+  // ── FormProgress sections (jump navigation) ──
+  const formProgressSections = useMemo(
+    () =>
+      visibleSteps.map((s) => ({
+        id: String(s.id),
+        label: s.name,
+        required: false,
+      })),
+    [visibleSteps]
+  );
+
+  const completedSectionIds = useMemo(
+    () => visibleSteps.filter((s) => s.id < currentStep).map((s) => String(s.id)),
+    [visibleSteps, currentStep]
+  );
+
+  const handleJumpToStep = useCallback(
+    (sectionId: string) => {
+      const nextStepId = Number(sectionId);
+      if (!Number.isNaN(nextStepId) && visibleSteps.some((s) => s.id === nextStepId)) {
+        setCurrentStep(nextStepId);
+      }
+    },
+    [setCurrentStep, visibleSteps]
+  );
+
+  const handleJumpToNextStep = useCallback(() => {
+    const currentIndex = visibleSteps.findIndex((s) => s.id === currentStep);
+    if (currentIndex === -1) return;
+    const nextStep = visibleSteps[currentIndex + 1];
+    if (nextStep) {
+      handleJumpToStep(String(nextStep.id));
+    }
+  }, [visibleSteps, currentStep, handleJumpToStep]);
+
+  const canJumpToNextStep = visibleSteps[visibleSteps.length - 1]?.id !== currentStep;
+
   // ── Render step ──
   const renderStepContent = () => {
     switch (currentStep) {
@@ -374,6 +427,19 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
           <Stepper steps={visibleSteps} currentStep={currentStep} completedSteps={completedSteps} onChange={setCurrentStep} layout="horizontal" />
         </div>
         <div className={`flex-1 transition-all duration-300 ${showPreview ? "lg:w-1/2" : "w-full"}`}>
+          <section aria-label="تقدم النموذج">
+            <FormProgress
+              sections={formProgressSections}
+              completedSections={completedSectionIds}
+              currentSection={String(currentStep)}
+              onSectionClick={handleJumpToStep}
+              onJumpToNextIncomplete={canJumpToNextStep ? handleJumpToNextStep : undefined}
+              variant="horizontal"
+              showPercentage
+              showCount
+              className="mb-6"
+            />
+          </section>
           <div className="flex justify-end mb-4">
             <Button variant="secondary" onClick={() => setShowPreview(!showPreview)}>
               {showPreview ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
@@ -402,11 +468,35 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
       </div>
       <footer className="fixed lg:absolute bottom-6 left-0 right-0 z-30 w-[90%] mx-auto pointer-events-none flex justify-center">
         <div className="bg-cream rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-hairline/20 pointer-events-auto max-w-4xl w-full">
-          <div className="w-full p-4">
-            <NavigationButtons currentStep={currentStep} onPrev={handlePrev} onNext={currentStep === 6 ? handleSubmit : handleNext} isLastStep={currentStep === 6} isSubmitting={isSubmitting} />
+          <div className="w-full p-4 flex items-center gap-3">
+            {/* Reset button (accessibility #53) */}
+            <button
+              type="button"
+              onClick={() => setShowResetConfirm(true)}
+              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-latte hover:text-ember-700 dark:hover:text-ember-300 hover:bg-ember-50 dark:hover:bg-ember-500/10 rounded-lg transition-colors shrink-0"
+              title="إعادة تعيين النموذج"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span className="hidden sm:inline">إعادة تعيين</span>
+            </button>
+            <div className="flex-1">
+              <NavigationButtons currentStep={currentStep} onPrev={handlePrev} onNext={currentStep === 6 ? handleSubmit : handleNext} isLastStep={currentStep === 6} isSubmitting={isSubmitting} />
+            </div>
           </div>
         </div>
       </footer>
+
+      {/* Reset confirmation dialog */}
+      <ConfirmDialog
+        isOpen={showResetConfirm}
+        onClose={() => setShowResetConfirm(false)}
+        onConfirm={handleResetForm}
+        title="إعادة تعيين النموذج"
+        message="هل أنت متأكد من رغبتك في إعادة تعيين النموذج؟ سيتم فقدان جميع البيانات المدخلة."
+        confirmLabel="نعم، إعادة تعيين"
+      />
     </div>
   );
 };

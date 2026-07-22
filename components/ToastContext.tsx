@@ -1,15 +1,17 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 
 export interface Toast {
   id: string;
   message: string;
   type: 'success' | 'error' | 'warning' | 'info';
   duration?: number;
+  /** Optional interactive element rendered next to the message (e.g. Undo). */
+  action?: React.ReactNode;
 }
 
 interface ToastContextType {
   toasts: Toast[];
-  showToast: (message: string, type: Toast['type'], duration?: number) => void;
+  showToast: (message: string, type: Toast['type'], duration?: number, action?: React.ReactNode, id?: string) => string;
   removeToast: (id: string) => void;
 }
 
@@ -17,23 +19,46 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
-
-  const showToast = useCallback((message: string, type: Toast['type'] = 'info', duration = 5000) => {
-    const id = `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-    const toast: Toast = { id, message, type, duration };
-    
-    setToasts((prev) => [...prev, toast]);
-    
-    // Auto-remove after duration
-    if (duration > 0) {
-      setTimeout(() => {
-        removeToast(id);
-      }, duration);
-    }
-  }, []);
+  const timeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const removeToast = useCallback((id: string) => {
+    if (timeoutsRef.current[id]) {
+      clearTimeout(timeoutsRef.current[id]);
+      delete timeoutsRef.current[id];
+    }
     setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  // Clean up any pending auto-remove timeouts when the provider unmounts.
+  useEffect(() => {
+    return () => {
+      Object.values(timeoutsRef.current).forEach(clearTimeout);
+      timeoutsRef.current = {};
+    };
+  }, []);
+
+  const showToast = useCallback((message: string, type: Toast['type'] = 'info', duration = 5000, action?: React.ReactNode, id?: string) => {
+    const toastId = id ?? `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    const toast: Toast = { id: toastId, message, type, duration, action };
+
+    setToasts((prev) => [...prev, toast]);
+
+    // Auto-remove after duration; keep a handle so we can cancel the timeout if
+    // the toast is dismissed manually before it fires. If a toast with the same
+    // id is already pending, clear its old timeout first to prevent leaks and
+    // premature removal.
+    if (timeoutsRef.current[toastId]) {
+      clearTimeout(timeoutsRef.current[toastId]);
+      delete timeoutsRef.current[toastId];
+    }
+    if (duration > 0) {
+      timeoutsRef.current[toastId] = setTimeout(() => {
+        delete timeoutsRef.current[toastId];
+        setToasts((prev) => prev.filter((t) => t.id !== toastId));
+      }, duration);
+    }
+
+    return toastId;
   }, []);
 
   return (
@@ -85,17 +110,23 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             
             {/* Message */}
             <p className="flex-1 text-sm font-medium">{toast.message}</p>
-            
-            {/* Close button */}
-            <button
-              onClick={() => removeToast(toast.id)}
-              className="flex-shrink-0 p-1 rounded hover:bg-ink/10 transition-colors text-latte hover:text-primary"
-              aria-label="إغلاق"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </button>
+
+            {/* Action */}
+            {toast.action && <div className="flex-shrink-0">{toast.action}</div>}
+
+            {/* Close button — hidden for actionable toasts so the user can't
+                dismiss a pending destructive operation without undoing it. */}
+            {!toast.action && (
+              <button
+                onClick={() => removeToast(toast.id)}
+                className="flex-shrink-0 p-1 rounded hover:bg-ink/10 transition-colors text-latte hover:text-primary"
+                aria-label="إغلاق"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            )}
           </div>
         ))}
       </div>

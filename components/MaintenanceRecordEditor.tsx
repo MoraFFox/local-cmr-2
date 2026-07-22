@@ -1,26 +1,12 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { MaintenanceRecord, Part, Service, Barista, ClientBarista, MaintenancePhoto } from '../types';
 import {
-  CalendarIcon,
-  UserIcon,
-  StarIcon,
-  MapPinIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  WrenchIcon,
-  CurrencyDollarIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-  DocumentTextIcon,
-  BeakerIcon,
-  ExclamationCircleIcon,
-  ClipboardDocumentListIcon,
-  PlusCircleIcon,
-  CameraIcon,
-  XMarkIcon,
-  ArrowUpTrayIcon
+  CalendarIcon, UserIcon, MapPinIcon, CheckCircleIcon, XCircleIcon,
+  WrenchIcon, CurrencyDollarIcon, ChevronRightIcon, ChevronLeftIcon,
+  DocumentTextIcon, BeakerIcon, ExclamationCircleIcon,
+  ClipboardDocumentListIcon, PlusCircleIcon, CameraIcon,
+  XMarkIcon, ArrowUpTrayIcon
 } from '@heroicons/react/24/outline';
-import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import RadioGroup from './RadioGroup';
 import ServiceSelector from './ServiceSelector';
 import PartsSelector from './PartsSelector';
@@ -30,16 +16,19 @@ import { useToast } from './ToastContext';
 import { compressImage, validateImageFile } from '../utils/imageCompression';
 import { logger } from '../utils/logger';
 import { ConfirmDialog } from './ui/ConfirmDialog';
-// NEW: Import auto-save and validation hooks
+import Stepper, { StepperStep } from './ui/Stepper';
 import { useAutoSave } from './forms/hooks/useAutoSave';
-import { useFormValidation, ValidationPatterns } from './forms/hooks/useFormValidation';
-// NEW: Import UI components
+import { useFormValidation } from './forms/hooks/useFormValidation';
 import { AutoSaveIndicator } from './form-ui/AutoSaveIndicator';
 import { ValidationSummary } from './form-ui/ValidationSummary';
-import { RequiredFieldBadge } from './form-ui/RequiredFieldBadge';
 import { DatePresetButtons } from './form-ui/EnhancedInput';
-// NEW: Context-aware suggestions based on reported problems
+import { StarRating } from './form-ui/StarRating';
+import { RequiredFieldBadge } from '@/packages/form-progress';
 import { getSuggestedServices, getSuggestedParts } from '../utils/problemSuggestions';
+import { useT } from '../utils/i18n';
+import { generateUniqueId } from '../utils/idGenerator';
+import { formatEgyptianPhone } from '../utils/phone';
+import { useSectionJump } from '../hooks/useSectionJump';
 
 interface MaintenanceRecordEditorProps {
   record: MaintenanceRecord;
@@ -47,7 +36,7 @@ interface MaintenanceRecordEditorProps {
   onCancel: () => void;
   partsList: Part[];
   servicesList: Service[];
-  problemCategories: { title: string; options: { label: string; value: string; }[] }[];
+  problemCategories: { title: string; options: { label: string; value: string }[] }[];
   allPredefinedProblems: string[];
   baristas?: Barista[];
   clientBaristas?: ClientBarista[];
@@ -56,1147 +45,541 @@ interface MaintenanceRecordEditorProps {
   isSidebarExpanded?: boolean;
 }
 
-interface SectionHeaderProps {
-  title: string;
-  section: string;
-  icon: React.ReactNode;
-  badge?: React.ReactNode;
-  isExpanded: boolean;
-  onClick: (section: string) => void;
-}
+const STEP_TO_SECTION: Record<number, string> = { 1: 'basic', 2: 'problems', 3: 'services', 4: 'parts', 5: 'payment', 6: 'supervisor', 7: 'notes', 8: 'photos' };
+const SECTION_TO_STEP: Record<string, number> = { basic: 1, problems: 2, services: 3, parts: 4, payment: 5, supervisor: 6, notes: 7, photos: 8 };
 
-const SectionHeader: React.FC<SectionHeaderProps> = ({ title, section, icon, badge, isExpanded, onClick }) => (
-  <button
-    type="button"
-    data-testid={`section-${section}`}
-    onClick={() => onClick(section)}
-    className="w-full flex items-center justify-between p-4 bg-cream dark:bg-espresso/50 hover:bg-cream dark:hover:bg-espresso-light/50 transition-colors rounded-t-lg"
-  >
-    <div className="flex items-center gap-3">
-      <span className="text-latte dark:text-latte">{icon}</span>
-      <span className="font-semibold text-primary dark:text-white">{title}</span>
-      {badge}
-    </div>
-    {isExpanded ? (
-      <ChevronUpIcon className="w-5 h-5 text-latte" />
-    ) : (
-      <ChevronDownIcon className="w-5 h-5 text-latte" />
-    )}
-  </button>
-);
+const STEPPER_STEPS: StepperStep[] = [
+  { id: 1, name: 'المعلومات الأساسية' },
+  { id: 2, name: 'المشاكل' },
+  { id: 3, name: 'الخدمات المنفذة' },
+  { id: 4, name: 'القطع المستبدلة' },
+  { id: 5, name: 'الدفع' },
+  { id: 6, name: 'بيانات المشرف' },
+  { id: 7, name: 'ملاحظات وتوصيات' },
+  { id: 8, name: 'صور قبل وبعد' },
+];
 
 const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
-  record,
-  onSave,
-  onCancel,
-  partsList,
-  servicesList,
-  problemCategories,
-  allPredefinedProblems,
-  baristas = [],
-  clientBaristas = [],
-  lastVisitDate,
-  averageDays,
-  isSidebarExpanded = false
+  record, onSave, onCancel, partsList, servicesList,
+  problemCategories, allPredefinedProblems,
+  baristas = [], clientBaristas = [],
+  lastVisitDate, averageDays, isSidebarExpanded = false
 }) => {
   const { showToast } = useToast();
+  const t = useT();
   const [editedRecord, setEditedRecord] = useState<MaintenanceRecord>(record);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(() => {
-    const initial = new Set<string>(['basic']);
-    if (record.hadProblem) initial.add('problems');
-    if (record.servicesPerformed.length > 0) initial.add('services');
-    if (record.partsReplaced.length > 0) initial.add('parts');
-    if (record.notes) initial.add('notes');
-    if (record.photos && record.photos.length > 0) initial.add('photos');
-    return initial;
-  });
+  const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
-  const [confirmPhotoDelete, setConfirmPhotoDelete] = useState<{isOpen: boolean; url: string; category: string} | null>(null);
+  const [confirmPhotoDelete, setConfirmPhotoDelete] = useState<{ isOpen: boolean; url: string; category: string } | null>(null);
 
-  // NEW: Auto-save hook - saves form automatically after each change
-  const autoSave = useAutoSave(
-    `maintenance-record-${record.id}`,
-    editedRecord,
-    {
-      debounceMs: 30000, // 30 seconds
-      onSave: (data) => {
-        logger.info('Auto-saved maintenance record', { id: data.id }, 'autosave');
-      },
-      onSaveError: (error) => {
-        logger.error('Auto-save failed', error, 'autosave');
-      },
-      enabled: true
-    }
-  );
-
-  // NEW: Validation hook with rules
-  const validation = useFormValidation(
-    editedRecord,
-    {
-      maintenanceDate: { required: true },
-      baristaName: { required: true, minLength: 2 },
-      supervisors: {
-        custom: (value) => {
-          if (!Array.isArray(value) || value.length === 0) {
-            return 'At least one supervisor is required';
-          }
-          const hasEmptyName = value.some((s: any) => !s.name?.trim());
-          return hasEmptyName ? 'All supervisor names are required' : null;
-        }
-      }
+  const { highlightedSection, jumpToSection, jumpToFirstError } = useSectionJump({
+    fieldSectionMapping: {
+      maintenanceDate: 'basic', baristaName: 'basic', clientBaristaName: 'basic', visitRating: 'basic', visitZone: 'basic',
+      hadProblem: 'problems', problems: 'problems', problemSolved: 'problems',
+      servicesPerformed: 'services',
+      partsWereReplaced: 'parts', partsReplaced: 'parts',
+      type: 'payment', paidBy: 'payment',
+      supervisors: 'supervisor',
+      notes: 'notes', recommendations: 'notes',
+      photos: 'photos',
     },
-    {
-      mode: 'onBlur',
-      showSummary: true,
-      validateOnMount: false
-    }
-  );
+    onExpandSection: (sectionId) => {
+      const step = SECTION_TO_STEP[sectionId];
+      if (step) setCurrentStep(step);
+    },
+    storageKey: `maintenance-record-${record.id}-last-section`,
+  });
 
-  // Sync state when record prop changes (e.g., when navigating between records
-  // or when the parent replaces the record with mock data).
-  // Note: the parent is expected to keep the `record` reference stable; this
-  // effect re-syncs only when the object identity changes.
+  // Auto-save
+  const autoSave = useAutoSave(`maintenance-record-${record.id}`, editedRecord, {
+    debounceMs: 30000,
+    onSave: (data) => logger.info('Auto-saved maintenance record', { id: data.id }, 'autosave'),
+    onSaveError: (error) => logger.error('Auto-save failed', error, 'autosave'),
+    enabled: true,
+  });
+
+  // Validation
+  const validation = useFormValidation(editedRecord, {
+    maintenanceDate: { required: true },
+    baristaName: { required: true, minLength: 2 },
+    supervisors: { custom: (value) => {
+      if (!Array.isArray(value) || value.length === 0) return 'At least one supervisor is required';
+      return value.some((s: any) => !s.name?.trim()) ? 'All supervisor names are required' : null;
+    }},
+  }, { mode: 'onBlur', showSummary: true, validateOnMount: false });
+
+  // Re-sync when record prop changes
   useEffect(() => {
     setEditedRecord(record);
     setErrors({});
-    // Reset expanded sections based on new record data
-    const newExpanded = new Set<string>(['basic']);
-    if (record.hadProblem) newExpanded.add('problems');
-    if (record.servicesPerformed.length > 0) newExpanded.add('services');
-    if (record.partsReplaced.length > 0) newExpanded.add('parts');
-    if (record.notes) newExpanded.add('notes');
-    if (record.photos && record.photos.length > 0) newExpanded.add('photos');
-    setExpandedSections(newExpanded);
-  }, [record]); // Re-sync whenever the parent passes a different record object
+    setCurrentStep(1);
+  }, [record]);
 
-  const toggleSection = useCallback((section: string) => {
-    setExpandedSections(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(section)) {
-        newSet.delete(section);
-      } else {
-        newSet.add(section);
-      }
-      return newSet;
-    });
-  }, []);
+  // Step navigation
+  const goToNextStep = useCallback(() => setCurrentStep(prev => Math.min(prev + 1, STEPPER_STEPS.length)), []);
+  const goToPrevStep = useCallback(() => setCurrentStep(prev => Math.max(prev - 1, 1)), []);
 
+  // Field handlers
   const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
     const newValue = type === 'checkbox' ? checked : value;
-
     setEditedRecord(prev => {
       let updated = { ...prev, [name]: newValue };
-      
-      if (name === 'hadProblem' && !checked) {
-        updated = { 
-          ...updated, 
-          partsWereReplaced: false, 
-          problemSolved: false,
-          partsReplaced: [], 
-          problems: [],
-          followUpVisits: []
-        };
-      }
-      
-      if (name === 'partsWereReplaced' && !checked) {
-        updated = { ...updated, partsReplaced: [] };
-      }
-      
-      if (name === 'problemSolved' && checked) {
-        updated.followUpVisits = [];
-      }
-
+      if (name === 'hadProblem' && !checked) updated = { ...updated, partsWereReplaced: false, problemSolved: false, partsReplaced: [], problems: [], followUpVisits: [] };
+      if (name === 'partsWereReplaced' && !checked) updated = { ...updated, partsReplaced: [] };
+      if (name === 'problemSolved' && checked) updated.followUpVisits = [];
       return updated;
     });
-
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
-  const handleServicesChange = (services: any[]) => {
-    setEditedRecord(prev => ({ ...prev, servicesPerformed: services }));
-  };
+  const handleServicesChange = (services: any[]) => setEditedRecord(prev => ({ ...prev, servicesPerformed: services }));
+  const handlePartsChange = (parts: any[]) => setEditedRecord(prev => ({ ...prev, partsReplaced: parts }));
+  const handleProblemsChange = (problems: string[]) => setEditedRecord(prev => ({ ...prev, problems }));
+  const handleRadioChange = (name: string, value: any) => { setEditedRecord(prev => ({ ...prev, [name]: value })); if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' })); };
 
-  const handlePartsChange = (parts: any[]) => {
-    setEditedRecord(prev => ({ ...prev, partsReplaced: parts }));
-  };
+  const suggestedServices = useMemo(() => getSuggestedServices(editedRecord.problems || []), [editedRecord.problems]);
+  const suggestedParts = useMemo(() => getSuggestedParts(editedRecord.problems || []), [editedRecord.problems]);
 
-  const handleProblemsChange = (problems: string[]) => {
-    setEditedRecord(prev => ({ ...prev, problems }));
-  };
+  // Supervisor handlers
+  const addSupervisor = () => setEditedRecord(prev => ({ ...prev, supervisors: [...(prev.supervisors || []), { id: generateUniqueId(), name: '', phone: '' }] }));
+  const updateSupervisor = (index: number, field: string, value: string) => setEditedRecord(prev => { const s = [...(prev.supervisors || [])]; s[index] = { ...s[index], [field]: value }; return { ...prev, supervisors: s }; });
+  const removeSupervisor = (index: number) => setEditedRecord(prev => ({ ...prev, supervisors: prev.supervisors?.filter((_, i) => i !== index) || [] }));
 
-  // NEW: Context-aware suggestions — compute relevant services/parts based on
-  // the problems the technician reported. Memoized so it only recomputes when
-  // the problems list actually changes.
-  const suggestedServices = useMemo(
-    () => getSuggestedServices(editedRecord.problems || []),
-    [editedRecord.problems]
-  );
-  const suggestedParts = useMemo(
-    () => getSuggestedParts(editedRecord.problems || []),
-    [editedRecord.problems]
-  );
-
-  const handleRadioChange = (name: string, value: any) => {
-    setEditedRecord(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
-
-  const addSupervisor = () => {
-    setEditedRecord(prev => ({
-      ...prev,
-      supervisors: [
-        ...(prev.supervisors || []),
-        { id: Date.now(), name: "", phone: "" }
-      ]
-    }));
-  };
-
-  const updateSupervisor = (index: number, field: string, value: string) => {
-    setEditedRecord(prev => {
-      const supervisors = [...(prev.supervisors || [])];
-      supervisors[index] = { ...supervisors[index], [field]: value };
-      return { ...prev, supervisors };
-    });
-  };
-
-  const removeSupervisor = (index: number) => {
-    setEditedRecord(prev => ({
-      ...prev,
-      supervisors: prev.supervisors?.filter((_, i) => i !== index) || []
-    }));
-  };
-
-  // Photo upload handler
-  const handlePhotoUpload = async (files: FileList | null, type: "before" | "after") => {
+  // Photo handlers
+  const handlePhotoUpload = async (files: FileList | null, type: 'before' | 'after') => {
     if (!files || files.length === 0) return;
-
-    // Check authentication
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      showToast("يجب تسجيل الدخول لرفع الصور", "error");
-      return;
-    }
-
+    if (!session) { showToast('يجب تسجيل الدخول لرفع الصور', 'error'); return; }
     setUploadingPhotos(true);
-
-    // Process each file
     for (const file of Array.from(files)) {
       try {
-        // Validate
-        const validation = validateImageFile(file);
-        if (!validation.valid) {
-          showToast(validation.error || "صورة غير صالحة", "error");
-          continue;
-        }
-
-        // Compress
+        const v = validateImageFile(file);
+        if (!v.valid) { showToast(v.error || 'صورة غير صالحة', 'error'); continue; }
         const compressed = await compressImage(file);
-        
-        // Generate unique filename
-        const timestamp = Date.now();
-        const randomStr = Math.random().toString(36).substring(2, 8);
-        const extension = compressed.name.split('.').pop() || 'webp';
-        const fileName = `${timestamp}-${randomStr}.${extension}`;
-        const filePath = `${editedRecord.id}/${fileName}`;
-
-        // Upload to Supabase storage
-        const { data, error } = await supabase.storage
-          .from('maintenance-photos')
-          .upload(filePath, compressed);
-        
+        const ts = Date.now();
+        const rnd = Math.random().toString(36).substring(2, 8);
+        const ext = compressed.name.split('.').pop() || 'webp';
+        const fp = `${editedRecord.id}/${ts}-${rnd}.${ext}`;
+        const { data, error } = await supabase.storage.from('maintenance-photos').upload(fp, compressed);
         if (error) throw error;
-        
-        // Get public URL
-        const { data: { publicUrl } } = supabase.storage
-          .from('maintenance-photos')
-          .getPublicUrl(data.path);
-        
-        // Add to photos array
-        setEditedRecord(prev => ({
-          ...prev,
-          photos: [...(prev.photos || []), { url: publicUrl, type }]
-        }));
-        
-        showToast("تم رفع الصورة بنجاح", "success");
-      } catch (error) {
-        logger.error('Upload error', error, 'upload');
-        showToast("تعذر رفع الصورة", "error");
-      }
+        const { data: { publicUrl } } = supabase.storage.from('maintenance-photos').getPublicUrl(data.path);
+        setEditedRecord(prev => ({ ...prev, photos: [...(prev.photos || []), { url: publicUrl, type }] }));
+        showToast('تم رفع الصورة بنجاح', 'success');
+      } catch (err) { logger.error('Upload error', err, 'upload'); showToast('تعذر رفع الصورة', 'error'); }
     }
-
     setUploadingPhotos(false);
   };
 
-  // Photo remove handler
   const handlePhotoRemove = async (photo: MaintenancePhoto) => {
-    // Remove from record
-    setEditedRecord(prev => ({
-      ...prev,
-      photos: (prev.photos || []).filter(p => p.url !== photo.url)
-    }));
-
-    // Try to delete from storage if it's in our bucket
+    setEditedRecord(prev => ({ ...prev, photos: (prev.photos || []).filter(p => p.url !== photo.url) }));
     if (photo.url.includes('maintenance-photos')) {
       try {
-        // Extract path from URL
-        const urlParts = photo.url.split('/maintenance-photos/');
-        if (urlParts.length > 1) {
-          const path = urlParts[1];
-          const { error } = await supabase.storage.from('maintenance-photos').remove([path]);
-          if (error) {
-            logger.warn('Could not delete from storage', error, 'upload');
-            showToast("تمت إزالة الصورة من السجل، لكن تعذر حذفها من التخزين", "warning");
-          }
+        const parts = photo.url.split('/maintenance-photos/');
+        if (parts.length > 1) {
+          const { error } = await supabase.storage.from('maintenance-photos').remove([parts[1]]);
+          if (error) showToast('تمت إزالة الصورة من السجل، لكن تعذر حذفها من التخزين', 'warning');
         }
-      } catch (error) {
-        logger.warn('Could not delete from storage', error, 'upload');
-        showToast("تمت إزالة الصورة من السجل، لكن تعذر حذفها من التخزين", "warning");
-      }
+      } catch { showToast('تمت إزالة الصورة من السجل، لكن تعذر حذفها من التخزين', 'warning'); }
     }
   };
 
-  // NEW: Enhanced validate function using validation hook
-  const validate = (): boolean => {
-    // Run validation hook's validateAll
-    const isValid = validation.validateAll();
-
-    // Also update legacy errors state for backward compatibility
-    setErrors(validation.errors);
-
-    return isValid;
-  };
-
-  // NEW: Enhanced handleSave using validation hook's handleSubmit
   const handleSave = () => {
     validation.handleSubmit(
-      // onValid
-      () => {
-        onSave(editedRecord);
-        showToast("تم حفظ السجل بنجاح", "success");
-      },
-      // onInvalid
-      () => {
-        showToast("يرجى تصحيح الأخطاء قبل الحفظ", "error");
-        // Scroll to first error
-        validation.focusNextError();
-      }
+      () => { onSave(editedRecord); showToast('تم حفظ السجل بنجاح', 'success'); },
+      (errors) => { showToast('يرجى تصحيح الأخطاء قبل الحفظ', 'error'); jumpToFirstError(errors); }
     )();
   };
 
+  // Completed steps for Stepper visual feedback
+  const completedSteps = useMemo(() => {
+    const completed: number[] = [];
+    if (editedRecord.maintenanceDate && editedRecord.baristaName) completed.push(1);
+    if (!editedRecord.hadProblem || (editedRecord.problems && editedRecord.problems.length > 0)) completed.push(2);
+    if (editedRecord.servicesPerformed.length > 0) completed.push(3);
+    if (!editedRecord.partsWereReplaced || editedRecord.partsReplaced.length > 0) completed.push(4);
+    if (editedRecord.type && editedRecord.paidBy) completed.push(5);
+    if (editedRecord.supervisors && editedRecord.supervisors.some(s => s.name.trim())) completed.push(6);
+    if (editedRecord.notes || editedRecord.recommendations) completed.push(7);
+    if (editedRecord.photos && editedRecord.photos.length > 0) completed.push(8);
+    return completed;
+  }, [editedRecord]);
+
+  // Shared section wrapper
+  const sectionClass = (stepId: number) => `bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden ${highlightedSection === STEP_TO_SECTION[stepId] ? 'animate-section-jump-highlight' : ''}`;
+
   return (
     <div className="space-y-6">
-      {/* NEW: Auto-save indicator */}
-      <AutoSaveIndicator
-        isSaving={autoSave.isSaving}
-        lastSaved={autoSave.lastSaved}
-        hasUnsavedChanges={autoSave.hasUnsavedChanges}
-        onSaveNow={autoSave.saveNow}
-        variant="full"
-      />
+      <AutoSaveIndicator isSaving={autoSave.isSaving} lastSaved={autoSave.lastSaved} hasUnsavedChanges={autoSave.hasUnsavedChanges} onSaveNow={autoSave.saveNow} variant="full" />
 
-      {/* NEW: Validation summary (shows when there are errors) */}
       {validation.hasErrors && (
-        <ValidationSummary
-          errors={validation.allErrors}
-          onJumpToError={(fieldName) => {
-            const element = document.querySelector(`[name="${fieldName}"]`) as HTMLInputElement;
-            element?.focus();
-            element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }}
-          title="Please fix the following errors before saving"
-        />
+        <ValidationSummary errors={validation.allErrors} onJumpToError={(fieldName) => {
+          const el = document.querySelector(`[name="${fieldName}"]`) as HTMLInputElement;
+          el?.focus(); el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }} title={t.ui.maintenanceEditor.validationTitle} />
       )}
 
-      {/* Basic Info Section */}
-      <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden">
-        <SectionHeader
-          title="المعلومات الأساسية"
-          section="basic"
-          icon={<DocumentTextIcon className="w-5 h-5" />}
-          isExpanded={expandedSections.has('basic')}
-          onClick={toggleSection}
-        />
-        
-        {expandedSections.has('basic') && (
-          <div className="p-6 space-y-6">
+      {/* Stepper */}
+      <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline p-4">
+        <Stepper steps={STEPPER_STEPS} currentStep={currentStep} onChange={setCurrentStep} layout="horizontal" completedSteps={completedSteps} />
+      </div>
+
+      {/* === STEP 1: Basic Info === */}
+      {currentStep === 1 && (
+        <div id="step-content-1" className={sectionClass(1)}>
+          <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
+            <DocumentTextIcon className="w-5 h-5 text-primary" />
+            <h3 className="font-semibold text-primary dark:text-white">المعلومات الأساسية</h3>
+          </div>
+          <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Date */}
               <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-primary dark:text-latte/70 mb-2">
-                  Maintenance Date
-                  <RequiredFieldBadge />
-                </label>
-                {/* Quick-select presets (audit issue #13) */}
-                <DatePresetButtons
-                  value={editedRecord.maintenanceDate}
-                  onChange={(date) => {
-                    setEditedRecord(prev => ({ ...prev, maintenanceDate: date }));
-                    // Clear the legacy inline error for this field (handleFieldChange
-                    // would do this, but presets bypass it since they pass a raw
-                    // date string instead of a ChangeEvent).
-                    if (errors.maintenanceDate) {
-                      setErrors(prev => ({ ...prev, maintenanceDate: '' }));
-                    }
-                    // Also clear the validation hook's error so the ValidationSummary
-                    // entry disappears immediately (parity with the mobile/split-pane
-                    // editors which use validation.clearError / touchField).
-                    // Guarded to avoid an unnecessary re-render when there's no error.
-                    if (validation.errors.maintenanceDate) {
-                      validation.clearError('maintenanceDate');
-                    }
-                  }}
-                  variant="cream"
-                  className="mb-2"
-                />
+                <label className="flex items-center gap-2 text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.maintenanceDate}<RequiredFieldBadge /></label>
+                <DatePresetButtons value={editedRecord.maintenanceDate} onChange={(date) => { setEditedRecord(prev => ({ ...prev, maintenanceDate: date })); if (errors.maintenanceDate) setErrors(prev => ({ ...prev, maintenanceDate: '' })); if (validation.errors.maintenanceDate) validation.clearError('maintenanceDate'); }} variant="cream" className="mb-2" />
                 <div className="relative">
                   <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
-                  <input
-                    type="date"
-                    name="maintenanceDate"
-                    value={editedRecord.maintenanceDate}
-                    onChange={handleFieldChange}
-                    className={`w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${
-                      errors.maintenanceDate 
-                        ? 'border-ember-500 focus:ring-ember-500' 
-                        : 'border-hairline dark:border-hairline'
-                    }`}
-                  />
+                  <input type="date" name="maintenanceDate" value={editedRecord.maintenanceDate} onChange={handleFieldChange} className={`w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${errors.maintenanceDate ? 'border-ember-500 focus:ring-ember-500' : 'border-hairline dark:border-hairline'}`} />
                 </div>
-                {errors.maintenanceDate && (
-                  <p className="mt-1 text-sm text-ember-700">{errors.maintenanceDate}</p>
+                {errors.maintenanceDate && <p className="mt-1 text-sm text-ember-700">{errors.maintenanceDate}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.lastVisit}</label>
+                {lastVisitDate ? (
+                  <div className="flex items-center gap-3 p-3 bg-cream dark:bg-espresso-light rounded-lg border border-hairline dark:border-hairline">
+                    <CalendarIcon className="w-5 h-5 text-primary" />
+                    <div><div className="text-primary dark:text-white font-medium">{lastVisitDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                      {averageDays && <div className="text-xs text-latte">{t.ui.maintenanceEditor.averageDaysBetweenVisits.replace('{{days}}', String(averageDays))}</div>}</div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 p-3 bg-cream dark:bg-espresso-light rounded-lg border border-hairline dark:border-hairline text-latte"><CalendarIcon className="w-5 h-5" /><span className="text-sm">{t.ui.maintenanceEditor.noPreviousVisits}</span></div>
                 )}
               </div>
-
-              {/* Last Visit Info */}
-              <div>
-                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
-                  Last Visit
-                </label>
-                <div className="relative">
-                  {lastVisitDate ? (
-                    <div className="flex items-center gap-3 p-3 bg-cream dark:bg-espresso-light rounded-lg border border-hairline dark:border-hairline">
-                      <CalendarIcon className="w-5 h-5 text-primary" />
-                      <div>
-                        <div className="text-primary dark:text-white font-medium">
-                          {lastVisitDate.toLocaleDateString('en-GB', { 
-                            day: 'numeric', 
-                            month: 'short', 
-                            year: 'numeric' 
-                          })}
-                        </div>
-                        {averageDays && (
-                          <div className="text-xs text-latte dark:text-latte">
-                            Average {averageDays} days between visits
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 p-3 bg-cream dark:bg-espresso-light rounded-lg border border-hairline dark:border-hairline text-latte dark:text-latte">
-                      <CalendarIcon className="w-5 h-5" />
-                      <span className="text-sm">No previous visits</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Barista */}
               <div className="md:col-span-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-primary dark:text-latte/70 mb-2">
-                  My Technician
-                  <RequiredFieldBadge />
-                </label>
+                <label className="flex items-center gap-2 text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.myTechnician}<RequiredFieldBadge /></label>
                 <div className="relative">
                   <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
                   {baristas.length > 0 ? (
-                    <select
-                      name="baristaName"
-                      value={editedRecord.baristaName}
-                      onChange={handleFieldChange}
-                      className={`w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${
-                        errors.baristaName 
-                          ? 'border-ember-500 focus:ring-ember-500' 
-                          : 'border-hairline dark:border-hairline'
-                      }`}
-                    >
-                      <option value="">Select Technician</option>
-                      {baristas.map(barista => (
-                        <option key={barista.id} value={barista.name}>{barista.name}</option>
-                      ))}
+                    <select name="baristaName" value={editedRecord.baristaName} onChange={handleFieldChange} className={`w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${errors.baristaName ? 'border-ember-500' : 'border-hairline dark:border-hairline'}`}>
+                      <option value="">{t.ui.maintenanceEditor.selectTechnician}</option>
+                      {baristas.map(b => <option key={b.id} value={b.name}>{b.name}</option>)}
                     </select>
                   ) : (
-                    <input
-                      type="text"
-                      name="baristaName"
-                      value={editedRecord.baristaName}
-                      onChange={handleFieldChange}
-                      placeholder="أدخل اسم فرد صيانة (Midoe's)"
-                      className={`w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${
-                        errors.baristaName 
-                          ? 'border-ember-500 focus:ring-ember-500' 
-                          : 'border-hairline dark:border-hairline'
-                      }`}
-                    />
+                    <input type="text" name="baristaName" value={editedRecord.baristaName} onChange={handleFieldChange} placeholder="أدخل اسم فرد صيانة (Midoe's)" className={`w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${errors.baristaName ? 'border-ember-500' : 'border-hairline dark:border-hairline'}`} />
                   )}
                 </div>
-                {errors.baristaName && (
-                  <p className="mt-1 text-sm text-ember-700">{errors.baristaName}</p>
-                )}
+                {errors.baristaName && <p className="mt-1 text-sm text-ember-700">{errors.baristaName}</p>}
               </div>
-
-              {/* Client Barista */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
-                  Client Barista
-                </label>
+                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.clientBarista}</label>
                 <div className="relative">
                   <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
                   {clientBaristas && clientBaristas.length > 0 ? (
-                    <select
-                      name="clientBaristaName"
-                      value={editedRecord.clientBaristaName || ''}
-                      onChange={handleFieldChange}
-                      className="w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
-                    >
-                      <option value="">Select Client Barista</option>
-                      {clientBaristas.map(barista => (
-                        <option key={barista.id} value={barista.name}>{barista.name}</option>
-                      ))}
+                    <select name="clientBaristaName" value={editedRecord.clientBaristaName || ''} onChange={handleFieldChange} className="w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline">
+                      <option value="">{t.ui.maintenanceEditor.selectClientBarista}</option>
+                      {clientBaristas.map(b => <option key={b.id} value={b.name}>{b.name}</option>)}
                     </select>
                   ) : (
-                    <input
-                      type="text"
-                      name="clientBaristaName"
-                      value={editedRecord.clientBaristaName || ''}
-                      onChange={handleFieldChange}
-                      placeholder="أدخل اسم باريستا العميل"
-                      className="w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
-                    />
+                    <input type="text" name="clientBaristaName" value={editedRecord.clientBaristaName || ''} onChange={handleFieldChange} placeholder="أدخل اسم باريستا العميل" className="w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline" />
                   )}
                 </div>
               </div>
-
-              {/* Client Barista Performance Rating */}
               <div>
-                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
-                  Client Barista Performance Rating
-                </label>
-                <div className="flex items-center gap-1 sm:gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setEditedRecord(prev => ({ ...prev, visitRating: star }))}
-                      className="p-2 sm:p-1 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center hover:scale-110 transition-transform"
-                    >
-                      {star <= (editedRecord.visitRating || 0) ? (
-                        <StarIconSolid className="w-8 h-8 text-yellow-400" />
-                      ) : (
-                        <StarIcon className="w-8 h-8 text-latte/70 dark:text-primary" />
-                      )}
-                    </button>
-                  ))}
-                </div>
+                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.clientBaristaPerformanceRating}</label>
+                <StarRating value={editedRecord.visitRating || 0} onChange={(v) => setEditedRecord(prev => ({ ...prev, visitRating: v }))} size="lg" showNA showNumeric />
               </div>
-
-              {/* Visit Zone */}
               <div>
-                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
-                  Visit Zone
-                </label>
+                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.visitZone}</label>
                 <div className="relative">
                   <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
-                  <select
-                    name="visitZone"
-                    value={editedRecord.visitZone || ''}
-                    onChange={handleFieldChange}
-                    className="w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
-                  >
-                    <option value="">Select Zone</option>
-                    <option value="cairo">Cairo (500 EGP)</option>
-                    <option value="outside_cairo">Outside Cairo (1500 EGP)</option>
-                    <option value="el_sahel">El Sahel (4000 EGP)</option>
+                  <select name="visitZone" value={editedRecord.visitZone || ''} onChange={handleFieldChange} className="w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline">
+                    <option value="">{t.ui.maintenanceEditor.selectZone}</option>
+                    <option value="cairo">{t.ui.maintenanceEditor.cairo}</option>
+                    <option value="outside_cairo">{t.ui.maintenanceEditor.outsideCairo}</option>
+                    <option value="el_sahel">{t.ui.maintenanceEditor.elSahel}</option>
                   </select>
                 </div>
               </div>
             </div>
           </div>
-        )}
-      </div>
+          <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
+            <span></span>
+            <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{STEPPER_STEPS[1].name}<ChevronLeftIcon className="w-4 h-4" /></button>
+          </div>
+        </div>
+      )}
 
-      {/* Problems & Services Section */}
-      <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden">
-        <SectionHeader
-          title="المشاكل والخدمات"
-          section="problems"
-          icon={<ExclamationCircleIcon className="w-5 h-5" />}
-          badge={editedRecord.problems?.length > 0 && (
-            <span className="px-2 py-0.5 bg-ember-50 dark:bg-ember-500/10 text-ember-700 dark:text-ember-300 text-xs rounded-full">
-              {editedRecord.problems.length} problems
-            </span>
-          )}
-          isExpanded={expandedSections.has('problems')}
-          onClick={toggleSection}
-        />
-        
-        {expandedSections.has('problems') && (
+      {/* === STEP 2: Problems === */}
+      {currentStep === 2 && (
+        <div id="step-content-2" className={sectionClass(2)}>
+          <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
+            <ExclamationCircleIcon className="w-5 h-5 text-ember-500" />
+            <h3 className="font-semibold text-primary dark:text-white">المشاكل</h3>
+            {editedRecord.problems?.length > 0 && <span className="px-2 py-0.5 bg-ember-50 dark:bg-ember-500/10 text-ember-700 dark:text-ember-300 text-xs rounded-full">{editedRecord.problems.length} مشاكل</span>}
+          </div>
           <div className="p-6 space-y-6">
-            {/* Had Problem */}
             <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="hadProblem"
-                name="hadProblem"
-                checked={editedRecord.hadProblem}
-                onChange={handleFieldChange}
-                className="w-5 h-5 text-primary rounded focus:ring-primary"
-              />
-              <label htmlFor="hadProblem" className="text-primary dark:text-latte/70">
-                Was there a problem?
-              </label>
+              <input type="checkbox" id="hadProblem" name="hadProblem" checked={editedRecord.hadProblem} onChange={handleFieldChange} className="w-5 h-5 text-primary rounded focus:ring-primary" />
+              <label htmlFor="hadProblem" className="text-primary dark:text-latte/70">{t.ui.maintenanceEditor.wasThereAProblem}</label>
             </div>
-
             {editedRecord.hadProblem && (
-              <>
-                <div className="pl-8 space-y-4">
-                  <CheckboxGroup
-                    categories={problemCategories}
-                    selectedValues={editedRecord.problems || []}
-                    onChange={handleProblemsChange}
-                    predefinedProblems={allPredefinedProblems}
-                  />
-
-                  <div className="flex items-center gap-3 pt-4 border-t border-hairline dark:border-hairline">
-                    <input
-                      type="checkbox"
-                      id="problemSolved"
-                      name="problemSolved"
-                      checked={editedRecord.problemSolved}
-                      onChange={handleFieldChange}
-                      className="w-5 h-5 text-primary rounded focus:ring-primary"
-                    />
-                    <label htmlFor="problemSolved" className="text-primary dark:text-latte/70 flex items-center gap-2">
-                      {editedRecord.problemSolved ? (
-                        <>
-                          <CheckCircleIcon className="w-5 h-5 text-leaf-500" />
-                          Problem is solved
-                        </>
-                      ) : (
-                        <>
-                          <XCircleIcon className="w-5 h-5 text-ember-500" />
-                          Problem is NOT solved
-                        </>
-                      )}
-                    </label>
-                  </div>
+              <div className="space-y-4">
+                <CheckboxGroup categories={problemCategories} selectedValues={editedRecord.problems || []} onChange={handleProblemsChange} predefinedProblems={allPredefinedProblems} />
+                <div className="flex items-center gap-3 pt-4 border-t border-hairline dark:border-hairline">
+                  <input type="checkbox" id="problemSolved" name="problemSolved" checked={editedRecord.problemSolved} onChange={handleFieldChange} className="w-5 h-5 text-primary rounded focus:ring-primary" />
+                  <label htmlFor="problemSolved" className="text-primary dark:text-latte/70 flex items-center gap-2">
+                    {editedRecord.problemSolved ? <><CheckCircleIcon className="w-5 h-5 text-leaf-500" />{t.ui.maintenanceEditor.problemIsSolved}</> : <><XCircleIcon className="w-5 h-5 text-ember-500" />{t.ui.maintenanceEditor.problemIsNotSolved}</>}
+                  </label>
                 </div>
-              </>
+              </div>
             )}
           </div>
-        )}
-      </div>
-
-      {/* Services Section */}
-      <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden">
-        <SectionHeader
-          title="الخدمات المنفذة"
-          section="services"
-          icon={<WrenchIcon className="w-5 h-5" />}
-          badge={editedRecord.servicesPerformed.length > 0 && (
-            <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs rounded-full">
-              {editedRecord.servicesPerformed.length} services
-            </span>
-          )}
-          isExpanded={expandedSections.has('services')}
-          onClick={toggleSection}
-        />
-        
-        {expandedSections.has('services') && (
-          <div className="p-6">
-            <ServiceSelector
-              options={servicesList}
-              selectedValues={editedRecord.servicesPerformed}
-              onChange={handleServicesChange}
-              suggestedValues={suggestedServices}
-            />
+          <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
+            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
+            <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{STEPPER_STEPS[2].name}<ChevronLeftIcon className="w-4 h-4" /></button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Parts Section */}
-      <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden">
-        <SectionHeader
-          title="القطع المستبدلة"
-          section="parts"
-          icon={<BeakerIcon className="w-5 h-5" />}
-          badge={editedRecord.partsReplaced.length > 0 && (
-            <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs rounded-full">
-              {editedRecord.partsReplaced.length} parts
-            </span>
-          )}
-          isExpanded={expandedSections.has('parts')}
-          onClick={toggleSection}
-        />
-        
-        {expandedSections.has('parts') && (
+      {/* === STEP 3: Services === */}
+      {currentStep === 3 && (
+        <div id="step-content-3" className={sectionClass(3)}>
+          <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
+            <WrenchIcon className="w-5 h-5 text-blue-500" />
+            <h3 className="font-semibold text-primary dark:text-white">الخدمات المنفذة</h3>
+            {editedRecord.servicesPerformed.length > 0 && <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs rounded-full">{editedRecord.servicesPerformed.length}</span>}
+          </div>
+          <div className="p-6">
+            <ServiceSelector options={servicesList} selectedValues={editedRecord.servicesPerformed} onChange={handleServicesChange} suggestedValues={suggestedServices} />
+          </div>
+          <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
+            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
+            <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{STEPPER_STEPS[3].name}<ChevronLeftIcon className="w-4 h-4" /></button>
+          </div>
+        </div>
+      )}
+
+      {/* === STEP 4: Parts === */}
+      {currentStep === 4 && (
+        <div id="step-content-4" className={sectionClass(4)}>
+          <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
+            <BeakerIcon className="w-5 h-5 text-purple-500" />
+            <h3 className="font-semibold text-primary dark:text-white">القطع المستبدلة</h3>
+            {editedRecord.partsReplaced.length > 0 && <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs rounded-full">{editedRecord.partsReplaced.length}</span>}
+          </div>
           <div className="p-6 space-y-4">
             <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="partsWereReplaced"
-                name="partsWereReplaced"
-                checked={editedRecord.partsWereReplaced}
-                onChange={handleFieldChange}
-                className="w-5 h-5 text-primary rounded focus:ring-primary"
-              />
-              <label htmlFor="partsWereReplaced" className="text-primary dark:text-latte/70">
-                Were parts replaced?
-              </label>
+              <input type="checkbox" id="partsWereReplaced" name="partsWereReplaced" checked={editedRecord.partsWereReplaced} onChange={handleFieldChange} className="w-5 h-5 text-primary rounded focus:ring-primary" />
+              <label htmlFor="partsWereReplaced" className="text-primary dark:text-latte/70">{t.ui.maintenanceEditor.werePartsReplaced}</label>
             </div>
-
-            {editedRecord.partsWereReplaced && (
-              <div className="pl-8">
-                <PartsSelector
-                  options={partsList}
-                  selectedValues={editedRecord.partsReplaced}
-                  onChange={handlePartsChange}
-                  suggestedValues={suggestedParts}
-                />
-              </div>
-            )}
+            {editedRecord.partsWereReplaced && <PartsSelector options={partsList} selectedValues={editedRecord.partsReplaced} onChange={handlePartsChange} suggestedValues={suggestedParts} />}
           </div>
-        )}
-      </div>
+          <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
+            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
+            <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{STEPPER_STEPS[4].name}<ChevronLeftIcon className="w-4 h-4" /></button>
+          </div>
+        </div>
+      )}
 
-      {/* Type & Payment Section */}
-      <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden">
-        <SectionHeader
-          title="نوع الزيارة والدفع"
-          section="payment"
-          icon={<CurrencyDollarIcon className="w-5 h-5" />}
-          isExpanded={expandedSections.has('payment')}
-          onClick={toggleSection}
-        />
-        
-        {expandedSections.has('payment') && (
-          <div className="p-6 space-y-6">
+      {/* === STEP 5: Payment === */}
+      {currentStep === 5 && (
+        <div id="step-content-5" className={sectionClass(5)}>
+          <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
+            <CurrencyDollarIcon className="w-5 h-5 text-amber-500" />
+            <h3 className="font-semibold text-primary dark:text-white">نوع الزيارة والدفع</h3>
+          </div>
+          <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <RadioGroup
-                label="نوع الزيارة"
-                name="type"
-                options={[
-                  { label: 'Requested', value: 'requested' },
-                  { label: 'Scheduled', value: 'scheduled' }
-                ]}
-                value={editedRecord.type}
-                onChange={(val) => handleRadioChange('type', val)}
-              />
-
+              <RadioGroup label="نوع الزيارة" name="type" options={[{ label: t.ui.maintenanceEditor.requested, value: 'requested' }, { label: t.ui.maintenanceEditor.scheduled, value: 'scheduled' }]} value={editedRecord.type} onChange={(val) => handleRadioChange('type', val)} />
               <div>
-                <label className="text-sm font-medium text-primary dark:text-latte/70 block mb-3">Paid By</label>
+                <label className="text-sm font-medium text-primary dark:text-latte/70 block mb-3">{t.ui.maintenanceEditor.paidBy}</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => handleRadioChange('paidBy', 'company')}
-                    className={`
-                      relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200
-                      ${editedRecord.paidBy === 'company'
-                        ? 'border-primary bg-cream-2 dark:bg-primary/10 text-primary-900 dark:text-primary-300'
-                        : 'border-hairline dark:border-hairline bg-cream dark:bg-espresso text-primary dark:text-latte/70 hover:border-hairline dark:hover:border-hairline'
-                      }
-                    `}
-                  >
-                    <div className={`
-                      w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold
-                      ${editedRecord.paidBy === 'company'
-                        ? 'bg-primary text-white'
-                        : 'bg-cream-2 dark:bg-espresso-light text-primary dark:text-latte'
-                      }
-                    `}>
-                      M
-                    </div>
-                    <div className="text-center">
-                      <div className="font-semibold">Mido's</div>
-                      <div className="text-xs text-latte dark:text-latte">Company pays</div>
-                    </div>                    
-                    {editedRecord.paidBy === 'company' && (
-                      <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                    )}
+                  <button type="button" onClick={() => handleRadioChange('paidBy', 'company')} className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 ${editedRecord.paidBy === 'company' ? 'border-primary bg-cream-2 dark:bg-primary/10 text-primary-900 dark:text-primary-300' : 'border-hairline dark:border-hairline bg-cream dark:bg-espresso text-primary dark:text-latte/70'}`}>
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${editedRecord.paidBy === 'company' ? 'bg-primary text-white' : 'bg-cream-2 dark:bg-espresso-light text-primary dark:text-latte'}`}>M</div>
+                    <div className="text-center"><div className="font-semibold">{t.ui.maintenanceEditor.midos}</div><div className="text-xs text-latte">{t.ui.maintenanceEditor.companyPays}</div></div>
+                    {editedRecord.paidBy === 'company' && <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center"><svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg></div>}
                   </button>
-                  
-                  <button
-                    type="button"
-                    onClick={() => handleRadioChange('paidBy', 'client')}
-                    className={`
-                      relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200
-                      ${editedRecord.paidBy === 'client'
-                        ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-900 dark:text-amber-100'
-                        : 'border-hairline dark:border-hairline bg-cream dark:bg-espresso text-primary dark:text-latte/70 hover:border-hairline dark:hover:border-hairline'
-                      }
-                    `}
-                  >
-                    <div className={`
-                      w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold
-                      ${editedRecord.paidBy === 'client'
-                        ? 'bg-amber-500 text-white'
-                        : 'bg-cream-2 dark:bg-espresso-light text-primary dark:text-latte'
-                      }
-                    `}>
-                      C
-                    </div>
-                    <div className="text-center">
-                      <div className="font-semibold">Client</div>
-                      <div className="text-xs text-latte dark:text-latte">Customer pays</div>
-                    </div>
-                    {editedRecord.paidBy === 'client' && (
-                      <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                    )}
+                  <button type="button" onClick={() => handleRadioChange('paidBy', 'client')} className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 ${editedRecord.paidBy === 'client' ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-900 dark:text-amber-100' : 'border-hairline dark:border-hairline bg-cream dark:bg-espresso text-primary dark:text-latte/70'}`}>
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${editedRecord.paidBy === 'client' ? 'bg-amber-500 text-white' : 'bg-cream-2 dark:bg-espresso-light text-primary dark:text-latte'}`}>C</div>
+                    <div className="text-center"><div className="font-semibold">{t.ui.maintenanceEditor.client}</div><div className="text-xs text-latte">{t.ui.maintenanceEditor.customerPays}</div></div>
+                    {editedRecord.paidBy === 'client' && <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center"><svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg></div>}
                   </button>
                 </div>
               </div>
             </div>
           </div>
-        )}
-      </div>
+          <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
+            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
+            <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{STEPPER_STEPS[5].name}<ChevronLeftIcon className="w-4 h-4" /></button>
+          </div>
+        </div>
+      )}
 
-      {/* Supervisor Section */}
-      <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden">
-        <SectionHeader
-          title="بيانات المشرف"
-          section="supervisor"
-          icon={<ClipboardDocumentListIcon className="w-5 h-5" />}
-          badge={
-            !editedRecord.supervisors || editedRecord.supervisors.length === 0 ? (
-              <span className="px-2 py-0.5 bg-ember-50 dark:bg-ember-500/10 text-ember-700 dark:text-ember-300 text-xs rounded-full">
-                Required
-              </span>
+      {/* === STEP 6: Supervisor === */}
+      {currentStep === 6 && (
+        <div id="step-content-6" className={sectionClass(6)} data-field="supervisors">
+          <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
+            <ClipboardDocumentListIcon className="w-5 h-5 text-leaf-500" />
+            <h3 className="font-semibold text-primary dark:text-white">بيانات المشرف</h3>
+            {(!editedRecord.supervisors || editedRecord.supervisors.length === 0) ? (
+              <span className="px-2 py-0.5 bg-ember-50 dark:bg-ember-500/10 text-ember-700 dark:text-ember-300 text-xs rounded-full">مطلوب</span>
             ) : (
-              <span className="px-2 py-0.5 bg-leaf-50 dark:bg-leaf-500/10 text-leaf-700 dark:text-leaf-300 text-xs rounded-full">
-                {editedRecord.supervisors.length} supervisor(s)
-              </span>
-            )
-          }
-          isExpanded={expandedSections.has('supervisor')}
-          onClick={toggleSection}
-        />
-        {expandedSections.has('supervisor') && (
+              <span className="px-2 py-0.5 bg-leaf-50 dark:bg-leaf-500/10 text-leaf-700 dark:text-leaf-300 text-xs rounded-full">{editedRecord.supervisors.length}</span>
+            )}
+          </div>
           <div className="p-6 space-y-4">
             {(editedRecord.supervisors || []).map((supervisor, index) => (
               <div key={supervisor.id} className="p-4 bg-cream dark:bg-espresso-light/50 rounded-lg border border-hairline dark:border-hairline">
                 <div className="flex justify-between items-center mb-3">
-                  <h4 className="font-semibold text-primary dark:text-latte/70">Supervisor {index + 1}</h4>
-                  {(editedRecord.supervisors || []).length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeSupervisor(index)}
-                      className="min-h-[44px] px-3 py-2 text-ember-700 hover:text-ember-700 hover:bg-ember-50 dark:hover:bg-ember-500/10 text-sm font-medium rounded-lg transition-colors"
-                    >
-                      Remove
-                    </button>
-                  )}
+                  <h4 className="font-semibold text-primary dark:text-latte/70">{t.ui.maintenanceEditor.supervisor} {index + 1}</h4>
+                  {(editedRecord.supervisors || []).length > 1 && <button type="button" onClick={() => removeSupervisor(index)} className="min-h-[44px] px-3 py-2 text-ember-700 hover:text-ember-700 hover:bg-ember-50 dark:hover:bg-ember-500/10 text-sm font-medium rounded-lg transition-colors">{t.ui.maintenanceEditor.remove}</button>}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">Name *</label>
-                    <input
-                      type="text"
-                      value={supervisor.name}
-                      onChange={(e) => updateSupervisor(index, 'name', e.target.value)}
-                      className="w-full px-3 py-2 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg border border-hairline dark:border-hairline focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="اسم المشرف"
-                    />
-                    {errors[`supervisor-${index}-name`] && (
-                      <p className="mt-1 text-sm text-ember-700">{errors[`supervisor-${index}-name`]}</p>
-                    )}
+                    <label htmlFor={`supervisor-${supervisor.id}-name`} className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.supervisorName}</label>
+                    <input id={`supervisor-${supervisor.id}-name`} name={`supervisor-${index}-name`} type="text" value={supervisor.name} onChange={(e) => updateSupervisor(index, 'name', e.target.value)} className="w-full px-3 py-2 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg border border-hairline dark:border-hairline focus:outline-none focus:ring-2 focus:ring-primary" placeholder="اسم المشرف" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">Phone</label>
-                    <input
-                      type="text"
-                      value={supervisor.phone}
-                      onChange={(e) => updateSupervisor(index, 'phone', e.target.value)}
-                      className="w-full px-3 py-2 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg border border-hairline dark:border-hairline focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="رقم الهاتف"
-                    />
+                    <label htmlFor={`supervisor-${supervisor.id}-phone`} className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.phone}</label>
+                    <input id={`supervisor-${supervisor.id}-phone`} name={`supervisor-${index}-phone`} type="tel" value={supervisor.phone} onChange={(e) => updateSupervisor(index, 'phone', formatEgyptianPhone(e.target.value))} className="w-full px-3 py-2 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg border border-hairline dark:border-hairline focus:outline-none focus:ring-2 focus:ring-primary" placeholder="رقم الهاتف" dir="ltr" />
                   </div>
                 </div>
               </div>
             ))}
-            <button
-              type="button"
-              onClick={addSupervisor}
-              className="flex items-center gap-2 px-4 py-2 text-primary dark:text-primary-400 font-medium hover:bg-cream-2 dark:hover:bg-primary/10 rounded-lg border border-primary/30 dark:border-copper-700 transition-colors"
-            >
-              <PlusCircleIcon className="w-5 h-5" /> Add Supervisor
-            </button>
+            <button type="button" onClick={addSupervisor} className="flex items-center gap-2 px-4 py-2 text-primary dark:text-primary-400 font-medium hover:bg-cream-2 dark:hover:bg-primary/10 rounded-lg border border-primary/30 dark:border-copper-700 transition-colors"><PlusCircleIcon className="w-5 h-5" /> {t.ui.maintenanceEditor.addSupervisor}</button>
           </div>
-        )}
-      </div>
-      {/* Notes Section */}
-      <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden">
-        <SectionHeader
-          title="ملاحظات وتوصيات"
-          section="notes"
-          icon={<DocumentTextIcon className="w-5 h-5" />}
-          badge={editedRecord.notes && (
-            <span className="px-2 py-0.5 bg-cream dark:bg-espresso-light text-primary dark:text-latte text-xs rounded-full">
-              Has notes
-            </span>
-          )}
-          isExpanded={expandedSections.has('notes')}
-          onClick={toggleSection}
-        />
-        
-        {expandedSections.has('notes') && (
+          <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
+            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
+            <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{STEPPER_STEPS[6].name}<ChevronLeftIcon className="w-4 h-4" /></button>
+          </div>
+        </div>
+      )}
+
+      {/* === STEP 7: Notes === */}
+      {currentStep === 7 && (
+        <div id="step-content-7" className={sectionClass(7)}>
+          <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
+            <DocumentTextIcon className="w-5 h-5 text-latte" />
+            <h3 className="font-semibold text-primary dark:text-white">ملاحظات وتوصيات</h3>
+          </div>
           <div className="p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
-                Notes
-              </label>
-              <textarea
-                name="notes"
-                value={editedRecord.notes || ''}
-                onChange={handleFieldChange}
-                rows={4}
-                placeholder="أضف أي ملاحظات إضافية..."
-                className="w-full px-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline resize-none"
-              />
+              <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.notes}</label>
+              <textarea name="notes" value={editedRecord.notes || ''} onChange={handleFieldChange} rows={4} placeholder="أضف أي ملاحظات إضافية..." className="w-full px-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline resize-none" />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
-                Recommendations
-              </label>
-              <textarea
-                name="recommendations"
-                value={editedRecord.recommendations || ''}
-                onChange={handleFieldChange}
-                rows={3}
-                placeholder="أضف توصيات للزيارات القادمة..."
-                className="w-full px-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline resize-none"
-              />
+              <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.recommendations}</label>
+              <textarea name="recommendations" value={editedRecord.recommendations || ''} onChange={handleFieldChange} rows={3} placeholder="أضف توصيات للزيارات القادمة..." className="w-full px-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline resize-none" />
             </div>
           </div>
-        )}
-      </div>
+          <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
+            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
+            <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{STEPPER_STEPS[7].name}<ChevronLeftIcon className="w-4 h-4" /></button>
+          </div>
+        </div>
+      )}
 
-      {/* Before & After Photos Section */}
-      <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden">
-        <SectionHeader
-          title="صور قبل وبعد"
-          section="photos"
-          icon={<CameraIcon className="w-5 h-5" />}
-          badge={editedRecord.photos && editedRecord.photos.length > 0 && (
-            <span className="px-2 py-0.5 bg-primary/10 dark:bg-primary/10 text-primary dark:text-primary-400 text-xs rounded-full">
-              {editedRecord.photos.length} photo(s)
-            </span>
-          )}
-          isExpanded={expandedSections.has('photos')}
-          onClick={toggleSection}
-        />
-        
-        {expandedSections.has('photos') && (
+      {/* === STEP 8: Photos === */}
+      {currentStep === 8 && (
+        <div id="step-content-8" className={sectionClass(8)}>
+          <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
+            <CameraIcon className="w-5 h-5 text-primary" />
+            <h3 className="font-semibold text-primary dark:text-white">صور قبل وبعد</h3>
+            {editedRecord.photos && editedRecord.photos.length > 0 && <span className="px-2 py-0.5 bg-primary/10 dark:bg-primary/10 text-primary dark:text-primary-400 text-xs rounded-full">{editedRecord.photos.length}</span>}
+          </div>
           <div className="p-6 space-y-6">
-            {/* Upload Progress Indicator */}
             {uploadingPhotos && (
               <div className="flex items-center gap-3 p-4 bg-cream-2 dark:bg-primary/10 rounded-lg border border-primary/30 dark:border-primary/30">
-                <svg className="animate-spin w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span className="text-primary dark:text-primary-400 font-medium">Uploading photos...</span>
+                <svg className="animate-spin w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                <span className="text-primary dark:text-primary-400 font-medium">{t.ui.maintenanceEditor.uploadingPhotos}</span>
               </div>
             )}
-
             {/* Before Photos */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <span className="font-medium text-primary dark:text-latte/70">Before Photos</span>
-                <label className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg cursor-pointer transition-colors ${
-                  uploadingPhotos 
-                    ? 'bg-cream dark:bg-espresso-light text-latte dark:text-latte cursor-not-allowed' 
-                    : 'bg-cream-2 dark:bg-primary/10 text-primary dark:text-primary-400 hover:bg-primary/10 dark:hover:bg-primary/10 border border-primary/30 dark:border-primary/30'
-                }`}>
-                  <ArrowUpTrayIcon className="w-4 h-4" />
-                  <span>Upload Before</span>
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    multiple 
-                    className="hidden" 
-                    disabled={uploadingPhotos}
-                    onChange={(e) => handlePhotoUpload(e.target.files, "before")} 
-                  />
+                <span className="font-medium text-primary dark:text-latte/70">{t.ui.maintenanceEditor.beforePhotos}</span>
+                <label className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg cursor-pointer transition-colors ${uploadingPhotos ? 'bg-cream dark:bg-espresso-light text-latte cursor-not-allowed' : 'bg-cream-2 dark:bg-primary/10 text-primary dark:text-primary-400 hover:bg-primary/10 border border-primary/30'}`}>
+                  <ArrowUpTrayIcon className="w-4 h-4" /><span>{t.ui.maintenanceEditor.uploadBefore}</span>
+                  <input type="file" accept="image/*" multiple className="hidden" disabled={uploadingPhotos} onChange={(e) => handlePhotoUpload(e.target.files, 'before')} />
                 </label>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {editedRecord.photos?.filter(p => p.type === "before").map((photo, i) => (
+                {editedRecord.photos?.filter(p => p.type === 'before').map((photo, i) => (
                   <div key={`before-${i}`} className="relative group aspect-square">
-                    <img 
-                      src={photo.url} 
-                      alt={`Before photo ${i + 1}`} 
-                      className="w-full h-full object-cover rounded-lg border border-hairline dark:border-hairline" 
-                    />
-                    <button 
-                      onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: "before" })} 
-                      className="absolute top-2 right-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                      title="إزالة الصورة" aria-label="إزالة الصورة"
-                    >
-                      <XMarkIcon className="w-4 h-4" />
-                    </button>
-                    <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/50 text-white text-xs rounded">
-                      Before
-                    </div>
+                    <img src={photo.url} alt={`${t.ui.maintenanceEditor.before} ${i + 1}`} className="w-full h-full object-cover rounded-lg border border-hairline dark:border-hairline" loading="lazy" />
+                    <button onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: 'before' })} className="absolute top-2 right-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" title="إزالة الصورة" aria-label="إزالة الصورة"><XMarkIcon className="w-4 h-4" /></button>
+                    <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/50 text-white text-xs rounded">{t.ui.maintenanceEditor.before}</div>
                   </div>
                 ))}
-                {(!editedRecord.photos || editedRecord.photos.filter(p => p.type === "before").length === 0) && (
-                  <div className="col-span-full flex items-center justify-center h-20 bg-cream dark:bg-espresso-light/50 rounded-lg border border-dashed border-hairline dark:border-hairline">
-                    <span className="text-sm text-latte dark:text-latte">No before photos</span>
-                  </div>
+                {(!editedRecord.photos || editedRecord.photos.filter(p => p.type === 'before').length === 0) && (
+                  <div className="col-span-full flex items-center justify-center h-20 bg-cream dark:bg-espresso-light/50 rounded-lg border border-dashed border-hairline dark:border-hairline"><span className="text-sm text-latte">{t.ui.maintenanceEditor.noBeforePhotos}</span></div>
                 )}
               </div>
             </div>
-
             {/* After Photos */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <span className="font-medium text-primary dark:text-latte/70">After Photos</span>
-                <label className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg cursor-pointer transition-colors ${
-                  uploadingPhotos 
-                    ? 'bg-cream dark:bg-espresso-light text-latte dark:text-latte cursor-not-allowed' 
-                    : 'bg-cream-2 dark:bg-primary/10 text-primary dark:text-primary-400 hover:bg-primary/10 dark:hover:bg-primary/10 border border-primary/30 dark:border-primary/30'
-                }`}>
-                  <ArrowUpTrayIcon className="w-4 h-4" />
-                  <span>Upload After</span>
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    multiple 
-                    className="hidden" 
-                    disabled={uploadingPhotos}
-                    onChange={(e) => handlePhotoUpload(e.target.files, "after")} 
-                  />
+                <span className="font-medium text-primary dark:text-latte/70">{t.ui.maintenanceEditor.afterPhotos}</span>
+                <label className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg cursor-pointer transition-colors ${uploadingPhotos ? 'bg-cream dark:bg-espresso-light text-latte cursor-not-allowed' : 'bg-cream-2 dark:bg-primary/10 text-primary dark:text-primary-400 hover:bg-primary/10 border border-primary/30'}`}>
+                  <ArrowUpTrayIcon className="w-4 h-4" /><span>{t.ui.maintenanceEditor.uploadAfter}</span>
+                  <input type="file" accept="image/*" multiple className="hidden" disabled={uploadingPhotos} onChange={(e) => handlePhotoUpload(e.target.files, 'after')} />
                 </label>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {editedRecord.photos?.filter(p => p.type === "after").map((photo, i) => (
+                {editedRecord.photos?.filter(p => p.type === 'after').map((photo, i) => (
                   <div key={`after-${i}`} className="relative group aspect-square">
-                    <img 
-                      src={photo.url} 
-                      alt={`After photo ${i + 1}`} 
-                      className="w-full h-full object-cover rounded-lg border border-hairline dark:border-hairline" 
-                    />
-                    <button 
-                      onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: "after" })} 
-                      className="absolute top-2 right-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                      title="إزالة الصورة" aria-label="إزالة الصورة"
-                    >
-                      <XMarkIcon className="w-4 h-4" />
-                    </button>
-                    <div className="absolute bottom-2 left-2 px-2 py-1 bg-leaf-500/80 text-white text-xs rounded">
-                      After
-                    </div>
+                    <img src={photo.url} alt={`${t.ui.maintenanceEditor.after} ${i + 1}`} className="w-full h-full object-cover rounded-lg border border-hairline dark:border-hairline" loading="lazy" />
+                    <button onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: 'after' })} className="absolute top-2 right-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" title="إزالة الصورة" aria-label="إزالة الصورة"><XMarkIcon className="w-4 h-4" /></button>
+                    <div className="absolute bottom-2 left-2 px-2 py-1 bg-leaf-500/80 text-white text-xs rounded">{t.ui.maintenanceEditor.after}</div>
                   </div>
                 ))}
-                {(!editedRecord.photos || editedRecord.photos.filter(p => p.type === "after").length === 0) && (
-                  <div className="col-span-full flex items-center justify-center h-20 bg-cream dark:bg-espresso-light/50 rounded-lg border border-dashed border-hairline dark:border-hairline">
-                    <span className="text-sm text-latte dark:text-latte">No after photos</span>
-                  </div>
+                {(!editedRecord.photos || editedRecord.photos.filter(p => p.type === 'after').length === 0) && (
+                  <div className="col-span-full flex items-center justify-center h-20 bg-cream dark:bg-espresso-light/50 rounded-lg border border-dashed border-hairline dark:border-hairline"><span className="text-sm text-latte">{t.ui.maintenanceEditor.noAfterPhotos}</span></div>
                 )}
               </div>
             </div>
-
-            {/* Legacy Photos - Display only, no upload */}
-            {editedRecord.photos && editedRecord.photos.filter(p => p.type === "legacy").length > 0 && (
+            {/* Legacy Photos */}
+            {editedRecord.photos && editedRecord.photos.filter(p => p.type === 'legacy').length > 0 && (
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-medium text-primary dark:text-latte/70">Legacy Photos</span>
-                  <span className="text-xs text-latte dark:text-latte">Imported from previous records</span>
-                </div>
+                <div className="flex items-center justify-between mb-3"><span className="font-medium text-primary dark:text-latte/70">{t.ui.maintenanceEditor.legacyPhotos}</span><span className="text-xs text-latte">{t.ui.maintenanceEditor.legacyPhotosHint}</span></div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                  {editedRecord.photos.filter(p => p.type === "legacy").map((photo, i) => (
+                  {editedRecord.photos.filter(p => p.type === 'legacy').map((photo, i) => (
                     <div key={`legacy-${i}`} className="relative group aspect-square">
-                      <img 
-                        src={photo.url} 
-                        alt={`Legacy photo ${i + 1}`} 
-                        className="w-full h-full object-cover rounded-lg border border-hairline dark:border-hairline" 
-                      />
-                      <button 
-                        onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: "legacy" })} 
-                        className="absolute top-2 right-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                        title="إزالة الصورة" aria-label="إزالة الصورة"
-                      >
-                        <XMarkIcon className="w-4 h-4" />
-                      </button>
-                      <div className="absolute bottom-2 left-2 px-2 py-1 bg-espresso/80 text-white text-xs rounded">
-                        Legacy
-                      </div>
+                      <img src={photo.url} alt={`${t.ui.maintenanceEditor.legacyPhotos} ${i + 1}`} className="w-full h-full object-cover rounded-lg border border-hairline dark:border-hairline" loading="lazy" />
+                      <button onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: 'legacy' })} className="absolute top-2 right-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" title="إزالة الصورة" aria-label="إزالة الصورة"><XMarkIcon className="w-4 h-4" /></button>
+                      <div className="absolute bottom-2 left-2 px-2 py-1 bg-espresso/80 text-white text-xs rounded">{t.ui.maintenanceEditor.legacy}</div>
                     </div>
                   ))}
                 </div>
               </div>
             )}
           </div>
-        )}
-      </div>
+          <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
+            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
+            <span className="text-xs text-latte">الخطوة الأخيرة</span>
+          </div>
+        </div>
+      )}
 
       {/* Action Bar */}
       <div className={`fixed bottom-0 left-0 right-0 ${isSidebarExpanded ? 'lg:right-64' : 'lg:right-20'} bg-cream/90 dark:bg-espresso/90 backdrop-blur-lg border-t border-hairline dark:border-hairline shadow-lg z-50 transition-all duration-300`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-3">
-            <button
-              onClick={onCancel}
-              className="flex items-center justify-center gap-2 min-h-[44px] px-4 sm:px-5 py-2.5 text-primary dark:text-latte font-medium hover:text-primary dark:hover:text-white hover:bg-cream dark:hover:bg-espresso-light/50 rounded-lg transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              <span className="hidden sm:inline">Cancel</span>
+            <button onClick={onCancel} className="flex items-center justify-center gap-2 min-h-[44px] px-4 sm:px-5 py-2.5 text-primary dark:text-latte font-medium hover:text-primary dark:hover:text-white hover:bg-cream dark:hover:bg-espresso-light/50 rounded-lg transition-colors">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              <span className="hidden sm:inline">{t.ui.maintenanceEditor.cancel}</span>
             </button>
-            
-            <button
-              onClick={handleSave}
-              className="btn-primary rounded-lg min-h-[44px] px-5 sm:px-6 py-2.5 shadow-lg"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              <span>Save</span>
+            <button onClick={handleSave} className="btn-primary rounded-lg min-h-[44px] px-5 sm:px-6 py-2.5 shadow-lg">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+              <span>{t.ui.maintenanceEditor.save}</span>
             </button>
-          </div>        
+          </div>
         </div>
       </div>
-      {/* Spacer for fixed action bar */}
       <div className="h-24"></div>
 
-      <ConfirmDialog
-        isOpen={!!confirmPhotoDelete?.isOpen}
-        onClose={() => setConfirmPhotoDelete(null)}
-        onConfirm={() => {
-          if (confirmPhotoDelete) {
-            handlePhotoRemove({ url: confirmPhotoDelete.url, type: confirmPhotoDelete.category as any });
-          }
-          setConfirmPhotoDelete(null);
-        }}
-        title="إزالة الصورة" aria-label="إزالة الصورة"
-        message="هل أنت متأكد من رغبتك في إزالة هذه الصورة؟ لا يمكن التراجع عن هذا الإجراء."
-        confirmLabel="نعم، إزالة"
-      />
+      <ConfirmDialog isOpen={!!confirmPhotoDelete?.isOpen} onClose={() => setConfirmPhotoDelete(null)} onConfirm={() => { if (confirmPhotoDelete) { handlePhotoRemove({ url: confirmPhotoDelete.url, type: confirmPhotoDelete.category as any }); } setConfirmPhotoDelete(null); }} title="إزالة الصورة" aria-label="إزالة الصورة" message="هل أنت متأكد من رغبتك في إزالة هذه الصورة؟ لا يمكن التراجع عن هذا الإجراء." confirmLabel="نعم، إزالة" />
     </div>
   );
 };

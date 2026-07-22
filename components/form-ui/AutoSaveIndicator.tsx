@@ -15,6 +15,7 @@
 
 import React, { useState } from 'react';
 import { CheckCircleIcon, ExclamationCircleIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { useT } from '../../utils/i18n';
 
 interface AutoSaveIndicatorProps {
   /** Currently saving */
@@ -36,21 +37,21 @@ interface AutoSaveIndicatorProps {
 /**
  * Format relative time (e.g., "2 min ago")
  */
-function formatRelativeTime(date: Date): string {
+function formatRelativeTime(date: Date, t: ReturnType<typeof useT>): string {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffSecs = Math.floor(diffMs / 1000);
   const diffMins = Math.floor(diffSecs / 60);
 
-  if (diffSecs < 30) return 'just now';
-  if (diffSecs < 60) return `${diffSecs}s ago`;
-  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffSecs < 30) return t.common.justNow;
+  if (diffSecs < 60) return t.common.secondsAgo.replace('{{count}}', String(diffSecs));
+  if (diffMins < 60) return t.common.minutesAgo.replace('{{count}}', String(diffMins));
 
   const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffHours < 24) return t.common.hoursAgo.replace('{{count}}', String(diffHours));
 
   const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays}d ago`;
+  return t.common.daysAgo.replace('{{count}}', String(diffDays));
 }
 
 export const AutoSaveIndicator: React.FC<AutoSaveIndicatorProps> = ({
@@ -62,6 +63,7 @@ export const AutoSaveIndicator: React.FC<AutoSaveIndicatorProps> = ({
   position = 'inline',
   className = ''
 }) => {
+  const t = useT();
   const [showTooltip, setShowTooltip] = useState(false);
 
   const status = hasError ? 'error' : isSaving ? 'saving' : hasUnsavedChanges ? 'unsaved' : 'saved';
@@ -72,32 +74,32 @@ export const AutoSaveIndicator: React.FC<AutoSaveIndicatorProps> = ({
       color: 'text-primary',
       bg: 'bg-primary/10',
       border: 'border-primary/30',
-      text: 'Saving...',
-      ariaLabel: 'Saving changes'
+      text: t.common.saving,
+      ariaLabel: t.common.saving
     },
     saved: {
       icon: CheckCircleIcon,
       color: 'text-emerald-500',
       bg: 'bg-emerald-500/10',
       border: 'border-emerald-500/30',
-      text: lastSaved ? `Saved ${formatRelativeTime(lastSaved)}` : 'Saved',
-      ariaLabel: 'All changes saved'
+      text: lastSaved ? `${t.common.saved} ${formatRelativeTime(lastSaved, t)}` : t.common.saved,
+      ariaLabel: t.common.saved
     },
     unsaved: {
       icon: ClockIcon,
       color: 'text-amber-500',
       bg: 'bg-amber-500/10',
       border: 'border-amber-500/30',
-      text: 'Unsaved changes',
-      ariaLabel: 'You have unsaved changes'
+      text: t.common.unsaved,
+      ariaLabel: t.common.unsaved
     },
     error: {
       icon: ExclamationCircleIcon,
       color: 'text-ember-500',
       bg: 'bg-ember-500/10',
       border: 'border-ember-500/30',
-      text: 'Save failed',
-      ariaLabel: 'Failed to save changes'
+      text: t.common.saveFailed,
+      ariaLabel: t.common.saveFailed
     }
   };
 
@@ -176,6 +178,7 @@ export const AutoSaveStatusBar: React.FC<AutoSaveStatusBarProps> = ({
   onSaveNow,
   versionCount = 0
 }) => {
+  const t = useT();
   return (
     <div className="flex items-center justify-between gap-4 px-4 py-2 bg-cream-2 border border-hairline rounded-lg">
       <AutoSaveIndicator
@@ -188,7 +191,7 @@ export const AutoSaveStatusBar: React.FC<AutoSaveStatusBarProps> = ({
 
       <div className="flex items-center gap-3 text-xs text-latte">
         {versionCount > 0 && (
-          <span>{versionCount} versions saved</span>
+          <span>{t.common.versionsSaved.replace('{{count}}', String(versionCount))}</span>
         )}
 
         {hasUnsavedChanges && onSaveNow && (
@@ -198,7 +201,7 @@ export const AutoSaveStatusBar: React.FC<AutoSaveStatusBarProps> = ({
             disabled={isSaving}
             className="px-3 py-1 text-primary bg-primary/10 rounded-md hover:bg-primary/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            Save now
+            {t.common.saveNow}
           </button>
         )}
       </div>

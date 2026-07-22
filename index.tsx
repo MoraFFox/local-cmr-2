@@ -7,6 +7,7 @@ import './index.css';
 import { BrowserRouter } from 'react-router-dom';
 import AppRouter from './components/AppRouter.tsx';
 import { ToastProvider } from './components/ToastContext.tsx';
+import { UndoQueueProvider } from './components/UndoQueueContext.tsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
 import DebugPanel from './components/DebugPanel.tsx';
 
@@ -20,15 +21,17 @@ root.render(
   <React.StrictMode>
     <ErrorBoundary>
       <ToastProvider>
-        <BrowserRouter
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true,
-          }}
-        >
-          <AppRouter />
-        </BrowserRouter>
-        {import.meta.env.DEV && <DebugPanel />}
+        <UndoQueueProvider>
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
+            <AppRouter />
+          </BrowserRouter>
+          {import.meta.env.DEV && <DebugPanel />}
+        </UndoQueueProvider>
       </ToastProvider>
     </ErrorBoundary>
   </React.StrictMode>

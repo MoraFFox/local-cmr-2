@@ -84,6 +84,7 @@ const SelectDrawer: React.FC<SelectDrawerProps> = ({
                 title={label}
                 maxHeight="85vh"
                 contentClassName="flex flex-col h-full"
+                hasUnsavedChanges={false}
             >
                 <div className="p-4 bg-espresso h-full flex flex-col overflow-hidden">
                     {searchable && (

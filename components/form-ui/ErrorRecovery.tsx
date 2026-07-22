@@ -23,6 +23,7 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import { logger } from '../../utils/logger';
+import { useT } from '../../utils/i18n';
 
 interface ErrorRecoveryProps {
   /** Error object or message */
@@ -61,7 +62,7 @@ interface ErrorType {
 /**
  * Categorize error and provide context
  */
-function categorizeError(error: Error | string): ErrorType {
+function categorizeError(error: Error | string, t: ReturnType<typeof useT>): ErrorType {
   const message = typeof error === 'string' ? error : error.message;
   const lowerMessage = message.toLowerCase();
 
@@ -73,8 +74,8 @@ function categorizeError(error: Error | string): ErrorType {
     lowerMessage.includes('timeout')
   ) {
     return {
-      title: 'Network Error',
-      description: 'Unable to connect to the server. Please check your internet connection and try again.',
+      title: t.errors.networkError,
+      description: t.errors.networkErrorDesc,
       icon: ExclamationTriangleIcon,
       canRetry: true,
       canSaveDraft: true
@@ -88,8 +89,8 @@ function categorizeError(error: Error | string): ErrorType {
     lowerMessage.includes('validation')
   ) {
     return {
-      title: 'Validation Error',
-      description: 'Please check your input and try again. Some fields may be missing or invalid.',
+      title: t.errors.validationError,
+      description: t.errors.validationErrorDesc,
       icon: ExclamationTriangleIcon,
       canRetry: false,
       canSaveDraft: true
@@ -103,8 +104,8 @@ function categorizeError(error: Error | string): ErrorType {
     lowerMessage.includes('login')
   ) {
     return {
-      title: 'Authentication Error',
-      description: 'Your session may have expired. Please log in again.',
+      title: t.errors.authenticationError,
+      description: t.errors.authenticationErrorDesc,
       icon: ExclamationTriangleIcon,
       canRetry: true,
       canSaveDraft: true
@@ -118,8 +119,8 @@ function categorizeError(error: Error | string): ErrorType {
     lowerMessage.includes('internal')
   ) {
     return {
-      title: 'Server Error',
-      description: 'Something went wrong on our end. Please try again later.',
+      title: t.errors.serverError,
+      description: t.errors.serverErrorDesc,
       icon: ExclamationTriangleIcon,
       canRetry: true,
       canSaveDraft: true
@@ -133,8 +134,8 @@ function categorizeError(error: Error | string): ErrorType {
     lowerMessage.includes('disk')
   ) {
     return {
-      title: 'Storage Error',
-      description: 'Unable to save data locally. Your device storage may be full.',
+      title: t.errors.storageError,
+      description: t.errors.storageErrorDesc,
       icon: ExclamationTriangleIcon,
       canRetry: false,
       canSaveDraft: false
@@ -143,8 +144,8 @@ function categorizeError(error: Error | string): ErrorType {
 
   // Default error
   return {
-    title: 'Error',
-    description: message || 'An unexpected error occurred.',
+    title: t.common.error,
+    description: message || t.errors.unexpectedError,
     icon: ExclamationTriangleIcon,
     canRetry: true,
     canSaveDraft: true
@@ -162,9 +163,10 @@ export const ErrorRecovery: React.FC<ErrorRecoveryProps> = ({
   autoDismiss,
   onDismiss
 }) => {
+  const t = useT();
   const [isRetrying, setIsRetrying] = React.useState(false);
   const [isSavingDraft, setIsSavingDraft] = React.useState(false);
-  const errorInfo = categorizeError(error);
+  const errorInfo = categorizeError(error, t);
   const ErrorIcon = errorInfo.icon;
 
   // Auto-dismiss logic
@@ -230,7 +232,7 @@ export const ErrorRecovery: React.FC<ErrorRecoveryProps> = ({
           {showDetails && (
             <details className="mt-2">
               <summary className="text-xs text-ember-500/60 cursor-pointer hover:text-ember-500">
-                Error details
+                {t.errors.errorDetails}
               </summary>
               <pre className="mt-1 text-xs text-ember-500/50 bg-ember-500/5 p-2 rounded overflow-auto">
                 {typeof error === 'string' ? error : error.stack || error.message}
@@ -244,7 +246,7 @@ export const ErrorRecovery: React.FC<ErrorRecoveryProps> = ({
             type="button"
             onClick={onDismiss}
             className="p-1.5 text-ember-500/60 hover:text-ember-500 rounded-lg hover:bg-ember-500/10 transition-colors"
-            aria-label="Dismiss error"
+            aria-label={t.common.close}
           >
             <XMarkIcon className="w-4 h-4" />
           </button>
@@ -264,7 +266,7 @@ export const ErrorRecovery: React.FC<ErrorRecoveryProps> = ({
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-ember-500 text-white rounded-lg hover:bg-ember-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px]"
               >
                 <ArrowPathIcon className={`w-4 h-4 ${isRetrying ? 'animate-spin' : ''}`} />
-                {isRetrying ? 'Retrying...' : 'Try Again'}
+                {isRetrying ? t.common.saving : t.errors.tryAgain}
               </button>
             )}
 
@@ -277,7 +279,7 @@ export const ErrorRecovery: React.FC<ErrorRecoveryProps> = ({
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary border border-hairline rounded-lg hover:bg-cream-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px]"
               >
                 <DocumentArrowDownIcon className={`w-4 h-4 ${isSavingDraft ? 'animate-bounce' : ''}`} />
-                {isSavingDraft ? 'Saving...' : 'Save Draft'}
+                {isSavingDraft ? t.common.saving : t.errors.saveDraft}
               </button>
             )}
 
@@ -289,7 +291,7 @@ export const ErrorRecovery: React.FC<ErrorRecoveryProps> = ({
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-latte border border-hairline rounded-lg hover:bg-cream-2 hover:text-primary transition-colors min-h-[44px]"
               >
                 <ChatBubbleLeftIcon className="w-4 h-4" />
-                Contact Support
+                {t.errors.contactSupport}
               </button>
             )}
 

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { ar } from '../../utils/arabicTranslations';
 import { CameraIcon, PhotoIcon, XMarkIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { ConfirmationDialog } from '../form-ui/SafeModal';
 import { Photo } from './PhotoUpload';
 import {
   compressImage,
@@ -14,6 +15,8 @@ interface CameraBottomSheetProps {
   photos: Photo[];
   onPhotosChange: (photos: Photo[]) => void;
   maxPhotos?: number;
+  /** Prevents accidental close while photos are being processed or selected. */
+  hasUnsavedChanges?: boolean;
 }
 
 const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
@@ -22,6 +25,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
   photos,
   onPhotosChange,
   maxPhotos = 4,
+  hasUnsavedChanges = false,
 }) => {
   const beforeCount = photos.filter((p) => p.type === 'before').length;
   const afterCount = photos.filter((p) => p.type === 'after').length;
@@ -36,10 +40,14 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [confirmView, setConfirmView] = useState(false);
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
   // Reset view when opening/closing
   React.useEffect(() => {
-    if (isOpen) setConfirmView(false);
+    if (isOpen) {
+      setConfirmView(false);
+      setShowCloseConfirm(false);
+    }
   }, [isOpen]);
 
   const handleFileSelected = useCallback(
@@ -101,6 +109,14 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
     setConfirmView(false);
   };
 
+  const requestClose = () => {
+    if (hasUnsavedChanges || isProcessing) {
+      setShowCloseConfirm(true);
+    } else {
+      onClose();
+    }
+  };
+
   if (!isOpen) return null;
 
   const canAddBefore = beforeCount < maxPerType;
@@ -111,12 +127,25 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
     <>
       {/* Overlay */}
       <div
+        data-testid="camera-overlay"
         className="fixed inset-0 bg-black/50 z-50 animate-fade-in"
-        onClick={onClose}
+        onClick={requestClose}
       />
 
       {/* Bottom Sheet */}
       <div className="fixed inset-x-0 bottom-0 z-50 animate-slide-up" dir="rtl">
+        {showCloseConfirm && (
+          <div className="absolute inset-0 z-20 bg-cream dark:bg-espresso-light rounded-t-2xl p-5">
+            <ConfirmationDialog
+              message={ar.common.unsavedChangesMessage}
+              onConfirm={() => {
+                setShowCloseConfirm(false);
+                onClose();
+              }}
+              onCancel={() => setShowCloseConfirm(false)}
+            />
+          </div>
+        )}
         <div className="bg-cream dark:bg-espresso-light rounded-t-2xl shadow-sm max-w-lg mx-auto">
           {/* Drag Handle */}
           <div className="flex justify-center pt-3 pb-2">
@@ -129,7 +158,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
               {ar.portal.capturePhoto}
             </h3>
             <button
-              onClick={onClose}
+              onClick={requestClose}
               className="p-2 -ml-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-cream-2 dark:hover:bg-chrome-light/50 transition-colors"
             >
               <XMarkIcon className="w-5 h-5 text-latte" />

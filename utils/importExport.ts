@@ -35,8 +35,8 @@ export const exportMaintenanceToCSV = (records: MaintenanceRecord[], companyName
         { header: 'Had Problem', accessor: (r) => r.hadProblem ? 'Yes' : 'No' },
         { header: 'Problems', accessor: (r) => (r.problems || []).join('; ') },
         { header: 'Parts Replaced', accessor: (r) => r.partsWereReplaced ? 'Yes' : 'No' },
-        { header: 'Parts', accessor: (r) => (r.partsReplaced || []).map(p => p.partName).join('; ') },
-        { header: 'Services', accessor: (r) => (r.servicesPerformed || []).map(s => s.serviceName).join('; ') },
+        { header: 'Parts', accessor: (r) => (r.partsReplaced || []).map(p => p.name).join('; ') },
+        { header: 'Services', accessor: (r) => (r.servicesPerformed || []).map(s => s.name).join('; ') },
         { header: 'Problem Solved', accessor: (r) => r.problemSolved ? 'Yes' : 'No' },
         { header: 'Paid By', accessor: 'paidBy' },
         { header: 'Visit Zone', accessor: 'visitZone' },
@@ -68,7 +68,46 @@ export const exportCompaniesData = (companies: FormData[]): void => {
     exportToJSON(companies, `companies_export_${timestamp}.json`);
 };
 
+/**
+ * Recursively rewrite legacy part/service keys (`partName`, `part_name`,
+ * `serviceName`, `service_name`) to `name` so that old JSON backups still
+ * load with the current PartRecord/ServiceRecord shape.
+ */
+export function migrateLegacyPartServiceKeys<T>(value: T): T {
+    if (value === null || typeof value !== 'object') {
+        return value;
+    }
+
+    if (Array.isArray(value)) {
+        return value.map((item) => migrateLegacyPartServiceKeys(item)) as unknown as T;
+    }
+
+    const obj = value as Record<string, unknown>;
+    const result: Record<string, unknown> = {};
+
+    for (const [key, val] of Object.entries(obj)) {
+        if (
+            key === 'partName' ||
+            key === 'part_name' ||
+            key === 'serviceName' ||
+            key === 'service_name'
+        ) {
+            // Only promote the legacy key if `name` has not already been set.
+            if (!('name' in result)) {
+                result.name = migrateLegacyPartServiceKeys(val);
+            }
+        } else {
+            result[key] = migrateLegacyPartServiceKeys(val);
+        }
+    }
+
+    return result as T;
+}
+
 // Import data from JSON file
+// NOTE: legacy partName/serviceName key migration is intentionally applied
+// later in `transformImportedCompany` so that this function remains a thin
+// JSON parser and there is a single source of truth for import normalisation.
 export const importFromJSON = (file: File): Promise<any> => {
     return new Promise((resolve, reject) => {
         // Add file size validation
@@ -181,7 +220,7 @@ export const validateImportedCompany = (data: any): { isValid: boolean; errors: 
 
 // Transform imported data to match FormData structure
 export const transformImportedCompany = (data: any): Partial<FormData> => {
-    return {
+    return migrateLegacyPartServiceKeys({
         companyName: data.companyName || '',
         email: data.email || '',
         taxNumber: data.taxNumber || '',
@@ -207,7 +246,7 @@ export const transformImportedCompany = (data: any): Partial<FormData> => {
             id: m.id || Date.now() + Math.random()
         })),
         contacts: data.contacts || []
-    };
+    });
 };
 
 // Helper functions

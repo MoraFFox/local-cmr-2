@@ -23,7 +23,7 @@
  * ```
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 
 // ============== Types ==============
 
@@ -87,7 +87,7 @@ interface FormValidationReturn<T> extends ValidationState {
   /** Get errors by section/group */
   errorsBySection: Record<string, ValidationError[]>;
   /** Handle form submit with validation (event is optional so it can be called from button onClick) */
-  handleSubmit: (onValid: () => void, onInvalid?: () => void) => (e?: React.FormEvent) => void;
+  handleSubmit: (onValid: () => void, onInvalid?: (errors: Record<string, string>) => void) => (e?: React.FormEvent) => void;
   /** Focus next error field */
   focusNextError: () => void;
 }
@@ -179,6 +179,11 @@ export function useFormValidation<T extends Record<string, unknown>>(
     errorCount: 0
   });
 
+  // Ref to store the latest validation errors so they can be passed to
+  // onInvalid synchronously, bypassing React's async setState. Without this,
+  // callers reading validation.errors in onInvalid get stale (empty) values.
+  const latestErrorsRef = useRef<Record<string, string>>({});
+
   /**
    * Validate a single field
    */
@@ -230,6 +235,10 @@ export function useFormValidation<T extends Record<string, unknown>>(
         }
       }
     });
+
+    // Store fresh errors in ref BEFORE setState (which is async) so
+    // handleSubmit can pass them to onInvalid synchronously.
+    latestErrorsRef.current = newErrors;
 
     setState(prev => ({
       ...prev,
@@ -329,7 +338,7 @@ export function useFormValidation<T extends Record<string, unknown>>(
    */
   const handleSubmit = useCallback((
     onValid: () => void,
-    onInvalid?: () => void
+    onInvalid?: (errors: Record<string, string>) => void
   ) => {
     return (e?: React.FormEvent) => {
       // Event is optional: preventDefault only when called from a real form event.
@@ -340,7 +349,9 @@ export function useFormValidation<T extends Record<string, unknown>>(
       if (isValid) {
         onValid();
       } else {
-        onInvalid?.();
+        // Pass fresh errors from the ref (async-safe) so callers don't
+        // read stale validation.errors from the hook's state.
+        onInvalid?.(latestErrorsRef.current);
       }
     };
   }, [validateAll]);

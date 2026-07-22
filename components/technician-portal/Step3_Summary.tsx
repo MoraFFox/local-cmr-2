@@ -10,7 +10,7 @@ import {
 import TechCard from './ui/TechCard';
 import TechButton from './ui/TechButton';
 import TechInput from './ui/TechInput';
-import CompactStarRating from './CompactStarRating';
+import { StarRating } from '../form-ui/StarRating';
 import { ar } from '../../utils/arabicTranslations';
 import { Step1ContextData } from './Step1_Context';
 import { Step2WorkLogData } from './Step2_WorkLog';
@@ -147,6 +147,7 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
                   value={step2Data.clientSupervisorName || ''}
                   onChange={onUpdateSupervisorName}
                   placeholder={ar.tactical.clientSupervisorName}
+                  autoScroll
               />
               <TechInput
                   label={ar.tactical.clientSupervisorPhone}
@@ -154,6 +155,7 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
                   onChange={onUpdateSupervisorPhone}
                   placeholder={ar.tactical.clientSupervisorPhone}
                   type="tel"
+                  autoScroll
               />
           </div>
       </TechCard>
@@ -189,10 +191,12 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
                          <span className="text-sm font-medium text-primary">{step1Data.clientBaristaName}</span>
                          <span className="text-xs text-latte">{ar.tactical.clientContact}</span>
                      </div>
-                     <CompactStarRating 
-                        value={step1Data.clientBaristaRating}
+                     <StarRating 
+                        value={step1Data.clientBaristaRating || 0}
                         onChange={onUpdateRating}
                         size="lg"
+                        showNA
+                        showNumeric
                      />
                  </div>
              )}

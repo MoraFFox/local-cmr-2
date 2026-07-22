@@ -15,6 +15,7 @@ import {
   CloudArrowUpIcon,
 } from "@heroicons/react/24/outline";
 import ThemeToggle from "../../components/ThemeToggle";
+import { KeyboardShortcutsHelpButton } from "../../components/KeyboardShortcutsHelp";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { logger } from "../../utils/logger";
 import { syncAllCompaniesToSheets } from "../../utils/googleSheetsSync";
@@ -101,7 +102,7 @@ const SidebarContent = React.memo(({
       </div>
 
       {/* ── Nav + CTA ── */}
-      <nav className="flex-grow p-2 space-y-1">
+      <nav className="flex-grow p-2 space-y-1" aria-label="القائمة الرئيسية">
         {/* Primary CTA — crema→copper gradient */}
         <div className="px-2 pb-2">
           <button
@@ -208,6 +209,11 @@ const SidebarContent = React.memo(({
         )}
 
         <ThemeToggle theme={theme} toggleTheme={toggleTheme} expanded={isSidebarExpanded} />
+
+        {/* Keyboard shortcuts help */}
+        <KeyboardShortcutsHelpButton
+          className={`w-full flex items-center gap-3 p-3 rounded-md text-sm font-semibold border border-hairline/50 bg-cream/50 dark:bg-espresso-light/30 text-latte hover:text-on-chrome hover:bg-espresso-light/40 transition-colors ${!isSidebarExpanded && "justify-center"}`}
+        />
 
         {/* Google Sheets Sync Button */}
         <button

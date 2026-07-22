@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
-import { ExclamationTriangleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import React from 'react';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import SafeModal from '../form-ui/SafeModal';
 import Button from './Button';
 
 export interface ConfirmDialogProps {
@@ -29,57 +30,40 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 }) => {
   const handleClose = onCancel || onClose || (() => {});
 
-  useEffect(() => {
-    if (isOpen) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = 'unset';
-    return () => { document.body.style.overflow = 'unset'; };
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
-      onClick={handleClose}
-      role="alertdialog"
-      aria-modal="true"
-      aria-labelledby="confirm-title"
-      aria-describedby="confirm-message"
-    >
-      <div
-        className="bg-cream dark:bg-espresso border border-hairline rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-scale-in"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start gap-4 p-5 border-b border-hairline">
-          <div className="p-2 bg-lava-500/10 rounded-lg">
-            <ExclamationTriangleIcon className="w-6 h-6 text-lava-500" />
-          </div>
-          <div className="flex-1">
-            <h3 id="confirm-title" className="text-lg font-bold text-text">
-              {title}
-            </h3>
-            <p id="confirm-message" className="text-sm text-latte mt-1">
-              {message}
-            </p>
-          </div>
-          <button
-            onClick={handleClose}
-            className="p-1 text-latte hover:text-text hover:bg-cream-2 rounded-full transition-colors"
-            aria-label="إغلاق"
-          >
-            <XMarkIcon className="w-5 h-5" />
-          </button>
-        </div>
+    <SafeModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={title}
+      type="alert"
+      closeOnBackdropClick={false}
+      showCloseButton
+      size="sm"
+      ariaLabel={title}
+      renderFooter={(closeModal) => (
         <div className="flex justify-end gap-3 p-4 bg-cream-2/30">
-          <Button variant="secondary" onClick={handleClose}>
+          <Button variant="secondary" onClick={closeModal}>
             {cancelLabel}
           </Button>
-          <Button variant={variant === 'danger' ? 'danger' : 'primary'} onClick={onConfirm} isLoading={isConfirming}>
+          <Button
+            variant={variant === 'danger' ? 'danger' : 'primary'}
+            onClick={onConfirm}
+            isLoading={isConfirming}
+          >
             {confirmLabel}
           </Button>
         </div>
+      )}
+    >
+      <div className="flex items-start gap-4 p-1">
+        <div className="p-2 bg-lava-500/10 rounded-lg flex-shrink-0">
+          <ExclamationTriangleIcon className="w-6 h-6 text-lava-500" />
+        </div>
+        <p id="confirm-message" className="text-sm text-latte mt-1">
+          {message}
+        </p>
       </div>
-    </div>
+    </SafeModal>
   );
 };
 

@@ -17,20 +17,7 @@ import MaintenanceRecordList from './MaintenanceRecordList';
 import MaintenanceRecordEditor from './MaintenanceRecordEditor';
 import { getNewMaintenanceRecord } from './MaintenanceRecordCard';
 import { generateMockMaintenanceRecord } from '../utils/mockData';
-
-/**
- * Generate a collision-resistant record id.
- *
- * Bare Date.now() collides if two records are created in the same millisecond
- * (e.g. rapid double-add) and also collides with the supervisor id, which
- * `getNewMaintenanceRecord` also derives from Date.now(). Combine the timestamp
- * with a monotonic counter so every id in a session is unique.
- */
-const recordIdCounter = { n: 0 };
-const generateRecordId = (): number => {
-  // epoch-ms * 1000 + counter(0..999) → unique within 1000 ids per ms
-  return Date.now() * 1000 + (recordIdCounter.n++ % 1000);
-};
+import { generateUniqueId } from '../utils/idGenerator';
 
 interface MaintenanceEditPageProps {
   submission: FormData;
@@ -42,6 +29,19 @@ interface MaintenanceEditPageProps {
   allPredefinedProblems: string[];
   isSidebarExpanded: boolean;
 }
+
+// Verify the supplied index still points to the intended record before
+// deleting by index. If the list shifted (or the caller passed a stale
+// index), fall back to filtering by id so the wrong item is never removed.
+const canDeleteByIndex = (
+  history: MaintenanceRecord[],
+  recordId: MaintenanceRecord['id'],
+  recordIndex?: number
+): recordIndex is number =>
+  recordIndex !== undefined &&
+  recordIndex >= 0 &&
+  recordIndex < history.length &&
+  history[recordIndex].id === recordId;
 
 const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
   submission,
@@ -258,7 +258,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
     }
   };
 
-  const handleQuickUpdate = (recordId: number, updates: Partial<MaintenanceRecord>) => {
+  const handleQuickUpdate = (recordId: MaintenanceRecord['id'], updates: Partial<MaintenanceRecord>) => {
     const newSubmission = structuredClone(localSubmission) as FormData;
 
     if (selectedBranch?.isMainOffice) {
@@ -286,28 +286,40 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
     onSave(newSubmission);
   };
 
-  const handleDeleteRecord = (recordId: number) => {
+  const handleDeleteRecord = (recordId: MaintenanceRecord['id'], recordIndex?: number) => {
     const newSubmission = structuredClone(localSubmission) as FormData;
 
     if (selectedBranch?.isMainOffice) {
-      newSubmission.maintenanceHistory = newSubmission.maintenanceHistory.filter(r => r.id !== recordId);
+      const history = newSubmission.maintenanceHistory;
+      if (canDeleteByIndex(history, recordId, recordIndex)) {
+        newSubmission.maintenanceHistory = history.filter((_, i) => i !== recordIndex);
+      } else {
+        newSubmission.maintenanceHistory = history.filter((r) => r.id !== recordId);
+      }
     } else if (selectedBranch) {
-      const branchIndex = newSubmission.branches.findIndex(b => b.id === selectedBranch.id);
+      const branchIndex = newSubmission.branches.findIndex((b) => b.id === selectedBranch.id);
       if (branchIndex !== -1) {
-        newSubmission.branches[branchIndex].maintenanceHistory = 
-          newSubmission.branches[branchIndex].maintenanceHistory.filter(r => r.id !== recordId);
+        const history = [...newSubmission.branches[branchIndex].maintenanceHistory];
+        if (canDeleteByIndex(history, recordId, recordIndex)) {
+          history.splice(recordIndex, 1);
+          newSubmission.branches[branchIndex].maintenanceHistory = history;
+        } else {
+          newSubmission.branches[branchIndex].maintenanceHistory = history.filter(
+            (r) => r.id !== recordId,
+          );
+        }
       }
     }
-    
+
     setLocalSubmission(newSubmission);
     onSave(newSubmission);
-    
+
     // Show success message
-    const branchName = selectedBranch?.isMainOffice 
-      ? 'Main Office' 
+    const branchName = selectedBranch?.isMainOffice
+      ? 'Main Office'
       : selectedBranch?.branchName || 'this branch';
     setSuccessMessage(`Maintenance record deleted successfully from ${branchName}.`);
-    
+
     // Auto-clear success message after 5 seconds
     setTimeout(() => {
       setSuccessMessage(null);
@@ -337,7 +349,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
 
     // Collision-resistant id (Change 3). `getNewMaintenanceRecord` also derives
     // a supervisor id from Date.now(); the counter entropy keeps them distinct.
-    const newId = generateRecordId();
+    const newId = generateUniqueId();
     const newRecord = getNewMaintenanceRecord(newId);
 
     // Staging model (Change 2): do NOT mutate localSubmission yet — the record

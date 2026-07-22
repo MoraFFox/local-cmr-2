@@ -1,16 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
-import { RequiredFieldBadge } from './form-ui/RequiredFieldBadge';
+import { RequiredFieldBadge } from '@/packages/form-progress';
+import { HelpTooltip } from './form-ui/HelpTooltip';
 
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
+  label?: React.ReactNode;
   icon?: React.ReactNode;
   error?: string;
   required?: boolean;
   suggestions?: string[];
+  helpText?: string;
 }
 
-const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, error, required, suggestions, ...props }) => {
+const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, error, required, suggestions, helpText, ...props }) => {
   const inputId = props.id || name;
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -43,10 +45,13 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, err
   return (
     <div className={className} ref={containerRef}>
       {label && (
-        <label htmlFor={inputId} className="block text-sm font-medium text-primary mb-1.5">
-          {label}
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <label htmlFor={inputId} className="text-sm font-medium text-primary">
+            {label}
+          </label>
           {required && <RequiredFieldBadge />}
-        </label>
+          {helpText && <HelpTooltip text={helpText} variant="inline" size="sm" />}
+        </div>
       )}
       <div className="relative group focus-within:text-primary">
         {icon && (
@@ -70,7 +75,7 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, err
           {...props}
           className={`block w-full ${icon ? 'pr-10' : 'pr-4'} ${isCombobox ? 'pl-10' : 'pl-4'} h-[50px] bg-cream text-primary rounded-lg placeholder-latte focus:outline-none focus:ring-2 border transition-colors ${
             error
-              ? 'border-ember-500 focus:border-primary focus:ring-primary/20 animate-shake'
+              ? 'border-ember-500 dark:border-ember-400 focus:border-primary focus:ring-primary/20 animate-shake'
               : 'border-hairline focus:border-primary focus:ring-primary/20'
           }`}
         />
@@ -105,7 +110,7 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, err
         )}
       </div>
       {error && (
-        <p id={`${inputId}-error`} className="mt-1 text-sm text-ember-500 animate-fade-in">
+        <p id={`${inputId}-error`} className="mt-1 text-sm text-ember-700 dark:text-ember-300 animate-fade-in">
           {error}
         </p>
       )}

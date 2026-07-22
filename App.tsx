@@ -1,17 +1,20 @@
+import { OfflineBanner } from "./components/form-ui/OfflineBanner";
 /** @format */
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, Suspense, lazy } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import SidebarContent from "./src/views/Sidebar";
-import HistoryView from "./src/views/HistoryView";
-import BaristasView from "./src/views/BaristasView";
-import FormWizardView from "./src/views/FormWizardView";
-import PrintView from "./src/views/PrintView";
-import SubmissionDetailsView from "./src/views/SubmissionDetailsView";
-import BaristaDetailsView from "./src/views/BaristaDetailsView";
-import MaintenanceEditView from "./src/views/MaintenanceEditView";
-import UserAccessView from "./src/views/UserAccessView";
+
+// Lazy-loaded views for code splitting (performance #49)
+const HistoryView = lazy(() => import("./src/views/HistoryView"));
+const BaristasView = lazy(() => import("./src/views/BaristasView"));
+const FormWizardView = lazy(() => import("./src/views/FormWizardView"));
+const PrintView = lazy(() => import("./src/views/PrintView"));
+const SubmissionDetailsView = lazy(() => import("./src/views/SubmissionDetailsView"));
+const BaristaDetailsView = lazy(() => import("./src/views/BaristaDetailsView"));
+const MaintenanceEditView = lazy(() => import("./src/views/MaintenanceEditView"));
+const UserAccessView = lazy(() => import("./src/views/UserAccessView"));
 
 import type { FormData, MaintenanceRecord } from "./types";
 import type { Draft } from "./hooks/useDrafts";
@@ -23,6 +26,10 @@ import { CLASSES } from "./utils/sharedConstants";
 import { initialFormData, allPredefinedProblems, VIEW_TITLES, steps } from "./utils/sharedConstants";
 
 import { ConfirmDialog } from "./components/ui/ConfirmDialog";
+import {
+  KeyboardShortcutsHelpProvider,
+  KeyboardShortcutsHelpButton,
+} from "./components/KeyboardShortcutsHelp";
 import { useToast } from "./components/ToastContext";
 import { logger } from "./utils/logger";
 import { generateMockWizardData } from "./utils/mockData";
@@ -33,6 +40,7 @@ import { useDrafts } from "./hooks/useDrafts";
 import { useTechnicians } from "./hooks/useTechnicians";
 import { useSubmissions } from "./hooks/useSubmissions";
 import { useOfflineQueue } from "./hooks/useOfflineQueue";
+import { LoadingState } from "./components/ui/LoadingState";
 
 interface AppProps {
   onAdminLogout?: () => Promise<void> | void;
@@ -113,7 +121,6 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [deleteCandidateId, setDeleteCandidateId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [offlineBannerDismissed, setOfflineBannerDismissed] = useState(false);
   const [draftToDelete, setDraftToDelete] = useState<string | null>(null);
   const [draftToLoad, setDraftToLoad] = useState<Draft | null>(null);
   const justLoadedDraftRef = React.useRef(false);
@@ -459,6 +466,16 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
       ? steps.find((s) => s.id === currentStep)?.name || "Form"
       : VIEW_TITLES[view] || "سجل عمليات الإرسال";
 
+  // ── Dynamic page title (accessibility: audit issues #27-45) ──
+  React.useEffect(() => {
+    if (view === "form") {
+      const stepName = steps.find((s) => s.id === currentStep)?.name;
+      document.title = stepName ? `${stepName} — ميدوز` : "نموذج الإرسال — ميدوز";
+    } else {
+      document.title = VIEW_TITLES[view] || "ميدوز — نظام إدارة الصيانة";
+    }
+  }, [view, currentStep]);
+
   // ── Render Current View ──
   const renderCurrentView = () => {
     switch (view) {
@@ -570,11 +587,12 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
     setView,
   };
 
-  const offlineBanner = !isOnline && !offlineBannerDismissed;
-  const syncBanner = isSyncing;
 
   return (
+    <KeyboardShortcutsHelpProvider>
     <div className="h-[100dvh] overflow-hidden flex bg-paper ">
+      {/* Screen-reader announcer for dynamic content (accessibility #42) */}
+      <div id="aria-announcer" aria-live="polite" aria-atomic="true" className="sr-only"></div>
       {/* Desktop Sidebar */}
       <aside
         className={`chrome border-l border-brass/20 flex-col fixed h-full transition-all duration-300 ease-in-out hidden lg:flex z-50 ${
@@ -594,7 +612,6 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
           className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
             isMobileMenuOpen ? "opacity-100" : "opacity-0"
           }`}
-          onClick={() => setIsMobileMenuOpen(false)}
         />
         <aside
           className={`absolute top-0 right-0 h-full w-64 chrome border-l border-brass/20 shadow-xl transition-transform duration-300 ease-in-out flex flex-col ${
@@ -612,11 +629,11 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
         }`}
       >
         {/* Mobile Header */}
-        <header className="sticky top-0 z-30 flex items-center justify-between lg:hidden h-16 chrome border-b border-brass/20 px-4 shrink-0">
+        <OfflineBanner />
+        <header role="banner" className="sticky top-0 z-30 flex items-center justify-between lg:hidden h-16 chrome border-b border-brass/20 px-4 shrink-0">
           <div className="w-1/4 flex justify-start items-center gap-1">
             <button
               aria-label="القائمة"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-2 -mr-2 rounded-md text-on-chrome/70 hover:text-on-chrome hover:bg-espresso-light transition-colors shrink-0"
             >
               <Bars3Icon className="h-6 w-6" />
@@ -636,7 +653,9 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
               ) : (
                 <SunIcon className="h-5 w-5" />
               )}
+                <SunIcon className="h-5 w-5" />
             </button>
+            <KeyboardShortcutsHelpButton className="p-2 rounded-md text-on-chrome/70 hover:text-on-chrome hover:bg-espresso-light transition-colors shrink-0" />
           </div>
 
           <div className="flex-1 flex items-center justify-center overflow-hidden">
@@ -654,33 +673,12 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
           </div>
         </header>
 
-        {/* Offline Banner */}
-        {offlineBanner && (
-          <div className="bg-cream-2 text-espresso px-4 py-2 text-center text-sm font-medium border-b border-hairline flex items-center justify-between gap-2 shrink-0">
-            <span className="flex items-center gap-2 flex-1 justify-center">
-              <SignalSlashIcon className="w-4 h-4 text-ember-500" />
-              أنت غير متصل حالياً. سيتم حفظ التغييرات محلياً ومزامنتها عند عودة الاتصال.
-            </span>
-            <button
-              onClick={() => setOfflineBannerDismissed(true)}
-              className="p-1 rounded hover:bg-cream-3 transition-colors"
-              aria-label="إخفاء التنبيه"
-            >
-              <XMarkIcon className="w-4 h-4" />
-            </button>
-          </div>
-        )}
 
-        {/* Sync Banner */}
-        {syncBanner && (
-          <div className="bg-cream-2 text-espresso px-4 py-2 text-center text-sm font-medium border-b border-hairline flex items-center justify-center gap-2 shrink-0">
-            <CloudArrowUpIcon className="w-4 h-4 text-copper-500 animate-bounce" />
-            جاري مزامنة التغييرات دون اتصال...
-          </div>
-        )}
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
-          {renderCurrentView()}
+        <main id="main-content" className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
+          <Suspense fallback={<LoadingState inline />}>
+            {renderCurrentView()}
+          </Suspense>
         </main>
       </div>
 
@@ -695,7 +693,6 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
       />
       <ConfirmDialog
         isOpen={draftToDelete !== null}
-        onClose={() => setDraftToDelete(null)}
         onConfirm={confirmDeleteDraft}
         title="تأكيد حذف المسودة"
         message="هل أنت متأكد من حذف هذه المسودة؟ سيتم فقدان كافة البيانات المحفوظة بها."
@@ -703,13 +700,13 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
       />
       <ConfirmDialog
         isOpen={draftToLoad !== null}
-        onClose={() => setDraftToLoad(null)}
         onConfirm={confirmLoadDraft}
         title="تحميل المسودة"
         message="هل تريد تحميل هذه المسودة؟ سيتم فقدان أي تغييرات حالية غير محفوظة."
         confirmLabel="تحميل المسودة"
       />
     </div>
+    </KeyboardShortcutsHelpProvider>
   );
 };
 

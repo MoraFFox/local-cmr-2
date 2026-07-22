@@ -1,5 +1,6 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useId } from 'react';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
+import HelpTooltip from './form-ui/HelpTooltip';
 
 interface RadioOption<T = string | boolean> {
     label: string;
@@ -9,7 +10,8 @@ interface RadioOption<T = string | boolean> {
 
 interface RadioGroupProps<T = string | boolean> {
     name: string;
-    label?: string;
+    label?: React.ReactNode;
+    helpText?: string;
     options: RadioOption<T>[];
     value: T;
     onChange: (value: T) => void;
@@ -17,7 +19,7 @@ interface RadioGroupProps<T = string | boolean> {
     disabled?: boolean;
 }
 
-function RadioGroup<T extends string | boolean>({ name, label, options, value, onChange, inline, disabled = false }: RadioGroupProps<T>) {
+function RadioGroup<T extends string | boolean>({ name, label, helpText, options, value, onChange, inline, disabled = false }: RadioGroupProps<T>) {
     const groupRef = useRef<HTMLDivElement>(null);
 
     const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -99,15 +101,24 @@ function RadioGroup<T extends string | boolean>({ name, label, options, value, o
         );
     };
 
+    const labelId = useId();
+    const hasLabelNode = React.isValidElement(label);
+
     return (
         <div
             ref={groupRef}
             role="radiogroup"
-            aria-label={label}
+            aria-label={typeof label === 'string' ? label : undefined}
+            aria-labelledby={hasLabelNode ? labelId : undefined}
             onKeyDown={handleKeyDown}
             className={disabled ? 'opacity-60' : ''}
         >
-            {label && <label className="text-sm font-medium text-primary block mb-3">{label}</label>}
+            {(label || helpText) && (
+                <div id={labelId} className="flex items-center gap-2 text-sm font-medium text-primary mb-3">
+                    {label && <span>{label}</span>}
+                    {helpText && <HelpTooltip text={helpText} variant="inline" size="sm" />}
+                </div>
+            )}
             <div className={inline ? 'flex flex-wrap gap-3' : 'space-y-2'}>
                 {options.map((option) => renderOption(option, value === option.value))}
             </div>

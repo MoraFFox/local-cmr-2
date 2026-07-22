@@ -1746,6 +1746,7 @@ body {
   padding-right: 1rem;
   padding-top: 0.625rem;
   padding-bottom: 0.625rem;
+  min-height: 44px;
   font-weight: 600;
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
@@ -1796,6 +1797,7 @@ body {
   padding-right: 1rem;
   padding-top: 0.625rem;
   padding-bottom: 0.625rem;
+  min-height: 44px;
   font-weight: 600;
   --tw-text-opacity: 1;
   color: rgb(182 30 36 / var(--tw-text-opacity, 1));
@@ -1842,6 +1844,7 @@ body {
   justify-content: center;
   gap: 0.5rem;
   border-radius: 0.5rem;
+  min-height: 44px;
   --tw-bg-opacity: 1;
   background-color: rgb(192 57 43 / var(--tw-bg-opacity, 1));
   padding-left: 1rem;
@@ -1894,6 +1897,7 @@ body {
   padding-right: 0.75rem;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+  min-height: 44px;
   font-weight: 500;
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);

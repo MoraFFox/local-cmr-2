@@ -13,6 +13,8 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import { CLASSES } from "../../../utils/sharedConstants";
+import { useT } from "../../../utils/i18n";
+import { formatEgyptianPhone } from "../../../utils/phone";
 import type { Branch } from "../../../types";
 
 interface BranchBaristaSectionProps {
@@ -39,7 +41,9 @@ export const BranchBaristaSection: React.FC<BranchBaristaSectionProps> = ({
   onNestedChange,
   isSubmitting,
   onAiNotesApplied,
-}) => (
+}) => {
+  const t = useT();
+  return (
   <div className="mt-6 pt-6 border-t border-hairline">
     <div className="flex justify-between items-center mb-4">
       <h4 className="text-lg font-bold text-primary tracking-tight">أفراد صيانة Midoe's</h4>
@@ -69,8 +73,18 @@ export const BranchBaristaSection: React.FC<BranchBaristaSectionProps> = ({
                   label="رقم الهاتف"
                   name="phone"
                   value={barista.phone}
-                  onChange={(e) => onNestedChange(e, "baristas", baristaIndex)}
+                  onChange={(e) =>
+                    onNestedChange(
+                      {
+                        target: { name: "phone", value: formatEgyptianPhone(e.target.value) },
+                      } as React.ChangeEvent<HTMLInputElement>,
+                      "baristas",
+                      baristaIndex,
+                    )
+                  }
                   icon={<PhoneIcon />}
+                  helpText={t.tooltips.contactPhone}
+                  dir="ltr"
                 />
               </div>
               <div>
@@ -96,3 +110,4 @@ export const BranchBaristaSection: React.FC<BranchBaristaSectionProps> = ({
     </div>
   </div>
 );
+};

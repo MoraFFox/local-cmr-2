@@ -21,6 +21,8 @@ import { partsList, servicesList, problemCategories } from "../../../constants";
 import { allPredefinedProblems, CLASSES } from "../../../utils/sharedConstants";
 import type { Branch, FormData } from "../../../types";
 import type { WizardStepActions } from "./types";
+import { useT } from "../../../utils/i18n";
+import { formatEgyptianPhone } from "../../../utils/phone";
 
 interface BranchCardProps {
   branch: Branch;
@@ -45,7 +47,10 @@ export const BranchCard: React.FC<BranchCardProps> = ({
   allKnownMachineNames = [],
   allKnownMachineTypes = [],
   allKnownMachineOptions = [],
-}) => (
+}) => {
+  const t = useT();
+
+  return (
   <CollapsibleCard
     initiallyOpen={branch.id === newlyAddedId}
     onRemove={() => actions.removeListItem("branches", index)}
@@ -94,6 +99,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
           value={branch.coffeeConsumptionKg || ""}
           onChange={(e) => actions.handleListItemChange(e, "branches", index)}
           placeholder="مثال: 50" icon={<ScaleIcon />}
+          helpText={t.tooltips.coffeeConsumption}
         />
         <div className="md:col-span-2">
           <RadioGroup label="هل يستخدمون ماكيناتنا؟" name={`usesOurMachines-${branch.id}`}
@@ -127,6 +133,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
                         onChange={(e) => actions.handleNestedListItemChange(e, index, "machines", idx)}
                         placeholder="مثال: La Marzocco"
                         suggestions={allKnownMachineNames}
+                        helpText={t.tooltips.machineName}
                       />
                       <TextInput
                         label="نوع الماكينة (اختياري)"
@@ -135,6 +142,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
                         onChange={(e) => actions.handleNestedListItemChange(e, index, "machines", idx)}
                         placeholder="مثال: Linea Classic"
                         suggestions={allKnownMachineTypes}
+                        helpText={t.tooltips.machineType}
                       />
                       <TextInput
                         label="نظام تشغيل الماكينة (اختياري)"
@@ -143,6 +151,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
                         onChange={(e) => actions.handleNestedListItemChange(e, index, "machines", idx)}
                         placeholder="مثال: Manual, Automatic..."
                         suggestions={allKnownMachineOptions}
+                        helpText={t.tooltips.machineOption}
                       />
                       <div>
                         <label className="block text-sm font-medium text-primary mb-2">كيف تم الحصول على الماكينة؟</label>
@@ -165,6 +174,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
                           onChange={(e) => actions.handleNestedListItemChange(e, index, "machines", idx)}
                           placeholder="0.00"
                           icon={<CurrencyDollarIcon />}
+                          helpText={t.tooltips.leaseValue}
                         />
                       )}
                     </div>
@@ -231,7 +241,18 @@ export const BranchCard: React.FC<BranchCardProps> = ({
                     onChange={(e) => actions.handleNestedListItemChange(e, index, "clientBaristas", cbi)} icon={<UserIcon />}
                   />
                   <TextInput label="رقم الهاتف" name="phone" value={cb.phone}
-                    onChange={(e) => actions.handleNestedListItemChange(e, index, "clientBaristas", cbi)} icon={<PhoneIcon />}
+                    onChange={(e) =>
+                      actions.handleNestedListItemChange(
+                        {
+                          target: { name: "phone", value: formatEgyptianPhone(e.target.value) },
+                        } as React.ChangeEvent<HTMLInputElement>,
+                        index,
+                        "clientBaristas",
+                        cbi,
+                      )
+                    }
+                    icon={<PhoneIcon />}
+                    dir="ltr"
                   />
                 </div>
                 <div>
@@ -293,3 +314,4 @@ export const BranchCard: React.FC<BranchCardProps> = ({
     </div>
   </CollapsibleCard>
 );
+};

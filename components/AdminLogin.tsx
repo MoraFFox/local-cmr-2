@@ -9,6 +9,7 @@ import {
   CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 import Button from "./ui/Button";
+import { formatEgyptianPhone } from "../utils/phone";
 
 interface AdminLoginProps {
   isLoading?: boolean;
@@ -373,7 +374,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
                   if (contactType === "email") {
                     setEmail(e.target.value);
                   } else {
-                    setPhone(e.target.value);
+                    setPhone(formatEgyptianPhone(e.target.value));
                   }
                 }}
                 placeholder={getPlaceholder()}

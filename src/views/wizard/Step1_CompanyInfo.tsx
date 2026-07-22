@@ -21,6 +21,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { ContactsSection } from "./ContactsSection";
 import type { WizardStepProps } from "./types";
+import { useT } from "../../../utils/i18n";
 
 export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
   formData,
@@ -29,7 +30,10 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
   allKnownMachineNames = [],
   allKnownMachineTypes = [],
   allKnownMachineOptions = [],
-}) => (
+}) => {
+  const t = useT();
+
+  return (
   <Card title="معلومات الشركة">
     <div className="space-y-6">
       <TextInput
@@ -73,6 +77,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
         onChange={actions.handleChange}
         placeholder="مثال: 50"
         icon={<ScaleIcon />}
+        helpText={t.tooltips.coffeeConsumption}
       />
       <div className="pt-8 mt-8 border-t border-hairline">
         <div className="flex justify-between items-center mb-4">
@@ -138,6 +143,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
                         onChange={(e) => actions.handleListItemChange(e, "machines", idx)}
                         placeholder="مثال: La Marzocco"
                         suggestions={allKnownMachineNames}
+                        helpText={t.tooltips.machineName}
                       />
                       <TextInput
                         label="نوع الماكينة (اختياري)"
@@ -146,6 +152,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
                         onChange={(e) => actions.handleListItemChange(e, "machines", idx)}
                         placeholder="مثال: Linea Classic"
                         suggestions={allKnownMachineTypes}
+                        helpText={t.tooltips.machineType}
                       />
                       <TextInput
                         label="نظام تشغيل الماكينة (اختياري)"
@@ -154,6 +161,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
                         onChange={(e) => actions.handleListItemChange(e, "machines", idx)}
                         placeholder="مثال: Manual, Automatic..."
                         suggestions={allKnownMachineOptions}
+                        helpText={t.tooltips.machineOption}
                       />
                       <div>
                         <label className="block text-sm font-medium text-primary mb-2">كيف تم الحصول على الماكينة؟</label>
@@ -176,6 +184,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
                           onChange={(e) => actions.handleListItemChange(e, "machines", idx)}
                           placeholder="0.00"
                           icon={<CurrencyDollarIcon />}
+                          helpText={t.tooltips.leaseValue}
                         />
                       )}
                     </div>
@@ -200,3 +209,4 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
     </div>
   </Card>
 );
+};

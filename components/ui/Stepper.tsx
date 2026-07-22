@@ -20,17 +20,12 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
 
   // Auto-scroll to keep active step visible in horizontal mode
   useEffect(() => {
-    if (layout === 'horizontal' && scrollContainerRef.current) {
+    if (layout === 'horizontal' && scrollContainerRef.current && typeof scrollContainerRef.current.scrollTo === 'function') {
       const activeElement = document.getElementById(`step-node-${currentStep}`);
       if (activeElement) {
-        // Calculate position to center the element
         const container = scrollContainerRef.current;
         const scrollLeft = activeElement.offsetLeft - (container.clientWidth / 2) + (activeElement.clientWidth / 2);
-        
-        container.scrollTo({
-          left: scrollLeft,
-          behavior: 'smooth'
-        });
+        container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
       }
     }
   }, [currentStep, layout]);
@@ -49,80 +44,45 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
             
             return (
               <li id={`step-node-${step.id}`} key={step.id} className={`relative shrink-0 flex flex-col items-center ${isLast ? 'w-20' : 'w-28'}`}>
-                {/* Connector line */}
                 {!isLast && (
-                  <div 
-                    className="absolute top-4 left-0 w-full h-[3px] -translate-x-1/2 z-0 overflow-hidden rounded-full" 
-                    aria-hidden="true"
-                  >
+                  <div className="absolute top-4 left-0 w-full h-[3px] -translate-x-1/2 z-0 overflow-hidden rounded-full" aria-hidden="true">
                     <div className="absolute inset-0 bg-hairline/40" />
-                    <div
-                      className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-                        isCompleted ? 'bg-gradient-to-l from-copper-500 to-copper-400' : 'bg-primary/0'
-                      }`}
-                      style={{
-                        transformOrigin: 'right',
-                        transform: isCompleted ? 'scaleX(1)' : 'scaleX(0)',
-                      }}
-                    />
+                    <div className={`absolute inset-0 transition-all duration-700 ease-in-out ${isCompleted ? 'bg-gradient-to-l from-copper-500 to-copper-400' : 'bg-primary/0'}`}
+                      style={{ transformOrigin: 'right', transform: isCompleted ? 'scaleX(1)' : 'scaleX(0)' }} />
                   </div>
                 )}
                 
                 <button
                   type="button"
-                  onClick={() => {
-                    if (isClickable && !isFuture) onChange?.(step.id);
-                  }}
-                  disabled={!isClickable || isFuture}
-                  className={`relative z-10 flex flex-col items-center group outline-none ${
-                    !isClickable ? 'cursor-default' : isFuture ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
-                  }`}
+                  onClick={() => { if (isClickable) onChange?.(step.id); }}
+                  disabled={!isClickable}
+                  className={`relative z-10 flex flex-col items-center group outline-none ${!isClickable ? 'cursor-default' : isFuture ? 'opacity-50 hover:opacity-80 cursor-pointer' : 'cursor-pointer'}`}
                   aria-current={isCurrent ? 'step' : undefined}
-                  aria-disabled={isFuture}
                 >
-                  {/* Step circle */}
                   <span className="relative flex-shrink-0 mb-2">
-                    {/* Active/Completed background glow */}
                     {(isCurrent || isCompleted) && (
-                      <span className={`absolute -inset-2 rounded-full transition-all duration-500 ${
-                        isCurrent ? 'bg-primary/20 animate-pulse-glow' : 'bg-leaf-500/10 group-hover:bg-leaf-500/20'
-                      }`} />
+                      <span className={`absolute -inset-2 rounded-full transition-all duration-500 ${isCurrent ? 'bg-primary/20 animate-pulse-glow' : 'bg-leaf-500/10 group-hover:bg-leaf-500/20'}`} />
                     )}
-                    
-                    {/* Hover focus ring */}
                     {!isFuture && isClickable && !isCurrent && (
                       <span className="absolute -inset-1 rounded-full bg-cream-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                     )}
-
                     <span className={`relative flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-300 ${
-                      isCurrent
-                        ? 'border-primary bg-primary shadow-[0_0_12px_rgba(184,115,51,0.4)] scale-110'
-                        : isCompleted
-                        ? 'border-leaf-500 bg-leaf-500 text-white shadow-sm group-hover:shadow-md group-hover:scale-105'
-                        : 'border-hairline bg-cream-2 group-hover:border-primary/40 group-hover:bg-cream-3'
+                      isCurrent ? 'border-primary bg-primary shadow-[0_0_12px_rgba(184,115,51,0.4)] scale-110' :
+                      isCompleted ? 'border-leaf-500 bg-leaf-500 text-white shadow-sm group-hover:shadow-md group-hover:scale-105' :
+                      'border-hairline bg-cream-2 group-hover:border-primary/40 group-hover:bg-cream-3'
                     }`}>
                       {isCompleted ? (
                         <CheckIcon className="h-5 w-5 text-white animate-pop-in" aria-hidden="true" />
                       ) : (
-                        <span className={`text-xs font-bold transition-colors ${
-                          isCurrent ? 'text-white' : 'text-latte/70 group-hover:text-primary'
-                        }`}>
-                          {index + 1}
-                        </span>
+                        <span className={`text-xs font-bold transition-colors ${isCurrent ? 'text-white' : 'text-latte/70 group-hover:text-primary'}`}>{index + 1}</span>
                       )}
                     </span>
                   </span>
-                  
-                  {/* Label under circle */}
                   <span className={`text-[11px] font-semibold text-center leading-tight truncate px-1 transition-all duration-300 ${
-                    isCurrent 
-                      ? 'text-primary dark:text-primary/80 font-bold scale-105' 
-                      : isCompleted 
-                      ? 'text-primary/90 group-hover:text-primary' 
-                      : 'text-latte/70 group-hover:text-primary/80'
-                  }`}>
-                    {step.name}
-                  </span>
+                    isCurrent ? 'text-primary dark:text-primary/80 font-bold scale-105' :
+                    isCompleted ? 'text-primary/90 group-hover:text-primary' :
+                    'text-latte/70 group-hover:text-primary/80'
+                  }`}>{step.name}</span>
                 </button>
               </li>
             );
@@ -145,126 +105,54 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
 
           return (
             <li key={step.id} className="relative group">
-              {/* Connector line */}
               {!isLast && (
                 <div className="absolute top-8 right-[15px] w-[3px] h-[calc(100%_-_8px)] overflow-hidden rounded-full" aria-hidden="true">
-                  {/* Background track */}
                   <div className="absolute inset-0 bg-hairline/40 rounded-full" />
-                  {/* Animated fill */}
-                  <div
-                    className={`absolute inset-0 rounded-full transition-all duration-700 ease-out ${
-                      isCompleted
-                        ? 'bg-gradient-to-b from-copper-500 to-copper-400'
-                        : 'bg-primary/0'
-                    }`}
-                    style={{
-                      transformOrigin: 'top',
-                      transform: isCompleted ? 'scaleY(1)' : 'scaleY(0)',
-                    }}
-                  />
+                  <div className={`absolute inset-0 rounded-full transition-all duration-700 ease-out ${isCompleted ? 'bg-gradient-to-b from-copper-500 to-copper-400' : 'bg-primary/0'}`}
+                    style={{ transformOrigin: 'top', transform: isCompleted ? 'scaleY(1)' : 'scaleY(0)' }} />
                 </div>
               )}
 
               <button
                 type="button"
-                onClick={() => {
-                  if (isClickable && !isFuture) onChange?.(step.id);
-                }}
+                onClick={() => { if (isClickable) onChange?.(step.id); }}
                 disabled={!isClickable}
                 onMouseEnter={() => setHoveredStep(step.id)}
                 onMouseLeave={() => setHoveredStep(null)}
                 className={`relative z-10 flex items-start gap-3 w-full text-right py-2.5 pr-2 rounded-xl transition-all duration-200 ${
-                  !isClickable
-                    ? 'cursor-default'
-                    : isFuture
-                    ? 'cursor-not-allowed opacity-50'
-                    : 'cursor-pointer'
-                } ${
-                  isHovered && isClickable && !isFuture
-                    ? 'bg-cream-2 shadow-sm'
-                    : ''
-                }`}
+                  !isClickable ? 'cursor-default' : isFuture ? 'opacity-50 hover:opacity-80 cursor-pointer' : 'cursor-pointer'
+                } ${isHovered && isClickable ? 'bg-cream-2 shadow-sm' : ''}`}
                 aria-current={isCurrent ? 'step' : undefined}
-                aria-disabled={isFuture}
               >
-                {/* Step circle indicator */}
                 <span className="relative flex-shrink-0">
-                  {/* Outer glow ring for current/completed */}
                   {(isCurrent || isCompleted) && (
-                    <span
-                      className={`absolute -inset-1.5 rounded-full animate-pulse-glow ${
-                        isCurrent
-                          ? 'bg-primary/20'
-                          : 'bg-leaf-500/10'
-                      }`}
-                    />
+                    <span className={`absolute -inset-1.5 rounded-full animate-pulse-glow ${isCurrent ? 'bg-primary/20' : 'bg-leaf-500/10'}`} />
                   )}
-
-                  <span
-                    className={`relative flex h-8 w-8 items-center justify-center rounded-full border-2 transition-colors duration-300 ${
-                      isCurrent
-                        ? 'border-primary bg-primary shadow-[0_0_12px_rgba(184,115,51,0.3)]'
-                        : isCompleted
-                        ? 'border-leaf-500 bg-leaf-500 text-white shadow-sm'
-                        : 'border-hairline bg-cream-2'
-                    } ${
-                      isHovered && isClickable && !isCurrent && !isCompleted
-                        ? 'border-primary/50 bg-cream-3'
-                        : ''
-                    }`}
-                  >
+                  <span className={`relative flex h-8 w-8 items-center justify-center rounded-full border-2 transition-colors duration-300 ${
+                    isCurrent ? 'border-primary bg-primary shadow-[0_0_12px_rgba(184,115,51,0.3)]' :
+                    isCompleted ? 'border-leaf-500 bg-leaf-500 text-white shadow-sm' :
+                    'border-hairline bg-cream-2'
+                  } ${isHovered && isClickable && !isCurrent && !isCompleted ? 'border-primary/50 bg-cream-3' : ''}`}>
                     {isCompleted ? (
-                      <CheckIcon
-                        className="h-5 w-5 text-white animate-pop-in"
-                        aria-hidden="true"
-                      />
+                      <CheckIcon className="h-5 w-5 text-white animate-pop-in" aria-hidden="true" />
                     ) : (
-                      <span
-                        className={`text-xs font-semibold ${
-                          isCurrent ? 'text-white' : 'text-latte/70'
-                        } ${
-                          isHovered && isClickable && !isCurrent ? 'text-primary' : ''
-                        } ${
-                          isCurrent ? 'scale-110' : ''
-                        }`}
-                      >
-                        {index + 1}
-                      </span>
+                      <span className={`text-xs font-semibold ${isCurrent ? 'text-white' : 'text-latte/70'} ${isHovered && isClickable && !isCurrent ? 'text-primary' : ''} ${isCurrent ? 'scale-110' : ''}`}>{index + 1}</span>
                     )}
                   </span>
                 </span>
-
-                {/* Step label */}
                 <div className="flex-1 pt-1 min-w-0">
-                  <p
-                    className={`text-sm font-semibold truncate transition-all duration-200 ${
-                      isCurrent
-                        ? 'text-primary'
-                        : isCompleted
-                        ? 'text-primary/90'
-                        : 'text-latte/70'
-                    }`}
-                  >
-                    {step.name}
-                  </p>
+                  <p className={`text-sm font-semibold truncate transition-all duration-200 ${isCurrent ? 'text-primary' : isCompleted ? 'text-primary/90' : 'text-latte/70'}`}>{step.name}</p>
                   {isCurrent && (
                     <p className="text-[11px] text-primary/80 dark:text-primary/80 mt-0.5 font-medium flex items-center gap-1">
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                      الخطوة الحالية
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />الخطوة الحالية
                     </p>
                   )}
                   {isCompleted && (
-                    <p className="text-[11px] text-leaf-500/70 mt-0.5 font-medium">
-                      ✓ تم الإكمال
-                    </p>
+                    <p className="text-[11px] text-leaf-500/70 mt-0.5 font-medium">✓ تم الإكمال</p>
                   )}
                 </div>
-
-                {/* Step number badge */}
                 {!isCurrent && !isCompleted && (
-                  <span className="text-[10px] text-latte/40 font-mono mt-1.5 ml-1">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
+                  <span className="text-[10px] text-latte/40 font-mono mt-1.5 ml-1">{String(index + 1).padStart(2, '0')}</span>
                 )}
               </button>
             </li>

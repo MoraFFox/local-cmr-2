@@ -25,7 +25,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { RequiredFieldBadge } from './RequiredFieldBadge';
+import { RequiredFieldBadge } from '@/packages/form-progress';
 
 interface EnhancedInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   /** Field name for error tracking */
@@ -151,14 +151,7 @@ export const EnhancedInput: React.FC<EnhancedInputProps> = ({
 
     // Scroll input into view with 20% padding from bottom
     const scrollIntoView = () => {
-      const viewportHeight = window.innerHeight;
-      const inputRect = input.getBoundingClientRect();
-      const targetY = inputRect.top - (viewportHeight * 0.2);
-
-      window.scrollTo({
-        top: window.scrollY + targetY,
-        behavior: 'smooth'
-      });
+      input.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
     };
 
     // Delay slightly for keyboard animation
@@ -213,7 +206,7 @@ export const EnhancedInput: React.FC<EnhancedInputProps> = ({
     ${icon ? 'pr-12' : rightElement ? 'pr-12' : 'pr-4'}
     ${suggestions ? 'pl-12' : 'pl-4'}
     ${hasError
-      ? 'border-ember-500 focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20'
+      ? 'border-ember-500 dark:border-ember-400 focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20'
       : 'focus:border-primary focus:ring-2 focus:ring-primary/20'
     }
     ${isFocused && !hasError ? 'shadow-[0_0_0_3px_rgba(184,115,51,0.1)]' : ''}
@@ -285,7 +278,7 @@ export const EnhancedInput: React.FC<EnhancedInputProps> = ({
 
           {/* Error icon */}
           {hasError && !rightElement && (
-            <svg className={`w-5 h-5 text-ember-500`} fill="currentColor" viewBox="0 0 20 20">
+            <svg className={`w-5 h-5 text-ember-700 dark:text-ember-300`} fill="currentColor" viewBox="0 0 20 20">
               <path
                 fillRule="evenodd"
                 d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -325,7 +318,7 @@ export const EnhancedInput: React.FC<EnhancedInputProps> = ({
 
       {/* Error Message */}
       {error && (
-        <p id={`${name}-error`} className="mt-1.5 text-sm text-ember-500 animate-fade-in flex items-center gap-1">
+        <p id={`${name}-error`} className="mt-1.5 text-sm text-ember-700 dark:text-ember-300 animate-fade-in flex items-center gap-1">
           <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"

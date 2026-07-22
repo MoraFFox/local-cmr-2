@@ -29,6 +29,7 @@ import {
   normalize,
   AggregatedBarista,
 } from "../utils/baristaAnalytics";
+import { formatEgyptianPhone } from "../utils/phone";
 
 interface BaristasPageProps {
   submissions: FormData[];
@@ -528,14 +529,15 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                 <label className='block text-sm font-medium text-primary mb-1'>
                   Phone
                 </label>
-                <input
-                  type='tel'
-                  value={editForm.phone}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, phone: e.target.value })
-                  }
-                  className='w-full rounded-lg border-hairline bg-cream p-2.5 text-primary focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none'
-                />
+              <input
+                type='tel'
+                value={editForm.phone}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, phone: formatEgyptianPhone(e.target.value) })
+                }
+                className='w-full rounded-lg border-hairline bg-cream p-2.5 text-primary focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none'
+                dir='ltr'
+              />
               </div>
 
               {editingBarista.sources && editingBarista.sources.length > 1 && (

@@ -25,6 +25,7 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { createPortal } from 'react-dom';
+import { ar } from '../../utils/arabicTranslations';
 
 interface SafeModalProps {
   /** Whether modal is open */
@@ -141,7 +142,7 @@ export const SafeModal: React.FC<SafeModalProps> = ({
   children,
   type = 'form',
   hasUnsavedChanges = false,
-  unsavedMessage = 'You have unsaved changes. Are you sure you want to close?',
+  unsavedMessage = ar.common.unsavedChangesMessage,
   size = 'md',
   showCloseButton = true,
   closeOnBackdropClick,
@@ -327,7 +328,7 @@ export const SafeModal: React.FC<SafeModalProps> = ({
                   clipRule="evenodd"
                 />
               </svg>
-              Unsaved changes will be lost if you close
+              {ar.common.unsavedChangesWarning}
             </p>
           </div>
         )}
@@ -339,15 +340,17 @@ export const SafeModal: React.FC<SafeModalProps> = ({
 };
 
 /**
- * Confirmation dialog component for unsaved changes
+ * Confirmation dialog component for unsaved changes.
+ * Exported so it can be reused by bottom-sheet style components that need
+ * the same safe-close UX without a centered modal.
  */
-interface ConfirmationDialogProps {
+export interface ConfirmationDialogProps {
   message: string;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
+export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   message,
   onConfirm,
   onCancel
@@ -366,7 +369,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
         </div>
 
         <div className="flex-1">
-          <h3 className="font-bold text-primary mb-1">Discard unsaved changes?</h3>
+          <h3 className="font-bold text-primary mb-1">{ar.common.discardUnsavedChanges}</h3>
           <p className="text-sm text-latte">{message}</p>
         </div>
       </div>
@@ -377,14 +380,14 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
           onClick={onCancel}
           className="px-4 py-2 text-sm font-medium text-primary border border-hairline rounded-lg hover:bg-cream-2 transition-colors min-h-[44px]"
         >
-          Keep Editing
+          {ar.common.keepEditing}
         </button>
         <button
           type="button"
           onClick={onConfirm}
           className="px-4 py-2 text-sm font-medium bg-ember-500 text-white rounded-lg hover:bg-ember-600 transition-colors min-h-[44px]"
         >
-          Discard Changes
+          {ar.common.discardChanges}
         </button>
       </div>
     </div>

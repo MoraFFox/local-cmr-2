@@ -1,0 +1,532 @@
+  '(
+                showImportFooter ? (',
+  '(
+        star',
+  '(
+    beforeCount',
+  '(
+  formData: T,
+  validationRules: ValidationRules',
+  '(
+  formId: string,
+  formData: T,
+  options: AutoSaveOptions',
+  '(),
+        services: new Map',
+  '(Client Paid)',
+  '(Paid by Client)',
+  '(null);
+
+  const handleFocus = (e: React.FocusEvent',
+  '(promise: Promise',
+  '(undefined);
+
+export const TechnicianAuthProvider: React.FC',
+  '(undefined);
+
+export const ToastProvider: React.FC',
+  '(undefined);
+
+export const UndoQueueProvider: React.FC',
+  ') : (
+            /* Bucket List View */',
+  ') : activeTab === 'invitations' ? (',
+  ') : activeTab === 'legacy' ? (',
+  ') : filteredSubmissions.length === 0 ? (',
+  ') : importStatus === 'error' ? (',
+  ') : isCompleted ? (',
+  ') : isCurrent ? (',
+  ') : legacyBuckets.length === 0 ? (',
+  ') : null;
+
+const ContactReview: React.FC',
+  ') : selectedBucket ? (
+            /* Row-level view */',
+  ') : submissions.length === 0 ? (',
+  ');
+
+  return (',
+  ');
+
+const CostBreakdownModal: React.FC',
+  ');
+
+const LinedTextArea: React.FC',
+  ');
+
+const MaintenanceRecordEditor: React.FC',
+  ');
+
+const MaintenanceTable: React.FC',
+  ');
+
+const PrintField: React.FC',
+  ');
+
+const WorkItem: React.FC',
+  ');
+      case 'accepted':
+        return (',
+  ');
+      case 'expired':
+        return (',
+  ');
+      case 'technician':
+        return (',
+  ');
+      default:
+        return (',
+  '*   Company Name
+ *',
+  '*   Visit Type
+ *',
+  ', ms: number): Promise',
+  '0
+        ? suggestedTemplates
+        : maintenanceTemplates;
+
+    if (!isOpen) return null;
+
+    return (',
+  '0 &&
+              filteredMainHistory.length === 0 && (',
+  '0 && isSelectedSectionExpanded && (',
+  '0 || searchTerm) && (',
+  '0.6 && similarity',
+  '0;
+
+  return (',
+  '0;
+                        return (',
+  '1 ? (currentIndex / (steps.length - 1)) * 100 : 0;
+
+    return (',
+  ';
+
+  return (',
+  ';
+            case 'barista':
+                return',
+  ';
+            case 'branch':
+                return',
+  ';
+            case 'maintenance':
+                return',
+  ';
+            default:
+                return',
+  ';
+      case 2: return',
+  ';
+      case 3: return',
+  ';
+      case 4.5: return',
+  ';
+      case 4: return',
+  ';
+      case 5: return',
+  ';
+      case 6: return',
+  ';
+      default: return',
+  ';
+  currentDraftId: string | null;
+  setCurrentDraftId: React.Dispatch',
+  ';
+  currentStep: number;
+  setCurrentStep: React.Dispatch',
+  ';
+  drafts: Draft[];
+  setDrafts: React.Dispatch',
+  ';
+  return (',
+  ';
+  setCurrentStep: React.Dispatch',
+  ';
+  setView: React.Dispatch',
+  ';
+  touched: Record',
+  '= 0 &&
+  recordIndex',
+  '= 0 && newIndex',
+  '= 12) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[a-z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+    if (score',
+  '= totalRequired;
+
+  return (',
+  'Accepted Invitations',
+  'Add First Visit',
+  'Add Follow-up Visit',
+  'Add Record',
+  'Add Visit',
+  'Aggregated Cost Summary',
+  'All Clients',
+  'All Parts',
+  'All Templates',
+  'All Types',
+  'Apply Template',
+  'Assign Staff',
+  'Assigned Staff',
+  'At least one of Email or Phone is required for the technician to sign up.',
+  'Available Protocols',
+  'BRANCH REPORT',
+  'Back to History',
+  'Barista Not Found',
+  'Baristas (Main Office)',
+  'Baristas at this Branch:',
+  'Batch Edit Maintenance Records',
+  'Branch Details & Maintenance',
+  'Branch Info',
+  'Branch Specific Name',
+  'Branches & Maintenance',
+  'CONFIDENTIAL - Internal Use Only • Mido for Distribution',
+  'Card view (detailed)',
+  'Change Date',
+  'Change Type',
+  'Checking access...',
+  'Chips view (compact)',
+  'Choose Operation',
+  'Choose a template to quickly fill in common maintenance scenarios',
+  'Client / Branch',
+  'Client Barista',
+  'Client Paid (Accumulated)',
+  'Client Paid (Rev)',
+  'Client Paid:',
+  'Client Report',
+  'Close Details',
+  'Close modal',
+  'Companies Merged',
+  'Company Details',
+  'Company Name',
+  'Company Paid (Accumulated)',
+  'Company Paid (Saved)',
+  'Complete data with all details',
+  'Comprehensive Maintenance Report',
+  'Contact Name',
+  'Contact Phone',
+  'Copied!',
+  'Copy Link',
+  'Copy context to clipboard',
+  'Cost Breakdown for this Visit',
+  'Create Invitation',
+  'Create an invitation to send to your technicians.',
+  'Custom Parts / Additional Services',
+  'Daily Lease Cost',
+  'Daily Lease:',
+  'Debug Panel (Ctrl+Shift+D)',
+  'Debug: Profile Aggregation Logic',
+  'Delete Records',
+  'Delete invitation',
+  'Deselect All',
+  'Detailed Visit History',
+  'Displayed Name',
+  'Edit Company',
+  'Edit Maintenance Records',
+  'Edit record',
+  'Email (Optional)',
+  'End of Work Order',
+  'Env:',
+  'Error:',
+  'Expired Invitations',
+  'Export Summary Report',
+  'Export as CSV',
+  'Export as JSON',
+  'Fill current maintenance record with realistic random data',
+  'Fill the current record with random realistic data (dev only)',
+  'Filter History by Date:',
+  'Follow-up Required',
+  'Follow-up Visits',
+  'Follow-up Visits:',
+  'Go Back',
+  'Grand Total:',
+  'Has Branches',
+  'Has Problem',
+  'Hides all cost information',
+  'History & Versions',
+  'Identified Issues',
+  'Identified Issues, Recommendations & Notes',
+  'Identified Issues:',
+  'Import / Export',
+  'Include 0 Visits',
+  'Include Log-Only',
+  'Includes all costs & financial data',
+  'Internal Report',
+  'Internal Use Document',
+  'Is Auto?',
+  'Issue:',
+  'Item Name / Service',
+  'Item name...',
+  'JSON or CSV format',
+  'Key Contacts',
+  'Machine / Asset',
+  'Machine Ownership',
+  'Machines Maintained',
+  'Machines:',
+  'Main Contacts',
+  'Main Office
+                  Maintenance',
+  'Main Office / Last Client',
+  'Main Office Records',
+  'Maintenance History Log',
+  'Maintenance Notes:',
+  'Maintenance Records',
+  'Maintenance Templates',
+  'Maintenance Visit Report',
+  'Maintenance records only',
+  'Manage technician invitations and invite links.',
+  'Mark Status',
+  'Mido for distribution',
+  'Mido's For Distribution',
+  'Mock Admin Wizard Data',
+  'Mock Technician Flow Data',
+  'My Technician',
+  'N/A',
+  'Name...',
+  'New (Unsaved)',
+  'New Invitation',
+  'No Rating Yet',
+  'No activity history yet',
+  'No baristas assigned',
+  'No contacts',
+  'No contacts listed.',
+  'No invitations yet',
+  'No items selected yet.',
+  'No log entries match the current filters',
+  'No machines listed',
+  'No maintenance costs to display.',
+  'No maintenance records found for this branch.',
+  'No maintenance records match filter.',
+  'No maintenance records match the selected date range.',
+  'No network activity matches the current filters',
+  'No options found.',
+  'No records found.',
+  'No records match your filters.',
+  'No response body captured',
+  'No saved versions yet',
+  'No services',
+  'No supervisors',
+  'Norm. Name Key',
+  'Not Solved',
+  'Not specified',
+  'Note:',
+  'Observations & Results',
+  'Overview of all companies with counts',
+  'Paid By:',
+  'Paid by Client',
+  'Parts Changed',
+  'Parts Replaced',
+  'Parts Replaced:',
+  'Parts Summary:',
+  'Parts Used',
+  'Parts:',
+  'Pending Invitations',
+  'Perf.',
+  'Phone (Optional)',
+  'Problem Reported',
+  'Qty:',
+  'Raw Names Merged',
+  'Redirecting...',
+  'Replacements Inventory',
+  'Requested / Emergency',
+  'Restore Version',
+  'Restore Version?',
+  'Review Your Submission',
+  'Revoke invitation',
+  'Search...',
+  'Select All',
+  'Select Different Branch',
+  'Select Staff',
+  'Select a Branch',
+  'Select records and choose an operation to apply to all selected',
+  'Send New Invitation',
+  'Services Performed',
+  'Services:',
+  'Session:',
+  'Set all:',
+  'Snapshots are created automatically before major changes',
+  'Sort by:',
+  'Staff Details',
+  'Status / Follow-up',
+  'Suggested based on the problems you reported',
+  'Suggested for your issues',
+  'Switch to card view',
+  'Switch to compact chips view',
+  'Tax ID',
+  'Technician Invitations',
+  'Technician Name',
+  'Technician's Recommendations:',
+  'This Visit Total',
+  'Total Company Paid',
+  'Total For Issue (incl. follow-ups)',
+  'Total Maintenance Cost',
+  'Total Parts Cost',
+  'Total Services Cost',
+  'Total Staff',
+  'Total Visits',
+  'Total Visits:',
+  'Track changes and restore previous versions',
+  'Unknown Step',
+  'User:',
+  'Using Our Machines',
+  'Validation Results',
+  'Verified & Approved',
+  'View Details',
+  'View Work History',
+  'Visit Date',
+  'Visit Details',
+  'Visit Rating',
+  'Visit Zone & Fee',
+  'Work Details',
+  'Work Done',
+  'Work Performed',
+  'Yes (No machines added)',
+  'a - b);
+    
+    if (sortedDates.length',
+  'acc + b.companyCost,
+    0,
+  );
+
+  return (',
+  'admin@example.com',
+  'b.maintenanceHistory.length === 0) ? (',
+  'company@example.com',
+  'cp === part) : -1;
+                return (',
+  'cs === service) : -1;
+                return (',
+  'e.g., 0100-123-4567',
+  'e.g., Ahmed Mohamed',
+  'e.g., ahmed@example.com',
+  'email@example.com',
+  'example@email.com',
+  'filterRecords(submission.maintenanceHistory || []),
+    [submission.maintenanceHistory, filterStartDate, filterEndDate],
+  );
+
+  return (',
+  'i.status === 'expired');
+
+  return (',
+  'item.transformed);
+
+        validCompanies.forEach((company: Partial',
+  'item.validation.isValid);
+
+    return (',
+  'maxLength * 0.9 && (',
+  'nextErrors[k]);
+      const cleanErrors: Record',
+  'onDelete?.(record.id, actualIndex);
+  return (',
+  'opt.value)
+);
+
+const Step2WorkLog: React.FC',
+  'p.type === "after").length === 0) && (',
+  'p.type === "before").length === 0) && (',
+  'p.type === 'after');
+
+  return (',
+  'p.type === photoType).length;
+      const remainingSlots = maxPerType - currentTypeCount;
+      if (remainingSlots',
+  'p.type === type).length;
+      const maxPerType = Math.floor(maxPhotos / 2);
+      const remainingSlots = maxPerType - currentTypeCount;
+
+      if (remainingSlots',
+  'p.type === type);
+  if (filtered.length === 0) return null;
+
+  return (',
+  'r.id === record.id);
+                return (',
+  'r.id === record.id);
+            return (',
+  's.id',
+  's.id === currentStep);
+    if (ci',
+  'step.id;
+                        const isCurrent = currentStep === step.id;
+                        const isFuture = !isCurrent && !isCompleted;
+
+                        return (',
+  'step.id;
+            const isFuture = !isCurrent && !isCompleted;
+            const isLast = index === steps.length - 1;
+            
+            return (',
+  'step.id;
+          const isFuture = !isCurrent && !isCompleted;
+          const isLast = index === steps.length - 1;
+          const isHovered = hoveredStep === step.id;
+
+          return (',
+  'u.role === 'technician').length;
+
+  return (',
+  'value || value === 0 || value === "لا" || value === "نعم" ? (',
+  'void | Promise',
+  'void;
+    companies: FormData[];
+    onImportCompany?: (company: Partial',
+  'void;
+    onSelectTemplate: (templateValues: Partial',
+  'void;
+  /** Custom presets (defaults to Today / Yesterday / Tomorrow) */
+  presets?: Array',
+  'void;
+  /** Custom recovery actions */
+  customActions?: Array',
+  'void;
+  /** Get all errors as array */
+  allErrors: ValidationError[];
+  /** Get errors by section/group */
+  errorsBySection: Record',
+  'void;
+  /** On blur callback */
+  onBlur?: (e: React.FocusEvent',
+  'void;
+  handleClientBaristaChange: (e: React.ChangeEvent',
+  'void;
+  handleContactChange: (e: React.ChangeEvent',
+  'void;
+  handleListItemChange: (e: React.ChangeEvent',
+  'void;
+  handleNestedListItemChange: (e: React.ChangeEvent',
+  'void;
+  handlePhoneNumberChange: (e: React.ChangeEvent',
+  'void;
+  onNestedChange: (
+    e: React.ChangeEvent',
+  'void;
+  onQuickUpdate: (recordId: MaintenanceRecord['id'], updates: Partial',
+  'void;
+  required?: boolean;
+  error?: string;
+  presets?: Array',
+  'void;
+  setFormData: React.Dispatch',
+  'void;
+  setSubmissions: React.Dispatch',
+  'أدخل اسم فرد صيانة (Midoe's)',
+  'أفراد صيانة Midoe's',
+  'إضافة فرد صيانة (Midoe's)',
+  'تنزيل JSON',
+  'فريق Midoe's (المكتب الرئيسي)',
+  'مثال: La Marzocco',
+  'مثال: Linea Classic',
+  'مثال: Manual, Automatic...',
+  'مثال: manager@midoes.com',
+  'مزامنة إلى Google Sheets',
+  '🐛 Debug',
+  '📋 Mock Wizard',
+  '🔧 Mock Maint',
+  '🔧 Mock Tech',

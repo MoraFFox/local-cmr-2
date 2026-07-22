@@ -12,6 +12,7 @@ import {
     CheckIcon,
     ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
+import { ConfirmDialog } from './ui/ConfirmDialog';
 
 interface HistoryViewerProps {
     isOpen: boolean;
@@ -31,6 +32,7 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
     const [snapshots, setSnapshots] = useState<VersionSnapshot[]>([]);
     const [selectedSnapshot, setSelectedSnapshot] = useState<VersionSnapshot | null>(null);
     const [showConfirmRestore, setShowConfirmRestore] = useState(false);
+    const [clearConfirm, setClearConfirm] = useState<'history' | 'snapshots' | null>(null);
 
     useEffect(() => {
         if (isOpen) {
@@ -48,17 +50,21 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
     };
 
     const handleClearHistory = () => {
-        if (confirm('Are you sure you want to clear all history? This cannot be undone.')) {
-            historyManager.clearHistory();
-            refreshData();
-        }
+        setClearConfirm('history');
     };
 
     const handleClearSnapshots = () => {
-        if (confirm('Are you sure you want to clear all snapshots? This cannot be undone.')) {
+        setClearConfirm('snapshots');
+    };
+
+    const confirmClear = () => {
+        if (clearConfirm === 'history') {
+            historyManager.clearHistory();
+        } else if (clearConfirm === 'snapshots') {
             historyManager.clearSnapshots();
-            refreshData();
         }
+        refreshData();
+        setClearConfirm(null);
     };
 
     const handleRestoreSnapshot = () => {
@@ -318,6 +324,17 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
                     </div>
                 </div>
             )}
+
+            <ConfirmDialog
+                isOpen={clearConfirm !== null}
+                onClose={() => setClearConfirm(null)}
+                onConfirm={confirmClear}
+                title={clearConfirm === 'history' ? 'مسح السجل' : 'مسح النسخ المحفوظة'}
+                message={clearConfirm === 'history'
+                    ? 'هل أنت متأكد من مسح جميع السجلات؟ لا يمكن التراجع عن هذا الإجراء.'
+                    : 'هل أنت متأكد من مسح جميع النسخ المحفوظة؟ لا يمكن التراجع عن هذا الإجراء.'}
+                confirmLabel="نعم، مسح"
+            />
         </div>
     );
 };

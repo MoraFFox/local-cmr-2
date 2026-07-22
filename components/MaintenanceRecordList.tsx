@@ -5,7 +5,6 @@ import {
   BoltIcon,
   CheckCircleIcon,
   XCircleIcon,
-  StarIcon,
   CalendarIcon,
   UserIcon,
   ChevronLeftIcon,
@@ -14,7 +13,7 @@ import {
   WrenchIcon,
   WrenchScrewdriverIcon
 } from '@heroicons/react/24/outline';
-import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+import { StarRatingDisplay } from './form-ui/StarRating';
 import QuickActionsMenu from './QuickActionsMenu';
 import EmptyState from './EmptyState';
 
@@ -22,25 +21,30 @@ interface MaintenanceRecordListProps {
   records: MaintenanceRecord[];
   branchName: string;
   onEdit: (record: MaintenanceRecord, index: number) => void;
-  onQuickUpdate: (recordId: number, updates: Partial<MaintenanceRecord>) => void;
-  onDelete?: (recordId: number) => void;
+  onQuickUpdate: (recordId: MaintenanceRecord['id'], updates: Partial<MaintenanceRecord>) => void;
+  onDelete?: (recordId: MaintenanceRecord['id'], recordIndex: number) => void;
 }
 
 const ITEMS_PER_PAGE = 10;
 
-// Fix 4.8: Create a memoized date formatter with caching
+// Fix 4.8: Create a memoized date formatter with caching.
+// Use an explicit 'dd MMM yyyy' format so the day always appears before
+// the month and the order is not affected by locale/browser settings.
 const createDateFormatter = () => {
   const cache = new Map<string, string>();
   return (dateString: string) => {
     if (cache.has(dateString)) {
       return cache.get(dateString)!;
     }
-    const date = new Date(dateString);
-    const formatted = date.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
+    // Parse as a local date (noon) to avoid UTC timezone shifting the day.
+    const date = new Date(`${dateString}T12:00:00`);
+    if (isNaN(date.getTime())) {
+      return dateString;
+    }
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = date.toLocaleDateString('en-GB', { month: 'short' });
+    const year = date.getFullYear();
+    const formatted = `${day} ${month} ${year}`;
     cache.set(dateString, formatted);
     return formatted;
   };
@@ -76,18 +80,7 @@ const getStatusBadge = (rec: MaintenanceRecord) => {
 
 const renderStars = (rating: number | undefined) => {
   if (!rating) return <span className="text-latte dark:text-latte text-sm">-</span>;
-
-  return (
-    <div className="flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((star) => (
-        star <= rating ? (
-          <StarIconSolid key={star} className="w-4 h-4 text-yellow-400" />
-        ) : (
-          <StarIcon key={star} className="w-4 h-4 text-latte/70 dark:text-primary" />
-        )
-      ))}
-    </div>
-  );
+  return <StarRatingDisplay value={rating} size="xs" />;
 };
 
 // Fix 4.5: Extract and memoize the row component
@@ -95,8 +88,8 @@ interface MaintenanceRecordRowProps {
   record: MaintenanceRecord;
   actualIndex: number;
   onEdit: (record: MaintenanceRecord, index: number) => void;
-  onQuickUpdate: (recordId: number, updates: Partial<MaintenanceRecord>) => void;
-  onDelete?: (recordId: number) => void;
+  onQuickUpdate: (recordId: MaintenanceRecord['id'], updates: Partial<MaintenanceRecord>) => void;
+  onDelete?: (recordId: MaintenanceRecord['id'], recordIndex: number) => void;
 }
 
 const MaintenanceRecordRow = React.memo(({
@@ -106,6 +99,7 @@ const MaintenanceRecordRow = React.memo(({
   onQuickUpdate,
   onDelete
 }: MaintenanceRecordRowProps) => {
+  const handleDelete = () => onDelete?.(record.id, actualIndex);
   return (
     <tr className="hover:bg-cream dark:hover:bg-espresso-light/50/50 transition-colors">
       <td className="px-6 py-4 whitespace-nowrap">
@@ -155,7 +149,7 @@ const MaintenanceRecordRow = React.memo(({
           <QuickActionsMenu
             record={record}
             onQuickUpdate={onQuickUpdate}
-            onDelete={onDelete}
+            onDelete={handleDelete}
           />
           <button
             onClick={() => onEdit(record, actualIndex)}
@@ -180,7 +174,9 @@ const MaintenanceRecordCardMobile: React.FC<MaintenanceRecordRowProps> = ({
   onEdit,
   onQuickUpdate,
   onDelete
-}) => (
+}) => {
+  const handleDelete = () => onDelete?.(record.id, actualIndex);
+  return (
   <div className="bg-cream dark:bg-espresso-light rounded-xl border border-hairline dark:border-hairline p-4 shadow-sm">
     {/* Top row: date + status */}
     <div className="flex items-center justify-between gap-3">
@@ -221,7 +217,7 @@ const MaintenanceRecordCardMobile: React.FC<MaintenanceRecordRowProps> = ({
         <QuickActionsMenu
           record={record}
           onQuickUpdate={onQuickUpdate}
-          onDelete={onDelete}
+          onDelete={handleDelete}
         />
         <button
           onClick={() => onEdit(record, actualIndex)}
@@ -234,7 +230,8 @@ const MaintenanceRecordCardMobile: React.FC<MaintenanceRecordRowProps> = ({
       </div>
     </div>
   </div>
-);
+  );
+};
 
 const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
   records,
@@ -325,8 +322,8 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
             message="لم يتم العثور على سجلات صيانة."
           />
         ) : (
-          paginatedRecords.map((record, index) => {
-            const actualIndex = startIndex + index;
+          paginatedRecords.map((record) => {
+            const actualIndex = records.findIndex((r) => r.id === record.id);
             return (
               <MaintenanceRecordCardMobile
                 key={record.id}
@@ -382,8 +379,8 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
               </tr>
             ) : (
               /* Fix 4.5: Use memoized MaintenanceRecordRow component */
-              paginatedRecords.map((record, index) => {
-                const actualIndex = startIndex + index;
+              paginatedRecords.map((record) => {
+                const actualIndex = records.findIndex((r) => r.id === record.id);
                 return (
                   <MaintenanceRecordRow
                     key={record.id}

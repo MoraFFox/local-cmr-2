@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { ConfirmationDialog } from './form-ui/SafeModal';
+import { ar } from '../utils/arabicTranslations';
 
 interface BottomSheetProps {
     isOpen: boolean;
@@ -10,6 +12,8 @@ interface BottomSheetProps {
     maxHeight?: string;
     showHandle?: boolean;
     contentClassName?: string;
+    /** Prevents accidental close when the user has unsaved form data. */
+    hasUnsavedChanges?: boolean;
 }
 
 const BottomSheet: React.FC<BottomSheetProps> = ({ 
@@ -19,8 +23,10 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     children,
     maxHeight = '85vh',
     showHandle = true,
-    contentClassName
+    contentClassName,
+    hasUnsavedChanges = false
 }) => {
+    const [showConfirm, setShowConfirm] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const [dragStartY, setDragStartY] = useState(0);
@@ -56,16 +62,24 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
 
     const handleTouchEnd = () => {
         if (dragOffset > 100) {
-            // If dragged down more than 100px, close the sheet
-            onClose();
+            // If dragged down more than 100px, request close (with protection)
+            requestClose();
         }
         setIsDragging(false);
         setDragOffset(0);
     };
 
+    const requestClose = () => {
+        if (hasUnsavedChanges) {
+            setShowConfirm(true);
+        } else {
+            onClose();
+        }
+    };
+
     const handleBackdropClick = (e: React.MouseEvent) => {
         if (e.target === e.currentTarget) {
-            onClose();
+            requestClose();
         }
     };
 
@@ -73,6 +87,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
 
     return createPortal(
         <div 
+            data-testid="bottom-sheet"
             className={`fixed inset-0 z-[9999] flex items-end justify-center transition-opacity duration-300 ${
                 isVisible ? 'opacity-100' : 'opacity-0'
             }`}
@@ -108,6 +123,20 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                     </div>
                 )}
 
+                {/* Unsaved-changes confirmation overlay */}
+                {showConfirm && (
+                    <div className="absolute inset-0 z-20 bg-espresso dark:bg-espresso rounded-t-3xl p-4 flex items-center justify-center">
+                        <ConfirmationDialog
+                            message={ar.common.unsavedChangesMessage}
+                            onConfirm={() => {
+                                setShowConfirm(false);
+                                onClose();
+                            }}
+                            onCancel={() => setShowConfirm(false)}
+                        />
+                    </div>
+                )}
+
                 {/* Header */}
                 {(title) && (
                     <div className="flex items-center justify-between px-6 py-4 border-b border-default dark:border-default">
@@ -115,7 +144,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                             {title}
                         </h3>
                         <button
-                            onClick={onClose}
+                            onClick={requestClose}
                             aria-label="إغلاق"
                             className="p-2 -mr-2 text-latte hover:text-cream dark:hover:text-cream rounded-full hover:bg-espresso-light dark:hover:bg-espresso-light transition-colors"
                         >
@@ -125,7 +154,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                 )}
 
                 {/* Content */}
-                <div className={contentClassName || "overflow-y-auto w-full"} style={{ maxHeight: `calc(${maxHeight} - ${title ? '70px' : '40px'})` }}>
+                <div className={`relative ${contentClassName || "overflow-y-auto w-full"}`} style={{ maxHeight: `calc(${maxHeight} - ${title ? '70px' : '40px'})` }}>
                     {children}
                 </div>
             </div>

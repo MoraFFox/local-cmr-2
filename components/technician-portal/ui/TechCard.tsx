@@ -2,7 +2,7 @@ import React from 'react';
 
 interface TechCardProps {
   children: React.ReactNode;
-  title?: string;
+  title?: React.ReactNode;
   icon?: React.ReactNode;
   className?: string;
   variant?: 'default' | 'alert' | 'success' | 'active';

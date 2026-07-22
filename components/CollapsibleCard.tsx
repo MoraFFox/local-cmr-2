@@ -22,11 +22,11 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ titleContent, childre
     const shouldRenderChildren = isOpen || hasBeenOpened;
 
     return (
-        <div className={`border border-hairline rounded-xl bg-cream shadow-md transition-shadow duration-300 ${isOpen ? 'shadow-lg' : 'shadow-md'}`}>
+        <div className={`border border-hairline rounded-xl bg-cream shadow-md transition-all duration-300 hover:shadow-lg ${isOpen ? 'shadow-lg' : 'shadow-md'}`}>
             <div
                 role="button"
                 tabIndex={0}
-                className={`w-full flex justify-between items-start sm:items-center p-4 cursor-pointer rounded-t-xl ${!isOpen ? 'rounded-b-xl' : ''} focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 gap-4`}
+                className={`w-full flex justify-between items-start sm:items-center p-4 cursor-pointer rounded-t-xl ${!isOpen ? 'rounded-b-xl' : ''} focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 gap-4 hover:bg-cream-2 dark:hover:bg-espresso-light/30 transition-colors duration-150`}
                 onClick={(e) => {
                     // Prevent toggling if a nested interactive element is clicked
                     if ((e.target as HTMLElement).closest('button, input, textarea, select, a')) return;
