@@ -1,4 +1,4 @@
-import { initialFormData } from "../../utils/sharedConstants";
+import { initialFormData, SIDEBAR_TOGGLE_SHORTCUT } from "../../utils/sharedConstants";
 import { NAV_ITEMS } from "../../constants";
 import React, { useState } from "react";
 import { FormData } from "../../types";
@@ -95,10 +95,28 @@ const SidebarContent = React.memo(({
   return (
     <>
       {/* ── Logo rail ── */}
-      <div
-        className={`flex items-center justify-center h-16 border-b border-brass/20 shrink-0 transition-all duration-300 overflow-hidden`}
-      >
-        <img src="/logo.svg" alt="شعار ميدوز" className="h-10 w-auto object-contain" />
+      <div className="relative flex items-center justify-center h-16 border-b border-brass/20 shrink-0 transition-all duration-300 overflow-hidden">
+        {isSidebarExpanded && (
+          <img src="/logo.svg" alt="شعار ميدوز" className="h-10 w-auto object-contain" />
+        )}
+        {/* Sidebar collapse/expand toggle (desktop only) */}
+        <button
+          onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
+          className={`hidden lg:flex absolute top-1/2 -translate-y-1/2 items-center justify-center w-7 h-7 rounded-md text-muted-chrome hover:text-on-chrome hover:bg-espresso-light/30 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors ${
+            isSidebarExpanded ? "left-2" : "left-1/2 -translate-x-1/2"
+          }`}
+          aria-expanded={isSidebarExpanded}
+          aria-controls="desktop-sidebar"
+          aria-keyshortcuts={SIDEBAR_TOGGLE_SHORTCUT.label}
+          aria-label={isSidebarExpanded ? "طي الشريط الجانبي" : "فتح الشريط الجانبي"}
+          title={isSidebarExpanded ? `طي (${SIDEBAR_TOGGLE_SHORTCUT.label})` : `فتح (${SIDEBAR_TOGGLE_SHORTCUT.label})`}
+        >
+          {isSidebarExpanded ? (
+            <ChevronDoubleRightIcon className="h-4 w-4" />
+          ) : (
+            <ChevronDoubleLeftIcon className="h-4 w-4" />
+          )}
+        </button>
       </div>
 
       {/* ── Nav + CTA ── */}
@@ -177,7 +195,9 @@ const SidebarContent = React.memo(({
               <div className="flex-grow border-t border-brass/20"></div>
             </div>
             <div className="space-y-1 max-h-48 overflow-y-auto custom-scrollbar pr-1">
-              {drafts.map((draft) => (
+              {drafts.map((draft) => {
+                const draftDate = new Date(draft.timestamp);
+                return (
                 <div
                   key={draft.id}
                   onClick={() => handleLoadDraft(draft)}
@@ -188,10 +208,15 @@ const SidebarContent = React.memo(({
                       {draft.formData.companyName || "شركة بدون اسم"}
                     </span>
                     <span className="stamp-id opacity-70">
-                      {new Date(draft.timestamp).toLocaleDateString()}{" "}
-                      {new Date(draft.timestamp).toLocaleTimeString([], {
+                      {draftDate.toLocaleDateString("ar-EG", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      })}{" "}
+                      {draftDate.toLocaleTimeString("ar-EG", {
                         hour: "2-digit",
                         minute: "2-digit",
+                        hour12: false,
                       })}
                     </span>
                   </div>
@@ -203,7 +228,8 @@ const SidebarContent = React.memo(({
                     <XMarkIcon className="w-4 h-4" />
                   </button>
                 </div>
-              ))}
+              );
+            })}
             </div>
           </div>
         )}
@@ -244,19 +270,6 @@ const SidebarContent = React.memo(({
             </span>
           </button>
         )}
-        <button
-          onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
-          className={`w-full hidden lg:flex items-center p-2 rounded-md text-sm font-medium text-muted-chrome hover:text-on-chrome hover:bg-espresso-light/30 transition-colors overflow-hidden ${!isSidebarExpanded && "justify-center"}`}
-          aria-label={isSidebarExpanded ? "طي الشريط الجانبي" : "فتح الشريط الجانبي"}
-          title={isSidebarExpanded ? "طي" : "فتح"}
-        >
-          {isSidebarExpanded ? (
-            <ChevronDoubleRightIcon className="h-6 w-6 shrink-0" />
-          ) : (
-            <ChevronDoubleLeftIcon className="h-6 w-6 shrink-0" />
-          )}
-          {isSidebarExpanded && <span className="ms-2 truncate">طي</span>}
-        </button>
       </div>
       <ConfirmDialog
         isOpen={confirmOpen}

@@ -41,6 +41,7 @@ export const Step4_Baristas: React.FC<WizardStepProps> = ({
             key={barista.id}
             initiallyOpen={barista.id === newlyAddedId}
             onRemove={() => actions.removeListItem("baristas", index)}
+            wizardKey={`company.baristas.${index}`}
             titleContent={<span className="font-semibold">{barista.name || "فرد صيانة جديد"}</span>}
           >
             <div className="space-y-4">
@@ -48,6 +49,7 @@ export const Step4_Baristas: React.FC<WizardStepProps> = ({
                 <TextInput
                   label="الاسم"
                   name="name"
+                  data-field={`company.baristas.${index}.name`}
                   value={barista.name}
                   onChange={(e) => actions.handleListItemChange(e, "baristas", index)}
                   icon={<UserIcon />}
@@ -55,6 +57,7 @@ export const Step4_Baristas: React.FC<WizardStepProps> = ({
                 <TextInput
                   label="رقم الهاتف"
                   name="phone"
+                  data-field={`company.baristas.${index}.phone`}
                   value={barista.phone}
                   onChange={(e) =>
                     actions.handleListItemChange(

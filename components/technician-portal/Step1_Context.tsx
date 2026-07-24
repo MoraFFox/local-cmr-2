@@ -6,12 +6,13 @@ import SelectDrawer from './ui/SelectDrawer';
 import TechButton from './ui/TechButton';
 import TechInput from './ui/TechInput';
 import { ar } from '../../utils/arabicTranslations';
+import { useVisitZones } from '../../utils/visitZones';
 
 export interface Step1ContextData {
   date: string;
   companyId: string | null;
   branchId: string | null;
-  visitZone: 'cairo' | 'outside_cairo' | 'el_sahel' | null;
+  visitZone: string | null;
   clientBaristaName: string;
   clientBaristaRating: number;
 }
@@ -24,12 +25,6 @@ interface Step1ContextProps {
   sortedZones?: { value: string; label: string }[];
 }
 
-const defaultZones = [
-  { value: 'cairo', label: ar.step3.cairo },
-  { value: 'outside_cairo', label: ar.step3.outsideCairo },
-  { value: 'el_sahel', label: ar.step3.elSahel },
-];
-
 const Step1_Context: React.FC<Step1ContextProps> = ({
   data,
   onChange,
@@ -37,11 +32,12 @@ const Step1_Context: React.FC<Step1ContextProps> = ({
   loadingCompanies,
   sortedZones,
 }) => {
-  const zones = sortedZones || defaultZones;
+  const { zones: allZones } = useVisitZones();
+  const zones = sortedZones || allZones.map(z => ({ value: z.key, label: z.label }));
   const selectedCompany = companies.find(c => c.id === data.companyId);
   const branches = selectedCompany?.branches || [];
 
-  const handleZoneSelect = (zone: 'cairo' | 'outside_cairo' | 'el_sahel') => {
+  const handleZoneSelect = (zone: string) => {
     onChange({ ...data, visitZone: zone });
   };
 
@@ -84,7 +80,7 @@ const Step1_Context: React.FC<Step1ContextProps> = ({
              <TechButton
                 key={zone.value}
                 variant={data.visitZone === zone.value ? 'primary' : 'secondary'}
-                onClick={() => handleZoneSelect(zone.value as any)}
+                onClick={() => handleZoneSelect(zone.value)}
                 className="justify-between"
              >
                 {zone.label}

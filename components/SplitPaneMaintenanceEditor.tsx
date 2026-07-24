@@ -14,6 +14,8 @@ import {
   ArrowDownIcon,
 } from "@heroicons/react/24/outline";
 import MaintenanceRecordEditor from './MaintenanceRecordEditor';
+import { useAutoSave } from './forms/hooks/useAutoSave';
+import { AutoSaveIndicator } from './form-ui/AutoSaveIndicator';
 
 interface SplitPaneMaintenanceEditorProps {
   records: MaintenanceRecord[];
@@ -43,6 +45,15 @@ const SplitPaneMaintenanceEditor: React.FC<SplitPaneMaintenanceEditorProps> = ({
 }) => {
   const [selectedRecordIndex, setSelectedRecordIndex] = useState<number>(0);
   const [isPaneOpen, setIsPaneOpen] = useState<boolean>(true);
+
+  // Auto-save the entire records list so add/remove/reorder changes are
+  // persisted to localStorage (the embedded MaintenanceRecordEditor already
+  // has its own per-record auto-save for in-progress edits).
+  const autoSave = useAutoSave(
+    'split-pane-maintenance-records',
+    records,
+    { debounceMs: 30000 }
+  );
 
   const selectedRecord = records[selectedRecordIndex];
 
@@ -261,6 +272,12 @@ const SplitPaneMaintenanceEditor: React.FC<SplitPaneMaintenanceEditorProps> = ({
                 >
                   {getStatusText(selectedRecord)}
                 </span>
+                <AutoSaveIndicator
+                  isSaving={autoSave.isSaving}
+                  lastSaved={autoSave.lastSaved}
+                  hasUnsavedChanges={autoSave.hasUnsavedChanges}
+                  variant="compact"
+                />
               </div>
 
               <button

@@ -1,5 +1,6 @@
 import { FormData, Branch, Barista, Contact, MaintenanceRecord, PartRecord, ServiceRecord, Supervisor, MachineMaintained } from '../types';
 import { partsList, servicesList, problemCategories } from '../constants';
+import { getAllVisitZones } from './visitZones';
 
 // Reusable pools of realistic Arabic dummy values
 const technicianNames = [
@@ -111,12 +112,8 @@ export const generateMockMaintenanceRecord = (
       ? pickRandom(opts.availableClientBaristas, 1)[0].name
       : pickRandom(clientBaristaNames, 1)[0];
 
-  const zones: Array<"cairo" | "outside_cairo" | "el_sahel" | null> = [
-    "cairo",
-    "outside_cairo",
-    "el_sahel",
-    null,
-  ];
+  const zoneKeys = getAllVisitZones().map(z => z.key);
+  const zones: (string | null)[] = [...zoneKeys, null];
   const visitZone = pickRandom(zones, 1)[0];
   const paidBy = randomBoolean(0.5) ? "company" : "client";
 
@@ -300,7 +297,7 @@ export const generateMockTechnicianStep1 = (companies: any[]) => {
     date: new Date().toISOString().split("T")[0],
     companyId: company.id,
     branchId: branchId,
-    visitZone: "el_sahel" as const,
+    visitZone: "el_sahel",
     clientBaristaName: "حسام الدين (عميل)",
     clientBaristaRating: 2 // Show low rating to trigger concerns
   };

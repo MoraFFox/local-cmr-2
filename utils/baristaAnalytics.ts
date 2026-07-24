@@ -1,6 +1,7 @@
 /** @format */
 
 import { FormData, Barista, MaintenanceRecord } from "../types";
+import { getVisitZoneFee } from "./visitZones";
 
 export interface AggregatedBarista extends Omit<Barista, 'rating'> {
   companyName: string;
@@ -152,14 +153,11 @@ export const getMatchScore = (name1: string, name2: string) => {
 };
 
 // --- Financial Constants ---
-export const visitZoneFees: Record<
-  "cairo" | "outside_cairo" | "el_sahel",
-  number
-> = {
-  cairo: 500,
-  outside_cairo: 1500,
-  el_sahel: 4000,
-};
+// Visit zone fees are now managed dynamically via utils/visitZones.ts
+// Use getVisitZoneFee() from '../utils/visitZones' instead
+export const visitZoneFees: Record<string, number> = new Proxy({}, {
+  get: (_, key: string) => getVisitZoneFee(key),
+});
 
 export const aggregateBaristaData = (
   submissions: FormData[],
@@ -286,7 +284,7 @@ export const aggregateBaristaData = (
     let recCostClient = 0;
     let recCostCompany = 0;
 
-    const visitFee = rec.visitZone ? visitZoneFees[rec.visitZone] || 0 : 0;
+    const visitFee = getVisitZoneFee(rec.visitZone);
     if (rec.paidBy === "client") {
       recCostClient += visitFee;
     } else {

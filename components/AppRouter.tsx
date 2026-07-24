@@ -154,6 +154,12 @@ const AppRouter: React.FC = () => {
   const evaluateRootAccess = useCallback(
     async (session: Session | null) => {
       logger.debug("evaluateRootAccess called", { sessionExists: !!session, userId: session?.user?.id }, 'auth');
+
+      // Dev-only bypass: set localStorage 'dev-bypass-auth' to '1' to skip admin auth
+      if (import.meta.env.DEV && window.localStorage.getItem("dev-bypass-auth") === "1") {
+        setAdminAccessState("allowed");
+        return;
+      }
       
       if (adminAccessEvaluatedRef.current) {
         logger.debug("Admin access already evaluated, skipping re-check", undefined, 'auth');
@@ -261,6 +267,12 @@ const AppRouter: React.FC = () => {
       }
 
       if (isTechnicianPath()) {
+        return;
+      }
+
+      // Dev-only bypass: set localStorage 'dev-bypass-auth' to '1' to skip admin auth
+      if (import.meta.env.DEV && window.localStorage.getItem("dev-bypass-auth") === "1") {
+        setAdminAccessState("allowed");
         return;
       }
 

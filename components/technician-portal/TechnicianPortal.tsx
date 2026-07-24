@@ -17,6 +17,7 @@ import { logger } from "../../utils/logger";
 import { partsList, servicesList, problemCategories } from "../../constants";
 import { Part, Service, PortalPhotoEntry } from "../../types";
 import { generateMockTechnicianStep1, generateMockTechnicianStep2 } from "../../utils/mockData";
+import { useVisitZones } from "../../utils/visitZones";
 
 interface TechnicianPortalProps {
   onBackToMain?: () => void;
@@ -89,11 +90,11 @@ const TechnicianPortal: React.FC<TechnicianPortalProps> = ({
   const [sortedServices, setSortedServices] = useState<Service[]>(servicesList);
   const [sortedParts, setSortedParts] = useState<Part[]>(partsList);
   const [sortedProblemCategories, setSortedProblemCategories] = useState<typeof problemCategories>(problemCategories);
-  const [sortedZones, setSortedZones] = useState<{value: string, label: string}[]>([
-    { value: 'cairo', label: ar.step3.cairo },
-    { value: 'outside_cairo', label: ar.step3.outsideCairo },
-    { value: 'el_sahel', label: ar.step3.elSahel },
-  ]);
+  const { zones: allVisitZones } = useVisitZones();
+
+  const [sortedZones, setSortedZones] = useState<{value: string, label: string}[]>(
+    allVisitZones.map(z => ({ value: z.key, label: z.label }))
+  );
 
   const [companyName, setCompanyName] = useState("");
   const [branchName, setBranchName] = useState("");
@@ -200,11 +201,9 @@ const TechnicianPortal: React.FC<TechnicianPortalProps> = ({
         });
         setSortedProblemCategories(newSortedCategories);
 
-        const newSortedZones = [
-          { value: 'cairo', label: ar.step3.cairo },
-          { value: 'outside_cairo', label: ar.step3.outsideCairo },
-          { value: 'el_sahel', label: ar.step3.elSahel },
-        ].sort((a, b) => {
+        const newSortedZones = allVisitZones
+          .map(z => ({ value: z.key, label: z.label }))
+          .sort((a, b) => {
           const countA = getCount('visit_zone', a.value);
           const countB = getCount('visit_zone', b.value);
           return countB - countA;

@@ -1,4 +1,5 @@
 import { MaintenanceRecord, PartRecord, ServiceRecord } from "../types";
+import { getVisitZoneFee } from "./visitZones";
 
 // Template definitions for common maintenance scenarios
 export interface MaintenanceTemplate {
@@ -148,7 +149,7 @@ export interface SmartDefaults {
   frequentlyReplacedParts: string[];
   commonProblems: string[];
   commonServices: string[];
-  defaultVisitZone: "cairo" | "outside_cairo" | "el_sahel";
+  defaultVisitZone: string;
   defaultPaidBy: "company" | "client";
 }
 
@@ -302,12 +303,7 @@ export const calculateEstimatedCost = (
 
   // Add visit zone fee
   if (record.visitZone) {
-    const zoneFees: Record<string, number> = {
-      cairo: 500,
-      outside_cairo: 1500,
-      el_sahel: 4000,
-    };
-    total += zoneFees[record.visitZone] || 0;
+    total += getVisitZoneFee(record.visitZone);
   }
 
   return total;

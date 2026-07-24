@@ -56,7 +56,7 @@ export const mapPortalToMaintenance = (
     clientBaristaName: sub.client_barista_name || "",
     visitRating: sub.visit_rating || 0,
     problems: sub.problems || [],
-    visitZone: sub.visit_zone as "cairo" | "outside_cairo" | "el_sahel" | null,
+    visitZone: sub.visit_zone ?? null,
     servicesPerformed: sub.services_performed || [],
     machines: sub.machines || [],
     supervisors: [],

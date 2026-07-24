@@ -39,6 +39,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
       <TextInput
         label="اسم الشركة"
         name="companyName"
+        data-field="company.companyName"
         value={formData.companyName}
         onChange={actions.handleChange}
         placeholder="مثال: شركة كافيه ميدوز"
@@ -47,6 +48,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
       <TextInput
         label="البريد الإلكتروني"
         name="email"
+        data-field="company.email"
         type="email"
         value={formData.email}
         onChange={actions.handleChange}
@@ -56,6 +58,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
       <TextInput
         label="الرقم الضريبي"
         name="taxNumber"
+        data-field="company.taxNumber"
         value={formData.taxNumber}
         onChange={actions.handleChange}
         placeholder="مثال: 12-3456789"
@@ -64,6 +67,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
       <TextInput
         label="الموقع"
         name="location"
+        data-field="company.location"
         value={formData.location}
         onChange={actions.handleChange}
         placeholder="مثال: شارع التحرير، القاهرة"
@@ -72,6 +76,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
       <TextInput
         label="استهلاك القهوة بالكيلو (كجم/شهر)"
         name="coffeeConsumptionKg"
+        data-field="company.coffeeConsumptionKg"
         type="number"
         value={formData.coffeeConsumptionKg || ""}
         onChange={actions.handleChange}
@@ -92,19 +97,22 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
           formData={formData}
           actions={actions}
           newlyAddedId={newlyAddedId}
+          fieldPrefix="company.contacts"
         />
       </div>
-      <RadioGroup
-        label="هل لدى الشركة عدة فروع؟"
-        name="hasBranches"
-        value={formData.hasBranches}
-        onChange={(val) => actions.handleRadioChange("hasBranches", val)}
-        options={[
-          { label: "نعم", value: true },
-          { label: "لا", value: false },
-        ]}
-        inline
-      />
+      <div data-field="company.hasBranches">
+        <RadioGroup
+          label="هل لدى الشركة عدة فروع؟"
+          name="hasBranches"
+          value={formData.hasBranches}
+          onChange={(val) => actions.handleRadioChange("hasBranches", val)}
+            options={[
+            { label: "نعم", value: true },
+            { label: "لا", value: false },
+          ]}
+          inline
+        />
+      </div>
       {formData.hasBranches === false && (
         <div className="pt-6 mt-6 border-t border-hairline space-y-6">
           <RadioGroup
@@ -139,6 +147,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
                       <TextInput
                         label="اسم الماكينة (اختياري)"
                         name="machineName"
+                        data-field={`company.machines.${idx}.machineName`}
                         value={machine.machineName || ""}
                         onChange={(e) => actions.handleListItemChange(e, "machines", idx)}
                         placeholder="مثال: La Marzocco"
@@ -148,6 +157,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
                       <TextInput
                         label="نوع الماكينة (اختياري)"
                         name="machineType"
+                        data-field={`company.machines.${idx}.machineType`}
                         value={machine.machineType || ""}
                         onChange={(e) => actions.handleListItemChange(e, "machines", idx)}
                         placeholder="مثال: Linea Classic"
@@ -157,6 +167,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
                       <TextInput
                         label="نظام تشغيل الماكينة (اختياري)"
                         name="machineOption"
+                        data-field={`company.machines.${idx}.machineOption`}
                         value={machine.machineOption || ""}
                         onChange={(e) => actions.handleListItemChange(e, "machines", idx)}
                         placeholder="مثال: Manual, Automatic..."
@@ -167,6 +178,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
                         <label className="block text-sm font-medium text-primary mb-2">كيف تم الحصول على الماكينة؟</label>
                         <select
                           name="machineOwnershipType"
+                          data-field={`company.machines.${idx}.machineOwnershipType`}
                           value={machine.machineOwnershipType || "leased"}
                           onChange={(e) => actions.handleListItemChange(e, "machines", idx)}
                           className="w-full pl-3 pr-10 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
@@ -179,6 +191,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
                         <TextInput
                           label={machine.machineOwnershipType === "leased" ? "قيمة الإيجار اليومي (ج.م)" : "القيمة اليومية (ج.م)"}
                           name="dailyLeaseCost"
+                          data-field={`company.machines.${idx}.dailyLeaseCost`}
                           type="number"
                           value={machine.dailyLeaseCost || ""}
                           onChange={(e) => actions.handleListItemChange(e, "machines", idx)}

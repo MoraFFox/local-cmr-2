@@ -15,7 +15,8 @@ import {
   UserGroupIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import { contactPositions } from "../../../constants";
+import { useContactPositions } from "../../../utils/contactPositions";
+import ContactPositionManager from "../../../components/ContactPositionManager";
 import { useT } from "../../../utils/i18n";
 import type { FormData, Contact } from "../../../types";
 import type { ContactPath, WizardStepActions } from "./types";
@@ -25,6 +26,8 @@ interface ContactsSectionProps {
   formData: FormData;
   actions: WizardStepActions;
   newlyAddedId: number | string | null;
+  /** Prefix used for data-field attributes (e.g. company.contacts, branch.0.contacts) */
+  fieldPrefix?: string;
 }
 
 export const ContactsSection: React.FC<ContactsSectionProps> = ({
@@ -32,8 +35,11 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
   formData,
   actions,
   newlyAddedId,
+  fieldPrefix,
 }) => {
   const t = useT();
+  const { positions: contactPositions } = useContactPositions();
+  const [isPositionManagerOpen, setIsPositionManagerOpen] = React.useState(false);
   let contacts: Contact[];
   if (path === "main") contacts = formData.contacts;
   else if (path === "warehouse") contacts = formData.warehouse.contacts;
@@ -50,6 +56,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
             key={contact.id}
             initiallyOpen={contact.id === newlyAddedId}
             onRemove={() => actions.removeContact(path, contactIndex)}
+            wizardKey={fieldPrefix ? `${fieldPrefix}.${contactIndex}` : undefined}
             titleContent={
               <span className="font-semibold text-primary">
                 {contact.name || "جهة اتصال جديدة"}
@@ -61,14 +68,24 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                 <TextInput
                   label="الاسم"
                   name="name"
+                  data-field={fieldPrefix ? `${fieldPrefix}.${contactIndex}.name` : undefined}
                   value={contact.name}
                   onChange={(e) => actions.handleContactChange(e, path, contactIndex)}
                   icon={<UserIcon />}
                 />
                 <div>
-                  <label className="flex items-center gap-1.5 text-sm font-medium text-primary mb-1.5">
-                    المسمى الوظيفي
-                    <HelpTooltip text={t.tooltips.contactPosition} />
+                  <label className="flex items-center justify-between gap-1.5 text-sm font-medium text-primary mb-1.5">
+                    <span className="flex items-center gap-1.5">
+                      المسمى الوظيفي
+                      <HelpTooltip text={t.tooltips.contactPosition} />
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsPositionManagerOpen(true)}
+                      className="text-xs text-primary hover:text-hover underline"
+                    >
+                      إدارة المسميات
+                    </button>
                   </label>
                   <div className="relative group focus-within:text-primary">
                     <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-latte">
@@ -76,6 +93,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                     </div>
                     <select
                       name="position"
+                      data-field={fieldPrefix ? `${fieldPrefix}.${contactIndex}.position` : undefined}
                       value={contact.position}
                       onChange={(e) => actions.handleContactChange(e, path, contactIndex)}
                       className="block w-full pr-10 h-[50px] bg-cream text-primary rounded-lg placeholder-latte focus:outline-none focus:ring-2 border border-hairline focus:border-primary focus:ring-primary/20 transition-colors appearance-none"
@@ -92,6 +110,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                   <TextInput
                     label="مسمى وظيفي مخصص"
                     name="customPosition"
+                    data-field={fieldPrefix ? `${fieldPrefix}.${contactIndex}.customPosition` : undefined}
                     value={contact.customPosition || ""}
                     onChange={(e) => actions.handleContactChange(e, path, contactIndex)}
                     className="md:col-span-2"
@@ -111,6 +130,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                         <input
                           type="tel"
                           value={phone.number}
+                          data-field={fieldPrefix ? `${fieldPrefix}.${contactIndex}.phone` : undefined}
                           onChange={(e) =>
                             actions.handlePhoneNumberChange(e, path, contactIndex, phoneIndex)
                           }
@@ -152,6 +172,11 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
           </Button>
         </EmptyState>
       )}
+
+      <ContactPositionManager
+        isOpen={isPositionManagerOpen}
+        onClose={() => setIsPositionManagerOpen(false)}
+      />
     </div>
   );
 };

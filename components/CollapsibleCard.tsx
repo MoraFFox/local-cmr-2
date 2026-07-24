@@ -7,9 +7,11 @@ interface CollapsibleCardProps {
     initiallyOpen?: boolean;
     onRemove?: () => void;
     removeLabel?: string;
+    /** Optional key used by the wizard jump feature to auto-open this card. */
+    wizardKey?: string;
 }
 
-const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ titleContent, children, initiallyOpen = false, onRemove, removeLabel = 'حذف' }) => {
+const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ titleContent, children, initiallyOpen = false, onRemove, removeLabel = 'حذف', wizardKey }) => {
     const [isOpen, setIsOpen] = useState(initiallyOpen);
     const [hasBeenOpened, setHasBeenOpened] = useState(initiallyOpen);
 
@@ -18,6 +20,19 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ titleContent, childre
             setHasBeenOpened(true);
         }
     }, [isOpen, hasBeenOpened]);
+
+    // Listen for wizard jump open events targeting this card's key.
+    React.useEffect(() => {
+        if (!wizardKey) return;
+        const handleOpen = ((event: CustomEvent<string>) => {
+            const targetKey = event.detail;
+            if (targetKey === wizardKey || targetKey.startsWith(`${wizardKey}.`)) {
+                setIsOpen(true);
+            }
+        }) as EventListener;
+        window.addEventListener("wizard:open", handleOpen);
+        return () => window.removeEventListener("wizard:open", handleOpen);
+    }, [wizardKey]);
 
     const shouldRenderChildren = isOpen || hasBeenOpened;
 

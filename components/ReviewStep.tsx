@@ -13,6 +13,7 @@ import Card from "./Card";
 import Avatar from "./Avatar";
 import { StarIcon } from "@heroicons/react/24/solid";
 import CostBreakdownModal from "./CostBreakdownModal";
+import { getVisitZoneFee, getVisitZoneLabel } from "../utils/visitZones";
 
 interface ReviewStepProps {
   formData: FormData;
@@ -22,11 +23,7 @@ interface ReviewStepProps {
   cardTitle?: React.ReactNode;
 }
 
-const visitZoneFees: Record<"cairo" | "outside_cairo" | "el_sahel", number> = {
-  cairo: 500,
-  outside_cairo: 1500,
-  el_sahel: 4000,
-};
+
 
 const Detail: React.FC<{ label: string; value: React.ReactNode }> = ({
   label,
@@ -135,7 +132,7 @@ const MaintenanceRecordReview: React.FC<{
   };
 
   const calculateRecordTotal = (rec: MaintenanceRecord): number => {
-    const visitFee = rec.visitZone ? visitZoneFees[rec.visitZone] : 0;
+    const visitFee = getVisitZoneFee(rec.visitZone);
 
     const partsCost =
       rec.partsWereReplaced && rec.partsReplaced
@@ -175,9 +172,7 @@ const MaintenanceRecordReview: React.FC<{
       0,
     );
 
-  const singleRecordVisitFee = record.visitZone
-    ? visitZoneFees[record.visitZone]
-    : 0;
+  const singleRecordVisitFee = getVisitZoneFee(record.visitZone);
   const singleRecordTotal =
     singleRecordVisitFee + singleRecordPartsCost + singleRecordServicesCost;
 
@@ -188,18 +183,9 @@ const MaintenanceRecordReview: React.FC<{
       currency: "EGP",
     }).format(value);
 
-  const getVisitZoneLabel = (zone: string | null) => {
+  const showVisitZoneLabel = (zone: string | null) => {
     if (!zone) return "Not Specified";
-    switch (zone) {
-      case "cairo":
-        return "القاهرة الكبرى";
-      case "outside_cairo":
-        return "خارج القاهرة";
-      case "el_sahel":
-        return "الساحل الشمالي";
-      default:
-        return zone;
-    }
+    return getVisitZoneLabel(zone);
   };
 
   return (
@@ -305,7 +291,7 @@ const MaintenanceRecordReview: React.FC<{
           <dl className="mt-1 text-xs">
             <Detail
               label="Visit Zone & Fee"
-              value={`${getVisitZoneLabel(record.visitZone)} (${formatCurrency(singleRecordVisitFee)})`}
+              value={`${showVisitZoneLabel(record.visitZone)} (${formatCurrency(singleRecordVisitFee)})`}
             />
             {record.servicesPerformed &&
               record.servicesPerformed.length > 0 && (
@@ -419,7 +405,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
   };
 
   const calculateRecordTreeCost = (record: MaintenanceRecord): number => {
-    const visitFee = record.visitZone ? visitZoneFees[record.visitZone] : 0;
+    const visitFee = getVisitZoneFee(record.visitZone);
 
     const partsCost =
       record.partsWereReplaced && record.partsReplaced

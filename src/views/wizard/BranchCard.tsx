@@ -54,6 +54,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
   <CollapsibleCard
     initiallyOpen={branch.id === newlyAddedId}
     onRemove={() => actions.removeListItem("branches", index)}
+    wizardKey={`branch.${index}`}
     titleContent={
       <div className="min-w-0 pr-1">
         <div className="marquee-container w-full">
@@ -81,21 +82,26 @@ export const BranchCard: React.FC<BranchCardProps> = ({
     {/* Branch info fields */}
     <div className="space-y-4">
       <TextInput label="اسم الفرع" name="branchName" value={branch.branchName || ""}
+        data-field={`branch.${index}.branchName`}
         onChange={(e) => actions.handleListItemChange(e, "branches", index)}
         placeholder="مثال: المعادي" icon={<BuildingStorefrontIcon />}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <TextInput label="البريد الإلكتروني" name="email" value={branch.email}
+          data-field={`branch.${index}.email`}
           onChange={(e) => actions.handleListItemChange(e, "branches", index)} icon={<EnvelopeIcon />}
         />
         <TextInput label="الرقم الضريبي" name="taxNumber" value={branch.taxNumber || ""}
+          data-field={`branch.${index}.taxNumber`}
           onChange={(e) => actions.handleListItemChange(e, "branches", index)} icon={<DocumentTextIcon />}
         />
         <TextInput label="الموقع" name="location" value={branch.location}
+          data-field={`branch.${index}.location`}
           onChange={(e) => actions.handleListItemChange(e, "branches", index)}
           className="md:col-span-2" icon={<MapPinIcon />}
         />
         <TextInput label="استهلاك القهوة بالكيلو (كجم/شهر)" name="coffeeConsumptionKg" type="number"
+          data-field={`branch.${index}.coffeeConsumptionKg`}
           value={branch.coffeeConsumptionKg || ""}
           onChange={(e) => actions.handleListItemChange(e, "branches", index)}
           placeholder="مثال: 50" icon={<ScaleIcon />}
@@ -123,12 +129,14 @@ export const BranchCard: React.FC<BranchCardProps> = ({
                     key={machine.id}
                     initiallyOpen={machine.id === newlyAddedId}
                     onRemove={() => actions.removeNestedListItem(index, "machines", idx)}
+                    wizardKey={`branch.${index}.machines.${idx}`}
                     titleContent={<span className="font-semibold">{machine.machineName || "ماكينة جديدة"}</span>}
                   >
                     <div className="space-y-4">
                       <TextInput
                         label="اسم الماكينة (اختياري)"
                         name="machineName"
+                        data-field={`branch.${index}.machines.${idx}.machineName`}
                         value={machine.machineName || ""}
                         onChange={(e) => actions.handleNestedListItemChange(e, index, "machines", idx)}
                         placeholder="مثال: La Marzocco"
@@ -138,6 +146,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
                       <TextInput
                         label="نوع الماكينة (اختياري)"
                         name="machineType"
+                        data-field={`branch.${index}.machines.${idx}.machineType`}
                         value={machine.machineType || ""}
                         onChange={(e) => actions.handleNestedListItemChange(e, index, "machines", idx)}
                         placeholder="مثال: Linea Classic"
@@ -147,6 +156,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
                       <TextInput
                         label="نظام تشغيل الماكينة (اختياري)"
                         name="machineOption"
+                        data-field={`branch.${index}.machines.${idx}.machineOption`}
                         value={machine.machineOption || ""}
                         onChange={(e) => actions.handleNestedListItemChange(e, index, "machines", idx)}
                         placeholder="مثال: Manual, Automatic..."
@@ -157,6 +167,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
                         <label className="block text-sm font-medium text-primary mb-2">كيف تم الحصول على الماكينة؟</label>
                         <select
                           name="machineOwnershipType"
+                          data-field={`branch.${index}.machines.${idx}.machineOwnershipType`}
                           value={machine.machineOwnershipType || "leased"}
                           onChange={(e) => actions.handleNestedListItemChange(e, index, "machines", idx)}
                           className="w-full pl-3 pr-10 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
@@ -169,6 +180,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
                         <TextInput
                           label={machine.machineOwnershipType === "leased" ? "قيمة الإيجار اليومي (ج.م)" : "القيمة اليومية (ج.م)"}
                           name="dailyLeaseCost"
+                          data-field={`branch.${index}.machines.${idx}.dailyLeaseCost`}
                           type="number"
                           value={machine.dailyLeaseCost || ""}
                           onChange={(e) => actions.handleNestedListItemChange(e, index, "machines", idx)}
@@ -206,7 +218,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
           <PlusCircleIcon className="w-4 h-4" /><span>إضافة جهة اتصال</span>
         </Button>
       </div>
-      <ContactsSection path={`branch-${index}`} formData={formData} actions={actions} newlyAddedId={newlyAddedId} />
+      <ContactsSection path={`branch-${index}`} formData={formData} actions={actions} newlyAddedId={newlyAddedId} fieldPrefix={`branch.${index}.contacts`} />
     </div>
 
     {/* Branch Baristas */}
@@ -233,14 +245,17 @@ export const BranchCard: React.FC<BranchCardProps> = ({
             <CollapsibleCard key={cb.id}
               initiallyOpen={cb.id === newlyAddedId}
               onRemove={() => actions.removeNestedListItem(index, "clientBaristas", cbi)}
+              wizardKey={`branch.${index}.clientBaristas.${cbi}`}
               titleContent={<span className="font-semibold">{cb.name || "باريستا عميل جديد"}</span>}
             >
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
                   <TextInput label="الاسم" name="name" value={cb.name}
+                    data-field={`branch.${index}.clientBaristas.${cbi}.name`}
                     onChange={(e) => actions.handleNestedListItemChange(e, index, "clientBaristas", cbi)} icon={<UserIcon />}
                   />
                   <TextInput label="رقم الهاتف" name="phone" value={cb.phone}
+                    data-field={`branch.${index}.clientBaristas.${cbi}.phone`}
                     onChange={(e) =>
                       actions.handleNestedListItemChange(
                         {

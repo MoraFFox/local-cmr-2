@@ -26,7 +26,7 @@ const Button: React.FC<ButtonProps> = ({
   return (
     <button
       disabled={disabled || isLoading}
-      className={`${variantClasses[variant]} min-h-[44px] ${className}`}
+      className={`${variantClasses[variant]} min-h-[40px] sm:min-h-[44px] ${className}`}
       {...props}
     >
       {isLoading ? (

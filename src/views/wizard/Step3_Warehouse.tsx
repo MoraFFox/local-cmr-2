@@ -22,8 +22,9 @@ export const Step3_Warehouse: React.FC<WizardStepProps> = ({
   <Card title="معلومات المخزن">
     <div className="space-y-6">
       <TextInput
-        label="Location"
+        label={t.ui.wizard.location}
         name="warehouse.location"
+        data-field="warehouse.location"
         value={formData.warehouse.location}
         onChange={actions.handleChange}
         icon={<MapPinIcon />}
@@ -42,6 +43,7 @@ export const Step3_Warehouse: React.FC<WizardStepProps> = ({
           formData={formData}
           actions={actions}
           newlyAddedId={newlyAddedId}
+          fieldPrefix="warehouse.contacts"
         />
       </div>
     </div>

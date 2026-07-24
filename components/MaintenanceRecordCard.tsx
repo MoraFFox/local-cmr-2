@@ -35,12 +35,8 @@ import { SafeModal } from "./form-ui/SafeModal";
 // NEW: Context-aware suggestions based on reported problems
 import { getSuggestedServices, getSuggestedParts } from "../utils/problemSuggestions";
 import { generateUniqueId } from "../utils/idGenerator";
+import { useVisitZones } from "../utils/visitZones";
 
-const visitZoneFees: Record<"cairo" | "outside_cairo" | "el_sahel", number> = {
-  cairo: 500,
-  outside_cairo: 1500,
-  el_sahel: 4000,
-};
 
 interface MaintenanceRecordCardProps {
   record: MaintenanceRecord;
@@ -239,6 +235,8 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(),
   );
+  const { zones } = useVisitZones();
+
   // Quick-add modal state (replaces prompt() — audit #54)
   const [quickAddModal, setQuickAddModal] = useState<{ type: 'barista' | 'clientBarista'; name: string } | null>(null);
 
@@ -596,20 +594,10 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                 target: { name: "visitZone", value: val },
               } as any)
             }
-            options={[
-              {
-                label: `القاهرة الكبرى (${visitZoneFees.cairo} جم)`,
-                value: "cairo",
-              },
-              {
-                label: `خارج القاهرة (${visitZoneFees.outside_cairo} جم)`,
-                value: "outside_cairo",
-              },
-              {
-                label: `الساحل الشمالي (${visitZoneFees.el_sahel} جم)`,
-                value: "el_sahel",
-              },
-            ]}
+            options={zones.map((z) => ({
+              label: `${z.label} (${z.fee.toLocaleString()} جم)`,
+              value: z.key,
+            }))}
             inline
           />
         </div>

@@ -97,6 +97,15 @@ export const getNewMaintenanceRecord = (id: number): MaintenanceRecord => ({
 });
 
 // ── Shared CSS Class Strings ───────────────────────────────────
+export const SIDEBAR_TOGGLE_SHORTCUT = {
+  label: "Ctrl+Shift+S",
+  ctrl: true,
+  shift: true,
+  alt: false,
+  meta: false,
+  key: "s",
+} as const;
+
 export const CLASSES = {
   textArea:
     "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-cream text-primary rounded-lg placeholder-latte focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 border border-hairline shadow-sm",

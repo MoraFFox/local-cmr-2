@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
 import { SafeModal } from './form-ui/SafeModal';
 import { ar } from '../utils/arabicTranslations';
+import { SIDEBAR_TOGGLE_SHORTCUT } from '../utils/sharedConstants';
 
 interface KeyboardShortcut {
   keyLabel: string;
@@ -52,6 +53,10 @@ const SHORTCUTS: KeyboardShortcut[] = [
   {
     keyLabel: ar.ui.formProgress.jumpToNextIncompleteShortcut,
     description: ar.ui.formProgress.jumpToNextIncomplete,
+  },
+  {
+    keyLabel: SIDEBAR_TOGGLE_SHORTCUT.label,
+    description: 'توسيع / طي القائمة الجانبية',
   },
   {
     keyLabel: '?',

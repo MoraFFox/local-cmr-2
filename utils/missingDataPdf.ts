@@ -441,14 +441,17 @@ const getDynamicCompanyFields = (data: FormData): MissingField[] => {
   if (isMissing(data.location)) {
     fields.push({
       key: "company.location",
-      label: "لوكشن الشركة",
+      label: "موقع الشركة",
       type: "text",
       required: true,
     });
   }
 
   // 3. Head of sales
-  fields.push(...getRoleContactFields(data.contacts, "sales", "مدير المبيعات", "company.contacts"));
+  fields.push(...getRoleContactFields(data.contacts, "purchasing_manager", "مدير المشتريات", "company.contacts"));
+
+  // 3.5. Procurement officer
+  fields.push(...getRoleContactFields(data.contacts, "purchasing_officer", "مسؤول المشتريات", "company.contacts"));
 
   // 4. Head of accounting
   fields.push(...getRoleContactFields(data.contacts, "accounting", "مدير الحسابات", "company.contacts"));
@@ -513,7 +516,7 @@ const getDynamicBranchFields = (branch: Branch, prefix: string): MissingField[] 
   if (isMissing(branch.location)) {
     fields.push({
       key: `${prefix}.location`,
-      label: "لوكشن الفرع",
+      label: "موقع الفرع",
       type: "text",
       required: true,
     });

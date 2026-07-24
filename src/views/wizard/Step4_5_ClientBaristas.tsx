@@ -35,17 +35,20 @@ export const Step4_5_ClientBaristas: React.FC<WizardStepProps> = ({
             key={cb.id}
             initiallyOpen={cb.id === newlyAddedId}
             onRemove={() => actions.removeClientBarista(null, index)}
+            wizardKey={`company.clientBaristas.${index}`}
             titleContent={<span className="font-semibold">{cb.name || "باريستا عميل جديد"}</span>}
           >
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <TextInput
                   label="الاسم" name="name" value={cb.name}
+                  data-field={`company.clientBaristas.${index}.name`}
                   onChange={(e) => actions.handleClientBaristaChange(e, null, index)}
                   icon={<UserIcon />}
                 />
                 <TextInput
                   label="رقم الهاتف" name="phone" value={cb.phone}
+                  data-field={`company.clientBaristas.${index}.phone`}
                   onChange={(e) =>
                     actions.handleClientBaristaChange(
                       {

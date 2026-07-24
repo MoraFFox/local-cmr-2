@@ -13,7 +13,7 @@ const rtl = (text: string | number | null | undefined): string => {
 };
 
 /** Format maintenance record details as clean bullet-point text for PDF tables. */
-const formatMaintenanceDetails = (r: MaintenanceRecord): string => {
+export const formatMaintenanceDetails = (r: MaintenanceRecord): string => {
   const sections: string[] = [];
 
   if (r.machines && r.machines.length > 0) {
@@ -59,22 +59,49 @@ const fontCache: {
   bold: string | null;
   logo: string | null;
   logoFormat: "PNG" | "JPEG";
+  logoWidth: number;
+  logoHeight: number;
 } = {
   regular: null,
   bold: null,
   logo: null,
   logoFormat: "PNG",
+  logoWidth: 0,
+  logoHeight: 0,
 };
 
 // Cache for loaded images to avoid re-fetching
 const imageCache = new Map<string, string>();
 
 /**
+ * Load an image and return its natural dimensions.
+ * Returns 0x0 when the image fails to load or data is null.
+ */
+function getImageDimensions(data: string | null): Promise<{ width: number; height: number }> {
+  return new Promise((resolve) => {
+    if (!data) {
+      resolve({ width: 0, height: 0 });
+      return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      resolve({ width: img.naturalWidth || 0, height: img.naturalHeight || 0 });
+    };
+    img.onerror = () => {
+      resolve({ width: 0, height: 0 });
+    };
+    img.src = data;
+  });
+}
+
+/**
  * Rasterize an SVG file to a transparent PNG data URL.
  * jsPDF cannot embed SVG directly, so we draw it to a canvas
  * and export as PNG. The canvas preserves the SVG's alpha channel.
+ * Returns the data URL plus the natural image dimensions so callers
+ * don't have to load the image again.
  */
-async function svgToPngDataUrl(svgUrl: string): Promise<string | null> {
+async function svgToPngDataUrl(svgUrl: string): Promise<LogoImageData | null> {
   try {
     const response = await fetch(svgUrl);
     if (!response.ok) return null;
@@ -92,8 +119,10 @@ async function svgToPngDataUrl(svgUrl: string): Promise<string | null> {
         // Use the SVG's intrinsic size, but cap at a reasonable resolution
         const maxWidth = 800;
         const scale = Math.min(1, maxWidth / img.naturalWidth);
-        canvas.width = Math.max(1, Math.floor(img.naturalWidth * scale));
-        canvas.height = Math.max(1, Math.floor(img.naturalHeight * scale));
+        const width = Math.max(1, Math.floor(img.naturalWidth * scale));
+        const height = Math.max(1, Math.floor(img.naturalHeight * scale));
+        canvas.width = width;
+        canvas.height = height;
 
         const ctx = canvas.getContext("2d");
         if (!ctx) {
@@ -107,7 +136,7 @@ async function svgToPngDataUrl(svgUrl: string): Promise<string | null> {
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         URL.revokeObjectURL(url);
 
-        resolve(canvas.toDataURL("image/png"));
+        resolve({ dataUrl: canvas.toDataURL("image/png"), width, height });
       };
       img.onerror = () => {
         URL.revokeObjectURL(url);
@@ -156,7 +185,7 @@ async function loadImageAsBase64(url: string): Promise<string | null> {
 /**
  * Render maintenance photos in PDF
  */
-async function renderPhotosInPDF(
+export async function renderPhotosInPDF(
   doc: jsPDF,
   photos: MaintenancePhoto[],
   startY: number,
@@ -280,7 +309,7 @@ const getMachineStatus = (
   return type;
 };
 
-const flattenMaintenanceRecords = (
+export const flattenMaintenanceRecords = (
   records: MaintenanceRecord[],
 ): MaintenanceRecord[] => {
   const result: MaintenanceRecord[] = [];
@@ -296,9 +325,19 @@ const flattenMaintenanceRecords = (
   return result;
 };
 
+export interface LogoImageData {
+  dataUrl: string;
+  width: number;
+  height: number;
+}
+
 export interface LogoAssets {
   logo: string | null;
   logoFormat: "PNG" | "JPEG";
+  /** Natural width in pixels (when logo is available). */
+  naturalWidth: number;
+  /** Natural height in pixels (when logo is available). */
+  naturalHeight: number;
 }
 
 export const loadFonts = async (doc: jsPDF): Promise<LogoAssets> => {
@@ -322,6 +361,8 @@ export const loadFonts = async (doc: jsPDF): Promise<LogoAssets> => {
     return {
       logo: fontCache.logo,
       logoFormat: fontCache.logoFormat,
+      naturalWidth: fontCache.logoWidth,
+      naturalHeight: fontCache.logoHeight,
     };
   }
 
@@ -372,12 +413,16 @@ export const loadFonts = async (doc: jsPDF): Promise<LogoAssets> => {
 
     let logoData: string | null = null;
     let logoFormat: "PNG" | "JPEG" = "PNG";
+    let logoWidth = 0;
+    let logoHeight = 0;
 
     // Prefer the SVG logo because it has a transparent background.
     // jsPDF cannot embed SVG directly, so we rasterize it to PNG.
     if (svgLogo) {
-      logoData = svgLogo;
+      logoData = svgLogo.dataUrl;
       logoFormat = "PNG";
+      logoWidth = svgLogo.width;
+      logoHeight = svgLogo.height;
     } else {
       // Fallback to the raster logo if SVG conversion fails.
       const pngLogo = await fetchAsset("/logo.png");
@@ -397,22 +442,29 @@ export const loadFonts = async (doc: jsPDF): Promise<LogoAssets> => {
         ) {
           logoFormat = "JPEG";
         } else {
-          return { logo: null, logoFormat: "PNG" };
+          return { logo: null, logoFormat: "PNG", naturalWidth: 0, naturalHeight: 0 };
         }
         logoData = `data:image/${logoFormat.toLowerCase()};base64,${toBase64(pngLogo)}`;
+        const dims = await getImageDimensions(logoData);
+        logoWidth = dims.width;
+        logoHeight = dims.height;
       }
     }
 
-    // Fix 4.3: Cache the logo
+    // Fix 4.3: Cache the logo and its dimensions
     fontCache.logo = logoData;
     fontCache.logoFormat = logoFormat;
+    fontCache.logoWidth = logoWidth;
+    fontCache.logoHeight = logoHeight;
 
     return {
       logo: logoData,
       logoFormat,
+      naturalWidth: logoWidth,
+      naturalHeight: logoHeight,
     };
   } catch (error) {
-    return { logo: null, logoFormat: "PNG" };
+    return { logo: null, logoFormat: "PNG", naturalWidth: 0, naturalHeight: 0 };
   }
 };
 
@@ -760,7 +812,8 @@ export const generateCompanyPDF = async (
     "manager",
     "chief",
     "ops_manager",
-    "sales",
+    "purchasing_manager",
+    "purchasing_officer",
     "accounting",
   ]);
   const managerContacts = (data.contacts || []).filter(

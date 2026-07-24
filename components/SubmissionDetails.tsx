@@ -14,6 +14,8 @@ import {
 import CollapsibleCard from "./CollapsibleCard";
 import Avatar from "./Avatar";
 import { generateCompanyPDF, generateBranchPDF } from "../utils/pdfGenerator";
+import { generateInternalCompanyReport, generateInternalBranchReport } from "../utils/internalReportPdf";
+import { getVisitZoneLabel } from "../utils/visitZones";
 import { getMachineOwnershipStatus } from "./ReviewStep";
 import {
   generateMissingDataPDF,
@@ -258,7 +260,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
             {record.visitZone && (
               <>
                 <span>•</span>
-                <span><bdi>{record.visitZone}</bdi></span>
+                <span><bdi>{getVisitZoneLabel(record.visitZone)}</bdi></span>
               </>
             )}
           </div>
@@ -557,7 +559,7 @@ const DetailedRecordPrint: React.FC<{
           </span>
           {record.visitZone && (
             <span className='text-xs text-text bg-cream-2 border border-hairline px-2 py-0.5 rounded-full capitalize'>
-              {record.visitZone.replace("_", " ")}
+              {getVisitZoneLabel(record.visitZone)}
             </span>
           )}
         </div>
@@ -1164,7 +1166,6 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
 }) => {
   const { showToast } = useToast();
   const [printingBranch, setPrintingBranch] = useState<Branch | null>(null);
-  const [isPrintingClientVersion, setIsPrintingClientVersion] = useState(false);
   const [filterStartDate, setFilterStartDate] = useState("");
   const [filterEndDate, setFilterEndDate] = useState("");
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
@@ -1175,11 +1176,15 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
   const handlePrintFull = async (mode: "internal" | "client") => {
     setIsGeneratingPDF(true);
     try {
-      const doc = await generateCompanyPDF(submission, {
-        includeCosts: mode === "internal",
-      });
-      const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${mode === "internal" ? "Internal" : "Client"}_Report_${new Date().toISOString().split("T")[0]}.pdf`;
-      doc.save(fileName);
+      if (mode === "internal") {
+        const doc = await generateInternalCompanyReport(submission);
+        const fileName = `${submission.companyName.replace(/\s+/g, "_")}_Internal_Report_${new Date().toISOString().split("T")[0]}.pdf`;
+        doc.save(fileName);
+      } else {
+        const doc = await generateCompanyPDF(submission, { includeCosts: false });
+        const fileName = `${submission.companyName.replace(/\s+/g, "_")}_Client_Report_${new Date().toISOString().split("T")[0]}.pdf`;
+        doc.save(fileName);
+      }
     } catch (error) {
       logger.error("Error generating PDF", error, "pdf");
       showToast("فشل إنشاء PDF. يرجى المحاولة مرة أخرى.", "error");
@@ -1188,17 +1193,18 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
     }
   };
 
-  const handlePrintBranch = async (
-    branch: Branch,
-    mode: "internal" | "client",
-  ) => {
+  const handlePrintBranch = async (branch: Branch, mode: "internal" | "client") => {
     setIsGeneratingPDF(true);
     try {
-      const doc = await generateBranchPDF(submission.companyName, branch, {
-        includeCosts: mode === "internal",
-      });
-      const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${branch.branchName?.replace(/\s+/g, "_")}_${mode === "internal" ? "Internal" : "Client"}_Report_${new Date().toISOString().split("T")[0]}.pdf`;
-      doc.save(fileName);
+      if (mode === "internal") {
+        const doc = await generateInternalBranchReport(submission.companyName, branch);
+        const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${branch.branchName?.replace(/\s+/g, "_")}_Internal_Report_${new Date().toISOString().split("T")[0]}.pdf`;
+        doc.save(fileName);
+      } else {
+        const doc = await generateBranchPDF(submission.companyName, branch, { includeCosts: false });
+        const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${branch.branchName?.replace(/\s+/g, "_")}_Client_Report_${new Date().toISOString().split("T")[0]}.pdf`;
+        doc.save(fileName);
+      }
     } catch (error) {
       logger.error("Error generating PDF", error, "pdf");
       showToast("فشل إنشاء PDF. يرجى المحاولة مرة أخرى.", "error");
@@ -1206,6 +1212,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
       setIsGeneratingPDF(false);
     }
   };
+
 
   const handleGenerateMissingDataPDF = async (scope: "company" | "branch", branchId?: number) => {
     setIsGeneratingPDF(true);
@@ -1702,6 +1709,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
         confirmLabel="استيراد"
         cancelLabel="إلغاء"
       />
+
     </div>
   );
 };

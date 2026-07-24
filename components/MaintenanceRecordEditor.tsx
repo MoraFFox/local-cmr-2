@@ -29,6 +29,8 @@ import { useT } from '../utils/i18n';
 import { generateUniqueId } from '../utils/idGenerator';
 import { formatEgyptianPhone } from '../utils/phone';
 import { useSectionJump } from '../hooks/useSectionJump';
+import { useVisitZones } from '../utils/visitZones';
+import VisitZoneManager from './VisitZoneManager';
 
 interface MaintenanceRecordEditorProps {
   record: MaintenanceRecord;
@@ -67,6 +69,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
 }) => {
   const { showToast } = useToast();
   const t = useT();
+  const { zones } = useVisitZones();
+  const [isZoneManagerOpen, setIsZoneManagerOpen] = useState(false);
   const [editedRecord, setEditedRecord] = useState<MaintenanceRecord>(record);
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -290,14 +294,23 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 <StarRating value={editedRecord.visitRating || 0} onChange={(v) => setEditedRecord(prev => ({ ...prev, visitRating: v }))} size="lg" showNA showNumeric />
               </div>
               <div>
-                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.visitZone}</label>
+                <label className="flex items-center justify-between text-sm font-medium text-primary dark:text-latte/70 mb-2">
+                  <span>{t.ui.maintenanceEditor.visitZone}</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsZoneManagerOpen(true)}
+                    className="text-xs text-primary hover:text-hover underline"
+                  >
+                    إدارة المناطق
+                  </button>
+                </label>
                 <div className="relative">
                   <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
                   <select name="visitZone" value={editedRecord.visitZone || ''} onChange={handleFieldChange} className="w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline">
                     <option value="">{t.ui.maintenanceEditor.selectZone}</option>
-                    <option value="cairo">{t.ui.maintenanceEditor.cairo}</option>
-                    <option value="outside_cairo">{t.ui.maintenanceEditor.outsideCairo}</option>
-                    <option value="el_sahel">{t.ui.maintenanceEditor.elSahel}</option>
+                    {zones.map((z) => (
+                      <option key={z.key} value={z.key}>{z.label} ({z.fee.toLocaleString()} جم)</option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -580,6 +593,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       <div className="h-24"></div>
 
       <ConfirmDialog isOpen={!!confirmPhotoDelete?.isOpen} onClose={() => setConfirmPhotoDelete(null)} onConfirm={() => { if (confirmPhotoDelete) { handlePhotoRemove({ url: confirmPhotoDelete.url, type: confirmPhotoDelete.category as any }); } setConfirmPhotoDelete(null); }} title="إزالة الصورة" aria-label="إزالة الصورة" message="هل أنت متأكد من رغبتك في إزالة هذه الصورة؟ لا يمكن التراجع عن هذا الإجراء." confirmLabel="نعم، إزالة" />
+
+      <VisitZoneManager isOpen={isZoneManagerOpen} onClose={() => setIsZoneManagerOpen(false)} />
     </div>
   );
 };

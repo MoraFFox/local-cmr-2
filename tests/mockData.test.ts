@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { generateMockMaintenanceRecord } from '../utils/mockData';
 import { MaintenanceRecord } from '../types';
 import { partsList, servicesList, problemCategories } from '../constants';
+import { getAllVisitZones } from '../utils/visitZones';
 
 const isISODate = (value: string | undefined): boolean => {
   if (!value) return false;
@@ -96,7 +97,10 @@ describe('generateMockMaintenanceRecord', () => {
 
   it('sets visitZone to a valid value or null', () => {
     const record = generateMockMaintenanceRecord('test');
-    const validZones: Array<string | null> = ['cairo', 'outside_cairo', 'el_sahel', null];
+    const validZones: Array<string | null> = [
+      ...getAllVisitZones().map(z => z.key),
+      null,
+    ];
     expect(validZones).toContain(record.visitZone);
   });
 

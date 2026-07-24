@@ -266,6 +266,21 @@
   animation: sectionJumpHighlight 1.6s cubic-bezier(0.4, 0, 0.6, 1) forwards;
 }
 
+/* Field-level highlight applied by the wizard cross-step field jump */
+.wizard-field-highlight {
+  outline: 3px solid rgba(182, 30, 36, 0.75);
+  outline-offset: 3px;
+  animation: sectionJumpHighlight 2s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wizard-field-highlight {
+    outline: 3px solid rgba(182, 30, 36, 0.75);
+    animation: none;
+  }
+}
+
 /* Smooth collapsible section content using CSS Grid */
 .section-content-grid {
   display: grid;

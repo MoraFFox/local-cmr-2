@@ -19,11 +19,18 @@ const UserAccessView = lazy(() => import("./src/views/UserAccessView"));
 import type { FormData, MaintenanceRecord } from "./types";
 import type { Draft } from "./hooks/useDrafts";
 
-import { Bars3Icon, XMarkIcon, MoonIcon, SunIcon, SignalSlashIcon, CloudArrowUpIcon } from "@heroicons/react/24/outline";
+import {
+  Bars3Icon,
+  XMarkIcon,
+  MoonIcon,
+  SunIcon,
+  SignalSlashIcon,
+  CloudArrowUpIcon,
+} from "@heroicons/react/24/outline";
 
 import { NAV_ITEMS, ViewKey, pathToView } from "./constants";
 import { CLASSES } from "./utils/sharedConstants";
-import { initialFormData, allPredefinedProblems, VIEW_TITLES, steps } from "./utils/sharedConstants";
+import { initialFormData, allPredefinedProblems, VIEW_TITLES, steps, SIDEBAR_TOGGLE_SHORTCUT } from "./utils/sharedConstants";
 
 import { ConfirmDialog } from "./components/ui/ConfirmDialog";
 import {
@@ -117,8 +124,63 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   const [selectedBarista, setSelectedBarista] = useState<string | null>(null);
 
   // ── Modal / UI State ──
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+  const SIDEBAR_STATE_KEY = "cmr-sidebar-expanded";
+
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(() => {
+    if (typeof window === "undefined") return true;
+    const stored = window.localStorage.getItem(SIDEBAR_STATE_KEY);
+    if (stored !== null) return stored === "true";
+    return window.innerWidth >= 1280;
+  });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const mobileMenuCloseRef = React.useRef<HTMLButtonElement>(null);
+  const mobileMenuButtonRef = React.useRef<HTMLButtonElement>(null);
+  const wasMobileMenuOpenRef = React.useRef(false);
+
+  // Persist sidebar expand/collapse preference.
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(SIDEBAR_STATE_KEY, String(isSidebarExpanded));
+  }, [isSidebarExpanded]);
+
+  // Keyboard shortcut: Ctrl+Shift+S toggles the sidebar.
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.isContentEditable ||
+        e.isComposing ||
+        target.matches("input, textarea, select")
+      ) {
+        return;
+      }
+      if (e.repeat) return;
+      if (
+        e.ctrlKey === SIDEBAR_TOGGLE_SHORTCUT.ctrl &&
+        e.shiftKey === SIDEBAR_TOGGLE_SHORTCUT.shift &&
+        e.altKey === SIDEBAR_TOGGLE_SHORTCUT.alt &&
+        e.metaKey === SIDEBAR_TOGGLE_SHORTCUT.meta &&
+        e.key.toLowerCase() === SIDEBAR_TOGGLE_SHORTCUT.key
+      ) {
+        e.preventDefault();
+        setIsSidebarExpanded((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Move focus to the mobile drawer close button when it opens and back to the
+  // hamburger button when it closes (a11y)
+  React.useEffect(() => {
+    if (isMobileMenuOpen) {
+      mobileMenuCloseRef.current?.focus();
+    } else if (wasMobileMenuOpenRef.current) {
+      mobileMenuButtonRef.current?.focus();
+    }
+    wasMobileMenuOpenRef.current = isMobileMenuOpen;
+  }, [isMobileMenuOpen]);
   const [deleteCandidateId, setDeleteCandidateId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [draftToDelete, setDraftToDelete] = useState<string | null>(null);
@@ -595,8 +657,9 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
       <div id="aria-announcer" aria-live="polite" aria-atomic="true" className="sr-only"></div>
       {/* Desktop Sidebar */}
       <aside
+        id="desktop-sidebar"
         className={`chrome border-l border-brass/20 flex-col fixed h-full transition-all duration-300 ease-in-out hidden lg:flex z-50 ${
-          isSidebarExpanded ? "w-64" : "w-20"
+          isSidebarExpanded ? "w-56 xl:w-64" : "w-20"
         }`}
       >
         <SidebarContent {...sidebarProps} />
@@ -609,23 +672,42 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
         }`}
       >
         <div
+          onClick={() => setIsMobileMenuOpen(false)}
           className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
             isMobileMenuOpen ? "opacity-100" : "opacity-0"
           }`}
         />
         <aside
+          id="mobile-sidebar"
+          role="dialog"
+          aria-label="القائمة"
+          aria-hidden={!isMobileMenuOpen}
+          aria-modal={isMobileMenuOpen}
+          onClick={(e) => e.stopPropagation()}
           className={`absolute top-0 right-0 h-full w-64 chrome border-l border-brass/20 shadow-xl transition-transform duration-300 ease-in-out flex flex-col ${
             isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
+          <div className="flex items-center justify-between p-4 border-b border-brass/20">
+            <span className="font-bold text-on-chrome">القائمة</span>
+            <button
+              ref={mobileMenuCloseRef}
+              onClick={() => setIsMobileMenuOpen(false)}
+              aria-label="إغلاق القائمة"
+              className="p-2 rounded-md text-on-chrome/70 hover:text-on-chrome hover:bg-espresso-light transition-colors"
+            >
+              <XMarkIcon className="h-6 w-6" />
+            </button>
+          </div>
           <SidebarContent {...sidebarProps} />
         </aside>
       </div>
 
       {/* Main Content */}
       <div
+        inert={isMobileMenuOpen ? true : undefined}
         className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${
-          isSidebarExpanded ? "lg:mr-64" : "lg:mr-20"
+          isSidebarExpanded ? "lg:mr-56 xl:mr-64" : "lg:mr-20"
         }`}
       >
         {/* Mobile Header */}
@@ -633,7 +715,11 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
         <header role="banner" className="sticky top-0 z-30 flex items-center justify-between lg:hidden h-16 chrome border-b border-brass/20 px-4 shrink-0">
           <div className="w-1/4 flex justify-start items-center gap-1">
             <button
+              ref={mobileMenuButtonRef}
+              onClick={() => setIsMobileMenuOpen(true)}
               aria-label="القائمة"
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-sidebar"
               className="p-2 -mr-2 rounded-md text-on-chrome/70 hover:text-on-chrome hover:bg-espresso-light transition-colors shrink-0"
             >
               <Bars3Icon className="h-6 w-6" />
@@ -653,7 +739,6 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
               ) : (
                 <SunIcon className="h-5 w-5" />
               )}
-                <SunIcon className="h-5 w-5" />
             </button>
             <KeyboardShortcutsHelpButton className="p-2 rounded-md text-on-chrome/70 hover:text-on-chrome hover:bg-espresso-light transition-colors shrink-0" />
           </div>
@@ -675,7 +760,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
 
 
 
-        <main id="main-content" className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
+        <main id="main-content" className="flex-1 overflow-y-auto p-2 sm:p-3 lg:p-6">
           <Suspense fallback={<LoadingState inline />}>
             {renderCurrentView()}
           </Suspense>

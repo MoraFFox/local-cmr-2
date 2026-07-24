@@ -46,7 +46,7 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, err
     <div className={className} ref={containerRef}>
       {label && (
         <div className="flex items-center gap-1.5 mb-1.5">
-          <label htmlFor={inputId} className="text-sm font-medium text-primary">
+          <label htmlFor={inputId} className="text-xs sm:text-sm font-medium text-primary">
             {label}
           </label>
           {required && <RequiredFieldBadge />}
@@ -73,7 +73,7 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, err
             props.onFocus?.(e);
           }}
           {...props}
-          className={`block w-full ${icon ? 'pr-10' : 'pr-4'} ${isCombobox ? 'pl-10' : 'pl-4'} h-[50px] bg-cream text-primary rounded-lg placeholder-latte focus:outline-none focus:ring-2 border transition-colors ${
+          className={`block w-full ${icon ? 'pr-10' : 'pr-4'} ${isCombobox ? 'pl-10' : 'pl-4'} h-[44px] sm:h-[50px] bg-cream text-primary rounded-lg placeholder-latte focus:outline-none focus:ring-2 border transition-colors ${
             error
               ? 'border-ember-500 dark:border-ember-400 focus:border-primary focus:ring-primary/20 animate-shake'
               : 'border-hairline focus:border-primary focus:ring-primary/20'

@@ -12,6 +12,7 @@ import TechButton from './ui/TechButton';
 import TechInput from './ui/TechInput';
 import { StarRating } from '../form-ui/StarRating';
 import { ar } from '../../utils/arabicTranslations';
+import { getVisitZoneLabel } from '../../utils/visitZones';
 import { Step1ContextData } from './Step1_Context';
 import { Step2WorkLogData } from './Step2_WorkLog';
 
@@ -28,11 +29,6 @@ interface Step3SummaryProps {
   onUpdateSupervisorPhone: (phone: string) => void;
 }
 
-const zoneLabels = {
-  cairo: ar.step3.cairo,
-  outside_cairo: ar.step3.outsideCairo,
-  el_sahel: ar.step3.elSahel,
-};
 
 const Step3Summary: React.FC<Step3SummaryProps> = ({
   step1Data,
@@ -73,7 +69,7 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
           {renderDataRow(ar.review.company, companyName || '-')}
           {renderDataRow(ar.review.branch, branchName || ar.step1.branchPlaceholder)}
           {renderDataRow(ar.review.date, step1Data.date || '-')}
-          {renderDataRow(ar.review.visitZone, step1Data.visitZone ? zoneLabels[step1Data.visitZone] : '-')}
+          {renderDataRow(ar.review.visitZone, step1Data.visitZone ? getVisitZoneLabel(step1Data.visitZone) : '-')}
         </div>
       </TechCard>
 

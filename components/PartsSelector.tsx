@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { ar } from '../utils/arabicTranslations';
 import { Part, PartRecord } from '../types';
 import { announce } from '../utils/ariaAnnouncer';
@@ -35,6 +35,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
   suggestedValues = [],
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const searchInputRef = useRef<HTMLDivElement>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isSelectedSectionExpanded, setIsSelectedSectionExpanded] = useState(true);
   const [customParts, setCustomParts] = useState<PartRecord[]>([]);
@@ -123,6 +124,23 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
     () => filteredOptions.filter((p) => !p.isFrequentlyReplaced),
     [filteredOptions]
   );
+
+  // Refocus search input after adding an item so the user can keep
+  // finding more without re-clicking (audit issue #19).
+  // useEffect guarantees focus after React commits the re-render.
+  // The first-render guard prevents focus from stealing on mount
+  // when editing an existing record with pre-selected items.
+  const didMountRef = useRef(false);
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    if (selectedValues.length > 0) {
+      searchInputRef.current?.querySelector('input')?.focus();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedValues.length]);
 
   // NEW: handleAddPart now accepts an optional quantity (audit issue #10 —
   // inline quantity selector on the add button means a single action per item
@@ -238,7 +256,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
       
       {/* Controls */}
       <div className="flex gap-2">
-        <div className="flex-grow">
+        <div className="flex-grow" ref={searchInputRef}>
              <TechInput 
                  placeholder={ar.selectors.searchParts}
                  value={searchTerm}

@@ -1,8 +1,9 @@
 import React from 'react';
-import { FormData, MaintenanceRecord, Part, Service, PartRecord, ServiceRecord } from '../types';
+import { FormData, Part, Service } from '../types';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import CollapsibleSection from './CollapsibleSection';
 import { SafeModal } from './form-ui/SafeModal';
+import { aggregateCosts, formatCurrency } from '../utils/costAggregation';
 
 interface CostBreakdownModalProps {
     isOpen: boolean;
@@ -11,76 +12,6 @@ interface CostBreakdownModalProps {
     partsList: Part[];
     servicesList: Service[];
 }
-
-const visitZoneFees: Record<'cairo' | 'outside_cairo' | 'el_sahel', number> = {
-    cairo: 500,
-    outside_cairo: 1500,
-    el_sahel: 4000
-};
-
-const formatCurrency = (value: number) => new Intl.NumberFormat('ar-EG', { style: 'currency', currency: 'EGP', minimumFractionDigits: 0 }).format(value);
-
-const aggregateCosts = (formData: FormData, partsList: Part[], servicesList: Service[]) => {
-    type AggregatedItem = { name: string, count: number, totalCost: number, unitCost: number };
-
-    const aggregated = {
-        parts: new Map<string, AggregatedItem>(),
-        services: new Map<string, AggregatedItem>(),
-        totalVisitFees: 0,
-        totalPartsCost: 0,
-        totalServicesCost: 0,
-        grandTotal: 0,
-    };
-
-    const getKey = (name: string, cost: number) => `${name}#${cost}`;
-
-    const processRecord = (record: MaintenanceRecord) => {
-        // Add visit fee
-        if (record.visitZone) {
-            aggregated.totalVisitFees += visitZoneFees[record.visitZone];
-        }
-
-        // Aggregate parts
-        (record.partsReplaced || []).filter(p => !p.paidByClient).forEach(partRecord => {
-            const unitCost = partRecord.cost ?? partsList.find(p => p.value === partRecord.name)?.cost ?? 0;
-            const key = getKey(partRecord.name, unitCost);
-
-            const existing = aggregated.parts.get(key) || { name: partRecord.name, count: 0, totalCost: 0, unitCost };
-            existing.count += partRecord.count;
-            existing.totalCost += partRecord.count * unitCost;
-            aggregated.parts.set(key, existing);
-        });
-
-        // Aggregate services
-        (record.servicesPerformed || []).filter(s => !s.paidByClient).forEach(serviceRecord => {
-            const unitCost = serviceRecord.cost ?? servicesList.find(s => s.value === serviceRecord.name)?.cost ?? 0;
-            const key = getKey(serviceRecord.name, unitCost);
-
-            const existing = aggregated.services.get(key) || { name: serviceRecord.name, count: 0, totalCost: 0, unitCost };
-            existing.count += serviceRecord.count;
-            existing.totalCost += serviceRecord.count * unitCost;
-            aggregated.services.set(key, existing);
-        });
-
-        // Recursively process follow-up visits
-        (record.followUpVisits || []).forEach(processRecord);
-    };
-
-    // Process main office records
-    formData.maintenanceHistory.forEach(processRecord);
-
-    // Process branch records
-    formData.branches.forEach(branch => {
-        branch.maintenanceHistory.forEach(processRecord);
-    });
-
-    // Calculate totals
-    aggregated.totalPartsCost = Array.from(aggregated.parts.values()).reduce((sum, p) => sum + p.totalCost, 0);
-    aggregated.totalServicesCost = Array.from(aggregated.services.values()).reduce((sum, s) => sum + s.totalCost, 0);
-    aggregated.grandTotal = aggregated.totalVisitFees + aggregated.totalPartsCost + aggregated.totalServicesCost;
-    
-    return aggregated;
-};
 
 
 const CostDetail: React.FC<{ label: React.ReactNode; value: string | number; isSubItem?: boolean }> = ({ label, value, isSubItem = false }) => (
@@ -119,9 +50,17 @@ const CostBreakdownModal: React.FC<CostBreakdownModalProps> = ({ isOpen, onClose
                 </div>
             )}
             renderFooter={() => (
-                <div className="mt-6 pt-4 pb-safe border-t border-hairline dark:border-hairline flex justify-between items-center px-6 sm:px-8">
-                    <span className="text-sm font-medium text-latte dark:text-latte">Grand Total:</span>
-                    <span className="text-xl font-bold text-primary-800 dark:text-primary-400">{formatCurrency(aggregatedData.grandTotal)}</span>
+                <div className="mt-6 pt-4 pb-safe border-t border-hairline dark:border-hairline flex flex-col gap-1 px-6 sm:px-8">
+                    <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-latte dark:text-latte">صافي تكلفة الشركة:</span>
+                        <span className="text-xl font-bold text-primary-800 dark:text-primary-400">{formatCurrency(aggregatedData.grandTotalCompanyCost)}</span>
+                    </div>
+                    {(aggregatedData.totalClientPartsCost > 0 || aggregatedData.totalClientServicesCost > 0) && (
+                        <div className="flex justify-between items-center text-xs text-latte">
+                            <span>+ فواتير العميل (قطع غيار + خدمات)</span>
+                            <span>{formatCurrency(aggregatedData.totalClientPartsCost + aggregatedData.totalClientServicesCost)}</span>
+                        </div>
+                    )}
                 </div>
             )}
         >
@@ -129,13 +68,19 @@ const CostBreakdownModal: React.FC<CostBreakdownModalProps> = ({ isOpen, onClose
                 {aggregatedData.grandTotal > 0 ? (
                     <>
                         {aggregatedData.totalVisitFees > 0 && (
-                            <CollapsibleSection title={`Visit Fees Total: ${formatCurrency(aggregatedData.totalVisitFees)}`}>
+                            <CollapsibleSection title={`رسوم الزيارات: ${formatCurrency(aggregatedData.totalVisitFees)}`}>
                                 <CostDetail label="إجمالي رسوم الزيارات" value={aggregatedData.totalVisitFees} />
                             </CollapsibleSection>
                         )}
 
+                        {aggregatedData.totalLeaseRevenue > 0 && (
+                            <CollapsibleSection title={`إيرادات تأجير الماكينات: ${formatCurrency(aggregatedData.totalLeaseRevenue)}`}>
+                                <CostDetail label="إجمالي إيرادات التأجير" value={aggregatedData.totalLeaseRevenue} />
+                            </CollapsibleSection>
+                        )}
+
                         {aggregatedData.totalPartsCost > 0 && (
-                            <CollapsibleSection title={`Parts Cost Total: ${formatCurrency(aggregatedData.totalPartsCost)}`}>
+                            <CollapsibleSection title={`قطع الغيار (علينا): ${formatCurrency(aggregatedData.totalPartsCost)}`}>
                                 <div className="space-y-1">
                                     {Array.from(aggregatedData.parts.values()).map((data) => (
                                         <CostDetail
@@ -153,12 +98,50 @@ const CostBreakdownModal: React.FC<CostBreakdownModalProps> = ({ isOpen, onClose
                             </CollapsibleSection>
                         )}
 
+                        {aggregatedData.totalClientPartsCost > 0 && (
+                            <CollapsibleSection title={`قطع الغيار (فاتورة العميل): ${formatCurrency(aggregatedData.totalClientPartsCost)}`}>
+                                <div className="space-y-1">
+                                    {Array.from(aggregatedData.clientParts.values()).map((data) => (
+                                        <CostDetail
+                                            key={`client-${data.name}#${data.unitCost}`}
+                                            label={
+                                                <span>
+                                                    {data.count}x {data.name} <span className="text-latte">@ {formatCurrency(data.unitCost)}</span>
+                                                </span>
+                                            }
+                                            value={data.totalCost}
+                                            isSubItem
+                                        />
+                                    ))}
+                                </div>
+                            </CollapsibleSection>
+                        )}
+
                          {aggregatedData.totalServicesCost > 0 && (
-                            <CollapsibleSection title={`Services Cost Total: ${formatCurrency(aggregatedData.totalServicesCost)}`}>
+                            <CollapsibleSection title={`الخدمات (علينا): ${formatCurrency(aggregatedData.totalServicesCost)}`}>
                                 <div className="space-y-1">
                                     {Array.from(aggregatedData.services.values()).map((data) => (
                                         <CostDetail
                                             key={`${data.name}#${data.unitCost}`}
+                                            label={
+                                                <span>
+                                                    {data.count}x {data.name} <span className="text-latte">@ {formatCurrency(data.unitCost)}</span>
+                                                </span>
+                                            }
+                                            value={data.totalCost}
+                                            isSubItem
+                                        />
+                                    ))}
+                                </div>
+                            </CollapsibleSection>
+                         )}
+
+                        {aggregatedData.totalClientServicesCost > 0 && (
+                            <CollapsibleSection title={`الخدمات (فاتورة العميل): ${formatCurrency(aggregatedData.totalClientServicesCost)}`}>
+                                <div className="space-y-1">
+                                    {Array.from(aggregatedData.clientServices.values()).map((data) => (
+                                        <CostDetail
+                                            key={`client-${data.name}#${data.unitCost}`}
                                             label={
                                                 <span>
                                                     {data.count}x {data.name} <span className="text-latte">@ {formatCurrency(data.unitCost)}</span>

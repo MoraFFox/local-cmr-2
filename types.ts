@@ -119,7 +119,7 @@ export interface MaintenanceRecord {
   visitRating?: number; // 1-5 Performance rating for client's barista
   recommendations?: string;
   problems?: string[];
-  visitZone: "cairo" | "outside_cairo" | "el_sahel" | null;
+  visitZone: string | null;
   servicesPerformed: ServiceRecord[];
   followUpVisits?: MaintenanceRecord[];
   machines?: MachineMaintained[];
@@ -169,7 +169,7 @@ export interface PortalSubmission {
   client_barista_name?: string;
   visit_rating?: number;
   problems?: string[];
-  visit_zone?: string;
+  visit_zone?: string | null;
   services_performed?: ServiceRecord[];
   machines?: MachineMaintained[];
   photo_urls?: string[];

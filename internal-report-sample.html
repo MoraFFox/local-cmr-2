@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تقرير داخلي - فرع المعادي | Mido's for Distribution</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700;800&display=swap');
+
+  :root {
+    --crimson: #AF2025;
+    --crimson-light: #D6454A;
+    --offwhite: #FFFFFE;
+    --espresso: #3D2C24;
+    --espresso-light: #5D4C44;
+    --surface: #FFFFFF;
+    --cream-bg: #F9FAFB;
+    --hairline: #E5E7EB;
+    --hairline-dark: #D1D5DB;
+    --text-primary: #3D2C24;
+    --text-secondary: #6B7280;
+    --text-muted: #9CA3AF;
+    --amber: #D97706;
+    --amber-bg: #FFFBEB;
+    --green: #059669;
+    --green-bg: #ECFDF5;
+    --blue: #2563EB;
+    --blue-bg: #EFF6FF;
+    --red: #DC2626;
+    --red-bg: #FEF2F2;
+    --page-width: 210mm;
+    --page-margin: 14mm;
+    --content-width: calc(var(--page-width) - var(--page-margin) * 2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Tajawal', 'Cairo', sans-serif;
+    background: #E5E7EB;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    color: var(--text-primary);
+  }
+
+  .page {
+    width: var(--page-width);
+    min-height: 297mm;
+    background: var(--offwhite);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── HEADER BAR ── */
+  .header-bar {
+    background: var(--crimson);
+    padding: 0;
+    position: relative;
+  }
+  .header-bar::after {
+    content: '';
+    display: block;
+    height: 3px;
+    background: linear-gradient(90deg, var(--crimson), #D4A017, var(--crimson));
+    opacity: 0.8;
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px var(--page-margin) 14px;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .logo-badge {
+    width: 42px;
+    height: 42px;
+    background: var(--offwhite);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--crimson);
+    border: 2px solid #D4A017;
+    flex-shrink: 0;
+  }
+  .header-title h1 {
+    color: var(--offwhite);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.3;
+    font-family: 'Cairo', sans-serif;
+  }
+  .header-title .subtitle {
+    color: rgba(255,255,255,0.85);
+    font-size: 11px;
+    font-weight: 400;
+  }
+  .confidential-badge {
+    background: rgba(0,0,0,0.2);
+    border: 1.5px solid rgba(255,255,255,0.4);
+    color: var(--offwhite);
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .header-meta {
+    background: var(--espresso);
+    padding: 10px var(--page-margin);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: rgba(255,255,255,0.8);
+  }
+  .header-meta .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .header-meta .meta-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #D4A017;
+  }
+
+  /* ── CONTENT ── */
+  .content {
+    padding: var(--page-margin);
+    padding-top: 18px;
+  }
+
+  /* ── KPI CARDS ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    padding: 14px 12px;
+    border-top: 3px solid var(--crimson);
+    position: relative;
+  }
+  .kpi-card.warn { border-top-color: var(--amber); }
+  .kpi-card.good { border-top-color: var(--green); }
+  .kpi-card.info { border-top-color: var(--blue); }
+  .kpi-card .kpi-icon {
+    font-size: 14px;
+    margin-bottom: 6px;
+    opacity: 0.7;
+  }
+  .kpi-card .kpi-label {
+    font-size: 9px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+  }
+  .kpi-card .kpi-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--espresso);
+    font-family: 'Cairo', sans-serif;
+    line-height: 1;
+  }
+  .kpi-card .kpi-sub {
+    font-size: 9px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+  }
+  .kpi-card .kpi-sub.good { color: var(--green); }
+  .kpi-card .kpi-sub.warn { color: var(--amber); }
+
+  /* ── SECTION HEADERS ── */
+  .section-title {
+    font-family: 'Cairo', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--espresso);
+    padding-bottom: 8px;
+    margin-bottom: 14px;
+    border-bottom: 2px solid var(--hairline);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 16px;
+    background: var(--crimson);
+    border-radius: 2px;
+    margin-left: 2px;
+  }
+
+  /* ── TWO-COLUMN LAYOUT ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 22px;
+  }
+
+  /* ── FINANCIAL SUMMARY TABLE ── */
+  .fin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+  }
+  .fin-table th {
+    background: var(--espresso);
+    color: var(--offwhite);
+    font-weight: 600;
+    padding: 8px 10px;
+    text-align: right;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .fin-table th:last-child { text-align: left; }
+  .fin-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--hairline);
+    vertical-align: middle;
+  }
+  .fin-table td:last-child {
+    text-align: left;
+    font-weight: 700;
+    font-family: 'Cairo', sans-serif;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .fin-table .category-row td {
+    font-weight: 600;
+    color: var(--text-primary);
+    background: var(--cream-bg);
+    font-size: 10px;
+  }
+  .fin-table .sub-row td:first-child { padding-right: 20px; color: var(--text-secondary); font-size: 9px; }
+  .fin-table .sub-row td:last-child { font-weight: 600; font-size: 10px; }
+  .fin-table .total-row td {
+    font-weight: 800;
+    font-size: 11px;
+    color: var(--crimson);
+    border-top: 2px solid var(--crimson);
+    background: #FEF2F2;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 8px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+  .tag.company { background: var(--red-bg); color: var(--red); }
+  .tag.client  { background: var(--blue-bg); color: var(--blue); }
+
+  /* ── VISIT ZONE TABLE ── */
+  .zone-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+    margin-bottom: 16px;
+  }
+  .zone-table th {
+    background: var(--cream-bg);
+    color: var(--text-secondary);
+    font-weight: 600;
+    padding: 6px 10px;
+    text-align: right;
+    font-size: 9px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--hairline-dark);
+  }
+  .zone-table th:last-child { text-align: left; }
+  .zone-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .zone-table td:last-child {
+    text-align: left;
+    font-weight: 700;
+    font-family: 'Cairo', sans-serif;
+  }
+
+  /* ── MAINTENANCE HISTORY TABLE ── */
+  .maint-table-wrap {
+    overflow-x: auto;
+    margin-bottom: 22px;
+  }
+  .maint-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9px;
+  }
+  .maint-table thead th {
+    background: var(--espresso);
+    color: var(--offwhite);
+    font-weight: 600;
+    padding: 7px 8px;
+    text-align: right;
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .maint-table thead th.num { text-align: left; }
+  .maint-table tbody td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--hairline);
+    vertical-align: top;
+  }
+  .maint-table tbody td.num {
+    text-align: left;
+    font-weight: 600;
+    font-family: 'Cairo', sans-serif;
+    white-space: nowrap;
+  }
+  .maint-table tbody tr:nth-child(even) { background: var(--cream-bg); }
+  .maint-table .badge-solved {
+    display: inline-block;
+    font-size: 7px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+  .badge-solved.yes { background: var(--green-bg); color: var(--green); }
+  .badge-solved.no  { background: var(--red-bg); color: var(--red); }
+  .maint-table .parts-list { font-size: 8px; color: var(--text-secondary); line-height: 1.5; }
+
+  /* ── TECH SUMMARY ── */
+  .tech-row {
+    font-size: 9px;
+    padding: 5px 0;
+  }
+
+  /* ── INFO BOX ── */
+  .info-box {
+    background: var(--cream-bg);
+    border: 1px solid var(--hairline);
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+  }
+  .info-box .info-row {
+    display: flex;
+    gap: 6px;
+    font-size: 10px;
+    padding: 3px 0;
+  }
+  .info-box .info-label {
+    color: var(--text-muted);
+    font-weight: 600;
+    min-width: 80px;
+    flex-shrink: 0;
+  }
+  .info-box .info-value {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  /* ── MACHINE CARDS ── */
+  .machine-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .machine-card {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 6px;
+    padding: 10px 12px;
+    border-right: 3px solid var(--crimson);
+    font-size: 10px;
+  }
+  .machine-card .mc-name {
+    font-weight: 700;
+    color: var(--espresso);
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+  .machine-card .mc-detail {
+    color: var(--text-secondary);
+    font-size: 9px;
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+  }
+  .machine-card .mc-cost {
+    font-weight: 700;
+    color: var(--crimson);
+    font-family: 'Cairo', sans-serif;
+  }
+
+  /* ── CONTACT GRID ── */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .contact-card {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 9px;
+  }
+  .contact-card .cc-name {
+    font-weight: 700;
+    font-size: 10px;
+    margin-bottom: 2px;
+  }
+  .contact-card .cc-role {
+    color: var(--text-muted);
+    font-size: 8px;
+  }
+  .contact-card .cc-phone {
+    color: var(--text-secondary);
+    margin-top: 3px;
+    direction: ltr;
+    text-align: right;
+  }
+
+  /* ── FOOTER ── */
+  .page-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--espresso);
+    color: rgba(255,255,255,0.6);
+    font-size: 8px;
+    padding: 6px var(--page-margin);
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <!-- ═══════════ HEADER ═══════════ -->
+  <div class="header-bar">
+    <div class="header-inner">
+      <div class="header-left">
+        <div class="logo-badge">MD</div>
+        <div class="header-title">
+          <h1>قهوة الصباح ذ.م.م — فرع المعادي</h1>
+          <div class="subtitle">تقرير صيانة داخلي · Branch Internal Report</div>
+        </div>
+      </div>
+      <div class="confidential-badge">🔒 سري — للاستخدام الداخلي فقط</div>
+    </div>
+    <div class="header-meta">
+      <div class="meta-item"><span class="meta-dot"></span> رقم التقرير: IR-2026-0717-B02</div>
+      <div class="meta-item"><span class="meta-dot"></span> تاريخ الإصدار: ٢٣ يوليو ٢٠٢٦</div>
+      <div class="meta-item"><span class="meta-dot"></span> الفترة: ١ مايو — ٢٣ يوليو ٢٠٢٦</div>
+      <div class="meta-item"><span class="meta-dot"></span> Mido's for Distribution</div>
+    </div>
+  </div>
+
+  <!-- ═══════════ CONTENT ═══════════ -->
+  <div class="content">
+
+    <!-- ── KPI CARDS ── -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-icon">📋</div>
+        <div class="kpi-label">إجمالي الزيارات</div>
+        <div class="kpi-value">١٤</div>
+        <div class="kpi-sub">٨ مجدولة · ٦ طارئة</div>
+      </div>
+      <div class="kpi-card good">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-label">نسبة حل المشاكل</div>
+        <div class="kpi-value">٨٦٪</div>
+        <div class="kpi-sub good">١٢ من ١٤ تم حلها</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">🔧</div>
+        <div class="kpi-label">قطع الغيار المستهلكة</div>
+        <div class="kpi-value">٣١</div>
+        <div class="kpi-sub">١٨ على حسابنا · ١٣ على العميل</div>
+      </div>
+      <div class="kpi-card good">
+        <div class="kpi-icon">⭐</div>
+        <div class="kpi-label">متوسط تقييم الزيارة</div>
+        <div class="kpi-value">٤٫٢</div>
+        <div class="kpi-sub good">من ٥ — ممتاز</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-label">صافي التكلفة على الشركة</div>
+        <div class="kpi-value">١٨٬٧٥٠</div>
+        <div class="kpi-sub">ج.م — شامل كل المصاريف</div>
+      </div>
+    </div>
+
+    <!-- ── TWO COLUMN: Financial + Visit Zones ── -->
+    <div class="two-col">
+      <!-- Financial Breakdown -->
+      <div>
+        <div class="section-title">تفصيل التكاليف</div>
+        <table class="fin-table">
+          <thead>
+            <tr><th>البند</th><th>التفاصيل</th><th>المبلغ</th></tr>
+          </thead>
+          <tbody>
+            <tr class="category-row">
+              <td colspan="2">📦 قطع الغيار — على حساب الشركة</td>
+              <td>٨٬٥٠٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td><span class="tag company">علينا</span> جوان</td><td>٨ قطع × ١٠٠ ج.م</td><td>٨٠٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td><span class="tag company">علينا</span> شاور</td><td>٥ قطع × ٣٠٠ ج.م</td><td>١٬٥٠٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td><span class="tag company">علينا</span> حساس</td><td>٣ قطع × ٤٥٠ ج.م</td><td>١٬٣٥٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td><span class="tag company">علينا</span> طرمبه</td><td>١ قطعة × ٤٬٥٠٠ ج.م</td><td>٤٬٥٠٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td><span class="tag company">علينا</span> كابستور</td><td>١ قطعة × ٣٠٠ ج.م</td><td>٣٠٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td><span class="tag company">علينا</span> تروس مطحنة</td><td>١ قطعة × ٢٬٠٠٠ ج.م</td><td>٢٬٠٠٠ ج.م</td>
+            </tr>
+
+            <tr class="category-row">
+              <td colspan="2">📦 قطع الغيار — على حساب العميل</td>
+              <td>٦٬٣٠٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td><span class="tag client">عميل</span> صنولويد</td><td>١ قطعة × ٣٬٠٠٠ ج.م</td><td>٣٬٠٠٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td><span class="tag client">عميل</span> زرار ماكينه بريميوم</td><td>٢ قطعة × ٨٠٠ ج.م</td><td>١٬٦٠٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td><span class="tag client">عميل</span> جوان لامرزوكو</td><td>٢ قطعة × ٦٠٠ ج.م</td><td>١٬٢٠٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td><span class="tag client">عميل</span> زور مطحنه</td><td>١ قطعة × ٥٠٠ ج.م</td><td>٥٠٠ ج.م</td>
+            </tr>
+
+            <tr class="category-row">
+              <td colspan="2">🛠️ الخدمات — على حساب الشركة</td>
+              <td>٤٬٨٥٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td><span class="tag company">علينا</span> دورة غسيل جروبات (أول مرة)</td><td>٣ مرات × ٥٠٠ ج.م</td><td>١٬٥٠٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td><span class="tag company">علينا</span> دورة غسيل خزان</td><td>١ مرة × ١٬٥٠٠ ج.م</td><td>١٬٥٠٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td><span class="tag company">علينا</span> تغيير جوانات</td><td>٢ مرة × ٤٠٠ ج.م</td><td>٨٠٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td><span class="tag company">علينا</span> تغيير طرمبة</td><td>١ مرة × ٥٠٠ ج.م</td><td>٥٠٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td><span class="tag company">علينا</span> ضبط الطحنة</td><td>٢ مرة × ٢٠٠ ج.م</td><td>٤٠٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td><span class="tag company">علينا</span> تنظيف شاورات</td><td>١ مرة × ١٥٠ ج.م</td><td>١٥٠ ج.م</td>
+            </tr>
+
+            <tr class="category-row">
+              <td colspan="2">🛠️ الخدمات — على حساب العميل</td>
+              <td>٩٥٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td><span class="tag client">عميل</span> دورة غسيل سوفتنر بالمادة</td><td>١ مرة × ١٬٥٠٠ ج.م</td><td>١٬٥٠٠ ج.م</td>
+            </tr>
+
+            <tr class="category-row">
+              <td colspan="2">🚗 رسوم الزيارات</td>
+              <td>٨٬٥٠٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td colspan="2" style="font-size:8px;color:var(--text-muted)">انظر جدول المناطق أدناه للتفصيل</td>
+              <td></td>
+            </tr>
+
+            <tr class="category-row">
+              <td colspan="2">🏭 إيجار الماكينات (وارد)</td>
+              <td style="color:var(--green)">− ١٠٬٣٥٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td>La Marzocco Linea PB — إيجار</td><td>٩٠ يوم × ١٠٠ ج.م</td><td>٩٬٠٠٠ ج.م</td>
+            </tr>
+            <tr class="sub-row">
+              <td>Mazzer Robur S — استهلاك</td><td>٤٥ كجم × ٣٠ ج.م</td><td>١٬٣٥٠ ج.م</td>
+            </tr>
+
+            <tr class="total-row">
+              <td colspan="2">📊 صافي التكلفة على الشركة</td>
+              <td>١٨٬٧٥٠ ج.م</td>
+            </tr>
+            <tr class="total-row" style="background:#FFF7ED; border-top-color:var(--amber); color:var(--amber); font-size:10px;">
+              <td colspan="2">📋 إجمالي فاتورة العميل (المستحق)</td>
+              <td>٧٬٢٥٠ ج.م</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Visit Zones + Machine Fleet -->
+      <div>
+        <div class="section-title">رسوم الزيارات حسب المنطقة</div>
+        <table class="zone-table">
+          <thead>
+            <tr><th>المنطقة</th><th>الرسوم</th><th>عدد الزيارات</th><th>الإجمالي</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>🏙️ القاهرة</td><td>٥٠٠ ج.م</td><td>١١</td><td>٥٬٥٠٠ ج.م</td>
+            </tr>
+            <tr>
+              <td>🛣️ خارج القاهرة</td><td>١٬٥٠٠ ج.م</td><td>٢</td><td>٣٬٠٠٠ ج.م</td>
+            </tr>
+            <tr>
+              <td>🏖️ الساحل</td><td>٤٬٠٠٠ ج.م</td><td>٠</td><td>٠ ج.م</td>
+            </tr>
+            <tr style="font-weight:700; border-top: 2px solid var(--hairline-dark);">
+              <td colspan="3">إجمالي رسوم الزيارات</td>
+              <td>٨٬٥٠٠ ج.م</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="section-title" style="margin-top:18px;">أسطول الماكينات</div>
+        <div class="machine-cards">
+          <div class="machine-card">
+            <div class="mc-name">☕ La Marzocco Linea PB</div>
+            <div class="mc-detail"><span>نوع العقد:</span> <span>إيجار Leased</span></div>
+            <div class="mc-detail"><span>الإيجار اليومي:</span> <span class="mc-cost">١٠٠ ج.م</span></div>
+            <div class="mc-detail"><span>الأيام النشطة:</span> <span>٩٠ يوم</span></div>
+            <div class="mc-detail"><span>إجمالي الإيجار:</span> <span class="mc-cost">٩٬٠٠٠ ج.م</span></div>
+          </div>
+          <div class="machine-card">
+            <div class="mc-name">⚙️ Mazzer Robur S</div>
+            <div class="mc-detail"><span>نوع العقد:</span> <span>استهلاك Consumption</span></div>
+            <div class="mc-detail"><span>سعر الكيلو:</span> <span class="mc-cost">٣٠ ج.م</span></div>
+            <div class="mc-detail"><span>الاستهلاك:</span> <span>٤٥ كجم</span></div>
+            <div class="mc-detail"><span>إجمالي الاستهلاك:</span> <span class="mc-cost">١٬٣٥٠ ج.م</span></div>
+          </div>
+        </div>
+
+        <!-- Branch Info -->
+        <div class="section-title">معلومات الفرع</div>
+        <div class="info-box">
+          <div class="info-row"><span class="info-label">📍 الموقع:</span><span class="info-value">المعادي، شارع ٩، بجوار محطة المترو</span></div>
+          <div class="info-row"><span class="info-label">📧 البريد:</span><span class="info-value">maadi@sabahcoffee.com</span></div>
+          <div class="info-row"><span class="info-label">🆔 الرقم الضريبي:</span><span class="info-value">٣٠٠-٤٥٦-٧٨٩-٢</span></div>
+          <div class="info-row"><span class="info-label">☕ استهلاك القهوة:</span><span class="info-value">٦٥ كجم / شهر</span></div>
+          <div class="info-row"><span class="info-label">🕐 أوقات الصيانة:</span><span class="info-value">السبت — الخميس، ٨ صباحاً — ٤ مساءً</span></div>
+        </div>
+
+        <!-- Contacts -->
+        <div class="section-title">جهات الاتصال</div>
+        <div class="contact-grid">
+          <div class="contact-card">
+            <div class="cc-name">أحمد فوزي</div>
+            <div class="cc-role">مدير الفرع</div>
+            <div class="cc-phone">📞 010 1234 5678</div>
+          </div>
+          <div class="contact-card">
+            <div class="cc-name">منى سامي</div>
+            <div class="cc-role">مسؤول المشتريات</div>
+            <div class="cc-phone">📞 012 9876 5432</div>
+          </div>
+          <div class="contact-card">
+            <div class="cc-name">كريم السيد</div>
+            <div class="cc-role">مسؤول حسابات</div>
+            <div class="cc-phone">📞 011 5555 4444</div>
+          </div>
+          <div class="contact-card">
+            <div class="cc-name">محمد عبد الله</div>
+            <div class="cc-role">باريستا أول (عميل)</div>
+            <div class="cc-phone">📞 015 3333 2222</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MAINTENANCE HISTORY ── -->
+    <div class="section-title">سجل الصيانة التفصيلي</div>
+    <div class="maint-table-wrap">
+      <table class="maint-table">
+        <thead>
+          <tr>
+            <th>التاريخ</th>
+            <th>النوع</th>
+            <th>الفني</th>
+            <th>المنطقة</th>
+            <th>المشاكل</th>
+            <th>تم الحل</th>
+            <th>قطع الغيار</th>
+            <th class="num">تكلفة القطع</th>
+            <th>الخدمات</th>
+            <th class="num">تكلفة الخدمات</th>
+            <th class="num">إيجار يومي</th>
+            <th class="num">إجمالي</th>
+            <th>التقييم</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>٢٢ يوليو ٢٠٢٦</td>
+            <td>طارئة</td>
+            <td>أحمد محمود</td>
+            <td>القاهرة</td>
+            <td>تسريب مياه، صوت عالي</td>
+            <td><span class="badge-solved yes">✓ نعم</span></td>
+            <td class="parts-list">١× طرمبه (علينا)<br>١× جوان (علينا)</td>
+            <td class="num">٤٬٦٠٠</td>
+            <td>تغيير طرمبة<br>تغيير جوانات</td>
+            <td class="num">١٬٠٠٠</td>
+            <td class="num">١٠٠</td>
+            <td class="num">٥٬٧٠٠</td>
+            <td>⭐ ٥</td>
+          </tr>
+          <tr>
+            <td>١٨ يوليو ٢٠٢٦</td>
+            <td>مجدولة</td>
+            <td>محمد علي</td>
+            <td>القاهرة</td>
+            <td>—</td>
+            <td><span class="badge-solved yes">✓ نعم</span></td>
+            <td class="parts-list">٢× شاور (علينا)</td>
+            <td class="num">٦٠٠</td>
+            <td>تنظيف شاورات<br>ضبط الطحنة</td>
+            <td class="num">٣٥٠</td>
+            <td class="num">١٠٠</td>
+            <td class="num">١٬٠٥٠</td>
+            <td>⭐ ٤</td>
+          </tr>
+          <tr>
+            <td>١٠ يوليو ٢٠٢٦</td>
+            <td>طارئة</td>
+            <td>خالد عمر</td>
+            <td>خارج القاهرة</td>
+            <td>درجة حرارة منخفضة</td>
+            <td><span class="badge-solved yes">✓ نعم</span></td>
+            <td class="parts-list">١× حساس (علينا)<br>١× كابستور (علينا)</td>
+            <td class="num">٧٥٠</td>
+            <td>ضبط الحرارة<br>تغيير حساس</td>
+            <td class="num">٧٠٠</td>
+            <td class="num">—</td>
+            <td class="num">١٬٤٥٠</td>
+            <td>⭐ ٤</td>
+          </tr>
+          <tr>
+            <td>٥ يوليو ٢٠٢٦</td>
+            <td>مجدولة</td>
+            <td>أحمد محمود</td>
+            <td>القاهرة</td>
+            <td>—</td>
+            <td><span class="badge-solved yes">✓ نعم</span></td>
+            <td class="parts-list">—</td>
+            <td class="num">٠</td>
+            <td>دورة غسيل جروبات<br>ضبط الطحنة</td>
+            <td class="num">٧٠٠</td>
+            <td class="num">١٠٠</td>
+            <td class="num">٨٠٠</td>
+            <td>⭐ ٥</td>
+          </tr>
+          <tr>
+            <td>٢٨ يونيو ٢٠٢٦</td>
+            <td>طارئة</td>
+            <td>سامي حسن</td>
+            <td>القاهرة</td>
+            <td>هاندات غير نظيفة،<br>نسبة الملح عالية</td>
+            <td><span class="badge-solved yes">✓ نعم</span></td>
+            <td class="parts-list">١× صنولويد (عميل)<br>١× زرار بريميوم (عميل)</td>
+            <td class="num">٣٬٨٠٠</td>
+            <td>دورة غسيل سوفتنر بالمادة (عميل)<br>تغيير زرار ماكينة</td>
+            <td class="num">١٬٨٠٠</td>
+            <td class="num">—</td>
+            <td class="num">٥٬٦٠٠</td>
+            <td>⭐ ٣</td>
+          </tr>
+          <tr>
+            <td>٢٠ يونيو ٢٠٢٦</td>
+            <td>مجدولة</td>
+            <td>محمد علي</td>
+            <td>القاهرة</td>
+            <td>—</td>
+            <td><span class="badge-solved yes">✓ نعم</span></td>
+            <td class="parts-list">٣× جوان (علينا)</td>
+            <td class="num">٣٠٠</td>
+            <td>دورة غسيل جروبات<br>تنظيف شاورات</td>
+            <td class="num">٦٥٠</td>
+            <td class="num">١٠٠</td>
+            <td class="num">١٬٠٥٠</td>
+            <td>⭐ ٤</td>
+          </tr>
+          <tr>
+            <td>١٢ يونيو ٢٠٢٦</td>
+            <td>طارئة</td>
+            <td>طارق سالم</td>
+            <td>القاهرة</td>
+            <td>ضغط غير منضبط</td>
+            <td><span class="badge-solved yes">✓ نعم</span></td>
+            <td class="parts-list">٢× شاور (علينا)<br>١× جوان (علينا)</td>
+            <td class="num">٧٠٠</td>
+            <td>ضبط الضغط</td>
+            <td class="num">٣٠٠</td>
+            <td class="num">١٠٠</td>
+            <td class="num">١٬١٠٠</td>
+            <td>⭐ ٤</td>
+          </tr>
+          <tr>
+            <td>٥ يونيو ٢٠٢٦</td>
+            <td>مجدولة</td>
+            <td>أحمد محمود</td>
+            <td>القاهرة</td>
+            <td>—</td>
+            <td><span class="badge-solved yes">✓ نعم</span></td>
+            <td class="parts-list">—</td>
+            <td class="num">٠</td>
+            <td>دورة غسيل خزان</td>
+            <td class="num">١٬٥٠٠</td>
+            <td class="num">١٠٠</td>
+            <td class="num">١٬٦٠٠</td>
+            <td>⭐ ٥</td>
+          </tr>
+          <tr>
+            <td>٢٨ مايو ٢٠٢٦</td>
+            <td>طارئة</td>
+            <td>خالد عمر</td>
+            <td>خارج القاهرة</td>
+            <td>تسريب بخار،<br>تحتاج الى شاورات</td>
+            <td><span class="badge-solved no">✗ لا</span></td>
+            <td class="parts-list">١× زور مطحنه (عميل)<br>١× جوان لامرزوكو (عميل)</td>
+            <td class="num">١٬٧٠٠</td>
+            <td>—</td>
+            <td class="num">٠</td>
+            <td class="num">—</td>
+            <td class="num">١٬٧٠٠</td>
+            <td>⭐ ٣</td>
+          </tr>
+          <tr>
+            <td>٢٠ مايو ٢٠٢٦</td>
+            <td>مجدولة</td>
+            <td>أحمد محمود</td>
+            <td>القاهرة</td>
+            <td>—</td>
+            <td><span class="badge-solved yes">✓ نعم</span></td>
+            <td class="parts-list">١× تروس مطحنة (علينا)</td>
+            <td class="num">٢٬٠٠٠</td>
+            <td>دورة غسيل جروبات<br>تغيير تروس مطحنة</td>
+            <td class="num">٧٠٠</td>
+            <td class="num">١٠٠</td>
+            <td class="num">٢٬٨٠٠</td>
+            <td>⭐ ٥</td>
+          </tr>
+          <tr>
+            <td>١٥ مايو ٢٠٢٦</td>
+            <td>مجدولة</td>
+            <td>محمد علي</td>
+            <td>القاهرة</td>
+            <td>—</td>
+            <td><span class="badge-solved yes">✓ نعم</span></td>
+            <td class="parts-list">١× حساس (علينا)</td>
+            <td class="num">٤٥٠</td>
+            <td>—</td>
+            <td class="num">٠</td>
+            <td class="num">١٠٠</td>
+            <td class="num">٥٥٠</td>
+            <td>⭐ ٤</td>
+          </tr>
+          <tr>
+            <td>١٠ مايو ٢٠٢٦</td>
+            <td>مجدولة</td>
+            <td>أحمد محمود</td>
+            <td>القاهرة</td>
+            <td>—</td>
+            <td><span class="badge-solved yes">✓ نعم</span></td>
+            <td class="parts-list">٢× جوان (علينا)<br>١× شاور (علينا)</td>
+            <td class="num">٥٠٠</td>
+            <td>تغيير جوانات</td>
+            <td class="num">٤٠٠</td>
+            <td class="num">١٠٠</td>
+            <td class="num">١٬٠٠٠</td>
+            <td>⭐ ٤</td>
+          </tr>
+          <tr>
+            <td>٥ مايو ٢٠٢٦</td>
+            <td>طارئة</td>
+            <td>طارق سالم</td>
+            <td>القاهرة</td>
+            <td>تسريب مياه</td>
+            <td><span class="badge-solved yes">✓ نعم</span></td>
+            <td class="parts-list">١× حساس (علينا)</td>
+            <td class="num">٤٥٠</td>
+            <td>—</td>
+            <td class="num">٠</td>
+            <td class="num">—</td>
+            <td class="num">٤٥٠</td>
+            <td>⭐ ٤</td>
+          </tr>
+          <tr>
+            <td>١ مايو ٢٠٢٦</td>
+            <td>مجدولة</td>
+            <td>أحمد محمود</td>
+            <td>القاهرة</td>
+            <td>—</td>
+            <td><span class="badge-solved yes">✓ نعم</span></td>
+            <td class="parts-list">—</td>
+            <td class="num">٠</td>
+            <td>دورة غسيل جروبات</td>
+            <td class="num">٥٠٠</td>
+            <td class="num">١٠٠</td>
+            <td class="num">٦٠٠</td>
+            <td>⭐ ٥</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── TECHNICIAN PERFORMANCE ── -->
+    <div class="section-title">أداء الفنيين</div>
+    <div class="maint-table-wrap">
+      <table class="maint-table">
+        <thead>
+          <tr>
+            <th>الفني</th>
+            <th class="num">عدد الزيارات</th>
+            <th class="num">متوسط التقييم</th>
+            <th class="num">قطع الغيار المستخدمة</th>
+            <th class="num">إجمالي التكلفة</th>
+            <th>المناطق</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:700;">أحمد محمود</td>
+            <td class="num">٦</td>
+            <td class="num">⭐ ٤٫٨</td>
+            <td class="num">١٢</td>
+            <td class="num">١٢٬٥٥٠ ج.م</td>
+            <td>القاهرة (٥) · خارج (١)</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700;">محمد علي</td>
+            <td class="num">٣</td>
+            <td class="num">⭐ ٤٫٠</td>
+            <td class="num">٧</td>
+            <td class="num">٢٬٦٥٠ ج.م</td>
+            <td>القاهرة (٣)</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700;">خالد عمر</td>
+            <td class="num">٢</td>
+            <td class="num">⭐ ٤٫٠</td>
+            <td class="num">٦</td>
+            <td class="num">٣٬١٥٠ ج.م</td>
+            <td>القاهرة (١) · خارج (١)</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700;">سامي حسن</td>
+            <td class="num">١</td>
+            <td class="num">⭐ ٣٫٠</td>
+            <td class="num">٢</td>
+            <td class="num">٥٬٦٠٠ ج.م</td>
+            <td>القاهرة (١)</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700;">طارق سالم</td>
+            <td class="num">٢</td>
+            <td class="num">⭐ ٤٫٠</td>
+            <td class="num">٤</td>
+            <td class="num">١٬٥٥٠ ج.م</td>
+            <td>القاهرة (٢)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── TOP PROBLEMS & PARTS ── -->
+    <div class="two-col">
+      <div>
+        <div class="section-title">أكثر المشاكل تكراراً</div>
+        <table class="zone-table">
+          <thead><tr><th>المشكلة</th><th class="num">عدد المرات</th><th>آخر ظهور</th></tr></thead>
+          <tbody>
+            <tr><td>تسريب مياه</td><td class="num">٣</td><td>٢٢ يوليو ٢٠٢٦</td></tr>
+            <tr><td>درجة حرارة منخفضة</td><td class="num">٢</td><td>١٠ يوليو ٢٠٢٦</td></tr>
+            <tr><td>هاندات غير نظيفة</td><td class="num">٢</td><td>٢٨ يونيو ٢٠٢٦</td></tr>
+            <tr><td>ضغط غير منضبط</td><td class="num">١</td><td>١٢ يونيو ٢٠٢٦</td></tr>
+            <tr><td>تسريب بخار</td><td class="num">١</td><td>٢٨ مايو ٢٠٢٦</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="section-title">أكثر القطع استهلاكاً</div>
+        <table class="zone-table">
+          <thead><tr><th>القطعة</th><th class="num">الكمية</th><th class="num">التكلفة</th></tr></thead>
+          <tbody>
+            <tr><td>جوان</td><td class="num">٨</td><td class="num">٨٠٠ ج.م</td></tr>
+            <tr><td>شاور</td><td class="num">٥</td><td class="num">١٬٥٠٠ ج.م</td></tr>
+            <tr><td>حساس</td><td class="num">٣</td><td class="num">١٬٣٥٠ ج.م</td></tr>
+            <tr><td>طرمبه</td><td class="num">١</td><td class="num">٤٬٥٠٠ ج.م</td></tr>
+            <tr><td>صنولويد</td><td class="num">١</td><td class="num">٣٬٠٠٠ ج.م</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════ FOOTER ═══════════ -->
+  <div class="page-footer">
+    <span>Mido's for Distribution — تقرير داخلي · سري</span>
+    <span>صفحة ١ من ١</span>
+    <span>تم إنشاؤه بواسطة: نظام CMR · ٢٣/٠٧/٢٠٢٦</span>
+  </div>
+</div>
+
+</body>
+</html>

@@ -58,6 +58,7 @@ export const BranchBaristaSection: React.FC<BranchBaristaSectionProps> = ({
             key={barista.id}
             initiallyOpen={barista.id === newlyAddedId}
             onRemove={() => onRemoveNested("baristas", baristaIndex)}
+            wizardKey={`branch.${index}.baristas.${baristaIndex}`}
             titleContent={<span className="font-semibold">{barista.name || "فرد صيانة جديد"}</span>}
           >
             <div className="space-y-4">
@@ -65,6 +66,7 @@ export const BranchBaristaSection: React.FC<BranchBaristaSectionProps> = ({
                 <TextInput
                   label="الاسم"
                   name="name"
+                  data-field={`branch.${index}.baristas.${baristaIndex}.name`}
                   value={barista.name}
                   onChange={(e) => onNestedChange(e, "baristas", baristaIndex)}
                   icon={<UserIcon />}
@@ -72,6 +74,7 @@ export const BranchBaristaSection: React.FC<BranchBaristaSectionProps> = ({
                 <TextInput
                   label="رقم الهاتف"
                   name="phone"
+                  data-field={`branch.${index}.baristas.${baristaIndex}.phone`}
                   value={barista.phone}
                   onChange={(e) =>
                     onNestedChange(

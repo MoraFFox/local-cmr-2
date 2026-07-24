@@ -123,12 +123,12 @@ export const FormProgress: React.FC<FormProgressComponentProps> = ({
       key={nextIncompleteSection.id}
       type="button"
       onClick={() => onJumpToNextIncomplete(nextIncompleteSection.id)}
-      className="mt-2 text-xs font-medium text-primary hover:text-primary-700 dark:hover:text-copper-300 underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-primary/30 rounded px-1 py-0.5 -ml-1 transition-colors animate-jump-button-pulse animate-jump-button-glow"
+      className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-latte hover:text-primary bg-cream-2/50 hover:bg-cream-2 border border-hairline rounded-lg px-3 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30"
       aria-label={`${effectiveJumpButtonLabel}: ${nextIncompleteSection.label}`}
       title={jumpButtonHint}
     >
-      {effectiveJumpButtonLabel}
-      {shortcutHint && <span className="sr-only"> ({shortcutHint})</span>}
+      <span>{effectiveJumpButtonLabel}</span>
+      {shortcutHint && <span className="text-[10px] opacity-70">({shortcutHint})</span>}
     </button>
   ) : null;
 
@@ -141,7 +141,7 @@ export const FormProgress: React.FC<FormProgressComponentProps> = ({
               {showCount && `${completedCount} ${t.of} ${totalSections} ${t.completed}`}
             </span>
             {showPercentage && (
-              <span className="text-primary font-bold">{percentage}%</span>
+              <span className="text-latte font-bold">{percentage}%</span>
             )}
           </div>
 
@@ -173,7 +173,7 @@ export const FormProgress: React.FC<FormProgressComponentProps> = ({
                 </span>
               )}
               {showPercentage && (
-                <span className="font-bold text-primary">{percentage}%</span>
+                <span className="font-bold text-latte">{percentage}%</span>
               )}
             </div>
           </div>
@@ -267,7 +267,7 @@ export const FormProgress: React.FC<FormProgressComponentProps> = ({
               </span>
             )}
             {showPercentage && (
-              <span className="font-bold text-primary">{percentage}%</span>
+              <span className="font-bold text-latte">{percentage}%</span>
             )}
           </div>
         </div>

@@ -10,7 +10,7 @@ export type ContactPath = "main" | "warehouse" | `branch-${number}`;
 export interface WizardStepActions {
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleRadioChange: (name: string, value: unknown) => void;
-  addContact: (path: ContactPath) => void;
+  addContact: (path: ContactPath, position?: string) => void;
   removeContact: (path: ContactPath, contactIndex: number) => void;
   handleContactChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, path: ContactPath, contactIndex: number) => void;
   addPhoneNumber: (path: ContactPath, contactIndex: number) => void;

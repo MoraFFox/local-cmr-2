@@ -58,6 +58,7 @@ function addToCustomHistory(problems: string[]): void {
 const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValues = [], onChange, predefinedProblems }) => {
     const [customProblems, setCustomProblems] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const searchInputRef = useRef<HTMLDivElement>(null);
     // NEW: accordion state — categories collapsed by default (audit issue #9)
     const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
     // NEW: autocomplete state (audit issue #14)
@@ -120,6 +121,23 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [activeSuggestionIndex]);
+
+    // Refocus search input after selection so the user can keep
+    // finding more items without re-clicking (audit issue #19).
+    // useEffect guarantees focus after React commits the re-render.
+    // The first-render guard prevents focus from stealing on mount
+    // when editing an existing record with pre-selected items.
+    const didMountRef = useRef(false);
+    useEffect(() => {
+        if (!didMountRef.current) {
+            didMountRef.current = true;
+            return;
+        }
+        if ((selectedValues || []).length > 0) {
+            searchInputRef.current?.querySelector('input')?.focus();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [(selectedValues || []).length]);
 
     const handleCheckboxChange = (value: string) => {
         const currentSelected = selectedValues || [];
@@ -340,7 +358,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             {/* Search */}
-            <div className="relative">
+            <div className="relative" ref={searchInputRef}>
                 <TechInput 
                     placeholder={ar.selectors.searchProblems}
                     value={searchTerm}

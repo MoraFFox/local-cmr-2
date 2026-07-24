@@ -22,7 +22,7 @@ export const NAV_ITEMS: NavItem[] = [
   { key: "history", path: "/", label: "السجل", iconName: "HomeIcon", inSidebar: true },
   { key: "baristas", path: "/baristas", label: "أداء الباريستا", iconName: "UsersIcon", inSidebar: true },
   { key: "technicians", path: "/users", label: "إدارة الفنيين", iconName: "UserGroupIcon", inSidebar: true },
-  { key: "form", path: "/companies/new", label: "إضافة شركة", iconName: "DocumentTextIcon", inSidebar: true },
+  { key: "form", path: "/companies/new", label: "نموذج جديد", iconName: "DocumentTextIcon", inSidebar: true },
   { key: "print", path: "/print", label: "طباعة", iconName: "DocumentTextIcon", inSidebar: false },
 ];
 
@@ -210,11 +210,12 @@ export const servicesList: Service[] = [
 export const contactPositions = [
   { label: "مدير", value: "manager" },
   { label: "مدير العمليات", value: "ops_manager" },
-  { label: "العلاقات العامة", value: "pr" },
-  { label: "المبيعات", value: "sales" },
+  { label: "مدير المشتريات", value: "purchasing_manager" },
+  { label: "مسؤول المشتريات", value: "purchasing_officer" },
   { label: "الحسابات", value: "accounting" },
   { label: "الرئيس التنفيذي", value: "chief" },
   { label: "المالك", value: "owner" },
+  { label: "العلاقات العامة", value: "pr" },
   { label: "مخصص", value: "custom" },
 ];
 
