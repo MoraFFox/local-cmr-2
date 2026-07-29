@@ -150,7 +150,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                   البريد الإلكتروني
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 end-0 pe-4 flex items-center pointer-events-none">
                     <EnvelopeIcon className="w-5 h-5 text-latte" />
                   </div>
                   <input
@@ -160,7 +160,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                     placeholder="admin@example.com"
                     autoCapitalize="none"
                     autoCorrect="off"
-                    className="input-base pe-14"
+                    className="input-base pe-16"
                     dir="ltr"
                   />
                 </div>
@@ -359,7 +359,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
               {getLabel()}
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
+              <div className="absolute inset-y-0 end-0 pe-4 flex items-center pointer-events-none">
                 {contactType === "email" ? (
                   <EnvelopeIcon className="w-5 h-5 text-latte" />
                 ) : (
@@ -380,7 +380,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
                 placeholder={getPlaceholder()}
                 autoCapitalize="none"
                 autoCorrect="off"
-                className="input-base pe-14"
+                className="input-base pe-16"
                 dir="ltr"
               />
             </div>
@@ -391,7 +391,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
               كلمة المرور
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
+              <div className="absolute inset-y-0 end-0 pe-4 flex items-center pointer-events-none">
                 <LockClosedIcon className="w-5 h-5 text-latte" />
               </div>
               <input
@@ -399,7 +399,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="input-base pe-14"
+                className="input-base pe-16"
                 dir="ltr"
               />
             </div>
