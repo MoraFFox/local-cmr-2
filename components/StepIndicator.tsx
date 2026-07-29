@@ -85,7 +85,7 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ steps, currentStep }) => 
                                             <div
                                                 className={`h-full rounded-full transition-all duration-700 ease-out ${
                                                     isCompleted
-                                                        ? 'bg-gradient-to-r from-copper-500 to-copper-400'
+                                                        ? 'ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-copper-500 to-copper-400'
                                                         : 'bg-primary/0'
                                                 }`}
                                                 style={{
@@ -118,7 +118,7 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ steps, currentStep }) => 
                 </div>
                 <div className="h-2 w-full bg-hairline/40 rounded-full overflow-hidden shadow-inner">
                     <div
-                        className="h-full bg-gradient-to-l from-copper-500 to-copper-400 rounded-full transition-all duration-700 ease-out relative overflow-hidden"
+                        className="h-full ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-copper-500 to-copper-400 rounded-full transition-all duration-700 ease-out relative overflow-hidden"
                         style={{ width: `${progress}%` }}
                     >
                         {/* Shimmer overlay */}

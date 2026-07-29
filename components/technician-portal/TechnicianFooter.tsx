@@ -23,7 +23,7 @@ const TechnicianFooter: React.FC<TechnicianFooterProps> = ({
   validationError,
 }) => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-gradient-to-t from-espresso via-espresso/95 to-transparent pb-[env(safe-area-inset-bottom)]">
+    <div className="fixed bottom-0 start-0 end-0 z-50 p-4 bg-gradient-to-t from-espresso via-espresso/95 to-transparent pb-[env(safe-area-inset-bottom)]">
       <div className="max-w-2xl mx-auto space-y-3">
 
         {/* Validation Error Banner */}

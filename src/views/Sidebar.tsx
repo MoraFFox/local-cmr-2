@@ -45,6 +45,8 @@ interface SidebarContentProps {
   handleLoadDraft: (draft: Draft) => void;
   handleDeleteDraft: (e: React.MouseEvent, draftId: string) => void;
   toggleTheme: () => void;
+  toggleLanguage?: () => void;
+  language?: 'ar' | 'en';
   onAdminLogout?: () => Promise<void> | void;
   handleAddNew: () => void;
   setIsSidebarExpanded: (expanded: boolean) => void;
@@ -54,7 +56,7 @@ interface SidebarContentProps {
   setView: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const SidebarContent = React.memo(({ 
+const SidebarContent = React.memo<SidebarContentProps>(({ 
   view, 
   isSidebarExpanded, 
   theme, 
@@ -64,6 +66,8 @@ const SidebarContent = React.memo(({
   handleLoadDraft,
   handleDeleteDraft,
   toggleTheme,
+  toggleLanguage,
+  language,
   onAdminLogout,
   handleAddNew,
   setIsSidebarExpanded,
@@ -103,7 +107,7 @@ const SidebarContent = React.memo(({
         <button
           onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
           className={`hidden lg:flex absolute top-1/2 -translate-y-1/2 items-center justify-center w-7 h-7 rounded-md text-muted-chrome hover:text-on-chrome hover:bg-espresso-light/30 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors ${
-            isSidebarExpanded ? "left-2" : "left-1/2 -translate-x-1/2"
+            isSidebarExpanded ? "start-2" : "start-1/2 ltr:-translate-x-1/2 rtl:translate-x-1/2"
           }`}
           aria-expanded={isSidebarExpanded}
           aria-controls="desktop-sidebar"
@@ -112,9 +116,9 @@ const SidebarContent = React.memo(({
           title={isSidebarExpanded ? `طي (${SIDEBAR_TOGGLE_SHORTCUT.label})` : `فتح (${SIDEBAR_TOGGLE_SHORTCUT.label})`}
         >
           {isSidebarExpanded ? (
-            <ChevronDoubleRightIcon className="h-4 w-4" />
+            language === 'en' ? <ChevronDoubleLeftIcon className="h-4 w-4" /> : <ChevronDoubleRightIcon className="h-4 w-4" />
           ) : (
-            <ChevronDoubleLeftIcon className="h-4 w-4" />
+            language === 'en' ? <ChevronDoubleRightIcon className="h-4 w-4" /> : <ChevronDoubleLeftIcon className="h-4 w-4" />
           )}
         </button>
       </div>
@@ -152,14 +156,14 @@ const SidebarContent = React.memo(({
               onClick={() => handleViewChange(item.key as any)}
               className={`group relative flex items-center w-full gap-3 p-2.5 rounded-lg text-sm font-medium transition-all duration-300 overflow-hidden ${
                 isActive
-                  ? "text-on-chrome bg-gradient-to-l from-copper-500/15 to-transparent shadow-[inset_-3px_0_0_0_#B87333]"
+                  ? "text-on-chrome ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-copper-500/15 to-transparent ltr:shadow-[inset_-3px_0_0_0_#B87333] rtl:shadow-[inset_3px_0_0_0_#B87333]"
                   : "text-muted-chrome hover:bg-espresso-light/40 hover:text-on-chrome"
               } ${!isSidebarExpanded && "justify-center"}`}
               title={item.label}
             >
               {/* Hover glow effect for inactive items */}
               {!isActive && (
-                <div className="absolute inset-0 bg-gradient-to-l from-cream/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                <div className="absolute inset-0 ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-cream/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
               )}
               
               <Icon 
@@ -194,14 +198,14 @@ const SidebarContent = React.memo(({
               </span>
               <div className="flex-grow border-t border-brass/20"></div>
             </div>
-            <div className="space-y-1 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+            <div className="space-y-1 max-h-48 overflow-y-auto custom-scrollbar pe-1">
               {drafts.map((draft) => {
                 const draftDate = new Date(draft.timestamp);
                 return (
                 <div
                   key={draft.id}
                   onClick={() => handleLoadDraft(draft)}
-                  className={`group flex items-center justify-between p-2 rounded-md text-sm cursor-pointer transition-colors ${currentDraftId === draft.id ? "bg-espresso-light border-r-2 border-primary text-on-chrome" : "text-muted-chrome hover:bg-espresso-light/40 hover:text-on-chrome"}`}
+                  className={`group flex items-center justify-between p-2 rounded-md text-sm cursor-pointer transition-colors ${currentDraftId === draft.id ? "bg-espresso-light border-e-2 border-primary text-on-chrome" : "text-muted-chrome hover:bg-espresso-light/40 hover:text-on-chrome"}`}
                 >
                   <div className="flex flex-col truncate">
                     <span className="font-medium truncate">
@@ -235,6 +239,20 @@ const SidebarContent = React.memo(({
         )}
 
         <ThemeToggle theme={theme} toggleTheme={toggleTheme} expanded={isSidebarExpanded} />
+
+        {/* Language Toggle */}
+        {toggleLanguage && language && (
+          <button
+            onClick={toggleLanguage}
+            className={`w-full flex items-center gap-3 p-3 rounded-md text-sm font-semibold border border-hairline/50 bg-cream/50 dark:bg-espresso-light/30 text-latte hover:text-on-chrome hover:bg-espresso-light/40 transition-colors ${!isSidebarExpanded && "justify-center"}`}
+            title={language === 'ar' ? 'English' : 'العربية'}
+          >
+            <span className="text-xs font-bold tracking-wider">{language === 'ar' ? 'EN' : 'AR'}</span>
+            <span className={`truncate ${!isSidebarExpanded && "lg:hidden"}`}>
+              {language === 'ar' ? 'English' : 'العربية'}
+            </span>
+          </button>
+        )}
 
         {/* Keyboard shortcuts help */}
         <KeyboardShortcutsHelpButton

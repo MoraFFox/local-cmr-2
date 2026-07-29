@@ -223,7 +223,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
               كلمة المرور الجديدة
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <div className="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
                 <LockClosedIcon className="w-5 h-5 text-latte" />
               </div>
               <input
@@ -231,7 +231,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream border border-hairline text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="w-full pe-10 ps-4 py-3 rounded-lg bg-cream border border-hairline text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 dir="ltr"
               />
             </div>
@@ -242,7 +242,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
               تأكيد كلمة المرور الجديدة
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <div className="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
                 <LockClosedIcon className="w-5 h-5 text-latte" />
               </div>
               <input
@@ -250,7 +250,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream border border-hairline text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="w-full pe-10 ps-4 py-3 rounded-lg bg-cream border border-hairline text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 dir="ltr"
               />
             </div>

@@ -3,7 +3,7 @@
  */
 import React from "react";
 import { describe, it, expect } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent } from "../testUtils";
 import { Step5_MaintenanceHistory } from "../../src/views/wizard/Step5_MaintenanceHistory";
 import { createMockActions, createFormData } from "./helpers";
 import { getNewMaintenanceRecord, getTodayDateString } from "../../utils/sharedConstants";

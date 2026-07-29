@@ -176,7 +176,7 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                 </div>
             )}
             renderFooter={(handleClose) => (
-                <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-4 sm:px-6 py-4 pb-safe border-t border-hairline dark:border-hairline bg-cream/30 dark:bg-espresso-light/20 flex-shrink-0">
+                <div className="flex flex-col-reverse sm:flex-row items-center ltr:justify-end rtl:justify-start gap-3 px-4 sm:px-6 py-4 pb-safe border-t border-hairline dark:border-hairline bg-cream/30 dark:bg-espresso-light/20 flex-shrink-0">
                     {/* Cancel goes through SafeModal's handleClose so the
                         unsaved-changes protection applies. */}
                     <button

@@ -1,17 +1,13 @@
-import { ar } from "./arabicTranslations";
-
-export { ar };
+import { useLanguage } from "./LanguageContext";
+import type { Translations } from "./arabicTranslations";
 
 /**
- * Arabic-only translation hook. Returns the shared `ar` translation tree.
- * No `en` fallback — this app is Arabic-only by product decision.
- *
- * Usage:
- *   const t = useT();
- *   <span>{t.admin.sidebar.history}</span>
+ * Translation hook that returns the translations for the current language.
+ * Uses the LanguageContext to get the active language.
  */
 export function useT() {
-  return ar;
+  const { t } = useLanguage();
+  return t;
 }
 
-export type Translations = typeof ar;
+export type { Translations };

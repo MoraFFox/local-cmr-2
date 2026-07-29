@@ -173,7 +173,7 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
       {/* Record List */}
       <div className="space-y-3">
         {records.map((record, index) => (
-          <button key={record.id} onClick={() => handleOpenEditor(index)} className="w-full bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 text-left active:scale-[0.98] transition-transform">
+          <button key={record.id} onClick={() => handleOpenEditor(index)} className="w-full bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 text-start active:scale-[0.98] transition-transform">
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
@@ -286,7 +286,7 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
                             ? selectedRecord.partsReplaced?.filter((p) => p.name !== part.label)
                             : [...(selectedRecord.partsReplaced || []), { name: part.label, count: 1, cost: part.cost }];
                           handleUpdateRecord({ ...selectedRecord, partsReplaced: newParts });
-                        }} className={`p-3 rounded-lg border text-left transition-colors ${selectedRecord.partsReplaced?.some((p) => p.name === part.label) ? "border-teal-500 bg-teal-50 dark:bg-teal-900/20" : "border-slate-200 dark:border-slate-600"}`}>
+                        }} className={`p-3 rounded-lg border text-start transition-colors ${selectedRecord.partsReplaced?.some((p) => p.name === part.label) ? "border-teal-500 bg-teal-50 dark:bg-teal-900/20" : "border-slate-200 dark:border-slate-600"}`}>
                           <span className="block font-medium text-sm">{part.label}</span>
                           <span className="block text-xs text-slate-500">{part.cost} EGP</span>
                         </button>
@@ -305,7 +305,7 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
                         ? selectedRecord.servicesPerformed?.filter((s) => s.name !== service.label)
                         : [...(selectedRecord.servicesPerformed || []), { name: service.label, count: 1, cost: service.cost }];
                       handleUpdateRecord({ ...selectedRecord, servicesPerformed: newServices });
-                    }} className={`w-full p-3 rounded-lg border text-left transition-colors ${selectedRecord.servicesPerformed?.some((s) => s.name === service.label) ? "border-teal-500 bg-teal-50 dark:bg-teal-900/20" : "border-slate-200 dark:border-slate-600"}`}>
+                    }} className={`w-full p-3 rounded-lg border text-start transition-colors ${selectedRecord.servicesPerformed?.some((s) => s.name === service.label) ? "border-teal-500 bg-teal-50 dark:bg-teal-900/20" : "border-slate-200 dark:border-slate-600"}`}>
                       <div className="flex items-center justify-between">
                         <span className="font-medium text-sm">{service.label}</span>
                         <span className="text-sm text-slate-500">{service.cost} EGP</span>
@@ -350,7 +350,7 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
       <BottomSheet isOpen={isTemplateSelectorOpen} onClose={() => setIsTemplateSelectorOpen(false)} title="اختر القالب">
         <div className="p-4 space-y-3">
           {maintenanceTemplates.map((template) => (
-            <button key={template.id} onClick={() => handleApplyTemplate(template.id)} className="w-full p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl text-left active:scale-[0.98] transition-transform">
+            <button key={template.id} onClick={() => handleApplyTemplate(template.id)} className="w-full p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl text-start active:scale-[0.98] transition-transform">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-teal-100 dark:bg-teal-900/30 rounded-lg"><WrenchIcon className="w-5 h-5 text-teal-600 dark:text-teal-400" /></div>
                 <div><h4 className="font-semibold text-slate-900 dark:text-white">{template.name}</h4><p className="text-sm text-slate-500 dark:text-slate-400">{template.description}</p></div>

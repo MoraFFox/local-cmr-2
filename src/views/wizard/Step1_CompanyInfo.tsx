@@ -181,7 +181,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
                           data-field={`company.machines.${idx}.machineOwnershipType`}
                           value={machine.machineOwnershipType || "leased"}
                           onChange={(e) => actions.handleListItemChange(e, "machines", idx)}
-                          className="w-full pl-3 pr-10 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
+                          className="w-full ps-3 pe-10 py-3 bg-cream dark:bg-espresso-light text-base text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
                         >
                           <option value="leased">إيجار</option>
                           <option value="consumption">مقابل الاستهلاك</option>

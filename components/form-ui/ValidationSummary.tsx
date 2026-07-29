@@ -90,7 +90,7 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
       aria-live="assertive"
     >
       {/* Header */}
-      <div className="flex items-start gap-3 mb-4">
+      <div className="flex ltr:items-start rtl:items-end gap-3 mb-4">
         <div className="p-2 bg-ember-500/20 rounded-lg flex-shrink-0">
           <ExclamationCircleIcon className="w-5 h-5 text-ember-700 dark:text-ember-300" />
         </div>
@@ -134,9 +134,9 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
                 key={error.field}
                 type="button"
                 onClick={() => onJumpToError?.(error.field)}
-                className="w-full text-left p-2 rounded-lg hover:bg-ember-500/10 transition-colors group"
+                className="w-full text-start p-2 rounded-lg hover:bg-ember-500/10 transition-colors group"
               >
-                <div className="flex items-start gap-2">
+                <div className="flex ltr:items-start rtl:items-end gap-2">
                   <ChevronRightIcon className="w-4 h-4 text-ember-500/50 mt-0.5 group-hover:text-ember-700 dark:group-hover:text-ember-300 transition-colors" />
                   <div className="flex-1">
                     <p className="text-sm font-medium text-ember-700 dark:text-ember-300">

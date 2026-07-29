@@ -65,7 +65,7 @@ const TechInput: React.FC<TechInputProps> = ({
   return (
     <div className="w-full">
       {label && (
-        <div className="flex items-center gap-1.5 mb-2 ml-1">
+        <div className="flex items-center gap-1.5 mb-2 ms-1">
           <label htmlFor={inputId} className="block text-xs font-bold uppercase tracking-wider text-latte">
             {label}
           </label>
@@ -87,7 +87,7 @@ const TechInput: React.FC<TechInputProps> = ({
         <input
           id={inputId}
           className={`
-            w-full bg-transparent px-3 py-3.5 text-cream placeholder-latte outline-none
+            w-full bg-transparent px-3 py-3.5 text-base text-cream placeholder-latte outline-none
             disabled:cursor-not-allowed
             ${className}
           `}

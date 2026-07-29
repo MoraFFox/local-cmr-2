@@ -362,7 +362,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
     <div className="min-h-screen bg-paper flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Language Toggle */}
-        <div className="flex justify-end mb-4">
+        <div className="flex ltr:justify-end rtl:justify-start mb-4">
           <button
             onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
             className="text-sm text-latte hover:text-primary transition-colors"
@@ -438,7 +438,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                 {copy[lang].nameLabel}
               </label>
               <div className="relative">
-                <div className={`absolute inset-y-0 ${lang === 'ar' ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
+                <div className={`absolute inset-y-0 ${lang === 'ar' ? 'end-0 pe-3' : 'start-0 ps-3'} flex items-center pointer-events-none`}>
                   <UserIcon className="h-5 w-5 text-latte" />
                 </div>
                 <input
@@ -446,7 +446,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={copy[lang].namePlaceholder}
-                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all`}
+                  className={`block w-full ${lang === 'ar' ? 'pe-10 ps-4' : 'ps-10 pe-4'} py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all`}
                   dir={lang === 'ar' ? 'rtl' : 'ltr'}
                 />
               </div>
@@ -459,7 +459,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                   {copy[lang].emailLabel}
                 </label>
                 <div className="relative">
-                  <div className={`absolute inset-y-0 ${lang === 'ar' ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
+                  <div className={`absolute inset-y-0 ${lang === 'ar' ? 'end-0 pe-3' : 'start-0 ps-3'} flex items-center pointer-events-none`}>
                     <EnvelopeIcon className="h-5 w-5 text-latte" />
                   </div>
                   <input
@@ -467,7 +467,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="email@example.com"
-                    className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all`}
+                    className={`block w-full ${lang === 'ar' ? 'pe-10 ps-4' : 'ps-10 pe-4'} py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all`}
                     dir="ltr"
                   />
                 </div>
@@ -480,7 +480,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                 {copy[lang].passwordLabel}
               </label>
               <div className="relative">
-                <div className={`absolute inset-y-0 ${lang === 'ar' ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
+                <div className={`absolute inset-y-0 ${lang === 'ar' ? 'end-0 pe-3' : 'start-0 ps-3'} flex items-center pointer-events-none`}>
                   <LockClosedIcon className="h-5 w-5 text-latte" />
                 </div>
                 <input
@@ -488,7 +488,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={copy[lang].passwordPlaceholder}
-                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all`}
+                  className={`block w-full ${lang === 'ar' ? 'pe-10 ps-4' : 'ps-10 pe-4'} py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all`}
                   dir="ltr"
                 />
               </div>
@@ -501,7 +501,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                 {copy[lang].confirmPasswordLabel}
               </label>
               <div className="relative">
-                <div className={`absolute inset-y-0 ${lang === 'ar' ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
+                <div className={`absolute inset-y-0 ${lang === 'ar' ? 'end-0 pe-3' : 'start-0 ps-3'} flex items-center pointer-events-none`}>
                   {password && confirmPassword && password === confirmPassword ? (
                     <CheckCircleIcon className="h-5 w-5 text-leaf-500" />
                   ) : (
@@ -513,7 +513,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder={copy[lang].confirmPasswordPlaceholder}
-                  className={`block w-full ${lang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-cream text-primary rounded-lg border ${
+                  className={`block w-full ${lang === 'ar' ? 'pe-10 ps-4' : 'ps-10 pe-4'} py-3 bg-cream text-primary rounded-lg border ${
                     password && confirmPassword && password !== confirmPassword
                       ? 'border-ember-500'
                       : 'border-hairline'

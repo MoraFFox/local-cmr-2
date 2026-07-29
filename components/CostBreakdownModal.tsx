@@ -15,7 +15,7 @@ interface CostBreakdownModalProps {
 
 
 const CostDetail: React.FC<{ label: React.ReactNode; value: string | number; isSubItem?: boolean }> = ({ label, value, isSubItem = false }) => (
-    <div className={`flex justify-between items-center py-1 ${isSubItem ? 'pl-4 text-xs' : 'text-sm'}`}>
+    <div className={`flex justify-between items-center py-1 ${isSubItem ? 'ps-4 text-xs' : 'text-sm'}`}>
         <span className={isSubItem ? "text-latte dark:text-latte" : "text-primary dark:text-latte/70"}>{label}</span>
         <span className="font-medium text-primary dark:text-cream">{typeof value === 'number' ? formatCurrency(value) : value}</span>
     </div>
@@ -64,7 +64,7 @@ const CostBreakdownModal: React.FC<CostBreakdownModalProps> = ({ isOpen, onClose
                 </div>
             )}
         >
-            <div className="overflow-y-auto pr-2 -mr-2 space-y-4 flex-grow px-6 sm:px-8 pb-4">
+            <div className="overflow-y-auto pe-2 -me-2 space-y-4 flex-grow px-6 sm:px-8 pb-4">
                 {aggregatedData.grandTotal > 0 ? (
                     <>
                         {aggregatedData.totalVisitFees > 0 && (

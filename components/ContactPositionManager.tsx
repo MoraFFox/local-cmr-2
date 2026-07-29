@@ -91,7 +91,7 @@ const ContactPositionManager: React.FC<ContactPositionManagerProps> = ({ isOpen,
                 value={newLabel}
                 onChange={(e) => setNewLabel(e.target.value)}
                 placeholder="مثال: المدير المالي"
-                className="w-full px-3 py-2 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                className="w-full px-3 py-2 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:ring-2 focus:ring-primary text-base"
               />
             </div>
             <div>
@@ -103,7 +103,7 @@ const ContactPositionManager: React.FC<ContactPositionManagerProps> = ({ isOpen,
                 value={newValue}
                 onChange={(e) => setNewValue(e.target.value)}
                 placeholder="مثال: finance_director"
-                className="w-full px-3 py-2 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                className="w-full px-3 py-2 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:ring-2 focus:ring-primary text-base"
                 onKeyDown={(e) => e.key === 'Enter' && canAdd && handleAdd()}
               />
             </div>

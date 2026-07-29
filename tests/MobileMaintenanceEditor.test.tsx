@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup } from './testUtils';
 import MobileMaintenanceEditor from '../components/MobileMaintenanceEditor';
 import { ToastProvider } from '../components/ToastContext';
 import { partsList, servicesList, problemCategories } from '../constants';

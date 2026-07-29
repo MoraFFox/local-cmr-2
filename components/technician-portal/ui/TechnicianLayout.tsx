@@ -30,7 +30,7 @@ const TechnicianLayout: React.FC<TechnicianLayoutProps> = ({
         <div className="max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
             <div className="flex items-center gap-3">
                 {onBack ? (
-                    <button onClick={onBack} className="p-2 -ml-2 text-latte hover:text-cream transition-colors rounded-full active:bg-espresso-light" aria-label="رجوع">
+                    <button onClick={onBack} className="p-3 -ms-2 text-latte hover:text-cream transition-colors rounded-full active:bg-espresso-light min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="رجوع">
                         <ArrowLeftIcon className="w-5 h-5" />
                     </button>
                 ) : (

@@ -408,6 +408,10 @@ export const ar = {
       baristaCount_other: 'أفراد صيانة',
       // AI suggestion
       aiOffline: '⚠ الذكاء الاصطناعي غير متاح دون اتصال',
+      baristaEditNote: 'يظهر هذا الباريستا في',
+      baristaEditNoteEnd: 'مواقع. التحديث هنا سيحدّث كل السجلات.',
+      mainOfficeMaintenance: 'صيانة المكتب الرئيسي',
+      mainOfficeMaintenanceHistory: 'سجل صيانة المكتب الرئيسي',
     },
     // Empty states
     empty: {
@@ -634,6 +638,6 @@ export const ar = {
       shortcutTypingGuard: 'يتم تجاهل الاختصارات أثناء الكتابة داخل حقول الإدخال.',
     },
   },
-} as const;
+};
 
 export type Translations = typeof ar;

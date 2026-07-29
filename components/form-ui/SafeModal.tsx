@@ -357,7 +357,7 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
 }) => {
   return (
     <div className="space-y-4 py-4">
-      <div className="flex items-start gap-3">
+      <div className="flex ltr:items-start rtl:items-end gap-3">
         <div className="p-2 bg-amber-500/20 rounded-lg flex-shrink-0">
           <svg className="w-6 h-6 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
             <path
@@ -374,7 +374,7 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
         </div>
       </div>
 
-      <div className="flex gap-3 justify-end pt-2">
+      <div className="flex gap-3 ltr:justify-end rtl:justify-start pt-2">
         <button
           type="button"
           onClick={onCancel}

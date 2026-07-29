@@ -56,14 +56,14 @@ const SelectedItemCard: React.FC<SelectedItemCardProps> = ({
             <button
                 type="button"
                 onClick={onRemove}
-                className="absolute top-2 right-2 p-1.5 text-latte hover:text-ember-300 hover:bg-ember-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                className="absolute top-2 end-2 p-1.5 text-latte hover:text-ember-300 hover:bg-ember-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
             >
                 <TrashIcon className="w-4 h-4" />
             </button>
         )}
 
       {/* Item Name */}
-      <div className={`${viewMode === 'list' ? 'flex-1 min-w-0' : 'w-full pr-8'}`}>
+      <div className={`${viewMode === 'list' ? 'flex-1 min-w-0' : 'w-full pe-8'}`}>
         {isCustom && onNameChange ? (
           <input
             type="text"

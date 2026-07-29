@@ -137,7 +137,7 @@ export const StarRating: React.FC<StarRatingProps> = ({
 
         {/* Numeric badge */}
         {numericDisplay && (
-          <span className={`ml-2 px-2 py-0.5 bg-yellow-500/10 text-yellow-500 text-xs font-bold rounded border border-yellow-500/20 select-none`}>
+          <span className={`ms-2 px-2 py-0.5 bg-yellow-500/10 text-yellow-500 text-xs font-bold rounded border border-yellow-500/20 select-none`}>
             {numericDisplay}
           </span>
         )}
@@ -147,7 +147,7 @@ export const StarRating: React.FC<StarRatingProps> = ({
           <button
             type="button"
             onClick={() => onChange(0)}
-            className={`ml-2 px-2 py-1 text-xs font-medium text-latte hover:text-ember-500 bg-cream-2 hover:bg-ember-500/10 rounded border border-hairline transition-colors min-h-[28px]`}
+            className={`ms-2 px-2 py-1 text-xs font-medium text-latte hover:text-ember-500 bg-cream-2 hover:bg-ember-500/10 rounded border border-hairline transition-colors min-h-[28px]`}
             aria-label="Clear rating"
           >
             N/A
@@ -187,7 +187,7 @@ export const StarRatingDisplay: React.FC<{ value: number; size?: 'xs' | 'sm' | '
           )}
         </span>
       ))}
-      <span className="ml-1 text-xs text-latte font-semibold">{value > 0 ? `${value % 1 === 0 ? value : value.toFixed(1)}` : '—'}</span>
+      <span className="ms-1 text-xs text-latte font-semibold">{value > 0 ? `${value % 1 === 0 ? value : value.toFixed(1)}` : '—'}</span>
     </div>
   );
 };

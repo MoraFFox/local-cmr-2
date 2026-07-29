@@ -1,6 +1,6 @@
 import React from "react";
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent, within } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "./testUtils";
 import FormWizardView from "../src/views/FormWizardView";
 import { initialFormData } from "../utils/sharedConstants";
 

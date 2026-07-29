@@ -148,7 +148,7 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
                     
                     <button
                         onClick={onClose}
-                        className="p-2 text-latte hover:text-primary dark:hover:text-latte/70 rounded-full hover:bg-cream dark:hover:bg-espresso-light/50 transition-colors"
+                        className="p-2 text-latte hover:text-primary dark:hover:text-latte/70 rounded-full hover:bg-cream dark:hover:bg-espresso-light/50 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                     >
                         <XMarkIcon className="w-5 h-5" />
                     </button>
@@ -192,7 +192,7 @@ const HistoryViewer: React.FC<HistoryViewerProps> = ({
                                 history.map((entry) => (
                                     <div
                                         key={entry.id}
-                                        className="flex items-start gap-3 p-4 hover:bg-cream dark:hover:bg-espresso-light/50/50 transition-colors"
+                                        className="flex ltr:items-start rtl:items-end gap-3 p-4 hover:bg-cream dark:hover:bg-espresso-light/50/50 transition-colors"
                                     >
                                         <div className={`flex-shrink-0 p-2 rounded-lg ${getActionColor(entry)}`}>
                                             {getActionIcon(entry)}

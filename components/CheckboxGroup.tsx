@@ -407,7 +407,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                                 <button
                                     type="button"
                                     onClick={() => toggleCategory(category.title)}
-                                    className="w-full flex items-center justify-between p-4 text-left hover:bg-cream-3 transition-colors"
+                                    className="w-full flex items-center justify-between p-4 text-start hover:bg-cream-3 transition-colors"
                                 >
                                     <div className="flex items-center gap-3">
                                         <span className="text-sm font-bold text-text uppercase tracking-wider">
@@ -534,7 +534,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                         const hasAnySuggestions = allSuggestions.length > 0;
 
                         return (
-                            <div key={index} className="flex items-center gap-2 animate-in slide-in-from-left-2">
+                            <div key={index} className="flex items-center gap-2 animate-in ltr:slide-in-from-left-2 rtl:slide-in-from-right-2">
                                 <div className="relative flex-1">
                                     <input
                                         ref={(el) => { if (el) inputRefs.current.set(index, el); else inputRefs.current.delete(index); }}
@@ -577,7 +577,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                                                             type="button"
                                                             onMouseEnter={() => setHighlightedSuggestionIdx(sIdx)}
                                                             onMouseDown={(e) => { e.preventDefault(); handleSuggestionSelect(index, s); }}
-                                                            className={`w-full px-4 py-2.5 text-left text-sm transition-colors flex items-center gap-2 ${
+                                                            className={`w-full px-4 py-2.5 text-start text-sm transition-colors flex items-center gap-2 ${
                                                                 highlightedSuggestionIdx === sIdx
                                                                     ? 'bg-primary/10 text-primary'
                                                                     : 'text-text hover:bg-cream'
@@ -607,7 +607,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                                                                 type="button"
                                                                 onMouseEnter={() => setHighlightedSuggestionIdx(globalIdx)}
                                                                 onMouseDown={(e) => { e.preventDefault(); handleSuggestionSelect(index, s); }}
-                                                                className={`w-full px-4 py-2.5 text-left text-sm transition-colors flex items-center gap-2 ${
+                                                                className={`w-full px-4 py-2.5 text-start text-sm transition-colors flex items-center gap-2 ${
                                                                     highlightedSuggestionIdx === globalIdx
                                                                         ? 'bg-primary/10 text-primary'
                                                                         : 'text-text hover:bg-cream'

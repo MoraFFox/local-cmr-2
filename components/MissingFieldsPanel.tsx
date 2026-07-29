@@ -74,7 +74,7 @@ export const MissingFieldsPanel: React.FC<MissingFieldsPanelProps> = ({
       role="alert"
       aria-live="polite"
     >
-      <div className="flex items-start gap-3 mb-3">
+      <div className="flex ltr:items-start rtl:items-end gap-3 mb-3">
         <div className="p-2 bg-ember-500/20 rounded-lg flex-shrink-0">
           <ExclamationCircleIcon className="w-5 h-5 text-ember-700 dark:text-ember-300" />
         </div>
@@ -87,7 +87,7 @@ export const MissingFieldsPanel: React.FC<MissingFieldsPanelProps> = ({
             <button
               type="button"
               onClick={() => jumpToField(field.key)}
-              className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-ember-500/10 transition-colors text-right"
+              className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-ember-500/10 transition-colors text-end"
             >
               <ChevronLeftIcon className="w-4 h-4 text-ember-500 flex-shrink-0" />
               <span className="text-sm text-ember-800 dark:text-ember-200 flex-1">{field.label}</span>
@@ -105,7 +105,7 @@ export const MissingFieldsPanel: React.FC<MissingFieldsPanelProps> = ({
                   <button
                     type="button"
                     onClick={() => jumpToField(field.key)}
-                    className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-ember-500/10 transition-colors text-right"
+                    className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-ember-500/10 transition-colors text-end"
                   >
                     <ChevronLeftIcon className="w-4 h-4 text-ember-500 flex-shrink-0" />
                     <span className="text-sm text-ember-800 dark:text-ember-200 flex-1">{field.label}</span>

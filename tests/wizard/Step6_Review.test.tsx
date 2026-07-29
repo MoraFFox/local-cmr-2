@@ -4,7 +4,7 @@
  */
 import React from "react";
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "../testUtils";
 import { Step6_Review } from "../../src/views/wizard/Step6_Review";
 import { createFormData } from "./helpers";
 

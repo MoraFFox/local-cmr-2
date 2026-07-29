@@ -156,7 +156,7 @@ const MaintenanceSummary: React.FC<{ record: MaintenanceRecord }> = ({
     <div className="flex flex-wrap items-center gap-3 text-sm">
       <div className="flex items-center gap-1.5 text-primary dark:text-latte">
         <CalendarIcon className="w-4 h-4" />
-        <span>{record.maintenanceDate || "No date"}</span>
+        <span>{record.maintenanceDate || "لا يوجد تاريخ"}</span>
       </div>
 
       {record.baristaName && (
@@ -173,36 +173,36 @@ const MaintenanceSummary: React.FC<{ record: MaintenanceRecord }> = ({
       <div className="flex items-center gap-2">
         {problemCount > 0 && (
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-ember-50 text-ember-700 dark:bg-ember-500/10 dark:text-ember-300">
-            <ExclamationCircleIcon className="w-3 h-3 mr-1" />
-            {problemCount} Problems
+            <ExclamationCircleIcon className="w-3 h-3 me-1" />
+            {problemCount} مشاكل
           </span>
         )}
 
         {serviceCount > 0 && (
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-            <WrenchIcon className="w-3 h-3 mr-1" />
-            {serviceCount} Services
+            <WrenchIcon className="w-3 h-3 me-1" />
+            {serviceCount} خدمات
           </span>
         )}
 
         {partsCount > 0 && (
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
-            <CurrencyDollarIcon className="w-3 h-3 mr-1" />
-            {partsCount} Parts
+            <CurrencyDollarIcon className="w-3 h-3 me-1" />
+            {partsCount} قطع
           </span>
         )}
 
         {hasFollowUps && (
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-            <ClipboardDocumentListIcon className="w-3 h-3 mr-1" />
-            {record.followUpVisits?.length} Follow-ups
+            <ClipboardDocumentListIcon className="w-3 h-3 me-1" />
+            {record.followUpVisits?.length} متابعات
           </span>
         )}
 
         {record.problemSolved && (
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-leaf-50 text-leaf-700 dark:bg-leaf-500/10 dark:text-leaf-300">
-            <CheckCircleIcon className="w-3 h-3 mr-1" />
-            Solved
+            <CheckCircleIcon className="w-3 h-3 me-1" />
+            تم الحل
           </span>
         )}
       </div>
@@ -500,7 +500,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                       <button
                         ref={typoMenu.contentRef as React.RefObject<HTMLButtonElement>}
                         type="button"
-                        className="fixed z-[9999] text-right bg-amber-50 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-700 rounded-md p-2 shadow-lg flex items-center gap-2 cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-800/50 transition-colors animate-content-fade-in"
+                        className="fixed z-[9999] text-end bg-amber-50 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-700 rounded-md p-2 shadow-lg flex items-center gap-2 cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-800/50 transition-colors animate-content-fade-in"
                         style={typoMenu.style}
                         onClick={applySuggestion}
                       >
@@ -673,7 +673,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               </div>
 
               {record.partsWereReplaced && (
-                <div className="pe-6 ps-2 space-y-4">
+                <div className="ltr:pe-6 rtl:ps-6 ltr:ps-2 rtl:pe-2 space-y-4">
                   <CollapsibleSection title="القطع المستبدلة">
                     <PartsSelector
                       options={props.partsList}
@@ -745,7 +745,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                     className="mt-3 flex items-center gap-1.5 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-500 transition-colors transform active:scale-95"
                   >
                     <PlusCircleIcon className="w-5 h-5" />
-                    Add Follow-up Visit
+                    إضافة زيارة متابعة
                   </button>
                 </div>
               )}
@@ -796,7 +796,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
           <CollapsibleSection title="الماكينات التي تمت صيانتها">
             <div className="space-y-3">
               {(record.machines || []).map((machine, index) => (
-                <div key={machine.id} className="flex items-start gap-2">
+                <div key={machine.id} className="flex ltr:items-start rtl:items-end gap-2">
                   <div className="grid grid-cols-4 gap-2 w-full">
                     <TextInput
                       placeholder="اسم/رقم الماكينة"
@@ -848,7 +848,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               {(record.supervisors || []).map((supervisor, index) => (
                 <div
                   key={supervisor.id}
-                  className="p-3 border border-hairline dark:border-hairline rounded-md bg-white dark:bg-espresso flex gap-3 items-start"
+                  className="p-3 border border-hairline dark:border-hairline rounded-md bg-white dark:bg-espresso flex gap-3 ltr:items-start rtl:items-end"
                 >
                   <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <TextInput
@@ -916,7 +916,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
             placeholder={quickAddModal?.type === 'barista' ? 'اسم الفني' : 'اسم باريستا العميل'}
             autoFocus
           />
-          <div className="flex justify-end gap-3">
+          <div className="flex ltr:justify-end rtl:justify-start gap-3">
             <button
               type="button"
               onClick={() => setQuickAddModal(null)}

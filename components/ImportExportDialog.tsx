@@ -177,7 +177,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
             )}
             renderFooter={() => (
                 showImportFooter ? (
-                    <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-6 py-4 pb-safe border-t border-hairline dark:border-hairline bg-cream/30 dark:bg-espresso-light/20 flex-shrink-0">
+                    <div className="flex flex-col-reverse sm:flex-row items-center ltr:justify-end rtl:justify-start gap-3 px-6 py-4 pb-safe border-t border-hairline dark:border-hairline bg-cream/30 dark:bg-espresso-light/20 flex-shrink-0">
                         <Button
                             variant="secondary"
                             onClick={() => {
@@ -370,7 +370,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                                             </div>
                                             
                                             {!item.validation.isValid && (
-                                                <ul className="mt-2 ml-7 text-sm text-ember-300">
+                                                <ul className="mt-2 ms-7 text-sm text-ember-300">
                                                     {item.validation.errors.map((error: string, i: number) => (
                                                         <li key={i}>{error}</li>
                                                     ))}

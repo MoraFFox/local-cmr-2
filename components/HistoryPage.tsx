@@ -262,11 +262,11 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
             <div className="bg-cream rounded-xl shadow-sm border border-hairline p-4 mb-6">
                 <div className="flex flex-col gap-4 w-full">
                     {/* Top Row: Search & Toggle */}
-                    <div className="grid grid-cols-1 sm:grid-cols-[1fr_180px] gap-4 items-end w-full">
+                    <div className="grid grid-cols-1 sm:grid-cols-[1fr_180px] gap-4 ltr:items-end rtl:items-start w-full">
                         <div className="w-full">
                             <label htmlFor="submission-search" className="block text-xs font-bold uppercase text-latte mb-1">بحث نصي</label>
                             <div className="relative rounded-md shadow-sm">
-                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
                                     <MagnifyingGlassIcon className="h-5 w-5 text-latte" aria-hidden="true" />
                                 </div>
                                 <input
@@ -274,7 +274,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                     id="submission-search"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="input-base pl-10"
+                                    className="input-base ps-10"
                                     placeholder="شركة، فرع، باريستا..."
                                 />
                             </div>
@@ -288,14 +288,14 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                             >
                                 <FunnelIcon className="w-5 h-5" />
                                 {showFilters ? 'إخفاء الفلاتر' : 'فلاتر متقدمة'}
-                                {activeFiltersCount > 0 && <span className="bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center ml-1">{activeFiltersCount}</span>}
+                                {activeFiltersCount > 0 && <span className="bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center ms-1">{activeFiltersCount}</span>}
                             </button>
                         </div>
                     </div>
 
                     {/* Filters Section (Collapsible) */}
                     {showFilters && (
-                        <div className="flex flex-wrap items-end gap-4 pt-4 mt-2 border-t border-hairline animate-fade-in w-full">
+                        <div className="flex flex-wrap ltr:items-end rtl:items-start gap-4 pt-4 mt-2 border-t border-hairline animate-fade-in w-full">
                             {/* Date Range */}
                             <div className="w-full sm:w-auto flex-1 sm:flex-none">
                                 <label className="block text-xs font-bold uppercase text-latte mb-1">من تاريخ</label>
@@ -392,13 +392,13 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                             data-testid={`company-card-${sub.id}`}
                             className={`bg-cream rounded-xl p-4 sm:p-5 flex flex-col gap-4 transition-all hover:shadow-md border ${sub.pendingSync ? 'border-amber-500/30 bg-amber-500/10' : 'border-hairline'}`}
                         >
-                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                            <div className="flex flex-col sm:flex-row sm:ltr:items-start rtl:items-end sm:justify-between gap-3">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center flex-wrap gap-2">
                                         <h3 className="font-bold text-lg text-text truncate">{sub.companyName || 'شركة بدون اسم'}</h3>
                                         {sub.pendingSync && (
                                             <span className="inline-flex items-center rounded-md bg-amber-500/15 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-400 border border-amber-500/30">
-                                                <CloudIcon className="w-3.5 h-3.5 mr-1" />
+                                                <CloudIcon className="w-3.5 h-3.5 me-1" />
                                                 بانتظار المزامنة
                                             </span>
                                         )}
@@ -519,7 +519,7 @@ const RowEllipsisMenu: React.FC<{
       <button
         ref={triggerRef as React.RefObject<HTMLButtonElement>}
         onClick={() => onOpenChange(!isOpen)}
-        className="p-2 rounded-lg text-latte hover:text-text hover:bg-surface-elevated transition-colors"
+        className="p-2 min-w-[44px] min-h-[44px] rounded-lg text-latte hover:text-text hover:bg-surface-elevated transition-colors"
         aria-label="المزيد من الإجراءات"
         aria-expanded={isOpen}
       >

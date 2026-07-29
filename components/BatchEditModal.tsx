@@ -243,7 +243,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
         >
             <div className="flex flex-1 overflow-hidden">
                 {/* Left Panel - Record Selection */}
-                <div className="w-1/2 border-r border-hairline flex flex-col">
+                <div className="w-1/2 border-e border-hairline flex flex-col">
                     <div className="flex items-center justify-between p-4 border-b border-hairline bg-cream-2">
                         <button
                             onClick={toggleAll}

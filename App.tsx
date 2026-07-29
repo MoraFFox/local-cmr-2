@@ -30,7 +30,7 @@ import {
 
 import { NAV_ITEMS, ViewKey, pathToView } from "./constants";
 import { CLASSES } from "./utils/sharedConstants";
-import { initialFormData, allPredefinedProblems, VIEW_TITLES, steps, SIDEBAR_TOGGLE_SHORTCUT } from "./utils/sharedConstants";
+import { initialFormData, allPredefinedProblems, steps, SIDEBAR_TOGGLE_SHORTCUT } from "./utils/sharedConstants";
 
 import { ConfirmDialog } from "./components/ui/ConfirmDialog";
 import {
@@ -42,6 +42,7 @@ import { logger } from "./utils/logger";
 import { generateMockWizardData } from "./utils/mockData";
 
 import { useTheme } from "./hooks/useTheme";
+import { useLanguage } from "./utils/LanguageContext";
 import { useNetworkStatus } from "./hooks/useNetworkStatus";
 import { useDrafts } from "./hooks/useDrafts";
 import { useTechnicians } from "./hooks/useTechnicians";
@@ -53,6 +54,18 @@ interface AppProps {
   onAdminLogout?: () => Promise<void> | void;
 }
 
+// ── View to admin.titles key mapping (static, does not depend on props/state) ──
+const VIEW_TITLE_MAP: Partial<Record<ViewKey, keyof import('./utils/arabicTranslations').Translations['admin']['titles']>> = {
+  form: 'form',
+  print: 'print',
+  details: 'details',
+  baristas: 'baristaPerformance',
+  'barista-details': 'baristaPerformance',
+  technicians: 'accessMgmt',
+  history: 'history',
+  'maintenance-edit': 'details',
+};
+
 const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -60,6 +73,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
 
   // ── Hooks ──
   const { theme, toggleTheme } = useTheme();
+  const { language, toggleLanguage, t, dir } = useLanguage();
   const isOnline = useNetworkStatus();
   const { isSyncing, processOfflineQueue } = useOfflineQueue();
   const { techniciansMap, getTechnicianDisplayName } = useTechnicians(isOnline);
@@ -525,18 +539,19 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   // ── Mobile title ──
   const mobileTitle =
     view === "form"
-      ? steps.find((s) => s.id === currentStep)?.name || "Form"
-      : VIEW_TITLES[view] || "سجل عمليات الإرسال";
+      ? steps.find((s) => s.id === currentStep)?.name || t.admin.titles.form
+      : t.admin.titles[VIEW_TITLE_MAP[view]] || t.admin.titles.history;
 
   // ── Dynamic page title (accessibility: audit issues #27-45) ──
   React.useEffect(() => {
     if (view === "form") {
       const stepName = steps.find((s) => s.id === currentStep)?.name;
-      document.title = stepName ? `${stepName} — ميدوز` : "نموذج الإرسال — ميدوز";
+      document.title = stepName ? `${stepName} — ${t.admin.appName}` : `${t.admin.titles.form} — ${t.admin.appName}`;
     } else {
-      document.title = VIEW_TITLES[view] || "ميدوز — نظام إدارة الصيانة";
+      const titleKey = VIEW_TITLE_MAP[view];
+      document.title = titleKey ? `${t.admin.titles[titleKey]} — ${t.admin.appName}` : `${t.admin.appName} — ${t.admin.appTagline}`;
     }
-  }, [view, currentStep]);
+  }, [view, currentStep, language, t]);
 
   // ── Render Current View ──
   const renderCurrentView = () => {
@@ -640,6 +655,8 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
     handleLoadDraft,
     handleDeleteDraft,
     toggleTheme,
+    toggleLanguage,
+    language,
     onAdminLogout,
     handleAddNew,
     setIsSidebarExpanded,
@@ -652,13 +669,13 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
 
   return (
     <KeyboardShortcutsHelpProvider>
-    <div className="h-[100dvh] overflow-hidden flex bg-paper ">
+    <div className="h-[100dvh] overflow-hidden flex bg-paper" dir={dir}>
       {/* Screen-reader announcer for dynamic content (accessibility #42) */}
       <div id="aria-announcer" aria-live="polite" aria-atomic="true" className="sr-only"></div>
       {/* Desktop Sidebar */}
       <aside
         id="desktop-sidebar"
-        className={`chrome border-l border-brass/20 flex-col fixed h-full transition-all duration-300 ease-in-out hidden lg:flex z-50 ${
+        className={`chrome border-e border-brass/20 flex-col fixed start-0 top-0 h-full transition-all duration-300 ease-in-out hidden lg:flex z-50 ${
           isSidebarExpanded ? "w-56 xl:w-64" : "w-20"
         }`}
       >
@@ -684,8 +701,8 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
           aria-hidden={!isMobileMenuOpen}
           aria-modal={isMobileMenuOpen}
           onClick={(e) => e.stopPropagation()}
-          className={`absolute top-0 right-0 h-full w-64 chrome border-l border-brass/20 shadow-xl transition-transform duration-300 ease-in-out flex flex-col ${
-            isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+          className={`absolute top-0 start-0 h-full w-64 chrome border-e border-brass/20 shadow-xl transition-transform duration-300 ease-in-out flex flex-col ${
+            isMobileMenuOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"
           }`}
         >
           <div className="flex items-center justify-between p-4 border-b border-brass/20">
@@ -707,20 +724,20 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
       <div
         inert={isMobileMenuOpen ? true : undefined}
         className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${
-          isSidebarExpanded ? "lg:mr-56 xl:mr-64" : "lg:mr-20"
+          isSidebarExpanded ? "lg:ms-56 xl:ms-64" : "lg:ms-20"
         }`}
       >
         {/* Mobile Header */}
         <OfflineBanner />
         <header role="banner" className="sticky top-0 z-30 flex items-center justify-between lg:hidden h-16 chrome border-b border-brass/20 px-4 shrink-0">
-          <div className="w-1/4 flex justify-start items-center gap-1">
+          <div className="w-1/4 flex ltr:justify-start rtl:justify-end items-center gap-1">
             <button
               ref={mobileMenuButtonRef}
               onClick={() => setIsMobileMenuOpen(true)}
               aria-label="القائمة"
               aria-expanded={isMobileMenuOpen}
               aria-controls="mobile-sidebar"
-              className="p-2 -mr-2 rounded-md text-on-chrome/70 hover:text-on-chrome hover:bg-espresso-light transition-colors shrink-0"
+              className="p-2 -me-2 rounded-md text-on-chrome/70 hover:text-on-chrome hover:bg-espresso-light transition-colors shrink-0"
             >
               <Bars3Icon className="h-6 w-6" />
             </button>
@@ -740,6 +757,14 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
                 <SunIcon className="h-5 w-5" />
               )}
             </button>
+            <button
+              onClick={toggleLanguage}
+              className="p-2 rounded-md text-on-chrome/70 hover:text-on-chrome hover:bg-espresso-light transition-colors shrink-0 text-xs font-bold"
+              aria-label={language === 'ar' ? 'English' : 'العربية'}
+              title={language === 'ar' ? 'English' : 'العربية'}
+            >
+              <span className="text-xs font-bold tracking-wider">{language === 'ar' ? 'EN' : 'AR'}</span>
+            </button>
             <KeyboardShortcutsHelpButton className="p-2 rounded-md text-on-chrome/70 hover:text-on-chrome hover:bg-espresso-light transition-colors shrink-0" />
           </div>
 
@@ -753,7 +778,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
             <img
               src="/logo.svg"
               alt="شعار ميدوز"
-              className="h-9 w-auto object-contain shrink-0 -ml-2"
+              className="h-9 w-auto object-contain shrink-0 -ms-2"
             />
           </div>
         </header>

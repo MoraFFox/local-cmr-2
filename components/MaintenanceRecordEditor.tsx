@@ -108,8 +108,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
     maintenanceDate: { required: true },
     baristaName: { required: true, minLength: 2 },
     supervisors: { custom: (value) => {
-      if (!Array.isArray(value) || value.length === 0) return 'At least one supervisor is required';
-      return value.some((s: any) => !s.name?.trim()) ? 'All supervisor names are required' : null;
+      if (!Array.isArray(value) || value.length === 0) return 'مطلوب مشرف واحد على الأقل';
+      return value.some((s: any) => !s.name?.trim()) ? 'جميع أسماء المشرفين مطلوبة' : null;
     }},
   }, { mode: 'onBlur', showSummary: true, validateOnMount: false });
 
@@ -243,8 +243,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 <label className="flex items-center gap-2 text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.maintenanceDate}<RequiredFieldBadge /></label>
                 <DatePresetButtons value={editedRecord.maintenanceDate} onChange={(date) => { setEditedRecord(prev => ({ ...prev, maintenanceDate: date })); if (errors.maintenanceDate) setErrors(prev => ({ ...prev, maintenanceDate: '' })); if (validation.errors.maintenanceDate) validation.clearError('maintenanceDate'); }} variant="cream" className="mb-2" />
                 <div className="relative">
-                  <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
-                  <input type="date" name="maintenanceDate" value={editedRecord.maintenanceDate} onChange={handleFieldChange} className={`w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${errors.maintenanceDate ? 'border-ember-500 focus:ring-ember-500' : 'border-hairline dark:border-hairline'}`} />
+                  <CalendarIcon className="absolute start-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
+                  <input type="date" name="maintenanceDate" value={editedRecord.maintenanceDate} onChange={handleFieldChange} className={`w-full ps-10 pe-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${errors.maintenanceDate ? 'border-ember-500 focus:ring-ember-500' : 'border-hairline dark:border-hairline'}`} />
                 </div>
                 {errors.maintenanceDate && <p className="mt-1 text-sm text-ember-700">{errors.maintenanceDate}</p>}
               </div>
@@ -263,14 +263,14 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
               <div className="md:col-span-2">
                 <label className="flex items-center gap-2 text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.myTechnician}<RequiredFieldBadge /></label>
                 <div className="relative">
-                  <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
+                  <UserIcon className="absolute start-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
                   {baristas.length > 0 ? (
-                    <select name="baristaName" value={editedRecord.baristaName} onChange={handleFieldChange} className={`w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${errors.baristaName ? 'border-ember-500' : 'border-hairline dark:border-hairline'}`}>
+                    <select name="baristaName" value={editedRecord.baristaName} onChange={handleFieldChange} className={`w-full ps-10 pe-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${errors.baristaName ? 'border-ember-500' : 'border-hairline dark:border-hairline'}`}>
                       <option value="">{t.ui.maintenanceEditor.selectTechnician}</option>
                       {baristas.map(b => <option key={b.id} value={b.name}>{b.name}</option>)}
                     </select>
                   ) : (
-                    <input type="text" name="baristaName" value={editedRecord.baristaName} onChange={handleFieldChange} placeholder="أدخل اسم فرد صيانة (Midoe's)" className={`w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${errors.baristaName ? 'border-ember-500' : 'border-hairline dark:border-hairline'}`} />
+                    <input type="text" name="baristaName" value={editedRecord.baristaName} onChange={handleFieldChange} placeholder="أدخل اسم فرد صيانة (Midoe's)" className={`w-full ps-10 pe-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${errors.baristaName ? 'border-ember-500' : 'border-hairline dark:border-hairline'}`} />
                   )}
                 </div>
                 {errors.baristaName && <p className="mt-1 text-sm text-ember-700">{errors.baristaName}</p>}
@@ -278,14 +278,14 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.clientBarista}</label>
                 <div className="relative">
-                  <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
+                  <UserIcon className="absolute start-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
                   {clientBaristas && clientBaristas.length > 0 ? (
-                    <select name="clientBaristaName" value={editedRecord.clientBaristaName || ''} onChange={handleFieldChange} className="w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline">
+                    <select name="clientBaristaName" value={editedRecord.clientBaristaName || ''} onChange={handleFieldChange} className="w-full ps-10 pe-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline">
                       <option value="">{t.ui.maintenanceEditor.selectClientBarista}</option>
                       {clientBaristas.map(b => <option key={b.id} value={b.name}>{b.name}</option>)}
                     </select>
                   ) : (
-                    <input type="text" name="clientBaristaName" value={editedRecord.clientBaristaName || ''} onChange={handleFieldChange} placeholder="أدخل اسم باريستا العميل" className="w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline" />
+                    <input type="text" name="clientBaristaName" value={editedRecord.clientBaristaName || ''} onChange={handleFieldChange} placeholder="أدخل اسم باريستا العميل" className="w-full ps-10 pe-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline" />
                   )}
                 </div>
               </div>
@@ -305,8 +305,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                   </button>
                 </label>
                 <div className="relative">
-                  <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
-                  <select name="visitZone" value={editedRecord.visitZone || ''} onChange={handleFieldChange} className="w-full pl-10 pr-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline">
+                  <MapPinIcon className="absolute start-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
+                  <select name="visitZone" value={editedRecord.visitZone || ''} onChange={handleFieldChange} className="w-full ps-10 pe-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline">
                     <option value="">{t.ui.maintenanceEditor.selectZone}</option>
                     {zones.map((z) => (
                       <option key={z.key} value={z.key}>{z.label} ({z.fee.toLocaleString()} جم)</option>
@@ -411,12 +411,12 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                   <button type="button" onClick={() => handleRadioChange('paidBy', 'company')} className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 ${editedRecord.paidBy === 'company' ? 'border-primary bg-cream-2 dark:bg-primary/10 text-primary-900 dark:text-primary-300' : 'border-hairline dark:border-hairline bg-cream dark:bg-espresso text-primary dark:text-latte/70'}`}>
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${editedRecord.paidBy === 'company' ? 'bg-primary text-white' : 'bg-cream-2 dark:bg-espresso-light text-primary dark:text-latte'}`}>M</div>
                     <div className="text-center"><div className="font-semibold">{t.ui.maintenanceEditor.midos}</div><div className="text-xs text-latte">{t.ui.maintenanceEditor.companyPays}</div></div>
-                    {editedRecord.paidBy === 'company' && <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center"><svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg></div>}
+                    {editedRecord.paidBy === 'company' && <div className="absolute top-2 end-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center"><svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg></div>}
                   </button>
                   <button type="button" onClick={() => handleRadioChange('paidBy', 'client')} className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 ${editedRecord.paidBy === 'client' ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-900 dark:text-amber-100' : 'border-hairline dark:border-hairline bg-cream dark:bg-espresso text-primary dark:text-latte/70'}`}>
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${editedRecord.paidBy === 'client' ? 'bg-amber-500 text-white' : 'bg-cream-2 dark:bg-espresso-light text-primary dark:text-latte'}`}>C</div>
                     <div className="text-center"><div className="font-semibold">{t.ui.maintenanceEditor.client}</div><div className="text-xs text-latte">{t.ui.maintenanceEditor.customerPays}</div></div>
-                    {editedRecord.paidBy === 'client' && <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center"><svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg></div>}
+                    {editedRecord.paidBy === 'client' && <div className="absolute top-2 end-2 w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center"><svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg></div>}
                   </button>
                 </div>
               </div>
@@ -521,8 +521,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 {editedRecord.photos?.filter(p => p.type === 'before').map((photo, i) => (
                   <div key={`before-${i}`} className="relative group aspect-square">
                     <img src={photo.url} alt={`${t.ui.maintenanceEditor.before} ${i + 1}`} className="w-full h-full object-cover rounded-lg border border-hairline dark:border-hairline" loading="lazy" />
-                    <button onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: 'before' })} className="absolute top-2 right-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" title="إزالة الصورة" aria-label="إزالة الصورة"><XMarkIcon className="w-4 h-4" /></button>
-                    <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/50 text-white text-xs rounded">{t.ui.maintenanceEditor.before}</div>
+                    <button onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: 'before' })} className="absolute top-2 end-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" title="إزالة الصورة" aria-label="إزالة الصورة"><XMarkIcon className="w-4 h-4" /></button>
+                    <div className="absolute bottom-2 start-2 px-2 py-1 bg-black/50 text-white text-xs rounded">{t.ui.maintenanceEditor.before}</div>
                   </div>
                 ))}
                 {(!editedRecord.photos || editedRecord.photos.filter(p => p.type === 'before').length === 0) && (
@@ -543,8 +543,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 {editedRecord.photos?.filter(p => p.type === 'after').map((photo, i) => (
                   <div key={`after-${i}`} className="relative group aspect-square">
                     <img src={photo.url} alt={`${t.ui.maintenanceEditor.after} ${i + 1}`} className="w-full h-full object-cover rounded-lg border border-hairline dark:border-hairline" loading="lazy" />
-                    <button onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: 'after' })} className="absolute top-2 right-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" title="إزالة الصورة" aria-label="إزالة الصورة"><XMarkIcon className="w-4 h-4" /></button>
-                    <div className="absolute bottom-2 left-2 px-2 py-1 bg-leaf-500/80 text-white text-xs rounded">{t.ui.maintenanceEditor.after}</div>
+                    <button onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: 'after' })} className="absolute top-2 end-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" title="إزالة الصورة" aria-label="إزالة الصورة"><XMarkIcon className="w-4 h-4" /></button>
+                    <div className="absolute bottom-2 start-2 px-2 py-1 bg-leaf-500/80 text-white text-xs rounded">{t.ui.maintenanceEditor.after}</div>
                   </div>
                 ))}
                 {(!editedRecord.photos || editedRecord.photos.filter(p => p.type === 'after').length === 0) && (
@@ -560,8 +560,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                   {editedRecord.photos.filter(p => p.type === 'legacy').map((photo, i) => (
                     <div key={`legacy-${i}`} className="relative group aspect-square">
                       <img src={photo.url} alt={`${t.ui.maintenanceEditor.legacyPhotos} ${i + 1}`} className="w-full h-full object-cover rounded-lg border border-hairline dark:border-hairline" loading="lazy" />
-                      <button onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: 'legacy' })} className="absolute top-2 right-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" title="إزالة الصورة" aria-label="إزالة الصورة"><XMarkIcon className="w-4 h-4" /></button>
-                      <div className="absolute bottom-2 left-2 px-2 py-1 bg-espresso/80 text-white text-xs rounded">{t.ui.maintenanceEditor.legacy}</div>
+                      <button onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: 'legacy' })} className="absolute top-2 end-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" title="إزالة الصورة" aria-label="إزالة الصورة"><XMarkIcon className="w-4 h-4" /></button>
+                      <div className="absolute bottom-2 start-2 px-2 py-1 bg-espresso/80 text-white text-xs rounded">{t.ui.maintenanceEditor.legacy}</div>
                     </div>
                   ))}
                 </div>
@@ -576,7 +576,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
       )}
 
       {/* Action Bar */}
-      <div className={`fixed bottom-0 left-0 right-0 ${isSidebarExpanded ? 'lg:right-64' : 'lg:right-20'} bg-cream/90 dark:bg-espresso/90 backdrop-blur-lg border-t border-hairline dark:border-hairline shadow-lg z-50 transition-all duration-300`}>
+      <div className={`fixed bottom-0 start-0 end-0 ${isSidebarExpanded ? 'lg:end-64' : 'lg:end-20'} bg-cream/90 dark:bg-espresso/90 backdrop-blur-lg border-t border-hairline dark:border-hairline shadow-lg z-50 transition-all duration-300`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-3">
             <button onClick={onCancel} className="flex items-center justify-center gap-2 min-h-[44px] px-4 sm:px-5 py-2.5 text-primary dark:text-latte font-medium hover:text-primary dark:hover:text-white hover:bg-cream dark:hover:bg-espresso-light/50 rounded-lg transition-colors">

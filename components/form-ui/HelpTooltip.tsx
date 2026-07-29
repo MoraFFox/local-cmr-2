@@ -56,10 +56,10 @@ export const HelpTooltip: React.FC<HelpTooltipProps> = ({
   }, [isVisible]);
 
   const placementClasses = {
-    top: 'bottom-full start-1/2 -translate-x-1/2 rtl:translate-x-1/2 mb-2',
-    bottom: 'top-full start-1/2 -translate-x-1/2 rtl:translate-x-1/2 mt-2',
-    left: 'end-full top-1/2 -translate-y-1/2 me-2',
-    right: 'start-full top-1/2 -translate-y-1/2 ms-2'
+    top: 'bottom-full start-1/2 mb-2 ltr:-translate-x-1/2 rtl:translate-x-1/2',
+    bottom: 'top-full start-1/2 mt-2 ltr:-translate-x-1/2 rtl:translate-x-1/2',
+    left: 'end-full top-1/2 -translate-y-1/2 ltr:me-2 rtl:ms-2',
+    right: 'start-full top-1/2 -translate-y-1/2 ltr:ms-2 rtl:me-2'
   };
 
   return (
@@ -89,7 +89,7 @@ export const HelpTooltip: React.FC<HelpTooltipProps> = ({
         <span
           id={tooltipId}
           dir="rtl"
-          className={`absolute z-50 p-2.5 text-xs text-right text-cream bg-espresso border border-hairline rounded-lg shadow-lg pointer-events-none max-w-[16rem] sm:max-w-xs w-max break-words leading-relaxed ${placementClasses[placement]}`}
+          className={`absolute z-50 p-2.5 text-xs text-end text-cream bg-espresso border border-hairline rounded-lg shadow-lg pointer-events-none max-w-[16rem] sm:max-w-xs w-max break-words leading-relaxed ${placementClasses[placement]}`}
           role="tooltip"
         >
           {text}

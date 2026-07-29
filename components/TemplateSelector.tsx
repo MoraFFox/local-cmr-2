@@ -122,21 +122,21 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                                 <button
                                     key={template.id}
                                     onClick={() => handleSelectTemplate(template.id)}
-                                    className={`relative p-4 rounded-xl border-2 text-left transition-all ${
+                                    className={`relative p-4 rounded-xl border-2 text-start transition-all ${
                                         isSelected
                                             ? 'border-primary bg-primary/10'
                                             : 'border-hairline hover:border-primary/50 hover:bg-cream-2'
                                     }`}
                                 >
                                     {isSelected && (
-                                        <div className="absolute top-3 right-3">
+                                        <div className="absolute top-3 end-3">
                                             <div className="bg-primary text-white rounded-full p-1">
                                                 <CheckIcon className="w-3 h-3" />
                                             </div>
                                         </div>
                                     )}
                                     
-                                    <div className="flex items-start gap-3">
+                                    <div className="flex ltr:items-start rtl:items-end gap-3">
                                         <div className={`p-2 rounded-lg ${
                                             isSelected
                                                 ? 'bg-primary/20 text-primary'
@@ -186,7 +186,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-hairline bg-cream-2">
+                <div className="flex items-center ltr:justify-end rtl:justify-start gap-3 px-6 py-4 border-t border-hairline bg-cream-2">
                     <button
                         onClick={handleClose}
                         className="px-4 py-2 text-primary font-medium rounded-lg hover:bg-cream-3 transition-colors"

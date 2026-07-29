@@ -41,7 +41,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       size="sm"
       ariaLabel={title}
       renderFooter={(closeModal) => (
-        <div className="flex justify-end gap-3 p-4 bg-cream-2/30">
+        <div className="flex ltr:justify-end rtl:justify-start gap-3 p-4 bg-cream-2/30">
           <Button variant="secondary" onClick={closeModal}>
             {cancelLabel}
           </Button>
@@ -55,7 +55,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </div>
       )}
     >
-      <div className="flex items-start gap-4 p-1">
+      <div className="flex ltr:items-start rtl:items-end gap-4 p-1">
         <div className="p-2 bg-lava-500/10 rounded-lg flex-shrink-0">
           <ExclamationTriangleIcon className="w-6 h-6 text-lava-500" />
         </div>

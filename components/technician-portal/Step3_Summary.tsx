@@ -43,9 +43,9 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
   onUpdateSupervisorPhone,
 }) => {
   const renderDataRow = (label: string, value: string | React.ReactNode) => (
-    <div className="flex justify-between items-start py-2 border-b border-dashed border-hairline last:border-0">
+    <div className="flex justify-between ltr:items-start rtl:items-end py-2 border-b border-dashed border-hairline last:border-0">
       <span className="text-sm text-latte">{label}</span>
-      <span className="text-sm font-medium text-primary text-right max-w-[60%] break-words">
+      <span className="text-sm font-medium text-primary text-end max-w-[60%] break-words">
         {value}
       </span>
     </div>
@@ -60,7 +60,7 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
         icon={<BuildingOfficeIcon />} 
         variant="primary"
         action={
-            <button onClick={() => onEditStep(1)} className="p-1 hover:bg-cream-2 rounded text-latte hover:text-primary transition-colors">
+            <button onClick={() => onEditStep(1)} className="p-2 hover:bg-cream-2 rounded text-latte hover:text-primary transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="تعديل">
                 <PencilIcon className="w-4 h-4" />
             </button>
         }
@@ -79,7 +79,7 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
         icon={<WrenchScrewdriverIcon />} 
         variant="active"
         action={
-            <button onClick={() => onEditStep(2)} className="p-1 hover:bg-cream-2 rounded text-latte hover:text-leaf-600 transition-colors" aria-label="تعديل">
+            <button onClick={() => onEditStep(2)} className="p-2 hover:bg-cream-2 rounded text-latte hover:text-leaf-600 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="تعديل">
                 <PencilIcon className="w-4 h-4" />
             </button>
         }
@@ -166,13 +166,13 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
                      <div className="flex items-center gap-2">
                          <button
                             onClick={() => onUpdateProblemSolved(true)}
-                            className={`px-3 py-1 rounded text-xs font-bold transition-all ${step2Data.problemSolved ? 'bg-leaf-500 text-white' : 'text-latte bg-cream-3'}`}
+                            className={`px-4 py-2 min-h-[44px] rounded text-sm font-bold transition-all ${step2Data.problemSolved ? 'bg-leaf-500 text-white' : 'text-latte bg-cream-3'}`}
                          >
                             {ar.common.yes}
                          </button>
                          <button
                             onClick={() => onUpdateProblemSolved(false)}
-                            className={`px-3 py-1 rounded text-xs font-bold transition-all ${!step2Data.problemSolved ? 'bg-ember-500 text-white' : 'text-latte bg-cream-3'}`}
+                            className={`px-4 py-2 min-h-[44px] rounded text-sm font-bold transition-all ${!step2Data.problemSolved ? 'bg-ember-500 text-white' : 'text-latte bg-cream-3'}`}
                          >
                             {ar.common.no}
                          </button>

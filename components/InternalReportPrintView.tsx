@@ -57,7 +57,7 @@ const FinancialCard: React.FC<FinancialCardProps> = ({ label, value, accent = "c
 };
 
 const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <h3 className='text-sm font-bold uppercase tracking-wider text-text border-l-4 border-primary pl-3 mb-3 mt-6'>
+  <h3 className='text-sm font-bold uppercase tracking-wider text-text border-s-4 border-primary ps-3 mb-3 mt-6'>
     {children}
   </h3>
 );
@@ -207,7 +207,7 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
   return (
     <div className='internal-report-page font-sans text-text bg-white w-full max-w-[210mm] mx-auto p-8'>
       {/* Header */}
-      <div className='flex justify-between items-start mb-6 pb-6 border-b-4 border-primary'>
+      <div className='flex justify-between ltr:items-start rtl:items-end mb-6 pb-6 border-b-4 border-primary'>
         <div className='flex items-center gap-4'>
           <img src='/logo.svg' alt='Logo' className='h-16 w-auto object-contain' />
           <div>
@@ -215,7 +215,7 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
             <h2 className='text-lg font-medium text-latte mt-1'>{branch.branchName || "تقرير الفرع"}</h2>
           </div>
         </div>
-        <div className='text-right'>
+        <div className='text-end'>
           <div className='inline-block bg-primary text-white text-xs font-bold uppercase px-3 py-1.5 rounded mb-2'>
             تقرير داخلي
           </div>
@@ -260,19 +260,19 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
           <table className='w-full text-xs border border-hairline mb-4'>
             <thead className='bg-primary text-white'>
               <tr>
-                <th className='text-right px-3 py-2'>الصنف</th>
-                <th className='text-right px-3 py-2 w-24'>الكمية</th>
-                <th className='text-right px-3 py-2 w-28'>سعر الوحدة</th>
-                <th className='text-right px-3 py-2 w-28'>الإجمالي</th>
+                <th className='text-end px-3 py-2'>الصنف</th>
+                <th className='text-end px-3 py-2 w-24'>الكمية</th>
+                <th className='text-end px-3 py-2 w-28'>سعر الوحدة</th>
+                <th className='text-end px-3 py-2 w-28'>الإجمالي</th>
               </tr>
             </thead>
             <tbody>
               {parts.map((item) => (
                 <tr key={item.name} className='border-b border-hairline'>
                   <td className='px-3 py-2 text-text font-medium'>{item.name}</td>
-                  <td className='px-3 py-2 text-right'>{item.count}</td>
-                  <td className='px-3 py-2 text-right'>{formatCurrency(item.unitCost)}</td>
-                  <td className='px-3 py-2 text-right font-bold'>{formatCurrency(item.totalCost)}</td>
+                  <td className='px-3 py-2 text-end'>{item.count}</td>
+                  <td className='px-3 py-2 text-end'>{formatCurrency(item.unitCost)}</td>
+                  <td className='px-3 py-2 text-end font-bold'>{formatCurrency(item.totalCost)}</td>
                 </tr>
               ))}
             </tbody>
@@ -286,19 +286,19 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
           <table className='w-full text-xs border border-hairline mb-4'>
             <thead className='bg-primary text-white'>
               <tr>
-                <th className='text-right px-3 py-2'>الخدمة</th>
-                <th className='text-right px-3 py-2 w-24'>العدد</th>
-                <th className='text-right px-3 py-2 w-28'>سعر الوحدة</th>
-                <th className='text-right px-3 py-2 w-28'>الإجمالي</th>
+                <th className='text-end px-3 py-2'>الخدمة</th>
+                <th className='text-end px-3 py-2 w-24'>العدد</th>
+                <th className='text-end px-3 py-2 w-28'>سعر الوحدة</th>
+                <th className='text-end px-3 py-2 w-28'>الإجمالي</th>
               </tr>
             </thead>
             <tbody>
               {services.map((item) => (
                 <tr key={item.name} className='border-b border-hairline'>
                   <td className='px-3 py-2 text-text font-medium'>{item.name}</td>
-                  <td className='px-3 py-2 text-right'>{item.count}</td>
-                  <td className='px-3 py-2 text-right'>{formatCurrency(item.unitCost)}</td>
-                  <td className='px-3 py-2 text-right font-bold'>{formatCurrency(item.totalCost)}</td>
+                  <td className='px-3 py-2 text-end'>{item.count}</td>
+                  <td className='px-3 py-2 text-end'>{formatCurrency(item.unitCost)}</td>
+                  <td className='px-3 py-2 text-end font-bold'>{formatCurrency(item.totalCost)}</td>
                 </tr>
               ))}
             </tbody>
@@ -323,21 +323,21 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
       <table className='w-full text-xs border border-hairline mb-6'>
         <thead className='bg-cream text-latte uppercase'>
           <tr>
-            <th className='text-right px-3 py-2'>الفني</th>
-            <th className='text-right px-3 py-2'>الزيارات</th>
-            <th className='text-right px-3 py-2'>التقييم</th>
-            <th className='text-right px-3 py-2'>قطع الغيار</th>
-            <th className='text-right px-3 py-2'>الحل</th>
+            <th className='text-end px-3 py-2'>الفني</th>
+            <th className='text-end px-3 py-2'>الزيارات</th>
+            <th className='text-end px-3 py-2'>التقييم</th>
+            <th className='text-end px-3 py-2'>قطع الغيار</th>
+            <th className='text-end px-3 py-2'>الحل</th>
           </tr>
         </thead>
         <tbody>
           {techs.map((t) => (
             <tr key={t.name} className='border-b border-hairline'>
               <td className='px-3 py-2 text-text font-medium'>{t.name}</td>
-              <td className='px-3 py-2 text-right'>{t.visits}</td>
-              <td className='px-3 py-2 text-right'>{t.avgRating > 0 ? `${t.avgRating}/5` : "-"}</td>
-              <td className='px-3 py-2 text-right'>{t.partsUsed}</td>
-              <td className='px-3 py-2 text-right'>{t.problemsResolved}/{t.totalProblems}</td>
+              <td className='px-3 py-2 text-end'>{t.visits}</td>
+              <td className='px-3 py-2 text-end'>{t.avgRating > 0 ? `${t.avgRating}/5` : "-"}</td>
+              <td className='px-3 py-2 text-end'>{t.partsUsed}</td>
+              <td className='px-3 py-2 text-end'>{t.problemsResolved}/{t.totalProblems}</td>
             </tr>
           ))}
         </tbody>
@@ -399,7 +399,7 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data }) =
   return (
     <div className='internal-report-page font-sans text-text bg-white w-full max-w-[210mm] mx-auto p-8'>
       {/* Header */}
-      <div className='flex justify-between items-start mb-6 pb-6 border-b-4 border-primary'>
+      <div className='flex justify-between ltr:items-start rtl:items-end mb-6 pb-6 border-b-4 border-primary'>
         <div className='flex items-center gap-4'>
           <img src='/logo.svg' alt='Logo' className='h-20 w-auto object-contain' />
           <div>
@@ -407,7 +407,7 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data }) =
             <p className='text-sm text-latte mt-1'>تقرير الصيانة الداخلي الشامل</p>
           </div>
         </div>
-        <div className='text-right'>
+        <div className='text-end'>
           <div className='inline-block bg-primary text-white text-xs font-bold uppercase px-3 py-1.5 rounded mb-2'>
             تقرير داخلي
           </div>
@@ -451,19 +451,19 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data }) =
           <table className='w-full text-xs border border-hairline mb-4'>
             <thead className='bg-primary text-white'>
               <tr>
-                <th className='text-right px-3 py-2'>الصنف</th>
-                <th className='text-right px-3 py-2 w-24'>الكمية</th>
-                <th className='text-right px-3 py-2 w-28'>سعر الوحدة</th>
-                <th className='text-right px-3 py-2 w-28'>الإجمالي</th>
+                <th className='text-end px-3 py-2'>الصنف</th>
+                <th className='text-end px-3 py-2 w-24'>الكمية</th>
+                <th className='text-end px-3 py-2 w-28'>سعر الوحدة</th>
+                <th className='text-end px-3 py-2 w-28'>الإجمالي</th>
               </tr>
             </thead>
             <tbody>
               {companyParts.map((item) => (
                 <tr key={item.name} className='border-b border-hairline'>
                   <td className='px-3 py-2 text-text font-medium'>{item.name}</td>
-                  <td className='px-3 py-2 text-right'>{item.count}</td>
-                  <td className='px-3 py-2 text-right'>{formatCurrency(item.unitCost)}</td>
-                  <td className='px-3 py-2 text-right font-bold'>{formatCurrency(item.totalCost)}</td>
+                  <td className='px-3 py-2 text-end'>{item.count}</td>
+                  <td className='px-3 py-2 text-end'>{formatCurrency(item.unitCost)}</td>
+                  <td className='px-3 py-2 text-end font-bold'>{formatCurrency(item.totalCost)}</td>
                 </tr>
               ))}
             </tbody>
@@ -477,19 +477,19 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data }) =
           <table className='w-full text-xs border border-hairline mb-4'>
             <thead className='bg-primary text-white'>
               <tr>
-                <th className='text-right px-3 py-2'>الخدمة</th>
-                <th className='text-right px-3 py-2 w-24'>العدد</th>
-                <th className='text-right px-3 py-2 w-28'>سعر الوحدة</th>
-                <th className='text-right px-3 py-2 w-28'>الإجمالي</th>
+                <th className='text-end px-3 py-2'>الخدمة</th>
+                <th className='text-end px-3 py-2 w-24'>العدد</th>
+                <th className='text-end px-3 py-2 w-28'>سعر الوحدة</th>
+                <th className='text-end px-3 py-2 w-28'>الإجمالي</th>
               </tr>
             </thead>
             <tbody>
               {companyServices.map((item) => (
                 <tr key={item.name} className='border-b border-hairline'>
                   <td className='px-3 py-2 text-text font-medium'>{item.name}</td>
-                  <td className='px-3 py-2 text-right'>{item.count}</td>
-                  <td className='px-3 py-2 text-right'>{formatCurrency(item.unitCost)}</td>
-                  <td className='px-3 py-2 text-right font-bold'>{formatCurrency(item.totalCost)}</td>
+                  <td className='px-3 py-2 text-end'>{item.count}</td>
+                  <td className='px-3 py-2 text-end'>{formatCurrency(item.unitCost)}</td>
+                  <td className='px-3 py-2 text-end font-bold'>{formatCurrency(item.totalCost)}</td>
                 </tr>
               ))}
             </tbody>
@@ -504,23 +504,23 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data }) =
           <table className='w-full text-xs border border-hairline mb-6'>
             <thead className='bg-primary text-white'>
               <tr>
-                <th className='text-right px-3 py-2'>الفرع</th>
-                <th className='text-right px-3 py-2'>الزيارات</th>
-                <th className='text-right px-3 py-2'>رسوم الزيارات</th>
-                <th className='text-right px-3 py-2'>قطع الغيار</th>
-                <th className='text-right px-3 py-2'>الخدمات</th>
-                <th className='text-right px-3 py-2'>صافي التكلفة</th>
+                <th className='text-end px-3 py-2'>الفرع</th>
+                <th className='text-end px-3 py-2'>الزيارات</th>
+                <th className='text-end px-3 py-2'>رسوم الزيارات</th>
+                <th className='text-end px-3 py-2'>قطع الغيار</th>
+                <th className='text-end px-3 py-2'>الخدمات</th>
+                <th className='text-end px-3 py-2'>صافي التكلفة</th>
               </tr>
             </thead>
             <tbody>
               {branchSummaries.map(({ branch, costs: bc, kpis: bk }) => (
                 <tr key={branch.id} className='border-b border-hairline'>
                   <td className='px-3 py-2 text-text font-medium'>{branch.branchName}</td>
-                  <td className='px-3 py-2 text-right'>{bk.totalVisits}</td>
-                  <td className='px-3 py-2 text-right'>{formatCurrency(bc.totalVisitFees)}</td>
-                  <td className='px-3 py-2 text-right'>{formatCurrency(bc.totalPartsCost)}</td>
-                  <td className='px-3 py-2 text-right'>{formatCurrency(bc.totalServicesCost)}</td>
-                  <td className='px-3 py-2 text-right font-bold'>{formatCurrency(bc.grandTotalCompanyCost)}</td>
+                  <td className='px-3 py-2 text-end'>{bk.totalVisits}</td>
+                  <td className='px-3 py-2 text-end'>{formatCurrency(bc.totalVisitFees)}</td>
+                  <td className='px-3 py-2 text-end'>{formatCurrency(bc.totalPartsCost)}</td>
+                  <td className='px-3 py-2 text-end'>{formatCurrency(bc.totalServicesCost)}</td>
+                  <td className='px-3 py-2 text-end font-bold'>{formatCurrency(bc.grandTotalCompanyCost)}</td>
                 </tr>
               ))}
             </tbody>
@@ -545,21 +545,21 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data }) =
       <table className='w-full text-xs border border-hairline mb-6'>
         <thead className='bg-cream text-latte uppercase'>
           <tr>
-            <th className='text-right px-3 py-2'>الفني</th>
-            <th className='text-right px-3 py-2'>الزيارات</th>
-            <th className='text-right px-3 py-2'>التقييم</th>
-            <th className='text-right px-3 py-2'>قطع الغيار</th>
-            <th className='text-right px-3 py-2'>الحل</th>
+            <th className='text-end px-3 py-2'>الفني</th>
+            <th className='text-end px-3 py-2'>الزيارات</th>
+            <th className='text-end px-3 py-2'>التقييم</th>
+            <th className='text-end px-3 py-2'>قطع الغيار</th>
+            <th className='text-end px-3 py-2'>الحل</th>
           </tr>
         </thead>
         <tbody>
           {techs.map((t) => (
             <tr key={t.name} className='border-b border-hairline'>
               <td className='px-3 py-2 text-text font-medium'>{t.name}</td>
-              <td className='px-3 py-2 text-right'>{t.visits}</td>
-              <td className='px-3 py-2 text-right'>{t.avgRating > 0 ? `${t.avgRating}/5` : "-"}</td>
-              <td className='px-3 py-2 text-right'>{t.partsUsed}</td>
-              <td className='px-3 py-2 text-right'>{t.problemsResolved}/{t.totalProblems}</td>
+              <td className='px-3 py-2 text-end'>{t.visits}</td>
+              <td className='px-3 py-2 text-end'>{t.avgRating > 0 ? `${t.avgRating}/5` : "-"}</td>
+              <td className='px-3 py-2 text-end'>{t.partsUsed}</td>
+              <td className='px-3 py-2 text-end'>{t.problemsResolved}/{t.totalProblems}</td>
             </tr>
           ))}
         </tbody>

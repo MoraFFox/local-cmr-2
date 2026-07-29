@@ -16,11 +16,11 @@ interface SectionContainerProps {
 }
 
 const accentBorderMap = {
-  teal: 'border-l-copper-500 dark:border-l-copper-400',
-  red: 'border-l-ember-500 dark:border-l-ember-400',
-  blue: 'border-l-copper-500 dark:border-l-copper-400',
-  amber: 'border-l-copper-500 dark:border-l-copper-400',
-  slate: 'border-l-hairline dark:border-l-hairline',
+  teal: 'ltr:border-l-copper rtl:border-r-copper-500 dark:ltr:border-l-copper rtl:border-r-copper-400',
+  red: 'ltr:border-l-ember rtl:border-r-ember-500 dark:ltr:border-l-ember rtl:border-r-ember-400',
+  blue: 'ltr:border-l-copper rtl:border-r-copper-500 dark:ltr:border-l-copper rtl:border-r-copper-400',
+  amber: 'ltr:border-l-copper rtl:border-r-copper-500 dark:ltr:border-l-copper rtl:border-r-copper-400',
+  slate: 'ltr:border-l-hairline rtl:border-r-hairline dark:ltr:border-l-hairline rtl:border-r-hairline',
 };
 
 const iconBgMap = {
@@ -40,7 +40,7 @@ const badgeBgMap = {
 };
 
 const variantStyles = {
-  primary: 'bg-cream dark:bg-espresso-light/80 p-6 shadow-lg border-l-4 rounded-2xl',
+  primary: 'bg-cream dark:bg-espresso-light/80 p-6 shadow-lg border-s-4 rounded-2xl',
   secondary: 'bg-cream dark:bg-espresso-light/50 p-4 rounded-xl',
   tertiary: 'py-3',
 };

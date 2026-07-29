@@ -56,9 +56,9 @@ export const BranchCard: React.FC<BranchCardProps> = ({
     onRemove={() => actions.removeListItem("branches", index)}
     wizardKey={`branch.${index}`}
     titleContent={
-      <div className="min-w-0 pr-1">
+      <div className="min-w-0 pe-1">
         <div className="marquee-container w-full">
-          <div className="inline-flex items-center gap-x-2 md:truncate md:animate-none lg:hover:animate-none animate-marquee-rtl pr-8">
+          <div className="inline-flex items-center gap-x-2 md:truncate md:animate-none lg:hover:animate-none animate-marquee-rtl pe-8">
             <span className="font-bold text-base whitespace-nowrap">{companyName || "الشركة"}</span>
             <span className="text-latte shrink-0">-</span>
             <span className="text-base whitespace-nowrap">{branch.branchName || "فرع جديد"}</span>
@@ -170,7 +170,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
                           data-field={`branch.${index}.machines.${idx}.machineOwnershipType`}
                           value={machine.machineOwnershipType || "leased"}
                           onChange={(e) => actions.handleNestedListItemChange(e, index, "machines", idx)}
-                          className="w-full pl-3 pr-10 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
+                          className="w-full ps-3 pe-10 py-3 bg-cream dark:bg-espresso-light text-base text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
                         >
                           <option value="leased">إيجار</option>
                           <option value="consumption">مقابل الاستهلاك</option>

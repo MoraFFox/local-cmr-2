@@ -24,6 +24,7 @@ import {
 } from "../utils/missingDataPdf";
 import { logger } from "../utils/logger";
 import { useToast } from "./ToastContext";
+import { useT } from "../utils/i18n";
 import { ConfirmDialog } from "./ui/ConfirmDialog";
 import {
   PrinterIcon,
@@ -154,7 +155,7 @@ const InfoRow = ({
 }) => {
   if (!value && value !== 0) return null;
   return (
-    <div className='flex items-start gap-2 text-sm py-1'>
+    <div className='flex ltr:items-start rtl:items-end gap-2 text-sm py-1'>
       {Icon && <Icon className='w-4 h-4 text-latte mt-0.5 shrink-0' />}
       <span className='font-medium text-latte shrink-0'>
         {label}:
@@ -233,9 +234,9 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
   record,
 }) => {
   return (
-    <div className='border-r-2 border-primary pr-4 py-3 mb-4 bg-cream-2 rounded-l-md'>
+    <div className='border-e-2 border-primary pe-4 py-3 mb-4 bg-cream-2 rounded-s-md'>
       {/* Header Row */}
-      <div className='flex flex-wrap justify-between items-start gap-y-3 gap-x-4'>
+      <div className='flex flex-wrap justify-between ltr:items-start rtl:items-end gap-y-3 gap-x-4'>
         {/* Right side (start of RTL flow): Date, Badges, Next Visit */}
         <div className='flex flex-col gap-1.5'>
           <div className='flex flex-wrap items-center gap-2'>
@@ -294,10 +295,10 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
             </div>
             <div className='space-y-1 text-text'>
               {record.machines.map((m) => (
-                <div key={m.id} className="flex items-start gap-1.5">
+                <div key={m.id} className="flex ltr:items-start rtl:items-end gap-1.5">
                   <span className="text-latte mt-0.5">•</span>
                   <div className="flex-1 min-w-0" dir="ltr">
-                    <div className="text-right w-full">{m.count}x {m.name}</div>
+                    <div className="text-end w-full">{m.count}x {m.name}</div>
                   </div>
                 </div>
               ))}
@@ -332,10 +333,10 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
             </div>
             <div className='space-y-1 text-text-secondary'>
               {record.partsReplaced.map((p, i) => (
-                <div key={i} className="flex items-start gap-1.5">
+                <div key={i} className="flex ltr:items-start rtl:items-end gap-1.5">
                   <span className="text-latte mt-0.5">•</span>
                   <div className="flex-1 flex flex-wrap items-center gap-x-2 gap-y-1" dir="rtl">
-                    <div dir="ltr" className="text-right">{p.count}x {p.name}</div>
+                    <div dir="ltr" className="text-end">{p.count}x {p.name}</div>
                     {p.paidByClient && (
                       <span className="text-xs text-ember-600 dark:text-ember-400 bg-ember-50 dark:bg-ember-900/30 px-1.5 py-0.5 rounded border border-ember-100 dark:border-ember-800/50 whitespace-nowrap">
                         (على حساب العميل)
@@ -356,10 +357,10 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
             </div>
             <div className='space-y-1 text-text-secondary'>
               {record.servicesPerformed.map((s, i) => (
-                <div key={i} className="flex items-start gap-1.5">
+                <div key={i} className="flex ltr:items-start rtl:items-end gap-1.5">
                   <span className="text-latte mt-0.5">•</span>
                   <div className="flex-1 flex flex-wrap items-center gap-x-2 gap-y-1" dir="rtl">
-                    <div dir="ltr" className="text-right">{s.count}x {s.name}</div>
+                    <div dir="ltr" className="text-end">{s.count}x {s.name}</div>
                     {s.paidByClient && (
                       <span className="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded border border-blue-100 dark:border-blue-800/50 whitespace-nowrap">
                         (على حساب العميل)
@@ -396,7 +397,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
 
       {/* Recursively show follow-ups */}
       {record.followUpVisits && record.followUpVisits.length > 0 && (
-        <div className='mt-5 pr-3 border-r-2 border-hairline pt-2'>
+        <div className='mt-5 pe-3 border-e-2 border-hairline pt-2'>
           <p className='text-xs font-bold text-latte mb-3 flex items-center gap-1.5'>
             <ArrowUturnLeftIcon className="w-4 h-4" />
             زيارات المتابعة
@@ -444,7 +445,7 @@ const MaintenanceTable: React.FC<{
     return <p className='text-xs text-latte italic'>No records found.</p>;
 
   return (
-    <table className='w-full text-left text-xs border border-hairline mb-4 break-inside-auto'>
+    <table className='w-full text-start text-xs border border-hairline mb-4 break-inside-auto'>
       <thead className='bg-cream text-text uppercase font-bold'>
         <tr>
           <th className='px-2 py-1.5 border-b border-hairline w-24'>Date</th>
@@ -547,7 +548,7 @@ const DetailedRecordPrint: React.FC<{
 }> = ({ record, depth = 0, hideCosts }) => {
   return (
     <div
-      className={`mb-6 break-inside-avoid border border-hairline rounded-lg overflow-hidden ${depth > 0 ? "ml-6 border-l-4 border-l-slate-400 bg-cream" : "bg-white shadow-sm"}`}
+      className={`mb-6 break-inside-avoid border border-hairline rounded-lg overflow-hidden ${depth > 0 ? "ms-6 border-s-4 ltr:border-l-slate rtl:border-r-slate-400 bg-cream" : "bg-white shadow-sm"}`}
     >
       <div className='bg-cream px-4 py-2 border-b border-hairline flex justify-between items-center'>
         <div className='flex items-center gap-3'>
@@ -613,7 +614,7 @@ const DetailedRecordPrint: React.FC<{
                     key={i}
                     className='inline-flex items-center bg-white border border-hairline px-2 py-1 rounded font-bold text-text shadow-sm'
                   >
-                    <CubeIcon className='w-3 h-3 text-latte mr-1' />
+                    <CubeIcon className='w-3 h-3 text-latte me-1' />
                     {m.count > 1 ? `${m.count}x ` : ""}
                     {m.name}
                   </span>
@@ -701,7 +702,7 @@ const DetailedRecordPrint: React.FC<{
         </div>
 
         {/* Right Col: Supervisors */}
-        <div className='col-span-4 pl-4 flex flex-col'>
+        <div className='col-span-4 ps-4 flex flex-col'>
           <div className='bg-white p-3 rounded-lg border-2 border-dashed border-hairline h-full flex flex-col justify-between'>
             <div>
               <p className='font-bold text-latte uppercase tracking-wider text-[10px] mb-3 text-center border-b border-hairline pb-1'>
@@ -765,7 +766,7 @@ const BranchPrintableDocument: React.FC<{
       className='hidden print:block font-sans text-black force-daylight bg-white w-full max-w-[210mm] mx-auto p-8'
     >
       {/* Header */}
-      <div className='flex justify-between items-start mb-8 border-b-2 border-hairline pb-6'>
+      <div className='flex justify-between ltr:items-start rtl:items-end mb-8 border-b-2 border-hairline pb-6'>
         <div className='flex items-center gap-4'>
           <img
             src='/logo.svg'
@@ -781,7 +782,7 @@ const BranchPrintableDocument: React.FC<{
             </h2>
           </div>
         </div>
-        <div className='text-right'>
+        <div className='text-end'>
           <div className='text-3xl font-bold text-cream'>BRANCH REPORT</div>
           <p className='text-xs text-latte mt-1'>
             Generated: {new Date().toLocaleDateString()}
@@ -922,6 +923,7 @@ const PrintableDocument: React.FC<{
   data: FormData & { created_at?: string };
   hideCosts?: boolean;
 }> = ({ data, hideCosts }) => {
+  const t = useT();
   return (
     <div
       id='print-container'
@@ -937,7 +939,7 @@ const PrintableDocument: React.FC<{
       </div>
 
       {/* Document Header */}
-      <div className='flex justify-between items-end border-b-2 border-hairline pb-4 mb-8'>
+      <div className='flex justify-between ltr:items-end rtl:items-start border-b-2 border-hairline pb-4 mb-8'>
         <div>
           <h1 className='text-3xl font-bold text-text tracking-tight'>
             {data.companyName}
@@ -946,7 +948,7 @@ const PrintableDocument: React.FC<{
             Comprehensive Maintenance Report
           </p>
         </div>
-        <div className='text-right text-xs text-latte'>
+        <div className='text-end text-xs text-latte'>
           <p>Report Date: {new Date().toLocaleDateString()}</p>
           <p>Submission ID: {data.id ? data.id : "Pending"}</p>
         </div>
@@ -971,13 +973,13 @@ const PrintableDocument: React.FC<{
             <h4 className='text-[10px] uppercase text-latte font-semibold mb-1'>
               Key Contacts
             </h4>
-            <ul className='text-sm list-disc pl-4 space-y-0.5'>
+            <ul className='text-sm list-disc ps-4 space-y-0.5'>
               {data.contacts.map((c) => (
                 <li key={c.id}>
                   <span className='font-semibold'>{c.name}</span>
                   <span className='text-text'> — {c.position}</span>
                   {c.phoneNumbers.length > 0 && (
-                    <span className='text-latte text-xs ml-2'>
+                    <span className='text-latte text-xs ms-2'>
                       ({c.phoneNumbers.map((p) => p.number).join(", ")})
                     </span>
                   )}
@@ -990,7 +992,7 @@ const PrintableDocument: React.FC<{
 
       {/* Main Office Maintenance (Only if no branches) */}
       {!data.hasBranches && data.maintenanceHistory.length > 0 && (
-        <PrintSection title='Main Office Maintenance History'>
+        <PrintSection title={t.admin.fields.mainOfficeMaintenanceHistory}>
           <MaintenanceTable
             records={data.maintenanceHistory}
             hideCosts={hideCosts}
@@ -1009,7 +1011,7 @@ const PrintableDocument: React.FC<{
             const stats = getBranchStats(branch.maintenanceHistory);
             return (
               <div key={branch.id} className='mb-8 break-inside-avoid-page'>
-                <div className='bg-cream p-2 border-l-4 border-hairline mb-3 flex justify-between items-baseline'>
+                <div className='bg-cream p-2 border-s-4 border-hairline mb-3 flex justify-between items-baseline'>
                   <h3 className='font-bold text-base text-text'>
                     {branch.branchName || `Branch ${idx + 1}`}
                   </h3>
@@ -1040,7 +1042,7 @@ const PrintableDocument: React.FC<{
                   <div className='mb-4 px-2 py-2 bg-cream border border-hairline rounded text-xs flex flex-wrap gap-x-8 gap-y-2'>
                     {!hideCosts && branch.dailyLeaseCost && (
                       <div>
-                        <span className='uppercase text-latte font-bold mr-2'>
+                        <span className='uppercase text-latte font-bold me-2'>
                           Daily Lease:
                         </span>
                         <span className='font-bold text-text'>
@@ -1050,7 +1052,7 @@ const PrintableDocument: React.FC<{
                     )}
                     {Object.keys(stats.partsMap).length > 0 && (
                       <div>
-                        <span className='uppercase text-latte font-bold mr-2'>
+                        <span className='uppercase text-latte font-bold me-2'>
                           Parts Replaced:
                         </span>
                         <span className='text-text'>
@@ -1106,7 +1108,7 @@ const PrintDropdown: React.FC<{
   };
 
   return (
-    <div className={`relative inline-block text-left ${className}`}>
+    <div className={`relative inline-block text-start ${className}`}>
       <button
         ref={triggerRef as React.RefObject<HTMLButtonElement>}
         type='button'
@@ -1119,7 +1121,7 @@ const PrintDropdown: React.FC<{
       >
         <PrinterIcon className='w-5 h-5' />
         {label}
-        <ChevronDownIcon className='w-4 h-4 ml-1' />
+        <ChevronDownIcon className='w-4 h-4 ms-1' />
       </button>
 
       {isOpen && createPortal(
@@ -1131,7 +1133,7 @@ const PrintDropdown: React.FC<{
           <div className='py-1' role='menu' aria-orientation='vertical'>
             <button
               onClick={() => handleSelect("internal")}
-              className='block w-full text-left px-4 py-3 text-sm text-text hover:bg-cream-2'
+              className='block w-full text-start px-4 py-3 text-sm text-text hover:bg-cream-2'
               role='menuitem'
             >
               <span className='font-bold'>Internal Report</span>
@@ -1141,7 +1143,7 @@ const PrintDropdown: React.FC<{
             </button>
             <button
               onClick={() => handleSelect("client")}
-              className='block w-full text-left px-4 py-3 text-sm text-text hover:bg-cream-2 border-t border-hairline'
+              className='block w-full text-start px-4 py-3 text-sm text-text hover:bg-cream-2 border-t border-hairline'
               role='menuitem'
             >
               <span className='font-bold'>Client Report</span>
@@ -1165,6 +1167,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
   onUpdate,
 }) => {
   const { showToast } = useToast();
+  const t = useT();
   const [printingBranch, setPrintingBranch] = useState<Branch | null>(null);
   const [filterStartDate, setFilterStartDate] = useState("");
   const [filterEndDate, setFilterEndDate] = useState("");
@@ -1355,7 +1358,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                   setFilterStartDate("");
                   setFilterEndDate("");
                 }}
-                className='ml-2 p-1.5 text-latte hover:text-primary hover:bg-primary/10 rounded-full transition-colors'
+                className='ms-2 p-1.5 text-latte hover:text-primary hover:bg-primary/10 rounded-full transition-colors'
                 title='Clear Dates'
               >
                 <XMarkIcon className='w-5 h-5' />
@@ -1367,7 +1370,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
         <div className='bg-cream rounded-xl shadow-lg overflow-hidden border border-hairline'>
           {/* Screen View Content */}
           <div className='p-6 sm:p-8 bg-cream-2/20 border-b border-hairline'>
-            <div className='flex flex-col sm:flex-row justify-between items-start gap-4'>
+            <div className='flex flex-col sm:flex-row justify-between ltr:items-start rtl:items-end gap-4'>
               <div className='flex items-center gap-4'>
                 <div className='h-16 w-16 bg-cream-2 rounded-lg border border-hairline flex items-center justify-center p-2 shadow-sm shrink-0'>
                   <img
@@ -1455,8 +1458,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
             {filteredMainHistory.length > 0 && (
               <div className='mt-6 pt-6 border-t border-hairline'>
                 <h3 className='text-md font-bold text-text mb-3 flex items-center gap-2'>
-                  <WrenchScrewdriverIcon className='w-5 h-5' /> Main Office
-                  Maintenance
+                  <WrenchScrewdriverIcon className='w-5 h-5' /> {t.admin.fields.mainOfficeMaintenance}
                 </h3>
                 {filteredMainHistory.map((r) => (
                   <MaintenanceRecordView key={r.id} record={r} />
@@ -1500,7 +1502,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                     >
                       <CollapsibleCard
                         titleContent={
-                          <div className='flex flex-col sm:flex-row sm:items-baseline gap-2 w-full pr-4'>
+                          <div className='flex flex-col sm:flex-row sm:items-baseline gap-2 w-full pe-4'>
                             <div className='flex flex-col sm:flex-row sm:items-baseline gap-2'>
                               <span className='font-bold text-lg'>
                                 {branch.branchName || `Branch ${index + 1}`}
@@ -1531,7 +1533,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                                 onPrint={(mode) =>
                                   handlePrintBranch(branch, mode)
                                 }
-                                className='scale-90 origin-right'
+                                className='scale-90 ltr:origin-right rtl:origin-left'
                                 disabled={isGeneratingPDF}
                               />
                             </div>
@@ -1632,7 +1634,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                               </div>
                             )}
                             {Object.keys(stats.partsMap).length > 0 && (
-                              <div className='flex items-start gap-2 w-full pt-2 border-t border-hairline'>
+                              <div className='flex ltr:items-start rtl:items-end gap-2 w-full pt-2 border-t border-hairline'>
                                 <CubeIcon className='w-4 h-4 text-latte mt-0.5' />
                                 <div className='flex flex-wrap gap-x-3 gap-y-1'>
                                   <span className='text-latte font-medium'>
@@ -1644,7 +1646,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                                         key={name}
                                         className='inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-cream-2 border border-hairline text-text'
                                       >
-                                        <span className='font-bold mr-1'>
+                                        <span className='font-bold me-1'>
                                           {count}x
                                         </span>{" "}
                                         {name}

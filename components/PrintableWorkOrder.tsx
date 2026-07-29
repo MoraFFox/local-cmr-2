@@ -9,8 +9,8 @@ interface PrintableWorkOrderProps {
 }
 
 const LinedField: React.FC<{ label: string, className?: string }> = ({ label, className = '' }) => (
-    <div className={`grid grid-cols-4 gap-x-2 items-end text-sm ${className}`}>
-        <label className="text-primary font-semibold text-right col-span-1 whitespace-nowrap">{label}:</label>
+    <div className={`grid grid-cols-4 gap-x-2 ltr:items-end rtl:items-start text-sm ${className}`}>
+        <label className="text-primary font-semibold text-end col-span-1 whitespace-nowrap">{label}:</label>
         <div className="border-b border-hairline border-dotted col-span-3 h-5"></div>
     </div>
 );
@@ -18,7 +18,7 @@ const LinedField: React.FC<{ label: string, className?: string }> = ({ label, cl
 const WorkItem: React.FC<{ label: string }> = ({ label }) => (
     <div className="p-1.5 border border-hairline rounded-md text-sm break-inside-avoid flex flex-col h-full">
         <p className="font-medium text-primary flex-grow text-[13px]">{label}</p>
-        <div className="flex justify-end items-center gap-x-2 mt-1.5 pt-1.5 border-t border-dotted border-hairline">
+        <div className="flex ltr:justify-end rtl:justify-start items-center gap-x-2 mt-1.5 pt-1.5 border-t border-dotted border-hairline">
             <div className="flex items-baseline gap-1">
                 <label className="text-[11px] text-latte">Qty:</label>
                 <div className="w-6 h-5 border-b border-hairline"></div>
@@ -37,7 +37,7 @@ const CustomItemsTable: React.FC = () => (
         <table className="w-full text-sm">
             <thead>
                 <tr className="border-b-2 border-hairline">
-                    <th className="p-1 text-left font-semibold text-xs">Item Name / Service</th>
+                    <th className="p-1 text-start font-semibold text-xs">Item Name / Service</th>
                     <th className="p-1 w-16 text-center font-semibold text-xs">Quantity</th>
                     <th className="p-1 w-24 text-center font-semibold text-xs">Paid by Client</th>
                 </tr>
@@ -91,7 +91,7 @@ const PrintableWorkOrder: React.FC<PrintableWorkOrderProps> = ({ onBack, partsLi
 
     return (
         <div className="bg-cream-2 dark:bg-espresso p-4 sm:p-8 print:p-0 print:bg-white">
-            <div className="fixed bottom-4 left-4 z-30 flex flex-col gap-3 print:hidden">
+            <div className="fixed bottom-4 start-4 z-30 flex flex-col gap-3 print:hidden">
                 <button
                     onClick={() => window.print()}
                     className="flex items-center gap-2 bg-hover text-white font-bold py-3 px-5 rounded-full hover:bg-copper-700 transition-colors shadow-lg transform active:scale-95"
@@ -115,7 +115,7 @@ const PrintableWorkOrder: React.FC<PrintableWorkOrderProps> = ({ onBack, partsLi
                         <h1 className="text-2xl font-bold text-primary">Maintenance Visit Report</h1>
                         <p className="text-xs text-latte">Internal Use Document</p>
                     </div>
-                    <div className="flex flex-col items-end">
+                    <div className="flex flex-col ltr:items-end rtl:items-start">
                         <img src="/logo.svg" alt="Mido for distribution" className="h-12 w-auto object-contain mb-1" />
                         <div className="text-sm font-bold text-primary">
                             Mido for distribution
@@ -140,7 +140,7 @@ const PrintableWorkOrder: React.FC<PrintableWorkOrderProps> = ({ onBack, partsLi
                         <div className="mb-3 break-inside-avoid">
                             <h4 className="text-xs font-bold uppercase tracking-wider text-primary mb-1.5">الخدمات المنفذة</h4>
                             {Object.keys(serviceGroups).map(category => (
-                                <div key={category} className="mb-2 pl-2">
+                                <div key={category} className="mb-2 ps-2">
                                     <p className="text-xs font-semibold text-latte">{category}</p>
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-1">
                                         {serviceGroups[category].map(item => <WorkItem key={item.value} label={item.label} />)}
@@ -152,7 +152,7 @@ const PrintableWorkOrder: React.FC<PrintableWorkOrderProps> = ({ onBack, partsLi
                         <div className="mb-3 break-inside-avoid">
                             <h4 className="text-xs font-bold uppercase tracking-wider text-primary mb-1.5">Parts Used</h4>
                             {Object.keys(partGroups).map(category => (
-                                <div key={category} className="mb-2 pl-2">
+                                <div key={category} className="mb-2 ps-2">
                                     <p className="text-xs font-semibold text-latte">{category}</p>
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-1">
                                         {partGroups[category].map(item => <WorkItem key={item.value} label={item.label} />)}

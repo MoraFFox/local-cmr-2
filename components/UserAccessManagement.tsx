@@ -756,7 +756,7 @@ const UserAccessManagement: React.FC = () => {
                 )}
 
                 {/* Submit Buttons */}
-                <div className="flex justify-end gap-3 pt-2">
+                <div className="flex ltr:justify-end rtl:justify-start gap-3 pt-2">
                   <Button
                     variant="secondary"
                     onClick={() => {
@@ -800,7 +800,7 @@ const UserAccessManagement: React.FC = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as InvitationStatus | 'all')}
-                className="rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-primary focus:border-primary focus:ring-primary"
+                className="rounded-lg border-hairline bg-cream py-2 px-3 text-base text-primary focus:border-primary focus:ring-primary"
               >
                 <option value="all">{t.allStatuses}</option>
                 <option value="pending">{t.filterPending}</option>
@@ -810,7 +810,7 @@ const UserAccessManagement: React.FC = () => {
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value as InviteRole | 'all')}
-                className="rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-primary focus:border-primary focus:ring-primary"
+                className="rounded-lg border-hairline bg-cream py-2 px-3 text-base text-primary focus:border-primary focus:ring-primary"
               >
                 <option value="all">{t.allRoles}</option>
                 <option value="admin">{t.admin}</option>
@@ -848,7 +848,7 @@ const UserAccessManagement: React.FC = () => {
                     }`}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                      <div className="flex items-start gap-3">
+                      <div className="flex ltr:items-start rtl:items-end gap-3">
                         <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
                           invitation.status === 'pending'
                             ? 'bg-primary/10'
@@ -873,7 +873,7 @@ const UserAccessManagement: React.FC = () => {
                             {getStatusBadge(invitation.status)}
                           </div>
                           <div className="text-sm text-latte mt-1">
-                            {invitation.email && <span className="mr-3">{invitation.email}</span>}
+                            {invitation.email && <span className="me-3">{invitation.email}</span>}
                             {invitation.phone && <span>{invitation.phone}</span>}
                           </div>
                           <div className="text-xs text-latte mt-1">
@@ -985,7 +985,7 @@ const UserAccessManagement: React.FC = () => {
                       <select
                         value={selectedTechnicianId}
                         onChange={(e) => setSelectedTechnicianId(e.target.value)}
-                        className="rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-primary focus:border-primary focus:ring-primary"
+                        className="rounded-lg border-hairline bg-cream py-2 px-3 text-base text-primary focus:border-primary focus:ring-primary"
                       >
                         <option value="">{t.selectTechnician}</option>
                         {technicians.map((tech) => (
@@ -1018,8 +1018,9 @@ const UserAccessManagement: React.FC = () => {
               )}
 
               <div className="bg-cream rounded-xl shadow-sm border border-hairline overflow-hidden">
-                <table className="min-w-full divide-y divide-hairline">
-                  <thead className="bg-cream-2/30">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-hairline">
+                    <thead className="bg-cream-2/30">
                     <tr>
                       <th className="px-4 py-3 text-start text-xs font-medium text-latte uppercase tracking-wider w-10">
                         <input
@@ -1088,7 +1089,8 @@ const UserAccessManagement: React.FC = () => {
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                  </table>
+                </div>
               </div>
             </div>
           ) : (
@@ -1101,7 +1103,7 @@ const UserAccessManagement: React.FC = () => {
                 <p className="text-sm text-latte mb-4">
                   {t.legacyRecordsDesc}
                 </p>
-                <div className="flex flex-wrap gap-3 items-end">
+                <div className="flex flex-wrap gap-3 ltr:items-end rtl:items-start">
                   <div className="flex-1 min-w-[200px]">
                     <label className="block text-sm font-medium text-primary mb-1">
                       {t.sourceTechnician}
@@ -1109,7 +1111,7 @@ const UserAccessManagement: React.FC = () => {
                     <select
                       value={sourceTechnicianId}
                       onChange={(e) => setSourceTechnicianId(e.target.value)}
-                      className="w-full rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-primary focus:border-primary focus:ring-primary"
+                      className="w-full rounded-lg border-hairline bg-cream py-2 px-3 text-base text-primary focus:border-primary focus:ring-primary"
                     >
                       <option value="">{t.selectTechnician}</option>
                       {technicians.map((tech) => (
@@ -1127,7 +1129,7 @@ const UserAccessManagement: React.FC = () => {
                     <select
                       value={targetTechnicianId}
                       onChange={(e) => setTargetTechnicianId(e.target.value)}
-                      className="w-full rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-primary focus:border-primary focus:ring-primary"
+                      className="w-full rounded-lg border-hairline bg-cream py-2 px-3 text-base text-primary focus:border-primary focus:ring-primary"
                     >
                       <option value="">{t.selectTechnician}</option>
                       {technicians.map((tech) => (
@@ -1156,7 +1158,7 @@ const UserAccessManagement: React.FC = () => {
                     className="bg-cream rounded-lg shadow-sm border border-hairline p-4"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                      <div className="flex items-start gap-3">
+                      <div className="flex ltr:items-start rtl:items-end gap-3">
                         <div className="h-10 w-10 rounded-full flex items-center justify-center bg-amber-500/10">
                           <UserCircleIcon className="h-5 w-5 text-amber-500" />
                         </div>
@@ -1239,7 +1241,7 @@ const UserAccessManagement: React.FC = () => {
                     <select
                       value={selectedTechnicianId}
                       onChange={(e) => setSelectedTechnicianId(e.target.value)}
-                      className="w-full rounded-lg border-hairline bg-cream py-2 px-3 text-sm text-primary focus:border-primary focus:ring-primary"
+                      className="w-full rounded-lg border-hairline bg-cream py-2 px-3 text-base text-primary focus:border-primary focus:ring-primary"
                     >
                       <option value="">{t.selectTechnician}</option>
                       {technicians.map((tech) => (
@@ -1260,12 +1262,12 @@ const UserAccessManagement: React.FC = () => {
                       />
                       {t.rewriteDisplayName}
                     </label>
-                    <p className="text-xs text-latte mt-1 ml-6">
+                    <p className="text-xs text-latte mt-1 ms-6">
                       {t.rewriteDesc}
                     </p>
                   </div>
 
-                  <div className="flex justify-end gap-3 pt-2">
+                  <div className="flex ltr:justify-end rtl:justify-start gap-3 pt-2">
                     <Button
                       variant="secondary"
                       onClick={() => {

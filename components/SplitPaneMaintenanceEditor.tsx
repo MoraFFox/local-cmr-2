@@ -141,7 +141,7 @@ const SplitPaneMaintenanceEditor: React.FC<SplitPaneMaintenanceEditorProps> = ({
     <div className="flex h-[600px] bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
       {/* Left Pane - Record List */}
       <div
-        className={`${isPaneOpen ? "w-80" : "w-12"} flex flex-col border-r border-slate-200 dark:border-slate-700 transition-all duration-300`}
+        className={`${isPaneOpen ? "w-80" : "w-12"} flex flex-col border-e border-slate-200 dark:border-slate-700 transition-all duration-300`}
       >
         {/* Pane Header */}
         <div className="flex items-center justify-between p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
@@ -189,11 +189,11 @@ const SplitPaneMaintenanceEditor: React.FC<SplitPaneMaintenanceEditorProps> = ({
                   onClick={() => handleRecordSelect(index)}
                   className={`p-3 border-b border-slate-100 dark:border-slate-700 cursor-pointer transition-colors ${
                     selectedRecordIndex === index
-                      ? "bg-teal-50 dark:bg-teal-900/20 border-l-4 border-l-teal-500"
-                      : "hover:bg-slate-50 dark:hover:bg-slate-700/50 border-l-4 border-l-transparent"
+                      ? "bg-teal-50 dark:bg-teal-900/20 border-s-4 ltr:border-l-teal rtl:border-r-teal-500"
+                      : "hover:bg-slate-50 dark:hover:bg-slate-700/50 border-s-4 ltr:border-l-transparent rtl:border-r-transparent"
                   }`}
                 >
-                  <div className="flex items-start justify-between">
+                  <div className="flex ltr:items-start rtl:items-end justify-between">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-medium text-slate-800 dark:text-slate-200 truncate">
@@ -228,7 +228,7 @@ const SplitPaneMaintenanceEditor: React.FC<SplitPaneMaintenanceEditorProps> = ({
                     </div>
 
                     {/* Quick Actions */}
-                    <div className="flex flex-col gap-1 ml-2">
+                    <div className="flex flex-col gap-1 ms-2">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

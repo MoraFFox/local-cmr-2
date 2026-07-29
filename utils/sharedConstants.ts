@@ -113,14 +113,3 @@ export const CLASSES = {
     "block w-full px-4 py-3 sm:px-5 sm:py-4 bg-cream text-primary rounded-lg placeholder-latte focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 border border-hairline shadow-sm",
 } as const;
 
-// ── View-to-Title Mapping ──────────────────────────────────────
-export const VIEW_TITLES: Record<string, string> = {
-  form: "نموذج الإرسال — ميدوز",
-  print: "طباعة أمر العمل — ميدوز",
-  details: "تفاصيل السجل — ميدوز",
-  baristas: "أداء فريق Midoe's — ميدوز",
-  "barista-details": "أداء فريق Midoe's — ميدوز",
-  technicians: "إدارة الفنيين — ميدوز",
-  history: "سجل عمليات الإرسال — ميدوز",
-  "maintenance-edit": "تحرير الصيانة — ميدوز",
-};

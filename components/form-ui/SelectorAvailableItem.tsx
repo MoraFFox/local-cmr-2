@@ -66,7 +66,7 @@ export const SelectorAvailableItem: React.FC<SelectorAvailableItemProps> = ({
 
   return (
     <div
-      className={`group border rounded-xl p-4 flex transition-all duration-200 text-left ${
+      className={`group border rounded-xl p-4 flex transition-all duration-200 text-start ${
         isSuggested
           ? 'border-primary/40 bg-primary/5 hover:bg-primary/10 hover:border-primary/60'
           : 'border-hairline bg-cream hover:bg-cream-2 hover:border-primary/50'
@@ -100,7 +100,7 @@ export const SelectorAvailableItem: React.FC<SelectorAvailableItemProps> = ({
       {/* Inline quantity stepper + add button (single action) */}
       <div
         className={`flex items-center gap-2 ${
-          viewMode === 'grid' ? 'mt-3' : 'mt-0 ml-4'
+          viewMode === 'grid' ? 'mt-3' : 'mt-0 ms-4'
         }`}
       >
         {/* Quantity stepper */}
@@ -108,7 +108,7 @@ export const SelectorAvailableItem: React.FC<SelectorAvailableItemProps> = ({
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); decrement(); }}
-            className="p-1 text-latte hover:text-text hover:bg-cream-3 rounded-md transition-colors min-w-[28px] min-h-[28px] flex items-center justify-center"
+            className="p-1 text-latte hover:text-text hover:bg-cream-3 rounded-md transition-colors min-w-[44px] min-h-[44px] sm:min-w-[28px] sm:min-h-[28px] flex items-center justify-center"
             aria-label={`Decrease quantity for ${label}`}
           >
             <MinusIcon className="w-3.5 h-3.5" />
@@ -119,7 +119,7 @@ export const SelectorAvailableItem: React.FC<SelectorAvailableItemProps> = ({
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); increment(); }}
-            className="p-1 text-latte hover:text-text hover:bg-cream-3 rounded-md transition-colors min-w-[28px] min-h-[28px] flex items-center justify-center"
+            className="p-1 text-latte hover:text-text hover:bg-cream-3 rounded-md transition-colors min-w-[44px] min-h-[44px] sm:min-w-[28px] sm:min-h-[28px] flex items-center justify-center"
             aria-label={`Increase quantity for ${label}`}
           >
             <PlusIcon className="w-3.5 h-3.5" />
@@ -130,7 +130,7 @@ export const SelectorAvailableItem: React.FC<SelectorAvailableItemProps> = ({
         <button
           type="button"
           onClick={handleAdd}
-          className="px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary/90 transition-colors flex items-center gap-1 min-h-[32px]"
+          className="px-3 py-1.5 bg-primary text-white rounded-lg text-sm sm:text-xs font-bold hover:bg-primary/90 transition-colors flex items-center gap-1 min-h-[44px] sm:min-h-[32px]"
           aria-label={`Add ${quantity} ${label}`}
         >
           <PlusIcon className="w-4 h-4" />

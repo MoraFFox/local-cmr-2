@@ -54,10 +54,10 @@ const TechCard: React.FC<TechCardProps> = ({
       </div>
 
       {/* Decorative Corner */}
-      <div className={`absolute -top-1 -right-1 w-3 h-3 border-t border-r ${
+      <div className={`absolute -top-1 ltr:-right-1 rtl:-left-1 w-3 h-3 border-t border-e ${
           variant === 'active' ? 'border-primary' : 'border-brass'
       } opacity-50`} />
-      <div className={`absolute -bottom-1 -left-1 w-3 h-3 border-b border-l ${
+      <div className={`absolute -bottom-1 ltr:-left-1 rtl:-right-1 w-3 h-3 border-b border-s ${
            variant === 'active' ? 'border-primary' : 'border-brass'
       } opacity-50`} />
     </div>

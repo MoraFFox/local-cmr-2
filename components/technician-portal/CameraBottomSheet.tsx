@@ -133,7 +133,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
       />
 
       {/* Bottom Sheet */}
-      <div className="fixed inset-x-0 bottom-0 z-50 animate-slide-up" dir="rtl">
+      <div className="fixed ltr:inset-x-0 rtl:inset-x-0 bottom-0 z-50 animate-slide-up" dir="rtl">
         {showCloseConfirm && (
           <div className="absolute inset-0 z-20 bg-cream dark:bg-espresso-light rounded-t-2xl p-5">
             <ConfirmationDialog
@@ -159,7 +159,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
             </h3>
             <button
               onClick={requestClose}
-              className="p-2 -ml-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-cream-2 dark:hover:bg-chrome-light/50 transition-colors"
+              className="p-2 -ms-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-cream-2 dark:hover:bg-chrome-light/50 transition-colors"
             >
               <XMarkIcon className="w-5 h-5 text-latte" />
             </button>

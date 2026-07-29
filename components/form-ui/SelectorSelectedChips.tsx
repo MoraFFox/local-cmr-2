@@ -104,7 +104,7 @@ export const SelectorSelectedChips: React.FC<SelectorSelectedChipsProps> = ({
               <button
                 type="button"
                 onClick={() => onQuantityChange(item.name, Math.max(1, item.count - 1))}
-                className="p-0.5 text-latte hover:text-text rounded transition-colors min-w-[20px] min-h-[20px] flex items-center justify-center"
+                className="p-0.5 text-latte hover:text-text rounded transition-colors min-w-[28px] min-h-[28px] sm:min-w-[20px] sm:min-h-[20px] flex items-center justify-center"
                 aria-label={`Decrease ${item.name} quantity`}
                 disabled={item.count <= 1}
               >
@@ -116,7 +116,7 @@ export const SelectorSelectedChips: React.FC<SelectorSelectedChipsProps> = ({
               <button
                 type="button"
                 onClick={() => onQuantityChange(item.name, item.count + 1)}
-                className="p-0.5 text-latte hover:text-text rounded transition-colors min-w-[20px] min-h-[20px] flex items-center justify-center"
+                className="p-0.5 text-latte hover:text-text rounded transition-colors min-w-[28px] min-h-[28px] sm:min-w-[20px] sm:min-h-[20px] flex items-center justify-center"
                 aria-label={`Increase ${item.name} quantity`}
               >
                 <PlusIcon className="w-3 h-3" />
@@ -138,7 +138,7 @@ export const SelectorSelectedChips: React.FC<SelectorSelectedChipsProps> = ({
             <button
               type="button"
               onClick={() => onRemove(item.name)}
-              className="p-0.5 text-latte hover:text-ember-500 rounded-full transition-colors min-w-[20px] min-h-[20px] flex items-center justify-center"
+              className="p-0.5 text-latte hover:text-ember-500 rounded-full transition-colors min-w-[28px] min-h-[28px] sm:min-w-[20px] sm:min-h-[20px] flex items-center justify-center"
               aria-label={`Remove ${item.name}`}
             >
               <XMarkIcon className="w-3.5 h-3.5" />

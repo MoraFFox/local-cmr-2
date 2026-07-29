@@ -234,7 +234,7 @@ const MaintenanceRecordReview: React.FC<{
           <Detail
             label="Identified Issues"
             value={
-              <ul className="list-disc pl-5">
+              <ul className="list-disc ps-5">
                 {record.problems.map((p) => (
                   <li key={p}>{p}</li>
                 ))}
@@ -253,7 +253,7 @@ const MaintenanceRecordReview: React.FC<{
           <Detail
             label="Machines Maintained"
             value={
-              <ul className="list-disc pl-5">
+              <ul className="list-disc ps-5">
                 {record.machines.map((m) => (
                   <li key={m.id}>
                     {m.count > 1 ? `${m.count}x ` : ""}
@@ -273,7 +273,7 @@ const MaintenanceRecordReview: React.FC<{
                 {record.supervisors.map((s) => (
                   <li
                     key={s.id}
-                    className="border-l-2 pl-2 border-hairline"
+                    className="border-s-2 ps-2 border-hairline"
                   >
                     <p className="font-semibold">{s.name}</p>
                     <p className="text-xs">{s.phone}</p>
@@ -298,7 +298,7 @@ const MaintenanceRecordReview: React.FC<{
                 <Detail
                   label="Services Performed"
                   value={
-                    <ul className="list-disc pl-5">
+                    <ul className="list-disc ps-5">
                       {record.servicesPerformed.map((s) => (
                         <li key={s.name}>
                           {s.count}x {s.name}{" "}
@@ -322,7 +322,7 @@ const MaintenanceRecordReview: React.FC<{
               <Detail
                 label="Parts Used"
                 value={
-                  <ul className="list-disc pl-5">
+                  <ul className="list-disc ps-5">
                     {record.partsReplaced.map((p) => (
                       <li key={p.name}>
                         {p.count}x {p.name}{" "}
@@ -353,7 +353,7 @@ const MaintenanceRecordReview: React.FC<{
           </dl>
         </div>
         {record.followUpVisits && record.followUpVisits.length > 0 && (
-          <div className="pl-4 mt-2 pt-2 border-t border-hairline">
+          <div className="ps-4 mt-2 pt-2 border-t border-hairline">
             <h6 className="text-sm font-semibold text-latte">
               Follow-up Visits:
             </h6>

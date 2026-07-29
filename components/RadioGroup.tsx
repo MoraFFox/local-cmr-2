@@ -72,7 +72,7 @@ function RadioGroup<T extends string | boolean>({ name, label, helpText, options
                 className={`
                     ${commonButtonClasses}
                     ${isSelected ? selectedClasses : unselectedClasses}
-                    ${inline ? 'px-4 py-3 flex-nowrap' : 'w-full p-4 text-left'}
+                    ${inline ? 'px-4 py-3 flex-nowrap' : 'w-full p-4 text-start'}
                 `}
             >
                 <div className={`

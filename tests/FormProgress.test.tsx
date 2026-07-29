@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from './testUtils';
 import { FormProgress, RequiredFieldsProgress } from '../packages/form-progress';
 import { ar } from '../utils/arabicTranslations';
 
@@ -70,8 +70,7 @@ describe('FormProgress', () => {
     );
 
     const button = screen.getByRole('button', { name: /الانتقال للقسم التالي غير المكتمل/ });
-    expect(button.className).toContain('animate-jump-button-pulse');
-    expect(button.className).toContain('animate-jump-button-glow');
+    expect(button.className).toContain('transition-colors');
   });
 
   it('does not render the jump button when all sections are complete', () => {

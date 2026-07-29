@@ -88,7 +88,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                     </button>
                   </label>
                   <div className="relative group focus-within:text-primary">
-                    <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-latte">
+                    <div className="absolute inset-y-0 end-0 pe-3.5 flex items-center pointer-events-none text-latte">
                       <BriefcaseIcon className="w-4 h-4" aria-hidden="true" />
                     </div>
                     <select
@@ -96,7 +96,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                       data-field={fieldPrefix ? `${fieldPrefix}.${contactIndex}.position` : undefined}
                       value={contact.position}
                       onChange={(e) => actions.handleContactChange(e, path, contactIndex)}
-                      className="block w-full pr-10 h-[50px] bg-cream text-primary rounded-lg placeholder-latte focus:outline-none focus:ring-2 border border-hairline focus:border-primary focus:ring-primary/20 transition-colors appearance-none"
+                      className="block w-full pe-10 h-[50px] bg-cream text-base text-primary rounded-lg placeholder-latte focus:outline-none focus:ring-2 border border-hairline focus:border-primary focus:ring-primary/20 transition-colors appearance-none"
                     >
                       {contactPositions.map((pos) => (
                         <option key={pos.value} value={pos.value}>
@@ -124,7 +124,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                   {contact.phoneNumbers.map((phone, phoneIndex) => (
                     <div key={phone.id} className="flex items-center gap-2">
                       <div className="relative flex-grow">
-                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
                           <PhoneIcon className="h-5 w-5 text-latte" />
                         </div>
                         <input
@@ -134,7 +134,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                           onChange={(e) =>
                             actions.handlePhoneNumberChange(e, path, contactIndex, phoneIndex)
                           }
-                          className="input-base pl-10"
+                          className="input-base ps-10"
                           placeholder="مثال: 0100-123-4567"
                           maxLength={20}
                         />

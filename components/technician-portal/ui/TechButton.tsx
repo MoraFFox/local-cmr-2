@@ -49,7 +49,7 @@ const TechButton: React.FC<TechButtonProps> = ({
             {/* Tech Scan Line Effect on Primary */}
             {variant === 'primary' && !disabled && (
                 <div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none">
-                    <div className="absolute top-0 left-[-100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 animate-[shimmer_3s_infinite]" />
+                    <div className="absolute top-0 ltr:left-[-100%] rtl:right-[-100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent ltr:skew-x-12 rtl:-skew-x-12 animate-[shimmer_3s_infinite]" />
                 </div>
             )}
         </button>

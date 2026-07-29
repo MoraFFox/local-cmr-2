@@ -147,7 +147,7 @@ export const FormProgress: React.FC<FormProgressComponentProps> = ({
 
           <div className="h-2 bg-hairline rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-primary to-copper-400 transition-all duration-500 ease-out"
+              className="h-full ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-primary to-copper-400 transition-all duration-500 ease-out"
               style={{ width: `${percentage}%` }}
             />
           </div>
@@ -180,7 +180,7 @@ export const FormProgress: React.FC<FormProgressComponentProps> = ({
 
           <div className="h-1.5 bg-hairline rounded-full overflow-hidden mb-4">
             <div
-              className="h-full bg-gradient-to-r from-primary to-copper-400 transition-all duration-500 ease-out"
+              className="h-full ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-primary to-copper-400 transition-all duration-500 ease-out"
               style={{ width: `${percentage}%` }}
             />
           </div>
@@ -223,11 +223,11 @@ export const FormProgress: React.FC<FormProgressComponentProps> = ({
 
                     <span className="text-xs font-medium">
                       {section.label}
-                      {section.required && <span className="text-ember-500 ml-1">*</span>}
+                      {section.required && <span className="text-ember-500 ms-1">*</span>}
                     </span>
 
                     {isCurrent && (
-                      <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                      <span className="absolute -top-1 ltr:-right-1 rtl:-left-1 flex h-3 w-3">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
                         <span className="relative inline-flex rounded-full h-3 w-3 bg-primary" />
                       </span>
@@ -237,7 +237,7 @@ export const FormProgress: React.FC<FormProgressComponentProps> = ({
                   {index < sections.length - 1 && (
                     <div className="w-8 h-0.5 bg-hairline relative">
                       <div
-                        className="absolute inset-y-0 left-0 bg-emerald-500/50 transition-all duration-300"
+                        className="absolute inset-y-0 start-0 bg-emerald-500/50 transition-all duration-300"
                         style={{ width: isCompleted ? '100%' : '0%' }}
                       />
                     </div>
@@ -283,7 +283,7 @@ export const FormProgress: React.FC<FormProgressComponentProps> = ({
                 onClick={() => handleSectionClick(section.id)}
                 disabled={isDisabled}
                 className={`
-                  w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-left
+                  w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-start
                   ${isDisabled
                     ? 'opacity-40 cursor-not-allowed bg-cream-2'
                     : isCurrent
@@ -317,7 +317,7 @@ export const FormProgress: React.FC<FormProgressComponentProps> = ({
 
                 <span className="flex-1 text-sm font-medium">
                   {section.label}
-                  {section.required && <span className="text-ember-500 ml-1">*</span>}
+                  {section.required && <span className="text-ember-500 ms-1">*</span>}
                 </span>
 
                 {isCurrent && (
@@ -339,7 +339,7 @@ export const FormProgress: React.FC<FormProgressComponentProps> = ({
         <div className="pt-3 border-t border-hairline">
           <div className="h-2 bg-hairline rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-primary to-copper-400 transition-all duration-500 ease-out"
+              className="h-full ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-primary to-copper-400 transition-all duration-500 ease-out"
               style={{ width: `${percentage}%` }}
             />
           </div>

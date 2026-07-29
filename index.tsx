@@ -10,6 +10,7 @@ import { ToastProvider } from './components/ToastContext.tsx';
 import { UndoQueueProvider } from './components/UndoQueueContext.tsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
 import DebugPanel from './components/DebugPanel.tsx';
+import { LanguageProvider } from './utils/LanguageContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -28,7 +29,9 @@ root.render(
               v7_relativeSplatPath: true,
             }}
           >
+            <LanguageProvider>
             <AppRouter />
+          </LanguageProvider>
           </BrowserRouter>
           {import.meta.env.DEV && <DebugPanel />}
         </UndoQueueProvider>

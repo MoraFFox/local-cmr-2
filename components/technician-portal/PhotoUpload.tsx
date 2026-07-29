@@ -218,7 +218,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
 
                 {/* Compression Badge */}
                 {photo.compressed && photo.compressedSize && (
-                  <div className="absolute bottom-1 left-1 bg-leaf-500/80 text-white text-xs px-2 py-0.5 rounded">
+                  <div className="absolute bottom-1 start-1 bg-leaf-500/80 text-white text-xs px-2 py-0.5 rounded">
                     {formatFileSize(photo.compressedSize)}
                   </div>
                 )}
@@ -226,7 +226,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
                 {/* Remove Button */}
                 <button
                   onClick={() => handleRemove(photo.id)}
-                  className="absolute top-1 right-1 p-1 bg-ember-500/80 hover:bg-ember-700 text-white rounded-full transition-colors"
+                  className="absolute top-1 end-1 p-1 bg-ember-500/80 hover:bg-ember-700 text-white rounded-full transition-colors"
                 >
                   <XMarkIcon className="w-4 h-4" />
                 </button>

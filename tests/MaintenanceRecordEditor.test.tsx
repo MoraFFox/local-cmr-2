@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, screen, cleanup, fireEvent, within, waitFor } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent, within, waitFor } from './testUtils';
 import MaintenanceRecordEditor from '../components/MaintenanceRecordEditor';
 import { ToastProvider } from '../components/ToastContext';
 import { generateMockMaintenanceRecord } from '../utils/mockData';

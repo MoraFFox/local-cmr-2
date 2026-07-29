@@ -224,8 +224,8 @@ export const FloatingAutoSave: React.FC<FloatingAutoSaveProps> = ({
   position = 'bottom-right'
 }) => {
   const positionClasses = {
-    'bottom-right': 'bottom-4 right-4',
-    'bottom-left': 'bottom-4 left-4'
+    'bottom-right': 'bottom-4 end-4',
+    'bottom-left': 'bottom-4 start-4'
   };
 
   return (

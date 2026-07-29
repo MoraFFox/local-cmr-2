@@ -3,7 +3,7 @@
  */
 import React from "react";
 import { describe, it, expect } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent } from "../testUtils";
 import { Step3_Warehouse } from "../../src/views/wizard/Step3_Warehouse";
 import { createMockActions, createFormData } from "./helpers";
 
@@ -14,7 +14,7 @@ describe("Step3_Warehouse", () => {
       <Step3_Warehouse formData={createFormData()} actions={actions} newlyAddedId={null} />,
     );
 
-    expect(screen.getByLabelText("Location")).toBeInTheDocument();
+    expect(screen.getByLabelText("الموقع")).toBeInTheDocument();
   });
 
   it("renders warehouse contacts add button that calls addContact", () => {

@@ -210,7 +210,7 @@ const TechnicianInvitations: React.FC = () => {
               At least one of Email or Phone is required for the technician to sign up.
             </p>
 
-            <div className="flex justify-end gap-3 pt-2">
+            <div className="flex ltr:justify-end rtl:justify-start gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => {
@@ -273,7 +273,7 @@ const TechnicianInvitations: React.FC = () => {
                   className="bg-cream dark:bg-espresso-light rounded-lg shadow-sm border border-hairline p-4"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div className="flex items-start gap-3">
+                    <div className="flex ltr:items-start rtl:items-end gap-3">
                       <div className="h-10 w-10 rounded-full bg-cream-2 dark:bg-primary/20 flex items-center justify-center">
                         <UserPlusIcon className="h-5 w-5 text-primary dark:text-primary" />
                       </div>
@@ -283,7 +283,7 @@ const TechnicianInvitations: React.FC = () => {
                           {getStatusBadge(invite.status)}
                         </div>
                         <div className="text-sm text-latte dark:text-latte/70 mt-1">
-                          {invite.email && <span className="mr-3">{invite.email}</span>}
+                          {invite.email && <span className="me-3">{invite.email}</span>}
                           {invite.phone && <span>{invite.phone}</span>}
                         </div>
                         <div className="text-xs text-latte dark:text-latte/70 mt-1">
@@ -341,7 +341,7 @@ const TechnicianInvitations: React.FC = () => {
                   className="bg-cream dark:bg-espresso-light rounded-lg shadow-sm border border-hairline p-4 opacity-75"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div className="flex items-start gap-3">
+                    <div className="flex ltr:items-start rtl:items-end gap-3">
                       <div className="h-10 w-10 rounded-full bg-leaf-50 dark:bg-leaf-500/20 flex items-center justify-center">
                         <EyeIcon className="h-5 w-5 text-leaf-600 dark:text-leaf-500" />
                       </div>
@@ -351,7 +351,7 @@ const TechnicianInvitations: React.FC = () => {
                           {getStatusBadge(invite.status)}
                         </div>
                         <div className="text-sm text-latte dark:text-latte/70 mt-1">
-                          {invite.email && <span className="mr-3">{invite.email}</span>}
+                          {invite.email && <span className="me-3">{invite.email}</span>}
                           {invite.phone && <span>{invite.phone}</span>}
                         </div>
                         <div className="text-xs text-latte dark:text-latte/70 mt-1">
@@ -386,7 +386,7 @@ const TechnicianInvitations: React.FC = () => {
                   className="bg-cream dark:bg-espresso-light rounded-lg shadow-sm border border-hairline p-4 opacity-60"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div className="flex items-start gap-3">
+                    <div className="flex ltr:items-start rtl:items-end gap-3">
                       <div className="h-10 w-10 rounded-full bg-cream-2 dark:bg-espresso-light flex items-center justify-center">
                         <ClockIcon className="h-5 w-5 text-latte" />
                       </div>
@@ -396,7 +396,7 @@ const TechnicianInvitations: React.FC = () => {
                           {getStatusBadge(invite.status)}
                         </div>
                         <div className="text-sm text-latte dark:text-latte/70 mt-1">
-                          {invite.email && <span className="mr-3">{invite.email}</span>}
+                          {invite.email && <span className="me-3">{invite.email}</span>}
                           {invite.phone && <span>{invite.phone}</span>}
                         </div>
                         <div className="text-xs text-latte dark:text-latte/70 mt-1">

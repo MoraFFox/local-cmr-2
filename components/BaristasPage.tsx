@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { FormData } from "../types";
 import { useToast } from "./ToastContext";
+import { useT } from "../utils/i18n";
 import { ConfirmDialog } from "./ui/ConfirmDialog";
 import {
   MagnifyingGlassIcon,
@@ -58,6 +59,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
   onUpdate,
 }) => {
   const { showToast } = useToast();
+  const t = useT();
   const [searchTerm, setSearchTerm] = useState("");
   const [showDebug, setShowDebug] = useState(false);
   const [includeLogOnly, setIncludeLogOnly] = useState(false);
@@ -160,7 +162,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
           </p>
         </div>
 
-        <div className='flex items-center gap-2'>
+        <div className='flex flex-wrap items-center gap-2'>
           <button
             onClick={() => setShowDebug(!showDebug)}
             className={`p-2 rounded-md transition-colors ${showDebug ? "bg-ember-50 text-ember-700" : "bg-cream text-latte"}`}
@@ -183,14 +185,14 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
             Include 0 Visits
           </button>
           <div className='relative w-full sm:w-72'>
-            <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
+            <div className='pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3'>
               <MagnifyingGlassIcon className='h-5 w-5 text-latte' />
             </div>
             <input
               type='search'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='block w-full rounded-lg border-hairline bg-cream py-2.5 pl-10 pr-3 text-primary placeholder:text-latte focus:border-primary focus:ring-primary sm:text-sm shadow-sm transition-colors'
+              className='block w-full rounded-lg border-hairline bg-cream py-2.5 ps-10 pe-3 text-primary placeholder:text-latte focus:border-primary focus:ring-primary sm:text-sm shadow-sm transition-colors'
               placeholder='Search baristas...'
             />
           </div>
@@ -202,7 +204,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
           <h3 className='text-white font-bold text-sm mb-2 border-b border-leaf-500 pb-1'>
             Debug: Profile Aggregation Logic
           </h3>
-          <table className='w-full text-left'>
+          <table className='w-full text-start'>
             <thead>
               <tr className='text-latte/70'>
                 <th className='p-1'>ID</th>
@@ -210,7 +212,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                 <th className='p-1'>Norm. Name Key</th>
                 <th className='p-1'>Companies Merged</th>
                 <th className='p-1'>Raw Names Merged</th>
-                <th className='p-1 text-right'>Is Auto?</th>
+                <th className='p-1 text-end'>Is Auto?</th>
               </tr>
             </thead>
             <tbody>
@@ -230,7 +232,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                   <td className='p-1 text-xs'>
                     {Array.from(b._rawNames || []).join(", ")}
                   </td>
-                  <td className='p-1 text-right font-bold text-primary-400'>
+                  <td className='p-1 text-end font-bold text-primary-400'>
                     {b.isAutoDetected ? "YES" : "NO"}
                   </td>
                 </tr>
@@ -303,7 +305,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
               {/* Auto Detected Badge */}
               {barista.isAutoDetected && (
                 <div
-                  className='absolute top-0 right-0 bg-blue-500 text-white text-[10px] uppercase font-bold px-2 py-1 rounded-bl-lg shadow-sm z-10 flex items-center gap-1'
+                  className='absolute top-0 end-0 bg-blue-500 text-white text-[10px] uppercase font-bold px-2 py-1 rounded-bl-lg shadow-sm z-10 flex items-center gap-1'
                   title='This barista was found in maintenance logs but is not in the team list.'
                 >
                   <SparklesIcon className='w-3 h-3' /> Auto-Detected
@@ -311,7 +313,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
               )}
 
               {/* Card Header */}
-              <div className='p-5 border-b border-hairline flex items-start justify-between'>
+              <div className='p-5 border-b border-hairline flex ltr:items-start rtl:items-end justify-between'>
                 <div className='flex items-center gap-3'>
                   <Avatar name={barista.name} />
                   <div>
@@ -367,7 +369,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                     </div>
                   </div>
                 </div>
-                <div className='flex flex-col items-end gap-2'>
+                <div className='flex flex-col ltr:items-end rtl:items-start gap-2'>
                   <span
                     className={`text-xs px-2 py-1 rounded-full font-bold uppercase tracking-wider ${barista.visitCount > 0 ? "bg-cream-2 text-primary dark:bg-primary/20 dark:text-primary-400" : "bg-cream text-latte dark:bg-espresso-light dark:text-latte/70"}`}
                   >
@@ -393,10 +395,10 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
 
               {/* Card Body */}
               <div className='p-5 flex-grow space-y-4'>
-                <div className='flex justify-between items-start'>
+                <div className='flex justify-between ltr:items-start rtl:items-end'>
                   {/* Location Context */}
                   <div>
-                    <div className='flex items-start gap-2 text-sm mb-1'>
+                    <div className='flex ltr:items-start rtl:items-end gap-2 text-sm mb-1'>
                       <BriefcaseIcon className='w-4 h-4 text-latte mt-0.5 shrink-0' />
                       <span
                         className='font-semibold text-primary dark:text-latte/70 line-clamp-1'
@@ -405,7 +407,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                         {barista.companyName}
                       </span>
                     </div>
-                    <div className='flex items-center gap-2 text-xs text-latte dark:text-latte/70 ml-6'>
+                    <div className='flex items-center gap-2 text-xs text-latte dark:text-latte/70 ms-6'>
                       {barista.branchName === "Main Office" ? (
                         <BuildingStorefrontIcon className='w-3 h-3' />
                       ) : (
@@ -415,17 +417,17 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                     </div>
                   </div>
 
-                  <div className='flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity pl-2'>
+                  <div className='flex flex-col gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity ps-2'>
                     <button
                       onClick={(e) => startEdit(e, barista)}
-                      className='p-1.5 text-latte hover:text-primary hover:bg-cream-2 dark:hover:bg-primary/20 rounded-lg transition-colors'
+                      className='p-1.5 text-latte hover:text-primary hover:bg-cream-2 dark:hover:bg-primary/20 rounded-lg transition-colors min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center'
                       title='Edit Details'
                     >
                       <PencilIcon className='w-5 h-5' />
                     </button>
                     <button
                       onClick={(e) => handleDelete(e, barista)}
-                      className='p-1.5 text-latte hover:text-ember-700 hover:bg-ember-50 dark:hover:bg-ember-500/20 rounded-lg transition-colors'
+                      className='p-1.5 text-latte hover:text-ember-700 hover:bg-ember-50 dark:hover:bg-ember-500/20 rounded-lg transition-colors min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center'
                       title='Delete Barista'
                     >
                       <TrashIcon className='w-5 h-5' />
@@ -514,7 +516,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
             <div className='space-y-4'>
               <div>
                 <label className='block text-sm font-medium text-primary mb-1'>
-                  Name
+                  الاسم
                 </label>
                 <input
                   type='text'
@@ -522,12 +524,12 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                   onChange={(e) =>
                     setEditForm({ ...editForm, name: e.target.value })
                   }
-                  className='w-full rounded-lg border-hairline bg-cream p-2.5 text-primary focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none'
+                  className='w-full rounded-lg border-hairline bg-cream p-3 text-base text-primary focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none'
                 />
               </div>
               <div>
                 <label className='block text-sm font-medium text-primary mb-1'>
-                  Phone
+                  رقم الهاتف
                 </label>
               <input
                 type='tel'
@@ -535,29 +537,28 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                 onChange={(e) =>
                   setEditForm({ ...editForm, phone: formatEgyptianPhone(e.target.value) })
                 }
-                className='w-full rounded-lg border-hairline bg-cream p-2.5 text-primary focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none'
+                className='w-full rounded-lg border-hairline bg-cream p-3 text-base text-primary focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none'
                 dir='ltr'
               />
               </div>
 
               {editingBarista.sources && editingBarista.sources.length > 1 && (
                 <div className='p-3 bg-amber-500/15 text-amber-700 dark:text-amber-400 text-xs rounded-lg border border-amber-500/30'>
-                  <span className='font-bold'>Note:</span> This barista appears
-                  in {editingBarista.sources.length} locations. Updating here
-                  will update all records.
+                  <span className='font-bold'>{t.admin.fields.baristaEditNote}</span>{" "}
+                  {editingBarista.sources.length} {t.admin.fields.baristaEditNoteEnd}
                 </div>
               )}
 
               <div className='flex gap-3 pt-4 border-t border-hairline mt-6'>
                 <button
                   onClick={() => setEditingBarista(null)}
-                  className='flex-1 py-2.5 border border-hairline text-primary rounded-lg font-semibold hover:bg-cream-2 transition-colors'
+                  className='flex-1 py-3 min-h-[44px] border border-hairline text-primary rounded-lg font-semibold hover:bg-cream-2 transition-colors'
                 >
                   إلغاء
                 </button>
                 <button
                   onClick={saveEdit}
-                  className='btn-primary flex-1 py-2.5 rounded-lg font-bold transition-colors'
+                  className='btn-primary flex-1 py-3 min-h-[44px] rounded-lg font-bold transition-colors'
                 >
                   حفظ التغييرات
                 </button>

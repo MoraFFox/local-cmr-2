@@ -41,7 +41,7 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ titleContent, childre
             <div
                 role="button"
                 tabIndex={0}
-                className={`w-full flex justify-between items-start sm:items-center p-4 cursor-pointer rounded-t-xl ${!isOpen ? 'rounded-b-xl' : ''} focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 gap-4 hover:bg-cream-2 dark:hover:bg-espresso-light/30 transition-colors duration-150`}
+                className={`w-full flex justify-between ltr:items-start rtl:items-end sm:items-center p-4 cursor-pointer rounded-t-xl ${!isOpen ? 'rounded-b-xl' : ''} focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 gap-4 hover:bg-cream-2 dark:hover:bg-espresso-light/30 transition-colors duration-150`}
                 onClick={(e) => {
                     // Prevent toggling if a nested interactive element is clicked
                     if ((e.target as HTMLElement).closest('button, input, textarea, select, a')) return;
@@ -56,7 +56,7 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ titleContent, childre
                 }}
                 aria-expanded={isOpen}
             >
-                <div className="flex-1 min-w-0 font-semibold text-primary relative text-right pointer-events-auto">
+                <div className="flex-1 min-w-0 font-semibold text-primary relative text-end pointer-events-auto">
                     {titleContent}
                 </div>
                 <div className="flex items-center shrink-0 gap-3 pt-1 sm:pt-0 pointer-events-auto">

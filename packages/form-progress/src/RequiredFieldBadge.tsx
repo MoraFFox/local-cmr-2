@@ -61,7 +61,7 @@ export const RequiredFieldBadge: React.FC<RequiredFieldBadgeComponentProps> = ({
   if (showWord) {
     return (
       <span
-        className={`${styles.badge} font-bold text-primary bg-primary/10 rounded-md border border-primary/30 inline-flex items-center ml-2 ${mergedClassName}`}
+        className={`${styles.badge} font-bold text-primary bg-primary/10 rounded-md border border-primary/30 inline-flex items-center ms-2 ${mergedClassName}`}
         aria-label={t.requiredField}
       >
         {text || t.required}
@@ -71,7 +71,7 @@ export const RequiredFieldBadge: React.FC<RequiredFieldBadgeComponentProps> = ({
 
   return (
     <span
-      className={`${styles.asterisk} font-bold text-ember-500 ml-1 ${mergedClassName}`}
+      className={`${styles.asterisk} font-bold text-ember-500 ms-1 ${mergedClassName}`}
       aria-label={t.requiredField}
       title={t.requiredFieldTitle}
     >

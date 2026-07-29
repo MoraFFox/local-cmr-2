@@ -66,7 +66,7 @@ interface EnhancedInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEle
 
 const sizeStyles = {
   sm: {
-    input: 'h-10 px-3 text-sm',
+    input: 'h-10 px-3 text-base',
     label: 'text-sm',
     icon: 'w-4 h-4'
   },
@@ -203,8 +203,8 @@ export const EnhancedInput: React.FC<EnhancedInputProps> = ({
   const inputClasses = `
     ${styles.input} ${variantStyles[variant]}
     w-full rounded-lg transition-all duration-200 outline-none
-    ${icon ? 'pr-12' : rightElement ? 'pr-12' : 'pr-4'}
-    ${suggestions ? 'pl-12' : 'pl-4'}
+    ${icon ? 'pe-12' : rightElement ? 'pe-12' : 'pe-4'}
+    ${suggestions ? 'ps-12' : 'ps-4'}
     ${hasError
       ? 'border-ember-500 dark:border-ember-400 focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20'
       : 'focus:border-primary focus:ring-2 focus:ring-primary/20'
@@ -230,7 +230,7 @@ export const EnhancedInput: React.FC<EnhancedInputProps> = ({
       <div className="relative">
         {/* Left Icon / Suggestion Toggle */}
         {(suggestions || icon) && (
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-latte">
+          <div className="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none text-latte">
             {icon || <div className="w-4 h-4" />}
           </div>
         )}
@@ -256,7 +256,7 @@ export const EnhancedInput: React.FC<EnhancedInputProps> = ({
         />
 
         {/* Right Element */}
-        <div className="absolute inset-y-0 right-0 pr-3 flex items-center gap-1">
+        <div className="absolute inset-y-0 end-0 pe-3 flex items-center gap-1">
           {/* Show/hide password toggle */}
           {type === 'password' && (
             <button
@@ -307,7 +307,7 @@ export const EnhancedInput: React.FC<EnhancedInputProps> = ({
                 key={idx}
                 type="button"
                 onClick={() => handleSuggestionClick(suggestion)}
-                className="w-full px-4 py-3 text-left hover:bg-cream transition-colors text-sm text-primary"
+                className="w-full px-4 py-3 text-start hover:bg-cream transition-colors text-sm text-primary"
               >
                 {suggestion}
               </button>
@@ -332,10 +332,10 @@ export const EnhancedInput: React.FC<EnhancedInputProps> = ({
 
       {/* Character Count */}
       {showCharCount && maxLength && (
-        <div className="mt-1 text-xs text-latte text-right">
+        <div className="mt-1 text-xs text-latte text-end">
           {charCount} / {maxLength}
           {charCount > maxLength * 0.9 && (
-            <span className="text-amber-500 ml-1">
+            <span className="text-amber-500 ms-1">
               {charCount >= maxLength ? ' (Limit reached)' : ' (Almost at limit)'}
             </span>
           )}

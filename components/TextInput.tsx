@@ -55,7 +55,7 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, err
       )}
       <div className="relative group focus-within:text-primary">
         {icon && (
-          <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-latte group-focus-within:text-primary transition-colors">
+          <div className="absolute inset-y-0 end-0 pe-3.5 flex items-center pointer-events-none text-latte group-focus-within:text-primary transition-colors">
             {React.cloneElement(icon as React.ReactElement, {
               className: 'w-4 h-4',
               'aria-hidden': 'true',
@@ -73,7 +73,7 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, err
             props.onFocus?.(e);
           }}
           {...props}
-          className={`block w-full ${icon ? 'pr-10' : 'pr-4'} ${isCombobox ? 'pl-10' : 'pl-4'} h-[44px] sm:h-[50px] bg-cream text-primary rounded-lg placeholder-latte focus:outline-none focus:ring-2 border transition-colors ${
+          className={`block w-full ${icon ? 'pe-10' : 'pe-4'} ${isCombobox ? 'ps-10' : 'ps-4'} h-[44px] sm:h-[50px] bg-cream text-base text-primary rounded-lg placeholder-latte focus:outline-none focus:ring-2 border transition-colors ${
             error
               ? 'border-ember-500 dark:border-ember-400 focus:border-primary focus:ring-primary/20 animate-shake'
               : 'border-hairline focus:border-primary focus:ring-primary/20'
@@ -82,7 +82,7 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, err
         
         {isCombobox && (
           <div 
-            className="absolute inset-y-0 left-0 pl-3.5 flex items-center cursor-pointer text-latte group-focus-within:text-primary transition-colors"
+            className="absolute inset-y-0 start-0 ps-3.5 flex items-center cursor-pointer text-latte group-focus-within:text-primary transition-colors"
             onClick={() => setIsOpen(!isOpen)}
           >
             <ChevronDownIcon className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />

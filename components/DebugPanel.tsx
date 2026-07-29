@@ -150,7 +150,7 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ isOpen: externalIsOpen, onToggl
       <button
         onClick={() => setIsOpen(true)}
         title="Debug Panel (Ctrl+Shift+D)"
-        className="fixed bottom-20 left-2 z-[99999] w-9 h-9 rounded-full bg-espresso/90 border border-hairline/20 text-blue-400 text-base cursor-pointer flex items-center justify-center backdrop-blur-sm opacity-60 hover:opacity-100 transition-opacity"
+        className="fixed bottom-20 start-2 z-[99999] w-11 h-11 rounded-full bg-espresso/90 border border-hairline/20 text-blue-400 text-base cursor-pointer flex items-center justify-center backdrop-blur-sm opacity-60 hover:opacity-100 transition-opacity"
       >
         🐛
       </button>
@@ -158,7 +158,7 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ isOpen: externalIsOpen, onToggl
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-[50vh] z-[99999] flex flex-col bg-slate-900/97 border-t border-slate-700/15 backdrop-blur-xl font-mono text-xs text-slate-200">
+    <div className="fixed bottom-0 start-0 end-0 h-[50vh] z-[99999] flex flex-col bg-slate-900/97 border-t border-slate-700/15 backdrop-blur-xl font-mono text-xs text-slate-200">
       <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 border-b border-slate-700/10 bg-slate-800/50 shrink-0">
         <div className="flex flex-wrap items-center gap-2 md:gap-3">
           <span className="font-bold text-blue-400 shrink-0">🐛 Debug</span>
@@ -197,7 +197,7 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ isOpen: externalIsOpen, onToggl
             </div>
           )}
 
-          <div className="flex gap-1 items-center ml-2">
+          <div className="flex gap-1 items-center ms-2">
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
@@ -242,7 +242,7 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ isOpen: externalIsOpen, onToggl
 
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('MOCK_TECHNICIAN_DATA'))}
-            className="px-2 py-0.5 rounded border border-primary/30 bg-primary/10 text-primary-400 text-[10px] cursor-pointer hover:bg-primary/20 font-bold ml-2"
+            className="px-2 py-0.5 rounded border border-primary/30 bg-primary/10 text-primary-400 text-[10px] cursor-pointer hover:bg-primary/20 font-bold ms-2"
             title="Mock Technician Flow Data"
           >
             🔧 Mock Tech
@@ -315,7 +315,7 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ isOpen: externalIsOpen, onToggl
                 onClick={() => entry.data && toggleExpand(entry.id)}
                 className={`px-3 py-0.5 border-b border-slate-700/5 cursor-default ${entry.data ? 'cursor-pointer hover:bg-slate-800/50' : ''} ${LEVEL_BG[entry.level]}`}
               >
-                <div className="flex items-start gap-2">
+                <div className="flex ltr:items-start rtl:items-end gap-2">
                   <span className="text-slate-600 shrink-0 text-[10px]" title={formatRelativeTime(entry.timestamp)}>
                     {formatTime(entry.timestamp)}
                   </span>
@@ -331,7 +331,7 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ isOpen: externalIsOpen, onToggl
                   {entry.data && <span className="text-slate-600 text-[10px]">▼</span>}
                 </div>
                 {expandedId === entry.id && entry.data && (
-                  <pre className="my-1 ml-24 p-2 bg-black/30 rounded text-slate-400 text-[11px] overflow-auto max-h-52 whitespace-pre-wrap break-words">
+                  <pre className="my-1 ms-24 p-2 bg-black/30 rounded text-slate-400 text-[11px] overflow-auto max-h-52 whitespace-pre-wrap break-words">
                     {typeof entry.data === 'string' ? entry.data : JSON.stringify(entry.data, null, 2)}
                   </pre>
                 )}
@@ -365,7 +365,7 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ isOpen: externalIsOpen, onToggl
                   <span className={`${getStatusColor(entry.status)} font-bold w-8 shrink-0 text-[11px]`}>
                     {entry.status || (entry.error ? 'ERR' : '...')}
                   </span>
-                  <span className={`shrink-0 w-14 text-[11px] text-right ${
+                  <span className={`shrink-0 w-14 text-[11px] text-end ${
                     entry.duration && entry.duration > 2000 ? 'text-amber-400' : 'text-slate-500'
                   }`}>
                     {entry.duration ? `${entry.duration}ms` : '—'}
@@ -375,7 +375,7 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ isOpen: externalIsOpen, onToggl
                   </span>
                 </div>
                 {expandedId === entry.id && (
-                  <div className="my-1 ml-24 p-2 bg-black/30 rounded text-[11px] overflow-auto max-h-52">
+                  <div className="my-1 ms-24 p-2 bg-black/30 rounded text-[11px] overflow-auto max-h-52">
                     {entry.error && (
                       <div className="text-red-400 mb-1">
                         <strong>Error:</strong> {entry.error}

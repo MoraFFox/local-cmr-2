@@ -26,7 +26,7 @@ const FloatingCameraFAB: React.FC<FloatingCameraFABProps> = ({
       onClick={handleClick}
       disabled={disabled}
       className={`
-        fixed right-4 bottom-28 z-40
+        fixed end-4 bottom-28 z-40
         w-14 h-14 rounded-full
         flex items-center justify-center
         bg-primary hover:bg-hover
@@ -43,7 +43,7 @@ const FloatingCameraFAB: React.FC<FloatingCameraFABProps> = ({
       {photoCount > 0 && (
         <span
           className="
-            absolute -top-1 -right-1
+            absolute -top-1 ltr:-right-1 rtl:-left-1
             w-5 h-5 rounded-full
             bg-ember-500 text-white
             text-xs font-medium

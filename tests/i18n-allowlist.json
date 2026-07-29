@@ -353,5 +353,15 @@
   "Multiply all:",
   "Double all quantities",
   "Halve all quantities (min 1)",
-  "Clear rating"
+  "Clear rating",
+  "This barista appears in",
+  "This barista appears\n                  in",
+  "locations. Updating here will update all records.",
+  "locations. Updating here\n                  will update all records.",
+  "القيمة التقنية (value)",
+  "مثال: finance_director",
+  "Main Office Maintenance",
+  "Main Office\n                  Maintenance",
+  "المفتاح (key)",
+  "مثال: luxor"
 ]

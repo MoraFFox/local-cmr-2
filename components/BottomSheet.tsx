@@ -88,7 +88,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     return createPortal(
         <div 
             data-testid="bottom-sheet"
-            className={`fixed inset-0 z-[9999] flex items-end justify-center transition-opacity duration-300 ${
+            className={`fixed inset-0 z-[9999] flex ltr:items-end rtl:items-start justify-center transition-opacity duration-300 ${
                 isVisible ? 'opacity-100' : 'opacity-0'
             }`}
             onClick={handleBackdropClick}
@@ -146,7 +146,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                         <button
                             onClick={requestClose}
                             aria-label="إغلاق"
-                            className="p-2 -mr-2 text-latte hover:text-cream dark:hover:text-cream rounded-full hover:bg-espresso-light dark:hover:bg-espresso-light transition-colors"
+                            className="p-2 -me-2 text-latte hover:text-cream dark:hover:text-cream rounded-full hover:bg-espresso-light dark:hover:bg-espresso-light transition-colors"
                         >
                             <XMarkIcon className="w-6 h-6" />
                         </button>

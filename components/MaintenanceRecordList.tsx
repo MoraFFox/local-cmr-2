@@ -144,8 +144,8 @@ const MaintenanceRecordRow = React.memo(({
         </div>
       </td>
       
-      <td className="px-6 py-4 whitespace-nowrap text-right">
-        <div className="flex items-center justify-end gap-2">
+      <td className="px-6 py-4 whitespace-nowrap text-end">
+        <div className="flex items-center ltr:justify-end rtl:justify-start gap-2">
           <QuickActionsMenu
             record={record}
             onQuickUpdate={onQuickUpdate}
@@ -303,7 +303,7 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
                 >
                   {field.charAt(0).toUpperCase() + field.slice(1)}
                   {sortBy === field && (
-                    <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                    <span className="ms-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                   )}
                 </button>
               ))}
@@ -343,25 +343,25 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
         <table className="w-full">
           <thead className="bg-cream dark:bg-espresso/50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
+              <th className="px-6 py-3 text-start text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
                 Date
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
+              <th className="px-6 py-3 text-start text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
                 My Technician
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
+              <th className="px-6 py-3 text-start text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
                 Client Barista
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
+              <th className="px-6 py-3 text-start text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
+              <th className="px-6 py-3 text-start text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
                 Rating
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
+              <th className="px-6 py-3 text-start text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
                 Services
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
+              <th className="px-6 py-3 text-end text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
                 Actions
               </th>
             </tr>

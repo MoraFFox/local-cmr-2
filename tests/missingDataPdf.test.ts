@@ -391,7 +391,7 @@ describe('getMissingFields - dynamic mode', () => {
     expect(result.company.some((f) => f.key === 'company.contacts.chief.email')).toBe(true);
     expect(result.company.some((f) => f.key === 'company.contacts.chief.phone')).toBe(true);
     expect(result.company.some((f) => f.key === 'company.location')).toBe(true);
-    expect(result.company.some((f) => f.key === 'company.contacts.sales.name')).toBe(true);
+    expect(result.company.some((f) => f.key === 'company.contacts.purchasing_manager.name')).toBe(true);
     expect(result.company.some((f) => f.key === 'company.contacts.accounting.email')).toBe(true);
     expect(result.company.some((f) => f.key === 'company.contacts.ops_manager.phone')).toBe(true);
 
@@ -400,19 +400,20 @@ describe('getMissingFields - dynamic mode', () => {
     const chiefEmail = result.company.find((f) => f.key === 'company.contacts.chief.email');
     expect(chiefEmail?.label).toBe('بريد مدير الشركه');
 
-    const salesName = result.company.find((f) => f.key === 'company.contacts.sales.name');
-    expect(salesName?.label).toBe('اسم مدير المبيعات');
-    const salesEmail = result.company.find((f) => f.key === 'company.contacts.sales.email');
-    expect(salesEmail?.label).toBe('بريد مدير المبيعات');
+    const purchasingName = result.company.find((f) => f.key === 'company.contacts.purchasing_manager.name');
+    expect(purchasingName?.label).toBe('اسم مدير المشتريات');
+    const purchasingEmail = result.company.find((f) => f.key === 'company.contacts.purchasing_manager.email');
+    expect(purchasingEmail?.label).toBe('بريد مدير المشتريات');
   });
 
   it('skips complete role contacts in dynamic mode', () => {
     const data = createBaseFormData({
       contacts: [
         createContact({ position: 'chief', name: 'CEO', email: 'ceo@test.com', phoneNumbers: [{ id: 1, number: '0100' }] }),
-        createContact({ position: 'sales', name: 'Sales', email: 'sales@test.com', phoneNumbers: [{ id: 2, number: '0200' }] }),
-        createContact({ position: 'accounting', name: 'Acc', email: 'acc@test.com', phoneNumbers: [{ id: 3, number: '0300' }] }),
-        createContact({ position: 'ops_manager', name: 'Ops', email: 'ops@test.com', phoneNumbers: [{ id: 4, number: '0400' }] }),
+        createContact({ position: 'purchasing_manager', name: 'Purchasing', email: 'purch@test.com', phoneNumbers: [{ id: 2, number: '0200' }] }),
+        createContact({ position: 'purchasing_officer', name: 'PurchOfficer', email: 'pofficer@test.com', phoneNumbers: [{ id: 3, number: '0300' }] }),
+        createContact({ position: 'accounting', name: 'Acc', email: 'acc@test.com', phoneNumbers: [{ id: 4, number: '0400' }] }),
+        createContact({ position: 'ops_manager', name: 'Ops', email: 'ops@test.com', phoneNumbers: [{ id: 5, number: '0500' }] }),
       ],
     });
 

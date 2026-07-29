@@ -49,7 +49,7 @@ const SelectDrawer: React.FC<SelectDrawerProps> = ({
 
     return (
         <div className="w-full">
-            <label className="block text-xs font-bold uppercase tracking-wider text-latte mb-2 ml-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-latte mb-2 ms-1">
                 {label}
             </label>
 
@@ -59,7 +59,7 @@ const SelectDrawer: React.FC<SelectDrawerProps> = ({
                 disabled={disabled}
                 className={`
                     w-full flex items-center justify-between px-4 py-3.5
-                    bg-espresso-light/50 border rounded-xl text-left transition-all
+                    bg-espresso-light/50 border rounded-xl text-start transition-all
                     ${disabled ? 'opacity-50 cursor-not-allowed border-hairline' : 'border-hairline hover:border-brass active:bg-espresso-light'}
                     ${value ? 'text-cream' : 'text-latte'}
                 `}
@@ -89,13 +89,13 @@ const SelectDrawer: React.FC<SelectDrawerProps> = ({
                 <div className="p-4 bg-espresso h-full flex flex-col overflow-hidden">
                     {searchable && (
                         <div className="mb-4 relative flex-shrink-0">
-                            <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-latte" />
+                            <MagnifyingGlassIcon className="w-5 h-5 absolute start-3 top-1/2 -translate-y-1/2 text-latte" />
                             <input
                                 type="text"
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 placeholder="Search..."
-                                className="w-full bg-espresso-light text-cream rounded-lg pl-10 pr-4 py-3 border border-hairline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-red focus:border-primary transition-colors"
+                                className="w-full bg-espresso-light text-base text-cream rounded-lg ps-10 pe-4 py-3 border border-hairline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-red focus:border-primary transition-colors"
                             />
                         </div>
                     )}
@@ -107,14 +107,14 @@ const SelectDrawer: React.FC<SelectDrawerProps> = ({
                                     key={opt.value}
                                     onClick={() => handleSelect(opt.value)}
                                     className={`
-                                        w-full flex items-center justify-between p-4 rounded-xl border transition-all text-right
+                                        w-full flex items-center justify-between p-4 rounded-xl border transition-all text-end
                                         ${String(value) === String(opt.value)
                                             ? 'bg-primary/10 border-primary/50 text-cream'
                                             : 'bg-espresso-light/30 border-hairline text-cream hover:bg-espresso-light hover:border-brass'
                                         }
                                     `}
                                 >
-                                    <div className="flex items-center gap-3 text-left">
+                                    <div className="flex items-center gap-3 text-start">
                                         {opt.icon && <span className="text-2xl">{opt.icon}</span>}
                                         <div className="flex flex-col">
                                             <span className={`font-semibold ${String(value) === String(opt.value) ? 'text-primary-400' : 'text-cream'}`}>

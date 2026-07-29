@@ -35,7 +35,7 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
   if (layout === 'horizontal') {
     return (
       <nav aria-label="Progress" className="w-full overflow-x-auto custom-scrollbar pb-2 pt-1 px-1 relative scroll-smooth" ref={scrollContainerRef}>
-        <ol className="flex items-start w-max min-w-full justify-center mx-auto">
+        <ol className="flex ltr:items-start rtl:items-end w-max min-w-full justify-center mx-auto">
           {steps.map((step, index) => {
             const isCurrent = currentStep === step.id;
             const isCompleted = completedSteps.includes(step.id) || currentStep > step.id;
@@ -45,9 +45,9 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
             return (
               <li id={`step-node-${step.id}`} key={step.id} className={`relative shrink-0 flex flex-col items-center ${isLast ? 'w-20' : 'w-28'}`}>
                 {!isLast && (
-                  <div className="absolute top-4 left-0 w-full h-[3px] -translate-x-1/2 z-0 overflow-hidden rounded-full" aria-hidden="true">
+                  <div className="absolute top-4 start-0 w-full h-[3px] ltr:-translate-x-1/2 rtl:-translate-x-1/2 z-0 overflow-hidden rounded-full" aria-hidden="true">
                     <div className="absolute inset-0 bg-hairline/40" />
-                    <div className={`absolute inset-0 transition-all duration-700 ease-in-out ${isCompleted ? 'bg-gradient-to-l from-copper-500 to-copper-400' : 'bg-primary/0'}`}
+                    <div className={`absolute inset-0 transition-all duration-700 ease-in-out ${isCompleted ? 'ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-copper-500 to-copper-400' : 'bg-primary/0'}`}
                       style={{ transformOrigin: 'right', transform: isCompleted ? 'scaleX(1)' : 'scaleX(0)' }} />
                   </div>
                 )}
@@ -119,7 +119,7 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                 disabled={!isClickable}
                 onMouseEnter={() => setHoveredStep(step.id)}
                 onMouseLeave={() => setHoveredStep(null)}
-                className={`relative z-10 flex items-start gap-3 w-full text-right py-2.5 pr-2 rounded-xl transition-all duration-200 ${
+                className={`relative z-10 flex ltr:items-start rtl:items-end gap-3 w-full text-end py-2.5 pe-2 rounded-xl transition-all duration-200 ${
                   !isClickable ? 'cursor-default' : isFuture ? 'opacity-50 hover:opacity-80 cursor-pointer' : 'cursor-pointer'
                 } ${isHovered && isClickable ? 'bg-cream-2 shadow-sm' : ''}`}
                 aria-current={isCurrent ? 'step' : undefined}
@@ -152,7 +152,7 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                   )}
                 </div>
                 {!isCurrent && !isCompleted && (
-                  <span className="text-[10px] text-latte/40 font-mono mt-1.5 ml-1">{String(index + 1).padStart(2, '0')}</span>
+                  <span className="text-[10px] text-latte/40 font-mono mt-1.5 ms-1">{String(index + 1).padStart(2, '0')}</span>
                 )}
               </button>
             </li>

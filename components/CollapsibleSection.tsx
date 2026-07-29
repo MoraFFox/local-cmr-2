@@ -14,7 +14,7 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, children
         <div className="border border-hairline dark:border-hairline rounded-lg bg-cream/50 dark:bg-espresso/20">
             <button
                 type="button" // Prevent form submission
-                className="w-full flex justify-between items-center p-3 sm:p-4 text-left"
+                className="w-full flex justify-between items-center p-3 sm:p-4 text-start"
                 onClick={() => setIsOpen(!isOpen)}
                 aria-expanded={isOpen}
             >

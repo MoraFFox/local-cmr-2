@@ -220,7 +220,7 @@ export const ErrorRecovery: React.FC<ErrorRecoveryProps> = ({
       aria-live="assertive"
     >
       {/* Header */}
-      <div className="flex items-start gap-3">
+      <div className="flex ltr:items-start rtl:items-end gap-3">
         <div className="p-2 bg-ember-500/20 rounded-lg flex-shrink-0">
           <ErrorIcon className="w-5 h-5 text-ember-500" />
         </div>

@@ -94,7 +94,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
         {/* Close Button */}
         <button
           onClick={handleClose}
-          className="absolute top-4 left-4 p-1 rounded-lg text-latte hover:text-primary hover:bg-cream-2 transition-colors"
+          className="absolute top-4 start-4 p-2 rounded-lg text-latte hover:text-primary hover:bg-cream-2 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
         >
           <XMarkIcon className="w-5 h-5" />
         </button>
@@ -141,11 +141,11 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-primary mb-2 text-right">
+                <label className="block text-sm font-medium text-primary mb-2 text-end">
                   البريد الإلكتروني
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
                     <EnvelopeIcon className="w-5 h-5 text-latte" />
                   </div>
                   <input
@@ -155,7 +155,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                     placeholder="example@email.com"
                     autoCapitalize="none"
                     autoCorrect="off"
-                    className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream-2 border border-hairline text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-right"
+                    className="w-full pe-10 ps-4 py-3 rounded-lg bg-cream-2 border border-hairline text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-end"
                     dir="ltr"
                   />
                 </div>
@@ -289,7 +289,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                 <button
                   type="button"
                   onClick={() => setContactType("email")}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all min-h-[44px] ${
                     contactType === "email"
                       ? "bg-cream text-primary shadow-sm"
                       : "text-latte hover:text-primary"
@@ -301,7 +301,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                 <button
                   type="button"
                   onClick={() => setContactType("phone")}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all min-h-[44px] ${
                     contactType === "phone"
                       ? "bg-cream text-primary shadow-sm"
                       : "text-latte hover:text-primary"
@@ -319,7 +319,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                 {contactType === "email" ? "البريد الإلكتروني" : "رقم الهاتف"}
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
                   {contactType === "email" ? (
                     <EnvelopeIcon className="h-5 w-5 text-latte" />
                   ) : (
@@ -340,7 +340,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                   placeholder={contactType === "email" ? "example@email.com" : "01xxxxxxxxx"}
                   autoCapitalize="none"
                   autoCorrect="off"
-                  className="block w-full pr-10 pl-4 py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-right"
+                  className="block w-full pe-10 ps-4 py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-end"
                   dir="ltr"
                 />
               </div>
@@ -352,7 +352,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                 {ar.login.passwordLabel}
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
                   <LockClosedIcon className="h-5 w-5 text-latte" />
                 </div>
                 <input
@@ -360,7 +360,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={ar.login.passwordPlaceholder}
-                  className="block w-full pr-10 pl-4 py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-right"
+                  className="block w-full pe-10 ps-4 py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-end"
                   dir="rtl"
                 />
               </div>
@@ -381,7 +381,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
-                  className="text-sm text-primary hover:text-primary transition-colors"
+                  className="text-sm text-primary hover:text-primary transition-colors min-h-[44px] px-2"
                 >
                   نسيت كلمة المرور؟
                 </button>
@@ -397,7 +397,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
 
         {/* Invite-Only Message */}
         <div className="mt-4 p-3 bg-cream-2 rounded-lg border border-hairline">
-          <div className="flex items-start gap-2">
+          <div className="flex ltr:items-start rtl:items-end gap-2">
             <InformationCircleIcon className="w-5 h-5 text-latte flex-shrink-0 mt-0.5" />
             <div className="text-sm text-latte">
               <p className="font-medium">إنشاء الحساب عبر رابط الدعوة فقط. تواصل مع المدير.</p>

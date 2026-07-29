@@ -86,7 +86,7 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
           <div className="py-1">
             <button
               onClick={handleToggleSolved}
-              className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
+              className="w-full px-4 py-3 text-start flex items-center gap-3 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
             >
               {record.problemSolved ? (
                 <>
@@ -107,7 +107,7 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
                   setShowRatingPicker(!showRatingPicker);
                   setShowDatePicker(false);
                 }}
-                className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
+                className="w-full px-4 py-3 text-start flex items-center gap-3 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
               >
                 <StarIcon className="w-5 h-5 text-yellow-500" />
                 <span className="text-sm text-text-primary">{t.common.changeRating}</span>
@@ -131,7 +131,7 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
                   setShowDatePicker(!showDatePicker);
                   setShowRatingPicker(false);
                 }}
-                className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
+                className="w-full px-4 py-3 text-start flex items-center gap-3 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
               >
                 <CalendarIcon className="w-5 h-5 text-text-primary" />
                 <span className="text-sm text-text-primary">{t.common.changeDate}</span>
@@ -160,7 +160,7 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
                       setShowRatingPicker(false);
                       setShowDatePicker(false);
                     }}
-                    className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-ember-500/10 dark:hover:bg-ember-500/20 transition-colors text-ember-700 dark:text-ember-300"
+                    className="w-full px-4 py-3 text-start flex items-center gap-3 hover:bg-ember-500/10 dark:hover:bg-ember-500/20 transition-colors text-ember-700 dark:text-ember-300"
                   >
                     <TrashIcon className="w-5 h-5" />
                     <span className="text-sm font-medium">{t.common.deleteRecord}</span>
@@ -168,7 +168,7 @@ const QuickActionsMenu: React.FC<QuickActionsMenuProps> = ({
 
                   {showDeleteConfirm && (
                     <div className="px-4 py-3 bg-ember-500/10 dark:bg-ember-500/20 border-t border-ember-500/20 dark:border-ember-500/30">
-                      <div className="flex items-start gap-2 mb-3">
+                      <div className="flex ltr:items-start rtl:items-end gap-2 mb-3">
                         <ExclamationTriangleIcon className="w-5 h-5 text-ember-700 dark:text-ember-300 flex-shrink-0 mt-0.5" />
                         <p className="text-sm text-ember-700 dark:text-ember-300">
                           {t.common.areYouSure}

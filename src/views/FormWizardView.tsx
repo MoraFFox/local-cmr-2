@@ -743,7 +743,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
               className="mb-3 sm:mb-6"
             />
           </section>
-          <div className="flex justify-end mb-4">
+          <div className="flex ltr:justify-end rtl:justify-start mb-4">
             <Button variant="secondary" onClick={() => setShowPreview(!showPreview)}>
               {showPreview ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
               {showPreview ? "إخفاء المعاينة" : "معاينة حية"}

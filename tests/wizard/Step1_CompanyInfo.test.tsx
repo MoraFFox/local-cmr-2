@@ -3,7 +3,7 @@
  */
 import React from "react";
 import { describe, it, expect } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent } from "../testUtils";
 import { Step1_CompanyInfo } from "../../src/views/wizard/Step1_CompanyInfo";
 import { createMockActions, createFormData, createMachine } from "./helpers";
 

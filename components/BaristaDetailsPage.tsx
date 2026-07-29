@@ -119,7 +119,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
       <div className='flex items-center gap-4'>
         <button
           onClick={onBack}
-          className='p-2 rounded-full bg-cream dark:bg-espresso-light shadow-sm border border-hairline text-primary dark:text-latte/70 hover:text-primary dark:hover:text-primary-400 transition-colors'
+          className='p-2 min-w-[44px] min-h-[44px] rounded-full bg-cream dark:bg-espresso-light shadow-sm border border-hairline text-primary dark:text-latte/70 hover:text-primary dark:hover:text-primary-400 transition-colors flex items-center justify-center'
         >
           <ArrowLeftIcon className='w-5 h-5' />
         </button>
@@ -135,7 +135,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
 
       {/* Profile Overview Card */}
       <div className='bg-cream dark:bg-espresso-light rounded-2xl shadow-xl border border-hairline overflow-hidden'>
-        <div className='p-6 sm:p-8 flex flex-col md:flex-row gap-8 items-center md:items-start text-center md:text-left'>
+        <div className='p-6 sm:p-8 flex flex-col md:flex-row gap-8 items-center md:ltr:items-start rtl:items-end text-center md:text-start'>
           <Avatar
             name={baristaName}
             className='w-32 h-32 text-4xl shadow-sm border-4 border-cream dark:border-espresso-light'
@@ -218,21 +218,21 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
           </h3>
 
           {/* Filters Toolbar */}
-          <div className='flex flex-wrap items-center gap-3'>
-            <div className='relative'>
-              <MagnifyingGlassIcon className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-latte' />
+          <div className='flex flex-col sm:flex-row sm:items-center gap-3'>
+            <div className='relative w-full sm:w-auto'>
+              <MagnifyingGlassIcon className='absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-latte' />
               <input
                 type='text'
                 placeholder='Search machines, notes...'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className='pl-9 pr-3 py-1.5 text-xs rounded-full border-hairline bg-slate-50 dark:bg-slate-900 text-primary dark:text-white focus:ring-primary focus:border-primary'
+                className='w-full sm:w-auto ps-9 pe-3 py-2.5 text-base rounded-full border-hairline bg-slate-50 dark:bg-slate-900 text-primary dark:text-white focus:ring-primary focus:border-primary'
               />
             </div>
             <select
               value={filterClient}
               onChange={(e) => setFilterClient(e.target.value)}
-              className='text-xs rounded-full border-hairline bg-slate-50 dark:bg-slate-900 text-primary dark:text-latte/70 py-1.5 focus:ring-primary'
+              className='w-full sm:w-auto text-base rounded-full border-hairline bg-slate-50 dark:bg-slate-900 text-primary dark:text-latte/70 py-2.5 ps-3 pe-8 focus:ring-primary'
             >
               <option value='all'>All Clients</option>
               {clientsList.map((c) => (
@@ -244,7 +244,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className='text-xs rounded-full border-hairline bg-slate-50 dark:bg-slate-900 text-primary dark:text-latte/70 py-1.5 focus:ring-primary'
+              className='w-full sm:w-auto text-base rounded-full border-hairline bg-slate-50 dark:bg-slate-900 text-primary dark:text-latte/70 py-2.5 ps-3 pe-8 focus:ring-primary'
             >
               <option value='all'>All Types</option>
               <option value='scheduled'>Scheduled</option>
@@ -254,7 +254,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
         </div>
 
         <div className='overflow-x-auto'>
-          <table className='w-full text-left border-collapse'>
+          <table className='w-full text-start border-collapse'>
             <thead>
               <tr className='bg-cream/50 dark:bg-espresso/50 text-latte text-[11px] font-bold uppercase tracking-wider'>
                 <th className='px-6 py-4'>Date</th>
@@ -263,7 +263,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                 <th className='px-6 py-4'>Type</th>
                 <th className='px-6 py-4 text-center'>Rating</th>
                 <th className='px-6 py-4'>Status / Follow-up</th>
-                <th className='px-6 py-4 text-right'>View</th>
+                <th className='px-6 py-4 text-end'>View</th>
               </tr>
             </thead>
             <tbody className='divide-y divide-hairline'>
@@ -347,7 +347,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                           )}
                       </div>
                     </td>
-                    <td className='px-6 py-4 text-right'>
+                    <td className='px-6 py-4 text-end'>
                       <button
                         onClick={() => setSelectedRecord(rec)}
                         className='text-latte group-hover:text-primary transition-colors p-2 rounded-full hover:bg-cream-2 dark:hover:bg-primary/10'
@@ -572,7 +572,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
             </div>
 
             {/* Modal Footer */}
-            <div className='px-6 py-4 border-t border-hairline text-right'>
+            <div className='px-6 py-4 border-t border-hairline text-end'>
               <button
                 onClick={() => setSelectedRecord(null)}
                 className='btn-primary px-6 py-2 font-bold rounded-xl transition-all px-8'

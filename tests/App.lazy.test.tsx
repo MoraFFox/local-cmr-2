@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from './testUtils';
 import { MemoryRouter } from 'react-router-dom';
 
 // Mock all the async view imports so React.lazy resolves synchronously in tests
@@ -191,21 +191,21 @@ describe('App — Lazy Loading & Suspense', () => {
     it('sets document.title for the history view', async () => {
       renderApp('/');
       await waitFor(() => {
-        expect(document.title).toBe('سجل الصيانة — ميدوز');
+        expect(document.title).toBe('سجل عمليات الإرسال — ميدوز');
       });
     });
 
     it('sets document.title for the baristas view', async () => {
       renderApp('/baristas');
       await waitFor(() => {
-        expect(document.title).toBe('الفنيون — ميدوز');
+        expect(document.title).toBe('أداء الباريستا — ميدوز');
       });
     });
 
     it('sets document.title for the print view', async () => {
       renderApp('/print');
       await waitFor(() => {
-        expect(document.title).toBe('طباعة — ميدوز');
+        expect(document.title).toBe('طباعة أمر العمل — ميدوز');
       });
     });
   });

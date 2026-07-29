@@ -46,7 +46,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             // Footer holds the No / Yes buttons. Rendered in SafeModal's
             // flex-shrink-0 footer slot so it stays pinned below the message.
             renderFooter={() => (
-                <div className="flex justify-end space-x-3 px-6 py-4 border-t border-hairline dark:border-hairline bg-cream-2/30 dark:bg-espresso-light/20">
+                <div className="flex ltr:justify-end rtl:justify-start ltr:space-x-3 rtl:space-x-reverse px-6 py-4 border-t border-hairline dark:border-hairline bg-cream-2/30 dark:bg-espresso-light/20">
                     <button
                         onClick={onClose}
                         disabled={isConfirming}

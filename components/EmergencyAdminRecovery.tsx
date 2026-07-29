@@ -153,7 +153,7 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
   return (
     <div className="min-h-screen bg-gradient-to-br from-cream to-ember-50 dark:from-espresso dark:to-ember-500/10 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="flex justify-end mb-4">
+        <div className="flex ltr:justify-end rtl:justify-start mb-4">
           <button
             onClick={() => setLang(lang === "ar" ? "en" : "ar")}
             className="text-sm text-latte dark:text-latte/70 hover:text-primary dark:hover:text-latte transition-colors"
@@ -174,7 +174,7 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
           </div>
 
           {error && (
-            <div className="mb-6 p-4 rounded-lg border border-ember-500/30 dark:border-ember-500/30 bg-ember-50 dark:bg-ember-500/10 text-sm text-ember-700 dark:text-ember-300 text-center flex items-start justify-center gap-2">
+            <div className="mb-6 p-4 rounded-lg border border-ember-500/30 dark:border-ember-500/30 bg-ember-50 dark:bg-ember-500/10 text-sm text-ember-700 dark:text-ember-300 text-center flex ltr:items-start rtl:items-end justify-center gap-2">
               <ExclamationCircleIcon className="w-5 h-5 mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
@@ -192,7 +192,7 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
                 {t.email}
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
                   <UserIcon className="w-5 h-5 text-latte" />
                 </div>
                 <input
@@ -202,7 +202,7 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
                   placeholder="admin@example.com"
                   autoCapitalize="none"
                   autoCorrect="off"
-                  className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
+                  className="w-full pe-10 ps-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
                   dir="ltr"
                 />
               </div>
@@ -213,7 +213,7 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
                 {t.name}
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
                   <UserIcon className="w-5 h-5 text-latte" />
                 </div>
                 <input
@@ -221,7 +221,7 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   placeholder="اسم المدير"
-                  className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
+                  className="w-full pe-10 ps-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
                   dir={lang === "ar" ? "rtl" : "ltr"}
                 />
               </div>
@@ -232,7 +232,7 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
                 {t.password}
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
                   <LockClosedIcon className="w-5 h-5 text-latte" />
                 </div>
                 <input
@@ -240,7 +240,7 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="••••••••"
-                  className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
+                  className="w-full pe-10 ps-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
                   dir="ltr"
                 />
               </div>
@@ -251,7 +251,7 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
                 {t.confirmPassword}
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
                   <LockClosedIcon className="w-5 h-5 text-latte" />
                 </div>
                 <input
@@ -259,7 +259,7 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
                   value={confirmPassword}
                   onChange={(event) => setConfirmPassword(event.target.value)}
                   placeholder="••••••••"
-                  className="w-full pr-10 pl-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
+                  className="w-full pe-10 ps-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
                   dir="ltr"
                 />
               </div>
