@@ -160,7 +160,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                     placeholder="admin@example.com"
                     autoCapitalize="none"
                     autoCorrect="off"
-                    className="input-base pe-10"
+                    className="input-base pe-14"
                     dir="ltr"
                   />
                 </div>
@@ -380,7 +380,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
                 placeholder={getPlaceholder()}
                 autoCapitalize="none"
                 autoCorrect="off"
-                className="input-base pe-10"
+                className="input-base pe-14"
                 dir="ltr"
               />
             </div>
@@ -399,7 +399,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="input-base pe-10"
+                className="input-base pe-14"
                 dir="ltr"
               />
             </div>

@@ -446,7 +446,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={copy[lang].namePlaceholder}
-                  className={`block w-full ${lang === 'ar' ? 'pe-10 ps-4' : 'ps-10 pe-4'} py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all`}
+                  className={`block w-full ${lang === 'ar' ? 'pe-14 ps-4' : 'ps-10 pe-4'} py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all`}
                   dir={lang === 'ar' ? 'rtl' : 'ltr'}
                 />
               </div>
@@ -467,7 +467,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="email@example.com"
-                    className={`block w-full ${lang === 'ar' ? 'pe-10 ps-4' : 'ps-10 pe-4'} py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all`}
+                    className={`block w-full ${lang === 'ar' ? 'pe-14 ps-4' : 'ps-10 pe-4'} py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all`}
                     dir="ltr"
                   />
                 </div>
@@ -488,7 +488,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={copy[lang].passwordPlaceholder}
-                  className={`block w-full ${lang === 'ar' ? 'pe-10 ps-4' : 'ps-10 pe-4'} py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all`}
+                  className={`block w-full ${lang === 'ar' ? 'pe-14 ps-4' : 'ps-10 pe-4'} py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all`}
                   dir="ltr"
                 />
               </div>
@@ -513,7 +513,7 @@ const InviteSignup: React.FC<InviteSignupProps> = ({
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder={copy[lang].confirmPasswordPlaceholder}
-                  className={`block w-full ${lang === 'ar' ? 'pe-10 ps-4' : 'ps-10 pe-4'} py-3 bg-cream text-primary rounded-lg border ${
+                  className={`block w-full ${lang === 'ar' ? 'pe-14 ps-4' : 'ps-10 pe-4'} py-3 bg-cream text-primary rounded-lg border ${
                     password && confirmPassword && password !== confirmPassword
                       ? 'border-ember-500'
                       : 'border-hairline'

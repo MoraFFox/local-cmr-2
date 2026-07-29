@@ -231,7 +231,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pe-10 ps-4 py-3 rounded-lg bg-cream border border-hairline text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="w-full pe-14 ps-4 py-3 rounded-lg bg-cream border border-hairline text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 dir="ltr"
               />
             </div>
@@ -250,7 +250,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pe-10 ps-4 py-3 rounded-lg bg-cream border border-hairline text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="w-full pe-14 ps-4 py-3 rounded-lg bg-cream border border-hairline text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 dir="ltr"
               />
             </div>

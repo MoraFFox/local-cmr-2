@@ -73,7 +73,7 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, err
             props.onFocus?.(e);
           }}
           {...props}
-          className={`block w-full ${icon ? 'pe-10' : 'pe-4'} ${isCombobox ? 'ps-10' : 'ps-4'} h-[44px] sm:h-[50px] bg-cream text-base text-primary rounded-lg placeholder-latte focus:outline-none focus:ring-2 border transition-colors ${
+          className={`block w-full ${icon ? 'pe-14' : 'pe-4'} ${isCombobox ? 'ps-10' : 'ps-4'} h-[44px] sm:h-[50px] bg-cream text-base text-primary rounded-lg placeholder-latte focus:outline-none focus:ring-2 border transition-colors ${
             error
               ? 'border-ember-500 dark:border-ember-400 focus:border-primary focus:ring-primary/20 animate-shake'
               : 'border-hairline focus:border-primary focus:ring-primary/20'

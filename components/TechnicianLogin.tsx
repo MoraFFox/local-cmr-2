@@ -155,7 +155,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                     placeholder="example@email.com"
                     autoCapitalize="none"
                     autoCorrect="off"
-                    className="w-full pe-10 ps-4 py-3 rounded-lg bg-cream-2 border border-hairline text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-end"
+                    className="w-full pe-14 ps-4 py-3 rounded-lg bg-cream-2 border border-hairline text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-end"
                     dir="ltr"
                   />
                 </div>
@@ -340,7 +340,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                   placeholder={contactType === "email" ? "example@email.com" : "01xxxxxxxxx"}
                   autoCapitalize="none"
                   autoCorrect="off"
-                  className="block w-full pe-10 ps-4 py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-end"
+                  className="block w-full pe-14 ps-4 py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-end"
                   dir="ltr"
                 />
               </div>
@@ -360,7 +360,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={ar.login.passwordPlaceholder}
-                  className="block w-full pe-10 ps-4 py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-end"
+                  className="block w-full pe-14 ps-4 py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-end"
                   dir="rtl"
                 />
               </div>

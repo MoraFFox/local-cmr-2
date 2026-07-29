@@ -202,7 +202,7 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
                   placeholder="admin@example.com"
                   autoCapitalize="none"
                   autoCorrect="off"
-                  className="w-full pe-10 ps-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
+                  className="w-full pe-14 ps-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
                   dir="ltr"
                 />
               </div>
@@ -221,7 +221,7 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   placeholder="اسم المدير"
-                  className="w-full pe-10 ps-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
+                  className="w-full pe-14 ps-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
                   dir={lang === "ar" ? "rtl" : "ltr"}
                 />
               </div>
@@ -240,7 +240,7 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="••••••••"
-                  className="w-full pe-10 ps-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
+                  className="w-full pe-14 ps-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
                   dir="ltr"
                 />
               </div>
@@ -259,7 +259,7 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
                   value={confirmPassword}
                   onChange={(event) => setConfirmPassword(event.target.value)}
                   placeholder="••••••••"
-                  className="w-full pe-10 ps-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
+                  className="w-full pe-14 ps-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
                   dir="ltr"
                 />
               </div>

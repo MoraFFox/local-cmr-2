@@ -96,7 +96,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                       data-field={fieldPrefix ? `${fieldPrefix}.${contactIndex}.position` : undefined}
                       value={contact.position}
                       onChange={(e) => actions.handleContactChange(e, path, contactIndex)}
-                      className="block w-full pe-10 h-[50px] bg-cream text-base text-primary rounded-lg placeholder-latte focus:outline-none focus:ring-2 border border-hairline focus:border-primary focus:ring-primary/20 transition-colors appearance-none"
+                      className="block w-full pe-14 h-[50px] bg-cream text-base text-primary rounded-lg placeholder-latte focus:outline-none focus:ring-2 border border-hairline focus:border-primary focus:ring-primary/20 transition-colors appearance-none"
                     >
                       {contactPositions.map((pos) => (
                         <option key={pos.value} value={pos.value}>
