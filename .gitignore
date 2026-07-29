@@ -48,6 +48,9 @@ FIX_PLAN.md
 .orchids/
 .vercel
 
+# Freebuff local desktop database files
+.freebuff/*.db*
+
 # Playwright MCP scratch output (local verification only)
 .playwright-mcp/
 *-screenshot.png
