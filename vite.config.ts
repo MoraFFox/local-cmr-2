@@ -73,6 +73,7 @@ export default defineConfig(({ mode }) => {
                   req.url?.startsWith('/admin/recovery') ||
                   req.url?.match(/^\/admin\/invite(\?.*)?$/) ||
                   req.url === '/reset-password' ||
+                  req.url === '/records' ||
                   req.url?.match(/^\/reset-password(\?.*)?$/)) {
                 req.url = '/index.html';
               }

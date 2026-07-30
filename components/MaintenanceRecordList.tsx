@@ -1,10 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { MaintenanceRecord } from '../types';
 import { 
   PencilIcon, 
-  BoltIcon,
   CheckCircleIcon,
-  XCircleIcon,
   CalendarIcon,
   UserIcon,
   ChevronLeftIcon,
@@ -27,17 +25,23 @@ interface MaintenanceRecordListProps {
 
 const ITEMS_PER_PAGE = 10;
 
-// Fix 4.8: Create a memoized date formatter with caching.
-// Use an explicit 'dd MMM yyyy' format so the day always appears before
-// the month and the order is not affected by locale/browser settings.
+// Sort fields available for column-header click sorting.
+type SortField = 'date' | 'lastModified' | 'baristaName' | 'status' | 'rating' | 'serviceCount';
+
+// Memoized date formatter with caching. Handles both 'YYYY-MM-DD' and
+// ISO-8601 timestamp strings so maintenanceDate and lastModified share
+// one display helper.
 const createDateFormatter = () => {
   const cache = new Map<string, string>();
-  return (dateString: string) => {
+  return (dateString: string | undefined) => {
+    if (!dateString) return '-';
     if (cache.has(dateString)) {
       return cache.get(dateString)!;
     }
-    // Parse as a local date (noon) to avoid UTC timezone shifting the day.
-    const date = new Date(`${dateString}T12:00:00`);
+    // ISO strings include 'T' or end with 'Z' — parse directly.
+    const date = dateString.includes('T')
+      ? new Date(dateString)
+      : new Date(`${dateString}T12:00:00`);
     if (isNaN(date.getTime())) {
       return dateString;
     }
@@ -50,7 +54,6 @@ const createDateFormatter = () => {
   };
 };
 
-// Fix 4.8: Use the memoized date formatter
 const formatDate = createDateFormatter();
 
 // Hoisted so both the desktop table row and the mobile card reuse them.
@@ -82,6 +85,30 @@ const renderStars = (rating: number | undefined) => {
   if (!rating) return <span className="text-latte dark:text-latte text-sm">-</span>;
   return <StarRatingDisplay value={rating} size="xs" />;
 };
+
+// Reusable clickable column header with sort indicator.
+const SortableHeader: React.FC<{
+  field: SortField;
+  label: string;
+  sortBy: SortField;
+  sortOrder: 'asc' | 'desc';
+  sortArrow: (f: SortField) => React.ReactNode;
+  handleSort: (f: SortField) => void;
+}> = ({ field, label, sortBy, sortOrder, sortArrow, handleSort }) => (
+  <th className="px-6 py-3 text-start text-xs font-medium uppercase tracking-wider">
+    <button
+      onClick={() => handleSort(field)}
+      className={`inline-flex items-center gap-1 transition-colors rounded hover:text-primary dark:hover:text-primary-400 ${
+        sortBy === field
+          ? 'text-primary dark:text-primary-400 font-bold'
+          : 'text-latte dark:text-latte'
+      }`}
+    >
+      {label}
+      {sortArrow(field)}
+    </button>
+  </th>
+);
 
 // Fix 4.5: Extract and memoize the row component
 interface MaintenanceRecordRowProps {
@@ -143,6 +170,12 @@ const MaintenanceRecordRow = React.memo(({
           )}
         </div>
       </td>
+
+      <td className="px-6 py-4 whitespace-nowrap">
+        <span className="text-xs text-latte dark:text-latte">
+          {formatDate(record.lastModified)}
+        </span>
+      </td>
       
       <td className="px-6 py-4 whitespace-nowrap text-end">
         <div className="flex items-center ltr:justify-end rtl:justify-start gap-2">
@@ -203,15 +236,22 @@ const MaintenanceRecordCardMobile: React.FC<MaintenanceRecordRowProps> = ({
       </span>
     </div>
 
-    {/* Bottom: rating + services + actions */}
+    {/* Bottom: rating + services + modified + actions */}
     <div className="mt-3 flex items-center justify-between gap-3">
-      <div className="flex items-center gap-3 min-w-0">
-        {renderStars(record.visitRating)}
-        <span className="text-xs text-latte dark:text-latte truncate">
-          {record.servicesPerformed.length > 0
-            ? `${record.servicesPerformed.length} service(s)`
-            : 'No services'}
-        </span>
+      <div className="flex flex-col gap-1 min-w-0">
+        <div className="flex items-center gap-3">
+          {renderStars(record.visitRating)}
+          <span className="text-xs text-latte dark:text-latte">
+            {record.servicesPerformed.length > 0
+              ? `${record.servicesPerformed.length} service(s)`
+              : 'No services'}
+          </span>
+        </div>
+        {record.lastModified && (
+          <span className="text-[10px] text-latte/70 dark:text-latte/70">
+            Edited {formatDate(record.lastModified)}
+          </span>
+        )}
       </div>
       <div className="flex items-center gap-1 shrink-0">
         <QuickActionsMenu
@@ -241,7 +281,7 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
   onDelete
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState<'date' | 'status' | 'rating'>('date');
+  const [sortBy, setSortBy] = useState<SortField>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const sortedRecords = React.useMemo(() => {
@@ -253,11 +293,20 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
         case 'date':
           comparison = new Date(a.maintenanceDate).getTime() - new Date(b.maintenanceDate).getTime();
           break;
+        case 'lastModified':
+          comparison = (new Date(a.lastModified || a.maintenanceDate).getTime()) - (new Date(b.lastModified || b.maintenanceDate).getTime());
+          break;
+        case 'baristaName':
+          comparison = (a.baristaName || '').localeCompare(b.baristaName || '');
+          break;
         case 'status':
           comparison = Number(a.problemSolved) - Number(b.problemSolved);
           break;
         case 'rating':
           comparison = (a.visitRating || 0) - (b.visitRating || 0);
+          break;
+        case 'serviceCount':
+          comparison = a.servicesPerformed.length - b.servicesPerformed.length;
           break;
       }
       
@@ -270,45 +319,33 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedRecords = sortedRecords.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  const handleSort = (field: 'date' | 'status' | 'rating') => {
+  const handleSort = (field: SortField) => {
     if (sortBy === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
       setSortBy(field);
-      setSortOrder('desc');
+      // Sensible defaults per field: newest-first for dates, A-Z for names, high-low for counts.
+      setSortOrder(field === 'baristaName' ? 'asc' : 'desc');
     }
     setCurrentPage(1);
+  };
+
+  // Shared sort indicator for column headers.
+  const sortArrow = (field: SortField) => {
+    if (sortBy !== field) return null;
+    return <span className="ms-1 text-xs">{sortOrder === 'asc' ? '▲' : '▼'}</span>;
   };
 
   return (
     <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline">
       <div className="px-6 py-4 border-b border-hairline dark:border-hairline bg-cream dark:bg-espresso/50 rounded-t-[0.75rem]">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-primary dark:text-white">
             {branchName}
           </h3>
-
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-latte dark:text-latte">Sort by:</span>
-            <div className="flex items-center gap-1">
-              {(['date', 'status', 'rating'] as const).map((field) => (
-                <button
-                  key={field}
-                  onClick={() => handleSort(field)}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-                    sortBy === field
-                      ? 'bg-primary/10 text-primary-800 dark:bg-primary/10 dark:text-primary-400'
-                      : 'text-primary dark:text-latte hover:bg-cream dark:hover:bg-espresso-light/50'
-                  }`}
-                >
-                  {field.charAt(0).toUpperCase() + field.slice(1)}
-                  {sortBy === field && (
-                    <span className="ms-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
+          <span className="text-xs text-latte dark:text-latte">
+            Click a column header to sort • {records.length} record{records.length !== 1 ? 's' : ''}
+          </span>
         </div>
       </div>
 
@@ -338,29 +375,20 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
         )}
       </div>
 
-      {/* Desktop: 7-column table (hidden on phones). */}
+      {/* Desktop: 8-column table (hidden on phones). */}
       <div className="hidden sm:block overflow-x-auto invisible-scrollbar">
         <table className="w-full">
           <thead className="bg-cream dark:bg-espresso/50">
             <tr>
+              <SortableHeader field="date" label="Date" {...{ sortBy, sortOrder, sortArrow, handleSort }} />
+              <SortableHeader field="baristaName" label="Technician" {...{ sortBy, sortOrder, sortArrow, handleSort }} />
               <th className="px-6 py-3 text-start text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
-                Date
+                Client
               </th>
-              <th className="px-6 py-3 text-start text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
-                My Technician
-              </th>
-              <th className="px-6 py-3 text-start text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
-                Client Barista
-              </th>
-              <th className="px-6 py-3 text-start text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-start text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
-                Rating
-              </th>
-              <th className="px-6 py-3 text-start text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
-                Services
-              </th>
+              <SortableHeader field="status" label="Status" {...{ sortBy, sortOrder, sortArrow, handleSort }} />
+              <SortableHeader field="rating" label="Rating" {...{ sortBy, sortOrder, sortArrow, handleSort }} />
+              <SortableHeader field="serviceCount" label="Services" {...{ sortBy, sortOrder, sortArrow, handleSort }} />
+              <SortableHeader field="lastModified" label="Modified" {...{ sortBy, sortOrder, sortArrow, handleSort }} />
               <th className="px-6 py-3 text-end text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
                 Actions
               </th>
@@ -369,7 +397,7 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
           <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
             {paginatedRecords.length === 0 ? (
               <tr className="border-b border-hairline dark:border-hairline/50">
-                <td colSpan={7} className="py-8">
+                <td colSpan={8} className="py-8">
                   <EmptyState 
                     icon={<WrenchScrewdriverIcon className="w-8 h-8" />} 
                     title="لا يوجد سجل صيانة" 

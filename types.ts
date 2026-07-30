@@ -128,6 +128,7 @@ export interface MaintenanceRecord {
   nextVisitDate?: string;
   photos?: MaintenancePhoto[];
   technicianId?: string;
+  lastModified?: string; // ISO timestamp of last edit
 }
 
 export interface FormData {

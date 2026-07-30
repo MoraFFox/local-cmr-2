@@ -202,6 +202,12 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
   };
 
   const handleSaveRecord = (updatedRecord: MaintenanceRecord) => {
+    // Stamp lastModified so the list can sort by recent edits.
+    const stampedRecord: MaintenanceRecord = {
+      ...updatedRecord,
+      lastModified: new Date().toISOString(),
+    };
+
     // Deep-clone so nested arrays/objects (branches[].maintenanceHistory) are
     // never mutated in place on the existing state (Change 4).
     const newSubmission = structuredClone(localSubmission) as FormData;
@@ -214,10 +220,10 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
     if (targetIsMainOffice) {
       if (isStagedNew) {
         // Append the newly-added record.
-        newSubmission.maintenanceHistory = [...newSubmission.maintenanceHistory, updatedRecord];
+        newSubmission.maintenanceHistory = [...newSubmission.maintenanceHistory, stampedRecord];
       } else {
         const newHistory = [...newSubmission.maintenanceHistory];
-        newHistory[editingRecordIndex] = updatedRecord;
+        newHistory[editingRecordIndex] = stampedRecord;
         newSubmission.maintenanceHistory = newHistory;
       }
     } else {
@@ -227,11 +233,11 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
         if (isStagedNew) {
           newSubmission.branches[branchIndex].maintenanceHistory = [
             ...newSubmission.branches[branchIndex].maintenanceHistory,
-            updatedRecord
+            stampedRecord
           ];
         } else {
           const newHistory = [...newSubmission.branches[branchIndex].maintenanceHistory];
-          newHistory[editingRecordIndex] = updatedRecord;
+          newHistory[editingRecordIndex] = stampedRecord;
           newSubmission.branches[branchIndex].maintenanceHistory = newHistory;
         }
       }
@@ -260,13 +266,15 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
 
   const handleQuickUpdate = (recordId: MaintenanceRecord['id'], updates: Partial<MaintenanceRecord>) => {
     const newSubmission = structuredClone(localSubmission) as FormData;
+    // Stamp lastModified so quick toggles (e.g. problemSolved) show as recent edits.
+    const stampedUpdates = { ...updates, lastModified: new Date().toISOString() };
 
     if (selectedBranch?.isMainOffice) {
       const recordIndex = newSubmission.maintenanceHistory.findIndex(r => r.id === recordId);
       if (recordIndex !== -1) {
         newSubmission.maintenanceHistory[recordIndex] = {
           ...newSubmission.maintenanceHistory[recordIndex],
-          ...updates
+          ...stampedUpdates
         };
       }
     } else if (selectedBranch) {
@@ -276,7 +284,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
         if (recordIndex !== -1) {
           newSubmission.branches[branchIndex].maintenanceHistory[recordIndex] = {
             ...newSubmission.branches[branchIndex].maintenanceHistory[recordIndex],
-            ...updates
+            ...stampedUpdates
           };
         }
       }

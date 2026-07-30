@@ -15,6 +15,7 @@ const SubmissionDetailsView = lazy(() => import("./src/views/SubmissionDetailsVi
 const BaristaDetailsView = lazy(() => import("./src/views/BaristaDetailsView"));
 const MaintenanceEditView = lazy(() => import("./src/views/MaintenanceEditView"));
 const UserAccessView = lazy(() => import("./src/views/UserAccessView"));
+const GlobalRecordsView = lazy(() => import("./src/views/GlobalRecordsView"));
 
 import type { FormData, MaintenanceRecord } from "./types";
 import type { Draft } from "./hooks/useDrafts";
@@ -64,6 +65,7 @@ const VIEW_TITLE_MAP: Partial<Record<ViewKey, keyof import('./utils/arabicTransl
   technicians: 'accessMgmt',
   history: 'history',
   'maintenance-edit': 'details',
+  'all-records': 'history',
 };
 
 const App: React.FC<AppProps> = ({ onAdminLogout }) => {
@@ -326,14 +328,15 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
 
   // ── View actions ──
   const handleViewChange = useCallback(
-    (newView: "history" | "form" | "baristas" | "technicians") => {
+    (newView: "history" | "form" | "baristas" | "technicians" | "all-records") => {
       const item = NAV_ITEMS.find((n) => n.key === newView);
       if (item) navigate(item.path);
       setIsMobileMenuOpen(false);
       if (
         newView === "history" ||
         newView === "baristas" ||
-        newView === "technicians"
+        newView === "technicians" ||
+        newView === "all-records"
       ) {
         setSelectedBarista(null);
       }
@@ -601,6 +604,14 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
         );
       case "technicians":
         return <UserAccessView />;
+      case "all-records":
+        return (
+          <GlobalRecordsView
+            submissions={submissions}
+            getTechnicianDisplayName={getTechnicianDisplayName}
+            isLoading={isLoading}
+          />
+        );
       case "history":
         return (
           <HistoryView

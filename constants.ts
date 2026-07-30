@@ -8,7 +8,8 @@ export type ViewKey =
   | "baristas"
   | "barista-details"
   | "maintenance-edit"
-  | "technicians";
+  | "technicians"
+  | "all-records";
 
 export interface NavItem {
   key: ViewKey;
@@ -22,12 +23,14 @@ export const NAV_ITEMS: NavItem[] = [
   { key: "history", path: "/", label: "السجل", iconName: "HomeIcon", inSidebar: true },
   { key: "baristas", path: "/baristas", label: "أداء الباريستا", iconName: "UsersIcon", inSidebar: true },
   { key: "technicians", path: "/users", label: "إدارة الفنيين", iconName: "UserGroupIcon", inSidebar: true },
+  { key: "all-records", path: "/records", label: "كل السجلات", iconName: "DocumentTextIcon", inSidebar: true },
   { key: "form", path: "/companies/new", label: "نموذج جديد", iconName: "DocumentTextIcon", inSidebar: true },
   { key: "print", path: "/print", label: "طباعة", iconName: "DocumentTextIcon", inSidebar: false },
 ];
 
 export const pathToView = (pathname: string): ViewKey => {
   if (pathname === "/") return "history";
+  if (pathname === "/records") return "all-records";
   if (pathname.startsWith("/baristas/")) return "barista-details";
   if (pathname === "/baristas") return "baristas";
   if (pathname === "/users") return "technicians";
