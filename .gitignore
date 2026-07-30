@@ -28,6 +28,8 @@ dist-ssr
 # *.pyc
 # *.yaml
 *.sql
+# Keep Supabase migration files tracked
+!supabase/migrations/*.sql
 # secret files
 .env
 *-service-account*.json
@@ -63,3 +65,9 @@ nul
 .mcp.json
 .agents/
 page-snapshot
+
+# Local preview/test scratch
+.freebuff/preview.pid
+dev.pid
+playwright.local.config.ts
+playwright.preview.config.ts

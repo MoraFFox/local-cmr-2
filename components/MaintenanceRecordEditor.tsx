@@ -25,6 +25,7 @@ import { DatePresetButtons } from './form-ui/EnhancedInput';
 import { StarRating } from './form-ui/StarRating';
 import { RequiredFieldBadge } from '@/packages/form-progress';
 import { getSuggestedServices, getSuggestedParts } from '../utils/problemSuggestions';
+import { useMergedCatalog } from '../hooks/useCustomCatalog';
 import { useT } from '../utils/i18n';
 import { generateUniqueId } from '../utils/idGenerator';
 import { formatEgyptianPhone } from '../utils/phone';
@@ -144,8 +145,17 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
   const handleProblemsChange = (problems: string[]) => setEditedRecord(prev => ({ ...prev, problems }));
   const handleRadioChange = (name: string, value: any) => { setEditedRecord(prev => ({ ...prev, [name]: value })); if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' })); };
 
-  const suggestedServices = useMemo(() => getSuggestedServices(editedRecord.problems || []), [editedRecord.problems]);
-  const suggestedParts = useMemo(() => getSuggestedParts(editedRecord.problems || []), [editedRecord.problems]);
+  const {
+    parts: mergedPartsList,
+    services: mergedServicesList,
+    problemCategoriesWithCustoms,
+    isLoading: catalogLoading,
+    error: catalogError,
+    addItem,
+  } = useMergedCatalog();
+
+  const suggestedServices = useMemo(() => getSuggestedServices(editedRecord.problems || [], mergedServicesList), [editedRecord.problems, mergedServicesList]);
+  const suggestedParts = useMemo(() => getSuggestedParts(editedRecord.problems || [], mergedPartsList), [editedRecord.problems, mergedPartsList]);
 
   // Supervisor handlers
   const addSupervisor = () => setEditedRecord(prev => ({ ...prev, supervisors: [...(prev.supervisors || []), { id: generateUniqueId(), name: '', phone: '' }] }));
@@ -338,7 +348,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             </div>
             {editedRecord.hadProblem && (
               <div className="space-y-4">
-                <CheckboxGroup categories={problemCategories} selectedValues={editedRecord.problems || []} onChange={handleProblemsChange} predefinedProblems={allPredefinedProblems} />
+                <CheckboxGroup categories={problemCategoriesWithCustoms} selectedValues={editedRecord.problems || []} onChange={handleProblemsChange} predefinedProblems={allPredefinedProblems} onAddCustom={(item) => addItem({ ...item, type: 'problem' })} existingCategories={problemCategoriesWithCustoms.map((c) => c.title)} />
                 <div className="flex items-center gap-3 pt-4 border-t border-hairline dark:border-hairline">
                   <input type="checkbox" id="problemSolved" name="problemSolved" checked={editedRecord.problemSolved} onChange={handleFieldChange} className="w-5 h-5 text-primary rounded focus:ring-primary" />
                   <label htmlFor="problemSolved" className="text-primary dark:text-latte/70 flex items-center gap-2">
@@ -364,7 +374,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             {editedRecord.servicesPerformed.length > 0 && <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs rounded-full">{editedRecord.servicesPerformed.length}</span>}
           </div>
           <div className="p-6">
-            <ServiceSelector options={servicesList} selectedValues={editedRecord.servicesPerformed} onChange={handleServicesChange} suggestedValues={suggestedServices} />
+            <ServiceSelector options={mergedServicesList} selectedValues={editedRecord.servicesPerformed} onChange={handleServicesChange} suggestedValues={suggestedServices} onAddCustom={(item) => addItem({ ...item, type: 'service' })} existingCategories={Array.from(new Set(mergedServicesList.map((s) => s.category)))} />
           </div>
           <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
             <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
@@ -386,7 +396,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
               <input type="checkbox" id="partsWereReplaced" name="partsWereReplaced" checked={editedRecord.partsWereReplaced} onChange={handleFieldChange} className="w-5 h-5 text-primary rounded focus:ring-primary" />
               <label htmlFor="partsWereReplaced" className="text-primary dark:text-latte/70">{t.ui.maintenanceEditor.werePartsReplaced}</label>
             </div>
-            {editedRecord.partsWereReplaced && <PartsSelector options={partsList} selectedValues={editedRecord.partsReplaced} onChange={handlePartsChange} suggestedValues={suggestedParts} />}
+            {editedRecord.partsWereReplaced && <PartsSelector options={mergedPartsList} selectedValues={editedRecord.partsReplaced} onChange={handlePartsChange} suggestedValues={suggestedParts} onAddCustom={(item) => addItem({ ...item, type: 'part' })} existingCategories={[]} />}
           </div>
           <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
             <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>

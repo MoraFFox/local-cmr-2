@@ -244,23 +244,42 @@ function scoreValues(valuesPerProblem: string[][]): Map<string, SuggestionScore>
 /**
  * Get suggested services for a list of problems.
  *
- * Returns `Service` objects (from `servicesList`) that are relevant to the
- * given problems, in suggestion order (most-relevant first). Services that
- * are suggested by multiple problems are ranked higher. Services not
- * present in `servicesList` are silently skipped (e.g., if a custom
- * problem maps to a service value that doesn't exist).
+ * Returns `Service` objects (from the provided `availableServices` list or
+ * the hardcoded `servicesList`) that are relevant to the given problems, in
+ * suggestion order (most-relevant first). Services that are suggested by
+ * multiple problems are ranked higher. Services not present in the available
+ * list are silently skipped.
  *
  * @param problems Array of problem values (predefined or custom free-text)
+ * @param availableServices Optional merged list of available services (defaults to hardcoded list)
  * @returns Service[] suggested services, deduplicated, in relevance order
  */
-export function getSuggestedServices(problems: string[]): Service[] {
+export function getSuggestedServices(problems: string[], availableServices?: Service[]): Service[] {
   if (!problems || problems.length === 0) return [];
 
+  const sourceList = availableServices ?? servicesList;
   const uniqueProblems = normalizeProblems(problems);
   const serviceValuesPerProblem = uniqueProblems.map((problem) => resolveProblem(problem).services);
   const scores = scoreValues(serviceValuesPerProblem);
 
-  const serviceMap = new Map(servicesList.map((s) => [s.value, s]));
+  const serviceMap = new Map(sourceList.map((s) => [s.value, s]));
+
+  // Also include custom services whose labels match the problem text directly.
+  const lowerProblems = uniqueProblems.map((p) => p.toLowerCase());
+  sourceList.forEach((service) => {
+    const lowerLabel = service.label.toLowerCase();
+    if (
+      service.isCustom &&
+      lowerProblems.some((p) => lowerLabel.includes(p) || p.includes(lowerLabel))
+    ) {
+      const existing = scores.get(service.value);
+      if (existing) {
+        scores.set(service.value, { ...existing, score: existing.score + 1 });
+      } else {
+        scores.set(service.value, { score: 1, firstIndex: 0 });
+      }
+    }
+  });
 
   return Array.from(scores.entries())
     .filter(([value]) => serviceMap.has(value))
@@ -275,21 +294,41 @@ export function getSuggestedServices(problems: string[]): Service[] {
 /**
  * Get suggested parts for a list of problems.
  *
- * Returns `Part` objects (from `partsList`) that are relevant to the given
- * problems, in suggestion order. Parts that are suggested by multiple
- * problems are ranked higher. Parts not in `partsList` are skipped.
+ * Returns `Part` objects (from the provided `availableParts` list or the
+ * hardcoded `partsList`) that are relevant to the given problems, in
+ * suggestion order. Parts that are suggested by multiple problems are ranked
+ * higher. Parts not in the available list are skipped.
  *
  * @param problems Array of problem values (predefined or custom free-text)
+ * @param availableParts Optional merged list of available parts (defaults to hardcoded list)
  * @returns Part[] suggested parts, deduplicated, in relevance order
  */
-export function getSuggestedParts(problems: string[]): Part[] {
+export function getSuggestedParts(problems: string[], availableParts?: Part[]): Part[] {
   if (!problems || problems.length === 0) return [];
 
+  const sourceList = availableParts ?? partsList;
   const uniqueProblems = normalizeProblems(problems);
   const partValuesPerProblem = uniqueProblems.map((problem) => resolveProblem(problem).parts);
   const scores = scoreValues(partValuesPerProblem);
 
-  const partMap = new Map(partsList.map((p) => [p.value, p]));
+  const partMap = new Map(sourceList.map((p) => [p.value, p]));
+
+  // Also include custom parts whose labels match the problem text directly.
+  const lowerProblems = uniqueProblems.map((p) => p.toLowerCase());
+  sourceList.forEach((part) => {
+    const lowerLabel = part.label.toLowerCase();
+    if (
+      part.isCustom &&
+      lowerProblems.some((p) => lowerLabel.includes(p) || p.includes(lowerLabel))
+    ) {
+      const existing = scores.get(part.value);
+      if (existing) {
+        scores.set(part.value, { ...existing, score: existing.score + 1 });
+      } else {
+        scores.set(part.value, { score: 1, firstIndex: 0 });
+      }
+    }
+  });
 
   return Array.from(scores.entries())
     .filter(([value]) => partMap.has(value))
@@ -302,14 +341,23 @@ export function getSuggestedParts(problems: string[]): Part[] {
 
 /**
  * Check whether any suggestions exist for the given problems.
- * Useful for conditionally rendering the "Suggested" section header.
+ * Useful for conditionally rendering the "Suggested" section header. *
+ * @param problems Array of problem values (predefined or custom free-text)
+ * @param availableServices Optional merged list of available services
+ * @param availableParts Optional merged list of available parts
  */
-export function hasSuggestions(problems: string[]): boolean {
+export function hasSuggestions(
+  problems: string[],
+  availableServices?: Service[],
+  availableParts?: Part[]
+): boolean {
   if (!problems || problems.length === 0) return false;
 
+  const serviceList = availableServices ?? servicesList;
+  const partList = availableParts ?? partsList;
   const uniqueProblems = normalizeProblems(problems);
-  const serviceSet = new Set(servicesList.map((s) => s.value));
-  const partSet = new Set(partsList.map((p) => p.value));
+  const serviceSet = new Set(serviceList.map((s) => s.value));
+  const partSet = new Set(partList.map((p) => p.value));
 
   return uniqueProblems.some((problem) => {
     const { services, parts } = resolveProblem(problem);

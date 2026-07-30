@@ -14,6 +14,9 @@ import {
 } from '@heroicons/react/24/outline';
 import SelectedItemCard from './SelectedItemCard';
 import TechInput from './technician-portal/ui/TechInput';
+import AddCustomCatalogItemDialog from './AddCustomCatalogItemDialog';
+import { CustomCatalogItem } from '../hooks/useCustomCatalog';
+import { useToast } from './ToastContext';
 // NEW: Phase 2 UX improvements (audit issues #10, #11, #21)
 import { SelectorAvailableItem } from './form-ui/SelectorAvailableItem';
 import { SelectorSelectedChips } from './form-ui/SelectorSelectedChips';
@@ -26,6 +29,10 @@ interface PartsSelectorProps {
    *  reported. Rendered in a dedicated "Suggested" section at the top
    *  with a badge, so the most relevant options are surfaced first. */
   suggestedValues?: Part[];
+  /** Callback when the user saves a new custom catalog item from the inline dialog. */
+  onAddCustom?: (item: Omit<CustomCatalogItem, 'id'>) => Promise<CustomCatalogItem | null> | void;
+  /** Existing categories the user can pick from when adding a custom part. */
+  existingCategories?: string[];
 }
 
 const PartsSelector: React.FC<PartsSelectorProps> = ({
@@ -33,8 +40,18 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
   selectedValues,
   onChange,
   suggestedValues = [],
+  onAddCustom,
+  existingCategories = [],
 }) => {
+  const { showToast } = useToast();
+
+  // Keep a live ref so the async add handler sees the latest selected values.
+  const selectedValuesRef = useRef(selectedValues);
+  useEffect(() => {
+    selectedValuesRef.current = selectedValues;
+  }, [selectedValues]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isAddCustomDialogOpen, setIsAddCustomDialogOpen] = useState(false);
   const searchInputRef = useRef<HTMLDivElement>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isSelectedSectionExpanded, setIsSelectedSectionExpanded] = useState(true);
@@ -148,8 +165,9 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
   // inline quantity selector on the add button means a single action per item
   // instead of add → find → adjust).
   const handleAddPart = useCallback((partValue: string, quantity: number = 1) => {
-    onChange([...selectedValues, { name: partValue, count: quantity, paidByClient: false }]);
-  }, [selectedValues, onChange]);
+    const option = options.find((o) => o.value === partValue);
+    onChange([...selectedValues, { name: partValue, count: quantity, cost: option?.cost, paidByClient: false }]);
+  }, [selectedValues, onChange, options]);
 
   // NEW: Bulk payer change — set all selected items' payer at once (audit issue #21).
   const handleBulkPayerChange = useCallback((paidByClient: boolean) => {
@@ -175,11 +193,6 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
 
   const handlePayerChange = useCallback((name: string, paidByClient: boolean) => {
     onChange(selectedValues.map((p) => p.name === name ? { ...p, paidByClient } : p));
-  }, [selectedValues, onChange]);
-
-  const handleAddCustomPart = useCallback(() => {
-    skipRefocusRef.current = true;
-    onChange([...selectedValues, { name: '', count: 1, cost: 0, paidByClient: false }]);
   }, [selectedValues, onChange]);
 
   const handleCustomNameChange = useCallback((selectedIndex: number, newName: string) => {
@@ -460,12 +473,28 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
                 )}
 
                 <button
-                    onClick={handleAddCustomPart}
+                    onClick={() => setIsAddCustomDialogOpen(true)}
                     className="w-full py-3 border border-dashed border-hairline rounded-xl text-latte hover:text-primary hover:border-primary/50 hover:bg-cream-2 transition-all flex items-center justify-center gap-2 font-medium"
                 >
                     <PlusCircleIcon className="w-5 h-5" />
                     {ar.selectors.addCustomPart}
-                </button>
+                </button>                <AddCustomCatalogItemDialog
+                    isOpen={isAddCustomDialogOpen}
+                    onClose={() => setIsAddCustomDialogOpen(false)}
+                    onSubmit={async (item) => {
+                      if (!onAddCustom) return;
+                      const saved = await onAddCustom(item);
+                      showToast('تم حفظ قطعة الغيار في الكتالوج', 'success');
+                      const value = saved?.value ?? item.value;
+                      const current = selectedValuesRef.current;
+                      if (!current.some((p) => p.name === value)) {
+                        onChange([...current, { name: value, count: 1, cost: saved?.cost ?? item.cost ?? 0, paidByClient: false }]);
+                      }
+                    }}
+                    initialValues={{ type: 'part' }}
+                    existingCategories={existingCategories}
+                    lockType
+                />
             </div>
         )}
       </div>

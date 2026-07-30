@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { ar } from '../utils/arabicTranslations';
-import { PlusCircleIcon, TrashIcon, MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { PlusCircleIcon, TrashIcon, MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, ClockIcon, BookmarkIcon } from '@heroicons/react/24/outline';
 import TechInput from './technician-portal/ui/TechInput'; // Reuse our new input
 import { announce } from '../utils/ariaAnnouncer';
+import AddCustomCatalogItemDialog from './AddCustomCatalogItemDialog';
+import { CustomCatalogItem } from '../hooks/useCustomCatalog';
+import { useToast } from './ToastContext';
 
 const COMMON_COUNT = 5;
 const CUSTOM_HISTORY_KEY = 'cmr-custom-problems-history';
@@ -24,6 +27,10 @@ interface CheckboxGroupProps {
     selectedValues?: string[];
     onChange: (selected: string[]) => void;
     predefinedProblems: string[];
+    /** Callback when the user saves a new custom catalog problem from the inline dialog. */
+    onAddCustom?: (item: Omit<CustomCatalogItem, 'id'>) => Promise<CustomCatalogItem | null> | void;
+    /** Existing categories the user can pick from when adding a custom problem. */
+    existingCategories?: string[];
 }
 
 // ── Custom Problem History (localStorage) ──
@@ -55,12 +62,16 @@ function addToCustomHistory(problems: string[]): void {
 
 // ── Component ──
 
-const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValues = [], onChange, predefinedProblems }) => {
-    const [customProblems, setCustomProblems] = useState<string[]>([]);
+const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValues = [], onChange, predefinedProblems, onAddCustom, existingCategories = [] }) => {
+  const { showToast } = useToast();
+
+  const [customProblems, setCustomProblems] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const searchInputRef = useRef<HTMLDivElement>(null);
     // NEW: accordion state — categories collapsed by default (audit issue #9)
     const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+    const [isAddCustomDialogOpen, setIsAddCustomDialogOpen] = useState(false);
+    const [addCustomDialogInitialLabel, setAddCustomDialogInitialLabel] = useState<string>('');
     // NEW: autocomplete state (audit issue #14)
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState<number | null>(null);
     const [highlightedSuggestionIdx, setHighlightedSuggestionIdx] = useState<number>(0);
@@ -638,17 +649,47 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                                 >
                                     <TrashIcon className="w-5 h-5" />
                                 </button>
+                                <button
+                                    onClick={() => {
+                                        if (problem.trim()) {
+                                        setAddCustomDialogInitialLabel(problem.trim());
+                                        setIsAddCustomDialogOpen(true);
+                                        }
+                                    }}
+                                    disabled={!problem.trim()}
+                                    title="حفظ في الكتالوج"
+                                    className="p-3 text-latte hover:text-primary hover:bg-primary/10 rounded-lg transition-colors flex-shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
+                                >
+                                    <BookmarkIcon className="w-5 h-5" />
+                                </button>
                             </div>
                         );
                     })}
 
                     <button
-                        onClick={handleAddCustomProblem}
+                        onClick={() => { setAddCustomDialogInitialLabel(''); setIsAddCustomDialogOpen(true); }}
                         className="w-full py-3 border-2 border-dashed border-hairline rounded-lg text-latte hover:text-text hover:border-primary hover:bg-cream transition-all flex items-center justify-center gap-2 font-medium"
                     >
                         <PlusCircleIcon className="w-5 h-5"/>
                         {ar.selectors.addCustomProblem}
                     </button>
+                    <AddCustomCatalogItemDialog
+                        isOpen={isAddCustomDialogOpen}
+                        onClose={() => setIsAddCustomDialogOpen(false)}
+                        onSubmit={async (item) => {
+                          if (!onAddCustom) return;
+                          const saved = await onAddCustom(item);
+                          showToast('تم حفظ المشكلة في الكتالوج', 'success');
+                          const value = saved?.value ?? item.value;
+                          const current = selectedValuesRef.current || [];
+                          if (value && !current.includes(value)) {
+                            onChange([...current, value]);
+                          }
+                        }}
+                        initialValues={{ type: 'problem', label: addCustomDialogInitialLabel, value: addCustomDialogInitialLabel }}
+                        existingCategories={existingCategories}
+                        lockType
+                    />
                 </div>
             </div>
         </div>

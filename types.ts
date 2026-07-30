@@ -13,6 +13,8 @@ export interface ServiceRecord {
 }
 
 export interface Part {
+  id?: string;
+  isCustom?: boolean;
   label: string;
   value: string;
   cost: number;
@@ -20,11 +22,22 @@ export interface Part {
 }
 
 export interface Service {
+  id?: string;
+  isCustom?: boolean;
   label: string;
   value: string;
   cost: number;
   category: string;
   description?: string;
+}
+
+/** A user-defined reusable problem option stored in the database catalog. */
+export interface CustomProblem {
+  id: string;
+  isCustom: true;
+  label: string;
+  value: string;
+  category: string;
 }
 
 export interface MaintenancePhoto {

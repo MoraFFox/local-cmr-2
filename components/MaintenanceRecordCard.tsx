@@ -36,6 +36,7 @@ import { SafeModal } from "./form-ui/SafeModal";
 import { getSuggestedServices, getSuggestedParts } from "../utils/problemSuggestions";
 import { generateUniqueId } from "../utils/idGenerator";
 import { useVisitZones } from "../utils/visitZones";
+import { useMergedCatalog } from "../hooks/useCustomCatalog";
 
 
 interface MaintenanceRecordCardProps {
@@ -224,6 +225,13 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
     onAddClientBarista,
     suggestedNames = [],
   } = props;
+
+  const {
+    parts: mergedPartsList,
+    services: mergedServicesList,
+    problemCategoriesWithCustoms,
+    addItem,
+  } = useMergedCatalog();
   const [typoSuggestion, setTypoSuggestion] = useState<string | null>(null);
   // Auto-triggered "did you mean…" popover. Controlled open because it's
   // driven by the fuzzy-match state rather than a click. Rendered through a
@@ -243,12 +251,12 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
   // NEW: Context-aware suggestions — compute relevant services/parts based on
   // the problems the technician reported for this record.
   const suggestedServices = useMemo(
-    () => getSuggestedServices(record.problems || []),
-    [record.problems],
+    () => getSuggestedServices(record.problems || [], mergedServicesList),
+    [record.problems, mergedServicesList],
   );
   const suggestedParts = useMemo(
-    () => getSuggestedParts(record.problems || []),
-    [record.problems],
+    () => getSuggestedParts(record.problems || [], mergedPartsList),
+    [record.problems, mergedPartsList],
   );
 
   useEffect(() => {
@@ -631,7 +639,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
             <div className="space-y-4">
               <CollapsibleSection title="المشاكل المكتشفة">
                 <CheckboxGroup
-                  categories={props.problemCategories}
+                  categories={problemCategoriesWithCustoms}
                   selectedValues={record.problems || []}
                   onChange={(selected) =>
                     handleFieldChange({
@@ -639,12 +647,14 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                     } as any)
                   }
                   predefinedProblems={props.allPredefinedProblems}
+                  onAddCustom={(item) => addItem({ ...item, type: 'problem' })}
+                  existingCategories={problemCategoriesWithCustoms.map((c) => c.title)}
                 />
               </CollapsibleSection>
 
               <CollapsibleSection title="الخدمات المُقدمة">
                 <ServiceSelector
-                  options={props.servicesList}
+                  options={mergedServicesList}
                   selectedValues={record.servicesPerformed || []}
                   onChange={(selected) =>
                     handleFieldChange({
@@ -652,6 +662,8 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                     } as any)
                   }
                   suggestedValues={suggestedServices}
+                  onAddCustom={(item) => addItem({ ...item, type: 'service' })}
+                  existingCategories={Array.from(new Set(mergedServicesList.map((s) => s.category)))}
                 />
               </CollapsibleSection>
 
@@ -676,7 +688,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                 <div className="ltr:pe-6 rtl:ps-6 ltr:ps-2 rtl:pe-2 space-y-4">
                   <CollapsibleSection title="القطع المستبدلة">
                     <PartsSelector
-                      options={props.partsList}
+                      options={mergedPartsList}
                       selectedValues={record.partsReplaced || []}
                       onChange={(selected) =>
                         handleFieldChange({
@@ -684,6 +696,8 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                         } as any)
                       }
                       suggestedValues={suggestedParts}
+                      onAddCustom={(item) => addItem({ ...item, type: 'part' })}
+                      existingCategories={[]}
                     />
                   </CollapsibleSection>
                 </div>
