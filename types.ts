@@ -45,6 +45,51 @@ export interface MaintenancePhoto {
   type: "before" | "after" | "legacy";
 }
 
+// ============================================
+// Machine Logistics Types
+// ============================================
+
+export interface CompanyMachine {
+  id: number;
+  name: string;
+  category: string;
+  machine_type?: string;
+  status: string;
+  monthly_rental_price?: number;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface LogisticsOperation {
+  id: number;
+  customer_id: number;
+  opened_by_record_id?: number;
+  closed_by_record_id?: number | null;
+  open_date?: string;
+  close_date?: string;
+  operation_type: 'pickup_and_deliver' | 'deliver_only' | 'pickup_only';
+  status: 'open' | 'closed';
+  machine_category?: string;
+  machine_ownership?: string;
+  machine_type?: string;
+  replacement_machine_id?: number | null;
+  monthly_rental_price?: number;
+  daily_rental_price?: number;
+  rental_duration_days?: number;
+  rental_duration_hours?: number;
+  rental_duration_minutes?: number;
+  billable_days?: number;
+  total_rental_cost?: number;
+  pickup_cost?: number;
+  return_cost?: number;
+  total_logistics_cost?: number;
+  internal_notes?: string;
+  created_at?: string;
+  updated_at?: string;
+  company_machines?: CompanyMachine;
+}
+
 export interface PortalPhotoEntry {
   url: string;
   type: "before" | "after";

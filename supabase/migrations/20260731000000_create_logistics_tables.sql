@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS logistics_operations (
   customer_id BIGINT NOT NULL,
   opened_by_record_id BIGINT,
   closed_by_record_id BIGINT,
+  open_date DATE,
+  close_date DATE,
   operation_type TEXT NOT NULL CHECK (operation_type IN ('pickup_and_deliver', 'deliver_only', 'pickup_only')),
   status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'closed')),
   machine_category TEXT CHECK (machine_category IN ('coffee', 'grinder', 'other')),
@@ -99,3 +101,10 @@ DROP POLICY IF EXISTS "Authenticated users can update logistics_operations" ON l
 CREATE POLICY "Authenticated users can update logistics_operations"
   ON logistics_operations FOR UPDATE
   USING (auth.role() = 'authenticated' AND created_by = auth.uid());
+
+-- 5. Idempotent column additions (for tables that may already exist)
+ALTER TABLE company_machines ADD COLUMN IF NOT EXISTS monthly_rental_price NUMERIC(10,2) CHECK (monthly_rental_price IS NULL OR monthly_rental_price >= 0);
+ALTER TABLE logistics_operations ADD COLUMN IF NOT EXISTS open_date DATE;
+ALTER TABLE logistics_operations ADD COLUMN IF NOT EXISTS close_date DATE;
+ALTER TABLE logistics_operations ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES auth.users(id);
+ALTER TABLE logistics_operations ADD COLUMN IF NOT EXISTS closed_by UUID REFERENCES auth.users(id);

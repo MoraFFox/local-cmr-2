@@ -43,6 +43,7 @@ export interface CreateLogisticsOperationInput {
   pickup_cost?: number;
   return_cost?: number;
   internal_notes?: string;
+  open_date: string;
 }
 
 export interface CloseOperationData {
@@ -98,6 +99,7 @@ export function useLogisticsOperations(customerId: number | null) {
           .insert({
             customer_id: customerId,
             opened_by_record_id: openedByRecordId,
+            open_date: input.open_date,
             operation_type: input.operation_type,
             status: 'open',
             machine_category: input.machine_category ?? null,
@@ -132,18 +134,10 @@ export function useLogisticsOperations(customerId: number | null) {
         const operation = operations.find((o) => o.id === operationId);
         if (!operation) throw new Error('العملية غير موجودة');
 
-        // Get the open date from the opening record's visit date
-        // We need to fetch the opening record to get its maintenanceDate
-        const { data: openRecord, error: openErr } = await supabase
-          .from('maintenance_history')
-          .select('maintenanceDate')
-          .eq('id', operation.opened_by_record_id)
-          .single();
-
-        if (openErr) throw new Error(`فشل جلب تاريخ الفتح: ${openErr.message}`);
-
-        const openDate = (openRecord as any)?.maintenanceDate;
-        if (!openDate) throw new Error('تاريخ الفتح غير موجود في سجل الصيانة');
+        // Use the stored open_date from the operation itself — no cross-table query needed.
+        // Maintenance records are stored as JSON in the companies table, not as separate rows.
+        const openDate = operation.open_date;
+        if (!openDate) throw new Error('تاريخ الفتح غير موجود في العملية');
 
         const duration = calculateRentalDuration(openDate, closeData.close_date);
         const billableDays = calculateBillableDays(duration);
@@ -160,6 +154,7 @@ export function useLogisticsOperations(customerId: number | null) {
           .update({
             status: 'closed',
             closed_by_record_id: closeData.closed_by_record_id,
+            close_date: closeData.close_date,
             rental_duration_days: duration.days,
             rental_duration_hours: duration.hours,
             rental_duration_minutes: duration.minutes,
