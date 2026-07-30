@@ -37,6 +37,7 @@ import { getSuggestedServices, getSuggestedParts } from "../utils/problemSuggest
 import { generateUniqueId } from "../utils/idGenerator";
 import { useVisitZones } from "../utils/visitZones";
 import { useMergedCatalog } from "../hooks/useCustomCatalog";
+import MachineLogisticsSection from "./MachineLogisticsSection";
 
 
 interface MaintenanceRecordCardProps {
@@ -60,6 +61,7 @@ interface MaintenanceRecordCardProps {
 
   newlyAddedId: number | null;
   isFollowUp?: boolean;
+  customerId?: number | null;
 }
 
 // Levenshtein for Tooltip Logic
@@ -224,6 +226,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
     onAddBarista,
     onAddClientBarista,
     suggestedNames = [],
+    customerId = null,
   } = props;
 
   const {
@@ -897,6 +900,17 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                 إضافة مشرف
               </button>
             </div>
+          </CollapsibleSection>
+        </div>
+
+        {/* Machine Logistics Section — always visible */}
+        <div className="pt-4 border-t border-hairline dark:border-hairline">
+          <CollapsibleSection title="لوجستيات الماكينات">
+            <MachineLogisticsSection
+              customerId={customerId}
+              recordId={typeof record.id === 'number' ? record.id : undefined as any}
+              maintenanceDate={record.maintenanceDate}
+            />
           </CollapsibleSection>
         </div>
 

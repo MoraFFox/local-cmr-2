@@ -5,7 +5,7 @@ import {
   WrenchIcon, CurrencyDollarIcon, ChevronRightIcon, ChevronLeftIcon,
   DocumentTextIcon, BeakerIcon, ExclamationCircleIcon,
   ClipboardDocumentListIcon, PlusCircleIcon, CameraIcon,
-  XMarkIcon, ArrowUpTrayIcon
+  XMarkIcon, ArrowUpTrayIcon, TruckIcon
 } from '@heroicons/react/24/outline';
 import RadioGroup from './RadioGroup';
 import ServiceSelector from './ServiceSelector';
@@ -26,6 +26,7 @@ import { StarRating } from './form-ui/StarRating';
 import { RequiredFieldBadge } from '@/packages/form-progress';
 import { getSuggestedServices, getSuggestedParts } from '../utils/problemSuggestions';
 import { useMergedCatalog } from '../hooks/useCustomCatalog';
+import MachineLogisticsSection from './MachineLogisticsSection';
 import { useT } from '../utils/i18n';
 import { generateUniqueId } from '../utils/idGenerator';
 import { formatEgyptianPhone } from '../utils/phone';
@@ -46,10 +47,11 @@ interface MaintenanceRecordEditorProps {
   lastVisitDate?: Date | null;
   averageDays?: number | null;
   isSidebarExpanded?: boolean;
+  customerId?: number | null;
 }
 
-const STEP_TO_SECTION: Record<number, string> = { 1: 'basic', 2: 'problems', 3: 'services', 4: 'parts', 5: 'payment', 6: 'supervisor', 7: 'notes', 8: 'photos' };
-const SECTION_TO_STEP: Record<string, number> = { basic: 1, problems: 2, services: 3, parts: 4, payment: 5, supervisor: 6, notes: 7, photos: 8 };
+const STEP_TO_SECTION: Record<number, string> = { 1: 'basic', 2: 'problems', 3: 'services', 4: 'parts', 5: 'payment', 6: 'supervisor', 7: 'logistics', 8: 'notes', 9: 'photos' };
+const SECTION_TO_STEP: Record<string, number> = { basic: 1, problems: 2, services: 3, parts: 4, payment: 5, supervisor: 6, logistics: 7, notes: 8, photos: 9 };
 
 const STEPPER_STEPS: StepperStep[] = [
   { id: 1, name: 'المعلومات الأساسية' },
@@ -58,15 +60,17 @@ const STEPPER_STEPS: StepperStep[] = [
   { id: 4, name: 'القطع المستبدلة' },
   { id: 5, name: 'الدفع' },
   { id: 6, name: 'بيانات المشرف' },
-  { id: 7, name: 'ملاحظات وتوصيات' },
-  { id: 8, name: 'صور قبل وبعد' },
+  { id: 7, name: 'لوجستيات الماكينات' },
+  { id: 8, name: 'ملاحظات وتوصيات' },
+  { id: 9, name: 'صور قبل وبعد' },
 ];
 
 const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
   record, onSave, onCancel, partsList, servicesList,
   problemCategories, allPredefinedProblems,
   baristas = [], clientBaristas = [],
-  lastVisitDate, averageDays, isSidebarExpanded = false
+  lastVisitDate, averageDays, isSidebarExpanded = false,
+  customerId = null
 }) => {
   const { showToast } = useToast();
   const t = useT();
@@ -216,8 +220,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
     if (!editedRecord.partsWereReplaced || editedRecord.partsReplaced.length > 0) completed.push(4);
     if (editedRecord.type && editedRecord.paidBy) completed.push(5);
     if (editedRecord.supervisors && editedRecord.supervisors.some(s => s.name.trim())) completed.push(6);
-    if (editedRecord.notes || editedRecord.recommendations) completed.push(7);
-    if (editedRecord.photos && editedRecord.photos.length > 0) completed.push(8);
+    if (editedRecord.notes || editedRecord.recommendations) completed.push(8);
+    if (editedRecord.photos && editedRecord.photos.length > 0) completed.push(9);
     return completed;
   }, [editedRecord]);
 
@@ -479,9 +483,30 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         </div>
       )}
 
-      {/* === STEP 7: Notes === */}
+      {/* === STEP 7: Logistics === */}
       {currentStep === 7 && (
         <div id="step-content-7" className={sectionClass(7)}>
+          <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
+            <TruckIcon className="w-5 h-5 text-amber-500" />
+            <h3 className="font-semibold text-primary dark:text-white">لوجستيات الماكينات</h3>
+          </div>
+          <div className="p-6">
+            <MachineLogisticsSection
+              customerId={customerId}
+              recordId={typeof editedRecord.id === 'number' ? editedRecord.id : undefined as any}
+              maintenanceDate={editedRecord.maintenanceDate}
+            />
+          </div>
+          <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
+            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
+            <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{STEPPER_STEPS[7].name}<ChevronLeftIcon className="w-4 h-4" /></button>
+          </div>
+        </div>
+      )}
+
+      {/* === STEP 8: Notes === */}
+      {currentStep === 8 && (
+        <div id="step-content-8" className={sectionClass(8)}>
           <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
             <DocumentTextIcon className="w-5 h-5 text-latte" />
             <h3 className="font-semibold text-primary dark:text-white">ملاحظات وتوصيات</h3>
@@ -498,14 +523,14 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
           </div>
           <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
             <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
-            <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{STEPPER_STEPS[7].name}<ChevronLeftIcon className="w-4 h-4" /></button>
+            <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{STEPPER_STEPS[8].name}<ChevronLeftIcon className="w-4 h-4" /></button>
           </div>
         </div>
       )}
 
-      {/* === STEP 8: Photos === */}
-      {currentStep === 8 && (
-        <div id="step-content-8" className={sectionClass(8)}>
+      {/* === STEP 9: Photos === */}
+      {currentStep === 9 && (
+        <div id="step-content-9" className={sectionClass(9)}>
           <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
             <CameraIcon className="w-5 h-5 text-primary" />
             <h3 className="font-semibold text-primary dark:text-white">صور قبل وبعد</h3>
@@ -580,7 +605,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
           </div>
           <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
             <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
-            <span className="text-xs text-latte">الخطوة الأخيرة</span>
+              <span className="text-xs text-latte">الخطوة الأخيرة</span>
           </div>
         </div>
       )}
