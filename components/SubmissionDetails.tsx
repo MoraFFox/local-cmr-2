@@ -15,6 +15,7 @@ import CollapsibleCard from "./CollapsibleCard";
 import Avatar from "./Avatar";
 import { generateCompanyPDF, generateBranchPDF } from "../utils/pdfGenerator";
 import { generateInternalCompanyReport, generateInternalBranchReport } from "../utils/internalReportPdf";
+import { useLogisticsOperations } from "../hooks/useLogisticsOperations";
 import { getVisitZoneLabel } from "../utils/visitZones";
 import { getMachineOwnershipStatus } from "./ReviewStep";
 import {
@@ -1176,15 +1177,18 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
   const [pendingParsedData, setPendingParsedData] = useState<FormData | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Fetch logistics operations for this customer to include in reports
+  const { operations: logisticsOps } = useLogisticsOperations(submission.id ?? null);
+
   const handlePrintFull = async (mode: "internal" | "client") => {
     setIsGeneratingPDF(true);
     try {
       if (mode === "internal") {
-        const doc = await generateInternalCompanyReport(submission);
+        const doc = await generateInternalCompanyReport(submission, { logisticsOperations: logisticsOps });
         const fileName = `${submission.companyName.replace(/\s+/g, "_")}_Internal_Report_${new Date().toISOString().split("T")[0]}.pdf`;
         doc.save(fileName);
       } else {
-        const doc = await generateCompanyPDF(submission, { includeCosts: false });
+        const doc = await generateCompanyPDF(submission, { includeCosts: false, logisticsOperations: logisticsOps });
         const fileName = `${submission.companyName.replace(/\s+/g, "_")}_Client_Report_${new Date().toISOString().split("T")[0]}.pdf`;
         doc.save(fileName);
       }
@@ -1200,11 +1204,11 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
     setIsGeneratingPDF(true);
     try {
       if (mode === "internal") {
-        const doc = await generateInternalBranchReport(submission.companyName, branch);
+        const doc = await generateInternalBranchReport(submission.companyName, branch, { logisticsOperations: logisticsOps });
         const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${branch.branchName?.replace(/\s+/g, "_")}_Internal_Report_${new Date().toISOString().split("T")[0]}.pdf`;
         doc.save(fileName);
       } else {
-        const doc = await generateBranchPDF(submission.companyName, branch, { includeCosts: false });
+        const doc = await generateBranchPDF(submission.companyName, branch, { includeCosts: false, logisticsOperations: logisticsOps });
         const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${branch.branchName?.replace(/\s+/g, "_")}_Client_Report_${new Date().toISOString().split("T")[0]}.pdf`;
         doc.save(fileName);
       }

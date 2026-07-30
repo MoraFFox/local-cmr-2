@@ -13,6 +13,7 @@ import {
   XMarkIcon,
   ArrowLeftOnRectangleIcon,
   CloudArrowUpIcon,
+  Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import ThemeToggle from "../../components/ThemeToggle";
 import { KeyboardShortcutsHelpButton } from "../../components/KeyboardShortcutsHelp";
@@ -33,6 +34,7 @@ const ICONS: Record<string, React.ElementType> = {
   UsersIcon,
   UserGroupIcon,
   DocumentTextIcon,
+  Cog6ToothIcon,
 };
 
 interface SidebarContentProps {

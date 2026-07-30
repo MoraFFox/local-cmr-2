@@ -1,6 +1,7 @@
 /** @format */
 
-import { FormData, MaintenanceRecord, Branch, MaintenancePhoto } from "../types";
+import { FormData, MaintenanceRecord, Branch, MaintenancePhoto, LogisticsOperation } from "../types";
+import { LOGISTICS_TYPE_LABELS_EN } from "./logisticsLabels";
 import { logger } from "./logger";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -51,6 +52,7 @@ export const formatMaintenanceDetails = (r: MaintenanceRecord): string => {
 
 interface PDFOptions {
   includeCosts: boolean;
+  logisticsOperations?: LogisticsOperation[];
 }
 
 // Fix 4.3: Add font caching to avoid re-fetching on every PDF generation
@@ -807,6 +809,63 @@ export const generateCompanyPDF = async (
     yPos = (doc as any).lastAutoTable.finalY + 10;
   }
 
+  // --- Machine Logistics ---
+  const logisticsOps = options.logisticsOperations ?? [];
+  if (logisticsOps.length > 0) {
+    if (yPos > 220) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    doc.setFontSize(12);
+    doc.setFont("Amiri", "bold");
+    doc.text("Machine Logistics", 14, yPos);
+    yPos += 6;
+
+    const logisticsRows = logisticsOps.map((op) => {
+      const row: any[] = [
+        LOGISTICS_TYPE_LABELS_EN[op.operation_type] || op.operation_type,
+        op.machine_category || "-",
+        op.status === "open" ? "Open" : "Closed",
+        op.open_date || "-",
+        op.close_date || "-",
+      ];
+      if (options.includeCosts) {
+        row.push(
+          op.total_rental_cost != null ? formatCurrency(op.total_rental_cost) : "-",
+        );
+        row.push(
+          op.total_logistics_cost != null ? formatCurrency(op.total_logistics_cost) : "-",
+        );
+      }
+      return row;
+    });
+
+    const logisticsHeaders = ["Operation", "Category", "Status", "Open Date", "Close Date"];
+    if (options.includeCosts) {
+      logisticsHeaders.push("Rental Cost");
+      logisticsHeaders.push("Total Logistics");
+    }
+
+    autoTable(doc, {
+      startY: yPos,
+      head: [logisticsHeaders],
+      body: logisticsRows,
+      theme: "striped",
+      styles: { fontSize: 8, font: "Amiri", halign: "left" },
+      headStyles: { fillColor: [20, 184, 166] },
+      columnStyles: {
+        0: { cellWidth: 35 },
+        1: { cellWidth: 25 },
+        2: { cellWidth: 22, halign: "center" },
+        3: { cellWidth: 30 },
+        4: { cellWidth: 30 },
+      },
+    });
+
+    yPos = (doc as any).lastAutoTable.finalY + 10;
+  }
+
   // Managers' Contacts
   const managerPositions = new Set([
     "manager",
@@ -1436,6 +1495,76 @@ export const generateBranchPDF = async (
 
         yPos = await renderPhotosInPDF(doc, r.photos, yPos, pageWidth, 14);
         yPos += 5;
+      }
+
+      yPos += 5;
+    }
+  }
+
+  // --- Machine Logistics ---
+  const logisticsOps = options.logisticsOperations ?? [];
+  if (logisticsOps.length > 0) {
+    if (yPos > 220) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont("Amiri", "bold");
+    doc.text("Machine Logistics", 14, yPos);
+    yPos += 10;
+
+    for (const op of logisticsOps) {
+      if (yPos > 230) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setDrawColor(200);
+      doc.line(14, yPos, pageWidth - 14, yPos);
+      yPos += 5;
+
+      // Type + Status
+      doc.setFontSize(10);
+      doc.setFont("Amiri", "bold");
+      doc.setTextColor(0);
+      doc.text(LOGISTICS_TYPE_LABELS_EN[op.operation_type] || op.operation_type, 14, yPos);
+      const statusLabel = op.status === "open" ? "Open" : "Closed";
+      doc.setTextColor(op.status === "open" ? 200 : 0, op.status === "open" ? 0 : 128, 0);
+      doc.text(statusLabel, pageWidth - 14, yPos, { align: "right" });
+      doc.setTextColor(0);
+      yPos += 6;
+
+      // Details
+      doc.setFontSize(9);
+      doc.setFont("Amiri", "normal");
+      const details: string[] = [];
+      if (op.machine_category) details.push(`Category: ${op.machine_category}`);
+      if (op.machine_type) details.push(`Type: ${op.machine_type}`);
+      if (op.open_date) details.push(`Open Date: ${op.open_date}`);
+      if (op.close_date) details.push(`Close Date: ${op.close_date}`);
+      if (op.monthly_rental_price != null && options.includeCosts) {
+        details.push(`Monthly Rental: ${formatCurrency(op.monthly_rental_price)}`);
+      }
+      if (op.total_rental_cost != null && options.includeCosts) {
+        details.push(`Rental Cost: ${formatCurrency(op.total_rental_cost)}`);
+      }
+      if (op.total_logistics_cost != null && options.includeCosts) {
+        details.push(`Total Logistics: ${formatCurrency(op.total_logistics_cost)}`);
+      }
+
+      details.forEach((d) => {
+        doc.text(d, 14, yPos);
+        yPos += 6;
+      });
+
+      if (op.internal_notes) {
+        doc.setFont("Amiri", "bold");
+        doc.text("Notes:", 14, yPos);
+        doc.setFont("Amiri", "normal");
+        const splitNotes = doc.splitTextToSize(rtl(op.internal_notes), pageWidth - 30);
+        doc.text(splitNotes, 14, yPos + 5);
+        yPos += splitNotes.length * 5 + 5;
       }
 
       yPos += 5;

@@ -5,6 +5,7 @@ import {
   FormData,
   Branch,
   MaintenanceRecord,
+  LogisticsOperation,
 } from "../types";
 import {
   aggregateCosts,
@@ -14,8 +15,10 @@ import {
   getOperationalKPIs,
   getProblemFrequency,
   formatCurrency,
+  aggregateLogisticsCosts,
   type AggregatedItem,
 } from "../utils/costAggregation";
+import LogisticsReportSection from "./LogisticsReportSection";
 import { partsList, servicesList } from "../constants";
 
 // ── Helpers ──
@@ -189,9 +192,10 @@ const PrintRecordCard: React.FC<{ record: MaintenanceRecord }> = ({ record }) =>
 interface BranchInternalReportProps {
   companyName: string;
   branch: Branch;
+  logisticsOperations?: LogisticsOperation[];
 }
 
-const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName, branch }) => {
+const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName, branch, logisticsOperations }) => {
   const costs = useMemo(
     () => aggregateBranchCosts(branch, partsList, servicesList),
     [branch],
@@ -357,6 +361,9 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
         </>
       )}
 
+      {/* Logistics Operations */}
+      <LogisticsReportSection operations={logisticsOperations ?? []} />
+
       {/* Maintenance history */}
       <SectionTitle>سجل الصيانة</SectionTitle>
       {branch.maintenanceHistory.map((record) => (
@@ -375,9 +382,10 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
 
 interface CompanyInternalReportProps {
   data: FormData & { created_at?: string };
+  logisticsOperations?: LogisticsOperation[];
 }
 
-const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data }) => {
+const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, logisticsOperations }) => {
   const costs = useMemo(() => aggregateCosts(data, partsList, servicesList), [data]);
   const kpis = useMemo(() => getOperationalKPIs(data.maintenanceHistory), [data.maintenanceHistory]);
   const zones = useMemo(() => getVisitZoneBreakdown(data.maintenanceHistory), [data.maintenanceHistory]);
@@ -510,6 +518,7 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data }) =
                 <th className='text-end px-3 py-2'>قطع الغيار</th>
                 <th className='text-end px-3 py-2'>الخدمات</th>
                 <th className='text-end px-3 py-2'>صافي التكلفة</th>
+                <th className='text-end px-3 py-2'>اللوجستيات</th>
               </tr>
             </thead>
             <tbody>
@@ -521,9 +530,26 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data }) =
                   <td className='px-3 py-2 text-end'>{formatCurrency(bc.totalPartsCost)}</td>
                   <td className='px-3 py-2 text-end'>{formatCurrency(bc.totalServicesCost)}</td>
                   <td className='px-3 py-2 text-end font-bold'>{formatCurrency(bc.grandTotalCompanyCost)}</td>
+                  <td className='px-3 py-2 text-end text-latte'>—</td>
                 </tr>
               ))}
             </tbody>
+            <tfoot>
+              <tr className='bg-cream border-t-2 border-primary font-bold'>
+                <td className='px-3 py-2 text-text'>الإجمالي</td>
+                <td className='px-3 py-2 text-end'>{kpis.totalVisits}</td>
+                <td className='px-3 py-2 text-end'>{formatCurrency(costs.totalVisitFees)}</td>
+                <td className='px-3 py-2 text-end'>{formatCurrency(costs.totalPartsCost)}</td>
+                <td className='px-3 py-2 text-end'>{formatCurrency(costs.totalServicesCost)}</td>
+                <td className='px-3 py-2 text-end'>{formatCurrency(costs.grandTotalCompanyCost)}</td>
+                <td className='px-3 py-2 text-end text-primary'>
+                  {(() => {
+                    const logC = aggregateLogisticsCosts(logisticsOperations ?? []);
+                    return logC.totalLogisticsCost > 0 ? formatCurrency(logC.totalLogisticsCost) : '—';
+                  })()}
+                </td>
+              </tr>
+            </tfoot>
           </table>
         </>
       )}
@@ -579,6 +605,9 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data }) =
         </>
       )}
 
+      {/* Logistics Operations */}
+      <LogisticsReportSection operations={logisticsOperations ?? []} />
+
       {/* Branch details */}
       {data.hasBranches && data.branches.map((branch) => (
         <React.Fragment key={branch.id}>
@@ -609,13 +638,14 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data }) =
 interface InternalReportPrintViewProps {
   data: FormData & { created_at?: string };
   branch?: Branch | null;
+  logisticsOperations?: LogisticsOperation[];
 }
 
-const InternalReportPrintView: React.FC<InternalReportPrintViewProps> = ({ data, branch }) => {
+const InternalReportPrintView: React.FC<InternalReportPrintViewProps> = ({ data, branch, logisticsOperations }) => {
   if (branch) {
-    return <BranchInternalReport companyName={data.companyName} branch={branch} />;
+    return <BranchInternalReport companyName={data.companyName} branch={branch} logisticsOperations={logisticsOperations} />;
   }
-  return <CompanyInternalReport data={data} />;
+  return <CompanyInternalReport data={data} logisticsOperations={logisticsOperations} />;
 };
 
 export default InternalReportPrintView;

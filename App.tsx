@@ -16,6 +16,8 @@ const BaristaDetailsView = lazy(() => import("./src/views/BaristaDetailsView"));
 const MaintenanceEditView = lazy(() => import("./src/views/MaintenanceEditView"));
 const UserAccessView = lazy(() => import("./src/views/UserAccessView"));
 const GlobalRecordsView = lazy(() => import("./src/views/GlobalRecordsView"));
+const CompanyMachinesSettings = lazy(() => import("./src/views/CompanyMachinesSettings"));
+const LogisticsTimelineView = lazy(() => import("./src/views/LogisticsTimelineView"));
 
 import type { FormData, MaintenanceRecord } from "./types";
 import type { Draft } from "./hooks/useDrafts";
@@ -328,7 +330,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
 
   // ── View actions ──
   const handleViewChange = useCallback(
-    (newView: "history" | "form" | "baristas" | "technicians" | "all-records") => {
+    (newView: "history" | "form" | "baristas" | "technicians" | "all-records" | "machines" | "logistics-timeline") => {
       const item = NAV_ITEMS.find((n) => n.key === newView);
       if (item) navigate(item.path);
       setIsMobileMenuOpen(false);
@@ -611,6 +613,21 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
             getTechnicianDisplayName={getTechnicianDisplayName}
             isLoading={isLoading}
           />
+        );
+      case "machines":
+        return (
+          <Suspense fallback={<LoadingState inline />}>
+            <CompanyMachinesSettings />
+          </Suspense>
+        );
+      case "logistics-timeline":
+        return (
+          <Suspense fallback={<LoadingState inline />}>
+            <LogisticsTimelineView
+              customerId={selectedSubmission?.id ?? null}
+              customerName={selectedSubmission?.companyName}
+            />
+          </Suspense>
         );
       case "history":
         return (

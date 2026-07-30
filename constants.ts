@@ -9,13 +9,15 @@ export type ViewKey =
   | "barista-details"
   | "maintenance-edit"
   | "technicians"
+  | "machines"
+  | "logistics-timeline"
   | "all-records";
 
 export interface NavItem {
   key: ViewKey;
   path: string;
   label: string;
-  iconName: "HomeIcon" | "UsersIcon" | "UserGroupIcon" | "DocumentTextIcon";
+  iconName: "HomeIcon" | "UsersIcon" | "UserGroupIcon" | "DocumentTextIcon" | "Cog6ToothIcon";
   inSidebar: boolean;
 }
 
@@ -25,6 +27,7 @@ export const NAV_ITEMS: NavItem[] = [
   { key: "technicians", path: "/users", label: "إدارة الفنيين", iconName: "UserGroupIcon", inSidebar: true },
   { key: "all-records", path: "/records", label: "كل السجلات", iconName: "DocumentTextIcon", inSidebar: true },
   { key: "form", path: "/companies/new", label: "نموذج جديد", iconName: "DocumentTextIcon", inSidebar: true },
+  { key: "machines", path: "/settings/machines", label: "إدارة الماكينات", iconName: "Cog6ToothIcon", inSidebar: true },
   { key: "print", path: "/print", label: "طباعة", iconName: "DocumentTextIcon", inSidebar: false },
 ];
 
@@ -34,9 +37,11 @@ export const pathToView = (pathname: string): ViewKey => {
   if (pathname.startsWith("/baristas/")) return "barista-details";
   if (pathname === "/baristas") return "baristas";
   if (pathname === "/users") return "technicians";
+  if (pathname === "/settings/machines") return "machines";
   if (pathname === "/companies/new") return "form";
   if (pathname === "/print") return "print";
   if (/^\/companies\/[^/]+\/maintenance$/.test(pathname)) return "maintenance-edit";
+  if (/^\/companies\/[^/]+\/logistics$/.test(pathname)) return "logistics-timeline";
   if (/^\/companies\/[^/]+$/.test(pathname)) return "details";
   return "history";
 };

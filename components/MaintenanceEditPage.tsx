@@ -483,6 +483,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
             lastVisitDate={lastVisitDate}
             averageDays={averageDaysBetweenMaintenance}
             isSidebarExpanded={isSidebarExpanded}
+            customerId={localSubmission.id ?? null}
           />
         </div>
       </div>

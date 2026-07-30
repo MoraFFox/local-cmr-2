@@ -7,13 +7,17 @@ import { render, screen, fireEvent } from "../testUtils";
 import { Step5_MaintenanceHistory } from "../../src/views/wizard/Step5_MaintenanceHistory";
 import { createMockActions, createFormData } from "./helpers";
 import { getNewMaintenanceRecord, getTodayDateString } from "../../utils/sharedConstants";
+import { ToastProvider } from "../../components/ToastContext";
+
+const renderWithProviders = (ui: React.ReactElement) =>
+  render(<ToastProvider>{ui}</ToastProvider>);
 
 describe("Step5_MaintenanceHistory", () => {
   it("renders header and add button", () => {
     const actions = createMockActions();
     // Provide a record so empty state doesn't render a duplicate add button
     const record = getNewMaintenanceRecord(1);
-    render(
+    renderWithProviders(
       <Step5_MaintenanceHistory
         formData={createFormData({ maintenanceHistory: [record] })}
         actions={actions}
@@ -29,7 +33,7 @@ describe("Step5_MaintenanceHistory", () => {
 
   it("shows empty state when no maintenance records exist", () => {
     const actions = createMockActions();
-    render(
+    renderWithProviders(
       <Step5_MaintenanceHistory
         formData={createFormData({ maintenanceHistory: [] })}
         actions={actions}
@@ -45,7 +49,7 @@ describe("Step5_MaintenanceHistory", () => {
   it("header add button calls addListItem", () => {
     const actions = createMockActions();
     const record = getNewMaintenanceRecord(1);
-    render(
+    renderWithProviders(
       <Step5_MaintenanceHistory
         formData={createFormData({ maintenanceHistory: [record] })}
         actions={actions}
@@ -61,7 +65,7 @@ describe("Step5_MaintenanceHistory", () => {
   it("renders maintenance record cards when records exist (collapsed summary visible)", () => {
     const today = getTodayDateString();
     const actions = createMockActions();
-    render(
+    renderWithProviders(
       <Step5_MaintenanceHistory
         formData={createFormData({
           maintenanceHistory: [{ ...getNewMaintenanceRecord(1), baristaName: "Ali", visitRating: 4 }],
@@ -81,7 +85,7 @@ describe("Step5_MaintenanceHistory", () => {
 
   it("renders maintenance record card content when open via newlyAddedId", () => {
     const actions = createMockActions();
-    render(
+    renderWithProviders(
       <Step5_MaintenanceHistory
         formData={createFormData({
           maintenanceHistory: [{ ...getNewMaintenanceRecord(1), machines: [{ id: 1, name: "Machine A", count: 1 }] }],
@@ -98,7 +102,7 @@ describe("Step5_MaintenanceHistory", () => {
 
   it("empty state add button calls addListItem", () => {
     const actions = createMockActions();
-    render(
+    renderWithProviders(
       <Step5_MaintenanceHistory
         formData={createFormData({ maintenanceHistory: [] })}
         actions={actions}
@@ -132,7 +136,7 @@ describe("Step5_MaintenanceHistory", () => {
 
   it("renders multiple maintenance records", () => {
     const actions = createMockActions();
-    render(
+    renderWithProviders(
       <Step5_MaintenanceHistory
         formData={createFormData({
           maintenanceHistory: [

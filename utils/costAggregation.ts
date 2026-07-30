@@ -1,6 +1,6 @@
 /** @format */
 
-import { FormData, MaintenanceRecord, Part, Service, PartRecord, ServiceRecord, Branch, Machine } from "../types";
+import { FormData, MaintenanceRecord, Part, Service, PartRecord, ServiceRecord, Branch, Machine, LogisticsOperation } from "../types";
 import { getAllVisitZones, getVisitZoneFee, getVisitZoneLabel, getVisitZoneFeesMap, getVisitZoneLabelsMap } from "./visitZones";
 
 // ── Dynamic Zone Helpers (re-exports for backward compatibility) ──
@@ -425,4 +425,45 @@ export const getProblemFrequency = (records: MaintenanceRecord[]): ProblemFreque
   return Array.from(map.entries())
     .map(([name, count]) => ({ name, count }))
     .sort((a, b) => b.count - a.count);
+};
+
+// ── Logistics Cost Aggregation ──
+
+export interface AggregatedLogisticsCosts {
+  totalRentalCost: number;
+  totalPickupCost: number;
+  totalReturnCost: number;
+  totalLogisticsCost: number;
+  openCount: number;
+  closedCount: number;
+}
+
+export const aggregateLogisticsCosts = (
+  operations: LogisticsOperation[],
+): AggregatedLogisticsCosts => {
+  let totalRentalCost = 0;
+  let totalPickupCost = 0;
+  let totalReturnCost = 0;
+  let openCount = 0;
+  let closedCount = 0;
+
+  operations.forEach((op) => {
+    if (op.status === 'open') openCount++;
+    else closedCount++;
+
+    totalRentalCost += op.total_rental_cost ?? 0;
+    totalPickupCost += op.pickup_cost ?? 0;
+    totalReturnCost += op.return_cost ?? 0;
+  });
+
+  const totalLogisticsCost = totalRentalCost + totalPickupCost + totalReturnCost;
+
+  return {
+    totalRentalCost,
+    totalPickupCost,
+    totalReturnCost,
+    totalLogisticsCost,
+    openCount,
+    closedCount,
+  };
 };

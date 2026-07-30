@@ -57,10 +57,10 @@ describe('MaintenanceRecordEditor (stepper)', () => {
     ];
     const record = createRecordWithPhotos(1, photos);
     renderWithProviders(<MaintenanceRecordEditor {...baseProps} record={record} />);
-    goToStep(8);
-    await waitFor(() => expect(getStepContent(8)).toBeInTheDocument());
+    goToStep(9);
+    await waitFor(() => expect(getStepContent(9)).toBeInTheDocument());
 
-    const thumbnails = within(getStepContent(8)!).getAllByRole('img');
+    const thumbnails = within(getStepContent(9)!).getAllByRole('img');
     expect(thumbnails).toHaveLength(4);
     const srcs = thumbnails.map((img) => (img as HTMLImageElement).src);
     photos.forEach((photo) => { expect(srcs).toContain(photo.url); });
@@ -76,13 +76,13 @@ describe('MaintenanceRecordEditor (stepper)', () => {
     ];
     const record = createRecordWithPhotos(2, photos);
     renderWithProviders(<MaintenanceRecordEditor {...baseProps} record={record} />);
-    goToStep(8);
-    await waitFor(() => expect(getStepContent(8)).toBeInTheDocument());
+    goToStep(9);
+    await waitFor(() => expect(getStepContent(9)).toBeInTheDocument());
 
-    const beforeImg = within(getStepContent(8)!).getByRole('img', {
+    const beforeImg = within(getStepContent(9)!).getByRole('img', {
       name: new RegExp(`${ar.ui.maintenanceEditor.before} 1`),
     }) as HTMLImageElement;
-    const afterImg = within(getStepContent(8)!).getByRole('img', {
+    const afterImg = within(getStepContent(9)!).getByRole('img', {
       name: new RegExp(`${ar.ui.maintenanceEditor.after} 1`),
     }) as HTMLImageElement;
     expect(beforeImg.src).toBe('https://example.com/before-a.jpg');
@@ -92,8 +92,8 @@ describe('MaintenanceRecordEditor (stepper)', () => {
   it('shows empty placeholders when the mock record has no photos', async () => {
     const record = createRecordWithPhotos(3, []);
     renderWithProviders(<MaintenanceRecordEditor {...baseProps} record={record} />);
-    goToStep(8);
-    await waitFor(() => expect(getStepContent(8)).toBeInTheDocument());
+    goToStep(9);
+    await waitFor(() => expect(getStepContent(9)).toBeInTheDocument());
 
     expect(screen.getByText(ar.ui.maintenanceEditor.noBeforePhotos)).toBeInTheDocument();
     expect(screen.getByText(ar.ui.maintenanceEditor.noAfterPhotos)).toBeInTheDocument();
@@ -106,10 +106,10 @@ describe('MaintenanceRecordEditor (stepper)', () => {
       { url: 'https://example.com/a.jpg', type: 'after' },
     ]);
     renderWithProviders(<MaintenanceRecordEditor {...baseProps} record={record} />);
-    goToStep(8);
-    await waitFor(() => expect(getStepContent(8)).toBeInTheDocument());
+    goToStep(9);
+    await waitFor(() => expect(getStepContent(9)).toBeInTheDocument());
 
-    const content = getStepContent(8)!;
+    const content = getStepContent(9)!;
     expect(content.textContent).toContain('2');
   });
 
@@ -118,12 +118,12 @@ describe('MaintenanceRecordEditor (stepper)', () => {
       { url: 'https://example.com/legacy.jpg', type: 'legacy' },
     ]);
     renderWithProviders(<MaintenanceRecordEditor {...baseProps} record={record} />);
-    goToStep(8);
-    await waitFor(() => expect(getStepContent(8)).toBeInTheDocument());
+    goToStep(9);
+    await waitFor(() => expect(getStepContent(9)).toBeInTheDocument());
 
     expect(screen.getByText(ar.ui.maintenanceEditor.legacyPhotos)).toBeInTheDocument();
     expect(
-      within(getStepContent(8)!).getByRole('img', { name: new RegExp(`${ar.ui.maintenanceEditor.legacyPhotos} 1`) })
+      within(getStepContent(9)!).getByRole('img', { name: new RegExp(`${ar.ui.maintenanceEditor.legacyPhotos} 1`) })
     ).toBeInTheDocument();
   });
 
@@ -134,10 +134,10 @@ describe('MaintenanceRecordEditor (stepper)', () => {
     ];
     const record = createRecordWithPhotos(6, photos);
     renderWithProviders(<MaintenanceRecordEditor {...baseProps} record={record} />);
-    goToStep(8);
-    await waitFor(() => expect(getStepContent(8)).toBeInTheDocument());
+    goToStep(9);
+    await waitFor(() => expect(getStepContent(9)).toBeInTheDocument());
 
-    const removeButtons = within(getStepContent(8)!).getAllByRole('button', { name: /إزالة الصورة/i });
+    const removeButtons = within(getStepContent(9)!).getAllByRole('button', { name: /إزالة الصورة/i });
     expect(removeButtons).toHaveLength(photos.length);
   });
 
@@ -147,7 +147,7 @@ describe('MaintenanceRecordEditor (stepper)', () => {
     const mockRecord = { ...baseRecord, baristaName: 'Mock Technician', maintenanceDate: '2025-06-15', photos: [{ url: 'https://example.com/mock-before.jpg', type: 'before' as const }] };
 
     const { rerender } = renderWithProviders(<MaintenanceRecordEditor {...baseProps} record={emptyRecord} />);
-    expect(getStepContent(8)).toBeNull();
+    expect(getStepContent(9)).toBeNull();
 
     rerender(<MaintenanceRecordEditor {...baseProps} record={mockRecord} />);
 

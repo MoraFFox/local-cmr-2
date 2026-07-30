@@ -51,6 +51,7 @@ export const Step5_MaintenanceHistory: React.FC<WizardStepProps> = ({
             onAddBarista={(name) => actions.handleQuickAddBarista(name, null)}
             onAddClientBarista={(name) => actions.handleQuickAddClientBarista(name, null)}
             suggestedNames={allKnownBaristaNames}
+            customerId={formData.id ?? null}
           />
         ))
       ) : (

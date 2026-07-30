@@ -4,6 +4,8 @@ import jsPDF from "jspdf";
 import { reshapeArabic } from "./arabicText";
 import { LogoAssets } from "./pdfGenerator";
 import { formatPdfCurrency, formatEnNumber } from "./costAggregation";
+import { LogisticsOperation } from "../types";
+import { LOGISTICS_TYPE_LABELS_AR_COMPACT } from "./logisticsLabels";
 
 // ── White / Black / Crimson Red Palette (matches company logo) ──
 export const BRAND = {
@@ -675,6 +677,66 @@ export const checkPageBreak = (doc: jsPDF, y: number, needed: number = 30): numb
     return 14;
   }
   return y;
+};
+
+// ── Date formatting (shared) ──
+
+export const ARABIC_SHORT_MONTHS = ["ينا", "فبر", "مار", "أبر", "ماي", "يون", "يول", "أغس", "سبت", "أكت", "نوف", "ديس"];
+
+export const formatDateEn = (date: string | Date): string => {
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "—";
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = ARABIC_SHORT_MONTHS[d.getMonth()];
+  const year = String(d.getFullYear());
+  return `${day} ${month} ${year}`;
+};
+
+// ── Logistics Operations Table (shared between internal reports) ──
+
+/**
+ * Draw a logistics operations table with full cost columns (internal report).
+ * Returns the Y position after the table.
+ */
+export const drawLogisticsOperationsTable = (
+  doc: jsPDF,
+  operations: LogisticsOperation[],
+  y: number,
+  margin: number,
+): number => {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const tableW = pageWidth - margin * 2;
+  const colWidths = [
+    tableW * 0.15, tableW * 0.15, tableW * 0.16, tableW * 0.12,
+    tableW * 0.12, tableW * 0.15, tableW * 0.15,
+  ];
+  const x = margin;
+
+  let nextY = drawTableHeader(
+    doc,
+    ["نوع العملية", "الفئة", "الحالة", "تاريخ الفتح", "تاريخ الإغلاق", "الإيجار", "إجمالي التكلفة"],
+    colWidths, x, y, tableW,
+  );
+
+  operations.forEach((op, i) => {
+    nextY = checkPageBreak(doc, nextY, 8);
+    nextY = drawTableRow(
+      doc,
+      [
+        rtl(LOGISTICS_TYPE_LABELS_AR_COMPACT[op.operation_type] || op.operation_type),
+        rtl(op.machine_category || "—"),
+        op.status === "open" ? "مفتوحة" : "مغلقة",
+        op.open_date ? formatDateEn(op.open_date) : "—",
+        op.close_date ? formatDateEn(op.close_date) : "—",
+        op.total_rental_cost != null ? formatPdfCurrency(op.total_rental_cost) : "—",
+        op.total_logistics_cost != null ? formatPdfCurrency(op.total_logistics_cost) : "—",
+      ],
+      colWidths, x, nextY, tableW, i % 2 === 1,
+      ["right", "right", "center", "right", "right", "right", "right"],
+    );
+  });
+
+  return nextY + 10;
 };
 
 // ── Legacy exports (kept for compatibility) ──

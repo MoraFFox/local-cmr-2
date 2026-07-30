@@ -2,7 +2,7 @@
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { FormData, MaintenanceRecord, Branch } from "../types";
+import { FormData, MaintenanceRecord, Branch, LogisticsOperation } from "../types";
 import { reshapeArabic } from "./arabicText";
 import { loadFonts, flattenMaintenanceRecords } from "./pdfGenerator";
 import { partsList, servicesList } from "../constants";
@@ -19,6 +19,7 @@ import {
   formatPdfCurrency,
   formatEnNumber,
   AggregatedCosts,
+  aggregateLogisticsCosts,
 } from "./costAggregation";
 import {
   BRAND,
@@ -34,6 +35,8 @@ import {
   drawTableHeader,
   drawTableRow,
   checkPageBreak,
+  drawLogisticsOperationsTable,
+  formatDateEn,
   KPICard,
   FinancialCategory,
   ZoneRow,
@@ -161,16 +164,6 @@ const buildFinancialCategories = (costs: AggregatedCosts): FinancialCategory[] =
   return categories;
 };
 
-// Format date with Arabic text but Latin (English) digits, e.g. "24 Jul 2026"
-const ARABIC_SHORT_MONTHS = ["ينا", "فبر", "مار", "أبر", "ماي", "يون", "يول", "أغس", "سبت", "أكت", "نوف", "ديس"];
-const formatDateEn = (date: string | Date): string => {
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return "—";
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = ARABIC_SHORT_MONTHS[d.getMonth()];
-  const year = String(d.getFullYear());
-  return `${day} ${month} ${year}`;
-};
 
 const formatPeriod = (records: MaintenanceRecord[]): string => {
   if (records.length === 0) return "—";
@@ -324,6 +317,8 @@ const renderMaintenanceHistoryTable = (
 export interface InternalReportOptions {
   /** When true (default), empty fields/sections are hidden and content reflows. */
   hideEmptyComponents?: boolean;
+  /** Logistics operations from Supabase (for machine logistics sections). */
+  logisticsOperations?: LogisticsOperation[];
 }
 
 export const generateInternalBranchReport = async (
@@ -336,6 +331,7 @@ export const generateInternalBranchReport = async (
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 10;
   const hideEmpty = options.hideEmptyComponents ?? true;
+  const logisticsOps = options.logisticsOperations ?? [];
 
   const allFlatRecords = flattenMaintenanceRecords(branch.maintenanceHistory);
   const period = formatPeriod(allFlatRecords);
@@ -344,6 +340,7 @@ export const generateInternalBranchReport = async (
   const engine = new PDFLayoutEngine(doc, startY, { hideEmptyComponents: hideEmpty });
 
   const costs = aggregateBranchCosts(branch, partsList, servicesList);
+  const logisticsCosts = aggregateLogisticsCosts(logisticsOps);
   const kpis = getOperationalKPIs(branch.maintenanceHistory);
   const zoneBreakdown = getVisitZoneBreakdown(branch.maintenanceHistory);
   const techSummary = getTechnicianSummary(branch.maintenanceHistory);
@@ -560,6 +557,58 @@ export const generateInternalBranchReport = async (
     drawSectionHeader,
   );
 
+  // Machine Logistics — independent standalone section (with costs)
+  if (!hideEmpty || logisticsOps.length > 0) {
+    engine.addSection(
+      "اللوجستيات — نقل واستبدال الماكينات",
+      (section) => {
+        // Cost summary block
+        section.addBlock({
+          estimatedHeight: logisticsCosts.totalLogisticsCost > 0 ? 35 : 15,
+          draw: (doc, y) => {
+            if (logisticsCosts.totalLogisticsCost <= 0) {
+              return drawEmptyMessage(doc, y, "لا توجد تكاليف لوجستية", margin);
+            }
+            const cardW = (pageWidth - margin * 2 - 18) / 4;
+            const cardH = 22;
+            const cards = [
+              { label: "إيجار الماكينات", value: formatPdfCurrency(logisticsCosts.totalRentalCost), color: BRAND.primary },
+              { label: "النقل — استلام", value: formatPdfCurrency(logisticsCosts.totalPickupCost), color: BRAND.primaryLight },
+              { label: "النقل — إرجاع", value: formatPdfCurrency(logisticsCosts.totalReturnCost), color: BRAND.info },
+              { label: "إجمالي اللوجستيات", value: formatPdfCurrency(logisticsCosts.totalLogisticsCost), color: BRAND.header },
+            ];
+            cards.forEach((card, i) => {
+              const cx = margin + i * (cardW + 6);
+              doc.setFillColor(...BRAND.white);
+              doc.setDrawColor(...BRAND.hairline);
+              doc.roundedRect(cx, y, cardW, cardH, 2, 2, "FD");
+              doc.setFillColor(...card.color);
+              doc.rect(cx, y, cardW, 3, "F");
+              doc.setFont("Amiri", "bold");
+              doc.setFontSize(12);
+              doc.setTextColor(...BRAND.text);
+              doc.text(card.value, cx + cardW - 4, y + 13, { align: "right" });
+              doc.setFont("Amiri", "bold");
+              doc.setFontSize(7);
+              doc.setTextColor(...BRAND.textMuted);
+              doc.text(rtl(card.label), cx + cardW - 4, y + 18, { align: "right" });
+            });
+            return y + cardH + 8;
+          },
+        });
+
+        // Operations table
+        section.addRepeater(
+          logisticsOps,
+          45 + logisticsOps.length * 9,
+          (doc, y) => drawEmptyMessage(doc, y, "لا توجد عمليات لوجستية", margin),
+          (doc, y, items) => drawLogisticsOperationsTable(doc, items, y, margin),
+        );
+      },
+      drawSectionHeader,
+    );
+  }
+
   engine.flush();
   applyFooters(doc, "نظام CMR", companyName);
 
@@ -579,6 +628,7 @@ export const generateInternalCompanyReport = async (
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 10;
   const hideEmpty = options.hideEmptyComponents ?? true;
+  const logisticsOps = options.logisticsOperations ?? [];
 
   const allFlatRecords = flattenMaintenanceRecords(data.maintenanceHistory);
   data.branches.forEach((b) => allFlatRecords.push(...flattenMaintenanceRecords(b.maintenanceHistory)));
@@ -588,6 +638,7 @@ export const generateInternalCompanyReport = async (
   const engine = new PDFLayoutEngine(doc, startY, { hideEmptyComponents: hideEmpty });
 
   const costs = aggregateCosts(data, partsList, servicesList);
+  const logisticsCosts = aggregateLogisticsCosts(logisticsOps);
   const kpis = getOperationalKPIs(data.maintenanceHistory);
   const zoneBreakdown = getVisitZoneBreakdown(data.maintenanceHistory);
   const techSummary = getTechnicianSummary(data.maintenanceHistory);
@@ -864,6 +915,58 @@ export const generateInternalCompanyReport = async (
     },
     drawSectionHeader,
   );
+
+  // Machine Logistics — independent standalone section (with costs)
+  if (!hideEmpty || logisticsOps.length > 0) {
+    engine.addSection(
+      "اللوجستيات — نقل واستبدال الماكينات",
+      (section) => {
+        // Cost summary block
+        section.addBlock({
+          estimatedHeight: logisticsCosts.totalLogisticsCost > 0 ? 35 : 15,
+          draw: (doc, y) => {
+            if (logisticsCosts.totalLogisticsCost <= 0) {
+              return drawEmptyMessage(doc, y, "لا توجد تكاليف لوجستية", margin);
+            }
+            const cardW = (pageWidth - margin * 2 - 18) / 4;
+            const cardH = 22;
+            const cards = [
+              { label: "إيجار الماكينات", value: formatPdfCurrency(logisticsCosts.totalRentalCost), color: BRAND.primary },
+              { label: "النقل — استلام", value: formatPdfCurrency(logisticsCosts.totalPickupCost), color: BRAND.primaryLight },
+              { label: "النقل — إرجاع", value: formatPdfCurrency(logisticsCosts.totalReturnCost), color: BRAND.info },
+              { label: "إجمالي اللوجستيات", value: formatPdfCurrency(logisticsCosts.totalLogisticsCost), color: BRAND.header },
+            ];
+            cards.forEach((card, i) => {
+              const cx = margin + i * (cardW + 6);
+              doc.setFillColor(...BRAND.white);
+              doc.setDrawColor(...BRAND.hairline);
+              doc.roundedRect(cx, y, cardW, cardH, 2, 2, "FD");
+              doc.setFillColor(...card.color);
+              doc.rect(cx, y, cardW, 3, "F");
+              doc.setFont("Amiri", "bold");
+              doc.setFontSize(12);
+              doc.setTextColor(...BRAND.text);
+              doc.text(card.value, cx + cardW - 4, y + 13, { align: "right" });
+              doc.setFont("Amiri", "bold");
+              doc.setFontSize(7);
+              doc.setTextColor(...BRAND.textMuted);
+              doc.text(rtl(card.label), cx + cardW - 4, y + 18, { align: "right" });
+            });
+            return y + cardH + 8;
+          },
+        });
+
+        // Operations table
+        section.addRepeater(
+          logisticsOps,
+          45 + logisticsOps.length * 9,
+          (doc, y) => drawEmptyMessage(doc, y, "لا توجد عمليات لوجستية", margin),
+          (doc, y, items) => drawLogisticsOperationsTable(doc, items, y, margin),
+        );
+      },
+      drawSectionHeader,
+    );
+  }
 
   engine.flush();
   applyFooters(doc, "نظام CMR", data.companyName);
