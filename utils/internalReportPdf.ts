@@ -263,8 +263,7 @@ interface MaintenanceTableColumn {
 }
 
 const buildMaintenanceTableColumns = (): MaintenanceTableColumn[] => [
-  { id: "date", label: "التاريخ", accessor: (r) => r.maintenanceDate, ignoreIf: "never", width: 13, format: (r) => formatDateEn(r.maintenanceDate) },
-  { id: "type", label: "النوع", accessor: (r) => r.type, ignoreIf: "never", width: 10, format: (r) => rtl(getTypeLabel(r.type)) },
+  { id: "date", label: "التاريخ", accessor: (r) => r.maintenanceDate, ignoreIf: "never", width: 13, format: (r) => formatDateEn(r.maintenanceDate) },      { id: "type", label: "النوع", accessor: (r) => r.type, ignoreIf: "never", width: 12, format: (r) => r.type === "requested" ? rtl(getTypeLabel("requested")) + " ●" : rtl(getTypeLabel(r.type)) },
   { id: "barista", label: "الفني", accessor: (r) => r.baristaName, ignoreIf: "empty", width: 15, format: (r) => rtl(r.baristaName) || "—" },
   { id: "zone", label: "المنطقة", accessor: (r) => r.visitZone, ignoreIf: "empty", width: 13, format: (r) => rtl(r.visitZone) || "—" },
   { id: "problems", label: "المشاكل", accessor: (r) => (r.problems || []).join(""), ignoreIf: "empty", width: 22, format: (r) => formatProblemsList(r.problems) },
@@ -306,7 +305,12 @@ const renderMaintenanceHistoryTable = (
     styles: { fontSize: 5.5, cellPadding: 0.8, font: "Amiri", halign: "right", valign: "middle" },
     headStyles: { fillColor: BRAND.primary as [number, number, number], textColor: BRAND.white as [number, number, number], fontStyle: "bold" },
     columnStyles,
-  });
+    didParseCell: (hookData) => {
+      if (hookData.row.section === 'body' && records[hookData.row.index]?.type === 'requested') {
+        hookData.cell.styles.textColor = BRAND.error;
+      }
+    },
+  } as any);
 
   return (doc as any).lastAutoTable.finalY + 8;
 };

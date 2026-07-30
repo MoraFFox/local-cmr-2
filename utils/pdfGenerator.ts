@@ -3,6 +3,7 @@
 import { FormData, MaintenanceRecord, Branch, MaintenancePhoto, LogisticsOperation } from "../types";
 import { DateRange, formatDateRangeLabel } from "./dateRangeFilter";
 import { LOGISTICS_TYPE_LABELS_EN } from "./logisticsLabels";
+import { BRAND } from "./pdfTheme";
 import { logger } from "./logger";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -936,9 +937,10 @@ export const generateCompanyPDF = async (
     doc.text("Main Office Maintenance History", 14, yPos);
     yPos += 6;
 
-    const maintenanceRows = flattenMaintenanceRecords(
+    const allMainOfficeFlat = flattenMaintenanceRecords(
       data.maintenanceHistory,
-    ).map((r) => {
+    );
+    const maintenanceRows = allMainOfficeFlat.map((r) => {
       const row: any[] = [
         r.maintenanceDate,
         r.type === "requested" ? "Requested" : "Scheduled",
@@ -972,12 +974,17 @@ export const generateCompanyPDF = async (
       },
       headStyles: { fillColor: [20, 184, 166], fontStyle: "bold" },
       columnStyles: { 5: { cellWidth: "auto" } },
-    });
+      didParseCell: (hookData: any) => {
+        if (hookData.row.section === 'body' && allMainOfficeFlat[hookData.row.index]?.type === 'requested') {
+          hookData.cell.styles.textColor = BRAND.error;
+        }
+      },
+    } as any);
 
     yPos = (doc as any).lastAutoTable.finalY + 10;
 
     // Render photos for main office maintenance records
-    const allMainOfficeRecords = flattenMaintenanceRecords(data.maintenanceHistory);
+    const allMainOfficeRecords = allMainOfficeFlat;
     for (const record of allMainOfficeRecords) {
       if (record.photos && record.photos.length > 0) {
         if (yPos > 240) {
@@ -1113,12 +1120,13 @@ export const generateCompanyPDF = async (
         doc.text("Maintenance History", 14, yPos);
         yPos += 5;
 
-        const maintenanceRows = flattenMaintenanceRecords(
+        const branchFlatRecords = flattenMaintenanceRecords(
           branch.maintenanceHistory,
-        ).map((r) => {
+        );
+        const maintenanceRows = branchFlatRecords.map((r) => {
           const row: any[] = [
             r.maintenanceDate,
-            r.type === "requested" ? "Requested" : "Scheduled",
+            r.type === "requested" ? "● Requested" : "Scheduled",
             r.type === "requested" ? rtl(r.clientBaristaName) || "-" : "-",
             rtl(r.baristaName) || "-",
             getPaidByLabel(r.paidBy),
@@ -1144,12 +1152,17 @@ export const generateCompanyPDF = async (
           },
           headStyles: { fillColor: [20, 184, 166], fontStyle: "bold" },
           columnStyles: { 5: { cellWidth: "auto" } },
-        });
+          didParseCell: (hookData: any) => {
+            if (hookData.row.section === 'body' && branchFlatRecords[hookData.row.index]?.type === 'requested') {
+              hookData.cell.styles.textColor = BRAND.error;
+            }
+          },
+        } as any);
 
         yPos = (doc as any).lastAutoTable.finalY + 5;
 
         // Render photos for branch maintenance records
-        const allBranchRecords = flattenMaintenanceRecords(branch.maintenanceHistory);
+        const allBranchRecords = branchFlatRecords;
         for (const record of allBranchRecords) {
           if (record.photos && record.photos.length > 0) {
             if (yPos > 240) {
@@ -1351,8 +1364,13 @@ export const generateBranchPDF = async (
       // Header: Date - Type
       doc.setFontSize(11);
       doc.setFont("Amiri", "bold");
-      doc.setTextColor(0);
-      const typeLabel = r.type === "requested" ? "Requested" : "Scheduled";
+      const typeLabel = r.type === "requested" ? "● Requested" : "Scheduled";
+      // Highlight requested visits in red so they stand out from scheduled visits
+      if (r.type === "requested") {
+        doc.setTextColor(...BRAND.error);
+      } else {
+        doc.setTextColor(0);
+      }
       doc.text(`${r.maintenanceDate} (${typeLabel})`, 14, yPos);
 
       // Problem Solved Status
