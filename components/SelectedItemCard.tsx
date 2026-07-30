@@ -12,6 +12,8 @@ interface SelectedItemCardProps {
   onRemove: () => void;
   onNameChange?: (name: string) => void;
   viewMode?: 'grid' | 'list';
+  /** When true, the custom name input will auto-focus on mount. */
+  autoFocus?: boolean;
 }
 
 const SelectedItemCard: React.FC<SelectedItemCardProps> = ({
@@ -24,6 +26,7 @@ const SelectedItemCard: React.FC<SelectedItemCardProps> = ({
   onRemove,
   onNameChange,
   viewMode = 'grid',
+  autoFocus = false,
 }) => {
   const borderColorClass = paidByClient
     ? 'border-amber-500/30 bg-amber-500/5'
@@ -71,6 +74,7 @@ const SelectedItemCard: React.FC<SelectedItemCardProps> = ({
             onChange={handleNameChange}
             className="w-full bg-cream text-text px-3 py-1.5 rounded-lg border border-hairline focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none transition-all placeholder-latte"
             placeholder="Item name..."
+            autoFocus={autoFocus}
           />
         ) : (
           <h4 className="font-bold text-text text-sm leading-snug break-words">

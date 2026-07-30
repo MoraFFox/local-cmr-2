@@ -122,15 +122,20 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [activeSuggestionIndex]);
 
-    // Refocus search input after selection so the user can keep
-    // finding more items without re-clicking (audit issue #19).
-    // useEffect guarantees focus after React commits the re-render.
-    // The first-render guard prevents focus from stealing on mount
-    // when editing an existing record with pre-selected items.
+    // Refocus search input after checkbox/category selection so the user can
+    // keep finding more items without re-clicking (audit issue #19).
+    // ▶ A separate guard prevents refocus when the selection change came from
+    // a custom-problem text input — otherwise the first keystroke in a new
+    // custom field would steal focus to the search bar.
+    const skipRefocusRef = useRef(false);
     const didMountRef = useRef(false);
     useEffect(() => {
         if (!didMountRef.current) {
             didMountRef.current = true;
+            return;
+        }
+        if (skipRefocusRef.current) {
+            skipRefocusRef.current = false;
             return;
         }
         if ((selectedValues || []).length > 0) {
@@ -163,6 +168,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
             newSelected.push(value.trim());
         }
         skipSyncRef.current = true;
+        skipRefocusRef.current = true;
         onChange(newSelected);
     };
 
@@ -172,6 +178,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
         setCustomProblems(newCustomProblems);
         const currentSelected = selectedValues || [];
         skipSyncRef.current = true;
+        skipRefocusRef.current = true;
         onChange(currentSelected.filter(v => v !== valueToRemove));
         setActiveSuggestionIndex(null);
     };
@@ -214,6 +221,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
         const newSelected = currentSelected.filter(v => v !== oldCustomValue);
         newSelected.push(suggestion.trim());
         skipSyncRef.current = true;
+        skipRefocusRef.current = true;
         onChange(newSelected);
 
         setActiveSuggestionIndex(null);
@@ -273,6 +281,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                 const newSelected = currentSelected.filter(v => v !== oldCustomValue);
                 newSelected.push(allSuggestions[idx].trim());
                 skipSyncRef.current = true;
+                skipRefocusRef.current = true;
                 onChange(newSelected);
                 setActiveSuggestionIndex(null);
                 setHighlightedSuggestionIdx(0);

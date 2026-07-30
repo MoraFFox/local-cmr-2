@@ -74,7 +74,7 @@ export const SelectorSelectedChips: React.FC<SelectorSelectedChipsProps> = ({
 
         return (
           <div
-            key={`${item.name}-${index}`}
+            key={`chip-${index}`}
             className={`group inline-flex items-center gap-1.5 px-2 py-1 rounded-full border ${chipBorder} transition-all`}
           >
             {/* Name: custom items get an inline input; predefined items toggle payer on click */}
@@ -86,6 +86,7 @@ export const SelectorSelectedChips: React.FC<SelectorSelectedChipsProps> = ({
                 className="text-xs font-semibold bg-transparent border-b border-hairline focus:border-primary outline-none px-1 max-w-[140px] text-text placeholder-latte"
                 placeholder="Name..."
                 aria-label={`Custom item name (row ${index + 1})`}
+                autoFocus={item.isCustom && item.name === ''}
               />
             ) : (
               <button

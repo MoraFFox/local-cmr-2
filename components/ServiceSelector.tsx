@@ -38,7 +38,6 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
   const searchInputRef = useRef<HTMLDivElement>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isSelectedSectionExpanded, setIsSelectedSectionExpanded] = useState(true);
-  const [customServices, setCustomServices] = useState<ServiceRecord[]>([]);
   // NEW: compact chips view toggle (audit issue #11) and bulk payer edit (audit issue #21)
   const [selectedViewMode, setSelectedViewMode] = useState<'cards' | 'chips'>('cards');
 
@@ -47,12 +46,7 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
     [options]
   );
 
-  useEffect(() => {
-    const customs = selectedValues.filter(
-      (sv) => !predefinedServiceValues.has(sv.name)
-    );
-    setCustomServices(customs);
-  }, [selectedValues, predefinedServiceValues]);
+
 
   // Announce selection count to screen readers (accessibility #42)
   useEffect(() => {
@@ -131,10 +125,18 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
   // useEffect guarantees focus after React commits the re-render.
   // The first-render guard prevents focus from stealing on mount
   // when editing an existing record with pre-selected items.
+  // ▶ A separate guard prevents refocus when the change came from a
+  // custom item text input — otherwise adding/editing a custom service
+  // steals focus from the newly appeared custom field.
+  const skipRefocusRef = useRef(false);
   const didMountRef = useRef(false);
   useEffect(() => {
     if (!didMountRef.current) {
       didMountRef.current = true;
+      return;
+    }
+    if (skipRefocusRef.current) {
+      skipRefocusRef.current = false;
       return;
     }
     if (selectedValues.length > 0) {
@@ -152,15 +154,18 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
 
   // NEW: Bulk payer change — set all selected items' payer at once (audit issue #21).
   const handleBulkPayerChange = useCallback((paidByClient: boolean) => {
+    skipRefocusRef.current = true;
     onChange(selectedValues.map((s) => ({ ...s, paidByClient })));
   }, [selectedValues, onChange]);
 
   // NEW: Bulk quantity multiply — multiply all selected items' counts (audit issue #20)
   const handleBulkQuantityMultiply = useCallback((multiplier: number) => {
+    skipRefocusRef.current = true;
     onChange(selectedValues.map((s) => ({ ...s, count: Math.max(1, Math.floor(s.count * multiplier)) })));
   }, [selectedValues, onChange]);
 
   const handleRemoveService = useCallback((name: string) => {
+    skipRefocusRef.current = true;
     onChange(selectedValues.filter((s) => s.name !== name));
   }, [selectedValues, onChange]);
 
@@ -174,15 +179,14 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
   }, [selectedValues, onChange]);
 
   const handleAddCustomService = useCallback(() => {
+    skipRefocusRef.current = true;
     onChange([...selectedValues, { name: '', count: 1, cost: 0, paidByClient: false }]);
   }, [selectedValues, onChange]);
 
-  const handleCustomNameChange = useCallback((index: number, newName: string) => {
-    const customService = customServices[index];
-    if (customService) {
-      onChange(selectedValues.map((s) => s === customService ? { ...s, name: newName } : s));
-    }
-  }, [customServices, selectedValues, onChange]);
+  const handleCustomNameChange = useCallback((selectedIndex: number, newName: string) => {
+    skipRefocusRef.current = true;
+    onChange(selectedValues.map((s, i) => i === selectedIndex ? { ...s, name: newName } : s));
+  }, [selectedValues, onChange]);
 
   // NEW: renderAvailableService now uses SelectorAvailableItem with inline
   // quantity stepper (audit issue #10). Pass `isSuggested` when the option
@@ -225,10 +229,10 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
           {items.length > 0 ? (
             items.map((service, index) => {
                 const isCustom = !predefinedServiceValues.has(service.name);
-                const customIndex = isCustom ? customServices.findIndex((cs) => cs === service) : -1;
+                const selectedIndex = selectedValues.findIndex((s) => s === service);
                 return (
                     <SelectedItemCard
-                        key={`${service.name}-${index}`}
+                        key={`service-${index}`}
                         name={service.name}
                         quantity={service.count}
                         paidByClient={service.paidByClient === true}
@@ -237,7 +241,8 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
                         onPayerChange={(paidByClient) => handlePayerChange(service.name, paidByClient)}
                         onQuantityChange={(quantity) => handleCountChange(service.name, quantity)}
                         onRemove={() => handleRemoveService(service.name)}
-                        onNameChange={isCustom && customIndex >= 0 ? (name) => handleCustomNameChange(customIndex, name) : undefined}
+                        onNameChange={isCustom && selectedIndex >= 0 ? (name) => handleCustomNameChange(selectedIndex, name) : undefined}
+                        autoFocus={isCustom && service.name === ''}
                     />
                 );
             })

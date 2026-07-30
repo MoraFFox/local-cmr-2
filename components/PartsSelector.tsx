@@ -38,7 +38,6 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
   const searchInputRef = useRef<HTMLDivElement>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isSelectedSectionExpanded, setIsSelectedSectionExpanded] = useState(true);
-  const [customParts, setCustomParts] = useState<PartRecord[]>([]);
   // NEW: compact chips view toggle (audit issue #11) and bulk payer edit (audit issue #21)
   const [selectedViewMode, setSelectedViewMode] = useState<'cards' | 'chips'>('cards');
 
@@ -47,12 +46,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
     [options]
   );
 
-  useEffect(() => {
-    const customs = selectedValues.filter(
-      (sv) => !predefinedPartValues.has(sv.name)
-    );
-    setCustomParts(customs);
-  }, [selectedValues, predefinedPartValues]);
+
 
   // Announce selection count to screen readers (accessibility #42)
   useEffect(() => {
@@ -130,10 +124,18 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
   // useEffect guarantees focus after React commits the re-render.
   // The first-render guard prevents focus from stealing on mount
   // when editing an existing record with pre-selected items.
+  // ▶ A separate guard prevents refocus when the change came from a
+  // custom item text input — otherwise adding/editing a custom part
+  // steals focus from the newly appeared custom field.
+  const skipRefocusRef = useRef(false);
   const didMountRef = useRef(false);
   useEffect(() => {
     if (!didMountRef.current) {
       didMountRef.current = true;
+      return;
+    }
+    if (skipRefocusRef.current) {
+      skipRefocusRef.current = false;
       return;
     }
     if (selectedValues.length > 0) {
@@ -151,15 +153,18 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
 
   // NEW: Bulk payer change — set all selected items' payer at once (audit issue #21).
   const handleBulkPayerChange = useCallback((paidByClient: boolean) => {
+    skipRefocusRef.current = true;
     onChange(selectedValues.map((p) => ({ ...p, paidByClient })));
   }, [selectedValues, onChange]);
 
   // NEW: Bulk quantity multiply — multiply all selected items' counts (audit issue #20)
   const handleBulkQuantityMultiply = useCallback((multiplier: number) => {
+    skipRefocusRef.current = true;
     onChange(selectedValues.map((p) => ({ ...p, count: Math.max(1, Math.floor(p.count * multiplier)) })));
   }, [selectedValues, onChange]);
 
   const handleRemovePart = useCallback((name: string) => {
+    skipRefocusRef.current = true;
     onChange(selectedValues.filter((p) => p.name !== name));
   }, [selectedValues, onChange]);
 
@@ -173,15 +178,14 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
   }, [selectedValues, onChange]);
 
   const handleAddCustomPart = useCallback(() => {
+    skipRefocusRef.current = true;
     onChange([...selectedValues, { name: '', count: 1, cost: 0, paidByClient: false }]);
   }, [selectedValues, onChange]);
 
-  const handleCustomNameChange = useCallback((index: number, newName: string) => {
-    const customPart = customParts[index];
-    if (customPart) {
-      onChange(selectedValues.map((p) => p === customPart ? { ...p, name: newName } : p));
-    }
-  }, [customParts, selectedValues, onChange]);
+  const handleCustomNameChange = useCallback((selectedIndex: number, newName: string) => {
+    skipRefocusRef.current = true;
+    onChange(selectedValues.map((p, i) => i === selectedIndex ? { ...p, name: newName } : p));
+  }, [selectedValues, onChange]);
 
   // NEW: renderAvailablePart now uses SelectorAvailableItem with inline
   // quantity stepper (audit issue #10). Pass `isSuggested` when the option
@@ -223,10 +227,10 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
           {items.length > 0 ? (
             items.map((part, index) => {
                 const isCustom = !predefinedPartValues.has(part.name);
-                const customIndex = isCustom ? customParts.findIndex((cp) => cp === part) : -1;
+                const selectedIndex = selectedValues.findIndex((p) => p === part);
                 return (
                     <SelectedItemCard
-                        key={`${part.name}-${index}`}
+                        key={`part-${index}`}
                         name={part.name}
                         quantity={part.count}
                         paidByClient={part.paidByClient === true}
@@ -235,7 +239,8 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
                         onPayerChange={(paidByClient) => handlePayerChange(part.name, paidByClient)}
                         onQuantityChange={(quantity) => handleCountChange(part.name, quantity)}
                         onRemove={() => handleRemovePart(part.name)}
-                        onNameChange={isCustom && customIndex >= 0 ? (name) => handleCustomNameChange(customIndex, name) : undefined}
+                        onNameChange={isCustom && selectedIndex >= 0 ? (name) => handleCustomNameChange(selectedIndex, name) : undefined}
+                        autoFocus={isCustom && part.name === ''}
                     />
                 );
             })
