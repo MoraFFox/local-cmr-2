@@ -58,36 +58,44 @@ ALTER TABLE company_machines ENABLE ROW LEVEL SECURITY;
 ALTER TABLE logistics_operations ENABLE ROW LEVEL SECURITY;
 
 -- Company machines: authenticated users can read
+DROP POLICY IF EXISTS "Authenticated users can manage company_machines" ON company_machines;
+DROP POLICY IF EXISTS "Authenticated users can read company_machines" ON company_machines;
 CREATE POLICY "Authenticated users can read company_machines"
   ON company_machines FOR SELECT
   USING (auth.role() = 'authenticated');
 
 -- Company machines: authenticated users can insert
+DROP POLICY IF EXISTS "Authenticated users can insert company_machines" ON company_machines;
 CREATE POLICY "Authenticated users can insert company_machines"
   ON company_machines FOR INSERT
   WITH CHECK (auth.role() = 'authenticated');
 
 -- Company machines: authenticated users can update (placeholder — restrict to admin role when available)
+DROP POLICY IF EXISTS "Authenticated users can update company_machines" ON company_machines;
 CREATE POLICY "Authenticated users can update company_machines"
   ON company_machines FOR UPDATE
   USING (auth.role() = 'authenticated');
 
 -- Company machines: authenticated users can delete (placeholder — restrict to admin role when available)
+DROP POLICY IF EXISTS "Authenticated users can delete company_machines" ON company_machines;
 CREATE POLICY "Authenticated users can delete company_machines"
   ON company_machines FOR DELETE
   USING (auth.role() = 'authenticated');
 
 -- Logistics operations: authenticated users can read
+DROP POLICY IF EXISTS "Authenticated users can read logistics_operations" ON logistics_operations;
 CREATE POLICY "Authenticated users can read logistics_operations"
   ON logistics_operations FOR SELECT
   USING (auth.role() = 'authenticated');
 
 -- Logistics operations: authenticated users can insert
+DROP POLICY IF EXISTS "Authenticated users can insert logistics_operations" ON logistics_operations;
 CREATE POLICY "Authenticated users can insert logistics_operations"
   ON logistics_operations FOR INSERT
   WITH CHECK (auth.role() = 'authenticated');
 
 -- Logistics operations: authenticated users can update (scoped to creating user)
+DROP POLICY IF EXISTS "Authenticated users can update logistics_operations" ON logistics_operations;
 CREATE POLICY "Authenticated users can update logistics_operations"
   ON logistics_operations FOR UPDATE
   USING (auth.role() = 'authenticated' AND created_by = auth.uid());
