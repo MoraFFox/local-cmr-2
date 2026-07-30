@@ -3,6 +3,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { FormData, MaintenanceRecord, Branch, LogisticsOperation } from "../types";
+import { DateRange, formatDateRangeLabel } from "./dateRangeFilter";
 import { reshapeArabic } from "./arabicText";
 import { loadFonts, flattenMaintenanceRecords } from "./pdfGenerator";
 import { partsList, servicesList } from "../constants";
@@ -319,6 +320,8 @@ export interface InternalReportOptions {
   hideEmptyComponents?: boolean;
   /** Logistics operations from Supabase (for machine logistics sections). */
   logisticsOperations?: LogisticsOperation[];
+  /** Date range filter — sets the period label in the header. */
+  dateRange?: DateRange;
 }
 
 export const generateInternalBranchReport = async (
@@ -334,7 +337,9 @@ export const generateInternalBranchReport = async (
   const logisticsOps = options.logisticsOperations ?? [];
 
   const allFlatRecords = flattenMaintenanceRecords(branch.maintenanceHistory);
-  const period = formatPeriod(allFlatRecords);
+  const period = options.dateRange && (options.dateRange.startDate || options.dateRange.endDate)
+    ? formatDateRangeLabel(options.dateRange)
+    : formatPeriod(allFlatRecords);
   const startY = drawInternalHeader(doc, companyName, branch.branchName || undefined, assets, period);
 
   const engine = new PDFLayoutEngine(doc, startY, { hideEmptyComponents: hideEmpty });
@@ -632,7 +637,9 @@ export const generateInternalCompanyReport = async (
 
   const allFlatRecords = flattenMaintenanceRecords(data.maintenanceHistory);
   data.branches.forEach((b) => allFlatRecords.push(...flattenMaintenanceRecords(b.maintenanceHistory)));
-  const period = formatPeriod(allFlatRecords);
+  const period = options.dateRange && (options.dateRange.startDate || options.dateRange.endDate)
+    ? formatDateRangeLabel(options.dateRange)
+    : formatPeriod(allFlatRecords);
   const startY = drawInternalHeader(doc, data.companyName, undefined, assets, period);
 
   const engine = new PDFLayoutEngine(doc, startY, { hideEmptyComponents: hideEmpty });

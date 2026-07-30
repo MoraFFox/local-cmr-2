@@ -16,6 +16,8 @@ import Avatar from "./Avatar";
 import { generateCompanyPDF, generateBranchPDF } from "../utils/pdfGenerator";
 import { generateInternalCompanyReport, generateInternalBranchReport } from "../utils/internalReportPdf";
 import { useLogisticsOperations } from "../hooks/useLogisticsOperations";
+import DateRangeExportModal from "./DateRangeExportModal";
+import { DateRange, filterMaintenanceByDateRange } from "../utils/dateRangeFilter";
 import { getVisitZoneLabel } from "../utils/visitZones";
 import { getMachineOwnershipStatus } from "./ReviewStep";
 import {
@@ -1177,46 +1179,97 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
   const [pendingParsedData, setPendingParsedData] = useState<FormData | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Date-range modal state
+  const [showDateRangeModal, setShowDateRangeModal] = useState(false);
+  const [pendingPrintAction, setPendingPrintAction] = useState<{
+    type: "full" | "branch";
+    mode: "internal" | "client";
+    branch?: Branch;
+  } | null>(null);
+
   // Fetch logistics operations for this customer to include in reports
   const { operations: logisticsOps } = useLogisticsOperations(submission.id ?? null);
 
-  const handlePrintFull = async (mode: "internal" | "client") => {
-    setIsGeneratingPDF(true);
-    try {
-      if (mode === "internal") {
-        const doc = await generateInternalCompanyReport(submission, { logisticsOperations: logisticsOps });
-        const fileName = `${submission.companyName.replace(/\s+/g, "_")}_Internal_Report_${new Date().toISOString().split("T")[0]}.pdf`;
-        doc.save(fileName);
-      } else {
-        const doc = await generateCompanyPDF(submission, { includeCosts: false, logisticsOperations: logisticsOps });
-        const fileName = `${submission.companyName.replace(/\s+/g, "_")}_Client_Report_${new Date().toISOString().split("T")[0]}.pdf`;
-        doc.save(fileName);
-      }
-    } catch (error) {
-      logger.error("Error generating PDF", error, "pdf");
-      showToast("فشل إنشاء PDF. يرجى المحاولة مرة أخرى.", "error");
-    } finally {
-      setIsGeneratingPDF(false);
-    }
+  // Helper: clone submission with filtered maintenance history by date range
+  const getFilteredSubmission = (range: DateRange) => {
+    if (!range.startDate && !range.endDate) return submission;
+    const filtered = structuredClone(submission) as FormData;
+    filtered.maintenanceHistory = filterMaintenanceByDateRange(
+      filtered.maintenanceHistory || [],
+      range,
+    );
+    filtered.branches = filtered.branches.map((b) => ({
+      ...b,
+      maintenanceHistory: filterMaintenanceByDateRange(b.maintenanceHistory, range),
+    }));
+    return filtered;
   };
 
-  const handlePrintBranch = async (branch: Branch, mode: "internal" | "client") => {
+  // Intercepted: opens date-range modal instead of generating directly
+  const handlePrintFull = (mode: "internal" | "client") => {
+    setPendingPrintAction({ type: "full", mode });
+    setShowDateRangeModal(true);
+  };
+
+  const handlePrintBranch = (branch: Branch, mode: "internal" | "client") => {
+    setPendingPrintAction({ type: "branch", mode, branch });
+    setShowDateRangeModal(true);
+  };
+
+  // Actual PDF generation after date range is selected
+  const handleDateRangeExport = async (range: DateRange) => {
+    if (!pendingPrintAction) return;
+    setShowDateRangeModal(false);
     setIsGeneratingPDF(true);
+
+    const { type, mode, branch } = pendingPrintAction;
+    const filteredSub = getFilteredSubmission(range);
+
     try {
-      if (mode === "internal") {
-        const doc = await generateInternalBranchReport(submission.companyName, branch, { logisticsOperations: logisticsOps });
-        const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${branch.branchName?.replace(/\s+/g, "_")}_Internal_Report_${new Date().toISOString().split("T")[0]}.pdf`;
-        doc.save(fileName);
-      } else {
-        const doc = await generateBranchPDF(submission.companyName, branch, { includeCosts: false, logisticsOperations: logisticsOps });
-        const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${branch.branchName?.replace(/\s+/g, "_")}_Client_Report_${new Date().toISOString().split("T")[0]}.pdf`;
-        doc.save(fileName);
+      if (type === "full") {
+        if (mode === "internal") {
+          const doc = await generateInternalCompanyReport(filteredSub, {
+            logisticsOperations: logisticsOps,
+            dateRange: range.preset !== "allTime" ? range : undefined,
+          });
+          const fileName = `${submission.companyName.replace(/\s+/g, "_")}_Internal_Report_${new Date().toISOString().split("T")[0]}.pdf`;
+          doc.save(fileName);
+        } else {
+          const doc = await generateCompanyPDF(filteredSub, {
+            includeCosts: false,
+            logisticsOperations: logisticsOps,
+            dateRange: range.preset !== "allTime" ? range : undefined,
+          });
+          const fileName = `${submission.companyName.replace(/\s+/g, "_")}_Client_Report_${new Date().toISOString().split("T")[0]}.pdf`;
+          doc.save(fileName);
+        }
+      } else if (branch) {
+        // Look up the filtered branch from the cloned submission (CR #1 fix)
+        const filteredBranch = filteredSub.branches.find(b => b.id === branch.id) || branch;
+        if (mode === "internal") {
+          const doc = await generateInternalBranchReport(
+            filteredSub.companyName,
+            filteredBranch,
+            { logisticsOperations: logisticsOps, dateRange: range.preset !== "allTime" ? range : undefined },
+          );
+          const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${filteredBranch.branchName?.replace(/\s+/g, "_")}_Internal_Report_${new Date().toISOString().split("T")[0]}.pdf`;
+          doc.save(fileName);
+        } else {
+          const doc = await generateBranchPDF(
+            filteredSub.companyName,
+            filteredBranch,
+            { includeCosts: false, logisticsOperations: logisticsOps, dateRange: range.preset !== "allTime" ? range : undefined },
+          );
+          const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${filteredBranch.branchName?.replace(/\s+/g, "_")}_Client_Report_${new Date().toISOString().split("T")[0]}.pdf`;
+          doc.save(fileName);
+        }
       }
     } catch (error) {
       logger.error("Error generating PDF", error, "pdf");
       showToast("فشل إنشاء PDF. يرجى المحاولة مرة أخرى.", "error");
     } finally {
       setIsGeneratingPDF(false);
+      setPendingPrintAction(null);
     }
   };
 
@@ -1706,6 +1759,15 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
         </div>
       </div>
 
+      <DateRangeExportModal
+        isOpen={showDateRangeModal}
+        onClose={() => {
+          setShowDateRangeModal(false);
+          setPendingPrintAction(null);
+        }}
+        onExport={handleDateRangeExport}
+        isGenerating={isGeneratingPDF}
+      />
       <ConfirmDialog
         isOpen={pendingParsedData !== null}
         onClose={cancelApplyParsedData}

@@ -6,6 +6,7 @@ import {
   CameraIcon,
   DocumentTextIcon,
   TrashIcon,
+  TruckIcon,
   UserIcon,
   PhoneIcon
 } from '@heroicons/react/24/outline';
@@ -15,6 +16,7 @@ import TechInput from './ui/TechInput';
 import CheckboxGroup from '../CheckboxGroup';
 import ServiceSelector from '../ServiceSelector';
 import PartsSelector from '../PartsSelector';
+import MachineLogisticsSection from '../MachineLogisticsSection';
 import { HelpTooltip } from '../form-ui/HelpTooltip';
 import { useT } from '../../utils/i18n';
 import { formatEgyptianPhone } from '../../utils/phone';
@@ -52,6 +54,12 @@ interface Step2WorkLogProps {
   sortedServices?: Service[];
   sortedParts?: Part[];
   sortedProblemCategories?: typeof problemCategories;
+  /** Customer ID for logistics operations (from Step1 company selection) */
+  customerId?: number | null;
+  /** Record ID for linking logistics operations (0 for new records) */
+  recordId?: number;
+  /** Maintenance date for logistics operations */
+  maintenanceDate?: string;
 }
 
 const predefinedProblemValues = problemCategories.flatMap((cat) =>
@@ -65,6 +73,9 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
   sortedServices,
   sortedParts,
   sortedProblemCategories,
+  customerId,
+  recordId = 0,
+  maintenanceDate,
 }) => {
   const t = useT();
   const handleVisitTypeChange = (type: 'problem' | 'scheduled') => {
@@ -372,7 +383,18 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
         </div>
       </TechCard>
 
-      {/* 8. Field Notes */}
+      {/* 8. Machine Logistics */}
+      {customerId != null && maintenanceDate && (
+        <TechCard title="لوجستيات الماكينات" icon={<TruckIcon />} variant="active">
+          <MachineLogisticsSection
+            customerId={customerId}
+            recordId={recordId}
+            maintenanceDate={maintenanceDate}
+          />
+        </TechCard>
+      )}
+
+      {/* 9. Field Notes */}
       <TechCard title={t.tactical.fieldNotes} icon={<DocumentTextIcon />}>
          <textarea
             value={data.notes}

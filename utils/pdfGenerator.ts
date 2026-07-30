@@ -1,6 +1,7 @@
 /** @format */
 
 import { FormData, MaintenanceRecord, Branch, MaintenancePhoto, LogisticsOperation } from "../types";
+import { DateRange, formatDateRangeLabel } from "./dateRangeFilter";
 import { LOGISTICS_TYPE_LABELS_EN } from "./logisticsLabels";
 import { logger } from "./logger";
 import jsPDF from "jspdf";
@@ -53,6 +54,7 @@ export const formatMaintenanceDetails = (r: MaintenanceRecord): string => {
 interface PDFOptions {
   includeCosts: boolean;
   logisticsOperations?: LogisticsOperation[];
+  dateRange?: DateRange;
 }
 
 // Fix 4.3: Add font caching to avoid re-fetching on every PDF generation
@@ -509,6 +511,18 @@ export const generateCompanyPDF = async (
     yPos,
     { align: "center" },
   );
+
+  // Period label when date range is active (D-06)
+  if (options.dateRange && (options.dateRange.startDate || options.dateRange.endDate)) {
+    yPos += 4;
+    doc.setFontSize(7);
+    doc.text(
+      `Period: ${formatDateRangeLabel(options.dateRange)}`,
+      pageWidth / 2,
+      yPos,
+      { align: "center" },
+    );
+  }
 
   yPos += 15;
 

@@ -553,6 +553,9 @@ const TechnicianPortal: React.FC<TechnicianPortalProps> = ({
                 sortedServices={sortedServices}
                 sortedParts={sortedParts}
                 sortedProblemCategories={sortedProblemCategories}
+                customerId={step1Data.companyId ? Number(step1Data.companyId) : null}
+                recordId={0 /* sentinel: new record, no real ID yet — linked later when record is created */}
+                maintenanceDate={step1Data.date}
             />
         )}
         

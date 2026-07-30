@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { useFloatingMenu } from '../hooks/useFloatingMenu';
 import { FormData, MaintenanceRecord } from '../types';
@@ -8,12 +9,15 @@ import EmptyState from './EmptyState';
 import { SkeletonCard } from './ui/Skeleton';
 import Button from './ui/Button';
 import { ConfirmDialog } from './ui/ConfirmDialog';
+import DateRangeExportModal from './DateRangeExportModal';
+import { DateRange } from '../utils/dateRangeFilter';
 
 interface HistoryPageProps {
     submissions: (FormData & { created_at: string })[];
     onEdit: (submission: FormData) => void;
     onDelete: (id: number) => void;
     onAddNew: () => void;
+    /** @deprecated No longer called — print button now navigates directly with date params. Kept for interface compatibility. */
     onPrint: () => void;
     onViewDetails: (submission: FormData & { created_at: string }) => void;
     onUpdateCompany?: (updatedCompany: FormData) => void;
@@ -24,6 +28,7 @@ interface HistoryPageProps {
 }
 
 const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete, onAddNew, onPrint, onViewDetails, onUpdateCompany, onEditMaintenance, onRequestMissingData, getTechnicianDisplayName, isLoading }) => {
+    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
@@ -33,6 +38,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
     const [isCompanyEditModalOpen, setIsCompanyEditModalOpen] = useState(false);
     const [confirmState, setConfirmState] = useState<{ open: boolean; onConfirm: () => void; message: string } | null>(null);
     const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+    const [showDateRangeModal, setShowDateRangeModal] = useState(false);
 
     const handleDelete = (id: number) => {
         setConfirmState({
@@ -208,7 +214,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                     <p className="text-latte mt-1 sm:mt-2">عرض أو تعديل أو حذف الإرسالات السابقة.</p>
                  </div>
                  <div className="flex items-center gap-x-2 sm:gap-x-3">
-                    <Button variant="secondary" onClick={onPrint}>
+                    <Button variant="secondary" onClick={() => setShowDateRangeModal(true)}>
                         <PrinterIcon className="w-5 h-5" />
                         طباعة
                     </Button>
@@ -484,6 +490,18 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                 onSave={handleSaveCompanyEdit}
             />
 
+            <DateRangeExportModal
+              isOpen={showDateRangeModal}
+              onClose={() => setShowDateRangeModal(false)}
+              onExport={(range: DateRange) => {
+                setShowDateRangeModal(false);
+                const params = new URLSearchParams();
+                if (range.startDate) params.set('startDate', range.startDate);
+                if (range.endDate) params.set('endDate', range.endDate);
+                const qs = params.toString();
+                navigate(qs ? `/print?${qs}` : '/print');
+              }}
+            />
             <ConfirmDialog
                 isOpen={confirmState?.open ?? false}
                 title="تأكيد الحذف"
