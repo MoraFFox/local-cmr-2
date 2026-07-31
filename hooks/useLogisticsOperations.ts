@@ -38,6 +38,9 @@ export interface CreateLogisticsOperationInput {
   machine_category?: string;
   machine_ownership?: string;
   machine_type?: string;
+  /** Machine given to the client (replacement) — category and system. */
+  given_machine_category?: string;
+  given_machine_type?: string;
   replacement_machine_id?: number | null;
   monthly_rental_price?: number;
   pickup_cost?: number;
@@ -49,6 +52,28 @@ export interface CreateLogisticsOperationInput {
 export interface CloseOperationData {
   closed_by_record_id: number;
   close_date: string; // maintenanceDate of the closing record
+  /** Cost of maintenance performed on the client's machine (internal, always company-paid). */
+  maintenance_cost: number;
+  /** What was done to the client's machine (parts changed, services performed, etc.). */
+  work_done: string;
+}
+
+/** Fields editable after creation (both open and closed operations). */
+export interface UpdateLogisticsOperationInput {
+  operation_type: 'pickup_and_deliver' | 'deliver_only' | 'pickup_only';
+  machine_category?: string;
+  machine_ownership?: string;
+  machine_type?: string;
+  given_machine_category?: string;
+  given_machine_type?: string;
+  replacement_machine_id?: number | null;
+  monthly_rental_price?: number;
+  pickup_cost?: number;
+  return_cost?: number;
+  internal_notes?: string;
+  /** Only meaningful for closed operations. */
+  maintenance_cost?: number;
+  work_done?: string;
 }
 
 /**
@@ -105,6 +130,8 @@ export function useLogisticsOperations(customerId: number | null) {
             machine_category: input.machine_category ?? null,
             machine_ownership: input.machine_ownership ?? null,
             machine_type: input.machine_type ?? null,
+            given_machine_category: input.given_machine_category ?? null,
+            given_machine_type: input.given_machine_type ?? null,
             replacement_machine_id: input.replacement_machine_id ?? null,
             monthly_rental_price: input.monthly_rental_price != null ? Math.max(0, input.monthly_rental_price) : null,
             pickup_cost: input.pickup_cost != null ? Math.max(0, input.pickup_cost) : 0,
@@ -160,6 +187,8 @@ export function useLogisticsOperations(customerId: number | null) {
             rental_duration_minutes: duration.minutes,
             billable_days: billableDays,
             total_rental_cost: rentalCost,
+            maintenance_cost: Math.max(0, closeData.maintenance_cost),
+            work_done: closeData.work_done,
             closed_by: userId,
           })
           .eq('id', operationId)
@@ -179,12 +208,70 @@ export function useLogisticsOperations(customerId: number | null) {
     [operations],
   );
 
+  const updateOperation = useCallback(
+    async (operationId: number, input: UpdateLogisticsOperationInput): Promise<LogisticsOperation | null> => {
+      try {
+        const { data, error: supaError } = await supabase
+          .from('logistics_operations')
+          .update({
+            operation_type: input.operation_type,
+            machine_category: input.machine_category ?? null,
+            machine_ownership: input.machine_ownership ?? null,
+            machine_type: input.machine_type ?? null,
+            given_machine_category: input.given_machine_category ?? null,
+            given_machine_type: input.given_machine_type ?? null,
+            replacement_machine_id: input.replacement_machine_id ?? null,
+            monthly_rental_price: input.monthly_rental_price != null ? Math.max(0, input.monthly_rental_price) : null,
+            pickup_cost: input.pickup_cost != null ? Math.max(0, input.pickup_cost) : 0,
+            return_cost: input.return_cost != null ? Math.max(0, input.return_cost) : 0,
+            internal_notes: input.internal_notes ?? null,
+            // Only overwrite close-time data when explicitly provided, so an edit that
+            // omits maintenance fields never wipes them from a closed operation.
+            ...(input.maintenance_cost != null ? { maintenance_cost: Math.max(0, input.maintenance_cost) } : {}),
+            ...(input.work_done != null ? { work_done: input.work_done } : {}),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', operationId)
+          .select('*, company_machines(*)')
+          .single();
+
+        if (supaError) throw new Error(supaError.message);
+        const updated = data as LogisticsOperation;
+        setOperations((prev) => prev.map((o) => (o.id === operationId ? updated : o)));
+        return updated;
+      } catch (err) {
+        const e = err instanceof Error ? err : new Error('فشل تحديث العملية اللوجستية');
+        logger.error('Failed to update logistics operation', e, 'logistics');
+        throw e;
+      }
+    },
+    [],
+  );
+
+  const deleteOperation = useCallback(async (operationId: number): Promise<void> => {
+    try {
+      const { error: supaError } = await supabase
+        .from('logistics_operations')
+        .delete()
+        .eq('id', operationId);
+
+      if (supaError) throw new Error(supaError.message);
+      setOperations((prev) => prev.filter((o) => o.id !== operationId));
+    } catch (err) {
+      const e = err instanceof Error ? err : new Error('فشل حذف العملية اللوجستية');
+      logger.error('Failed to delete logistics operation', e, 'logistics');
+      throw e;
+    }
+  }, []);
+
   return {
     operations,
     isLoading,
     error,
     createOperation,
     closeOperation,
+    updateOperation,
+    deleteOperation,
     refresh: fetchOperations,
   };
 }

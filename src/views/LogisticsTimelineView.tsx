@@ -105,7 +105,13 @@ const LogisticsTimelineView: React.FC<LogisticsTimelineViewProps> = ({ customerI
                   {op.machine_category && (
                     <div className="flex items-center gap-2 text-latte">
                       <CalendarIcon className="w-4 h-4" />
-                      <span>الفئة: {op.machine_category}</span>
+                      <span>ماكينة العميل: {op.machine_category}{op.machine_type ? ` · ${op.machine_type}` : ''}</span>
+                    </div>
+                  )}
+                  {(op.given_machine_category || op.given_machine_type) && (
+                    <div className="flex items-center gap-2 text-latte">
+                      <CalendarIcon className="w-4 h-4" />
+                      <span>الماكينة المقدمة: {[op.given_machine_category, op.given_machine_type].filter(Boolean).join(' · ')}</span>
                     </div>
                   )}
                   {op.monthly_rental_price != null && (
@@ -130,7 +136,14 @@ const LogisticsTimelineView: React.FC<LogisticsTimelineViewProps> = ({ customerI
                     {op.billable_days != null && <div>أيام قابلة للفوترة: {op.billable_days}</div>}
                     {op.pickup_cost != null && op.pickup_cost > 0 && <div>تكلفة الاستلام: {op.pickup_cost.toLocaleString()} ج.م</div>}
                     {op.return_cost != null && op.return_cost > 0 && <div>تكلفة الإرجاع: {op.return_cost.toLocaleString()} ج.م</div>}
+                    {op.maintenance_cost != null && op.maintenance_cost > 0 && (
+                      <div className="text-leaf-700 dark:text-leaf-300 font-medium">تكلفة الصيانة: {op.maintenance_cost.toLocaleString()} ج.م</div>
+                    )}
                   </div>
+                )}
+
+                {op.status === 'closed' && op.work_done && (
+                  <p className="mt-2 text-xs text-latte/80">الأعمال المنفذة: {op.work_done}</p>
                 )}
 
                 {op.internal_notes && (

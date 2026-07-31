@@ -2,7 +2,7 @@
 
 import { FormData, MaintenanceRecord, Branch, MaintenancePhoto, LogisticsOperation } from "../types";
 import { DateRange, formatDateRangeLabel } from "./dateRangeFilter";
-import { LOGISTICS_TYPE_LABELS_EN } from "./logisticsLabels";
+import { LOGISTICS_TYPE_LABELS_EN, formatMachineDescription } from "./logisticsLabels";
 import { BRAND } from "./pdfTheme";
 import { logger } from "./logger";
 import jsPDF from "jspdf";
@@ -840,7 +840,8 @@ export const generateCompanyPDF = async (
     const logisticsRows = logisticsOps.map((op) => {
       const row: any[] = [
         LOGISTICS_TYPE_LABELS_EN[op.operation_type] || op.operation_type,
-        op.machine_category || "-",
+        formatMachineDescription(op.machine_category, op.machine_type) || "-",
+        formatMachineDescription(op.given_machine_category, op.given_machine_type) || "-",
         op.status === "open" ? "Open" : "Closed",
         op.open_date || "-",
         op.close_date || "-",
@@ -849,14 +850,17 @@ export const generateCompanyPDF = async (
         row.push(
           op.total_rental_cost != null ? formatCurrency(op.total_rental_cost) : "-",
         );
-        row.push(
-          op.total_logistics_cost != null ? formatCurrency(op.total_logistics_cost) : "-",
-        );
+        // Maintenance cost is internal-only — exclude it from client-facing totals
+        const clientTotal =
+          op.total_logistics_cost != null
+            ? Math.max(0, op.total_logistics_cost - (op.maintenance_cost ?? 0))
+            : null;
+        row.push(clientTotal != null ? formatCurrency(clientTotal) : "-");
       }
       return row;
     });
 
-    const logisticsHeaders = ["Operation", "Category", "Status", "Open Date", "Close Date"];
+    const logisticsHeaders = ["Operation", "Client Machine", "Given Machine", "Status", "Open Date", "Close Date"];
     if (options.includeCosts) {
       logisticsHeaders.push("Rental Cost");
       logisticsHeaders.push("Total Logistics");
@@ -869,14 +873,17 @@ export const generateCompanyPDF = async (
       theme: "striped",
       styles: { fontSize: 8, font: "Amiri", halign: "left" },
       headStyles: { fillColor: [20, 184, 166] },
+      // Wider content area keeps the 8-column table (with costs) on-page
+      margin: { left: 14, right: 14 },
       columnStyles: {
-        0: { cellWidth: 35 },
-        1: { cellWidth: 25 },
-        2: { cellWidth: 22, halign: "center" },
-        3: { cellWidth: 30 },
-        4: { cellWidth: 30 },
+        0: { cellWidth: 30 },
+        1: { cellWidth: 26 },
+        2: { cellWidth: 26 },
+        3: { cellWidth: 18, halign: "center" },
+        4: { cellWidth: 24 },
+        5: { cellWidth: 24 },
       },
-    });
+    } as any);
 
     yPos = (doc as any).lastAutoTable.finalY + 10;
   }
@@ -1571,8 +1578,10 @@ export const generateBranchPDF = async (
       doc.setFontSize(9);
       doc.setFont("Amiri", "normal");
       const details: string[] = [];
-      if (op.machine_category) details.push(`Category: ${op.machine_category}`);
-      if (op.machine_type) details.push(`Type: ${op.machine_type}`);
+      const clientMachine = formatMachineDescription(op.machine_category, op.machine_type);
+      const givenMachine = formatMachineDescription(op.given_machine_category, op.given_machine_type);
+      if (clientMachine) details.push(`Client Machine: ${clientMachine}`);
+      if (givenMachine) details.push(`Given Machine: ${givenMachine}`);
       if (op.open_date) details.push(`Open Date: ${op.open_date}`);
       if (op.close_date) details.push(`Close Date: ${op.close_date}`);
       if (op.monthly_rental_price != null && options.includeCosts) {
@@ -1582,7 +1591,9 @@ export const generateBranchPDF = async (
         details.push(`Rental Cost: ${formatCurrency(op.total_rental_cost)}`);
       }
       if (op.total_logistics_cost != null && options.includeCosts) {
-        details.push(`Total Logistics: ${formatCurrency(op.total_logistics_cost)}`);
+        // Maintenance cost is internal-only — exclude it from client-facing totals
+        const clientTotal = Math.max(0, op.total_logistics_cost - (op.maintenance_cost ?? 0));
+        details.push(`Total Logistics: ${formatCurrency(clientTotal)}`);
       }
 
       details.forEach((d) => {

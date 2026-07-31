@@ -73,6 +73,8 @@ export interface LogisticsOperation {
   machine_category?: string;
   machine_ownership?: string;
   machine_type?: string;
+  given_machine_category?: string;
+  given_machine_type?: string;
   replacement_machine_id?: number | null;
   monthly_rental_price?: number;
   daily_rental_price?: number;
@@ -83,6 +85,8 @@ export interface LogisticsOperation {
   total_rental_cost?: number;
   pickup_cost?: number;
   return_cost?: number;
+  maintenance_cost?: number;
+  work_done?: string;
   total_logistics_cost?: number;
   internal_notes?: string;
   created_at?: string;

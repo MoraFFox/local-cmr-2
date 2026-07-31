@@ -433,6 +433,7 @@ export interface AggregatedLogisticsCosts {
   totalRentalCost: number;
   totalPickupCost: number;
   totalReturnCost: number;
+  totalMaintenanceCost: number;
   totalLogisticsCost: number;
   openCount: number;
   closedCount: number;
@@ -444,6 +445,7 @@ export const aggregateLogisticsCosts = (
   let totalRentalCost = 0;
   let totalPickupCost = 0;
   let totalReturnCost = 0;
+  let totalMaintenanceCost = 0;
   let openCount = 0;
   let closedCount = 0;
 
@@ -454,14 +456,16 @@ export const aggregateLogisticsCosts = (
     totalRentalCost += op.total_rental_cost ?? 0;
     totalPickupCost += op.pickup_cost ?? 0;
     totalReturnCost += op.return_cost ?? 0;
+    totalMaintenanceCost += op.maintenance_cost ?? 0;
   });
 
-  const totalLogisticsCost = totalRentalCost + totalPickupCost + totalReturnCost;
+  const totalLogisticsCost = totalRentalCost + totalPickupCost + totalReturnCost + totalMaintenanceCost;
 
   return {
     totalRentalCost,
     totalPickupCost,
     totalReturnCost,
+    totalMaintenanceCost,
     totalLogisticsCost,
     openCount,
     closedCount,

@@ -5,7 +5,7 @@ import { reshapeArabic } from "./arabicText";
 import { LogoAssets } from "./pdfGenerator";
 import { formatPdfCurrency, formatEnNumber } from "./costAggregation";
 import { LogisticsOperation } from "../types";
-import { LOGISTICS_TYPE_LABELS_AR_COMPACT } from "./logisticsLabels";
+import { LOGISTICS_TYPE_LABELS_AR_COMPACT, formatMachineDescriptionAr } from "./logisticsLabels";
 
 // ── White / Black / Crimson Red Palette (matches company logo) ──
 export const BRAND = {
@@ -706,34 +706,98 @@ export const drawLogisticsOperationsTable = (
 ): number => {
   const pageWidth = doc.internal.pageSize.getWidth();
   const tableW = pageWidth - margin * 2;
+  // Category column is wider to fit Arabic machine descriptions (client + given).
   const colWidths = [
-    tableW * 0.15, tableW * 0.15, tableW * 0.16, tableW * 0.12,
-    tableW * 0.12, tableW * 0.15, tableW * 0.15,
+    tableW * 0.13, tableW * 0.17, tableW * 0.14, tableW * 0.10,
+    tableW * 0.10, tableW * 0.11, tableW * 0.11, tableW * 0.14,
   ];
   const x = margin;
+  const lineH = 3.1;
+  const minRowH = 9;
 
   let nextY = drawTableHeader(
     doc,
-    ["نوع العملية", "الفئة", "الحالة", "تاريخ الفتح", "تاريخ الإغلاق", "الإيجار", "إجمالي التكلفة"],
+    ["نوع العملية", "الفئة", "الحالة", "تاريخ الفتح", "تاريخ الإغلاق", "الإيجار", "الصيانة", "إجمالي التكلفة"],
     colWidths, x, y, tableW,
   );
 
   operations.forEach((op, i) => {
-    nextY = checkPageBreak(doc, nextY, 8);
-    nextY = drawTableRow(
-      doc,
-      [
-        rtl(LOGISTICS_TYPE_LABELS_AR_COMPACT[op.operation_type] || op.operation_type),
-        rtl(op.machine_category || "—"),
-        op.status === "open" ? "مفتوحة" : "مغلقة",
-        op.open_date ? formatDateEn(op.open_date) : "—",
-        op.close_date ? formatDateEn(op.close_date) : "—",
-        op.total_rental_cost != null ? formatPdfCurrency(op.total_rental_cost) : "—",
-        op.total_logistics_cost != null ? formatPdfCurrency(op.total_logistics_cost) : "—",
-      ],
-      colWidths, x, nextY, tableW, i % 2 === 1,
-      ["right", "right", "center", "right", "right", "right", "right"],
-    );
+    const clientMachine = formatMachineDescriptionAr(op.machine_category, op.machine_type) || "—";
+    const givenMachine = formatMachineDescriptionAr(op.given_machine_category, op.given_machine_type);
+
+    // Wrap machine descriptions within the category column so long Arabic
+    // labels don't bleed into adjacent columns (doc.text does not wrap).
+    doc.setFont("Amiri", "normal");
+    doc.setFontSize(7);
+    const catWidth = colWidths[1];
+    const clientLines: string[] = doc.splitTextToSize(rtl(clientMachine), catWidth - 2);
+    const givenLines: string[] = givenMachine
+      ? doc.splitTextToSize(rtl(`المقدمة: ${givenMachine}`), catWidth - 2)
+      : [];
+
+    // Pad generously so the last baseline (3.5 + (N-1)*lineH) + font descent stays inside the row
+    const contentLines = clientLines.length + givenLines.length;
+    const rowH = Math.max(minRowH, contentLines * lineH + 4);
+
+    nextY = checkPageBreak(doc, nextY, rowH + 2);
+    if (i % 2 === 1) {
+      doc.setFillColor(...BRAND.cream);
+      doc.rect(x, nextY, tableW, rowH, "F");
+    }
+
+    const cells = [
+      LOGISTICS_TYPE_LABELS_AR_COMPACT[op.operation_type] || op.operation_type,
+      clientMachine,
+      op.status === "open" ? "مفتوحة" : "مغلقة",
+      op.open_date ? formatDateEn(op.open_date) : "—",
+      op.close_date ? formatDateEn(op.close_date) : "—",
+      op.total_rental_cost != null ? formatPdfCurrency(op.total_rental_cost) : "—",
+      op.maintenance_cost != null ? formatPdfCurrency(op.maintenance_cost) : "—",
+      op.total_logistics_cost != null ? formatPdfCurrency(op.total_logistics_cost) : "—",
+    ];
+    const aligns: Array<"left" | "right" | "center"> = ["right", "right", "center", "right", "right", "right", "right", "right"];
+    const catRightX = x + tableW - colWidths[0];
+
+    let baseline = nextY + 3.5;
+
+    // Category column (client machine) — wrapped lines
+    clientLines.forEach((line, li) => {
+      doc.setFont("Amiri", "normal");
+      doc.setFontSize(7);
+      doc.setTextColor(...BRAND.text);
+      doc.text(line, catRightX - 2, baseline, { align: "right" });
+
+      // All other columns only on the first baseline
+      if (li === 0) {
+        let cx = x + tableW;
+        cells.forEach((cell, idx) => {
+          if (idx === 1) {
+            cx -= colWidths[idx];
+            return;
+          }
+          const w = colWidths[idx];
+          const align = aligns[idx];
+          doc.setFont("Amiri", "normal");
+          doc.setFontSize(7);
+          doc.setTextColor(...BRAND.text);
+          const textX = align === "right" ? cx - 2 : align === "center" ? cx - w / 2 : cx - w + 2;
+          doc.text(rtl(cell), textX, baseline, { align });
+          cx -= w;
+        });
+      }
+      baseline += lineH;
+    });
+
+    // Given-machine lines (smaller, muted)
+    doc.setFont("Amiri", "normal");
+    doc.setFontSize(5.5);
+    doc.setTextColor(...BRAND.textMuted);
+    givenLines.forEach((line) => {
+      doc.text(line, catRightX - 2, baseline, { align: "right" });
+      baseline += lineH;
+    });
+
+    nextY += rowH;
   });
 
   return nextY + 10;

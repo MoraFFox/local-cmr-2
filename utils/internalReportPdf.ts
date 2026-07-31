@@ -578,12 +578,13 @@ export const generateInternalBranchReport = async (
             if (logisticsCosts.totalLogisticsCost <= 0) {
               return drawEmptyMessage(doc, y, "لا توجد تكاليف لوجستية", margin);
             }
-            const cardW = (pageWidth - margin * 2 - 18) / 4;
+            const cardW = (pageWidth - margin * 2 - 24) / 5;
             const cardH = 22;
             const cards = [
               { label: "إيجار الماكينات", value: formatPdfCurrency(logisticsCosts.totalRentalCost), color: BRAND.primary },
               { label: "النقل — استلام", value: formatPdfCurrency(logisticsCosts.totalPickupCost), color: BRAND.primaryLight },
               { label: "النقل — إرجاع", value: formatPdfCurrency(logisticsCosts.totalReturnCost), color: BRAND.info },
+              { label: "تكلفة الصيانة", value: formatPdfCurrency(logisticsCosts.totalMaintenanceCost), color: BRAND.warning },
               { label: "إجمالي اللوجستيات", value: formatPdfCurrency(logisticsCosts.totalLogisticsCost), color: BRAND.header },
             ];
             cards.forEach((card, i) => {
@@ -609,7 +610,7 @@ export const generateInternalBranchReport = async (
         // Operations table
         section.addRepeater(
           logisticsOps,
-          45 + logisticsOps.length * 9,
+          45 + logisticsOps.length * 12,
           (doc, y) => drawEmptyMessage(doc, y, "لا توجد عمليات لوجستية", margin),
           (doc, y, items) => drawLogisticsOperationsTable(doc, items, y, margin),
         );
@@ -939,12 +940,13 @@ export const generateInternalCompanyReport = async (
             if (logisticsCosts.totalLogisticsCost <= 0) {
               return drawEmptyMessage(doc, y, "لا توجد تكاليف لوجستية", margin);
             }
-            const cardW = (pageWidth - margin * 2 - 18) / 4;
+            const cardW = (pageWidth - margin * 2 - 24) / 5;
             const cardH = 22;
             const cards = [
               { label: "إيجار الماكينات", value: formatPdfCurrency(logisticsCosts.totalRentalCost), color: BRAND.primary },
               { label: "النقل — استلام", value: formatPdfCurrency(logisticsCosts.totalPickupCost), color: BRAND.primaryLight },
               { label: "النقل — إرجاع", value: formatPdfCurrency(logisticsCosts.totalReturnCost), color: BRAND.info },
+              { label: "تكلفة الصيانة", value: formatPdfCurrency(logisticsCosts.totalMaintenanceCost), color: BRAND.warning },
               { label: "إجمالي اللوجستيات", value: formatPdfCurrency(logisticsCosts.totalLogisticsCost), color: BRAND.header },
             ];
             cards.forEach((card, i) => {
@@ -970,7 +972,7 @@ export const generateInternalCompanyReport = async (
         // Operations table
         section.addRepeater(
           logisticsOps,
-          45 + logisticsOps.length * 9,
+          45 + logisticsOps.length * 12,
           (doc, y) => drawEmptyMessage(doc, y, "لا توجد عمليات لوجستية", margin),
           (doc, y, items) => drawLogisticsOperationsTable(doc, items, y, margin),
         );

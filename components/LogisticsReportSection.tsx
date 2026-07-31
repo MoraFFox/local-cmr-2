@@ -3,14 +3,14 @@
 import React, { useMemo } from "react";
 import { LogisticsOperation } from "../types";
 import { aggregateLogisticsCosts, formatCurrency } from "../utils/costAggregation";
-import { LOGISTICS_TYPE_LABELS_AR } from "../utils/logisticsLabels";
+import { LOGISTICS_TYPE_LABELS_AR, formatMachineDescriptionAr } from "../utils/logisticsLabels";
 
 // ── Self-contained card / section helpers (no dependency on InternalReportPrintView) ──
 
 interface FinancialCardProps {
   label: string;
   value: string | number;
-  accent?: "crimson" | "blue" | "amber" | "green";
+  accent?: "crimson" | "blue" | "amber" | "green" | "purple";
 }
 
 const FinancialCard: React.FC<FinancialCardProps> = ({ label, value, accent = "crimson" }) => {
@@ -19,6 +19,7 @@ const FinancialCard: React.FC<FinancialCardProps> = ({ label, value, accent = "c
     blue: "border-blue-600",
     amber: "border-amber-500",
     green: "border-green-600",
+    purple: "border-purple-600",
   };
   return (
     <div className={`bg-white border-t-4 ${borderColors[accent]} border border-hairline rounded-lg p-3 shadow-sm`}>
@@ -48,8 +49,8 @@ interface LogisticsReportSectionProps {
  * Reusable logistics section for HTML/internal print reports.
  *
  * Renders:
- *   1. Four cost summary cards (rental, pickup transport, return transport, total)
- *   2. An 8-column operations table (type, category, status, dates, rental, transport, total)
+ *   1. Five cost summary cards (rental, pickup transport, return transport, maintenance, total)
+ *   2. An operations table (type, client/given machine, status, dates, rental, maintenance, transport, total)
  *
  * Used by InternalReportPrintView and can be dropped into any React report view.
  */
@@ -68,10 +69,11 @@ const LogisticsReportSection: React.FC<LogisticsReportSectionProps> = ({
 
       {/* Cost summary cards */}
       {!hideCosts && logCosts.totalLogisticsCost > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
           <FinancialCard label="إيجار الماكينات البديلة" value={formatCurrency(logCosts.totalRentalCost)} accent="amber" />
           <FinancialCard label="النقل — استلام" value={formatCurrency(logCosts.totalPickupCost)} accent="blue" />
           <FinancialCard label="النقل — إرجاع" value={formatCurrency(logCosts.totalReturnCost)} accent="green" />
+          <FinancialCard label="تكلفة الصيانة" value={formatCurrency(logCosts.totalMaintenanceCost)} accent="purple" />
           <FinancialCard label="إجمالي اللوجستيات" value={formatCurrency(logCosts.totalLogisticsCost)} accent="crimson" />
         </div>
       )}
@@ -86,6 +88,7 @@ const LogisticsReportSection: React.FC<LogisticsReportSectionProps> = ({
             <th className="text-end px-3 py-2">تاريخ الفتح</th>
             <th className="text-end px-3 py-2">تاريخ الإغلاق</th>
             {!hideCosts && <th className="text-end px-3 py-2">الإيجار</th>}
+            {!hideCosts && <th className="text-end px-3 py-2">الصيانة</th>}
             {!hideCosts && <th className="text-end px-3 py-2">تكلفة النقل</th>}
             {!hideCosts && <th className="text-end px-3 py-2">الإجمالي</th>}
           </tr>
@@ -93,13 +96,23 @@ const LogisticsReportSection: React.FC<LogisticsReportSectionProps> = ({
         <tbody>
           {operations.map((op) => {
             const transportTotal = (op.pickup_cost || 0) + (op.return_cost || 0);
-            const opTotal = (op.total_rental_cost || 0) + transportTotal;
+            const opTotal = (op.total_rental_cost || 0) + transportTotal + (op.maintenance_cost || 0);
             return (
               <tr key={op.id} className="border-b border-hairline">
                 <td className="px-3 py-2 text-text">
                   {LOGISTICS_TYPE_LABELS_AR[op.operation_type] || op.operation_type}
+                  {op.work_done && (
+                    <div className="text-[10px] text-latte mt-0.5 leading-tight">{op.work_done}</div>
+                  )}
                 </td>
-                <td className="px-3 py-2 text-text">{op.machine_category || "-"}</td>
+                <td className="px-3 py-2 text-text">
+                  <div>{formatMachineDescriptionAr(op.machine_category, op.machine_type) || "-"}</div>
+                  {(op.given_machine_category || op.given_machine_type) && (
+                    <div className="text-[10px] text-latte mt-0.5">
+                      المقدمة: {formatMachineDescriptionAr(op.given_machine_category, op.given_machine_type)}
+                    </div>
+                  )}
+                </td>
                 <td className="px-3 py-2">
                   <span className={op.status === "open" ? "text-amber-600 font-bold" : "text-green-600 font-bold"}>
                     {op.status === "open" ? "مفتوحة" : "مغلقة"}
@@ -108,6 +121,7 @@ const LogisticsReportSection: React.FC<LogisticsReportSectionProps> = ({
                 <td className="px-3 py-2 text-text">{op.open_date || "-"}</td>
                 <td className="px-3 py-2 text-text">{op.close_date || "-"}</td>
                 {!hideCosts && <td className="px-3 py-2 text-end font-bold">{formatCurrency(op.total_rental_cost || 0)}</td>}
+                {!hideCosts && <td className="px-3 py-2 text-end">{formatCurrency(op.maintenance_cost || 0)}</td>}
                 {!hideCosts && <td className="px-3 py-2 text-end">{formatCurrency(transportTotal)}</td>}
                 {!hideCosts && <td className="px-3 py-2 text-end font-bold">{formatCurrency(opTotal)}</td>}
               </tr>
