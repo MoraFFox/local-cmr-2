@@ -403,7 +403,6 @@ const SECTION_ICON_BY_TITLE: Record<string, PdfIconName> = {
   "Detailed Maintenance Log": "doc",
   "Maintenance Log": "doc",
   "Technician Performance": "user",
-  "Problems & Parts Summary": "alert",
   "Most Frequent Problems": "alert",
   "Most Used Parts": "package",
   "Branch Comparison": "chart",

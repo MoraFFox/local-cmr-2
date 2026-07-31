@@ -74,23 +74,35 @@ const formatProblemsList = (problems: string[] | undefined): string => {
 };
 
 const formatPartsList = (
-  parts: { name: string; count: number; paidByClient?: boolean }[] | undefined,
+  parts: { name: string; count: number; cost?: number; paidByClient?: boolean }[] | undefined,
   showPayer = true,
 ): string => {
   if (!parts || parts.length === 0) return "—";
-  return parts
-    .map((p) => `${formatEnNumber(p.count)}× ${rtl(p.name)}${showPayer ? ` (${getPaidByLabel(p.paidByClient ? "client" : "company")})` : ""}`)
-    .join("\n");
+  const lines = parts.map((p) => {
+    const qty = p.count || 0;
+    const itemCost = qty * resolvePartCost(p, partsList);
+    const payer = showPayer ? ` (${getPaidByLabel(p.paidByClient ? "client" : "company")})` : "";
+    return `• ${formatEnNumber(qty)}× ${rtl(p.name)} — ${formatPdfCurrencyEn(itemCost)}${payer}`;
+  });
+  const total = parts.reduce((sum, p) => sum + (p.count || 0) * resolvePartCost(p, partsList), 0);
+  lines.push(`Total: ${formatPdfCurrencyEn(total)}`);
+  return lines.join("\n");
 };
 
 const formatServicesList = (
-  services: { name: string; count: number; paidByClient?: boolean }[] | undefined,
+  services: { name: string; count: number; cost?: number; paidByClient?: boolean }[] | undefined,
   showPayer = true,
 ): string => {
   if (!services || services.length === 0) return "—";
-  return services
-    .map((s) => `${formatEnNumber(s.count)}× ${rtl(s.name)}${showPayer ? ` (${getPaidByLabel(s.paidByClient ? "client" : "company")})` : ""}`)
-    .join("\n");
+  const lines = services.map((s) => {
+    const qty = s.count || 0;
+    const itemCost = qty * resolveServiceCost(s, servicesList);
+    const payer = showPayer ? ` (${getPaidByLabel(s.paidByClient ? "client" : "company")})` : "";
+    return `• ${formatEnNumber(qty)}× ${rtl(s.name)} — ${formatPdfCurrencyEn(itemCost)}${payer}`;
+  });
+  const total = services.reduce((sum, s) => sum + (s.count || 0) * resolveServiceCost(s, servicesList), 0);
+  lines.push(`Total: ${formatPdfCurrencyEn(total)}`);
+  return lines.join("\n");
 };
 
 const getTypeLabel = (type: string): string => (type === "requested" ? "Requested" : "Scheduled");
@@ -254,6 +266,7 @@ const buildKPICards = (
   costs: AggregatedCosts,
   kpis: KPIData,
   costMode = false,
+  logisticsCost = 0,
 ): KPICard[] => {
   const scheduledCount = records.filter((r) => r.type === "scheduled").length;
   const requestedCount = records.filter((r) => r.type === "requested").length;
@@ -266,15 +279,17 @@ const buildKPICards = (
 
   const resolutionVariant: KPICard["variant"] =
     kpis.resolutionRate >= 80 ? "good" : kpis.resolutionRate >= 50 ? "warn" : "default";
-  const ratingVariant: KPICard["variant"] =
-    kpis.avgVisitRating >= 4 ? "good" : kpis.avgVisitRating >= 3 ? "warn" : "default";
+
+  // Total/Net cost KPI includes the logistics section costs (machine rental,
+  // pickup/return transport and logistics maintenance) on top of the
+  // maintenance-visit costs aggregated in `costs`.
+  const totalCost = (costMode ? costs.grandTotal + costs.totalLeaseRevenue : costs.grandTotalCompanyCost) + logisticsCost;
 
   return [
     { icon: "chart", label: "Total Visits", value: formatEnNumber(kpis.totalVisits), sublabel: `${formatEnNumber(scheduledCount)} Scheduled · ${formatEnNumber(requestedCount)} Requested` },
     { icon: "check", label: "Resolution Rate", value: `${formatEnNumber(kpis.resolutionRate)}%`, sublabel: resolutionSub, variant: resolutionVariant },
     { icon: "package", label: "Spare Parts", value: formatEnNumber(kpis.totalPartsUsed), sublabel: costMode ? `${formatEnNumber(totalPartCount)} total` : `${formatEnNumber(companyPartCount)} Company · ${formatEnNumber(clientPartCount)} Client` },
-    { icon: "star", label: "Avg Rating", value: kpis.avgVisitRating > 0 ? `${formatEnNumber(kpis.avgVisitRating)}/5` : "-", sublabel: kpis.avgVisitRating >= 4 ? "Excellent" : kpis.avgVisitRating >= 3 ? "Good" : kpis.avgVisitRating > 0 ? "Fair" : "No ratings", variant: ratingVariant },
-    { icon: "money", label: costMode ? "Total Cost" : "Net Cost", value: formatPdfCurrencyEn(costMode ? costs.grandTotal + costs.totalLeaseRevenue : costs.grandTotalCompanyCost), sublabel: "All costs included" },
+    { icon: "money", label: costMode ? "Total Cost" : "Net Cost", value: formatPdfCurrencyEn(totalCost), sublabel: "All costs included" },
   ];
 };
 
@@ -326,12 +341,10 @@ const buildMaintenanceTableColumns = (showPayer = true): MaintenanceTableColumn[
   { id: "zone", label: "Zone", accessor: (r) => r.visitZone, ignoreIf: "empty", width: 13, format: (r) => rtl(r.visitZone) || "—" },
   { id: "problems", label: "Problems", accessor: (r) => (r.problems || []).join(""), ignoreIf: "empty", width: 22, format: (r) => formatProblemsList(r.problems) },
   { id: "solved", label: "Resolved", accessor: () => "always", ignoreIf: "never", width: 10, format: (r) => (r.problemSolved ? "✓ Yes" : "✗ No") },
-  { id: "parts", label: "Parts", accessor: (r) => formatPartsList(r.partsReplaced, showPayer), ignoreIf: "empty", width: 24, format: (r) => formatPartsList(r.partsReplaced, showPayer) },
-  { id: "partsCost", label: "Parts Cost", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).partsCost, ignoreIf: "zero", width: 11, format: (r) => formatPdfCurrencyEn(getRecordCostSummary(r, partsList, servicesList).partsCost) },
-  { id: "services", label: "Services", accessor: (r) => formatServicesList(r.servicesPerformed, showPayer), ignoreIf: "empty", width: 24, format: (r) => formatServicesList(r.servicesPerformed, showPayer) },
-  { id: "servicesCost", label: "Services Cost", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).servicesCost, ignoreIf: "zero", width: 11, format: (r) => formatPdfCurrencyEn(getRecordCostSummary(r, partsList, servicesList).servicesCost) },
+  { id: "parts", label: "Parts", accessor: (r) => formatPartsList(r.partsReplaced, showPayer), ignoreIf: "empty", width: 35, format: (r) => formatPartsList(r.partsReplaced, showPayer) },
+  { id: "services", label: "Services", accessor: (r) => formatServicesList(r.servicesPerformed, showPayer), ignoreIf: "empty", width: 35, format: (r) => formatServicesList(r.servicesPerformed, showPayer) },
   { id: "lease", label: "Daily Lease", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).leaseCost, ignoreIf: "zero", width: 11, format: (r) => { const c = getRecordCostSummary(r, partsList, servicesList); return c.leaseCost > 0 ? formatPdfCurrencyEn(c.leaseCost) : "—"; } },
-  { id: "total", label: "Total", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).total, ignoreIf: "never", width: 12, format: (r) => formatPdfCurrencyEn(getRecordCostSummary(r, partsList, servicesList).total) },
+  { id: "total", label: "Record Total", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).total, ignoreIf: "never", width: 14, format: (r) => formatPdfCurrencyEn(getRecordCostSummary(r, partsList, servicesList).total) },
   { id: "rating", label: "Rating", accessor: (r) => r.visitRating, ignoreIf: "zero", width: 10, format: (r) => (r.visitRating ? `★ ${formatEnNumber(r.visitRating)}` : "—") },
 ];
 
@@ -431,7 +444,7 @@ export const generateInternalBranchReport = async (
   engine.addBlock({
     estimatedHeight: 32,
     draw: (doc, y) => {
-      const cards = buildKPICards(allFlatRecords, costs, kpis, costMode);
+      const cards = buildKPICards(allFlatRecords, costs, kpis, costMode, logisticsCosts.totalLogisticsCost);
       return drawKPICards(doc, cards, y);
     },
   });
@@ -514,7 +527,7 @@ export const generateInternalBranchReport = async (
     },
   });
 
-  // Maintenance History — 13 columns matching HTML preview, pruned when empty
+  // Maintenance History — 11 columns (Parts/Services carry itemized bullets + total), pruned when empty
   engine.addSection(
     "Detailed Maintenance Log",
     (section) => {
@@ -594,45 +607,22 @@ export const generateInternalBranchReport = async (
   });
 
   engine.addSection(
-    "Problems & Parts Summary",
+    "Most Frequent Problems",
     (section) => {
       section.addBlock({
-        estimatedHeight: topProblems.length > 0 || allParts.length > 0 || !hideEmpty ? 80 : 20,
+        estimatedHeight: topProblems.length > 0 || !hideEmpty ? 60 : 20,
         draw: (doc, y) => {
-          if (hideEmpty && topProblems.length === 0 && allParts.length === 0) {
-            return drawEmptyMessage(doc, y, "No problems or parts", margin);
+          if (hideEmpty && topProblems.length === 0) {
+            return drawEmptyMessage(doc, y, "No problems", margin);
           }
-
-          const startY = y;
-          const colW = (pageWidth - margin * 2 - 8) / 2;
-
-          if (!hideEmpty || topProblems.length > 0) {
-            const x = margin;
-            let py = drawSectionHeader(doc, "Most Frequent Problems", startY);
-            const cw = [colW * 0.5, colW * 0.2, colW * 0.3];
-            py = drawTableHeader(doc, ["Problem", "Count", "Last Seen"], cw, x, py, colW);
-            topProblems.forEach((p, i) => {
-              py = checkPageBreak(doc, py, 8);
-              py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatDateEn(problemLastDate.get(p.name) || "—")], cw, x, py, colW, i % 2 === 1, ["left", "center", "right"]);
-            });
-          }
-
-          if (!hideEmpty || allParts.length > 0) {
-            const x = margin + colW + 8;
-            let py = drawSectionHeader(doc, "Most Used Parts", startY);
-            const cw = [colW * 0.5, colW * 0.25, colW * 0.25];
-            py = drawTableHeader(doc, ["Part", "Qty", "Cost"], cw, x, py, colW);
-            allParts.forEach((p, i) => {
-              py = checkPageBreak(doc, py, 8);
-              py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatPdfCurrencyEn(p.totalCost)], cw, x, py, colW, i % 2 === 1, [
-                "left",
-                "center",
-                "right",
-              ]);
-            });
-          }
-
-          return Math.max(y, startY + 60);
+          const colW = pageWidth - margin * 2;
+          const cw = [colW * 0.5, colW * 0.2, colW * 0.3];
+          let py = drawTableHeader(doc, ["Problem", "Count", "Last Seen"], cw, margin, y, colW);
+          topProblems.forEach((p, i) => {
+            py = checkPageBreak(doc, py, 8);
+            py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatDateEn(problemLastDate.get(p.name) || "—")], cw, margin, py, colW, i % 2 === 1, ["left", "center", "right"]);
+          });
+          return py + 10;
         },
       });
     },
@@ -692,6 +682,34 @@ export const generateInternalBranchReport = async (
       drawSectionHeader,
     );
   }
+
+  // Most Used Parts — closes the report (requested to be the last section)
+  engine.addSection(
+    "Most Used Parts",
+    (section) => {
+      section.addBlock({
+        estimatedHeight: allParts.length > 0 || !hideEmpty ? 60 : 20,
+        draw: (doc, y) => {
+          if (hideEmpty && allParts.length === 0) {
+            return drawEmptyMessage(doc, y, "No parts used", margin);
+          }
+          const colW = pageWidth - margin * 2;
+          const cw = [colW * 0.5, colW * 0.25, colW * 0.25];
+          let py = drawTableHeader(doc, ["Part", "Qty", "Cost"], cw, margin, y, colW);
+          allParts.forEach((p, i) => {
+            py = checkPageBreak(doc, py, 8);
+            py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatPdfCurrencyEn(p.totalCost)], cw, margin, py, colW, i % 2 === 1, [
+              "left",
+              "center",
+              "right",
+            ]);
+          });
+          return py + 10;
+        },
+      });
+    },
+    drawSectionHeader,
+  );
 
   engine.flush();
   applyFooters(doc, "CMR System", companyName);
@@ -796,7 +814,7 @@ export const generateInternalCompanyReport = async (
   engine.addBlock({
     estimatedHeight: 32,
     draw: (doc, y) => {
-      const kpiCards = buildKPICards(allFlatRecords, costs, kpis, costMode);
+      const kpiCards = buildKPICards(allFlatRecords, costs, kpis, costMode, logisticsCosts.totalLogisticsCost);
       return drawKPICards(doc, kpiCards, y);
     },
   });
@@ -970,45 +988,22 @@ export const generateInternalCompanyReport = async (
   });
 
   engine.addSection(
-    "Problems & Parts Summary",
+    "Most Frequent Problems",
     (section) => {
       section.addBlock({
-        estimatedHeight: topProblems.length > 0 || allParts.length > 0 || !hideEmpty ? 80 : 20,
+        estimatedHeight: topProblems.length > 0 || !hideEmpty ? 60 : 20,
         draw: (doc, y) => {
-          if (hideEmpty && topProblems.length === 0 && allParts.length === 0) {
-            return drawEmptyMessage(doc, y, "No problems or parts", margin);
+          if (hideEmpty && topProblems.length === 0) {
+            return drawEmptyMessage(doc, y, "No problems", margin);
           }
-
-          const startY = y;
-          const colW = (pageWidth - margin * 2 - 8) / 2;
-
-          if (!hideEmpty || topProblems.length > 0) {
-            const x = margin;
-            let py = drawSectionHeader(doc, "Most Frequent Problems", startY);
-            const cw = [colW * 0.5, colW * 0.2, colW * 0.3];
-            py = drawTableHeader(doc, ["Problem", "Count", "Last Seen"], cw, x, py, colW);
-            topProblems.forEach((p, i) => {
-              py = checkPageBreak(doc, py, 8);
-              py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatDateEn(problemLastDate.get(p.name) || "—")], cw, x, py, colW, i % 2 === 1, ["left", "center", "right"]);
-            });
-          }
-
-          if (!hideEmpty || allParts.length > 0) {
-            const x = margin + colW + 8;
-            let py = drawSectionHeader(doc, "Most Used Parts", startY);
-            const cw = [colW * 0.5, colW * 0.25, colW * 0.25];
-            py = drawTableHeader(doc, ["Part", "Qty", "Cost"], cw, x, py, colW);
-            allParts.forEach((p, i) => {
-              py = checkPageBreak(doc, py, 8);
-              py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatPdfCurrencyEn(p.totalCost)], cw, x, py, colW, i % 2 === 1, [
-                "left",
-                "center",
-                "right",
-              ]);
-            });
-          }
-
-          return Math.max(y, startY + 60);
+          const colW = pageWidth - margin * 2;
+          const cw = [colW * 0.5, colW * 0.2, colW * 0.3];
+          let py = drawTableHeader(doc, ["Problem", "Count", "Last Seen"], cw, margin, y, colW);
+          topProblems.forEach((p, i) => {
+            py = checkPageBreak(doc, py, 8);
+            py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatDateEn(problemLastDate.get(p.name) || "—")], cw, margin, py, colW, i % 2 === 1, ["left", "center", "right"]);
+          });
+          return py + 10;
         },
       });
     },
@@ -1085,6 +1080,34 @@ export const generateInternalCompanyReport = async (
       drawSectionHeader,
     );
   }
+
+  // Most Used Parts — closes the report (requested to be the last section)
+  engine.addSection(
+    "Most Used Parts",
+    (section) => {
+      section.addBlock({
+        estimatedHeight: allParts.length > 0 || !hideEmpty ? 60 : 20,
+        draw: (doc, y) => {
+          if (hideEmpty && allParts.length === 0) {
+            return drawEmptyMessage(doc, y, "No parts used", margin);
+          }
+          const colW = pageWidth - margin * 2;
+          const cw = [colW * 0.5, colW * 0.25, colW * 0.25];
+          let py = drawTableHeader(doc, ["Part", "Qty", "Cost"], cw, margin, y, colW);
+          allParts.forEach((p, i) => {
+            py = checkPageBreak(doc, py, 8);
+            py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatPdfCurrencyEn(p.totalCost)], cw, margin, py, colW, i % 2 === 1, [
+              "left",
+              "center",
+              "right",
+            ]);
+          });
+          return py + 10;
+        },
+      });
+    },
+    drawSectionHeader,
+  );
 
   engine.flush();
   applyFooters(doc, "CMR System", data.companyName);

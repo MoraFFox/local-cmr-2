@@ -4,7 +4,7 @@ import path from "node:path";
 import jsPDF from "jspdf";
 import { drawLogisticsDetailsRow, drawLogisticsOperationsTable, drawClientLogisticsTable, pdfText, configureArabicBidi } from "../utils/pdfTheme";
 import { reshapeArabic } from "../utils/arabicText";
-import { FormData, LogisticsOperation, MaintenanceRecord } from "../types";
+import { Branch, FormData, LogisticsOperation, MaintenanceRecord } from "../types";
 import {
   generateInternalCompanyReport,
   generateInternalBranchReport,
@@ -471,6 +471,160 @@ describe("internal report PDF generation", () => {
     expect(internalDrawn).toContain("Client Paid");
     expect(internalDrawn).toContain("Client Invoice Total");
     expect(internalDrawn).toContain("Net Cost to Company");
+  }, 30000);
+
+  it("maintenance log table renders Parts/Services as bullets with per-item cost and a Total line", async () => {
+    // Regression: the Parts and Services columns must itemize every entry as a
+    // bullet with its own line cost (count × unit) and end with a Total line.
+    const base = generateMockWizardData();
+    const record: MaintenanceRecord = {
+      id: "bullet-probe-1",
+      maintenanceDate: "2026-07-15",
+      type: "scheduled",
+      isLogisticsVisit: false,
+      hadProblem: true,
+      partsWereReplaced: true,
+      problemSolved: true,
+      partsReplaced: [
+        { name: "Pump A", count: 2, cost: 100 },
+        { name: "Gasket B", count: 1, cost: 50, paidByClient: true },
+      ],
+      paidBy: "company",
+      baristaName: "Tech 1",
+      visitZone: "cairo",
+      servicesPerformed: [{ name: "Service X", count: 3, cost: 20 }],
+      followUpVisits: [],
+      supervisors: [],
+      dailyLeaseCost: 0,
+      problems: ["Leak"],
+    };
+    const branch: Branch = {
+      ...base.branches[0],
+      branchName: "Bullet Probe",
+      maintenanceHistory: [record],
+      machines: [],
+    };
+
+    drawnStrings.length = 0;
+    const doc = await generateInternalBranchReport("Probe Co", branch, {});
+    expect(doc.output("arraybuffer").byteLength).toBeGreaterThan(1000);
+    const drawn = drawnStrings.join("\n");
+
+    // Each item is a bullet with its own line cost.
+    expect(drawn).toContain("• 2× Pump A — 200 EGP (Company)");
+    expect(drawn).toContain("• 1× Gasket B — 50 EGP (Client)");
+    expect(drawn).toContain("• 3× Service X — 60 EGP (Company)");
+    // Each column ends with its subtotal.
+    expect(drawn).toContain("Total: 250 EGP");
+    expect(drawn).toContain("Total: 60 EGP");
+    // The standalone cost columns were removed, so the totals live inside the
+    // Parts/Services cells rather than in dedicated columns.
+    expect(drawn).not.toContain("Parts Cost");
+    expect(drawn).not.toContain("Services Cost");
+    // The row's grand figure column is relabeled so it isn't confused with the
+    // "Total:" lines that now end each Parts/Services cell.
+    expect(drawn).toContain("Record Total");
+
+    // costMode strips payer labels from the bullets too (showPayer=false).
+    drawnStrings.length = 0;
+    await generateCostBranchReport("Probe Co", branch, {});
+    const costDrawn = drawnStrings.join("\n");
+    expect(costDrawn).toContain("• 2× Pump A — 200 EGP");
+    expect(costDrawn).toContain("• 1× Gasket B — 50 EGP");
+    expect(costDrawn).not.toContain("(Company)");
+    expect(costDrawn).not.toContain("(Client)");
+  }, 30000);
+
+  it("drops Avg Rating KPI, adds logistics to Total Cost KPI, and moves Most Used Parts last", async () => {
+    // Deterministic dataset:
+    //   parts 2×100 (company) + 1×50 (client) = 250, services 3×20 = 60
+    //   visit fee cairo = 500, daily lease = 120
+    //   grandTotalCompanyCost = 200 + 60 + 500 - 120 = 640
+    //   logistics op total = 300 + 100 + 100 + 150 = 650
+    //   ⇒ Total Cost KPI must show 640 + 650 = 1,290 EGP.
+    const base = generateMockWizardData();
+    const record: MaintenanceRecord = {
+      id: "kpi-probe-1",
+      maintenanceDate: "2026-07-15",
+      type: "scheduled",
+      isLogisticsVisit: false,
+      hadProblem: true,
+      partsWereReplaced: true,
+      problemSolved: true,
+      partsReplaced: [
+        { name: "Pump A", count: 2, cost: 100 },
+        { name: "Gasket B", count: 1, cost: 50, paidByClient: true },
+      ],
+      paidBy: "company",
+      baristaName: "Tech 1",
+      visitZone: "cairo",
+      servicesPerformed: [{ name: "Service X", count: 3, cost: 20 }],
+      followUpVisits: [],
+      supervisors: [],
+      dailyLeaseCost: 120,
+      problems: ["Leak"],
+    };
+    const branch: Branch = {
+      ...base.branches[0],
+      branchName: "KPI Probe",
+      maintenanceHistory: [record],
+      machines: [],
+    };
+    const logisticsOperations: LogisticsOperation[] = [
+      {
+        id: 1,
+        customer_id: 1,
+        operation_type: "pickup_and_deliver",
+        status: "closed",
+        machine_category: "coffee",
+        total_rental_cost: 300,
+        maintenance_cost: 150,
+        pickup_cost: 100,
+        return_cost: 100,
+        total_logistics_cost: 650,
+        maintenance_issues: [],
+        maintenance_services: [],
+        maintenance_parts: [],
+        work_done: "",
+        internal_notes: "",
+      },
+    ];
+
+    drawnStrings.length = 0;
+    const doc = await generateInternalBranchReport("Probe Co", branch, { logisticsOperations });
+    const drawn = drawnStrings.join("\n");
+    expect(doc.output("arraybuffer").byteLength).toBeGreaterThan(1000);
+
+    // 1) Avg Rating KPI removed: the only remaining "Avg Rating" string is
+    //    the Technician Performance table header, so it must appear exactly once.
+    expect(drawnStrings.filter((s) => s === "Avg Rating").length).toBe(1);
+
+    // 2) Total/Net Cost KPI includes the logistics section costs.
+    expect(drawn).toContain("1,290 EGP");
+
+    // 3) Most Used Parts renders AFTER the logistics section (it closes the report).
+    const logisticsIdx = drawnStrings.lastIndexOf("Logistics — Machine Transport & Replacement");
+    const partsIdx = drawnStrings.lastIndexOf("Most Used Parts");
+    expect(partsIdx).toBeGreaterThan(logisticsIdx);
+
+    // Same guarantees hold for the company-level report (shared section logic).
+    const costData: FormData = {
+      ...base,
+      companyName: "Probe Co",
+      maintenanceHistory: [],
+      branches: [branch],
+    };
+    drawnStrings.length = 0;
+    await generateInternalCompanyReport(costData, { logisticsOperations });
+    const companyDrawn = drawnStrings.join("\n");
+    // (Avg Rating KPI removal is already locked above via the shared
+    // buildKPICards through the branch run; the company-level Technician
+    // Performance table builds from top-level maintenanceHistory, which is
+    // empty here, so its header is absent rather than rendered once.)
+    expect(companyDrawn).toContain("1,290 EGP");
+    expect(drawnStrings.lastIndexOf("Most Used Parts")).toBeGreaterThan(
+      drawnStrings.lastIndexOf("Logistics — Machine Transport & Replacement"),
+    );
   }, 30000);
 
   it("visit reports render follow-ups, photos and empty branches without throwing", async () => {
