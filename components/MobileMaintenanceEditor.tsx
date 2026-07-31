@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { MaintenanceRecord, Part, Service, Barista } from "../types";
 import BottomSheet from "./BottomSheet";
 import { useAutoSave } from './forms/hooks/useAutoSave';
@@ -63,7 +63,7 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
 
   const autoSave = useAutoSave(
     selectedRecord ? `mobile-maintenance-record-${selectedRecord.id}` : '',
-    selectedRecord, { debounceMs: 30000, enabled: !!selectedRecord }
+    selectedRecord, { debounceMs: 2000, enabled: !!selectedRecord }
   );
 
   const validation = useFormValidation(
@@ -104,6 +104,27 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
     setCurrentStep(1);
   };
 
+  // Restore auto-saved in-progress edits when the editor opens for a record
+  // (e.g. the user closed the tab mid-edit and came back). A JSON equality
+  // guard skips a spurious restore (and onChange round-trip) when the saved
+  // draft is identical to the current record. The draft is merged over the
+  // current record so fields added to the schema after the draft was saved are
+  // never silently dropped.
+  // Guard so React StrictMode's double-mount in dev does not fire the
+  // restore toast twice for the same record.
+  const restoredForIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!selectedRecord) return;
+    if (restoredForIdRef.current === selectedRecord.id) return;
+    restoredForIdRef.current = selectedRecord.id;
+    const saved = autoSave.restore();
+    if (saved && JSON.stringify(saved) !== JSON.stringify(selectedRecord)) {
+      handleUpdateRecord({ ...selectedRecord, ...saved });
+      showToast('تم استعادة آخر نسخة محفوظة تلقائيًا', 'info');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRecord?.id]);
+
   // Shared validation error handler — shows toast + auto-jumps to first error
   const showValidationErrors = useCallback((errors: Record<string, string>) => {
     showToast('يرجى تصحيح الأخطاء قبل الحفظ', 'error');
@@ -115,16 +136,22 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
   const handleSubmit = useCallback(() => {
     if (!selectedRecord) return;
     validation.handleSubmit(
-      () => { setIsEditorOpen(false); },
+      () => {
+        setIsEditorOpen(false);
+        // Record is now committed to the parent list — drop the autosave so a
+        // stale draft is not restored next time.
+        autoSave.clearSaved();
+      },
       showValidationErrors
     )();
-  }, [selectedRecord, validation.handleSubmit, showValidationErrors]);
+  }, [selectedRecord, validation.handleSubmit, showValidationErrors, autoSave]);
 
   // Save current record and immediately create a new empty one for the next visit
   const handleSubmitAndAddAnother = useCallback(() => {
     if (!selectedRecord || selectedRecordIndex === null) return;
     validation.handleSubmit(
       () => {
+        autoSave.clearSaved();
         const newRecord: MaintenanceRecord = {
           id: Date.now(), maintenanceDate: new Date().toISOString().split("T")[0],
           notes: "", type: "scheduled", hadProblem: false, partsWereReplaced: false,
@@ -140,7 +167,7 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
       },
       showValidationErrors
     )();
-  }, [selectedRecord, selectedRecordIndex, records, onChange, validation.handleSubmit, showValidationErrors, showToast]);
+  }, [selectedRecord, selectedRecordIndex, records, onChange, validation.handleSubmit, showValidationErrors, showToast, autoSave]);
 
   const handleApplyTemplate = (templateId: string) => {
     if (selectedRecordIndex === null) return;

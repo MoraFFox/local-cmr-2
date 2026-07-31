@@ -302,6 +302,32 @@ export function useAutoSave<T extends Record<string, unknown>>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, formId, maxVersions]);
 
+  /**
+   * Flush unsaved changes when the page is hidden or about to be unloaded
+   * (browser/tab close, refresh, navigation away). This closes the gap left by
+   * the debounce: if the user types and closes the tab within the debounce
+   * window, the pending changes would otherwise be lost. localStorage writes
+   * are synchronous, so this reliably persists the latest state on close.
+   */
+  useEffect(() => {
+    if (!enabled) return;
+
+    const flush = () => {
+      try {
+        saveToStorage(formId, latestFormDataRef.current, maxVersions);
+      } catch (error) {
+        onSaveErrorRef.current?.(error as Error);
+      }
+    };
+
+    window.addEventListener('pagehide', flush);
+    window.addEventListener('beforeunload', flush);
+    return () => {
+      window.removeEventListener('pagehide', flush);
+      window.removeEventListener('beforeunload', flush);
+    };
+  }, [enabled, formId, maxVersions]);
+
   return {
     isSaving: state.isSaving,
     lastSaved: state.lastSaved,

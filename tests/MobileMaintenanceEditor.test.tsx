@@ -7,11 +7,13 @@ import { partsList, servicesList, problemCategories } from '../constants';
 import { MaintenanceRecord } from '../types';
 
 vi.mock('../components/forms/hooks/useAutoSave', () => ({
-  useAutoSave: () => ({
+  useAutoSave: vi.fn(() => ({
     isSaving: false, lastSaved: null, hasUnsavedChanges: false, versionCount: 0,
     saveNow: vi.fn(), clearSaved: vi.fn(), restore: vi.fn(), getVersions: vi.fn(), restoreVersion: vi.fn(),
-  }),
+  })),
 }));
+
+import { useAutoSave } from '../components/forms/hooks/useAutoSave';
 
 const allPredefinedProblems = problemCategories.flatMap((cat) =>
   cat.options.map((opt) => opt.value)
@@ -37,7 +39,18 @@ const goToStep = (step: number) => {
 
 describe('MobileMaintenanceEditor', () => {
   beforeEach(() => { localStorage.clear(); });
-  afterEach(() => { cleanup(); localStorage.clear(); });
+  afterEach(() => {
+    cleanup(); localStorage.clear();
+    // Ensure the per-test useAutoSave mock override (if any) never leaks into
+    // other tests, even when the test body fails early.
+    vi.mocked(useAutoSave).mockImplementation(
+      () => ({
+        isSaving: false, lastSaved: null, hasUnsavedChanges: false, versionCount: 0,
+        saveNow: vi.fn(), clearSaved: vi.fn(), restore: vi.fn(),
+        getVersions: vi.fn(), restoreVersion: vi.fn(),
+      }),
+    );
+  });
 
   const baseProps = {
     onChange: vi.fn(), partsList, servicesList, problemCategories,
@@ -164,5 +177,27 @@ describe('MobileMaintenanceEditor', () => {
     goToStep(2);
 
     expect(screen.getByText('لم يتم الإبلاغ عن أي مشاكل')).toBeInTheDocument();
+  });
+
+  it('restores an auto-saved draft when the editor opens', () => {
+    const record = createRecord();
+    const saved = { ...record, baristaName: 'Restored Tech' };
+    const onChange = vi.fn();
+
+    // useAutoSave is called on every render (the hook is called twice: once
+    // before the editor opens, once after), so mockImplementation is required
+    // rather than mockReturnValueOnce. afterEach resets it for other tests.
+    vi.mocked(useAutoSave).mockImplementation(() => ({
+      isSaving: false, lastSaved: null, hasUnsavedChanges: false, versionCount: 0,
+      saveNow: vi.fn(), clearSaved: vi.fn(), restore: () => saved,
+      getVersions: vi.fn(), restoreVersion: vi.fn(),
+    }));
+
+    renderWithProviders(<MobileMaintenanceEditor records={[record]} {...baseProps} onChange={onChange} />);
+
+    // Open the editor — the auto-saved draft should be pushed back to the parent
+    fireEvent.click(screen.getByText(record.maintenanceDate));
+
+    expect(onChange).toHaveBeenCalledWith([expect.objectContaining({ baristaName: 'Restored Tech' })]);
   });
 });

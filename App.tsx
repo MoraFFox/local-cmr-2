@@ -29,6 +29,7 @@ import {
   SunIcon,
   SignalSlashIcon,
   CloudArrowUpIcon,
+  DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 
 import { NAV_ITEMS, ViewKey, pathToView } from "./constants";
@@ -70,10 +71,15 @@ const VIEW_TITLE_MAP: Partial<Record<ViewKey, keyof import('./utils/arabicTransl
   'all-records': 'history',
 };
 
+// localStorage key tracking draft ids the user explicitly dismissed via the
+// resume FAB's close button. Dismissal is remembered across page loads so the
+// same draft is not re-offered after every refresh.
+const DISMISSED_DRAFTS_KEY = "cmr-dismissed-drafts";
+
 const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { showToast } = useToast();
+  const { showToast, removeToast } = useToast();
 
   // ── Hooks ──
   const { theme, toggleTheme } = useTheme();
@@ -203,7 +209,31 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [draftToDelete, setDraftToDelete] = useState<string | null>(null);
   const [draftToLoad, setDraftToLoad] = useState<Draft | null>(null);
+  // The most recent saved draft offered by the bottom-left resume FAB on a
+  // fresh load, plus a session flag for when the user explicitly dismisses it.
+  const [resumeDraft, setResumeDraft] = useState<Draft | null>(null);
+  const [isResumeDismissed, setIsResumeDismissed] = useState(false);
+  // Draft ids the user dismissed via the FAB close button — persisted to
+  // localStorage so a refresh does not re-offer the same draft.
+  const [dismissedDraftIds, setDismissedDraftIds] = useState<Set<string>>(() => {
+    try {
+      const raw = window.localStorage.getItem(DISMISSED_DRAFTS_KEY);
+      if (!raw) return new Set();
+      const parsed: unknown = JSON.parse(raw);
+      return new Set(Array.isArray(parsed) ? (parsed as string[]) : []);
+    } catch {
+      return new Set();
+    }
+  });
   const justLoadedDraftRef = React.useRef(false);
+
+  // True while the wizard form is untouched — gates the mount-time resume FAB
+  // so it never overlays a form the user has already started filling.
+  const isFormFresh =
+    !formData.companyName &&
+    !formData.email &&
+    !formData.taxNumber &&
+    !formData.location;
 
   // ── Collapse sidebar on maintenance-edit view ──
   React.useEffect(() => {
@@ -306,6 +336,8 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
       navigate("/companies/new");
       if (window.innerWidth < 1024) setIsSidebarExpanded(false);
       setDraftToLoad(null);
+      // The FAB's purpose is served once any draft is loaded.
+      setResumeDraft(null);
     }
   }, [draftToLoad, navigate, setCurrentDraftId]);
 
@@ -327,6 +359,89 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
       showToast("تم حذف المسودة بنجاح", "success");
     }
   }, [draftToDelete, currentDraftId, deleteDraftById, setCurrentDraftId, showToast]);
+
+  // Undo a FAB dismissal: drop the draft id from the persisted set and bring
+  // the FAB back (the draft is still the current resume offer). Mirrors
+  // dismissResumeFab: the next set is computed outside the state updater and
+  // localStorage is written after, never inside the updater.
+  const undoDismissedDraft = useCallback((draftId: string) => {
+    const next = new Set(dismissedDraftIds);
+    next.delete(draftId);
+    setDismissedDraftIds(next);
+    try {
+      window.localStorage.setItem(
+        DISMISSED_DRAFTS_KEY,
+        JSON.stringify(Array.from(next)),
+      );
+    } catch {
+      // localStorage full or unavailable — undo is best-effort.
+    }
+    setIsResumeDismissed(false);
+  }, [dismissedDraftIds]);
+
+  // Dismiss the resume FAB and remember the dismissal across page loads so the
+  // same draft is never re-offered after a refresh. A brief undo toast lets a
+  // mis-click on ✕ restore the FAB instead of permanently hiding the draft.
+  const dismissResumeFab = useCallback(() => {
+    if (!resumeDraft) return;
+    setIsResumeDismissed(true);
+    // Compute the next set outside the state updater — writing to localStorage
+    // inside the updater would be a side effect during state computation (React
+    // double-invokes updaters in StrictMode dev).
+    const next = new Set(dismissedDraftIds);
+    next.add(resumeDraft.id);
+    setDismissedDraftIds(next);
+    try {
+      window.localStorage.setItem(
+        DISMISSED_DRAFTS_KEY,
+        JSON.stringify(Array.from(next)),
+      );
+    } catch {
+      // localStorage full or unavailable — dismissal is best-effort.
+    }
+    showToast(
+      "تم إخفاء المسودة",
+      "info",
+      8000,
+      <button
+        onClick={() => {
+          // The undo is done — dismiss the toast immediately so it doesn't
+          // linger saying the draft is hidden when it's visible again.
+          removeToast("undo-resume-draft");
+          undoDismissedDraft(resumeDraft.id);
+        }}
+        className="btn-primary px-3 py-1.5 text-xs font-bold rounded-lg"
+      >
+        استرجاع
+      </button>,
+      "undo-resume-draft",
+    );
+  }, [resumeDraft, dismissedDraftIds, showToast, removeToast, undoDismissedDraft]);
+
+  // ── Crash/close recovery: offer to resume the most recent draft ──
+  // When the app mounts fresh (empty form) but saved drafts already exist,
+  // surface a persistent FAB (bottom-left) with a Resume action so work from
+  // a closed/refreshed tab is never silently lost. Unlike a transient toast
+  // that auto-dismisses after a few seconds (easy to miss), the FAB stays on
+  // screen until the user either resumes the draft or explicitly closes it.
+  // Evaluated strictly at mount time: the ref is armed on the very first
+  // effect run, so a draft created later in the session (e.g. after
+  // deliberately starting a new form) never triggers a surprise offer.
+  const resumeOfferShownRef = React.useRef(false);
+  React.useEffect(() => {
+    if (resumeOfferShownRef.current) return;
+    resumeOfferShownRef.current = true;
+    if (drafts.length === 0) return;
+    // Only offer when the current form is untouched (fresh session).
+    if (!isFormFresh) return;
+    const latest = [...drafts].sort((a, b) => b.timestamp - a.timestamp)[0];
+    if (!latest) return;
+    // Never re-offer a draft the user explicitly dismissed via the FAB close
+    // button — the dismissal is remembered across page loads.
+    if (dismissedDraftIds.has(latest.id)) return;
+    setResumeDraft(latest);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drafts, formData]);
 
   // ── View actions ──
   const handleViewChange = useCallback(
@@ -350,6 +465,8 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
     setFormData(initialFormData);
     setCurrentStep(1);
     setCurrentDraftId(null);
+    // Deliberately starting fresh — hide the resume FAB for this session.
+    setResumeDraft(null);
     navigate("/companies/new");
     setIsMobileMenuOpen(false);
   }, [navigate, setCurrentDraftId]);
@@ -660,6 +777,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
             setCurrentDraftId={setCurrentDraftId}
             drafts={drafts}
             setDrafts={setDrafts}
+            discardCurrent={discardCurrent}
             setView={setViewWrapper}
             setSubmissions={setSubmissions}
             refreshSubmissions={fetchSubmissions}
@@ -820,6 +938,39 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
         </main>
       </div>
 
+      {/* Resume-draft FAB: persistent crash/close recovery offer (bottom-left).
+          Stays visible until the user resumes the draft, dismisses it, or the
+          form is no longer fresh — unlike a toast it cannot be missed. */}
+      {resumeDraft && !isResumeDismissed && isFormFresh && view !== "maintenance-edit" && view !== "print" && (
+        <div className="fixed bottom-4 left-4 z-50 print:hidden">
+          <div className="flex items-stretch rounded-full bg-primary text-white shadow-xl ring-1 ring-black/10 animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <button
+              onClick={() => handleLoadDraft(resumeDraft)}
+              aria-label="استئناف المسودة"
+              className="flex items-center gap-2 ps-4 pe-3 py-3 text-sm font-bold hover:bg-white/10 transition-colors rounded-s-full"
+            >
+              <DocumentTextIcon className="w-5 h-5 shrink-0" />
+              <span>استئناف المسودة</span>
+              <span className="hidden sm:inline text-xs font-medium opacity-80 whitespace-nowrap">
+                ({new Date(resumeDraft.timestamp).toLocaleString("ar-EG", {
+                  day: "numeric",
+                  month: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })})
+              </span>
+            </button>
+            <button
+              onClick={dismissResumeFab}
+              aria-label="إغلاق"
+              className="self-stretch px-3 border-s border-white/20 hover:bg-white/10 transition-colors rounded-e-full"
+            >
+              <XMarkIcon className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Confirm Dialogs */}
       <ConfirmDialog
         isOpen={deleteCandidateId !== null}
@@ -839,6 +990,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
       <ConfirmDialog
         isOpen={draftToLoad !== null}
         onConfirm={confirmLoadDraft}
+        onClose={() => setDraftToLoad(null)}
         title="تحميل المسودة"
         message="هل تريد تحميل هذه المسودة؟ سيتم فقدان أي تغييرات حالية غير محفوظة."
         confirmLabel="تحميل المسودة"

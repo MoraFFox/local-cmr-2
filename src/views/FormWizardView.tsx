@@ -53,6 +53,8 @@ export interface FormWizardViewProps {
   setCurrentDraftId: React.Dispatch<React.SetStateAction<string | null>>;
   drafts: Draft[];
   setDrafts: React.Dispatch<React.SetStateAction<Draft[]>>;
+  /** Remove the current draft from storage after submit/reset (no-op when undefined). */
+  discardCurrent?: () => void;
   setView: (view: any) => void;
   setSubmissions: React.Dispatch<React.SetStateAction<any[]>>;
   refreshSubmissions: () => Promise<void>;
@@ -64,7 +66,7 @@ export interface FormWizardViewProps {
 
 const FormWizardView: React.FC<FormWizardViewProps> = ({
   formData, setFormData, currentStep, setCurrentStep, currentDraftId, setCurrentDraftId,
-  drafts, setDrafts, setView, refreshSubmissions, createSubmission,
+  drafts, setDrafts, discardCurrent, setView, refreshSubmissions, createSubmission,
   allKnownMachineNames = [], allKnownMachineTypes = [], allKnownMachineOptions = [],
 }) => {
   const [newlyAddedId, setNewlyAddedId] = useState<number | string | null>(null);
@@ -208,23 +210,26 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
 
   // ── Form reset ──
   const handleResetForm = useCallback(() => {
-    // Clean up auto-save draft from localStorage if one exists
-    if (currentDraftId) {
-      localStorage.removeItem(`auto-save-form-${currentDraftId}`);
-    }
+    // Clean up auto-save draft from storage if one exists
+    discardCurrent?.();
     setFormData(initialFormData);
     setCurrentStep(1);
     setCurrentDraftId(null);
     setShowResetConfirm(false);
-  }, [currentDraftId, setFormData, setCurrentStep, setCurrentDraftId]);
+  }, [discardCurrent, setFormData, setCurrentStep, setCurrentDraftId]);
 
   // ── Submission ──
   const handleSubmit = useCallback(async () => {
     setIsSubmitting(true);
     const ok = await createSubmission(formData);
     setIsSubmitting(false);
-    if (ok) { refreshSubmissions(); setView("history"); setCurrentStep(1); setFormData(initialFormData); setShowPreview(false); }
-  }, [formData, createSubmission, refreshSubmissions, setView, setCurrentStep, setFormData]);
+    if (ok) {
+      // The submitted company is now a real record — remove the draft so it
+      // doesn't linger in the sidebar / resume toast.
+      discardCurrent?.();
+      refreshSubmissions(); setView("history"); setCurrentStep(1); setFormData(initialFormData); setShowPreview(false);
+    }
+  }, [formData, createSubmission, refreshSubmissions, setView, setCurrentStep, setFormData, discardCurrent]);
 
   // ── AI Notes ──
 

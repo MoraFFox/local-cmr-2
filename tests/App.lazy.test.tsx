@@ -1,7 +1,9 @@
 import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from './testUtils';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, waitFor, fireEvent, act } from './testUtils';
 import { MemoryRouter } from 'react-router-dom';
+import type { Draft } from '../hooks/useDrafts';
+import type { FormData } from '../types';
 
 // Mock all the async view imports so React.lazy resolves synchronously in tests
 vi.mock('../src/views/HistoryView', () => ({
@@ -59,19 +61,27 @@ vi.mock('../hooks/useSubmissions', () => ({
   }),
 }));
 vi.mock('../hooks/useDrafts', () => ({
-  useDrafts: () => ({
+  useDrafts: vi.fn(() => ({
     drafts: [],
     setDrafts: vi.fn(),
     currentDraftId: null,
     setCurrentDraftId: vi.fn(),
     deleteDraftById: vi.fn(),
     discardCurrent: vi.fn(),
-  }),
+  })),
 }));
 
-// Mock ToastContext
+import { useDrafts } from '../hooks/useDrafts';
+
+// Mock ToastContext — showToast is a hoisted mock so tests can inspect the
+// action ReactNode it received (e.g. the undo-dismiss restore button).
+const { showToastMock, removeToastMock } = vi.hoisted(() => ({
+  showToastMock: vi.fn(),
+  removeToastMock: vi.fn(),
+}));
+
 vi.mock('../components/ToastContext', () => ({
-  useToast: () => ({ showToast: vi.fn() }),
+  useToast: () => ({ showToast: showToastMock, removeToast: removeToastMock }),
   ToastProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
@@ -225,6 +235,135 @@ describe('App — Lazy Loading & Suspense', () => {
 
       // After resolution, the actual view should be visible
       expect(historyView).toBeInTheDocument();
+    });
+  });
+
+  describe('resume-draft FAB (crash/close recovery)', () => {
+    // Capture the default useDrafts implementation (drafts: []) so each test
+    // can override it safely and always restore it afterwards — vi.clearAllMocks
+    // clears call history but not implementations, so a skipped restore would
+    // otherwise leak into later tests.
+    const defaultDraftsImpl = vi.mocked(useDrafts).getMockImplementation();
+
+    // A saved draft from a previous session, injected into the useDrafts mock.
+    const savedDraft: Draft = {
+      id: 'draft_fab',
+      timestamp: Date.now(),
+      currentStep: 3,
+      formData: { companyName: 'Company Alpha' } as FormData,
+    };
+
+    const mockSavedDrafts = (drafts: Draft[]) => {
+      vi.mocked(useDrafts).mockReturnValue({
+        drafts,
+        setDrafts: vi.fn(),
+        currentDraftId: null,
+        setCurrentDraftId: vi.fn(),
+        deleteDraftById: vi.fn(),
+        discardCurrent: vi.fn(),
+      });
+    };
+
+    afterEach(() => {
+      vi.mocked(useDrafts).mockImplementation(defaultDraftsImpl!);
+      // The FAB dismissal is persisted to localStorage — isolate it per test.
+      localStorage.clear();
+    });
+
+    it('shows the persistent resume FAB when saved drafts exist on a fresh load', async () => {
+      mockSavedDrafts([savedDraft]);
+      renderApp('/');
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /استئناف المسودة/ })).toBeInTheDocument();
+      });
+    });
+
+    it('does not show the FAB when there are no saved drafts', () => {
+      renderApp('/');
+      expect(screen.queryByRole('button', { name: /استئناف المسودة/ })).not.toBeInTheDocument();
+    });
+
+    it('clicking the FAB opens the load-draft confirmation dialog', async () => {
+      mockSavedDrafts([savedDraft]);
+      renderApp('/');
+      const fab = await screen.findByRole('button', { name: /استئناف المسودة/ });
+      fireEvent.click(fab);
+      await waitFor(() => {
+        expect(screen.getByText(/هل تريد تحميل هذه المسودة/)).toBeInTheDocument();
+      });
+    });
+
+    it('clicking the close button dismisses the FAB for the session', async () => {
+      mockSavedDrafts([savedDraft]);
+      renderApp('/');
+      await screen.findByRole('button', { name: /استئناف المسودة/ });
+      fireEvent.click(screen.getByRole('button', { name: 'إغلاق' }));
+      await waitFor(() => {
+        expect(screen.queryByRole('button', { name: /استئناف المسودة/ })).not.toBeInTheDocument();
+      });
+    });
+
+    it('remembers the dismissal across a page refresh (same draft is not re-offered)', async () => {
+      mockSavedDrafts([savedDraft]);
+      const first = renderApp('/');
+      const fab = await screen.findByRole('button', { name: /استئناف المسودة/ });
+      fireEvent.click(fab);
+      fireEvent.click(screen.getByRole('button', { name: 'إغلاق' }));
+
+      // The dismissal must be persisted to localStorage, keyed by draft id.
+      const stored = JSON.parse(localStorage.getItem('cmr-dismissed-drafts') || '[]') as string[];
+      expect(stored).toContain(savedDraft.id);
+
+      // Simulate a full page reload: unmount, then mount fresh with the same drafts.
+      first.unmount();
+      renderApp('/');
+      await screen.findByTestId('history-view');
+      await waitFor(() => {
+        expect(screen.queryByRole('button', { name: /استئناف المسودة/ })).not.toBeInTheDocument();
+      });
+    });
+
+    it('loading the draft via the confirm dialog hides the FAB', async () => {
+      mockSavedDrafts([savedDraft]);
+      renderApp('/');
+      const fab = await screen.findByRole('button', { name: /استئناف المسودة/ });
+      fireEvent.click(fab);
+      // Confirm in the dialog → draft is loaded → FAB must disappear.
+      const confirmBtn = await screen.findByRole('button', { name: 'تحميل المسودة' });
+      fireEvent.click(confirmBtn);
+      await waitFor(() => {
+        expect(screen.queryByRole('button', { name: /استئناف المسودة/ })).not.toBeInTheDocument();
+      });
+    });
+
+    it('undoing the dismissal via the toast restores the FAB and clears the persisted id', async () => {
+      mockSavedDrafts([savedDraft]);
+      renderApp('/');
+      await screen.findByRole('button', { name: /استئناف المسودة/ });
+      fireEvent.click(screen.getByRole('button', { name: 'إغلاق' }));
+
+      // Dismissed: FAB hidden, draft id persisted, undo toast fired.
+      await waitFor(() => {
+        expect(screen.queryByRole('button', { name: /استئناف المسودة/ })).not.toBeInTheDocument();
+      });
+      const stored = JSON.parse(localStorage.getItem('cmr-dismissed-drafts') || '[]') as string[];
+      expect(stored).toContain(savedDraft.id);
+
+      const undoCall = showToastMock.mock.calls.find((c) => c[0] === 'تم إخفاء المسودة');
+      expect(undoCall).toBeDefined();
+      const action = undoCall![3] as React.ReactElement<{ onClick: () => void }>;
+
+      // Click the undo action → FAB returns, the persisted id is cleared, and
+      // the undo toast is dismissed so it doesn't linger.
+      act(() => {
+        action.props.onClick();
+      });
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /استئناف المسودة/ })).toBeInTheDocument();
+      });
+      const afterUndo = JSON.parse(localStorage.getItem('cmr-dismissed-drafts') || '[]') as string[];
+      expect(afterUndo).not.toContain(savedDraft.id);
+      expect(removeToastMock).toHaveBeenCalledWith('undo-resume-draft');
     });
   });
 

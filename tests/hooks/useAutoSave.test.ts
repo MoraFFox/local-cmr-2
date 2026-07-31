@@ -101,4 +101,41 @@ describe('useAutoSave', () => {
     spy.mockRestore();
     unmount();
   });
+
+  it('flushes pending changes to localStorage on pagehide (tab close)', () => {
+    const { rerender, unmount } = renderHook(
+      ({ data }) => useAutoSave('test-form', data, { debounceMs: 60000, maxVersions: 1 }),
+      { initialProps: { data: { name: 'John' } } }
+    );
+
+    // Change data; the 60s debounce will never fire — simulate closing the tab.
+    rerender({ data: { name: 'Jane' } });
+
+    act(() => {
+      window.dispatchEvent(new Event('pagehide'));
+    });
+
+    const raw = localStorage.getItem('cmr-autosave-test-form-current');
+    expect(raw).not.toBeNull();
+    expect(JSON.parse(raw!).data).toEqual({ name: 'Jane' });
+    unmount();
+  });
+
+  it('flushes pending changes to localStorage on beforeunload', () => {
+    const { rerender, unmount } = renderHook(
+      ({ data }) => useAutoSave('test-form', data, { debounceMs: 60000, maxVersions: 1 }),
+      { initialProps: { data: { name: 'John' } } }
+    );
+
+    rerender({ data: { name: 'Bob' } });
+
+    act(() => {
+      window.dispatchEvent(new Event('beforeunload'));
+    });
+
+    const raw = localStorage.getItem('cmr-autosave-test-form-current');
+    expect(raw).not.toBeNull();
+    expect(JSON.parse(raw!).data).toEqual({ name: 'Bob' });
+    unmount();
+  });
 });
