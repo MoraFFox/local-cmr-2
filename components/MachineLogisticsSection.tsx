@@ -80,6 +80,79 @@ const getTypeLabel = (value?: string | null): string =>
 const INPUT_CLASS =
   'w-full px-3 py-2 bg-white dark:bg-espresso text-primary dark:text-white rounded-lg border border-hairline dark:border-hairline text-sm';
 
+/** Resolve the unit cost for a selected service/part, preferring the stored cost, falling back to the catalog. */
+const resolveUnitCost = (
+  item: { name: string; cost?: number },
+  catalog: Array<{ value: string; cost: number }>,
+): number => {
+  if (item.cost != null && !isNaN(Number(item.cost))) return Number(item.cost);
+  return catalog.find((c) => c.value === item.name)?.cost ?? 0;
+};
+
+/** Total maintenance cost from selected services + parts (cost × count each). */
+const calculateMaintenanceCost = (
+  services: ServiceRecord[],
+  parts: PartRecord[],
+  servicesCatalog: Array<{ value: string; cost: number }>,
+  partsCatalog: Array<{ value: string; cost: number }>,
+): number => {
+  const servicesCost = services.reduce(
+    (sum, s) => sum + resolveUnitCost(s, servicesCatalog) * (s.count || 1),
+    0,
+  );
+  const partsCost = parts.reduce(
+    (sum, p) => sum + resolveUnitCost(p, partsCatalog) * (p.count || 1),
+    0,
+  );
+  return Math.round((servicesCost + partsCost) * 100) / 100;
+};
+
+/**
+ * String for the maintenance-cost field when services/parts change.
+ * Empty when nothing is selected so the required-cost validation still applies.
+ */
+const autoMaintenanceCostValue = (
+  services: ServiceRecord[],
+  parts: PartRecord[],
+  servicesCatalog: Array<{ value: string; cost: number }>,
+  partsCatalog: Array<{ value: string; cost: number }>,
+): string => {
+  if (services.length === 0 && parts.length === 0) return '';
+  return String(calculateMaintenanceCost(services, parts, servicesCatalog, partsCatalog));
+};
+
+/** Small hint under the cost input explaining the auto-calc (with a live breakdown). */
+const MaintenanceCostAutoHint: React.FC<{
+  services: ServiceRecord[];
+  parts: PartRecord[];
+  servicesCatalog: Array<{ value: string; cost: number }>;
+  partsCatalog: Array<{ value: string; cost: number }>;
+}> = ({ services, parts, servicesCatalog, partsCatalog }) => {
+  const hasItems = services.length > 0 || parts.length > 0;
+  if (!hasItems) {
+    return (
+      <p className="text-xs text-latte mt-1">
+        تُحسب تلقائياً من الخدمات وقطع الغيار المختارة — ويمكنك تعديلها يدوياً.
+      </p>
+    );
+  }
+  const servicesCost = services.reduce(
+    (sum, s) => sum + resolveUnitCost(s, servicesCatalog) * (s.count || 1),
+    0,
+  );
+  const partsCost = parts.reduce(
+    (sum, p) => sum + resolveUnitCost(p, partsCatalog) * (p.count || 1),
+    0,
+  );
+  const total = Math.round((servicesCost + partsCost) * 100) / 100;
+  return (
+    <p className="text-xs text-latte mt-1">
+      محسوبة تلقائياً: الخدمات {servicesCost.toLocaleString()} + القطع{' '}
+      {partsCost.toLocaleString()} = {total.toLocaleString()} ج.م — يمكنك تعديلها يدوياً.
+    </p>
+  );
+};
+
 const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
   customerId,
   recordId,
@@ -422,6 +495,12 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
           className={INPUT_CLASS}
           placeholder="0.00"
         />
+        <MaintenanceCostAutoHint
+          services={closeForm.services}
+          parts={closeForm.parts}
+          servicesCatalog={mergedServicesList}
+          partsCatalog={mergedPartsList}
+        />
       </div>
 
       {/* Issues — required */}
@@ -462,7 +541,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
             <ServiceSelector
               options={mergedServicesList}
               selectedValues={closeForm.services}
-              onChange={(services) => setCloseForm((f) => ({ ...f, services }))}
+              onChange={(services) => setCloseForm((f) => ({ ...f, services, maintenance_cost: autoMaintenanceCostValue(services, f.parts, mergedServicesList, mergedPartsList) }))}
               suggestedValues={suggestedServices}
               onAddCustom={(item) => addItem({ ...item, type: 'service' })}
               existingCategories={Array.from(new Set(mergedServicesList.map((s) => s.category)))}
@@ -493,7 +572,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
             <PartsSelector
               options={mergedPartsList}
               selectedValues={closeForm.parts}
-              onChange={(parts) => setCloseForm((f) => ({ ...f, parts }))}
+              onChange={(parts) => setCloseForm((f) => ({ ...f, parts, maintenance_cost: autoMaintenanceCostValue(f.services, parts, mergedServicesList, mergedPartsList) }))}
               suggestedValues={suggestedParts}
               onAddCustom={(item) => addItem({ ...item, type: 'part' })}
               existingCategories={[]}
@@ -965,6 +1044,12 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                   className={INPUT_CLASS}
                   placeholder="0.00"
                 />
+                <MaintenanceCostAutoHint
+                  services={formData.maintenance_services}
+                  parts={formData.maintenance_parts}
+                  servicesCatalog={mergedServicesList}
+                  partsCatalog={mergedPartsList}
+                />
               </div>
 
               {/* Issues — required */}
@@ -1005,7 +1090,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                     <ServiceSelector
                       options={mergedServicesList}
                       selectedValues={formData.maintenance_services}
-                      onChange={(services) => setFormData((f) => ({ ...f, maintenance_services: services }))}
+                      onChange={(services) => setFormData((f) => ({ ...f, maintenance_services: services, maintenance_cost: autoMaintenanceCostValue(services, f.maintenance_parts, mergedServicesList, mergedPartsList) }))}
                       suggestedValues={getSuggestedServices(formData.maintenance_issues, mergedServicesList)}
                       onAddCustom={(item) => addItem({ ...item, type: 'service' })}
                       existingCategories={Array.from(new Set(mergedServicesList.map((s) => s.category)))}
@@ -1036,7 +1121,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                     <PartsSelector
                       options={mergedPartsList}
                       selectedValues={formData.maintenance_parts}
-                      onChange={(parts) => setFormData((f) => ({ ...f, maintenance_parts: parts }))}
+                      onChange={(parts) => setFormData((f) => ({ ...f, maintenance_parts: parts, maintenance_cost: autoMaintenanceCostValue(f.maintenance_services, parts, mergedServicesList, mergedPartsList) }))}
                       suggestedValues={getSuggestedParts(formData.maintenance_issues, mergedPartsList)}
                       onAddCustom={(item) => addItem({ ...item, type: 'part' })}
                       existingCategories={[]}

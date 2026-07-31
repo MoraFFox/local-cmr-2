@@ -286,6 +286,78 @@ describe('MachineLogisticsSection', () => {
     expect(screen.getByTestId('close-parts-body')).toBeInTheDocument();
   });
 
+  it('auto-fills maintenance cost from selected services and parts in the close form', async () => {
+    mockHook([openOp]);
+    renderWithProviders(<MachineLogisticsSection {...baseProps} />);
+
+    fireEvent.click(screen.getByText('إغلاق هذه العملية'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/تكلفة الصيانة المنفذة على ماكينة العميل/)).toBeInTheDocument();
+    });
+
+    const costInput = screen.getByPlaceholderText('0.00');
+    expect((costInput as HTMLInputElement).value).toBe(''); // empty initially
+
+    // Add one service (تغيير جوانات = 400)
+    fireEvent.click(screen.getByText('الخدمات المنفذة'));
+    fireEvent.click(screen.getByRole('button', { name: 'Add 1 تغيير جوانات' }));
+    expect((costInput as HTMLInputElement).value).toBe('400');
+
+    // Add one part (جوان = 100) → total 500
+    fireEvent.click(screen.getByText('قطع الغيار المستبدلة'));
+    fireEvent.click(screen.getByRole('button', { name: 'Add 1 جوان' }));
+    expect((costInput as HTMLInputElement).value).toBe('500');
+
+    // Auto-calc hint with live breakdown is shown
+    expect(screen.getByText(/محسوبة تلقائياً/)).toBeInTheDocument();
+  });
+
+  it('lets the user manually override the auto-calculated cost and recalcs on item changes', async () => {
+    mockHook([openOp]);
+    renderWithProviders(<MachineLogisticsSection {...baseProps} />);
+
+    fireEvent.click(screen.getByText('إغلاق هذه العملية'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/تكلفة الصيانة المنفذة على ماكينة العميل/)).toBeInTheDocument();
+    });
+
+    const costInput = screen.getByPlaceholderText('0.00');
+
+    // Add a service → auto 400
+    fireEvent.click(screen.getByText('الخدمات المنفذة'));
+    fireEvent.click(screen.getByRole('button', { name: 'Add 1 تغيير جوانات' }));
+    expect((costInput as HTMLInputElement).value).toBe('400');
+
+    // Manual override is kept
+    fireEvent.change(costInput, { target: { value: '999' } });
+    expect((costInput as HTMLInputElement).value).toBe('999');
+
+    // Adding another service (تنظيف شاورات = 400) recalculates automatically
+    fireEvent.click(screen.getByRole('button', { name: 'Add 1 تنظيف شاورات' }));
+    expect((costInput as HTMLInputElement).value).toBe('800');
+  });
+
+  it('recalculates maintenance cost when editing services on a closed operation', async () => {
+    mockHook([closedOp]);
+    renderWithProviders(<MachineLogisticsSection {...baseProps} />);
+
+    fireEvent.click(screen.getByText('تعديل'));
+
+    await waitFor(() => {
+      expect(screen.getByText('بيانات الإغلاق')).toBeInTheDocument();
+    });
+
+    // Pre-filled from stored close data (400 service + 100 part = 500)
+    const costInput = screen.getByDisplayValue('500');
+
+    // The services section is already open (pre-filled). Add another one
+    // (تغيير شاورات = 400) → auto-recalc to 900
+    fireEvent.click(screen.getByRole('button', { name: 'Add 1 تغيير شاورات' }));
+    expect((costInput as HTMLInputElement).value).toBe('900');
+  });
+
   it('shows given machine and structured maintenance info on operation cards', async () => {
     mockHook([openOp, closedOp]);
     renderWithProviders(<MachineLogisticsSection {...baseProps} />);
