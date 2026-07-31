@@ -5,7 +5,7 @@ import { reshapeArabic } from "./arabicText";
 import { LogoAssets } from "./pdfGenerator";
 import { formatPdfCurrency, formatEnNumber } from "./costAggregation";
 import { LogisticsOperation } from "../types";
-import { LOGISTICS_TYPE_LABELS_AR_COMPACT, formatMachineDescriptionAr } from "./logisticsLabels";
+import { LOGISTICS_TYPE_LABELS_AR_COMPACT, formatMachineDescriptionAr, getMaintenanceWorkSections, MAINTENANCE_SECTION_LABELS_AR } from "./logisticsLabels";
 
 // ── White / Black / Crimson Red Palette (matches company logo) ──
 export const BRAND = {
@@ -735,8 +735,36 @@ export const drawLogisticsOperationsTable = (
       ? doc.splitTextToSize(rtl(`المقدمة: ${givenMachine}`), catWidth - 2)
       : [];
 
+    // What was actually done on the machine — issues/services/parts — as
+    // structured, labeled sections (a section label line followed by
+    // bulleted items), drawn full-width inside the row. Falls back to the
+    // legacy free-text work_done when structured data is absent.
+    const workSections = getMaintenanceWorkSections(
+      op.maintenance_issues,
+      op.maintenance_services,
+      op.maintenance_parts,
+    );
+    const workMeta: Array<{ kind: "label" | "item"; text: string }> = [];
+    if (workSections.length > 0) {
+      workSections.forEach((s) => {
+        workMeta.push({ kind: "label", text: `${MAINTENANCE_SECTION_LABELS_AR[s.key]}:` });
+        s.items.forEach((item) => workMeta.push({ kind: "item", text: `• ${item}` }));
+      });
+    } else if (op.work_done) {
+      workMeta.push({ kind: "item", text: op.work_done });
+    }
+
+    doc.setFont("Amiri", "normal");
+    doc.setFontSize(5.5);
+    const workLines: Array<{ kind: "label" | "item"; text: string }> = [];
+    workMeta.forEach((meta) => {
+      doc.splitTextToSize(rtl(meta.text), tableW - 4).forEach((ln) =>
+        workLines.push({ kind: meta.kind, text: ln }),
+      );
+    });
+
     // Pad generously so the last baseline (3.5 + (N-1)*lineH) + font descent stays inside the row
-    const contentLines = clientLines.length + givenLines.length;
+    const contentLines = clientLines.length + givenLines.length + workLines.length;
     const rowH = Math.max(minRowH, contentLines * lineH + 4);
 
     nextY = checkPageBreak(doc, nextY, rowH + 2);
@@ -784,6 +812,13 @@ export const drawLogisticsOperationsTable = (
           doc.text(rtl(cell), textX, baseline, { align });
           cx -= w;
         });
+
+        // Operation number — small and muted, below the type label, aligned
+        // to the right edge of column 0 (catRightX is the col 1/0 boundary).
+        doc.setFont("Amiri", "normal");
+        doc.setFontSize(5.5);
+        doc.setTextColor(...BRAND.textMuted);
+        doc.text(`#${formatEnNumber(i + 1)}`, x + tableW - 2, baseline + lineH, { align: "right" });
       }
       baseline += lineH;
     });
@@ -796,6 +831,20 @@ export const drawLogisticsOperationsTable = (
       doc.text(line, catRightX - 2, baseline, { align: "right" });
       baseline += lineH;
     });
+
+    // Work-done lines (issues/services/parts) — section labels stand out
+    // in brand color, items as muted bullets, all full-width.
+    workLines.forEach((wl) => {
+      doc.setFont("Amiri", wl.kind === "label" ? "bold" : "normal");
+      doc.setFontSize(wl.kind === "label" ? 5.8 : 5.5);
+      doc.setTextColor(...(wl.kind === "label" ? BRAND.primary : BRAND.textSecondary));
+      doc.text(wl.text, x + tableW - 2, baseline, { align: "right" });
+      baseline += lineH;
+    });
+
+    // Hairline separator between operation rows for easier tracking
+    doc.setDrawColor(...BRAND.hairline);
+    doc.line(x, nextY + rowH, x + tableW, nextY + rowH);
 
     nextY += rowH;
   });

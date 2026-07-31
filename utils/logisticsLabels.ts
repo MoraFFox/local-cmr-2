@@ -11,6 +11,53 @@ import { ServiceRecord, PartRecord } from '../types';
 const formatWorkItem = (name: string, count: number): string =>
   count > 1 ? `${name} ×${count}` : name;
 
+/** The three possible maintenance-work sections. */
+export type MaintenanceSectionKey = 'issues' | 'services' | 'parts';
+
+/** One structured section of the maintenance performed on a machine. */
+export interface MaintenanceWorkSection {
+  key: MaintenanceSectionKey;
+  /** Pre-formatted items: "الاسم" or "الاسم ×2". */
+  items: string[];
+}
+
+/** Arabic section labels (internal reports / HTML). */
+export const MAINTENANCE_SECTION_LABELS_AR: Record<MaintenanceSectionKey, string> = {
+  issues: 'المشاكل',
+  services: 'الخدمات',
+  parts: 'القطع',
+};
+
+/** English section labels (client-facing PDFs). */
+export const MAINTENANCE_SECTION_LABELS_EN: Record<MaintenanceSectionKey, string> = {
+  issues: 'Issues',
+  services: 'Services',
+  parts: 'Parts',
+};
+
+/**
+ * Split the maintenance performed into structured, labeled sections
+ * (issues / services / parts) with pre-formatted items. Empty sections
+ * are omitted so reports only show what actually happened.
+ */
+export function getMaintenanceWorkSections(
+  issues: string[] = [],
+  services: ServiceRecord[] = [],
+  parts: PartRecord[] = [],
+): MaintenanceWorkSection[] {
+  const sections: MaintenanceWorkSection[] = [];
+  if (issues.length > 0) {
+    sections.push({ key: 'issues', items: issues });
+  }
+  if (services.length > 0) {
+    sections.push({ key: 'services', items: services.map((s) => formatWorkItem(s.name, s.count)) });
+  }
+  if (parts.length > 0) {
+    sections.push({ key: 'parts', items: parts.map((p) => formatWorkItem(p.name, p.count)) });
+  }
+  return sections;
+}
+
 /**
  * Compose a human-readable Arabic summary of the maintenance performed
  * (issues + services + parts). Used to populate the legacy `work_done`
@@ -21,17 +68,26 @@ export function composeMaintenanceWork(
   services: ServiceRecord[] = [],
   parts: PartRecord[] = [],
 ): string {
-  const sections: string[] = [];
-  if (issues.length > 0) {
-    sections.push(`المشاكل: ${issues.join('، ')}`);
-  }
-  if (services.length > 0) {
-    sections.push(`الخدمات: ${services.map((s) => formatWorkItem(s.name, s.count)).join('، ')}`);
-  }
-  if (parts.length > 0) {
-    sections.push(`القطع: ${parts.map((p) => formatWorkItem(p.name, p.count)).join('، ')}`);
-  }
-  return sections.join(' | ');
+  return getMaintenanceWorkSections(issues, services, parts)
+    .map((s) => `${MAINTENANCE_SECTION_LABELS_AR[s.key]}: ${s.items.join('، ')}`)
+    .join(' | ');
+}
+
+/**
+ * Compose a structured, multi-line summary with English section labels
+ * (used in client-facing PDF tables). Each section is a labeled line
+ * followed by bulleted items, e.g.:
+ *
+ *   Issues:\n  • هاندات غير نظيفة\n  • تسريب مياة\n\nServices:\n  • تغيير جوانات
+ */
+export function composeMaintenanceWorkEn(
+  issues: string[] = [],
+  services: ServiceRecord[] = [],
+  parts: PartRecord[] = [],
+): string {
+  return getMaintenanceWorkSections(issues, services, parts)
+    .map((s) => `${MAINTENANCE_SECTION_LABELS_EN[s.key]}:\n${s.items.map((i) => `  • ${i}`).join('\n')}`)
+    .join('\n\n');
 }
 
 /** Full Arabic labels used in internal HTML reports and the logistics timeline. */

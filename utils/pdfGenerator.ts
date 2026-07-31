@@ -2,7 +2,13 @@
 
 import { FormData, MaintenanceRecord, Branch, MaintenancePhoto, LogisticsOperation } from "../types";
 import { DateRange, formatDateRangeLabel } from "./dateRangeFilter";
-import { LOGISTICS_TYPE_LABELS_EN, formatMachineDescription } from "./logisticsLabels";
+import {
+  LOGISTICS_TYPE_LABELS_EN,
+  formatMachineDescription,
+  composeMaintenanceWorkEn,
+  getMaintenanceWorkSections,
+  MAINTENANCE_SECTION_LABELS_EN,
+} from "./logisticsLabels";
 import { BRAND } from "./pdfTheme";
 import { logger } from "./logger";
 import jsPDF from "jspdf";
@@ -837,11 +843,19 @@ export const generateCompanyPDF = async (
     doc.text("Machine Logistics", 14, yPos);
     yPos += 6;
 
-    const logisticsRows = logisticsOps.map((op) => {
+    const logisticsRows = logisticsOps.map((op, idx) => {
+      // What was done on the machine — structured, labeled sections
+      // (Issues/Services/Parts with bullets); falls back to legacy work_done.
+      const workCell = composeMaintenanceWorkEn(
+        op.maintenance_issues,
+        op.maintenance_services,
+        op.maintenance_parts,
+      );
       const row: any[] = [
-        LOGISTICS_TYPE_LABELS_EN[op.operation_type] || op.operation_type,
+        `#${idx + 1} ${LOGISTICS_TYPE_LABELS_EN[op.operation_type] || op.operation_type}`,
         formatMachineDescription(op.machine_category, op.machine_type) || "-",
         formatMachineDescription(op.given_machine_category, op.given_machine_type) || "-",
+        rtl(workCell || op.work_done || "-"),
         op.status === "open" ? "Open" : "Closed",
         op.open_date || "-",
         op.close_date || "-",
@@ -860,7 +874,7 @@ export const generateCompanyPDF = async (
       return row;
     });
 
-    const logisticsHeaders = ["Operation", "Client Machine", "Given Machine", "Status", "Open Date", "Close Date"];
+    const logisticsHeaders = ["Operation", "Client Machine", "Given Machine", "Work Done", "Status", "Open Date", "Close Date"];
     if (options.includeCosts) {
       logisticsHeaders.push("Rental Cost");
       logisticsHeaders.push("Total Logistics");
@@ -879,9 +893,10 @@ export const generateCompanyPDF = async (
         0: { cellWidth: 30 },
         1: { cellWidth: 26 },
         2: { cellWidth: 26 },
-        3: { cellWidth: 18, halign: "center" },
-        4: { cellWidth: 24 },
+        3: { cellWidth: "auto" },
+        4: { cellWidth: 18, halign: "center" },
         5: { cellWidth: 24 },
+        6: { cellWidth: 24 },
       },
     } as any);
 
@@ -1553,7 +1568,7 @@ export const generateBranchPDF = async (
     doc.text("Machine Logistics", 14, yPos);
     yPos += 10;
 
-    for (const op of logisticsOps) {
+    logisticsOps.forEach((op, opIdx) => {
       if (yPos > 230) {
         doc.addPage();
         yPos = 20;
@@ -1563,11 +1578,11 @@ export const generateBranchPDF = async (
       doc.line(14, yPos, pageWidth - 14, yPos);
       yPos += 5;
 
-      // Type + Status
+      // Numbered type header + Status (right)
       doc.setFontSize(10);
       doc.setFont("Amiri", "bold");
       doc.setTextColor(0);
-      doc.text(LOGISTICS_TYPE_LABELS_EN[op.operation_type] || op.operation_type, 14, yPos);
+      doc.text(`#${opIdx + 1} — ${LOGISTICS_TYPE_LABELS_EN[op.operation_type] || op.operation_type}`, 14, yPos);
       const statusLabel = op.status === "open" ? "Open" : "Closed";
       doc.setTextColor(op.status === "open" ? 200 : 0, op.status === "open" ? 0 : 128, 0);
       doc.text(statusLabel, pageWidth - 14, yPos, { align: "right" });
@@ -1601,6 +1616,51 @@ export const generateBranchPDF = async (
         yPos += 6;
       });
 
+      // What was done on the machine — structured, labeled sections with
+      // bulleted items (falls back to legacy free-text work_done).
+      const workSections = getMaintenanceWorkSections(
+        op.maintenance_issues,
+        op.maintenance_services,
+        op.maintenance_parts,
+      );
+      if (workSections.length > 0) {
+        workSections.forEach((s) => {
+          if (yPos > 250) {
+            doc.addPage();
+            yPos = 20;
+          }
+
+          doc.setFont("Amiri", "bold");
+          doc.setFontSize(9);
+          doc.setTextColor(0);
+          doc.text(`${MAINTENANCE_SECTION_LABELS_EN[s.key]}:`, 14, yPos);
+          yPos += 5;
+
+          doc.setFont("Amiri", "normal");
+          doc.setFontSize(8.5);
+          doc.setTextColor(80);
+          s.items.forEach((item) => {
+            const itemLines = doc.splitTextToSize(rtl(`  • ${item}`), pageWidth - 30);
+            itemLines.forEach((il) => {
+              doc.text(il, 14, yPos);
+              yPos += 5;
+            });
+          });
+          yPos += 2;
+        });
+        doc.setTextColor(0);
+      } else if (op.work_done) {
+        doc.setFont("Amiri", "normal");
+        doc.setFontSize(8.5);
+        doc.setTextColor(80);
+        const workLines = doc.splitTextToSize(rtl(op.work_done), pageWidth - 30);
+        workLines.forEach((wl) => {
+          doc.text(wl, 14, yPos);
+          yPos += 6;
+        });
+        doc.setTextColor(0);
+      }
+
       if (op.internal_notes) {
         doc.setFont("Amiri", "bold");
         doc.text("Notes:", 14, yPos);
@@ -1611,7 +1671,7 @@ export const generateBranchPDF = async (
       }
 
       yPos += 5;
-    }
+    });
   }
 
   const pageCount = doc.getNumberOfPages();
