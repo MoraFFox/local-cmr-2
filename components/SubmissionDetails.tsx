@@ -13,10 +13,11 @@ import {
 } from "../types";
 import CollapsibleCard from "./CollapsibleCard";
 import Avatar from "./Avatar";
-import { generateCompanyPDF, generateBranchPDF } from "../utils/pdfGenerator";
 import {
   generateInternalCompanyReport,
   generateInternalBranchReport,
+  generateClientCompanyReport,
+  generateClientBranchReport,
   generateCostCompanyReport,
   generateCostBranchReport,
   generateInternalVisitReport,
@@ -1323,8 +1324,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
           const fileName = `${submission.companyName.replace(/\s+/g, "_")}_Internal_Report_${new Date().toISOString().split("T")[0]}.pdf`;
           doc.save(fileName);
         } else if (mode === "client") {
-          const doc = await generateCompanyPDF(filteredSub, {
-            includeCosts: false,
+          const doc = await generateClientCompanyReport(filteredSub, {
             logisticsOperations: logisticsOps,
             dateRange: range.preset !== "allTime" ? range : undefined,
           });
@@ -1350,10 +1350,10 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
           const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${filteredBranch.branchName?.replace(/\s+/g, "_")}_Internal_Report_${new Date().toISOString().split("T")[0]}.pdf`;
           doc.save(fileName);
         } else if (mode === "client") {
-          const doc = await generateBranchPDF(
+          const doc = await generateClientBranchReport(
             filteredSub.companyName,
             filteredBranch,
-            { includeCosts: false, logisticsOperations: logisticsOps, dateRange: range.preset !== "allTime" ? range : undefined },
+            { logisticsOperations: logisticsOps, dateRange: range.preset !== "allTime" ? range : undefined },
           );
           const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${filteredBranch.branchName?.replace(/\s+/g, "_")}_Client_Report_${new Date().toISOString().split("T")[0]}.pdf`;
           doc.save(fileName);

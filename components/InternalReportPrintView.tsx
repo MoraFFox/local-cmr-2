@@ -239,11 +239,10 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
       </div>
 
       {/* KPI Cards */}
-      <div className='grid grid-cols-5 gap-3 mb-6'>
+      <div className='grid grid-cols-4 gap-3 mb-6'>
         <FinancialCard label='Total Visits' icon='chart' value={kpis.totalVisits} accent='blue' />
         <FinancialCard label='Resolution Rate' icon='check' value={`${kpis.resolutionRate}%`} accent='green' />
         <FinancialCard label='Spare Parts' icon='package' value={kpis.totalPartsUsed} accent='amber' />
-        <FinancialCard label='Avg Rating' icon='star' value={kpis.avgVisitRating > 0 ? `${kpis.avgVisitRating}/5` : "-"} accent='blue' />
         <FinancialCard label='Net Cost' icon='money' value={formatCurrencyEn(costs.grandTotalCompanyCost)} accent='crimson' />
       </div>
 
@@ -445,11 +444,10 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, log
       </div>
 
       {/* KPI Cards */}
-      <div className='grid grid-cols-5 gap-3 mb-6'>
+      <div className='grid grid-cols-4 gap-3 mb-6'>
         <FinancialCard label='Total Visits' icon='chart' value={kpis.totalVisits} accent='blue' />
         <FinancialCard label='Resolution Rate' icon='check' value={`${kpis.resolutionRate}%`} accent='green' />
         <FinancialCard label='Spare Parts' icon='package' value={kpis.totalPartsUsed} accent='amber' />
-        <FinancialCard label='Avg Rating' icon='star' value={kpis.avgVisitRating > 0 ? `${kpis.avgVisitRating}/5` : "-"} accent='blue' />
         <FinancialCard label='Net Cost' icon='money' value={formatCurrencyEn(costs.grandTotalCompanyCost)} accent='crimson' />
       </div>
 

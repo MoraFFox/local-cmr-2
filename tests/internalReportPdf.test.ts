@@ -8,6 +8,8 @@ import { Branch, FormData, LogisticsOperation, MaintenanceRecord } from "../type
 import {
   generateInternalCompanyReport,
   generateInternalBranchReport,
+  generateClientCompanyReport,
+  generateClientBranchReport,
   generateCostCompanyReport,
   generateCostBranchReport,
   generateInternalVisitReport,
@@ -625,6 +627,177 @@ describe("internal report PDF generation", () => {
     expect(drawnStrings.lastIndexOf("Most Used Parts")).toBeGreaterThan(
       drawnStrings.lastIndexOf("Logistics — Machine Transport & Replacement"),
     );
+  }, 30000);
+
+  it("cost PDF reports drop the Resolution Rate KPI (internal report keeps it)", async () => {
+    // Deterministic dataset with a resolvable problem so the rate is defined.
+    const base = generateMockWizardData();
+    const record: MaintenanceRecord = {
+      id: "res-probe-1",
+      maintenanceDate: "2026-07-15",
+      type: "scheduled",
+      isLogisticsVisit: false,
+      hadProblem: true,
+      partsWereReplaced: true,
+      problemSolved: true,
+      partsReplaced: [{ name: "Pump A", count: 2, cost: 100 }],
+      paidBy: "company",
+      baristaName: "Tech 1",
+      visitZone: "cairo",
+      servicesPerformed: [],
+      followUpVisits: [],
+      supervisors: [],
+      dailyLeaseCost: 0,
+      problems: ["Leak"],
+    };
+    const branch: Branch = {
+      ...base.branches[0],
+      branchName: "Res Probe",
+      maintenanceHistory: [record],
+      machines: [],
+    };
+    const costData: FormData = {
+      ...base,
+      companyName: "Probe Co",
+      maintenanceHistory: [],
+      branches: [branch],
+    };
+
+    // Cost reports (branch + company) must NOT draw a Resolution Rate card.
+    drawnStrings.length = 0;
+    await generateCostBranchReport("Probe Co", branch, {});
+    expect(drawnStrings.join("\n")).not.toContain("Resolution Rate");
+
+    drawnStrings.length = 0;
+    await generateCostCompanyReport(costData, {});
+    expect(drawnStrings.join("\n")).not.toContain("Resolution Rate");
+
+    // Differential control: the regular internal reports on the SAME data
+    // must KEEP the Resolution Rate card (proving costMode is what strips it).
+    drawnStrings.length = 0;
+    await generateInternalBranchReport("Probe Co", branch, {});
+    expect(drawnStrings.join("\n")).toContain("Resolution Rate");
+
+    drawnStrings.length = 0;
+    await generateInternalCompanyReport(costData, {});
+    expect(drawnStrings.join("\n")).toContain("Resolution Rate");
+  }, 30000);
+
+  it("client reports use the cost-report style but strip every cost figure", async () => {
+    // Deterministic dataset with costs on every item so the differential
+    // control (cost report) is unambiguous:
+    //   parts 2×100 (company) + 1×50 (client), services 3×20 (company)
+    //   daily lease 120, cairo zone fee 500 ⇒ grandTotalCompanyCost = 640
+    const base = generateMockWizardData();
+    const record: MaintenanceRecord = {
+      id: "client-probe-1",
+      maintenanceDate: "2026-07-15",
+      type: "scheduled",
+      isLogisticsVisit: false,
+      hadProblem: true,
+      partsWereReplaced: true,
+      problemSolved: true,
+      partsReplaced: [
+        { name: "Pump A", count: 2, cost: 100 },
+        { name: "Gasket B", count: 1, cost: 50, paidByClient: true },
+      ],
+      paidBy: "company",
+      baristaName: "Tech 1",
+      visitZone: "cairo",
+      servicesPerformed: [{ name: "Service X", count: 3, cost: 20 }],
+      followUpVisits: [],
+      supervisors: [],
+      dailyLeaseCost: 120,
+      problems: ["Leak"],
+    };
+    const branch: Branch = {
+      ...base.branches[0],
+      branchName: "Client Probe",
+      maintenanceHistory: [record],
+      machines: [],
+    };
+    const clientData: FormData = {
+      ...base,
+      companyName: "Probe Co",
+      maintenanceHistory: [],
+      branches: [branch],
+    };
+    const logisticsOperations: LogisticsOperation[] = [
+      {
+        id: 1,
+        customer_id: 1,
+        operation_type: "pickup_and_deliver",
+        status: "closed",
+        machine_category: "coffee",
+        total_rental_cost: 300,
+        maintenance_cost: 150,
+        pickup_cost: 100,
+        return_cost: 100,
+        total_logistics_cost: 650,
+        maintenance_issues: [],
+        maintenance_services: [{ name: "Service Y", count: 1, cost: 40 }],
+        maintenance_parts: [{ name: "Part Z", count: 1, cost: 30 }],
+        work_done: "",
+        internal_notes: "",
+      },
+    ];
+
+    // Branch client report: same sections as the cost report, no costs.
+    drawnStrings.length = 0;
+    const branchDoc = await generateClientBranchReport("Probe Co", branch, { logisticsOperations });
+    expect(branchDoc.output("arraybuffer").byteLength).toBeGreaterThan(1000);
+    const branchDrawn = drawnStrings.join("\n");
+
+    // Style: same brand layout (header subtitle, KPI cards, section headers).
+    expect(branchDrawn).toContain("Client Report");
+    expect(branchDrawn).toContain("Total Visits");
+    expect(branchDrawn).toContain("Spare Parts");
+    expect(branchDrawn).toContain("Detailed Maintenance Log");
+    expect(branchDrawn).toContain("Technician Performance");
+    expect(branchDrawn).toContain("Most Frequent Problems");
+    expect(branchDrawn).toContain("Logistics — Machine Transport & Replacement");
+    expect(branchDrawn).toContain("Most Used Parts");
+
+    // Info: parts/services bullets keep payer labels but NO prices or totals.
+    expect(branchDrawn).toContain("• 2× Pump A (Company)");
+    expect(branchDrawn).toContain("• 1× Gasket B (Client)");
+    expect(branchDrawn).not.toContain("• 2× Pump A — 200 EGP");
+    expect(branchDrawn).not.toContain("Total: 250 EGP");
+
+    // No cost figures or cost sections anywhere.
+    expect(branchDrawn).not.toContain("EGP");
+    expect(branchDrawn).not.toContain("Cost Breakdown");
+    expect(branchDrawn).not.toContain("Total Cost");
+    expect(branchDrawn).not.toContain("Net Cost");
+    expect(branchDrawn).not.toContain("Daily Lease");
+    expect(branchDrawn).not.toContain("Record Total");
+    expect(branchDrawn).not.toContain("Maintenance Cost Report");
+    expect(branchDrawn).not.toContain("Machine Rental");
+    expect(branchDrawn).not.toContain("Client Invoice Total");
+
+    // Company client report: same guarantees (Branch Comparison is cost-only
+    // and must be absent in client mode).
+    drawnStrings.length = 0;
+    const companyDoc = await generateClientCompanyReport(clientData, { logisticsOperations });
+    expect(companyDoc.output("arraybuffer").byteLength).toBeGreaterThan(1000);
+    const companyDrawn = drawnStrings.join("\n");
+    expect(companyDrawn).toContain("Client Report");
+    expect(companyDrawn).toContain("Total Visits");
+    expect(companyDrawn).not.toContain("EGP");
+    expect(companyDrawn).not.toContain("Cost Breakdown");
+    expect(companyDrawn).not.toContain("Branch Comparison");
+    expect(companyDrawn).not.toContain("Record Total");
+    expect(companyDrawn).not.toContain("Daily Lease");
+
+    // Differential control: the cost report on the SAME data shows all costs.
+    drawnStrings.length = 0;
+    await generateCostBranchReport("Probe Co", branch, { logisticsOperations });
+    const costDrawn = drawnStrings.join("\n");
+    expect(costDrawn).toContain("EGP");
+    expect(costDrawn).toContain("Cost Breakdown");
+    expect(costDrawn).toContain("• 2× Pump A — 200 EGP");
+    expect(costDrawn).toContain("Total Cost");
+    expect(costDrawn).toContain("Machine Rental");
   }, 30000);
 
   it("visit reports render follow-ups, photos and empty branches without throwing", async () => {

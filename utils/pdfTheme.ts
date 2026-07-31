@@ -739,10 +739,15 @@ export interface ContactInfo {
   phone: string;
 }
 
-export const drawContactCards = (doc: jsPDF, contacts: ContactInfo[], y: number): number => {
+export const drawContactCards = (
+  doc: jsPDF,
+  contacts: ContactInfo[],
+  y: number,
+  options?: { x?: number; width?: number },
+): number => {
   const pageWidth = doc.internal.pageSize.getWidth();
-  const containerW = pageWidth / 2 - MARGIN - 6;
-  const x = MARGIN;
+  const containerW = options?.width ?? pageWidth / 2 - MARGIN - 6;
+  const x = options?.x ?? MARGIN;
   const cardW = (containerW - 6) / 2;
   const cardH = 16;
   let rowY = y;

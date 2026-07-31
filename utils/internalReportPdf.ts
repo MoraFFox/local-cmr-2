@@ -40,6 +40,7 @@ import {
   drawTableRow,
   checkPageBreak,
   drawLogisticsOperationsTable,
+  drawClientLogisticsTable,
   drawIconBadge,
   pdfText,
   formatDateEn,
@@ -76,32 +77,40 @@ const formatProblemsList = (problems: string[] | undefined): string => {
 const formatPartsList = (
   parts: { name: string; count: number; cost?: number; paidByClient?: boolean }[] | undefined,
   showPayer = true,
+  showCosts = true,
 ): string => {
   if (!parts || parts.length === 0) return "—";
   const lines = parts.map((p) => {
     const qty = p.count || 0;
-    const itemCost = qty * resolvePartCost(p, partsList);
     const payer = showPayer ? ` (${getPaidByLabel(p.paidByClient ? "client" : "company")})` : "";
+    if (!showCosts) return `• ${formatEnNumber(qty)}× ${rtl(p.name)}${payer}`;
+    const itemCost = qty * resolvePartCost(p, partsList);
     return `• ${formatEnNumber(qty)}× ${rtl(p.name)} — ${formatPdfCurrencyEn(itemCost)}${payer}`;
   });
-  const total = parts.reduce((sum, p) => sum + (p.count || 0) * resolvePartCost(p, partsList), 0);
-  lines.push(`Total: ${formatPdfCurrencyEn(total)}`);
+  if (showCosts) {
+    const total = parts.reduce((sum, p) => sum + (p.count || 0) * resolvePartCost(p, partsList), 0);
+    lines.push(`Total: ${formatPdfCurrencyEn(total)}`);
+  }
   return lines.join("\n");
 };
 
 const formatServicesList = (
   services: { name: string; count: number; cost?: number; paidByClient?: boolean }[] | undefined,
   showPayer = true,
+  showCosts = true,
 ): string => {
   if (!services || services.length === 0) return "—";
   const lines = services.map((s) => {
     const qty = s.count || 0;
-    const itemCost = qty * resolveServiceCost(s, servicesList);
     const payer = showPayer ? ` (${getPaidByLabel(s.paidByClient ? "client" : "company")})` : "";
+    if (!showCosts) return `• ${formatEnNumber(qty)}× ${rtl(s.name)}${payer}`;
+    const itemCost = qty * resolveServiceCost(s, servicesList);
     return `• ${formatEnNumber(qty)}× ${rtl(s.name)} — ${formatPdfCurrencyEn(itemCost)}${payer}`;
   });
-  const total = services.reduce((sum, s) => sum + (s.count || 0) * resolveServiceCost(s, servicesList), 0);
-  lines.push(`Total: ${formatPdfCurrencyEn(total)}`);
+  if (showCosts) {
+    const total = services.reduce((sum, s) => sum + (s.count || 0) * resolveServiceCost(s, servicesList), 0);
+    lines.push(`Total: ${formatPdfCurrencyEn(total)}`);
+  }
   return lines.join("\n");
 };
 
@@ -267,6 +276,7 @@ const buildKPICards = (
   kpis: KPIData,
   costMode = false,
   logisticsCost = 0,
+  clientMode = false,
 ): KPICard[] => {
   const scheduledCount = records.filter((r) => r.type === "scheduled").length;
   const requestedCount = records.filter((r) => r.type === "requested").length;
@@ -285,12 +295,18 @@ const buildKPICards = (
   // maintenance-visit costs aggregated in `costs`.
   const totalCost = (costMode ? costs.grandTotal + costs.totalLeaseRevenue : costs.grandTotalCompanyCost) + logisticsCost;
 
-  return [
+  // Resolution Rate is an internal-report metric — the cost (costMode) and
+  // client (clientMode) reports omit it; the client report also drops the
+  // cost card entirely so no financial figures ever reach the client.
+  const cards: KPICard[] = [
     { icon: "chart", label: "Total Visits", value: formatEnNumber(kpis.totalVisits), sublabel: `${formatEnNumber(scheduledCount)} Scheduled · ${formatEnNumber(requestedCount)} Requested` },
-    { icon: "check", label: "Resolution Rate", value: `${formatEnNumber(kpis.resolutionRate)}%`, sublabel: resolutionSub, variant: resolutionVariant },
-    { icon: "package", label: "Spare Parts", value: formatEnNumber(kpis.totalPartsUsed), sublabel: costMode ? `${formatEnNumber(totalPartCount)} total` : `${formatEnNumber(companyPartCount)} Company · ${formatEnNumber(clientPartCount)} Client` },
-    { icon: "money", label: costMode ? "Total Cost" : "Net Cost", value: formatPdfCurrencyEn(totalCost), sublabel: "All costs included" },
+    ...(costMode || clientMode
+      ? []
+      : [{ icon: "check" as const, label: "Resolution Rate", value: `${formatEnNumber(kpis.resolutionRate)}%`, sublabel: resolutionSub, variant: resolutionVariant }]),
+    { icon: "package", label: "Spare Parts", value: formatEnNumber(kpis.totalPartsUsed), sublabel: costMode || clientMode ? `${formatEnNumber(totalPartCount)} total` : `${formatEnNumber(companyPartCount)} Company · ${formatEnNumber(clientPartCount)} Client` },
+    ...(clientMode ? [] : [{ icon: "money" as const, label: costMode ? "Total Cost" : "Net Cost", value: formatPdfCurrencyEn(totalCost), sublabel: "All costs included" }]),
   ];
+  return cards;
 };
 
 // ── Empty-state message helper ──
@@ -335,18 +351,33 @@ interface MaintenanceTableColumn {
   format: (r: MaintenanceRecord) => string;
 }
 
-const buildMaintenanceTableColumns = (showPayer = true): MaintenanceTableColumn[] => [
-  { id: "date", label: "Date", accessor: (r) => r.maintenanceDate, ignoreIf: "never", width: 13, format: (r) => formatDateEn(r.maintenanceDate) },      { id: "type", label: "Type", accessor: (r) => r.type, ignoreIf: "never", width: 12, format: (r) => r.type === "requested" ? rtl(getTypeLabel("requested")) + " ●" : rtl(getTypeLabel(r.type)) },
-  { id: "barista", label: "Technician", accessor: (r) => r.baristaName, ignoreIf: "empty", width: 15, format: (r) => rtl(r.baristaName) || "—" },
-  { id: "zone", label: "Zone", accessor: (r) => r.visitZone, ignoreIf: "empty", width: 13, format: (r) => rtl(r.visitZone) || "—" },
-  { id: "problems", label: "Problems", accessor: (r) => (r.problems || []).join(""), ignoreIf: "empty", width: 22, format: (r) => formatProblemsList(r.problems) },
-  { id: "solved", label: "Resolved", accessor: () => "always", ignoreIf: "never", width: 10, format: (r) => (r.problemSolved ? "✓ Yes" : "✗ No") },
-  { id: "parts", label: "Parts", accessor: (r) => formatPartsList(r.partsReplaced, showPayer), ignoreIf: "empty", width: 35, format: (r) => formatPartsList(r.partsReplaced, showPayer) },
-  { id: "services", label: "Services", accessor: (r) => formatServicesList(r.servicesPerformed, showPayer), ignoreIf: "empty", width: 35, format: (r) => formatServicesList(r.servicesPerformed, showPayer) },
-  { id: "lease", label: "Daily Lease", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).leaseCost, ignoreIf: "zero", width: 11, format: (r) => { const c = getRecordCostSummary(r, partsList, servicesList); return c.leaseCost > 0 ? formatPdfCurrencyEn(c.leaseCost) : "—"; } },
-  { id: "total", label: "Record Total", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).total, ignoreIf: "never", width: 14, format: (r) => formatPdfCurrencyEn(getRecordCostSummary(r, partsList, servicesList).total) },
-  { id: "rating", label: "Rating", accessor: (r) => r.visitRating, ignoreIf: "zero", width: 10, format: (r) => (r.visitRating ? `★ ${formatEnNumber(r.visitRating)}` : "—") },
-];
+const buildMaintenanceTableColumns = (showPayer = true, clientMode = false): MaintenanceTableColumn[] => {
+  // In client mode every cost-bearing element is dropped: the Daily Lease and
+  // Record Total columns vanish and the Parts/Services bullets render without
+  // per-item prices or their "Total:" subtotal line (the widths are widened to
+  // keep the table at the same full usable width).
+  const showCosts = !clientMode;
+  const partsW = clientMode ? 47.5 : 35;
+  const servicesW = clientMode ? 47.5 : 35;
+  const cols: MaintenanceTableColumn[] = [
+    { id: "date", label: "Date", accessor: (r) => r.maintenanceDate, ignoreIf: "never", width: 13, format: (r) => formatDateEn(r.maintenanceDate) },
+    { id: "type", label: "Type", accessor: (r) => r.type, ignoreIf: "never", width: 12, format: (r) => r.type === "requested" ? rtl(getTypeLabel("requested")) + " ●" : rtl(getTypeLabel(r.type)) },
+    { id: "barista", label: "Technician", accessor: (r) => r.baristaName, ignoreIf: "empty", width: 15, format: (r) => rtl(r.baristaName) || "—" },
+    { id: "zone", label: "Zone", accessor: (r) => r.visitZone, ignoreIf: "empty", width: 13, format: (r) => rtl(r.visitZone) || "—" },
+    { id: "problems", label: "Problems", accessor: (r) => (r.problems || []).join(""), ignoreIf: "empty", width: 22, format: (r) => formatProblemsList(r.problems) },
+    { id: "solved", label: "Resolved", accessor: () => "always", ignoreIf: "never", width: 10, format: (r) => (r.problemSolved ? "✓ Yes" : "✗ No") },
+    { id: "parts", label: "Parts", accessor: (r) => formatPartsList(r.partsReplaced, showPayer, showCosts), ignoreIf: "empty", width: partsW, format: (r) => formatPartsList(r.partsReplaced, showPayer, showCosts) },
+    { id: "services", label: "Services", accessor: (r) => formatServicesList(r.servicesPerformed, showPayer, showCosts), ignoreIf: "empty", width: servicesW, format: (r) => formatServicesList(r.servicesPerformed, showPayer, showCosts) },
+  ];
+  if (!clientMode) {
+    cols.push(
+      { id: "lease", label: "Daily Lease", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).leaseCost, ignoreIf: "zero", width: 11, format: (r) => { const c = getRecordCostSummary(r, partsList, servicesList); return c.leaseCost > 0 ? formatPdfCurrencyEn(c.leaseCost) : "—"; } },
+      { id: "total", label: "Record Total", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).total, ignoreIf: "never", width: 14, format: (r) => formatPdfCurrencyEn(getRecordCostSummary(r, partsList, servicesList).total) },
+    );
+  }
+  cols.push({ id: "rating", label: "Rating", accessor: (r) => r.visitRating, ignoreIf: "zero", width: 10, format: (r) => (r.visitRating ? `★ ${formatEnNumber(r.visitRating)}` : "—") });
+  return cols;
+};
 
 const renderMaintenanceHistoryTable = (
   doc: jsPDF,
@@ -354,8 +385,9 @@ const renderMaintenanceHistoryTable = (
   y: number,
   hideEmpty: boolean,
   showPayer = true,
+  clientMode = false,
 ): number => {
-  const allCols = buildMaintenanceTableColumns(showPayer);
+  const allCols = buildMaintenanceTableColumns(showPayer, clientMode);
   const activeCols = hideEmpty
     ? allCols.filter((col) => {
         if (col.ignoreIf === "never") return true;
@@ -403,6 +435,14 @@ export interface InternalReportOptions {
    * services, visit fees and machine rental. Header reads "Maintenance Cost Report".
    */
   costMode?: boolean;
+  /**
+   * Client Report mode: the SAME layout, colors and style as the cost report
+   * (header bar, KPI cards, section headers, logistics table) but every cost
+   * figure is removed — no financial summary, no cost KPI card, no cost
+   * columns in the maintenance log / technician / parts tables, no logistics
+   * cost cards, and logistics costs are hidden. Header reads "Client Report".
+   */
+  clientMode?: boolean;
 }
 
 export const generateInternalBranchReport = async (
@@ -415,7 +455,8 @@ export const generateInternalBranchReport = async (
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 10;
   const hideEmpty = options.hideEmptyComponents ?? true;
-  const costMode = options.costMode ?? false;
+  const clientMode = options.clientMode ?? false;
+  const costMode = (options.costMode ?? false) && !clientMode;
   const logisticsOps = options.logisticsOperations ?? [];
 
   // Logistics-only visits are tracked in the app but excluded from reports.
@@ -428,7 +469,8 @@ export const generateInternalBranchReport = async (
   const period = options.dateRange && (options.dateRange.startDate || options.dateRange.endDate)
     ? formatDateRangeLabelEn(options.dateRange)
     : formatPeriod(allFlatRecords);
-  const startY = drawInternalHeader(doc, companyName, branch.branchName || undefined, assets, period, costMode ? "Maintenance Cost Report" : undefined);
+  const headerSubtitle = clientMode ? "Client Report" : costMode ? "Maintenance Cost Report" : undefined;
+  const startY = drawInternalHeader(doc, companyName, branch.branchName || undefined, assets, period, headerSubtitle);
 
   const engine = new PDFLayoutEngine(doc, startY, { hideEmptyComponents: hideEmpty });
 
@@ -444,7 +486,7 @@ export const generateInternalBranchReport = async (
   engine.addBlock({
     estimatedHeight: 32,
     draw: (doc, y) => {
-      const cards = buildKPICards(allFlatRecords, costs, kpis, costMode, logisticsCosts.totalLogisticsCost);
+      const cards = buildKPICards(allFlatRecords, costs, kpis, costMode, logisticsCosts.totalLogisticsCost, clientMode);
       return drawKPICards(doc, cards, y);
     },
   });
@@ -456,32 +498,37 @@ export const generateInternalBranchReport = async (
       const leftColW = pageWidth / 2 - margin - 6;
       const rightColX = pageWidth / 2 + 3;
 
-      // Right column: financial summary
-      const financeHeaderY = drawSectionHeader(doc, "Cost Breakdown", y, {
-        x: rightColX,
-        width: leftColW,
-        icon: "money",
-      });
-      const financialCategories = buildFinancialCategories(costs, costMode);
-      let financeY = drawFinancialSummary(
-        doc,
-        financialCategories,
-        costMode ? costs.grandTotal + costs.totalLeaseRevenue : costs.grandTotalCompanyCost,
-        costMode ? 0 : costs.totalClientPartsCost + costs.totalClientServicesCost,
-        financeHeaderY,
-        costMode ? { grandTotalLabel: "Total Cost" } : undefined,
-      );
+      // Right column: financial summary (client report has NO costs at all)
+      let financeY = y;
+      if (!clientMode) {
+        const financeHeaderY = drawSectionHeader(doc, "Cost Breakdown", y, {
+          x: rightColX,
+          width: leftColW,
+          icon: "money",
+        });
+        const financialCategories = buildFinancialCategories(costs, costMode);
+        financeY = drawFinancialSummary(
+          doc,
+          financialCategories,
+          costMode ? costs.grandTotal + costs.totalLeaseRevenue : costs.grandTotalCompanyCost,
+          costMode ? 0 : costs.totalClientPartsCost + costs.totalClientServicesCost,
+          financeHeaderY,
+          costMode ? { grandTotalLabel: "Total Cost" } : undefined,
+        );
+      }
 
-      // Left column: sidebar
+      // Left column: sidebar. The client report drops the cost-bearing
+      // sections (zone fees + machine fleet) and uses the full width.
       let sideY = y;
+      const contentW = clientMode ? pageWidth - margin * 2 : leftColW;
 
-      if (zoneBreakdown.some((z) => z.visits > 0)) {
+      if (!clientMode && zoneBreakdown.some((z) => z.visits > 0)) {
         sideY = checkPageBreak(doc, sideY, 35);
         sideY = drawSectionHeader(doc, "Visit Fees by Zone", sideY, { x: margin, width: leftColW, icon: "location" });
         sideY = drawZoneTable(doc, zoneBreakdown as ZoneRow[], costs.totalVisitFees, sideY);
       }
 
-      if (machineSummary.length > 0) {
+      if (!clientMode && machineSummary.length > 0) {
         sideY = checkPageBreak(doc, sideY, 35);
         sideY = drawSectionHeader(doc, "Machine Fleet", sideY, { x: margin, width: leftColW, icon: "coffee" });
         const machines: MachineInfo[] = machineSummary.map((m) => ({
@@ -508,8 +555,8 @@ export const generateInternalBranchReport = async (
 
       if (branchInfo.length > 0) {
         sideY = checkPageBreak(doc, sideY, 40);
-        sideY = drawSectionHeader(doc, "Branch Information", sideY, { x: margin, width: leftColW, icon: "home" });
-        sideY = drawInfoBox(doc, branchInfo, sideY);
+        sideY = drawSectionHeader(doc, "Branch Information", sideY, { x: margin, width: contentW, icon: "home" });
+        sideY = drawInfoBox(doc, branchInfo, sideY, { x: margin, width: contentW });
       }
 
       if (branch.contacts.length > 0) {
@@ -519,15 +566,16 @@ export const generateInternalBranchReport = async (
           phone: c.phoneNumbers.map((p) => p.number).join(" / ") || "—",
         }));
         sideY = checkPageBreak(doc, sideY, 40);
-        sideY = drawSectionHeader(doc, "Contacts", sideY, { x: margin, width: leftColW, icon: "phone" });
-        sideY = drawContactCards(doc, contacts, sideY);
+        sideY = drawSectionHeader(doc, "Contacts", sideY, { x: margin, width: contentW, icon: "phone" });
+        sideY = drawContactCards(doc, contacts, sideY, { x: margin, width: contentW });
       }
 
       return Math.max(financeY, sideY) + 8;
     },
   });
 
-  // Maintenance History — 11 columns (Parts/Services carry itemized bullets + total), pruned when empty
+  // Maintenance History — 11 columns internally (9 in client mode: cost
+  // columns vanish), Parts/Services carry itemized bullets + total, pruned when empty
   engine.addSection(
     "Detailed Maintenance Log",
     (section) => {
@@ -535,13 +583,13 @@ export const generateInternalBranchReport = async (
         allFlatRecords,
         40 + allFlatRecords.length * 8,
         (doc, y) => drawEmptyMessage(doc, y, "No maintenance records", margin),
-        (doc, y, items) => renderMaintenanceHistoryTable(doc, items, y, hideEmpty, !costMode),
+        (doc, y, items) => renderMaintenanceHistoryTable(doc, items, y, hideEmpty, !costMode, clientMode),
       );
     },
     drawSectionHeader,
   );
 
-  // Technician Performance — 6 columns
+  // Technician Performance — 6 columns (5 in client mode: Total Cost dropped)
   engine.addSection(
     "Technician Performance",
     (section) => {
@@ -551,10 +599,14 @@ export const generateInternalBranchReport = async (
         (doc, y) => drawEmptyMessage(doc, y, "No technician data", margin),
         (doc, y, items) => {
           const tableW = pageWidth - margin * 2;
-          const colWidths = [tableW * 0.22, tableW * 0.12, tableW * 0.14, tableW * 0.14, tableW * 0.16, tableW * 0.22];
+          const colWidths = clientMode
+            ? [tableW * 0.26, tableW * 0.14, tableW * 0.16, tableW * 0.16, tableW * 0.28]
+            : [tableW * 0.22, tableW * 0.12, tableW * 0.14, tableW * 0.14, tableW * 0.16, tableW * 0.22];
           const x = margin;
 
-          let nextY = drawTableHeader(doc, ["Technician", "Visits", "Avg Rating", "Parts Used", "Total Cost", "Zones"], colWidths, x, y, tableW);
+          let nextY = drawTableHeader(doc, clientMode
+            ? ["Technician", "Visits", "Avg Rating", "Parts Used", "Zones"]
+            : ["Technician", "Visits", "Avg Rating", "Parts Used", "Total Cost", "Zones"], colWidths, x, y, tableW);
 
           const techMap = new Map<string, { totalCost: number; zones: Record<string, number> }>();
           allFlatRecords.forEach((r) => {
@@ -574,11 +626,17 @@ export const generateInternalBranchReport = async (
               .map(([zone, count]) => `${rtl(zone)} (${formatEnNumber(count)})`)
               .join(" · ") || "—";
             nextY = checkPageBreak(doc, nextY, 8);
+            const cells = clientMode
+              ? [rtl(t.name), formatEnNumber(t.visits), t.avgRating > 0 ? `★ ${formatEnNumber(t.avgRating)}/5` : "-", formatEnNumber(t.partsUsed), zonesStr]
+              : [rtl(t.name), formatEnNumber(t.visits), t.avgRating > 0 ? `★ ${formatEnNumber(t.avgRating)}/5` : "-", formatEnNumber(t.partsUsed), formatPdfCurrencyEn(extra.totalCost), zonesStr];
+            const aligns: Array<"left" | "center" | "right"> = clientMode
+              ? ["left", "center", "center", "center", "right"]
+              : ["left", "center", "center", "center", "right", "right"];
             nextY = drawTableRow(
               doc,
-              [rtl(t.name), formatEnNumber(t.visits), t.avgRating > 0 ? `★ ${formatEnNumber(t.avgRating)}/5` : "-", formatEnNumber(t.partsUsed), formatPdfCurrencyEn(extra.totalCost), zonesStr],
+              cells,
               colWidths, x, nextY, tableW, i % 2 === 1,
-              ["left", "center", "center", "center", "right", "right"],
+              aligns,
             );
           });
 
@@ -629,54 +687,60 @@ export const generateInternalBranchReport = async (
     drawSectionHeader,
   );
 
-  // Machine Logistics — independent standalone section (with costs)
+  // Machine Logistics — independent standalone section (costs shown except in
+  // client mode, which reuses the cost-free client table in brand colors)
   if (!hideEmpty || logisticsOps.length > 0) {
     engine.addSection(
       "Logistics — Machine Transport & Replacement",
       (section) => {
-        // Cost summary block
-        section.addBlock({
-          estimatedHeight: logisticsCosts.totalLogisticsCost > 0 ? 35 : 15,
-          draw: (doc, y) => {
-            if (logisticsCosts.totalLogisticsCost <= 0) {
-              return drawEmptyMessage(doc, y, "No logistics costs", margin);
-            }
-            const cardW = (pageWidth - margin * 2 - 24) / 5;
-            const cardH = 22;
-            const cards: Array<{ label: string; value: string; color: [number, number, number]; icon: PdfIconName }> = [
-              { label: "Machine Rental", value: formatPdfCurrencyEn(logisticsCosts.totalRentalCost), color: BRAND.primary, icon: "calendar" },
-              { label: "Transport — Pickup", value: formatPdfCurrencyEn(logisticsCosts.totalPickupCost), color: BRAND.primaryLight, icon: "truck" },
-              { label: "Transport — Return", value: formatPdfCurrencyEn(logisticsCosts.totalReturnCost), color: BRAND.info, icon: "truck" },
-              { label: "Maintenance Cost", value: formatPdfCurrencyEn(logisticsCosts.totalMaintenanceCost), color: BRAND.warning, icon: "wrench" },
-              { label: "Logistics Total", value: formatPdfCurrencyEn(logisticsCosts.totalLogisticsCost), color: BRAND.header, icon: "money" },
-            ];
-            cards.forEach((card, i) => {
-              const cx = margin + i * (cardW + 6);
-              doc.setFillColor(...BRAND.white);
-              doc.setDrawColor(...BRAND.hairline);
-              doc.roundedRect(cx, y, cardW, cardH, 2, 2, "FD");
-              doc.setFillColor(...card.color);
-              doc.rect(cx, y, cardW, 3, "F");
-              drawIconBadge(doc, cx + cardW - 7, y + 10, card.icon, card.color, 2.4);
-              doc.setFont("Amiri", "bold");
-              doc.setFontSize(12);
-              doc.setTextColor(...BRAND.text);
-              pdfText(doc, card.value, cx + 4, y + 13, { align: "left" });
-              doc.setFont("Amiri", "bold");
-              doc.setFontSize(7);
-              doc.setTextColor(...BRAND.textMuted);
-              pdfText(doc, card.label, cx + 4, y + 18, { align: "left" });
-            });
-            return y + cardH + 8;
-          },
-        });
+        // Cost summary block — internal/cost reports only
+        if (!clientMode) {
+          section.addBlock({
+            estimatedHeight: logisticsCosts.totalLogisticsCost > 0 ? 35 : 15,
+            draw: (doc, y) => {
+              if (logisticsCosts.totalLogisticsCost <= 0) {
+                return drawEmptyMessage(doc, y, "No logistics costs", margin);
+              }
+              const cardW = (pageWidth - margin * 2 - 24) / 5;
+              const cardH = 22;
+              const cards: Array<{ label: string; value: string; color: [number, number, number]; icon: PdfIconName }> = [
+                { label: "Machine Rental", value: formatPdfCurrencyEn(logisticsCosts.totalRentalCost), color: BRAND.primary, icon: "calendar" },
+                { label: "Transport — Pickup", value: formatPdfCurrencyEn(logisticsCosts.totalPickupCost), color: BRAND.primaryLight, icon: "truck" },
+                { label: "Transport — Return", value: formatPdfCurrencyEn(logisticsCosts.totalReturnCost), color: BRAND.info, icon: "truck" },
+                { label: "Maintenance Cost", value: formatPdfCurrencyEn(logisticsCosts.totalMaintenanceCost), color: BRAND.warning, icon: "wrench" },
+                { label: "Logistics Total", value: formatPdfCurrencyEn(logisticsCosts.totalLogisticsCost), color: BRAND.header, icon: "money" },
+              ];
+              cards.forEach((card, i) => {
+                const cx = margin + i * (cardW + 6);
+                doc.setFillColor(...BRAND.white);
+                doc.setDrawColor(...BRAND.hairline);
+                doc.roundedRect(cx, y, cardW, cardH, 2, 2, "FD");
+                doc.setFillColor(...card.color);
+                doc.rect(cx, y, cardW, 3, "F");
+                drawIconBadge(doc, cx + cardW - 7, y + 10, card.icon, card.color, 2.4);
+                doc.setFont("Amiri", "bold");
+                doc.setFontSize(12);
+                doc.setTextColor(...BRAND.text);
+                pdfText(doc, card.value, cx + 4, y + 13, { align: "left" });
+                doc.setFont("Amiri", "bold");
+                doc.setFontSize(7);
+                doc.setTextColor(...BRAND.textMuted);
+                pdfText(doc, card.label, cx + 4, y + 18, { align: "left" });
+              });
+              return y + cardH + 8;
+            },
+          });
+        }
 
-        // Operations table
+        // Operations table — cost-free client table in brand colors for the
+        // client report (same columns/sections, no financial figures)
         section.addRepeater(
           logisticsOps,
           45 + logisticsOps.length * 12,
           (doc, y) => drawEmptyMessage(doc, y, "No logistics operations", margin),
-          (doc, y, items) => drawLogisticsOperationsTable(doc, items, y, margin),
+          (doc, y, items) => clientMode
+            ? drawClientLogisticsTable(doc, items, y, margin, { includeCosts: false, headerColor: BRAND.primary })
+            : drawLogisticsOperationsTable(doc, items, y, margin),
         );
       },
       drawSectionHeader,
@@ -694,15 +758,13 @@ export const generateInternalBranchReport = async (
             return drawEmptyMessage(doc, y, "No parts used", margin);
           }
           const colW = pageWidth - margin * 2;
-          const cw = [colW * 0.5, colW * 0.25, colW * 0.25];
-          let py = drawTableHeader(doc, ["Part", "Qty", "Cost"], cw, margin, y, colW);
+          const cw = clientMode ? [colW * 0.6, colW * 0.4] : [colW * 0.5, colW * 0.25, colW * 0.25];
+          let py = drawTableHeader(doc, clientMode ? ["Part", "Qty"] : ["Part", "Qty", "Cost"], cw, margin, y, colW);
           allParts.forEach((p, i) => {
             py = checkPageBreak(doc, py, 8);
-            py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatPdfCurrencyEn(p.totalCost)], cw, margin, py, colW, i % 2 === 1, [
-              "left",
-              "center",
-              "right",
-            ]);
+            py = drawTableRow(doc, clientMode
+              ? [rtl(p.name), formatEnNumber(p.count)]
+              : [rtl(p.name), formatEnNumber(p.count), formatPdfCurrencyEn(p.totalCost)], cw, margin, py, colW, i % 2 === 1, clientMode ? ["left", "center"] : ["left", "center", "right"]);
           });
           return py + 10;
         },
@@ -716,6 +778,16 @@ export const generateInternalBranchReport = async (
 
   return doc;
 };
+
+/**
+ * Client Report for ONE branch: the same layout, colors and style as the
+ * cost report but with every cost figure removed.
+ */
+export const generateClientBranchReport = async (
+  companyName: string,
+  branch: Branch,
+  options: InternalReportOptions = {},
+): Promise<jsPDF> => generateInternalBranchReport(companyName, branch, { ...options, clientMode: true });
 
 /**
  * Cost Report for ONE branch: full costs like the internal report but with no
@@ -741,7 +813,8 @@ export const generateInternalCompanyReport = async (
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 10;
   const hideEmpty = options.hideEmptyComponents ?? true;
-  const costMode = options.costMode ?? false;
+  const clientMode = options.clientMode ?? false;
+  const costMode = (options.costMode ?? false) && !clientMode;
   const logisticsOps = options.logisticsOperations ?? [];
 
   // Logistics-only visits are tracked in the app but excluded from reports.
@@ -759,7 +832,8 @@ export const generateInternalCompanyReport = async (
   const period = options.dateRange && (options.dateRange.startDate || options.dateRange.endDate)
     ? formatDateRangeLabelEn(options.dateRange)
     : formatPeriod(allFlatRecords);
-  const startY = drawInternalHeader(doc, data.companyName, undefined, assets, period, costMode ? "Maintenance Cost Report" : undefined);
+  const headerSubtitle = clientMode ? "Client Report" : costMode ? "Maintenance Cost Report" : undefined;
+  const startY = drawInternalHeader(doc, data.companyName, undefined, assets, period, headerSubtitle);
 
   const engine = new PDFLayoutEngine(doc, startY, { hideEmptyComponents: hideEmpty });
 
@@ -814,7 +888,7 @@ export const generateInternalCompanyReport = async (
   engine.addBlock({
     estimatedHeight: 32,
     draw: (doc, y) => {
-      const kpiCards = buildKPICards(allFlatRecords, costs, kpis, costMode, logisticsCosts.totalLogisticsCost);
+      const kpiCards = buildKPICards(allFlatRecords, costs, kpis, costMode, logisticsCosts.totalLogisticsCost, clientMode);
       return drawKPICards(doc, kpiCards, y);
     },
   });
@@ -826,30 +900,34 @@ export const generateInternalCompanyReport = async (
       const leftColW = pageWidth / 2 - margin - 6;
       const rightColX = pageWidth / 2 + 3;
 
-      const financeHeaderY = drawSectionHeader(doc, "Cost Breakdown", y, {
-        x: rightColX,
-        width: leftColW,
-        icon: "money",
-      });
-      const financialCategories = buildFinancialCategories(costs, costMode);
-      let financeY = drawFinancialSummary(
-        doc,
-        financialCategories,
-        costMode ? costs.grandTotal + costs.totalLeaseRevenue : costs.grandTotalCompanyCost,
-        costMode ? 0 : costs.totalClientPartsCost + costs.totalClientServicesCost,
-        financeHeaderY,
-        costMode ? { grandTotalLabel: "Total Cost" } : undefined,
-      );
+      let financeY = y;
+      if (!clientMode) {
+        const financeHeaderY = drawSectionHeader(doc, "Cost Breakdown", y, {
+          x: rightColX,
+          width: leftColW,
+          icon: "money",
+        });
+        const financialCategories = buildFinancialCategories(costs, costMode);
+        financeY = drawFinancialSummary(
+          doc,
+          financialCategories,
+          costMode ? costs.grandTotal + costs.totalLeaseRevenue : costs.grandTotalCompanyCost,
+          costMode ? 0 : costs.totalClientPartsCost + costs.totalClientServicesCost,
+          financeHeaderY,
+          costMode ? { grandTotalLabel: "Total Cost" } : undefined,
+        );
+      }
 
       let sideY = y;
+      const contentW = clientMode ? pageWidth - margin * 2 : leftColW;
 
-      if (zoneBreakdown.some((z) => z.visits > 0)) {
+      if (!clientMode && zoneBreakdown.some((z) => z.visits > 0)) {
         sideY = checkPageBreak(doc, sideY, 35);
         sideY = drawSectionHeader(doc, "Visit Fees by Zone", sideY, { x: margin, width: leftColW, icon: "location" });
         sideY = drawZoneTable(doc, zoneBreakdown as ZoneRow[], costs.totalVisitFees, sideY);
       }
 
-      if (machineSummary.length > 0) {
+      if (!clientMode && machineSummary.length > 0) {
         sideY = checkPageBreak(doc, sideY, 35);
         sideY = drawSectionHeader(doc, "Machine Fleet", sideY, { x: margin, width: leftColW, icon: "coffee" });
         const machines: MachineInfo[] = machineSummary.map((m) => ({
@@ -876,53 +954,55 @@ export const generateInternalCompanyReport = async (
 
       if (companyInfo.length > 0) {
         sideY = checkPageBreak(doc, sideY, 40);
-        sideY = drawSectionHeader(doc, "Company Information", sideY, { x: margin, width: leftColW, icon: "home" });
-        sideY = drawInfoBox(doc, companyInfo, sideY);
+        sideY = drawSectionHeader(doc, "Company Information", sideY, { x: margin, width: contentW, icon: "home" });
+        sideY = drawInfoBox(doc, companyInfo, sideY, { x: margin, width: contentW });
       }
 
       return Math.max(financeY, sideY) + 8;
     },
   });
 
-  // Branch Cost Comparison
+  // Branch Cost Comparison — costs only, so it is omitted entirely for clients
   const branchCostMap = new Map<string, number>();
   reportData.branches.forEach((b) => {
     const c = aggregateBranchCosts(b, partsList, servicesList);
     branchCostMap.set(b.branchName || "Branch", c.grandTotal + c.totalLeaseRevenue);
   });
 
-  engine.addSection(
-    "Branch Comparison",
-    (section) => {
-      section.addRepeater(
-        branchSummaries,
-        40 + branchSummaries.length * 8,
-        (doc, y) => drawEmptyMessage(doc, y, "No branches to compare", margin),
-        (doc, y, items) => {
-          const tableW = pageWidth - margin * 2;
-          const colWidths = [tableW * 0.22, tableW * 0.13, tableW * 0.15, tableW * 0.15, tableW * 0.15, tableW * 0.2];
-          const x = margin;
+  if (!clientMode) {
+    engine.addSection(
+      "Branch Comparison",
+      (section) => {
+        section.addRepeater(
+          branchSummaries,
+          40 + branchSummaries.length * 8,
+          (doc, y) => drawEmptyMessage(doc, y, "No branches to compare", margin),
+          (doc, y, items) => {
+            const tableW = pageWidth - margin * 2;
+            const colWidths = [tableW * 0.22, tableW * 0.13, tableW * 0.15, tableW * 0.15, tableW * 0.15, tableW * 0.2];
+            const x = margin;
 
-          let nextY = drawTableHeader(doc, ["Branch", "Visits", "Visit Fees", "Parts", "Services", costMode ? "Total Cost" : "Net Cost"], colWidths, x, y, tableW);
+            let nextY = drawTableHeader(doc, ["Branch", "Visits", "Visit Fees", "Parts", "Services", costMode ? "Total Cost" : "Net Cost"], colWidths, x, y, tableW);
 
-          items.forEach((bs, i) => {
-            nextY = checkPageBreak(doc, nextY, 8);
-            nextY = drawTableRow(
-              doc,
-              [rtl(bs.branchName), formatEnNumber(bs.visitCount), formatPdfCurrencyEn(bs.visitFees), formatPdfCurrencyEn(bs.partsCost), formatPdfCurrencyEn(bs.servicesCost), formatPdfCurrencyEn(costMode ? (branchCostMap.get(bs.branchName) ?? bs.netCost) : bs.netCost)],
-              colWidths, x, nextY, tableW, i % 2 === 1,
-              ["left", "center", "right", "right", "right", "right"],
-            );
-          });
+            items.forEach((bs, i) => {
+              nextY = checkPageBreak(doc, nextY, 8);
+              nextY = drawTableRow(
+                doc,
+                [rtl(bs.branchName), formatEnNumber(bs.visitCount), formatPdfCurrencyEn(bs.visitFees), formatPdfCurrencyEn(bs.partsCost), formatPdfCurrencyEn(bs.servicesCost), formatPdfCurrencyEn(costMode ? (branchCostMap.get(bs.branchName) ?? bs.netCost) : bs.netCost)],
+                colWidths, x, nextY, tableW, i % 2 === 1,
+                ["left", "center", "right", "right", "right", "right"],
+              );
+            });
 
-          return nextY + 10;
-        },
-      );
-    },
-    drawSectionHeader,
-  );
+            return nextY + 10;
+          },
+        );
+      },
+      drawSectionHeader,
+    );
+  }
 
-  // Technician Performance
+  // Technician Performance — 6 columns (5 in client mode: Total Cost dropped)
   engine.addSection(
     "Technician Performance",
     (section) => {
@@ -932,10 +1012,14 @@ export const generateInternalCompanyReport = async (
         (doc, y) => drawEmptyMessage(doc, y, "No technician data", margin),
         (doc, y, items) => {
           const tableW = pageWidth - margin * 2;
-          const colWidths = [tableW * 0.22, tableW * 0.12, tableW * 0.14, tableW * 0.14, tableW * 0.16, tableW * 0.22];
+          const colWidths = clientMode
+            ? [tableW * 0.26, tableW * 0.14, tableW * 0.16, tableW * 0.16, tableW * 0.28]
+            : [tableW * 0.22, tableW * 0.12, tableW * 0.14, tableW * 0.14, tableW * 0.16, tableW * 0.22];
           const x = margin;
 
-          let nextY = drawTableHeader(doc, ["Technician", "Visits", "Avg Rating", "Parts Used", "Total Cost", "Zones"], colWidths, x, y, tableW);
+          let nextY = drawTableHeader(doc, clientMode
+            ? ["Technician", "Visits", "Avg Rating", "Parts Used", "Zones"]
+            : ["Technician", "Visits", "Avg Rating", "Parts Used", "Total Cost", "Zones"], colWidths, x, y, tableW);
 
           const techMap = new Map<string, { totalCost: number; zones: Record<string, number> }>();
           allFlatRecords.forEach((r) => {
@@ -955,11 +1039,17 @@ export const generateInternalCompanyReport = async (
               .map(([zone, count]) => `${rtl(zone)} (${formatEnNumber(count)})`)
               .join(" · ") || "—";
             nextY = checkPageBreak(doc, nextY, 8);
+            const cells = clientMode
+              ? [rtl(t.name), formatEnNumber(t.visits), t.avgRating > 0 ? `★ ${formatEnNumber(t.avgRating)}/5` : "-", formatEnNumber(t.partsUsed), zonesStr]
+              : [rtl(t.name), formatEnNumber(t.visits), t.avgRating > 0 ? `★ ${formatEnNumber(t.avgRating)}/5` : "-", formatEnNumber(t.partsUsed), formatPdfCurrencyEn(extra.totalCost), zonesStr];
+            const aligns: Array<"left" | "center" | "right"> = clientMode
+              ? ["left", "center", "center", "center", "right"]
+              : ["left", "center", "center", "center", "right", "right"];
             nextY = drawTableRow(
               doc,
-              [rtl(t.name), formatEnNumber(t.visits), t.avgRating > 0 ? `★ ${formatEnNumber(t.avgRating)}/5` : "-", formatEnNumber(t.partsUsed), formatPdfCurrencyEn(extra.totalCost), zonesStr],
+              cells,
               colWidths, x, nextY, tableW, i % 2 === 1,
-              ["left", "center", "center", "center", "right", "right"],
+              aligns,
             );
           });
 
@@ -1020,61 +1110,67 @@ export const generateInternalCompanyReport = async (
         (doc, y) => drawEmptyMessage(doc, y, "No maintenance records", margin),
         (doc, y, items) => {
           const recentRecords = items.slice(-20);
-          return renderMaintenanceHistoryTable(doc, recentRecords, y, hideEmpty, !costMode);
+          return renderMaintenanceHistoryTable(doc, recentRecords, y, hideEmpty, !costMode, clientMode);
         },
       );
     },
     drawSectionHeader,
   );
 
-  // Machine Logistics — independent standalone section (with costs)
+  // Machine Logistics — independent standalone section (costs shown except in
+  // client mode, which reuses the cost-free client table in brand colors)
   if (!hideEmpty || logisticsOps.length > 0) {
     engine.addSection(
       "Logistics — Machine Transport & Replacement",
       (section) => {
-        // Cost summary block
-        section.addBlock({
-          estimatedHeight: logisticsCosts.totalLogisticsCost > 0 ? 35 : 15,
-          draw: (doc, y) => {
-            if (logisticsCosts.totalLogisticsCost <= 0) {
-              return drawEmptyMessage(doc, y, "No logistics costs", margin);
-            }
-            const cardW = (pageWidth - margin * 2 - 24) / 5;
-            const cardH = 22;
-            const cards: Array<{ label: string; value: string; color: [number, number, number]; icon: PdfIconName }> = [
-              { label: "Machine Rental", value: formatPdfCurrencyEn(logisticsCosts.totalRentalCost), color: BRAND.primary, icon: "calendar" },
-              { label: "Transport — Pickup", value: formatPdfCurrencyEn(logisticsCosts.totalPickupCost), color: BRAND.primaryLight, icon: "truck" },
-              { label: "Transport — Return", value: formatPdfCurrencyEn(logisticsCosts.totalReturnCost), color: BRAND.info, icon: "truck" },
-              { label: "Maintenance Cost", value: formatPdfCurrencyEn(logisticsCosts.totalMaintenanceCost), color: BRAND.warning, icon: "wrench" },
-              { label: "Logistics Total", value: formatPdfCurrencyEn(logisticsCosts.totalLogisticsCost), color: BRAND.header, icon: "money" },
-            ];
-            cards.forEach((card, i) => {
-              const cx = margin + i * (cardW + 6);
-              doc.setFillColor(...BRAND.white);
-              doc.setDrawColor(...BRAND.hairline);
-              doc.roundedRect(cx, y, cardW, cardH, 2, 2, "FD");
-              doc.setFillColor(...card.color);
-              doc.rect(cx, y, cardW, 3, "F");
-              drawIconBadge(doc, cx + cardW - 7, y + 10, card.icon, card.color, 2.4);
-              doc.setFont("Amiri", "bold");
-              doc.setFontSize(12);
-              doc.setTextColor(...BRAND.text);
-              pdfText(doc, card.value, cx + 4, y + 13, { align: "left" });
-              doc.setFont("Amiri", "bold");
-              doc.setFontSize(7);
-              doc.setTextColor(...BRAND.textMuted);
-              pdfText(doc, card.label, cx + 4, y + 18, { align: "left" });
-            });
-            return y + cardH + 8;
-          },
-        });
+        // Cost summary block — internal/cost reports only
+        if (!clientMode) {
+          section.addBlock({
+            estimatedHeight: logisticsCosts.totalLogisticsCost > 0 ? 35 : 15,
+            draw: (doc, y) => {
+              if (logisticsCosts.totalLogisticsCost <= 0) {
+                return drawEmptyMessage(doc, y, "No logistics costs", margin);
+              }
+              const cardW = (pageWidth - margin * 2 - 24) / 5;
+              const cardH = 22;
+              const cards: Array<{ label: string; value: string; color: [number, number, number]; icon: PdfIconName }> = [
+                { label: "Machine Rental", value: formatPdfCurrencyEn(logisticsCosts.totalRentalCost), color: BRAND.primary, icon: "calendar" },
+                { label: "Transport — Pickup", value: formatPdfCurrencyEn(logisticsCosts.totalPickupCost), color: BRAND.primaryLight, icon: "truck" },
+                { label: "Transport — Return", value: formatPdfCurrencyEn(logisticsCosts.totalReturnCost), color: BRAND.info, icon: "truck" },
+                { label: "Maintenance Cost", value: formatPdfCurrencyEn(logisticsCosts.totalMaintenanceCost), color: BRAND.warning, icon: "wrench" },
+                { label: "Logistics Total", value: formatPdfCurrencyEn(logisticsCosts.totalLogisticsCost), color: BRAND.header, icon: "money" },
+              ];
+              cards.forEach((card, i) => {
+                const cx = margin + i * (cardW + 6);
+                doc.setFillColor(...BRAND.white);
+                doc.setDrawColor(...BRAND.hairline);
+                doc.roundedRect(cx, y, cardW, cardH, 2, 2, "FD");
+                doc.setFillColor(...card.color);
+                doc.rect(cx, y, cardW, 3, "F");
+                drawIconBadge(doc, cx + cardW - 7, y + 10, card.icon, card.color, 2.4);
+                doc.setFont("Amiri", "bold");
+                doc.setFontSize(12);
+                doc.setTextColor(...BRAND.text);
+                pdfText(doc, card.value, cx + 4, y + 13, { align: "left" });
+                doc.setFont("Amiri", "bold");
+                doc.setFontSize(7);
+                doc.setTextColor(...BRAND.textMuted);
+                pdfText(doc, card.label, cx + 4, y + 18, { align: "left" });
+              });
+              return y + cardH + 8;
+            },
+          });
+        }
 
-        // Operations table
+        // Operations table — cost-free client table in brand colors for the
+        // client report (same columns/sections, no financial figures)
         section.addRepeater(
           logisticsOps,
           45 + logisticsOps.length * 12,
           (doc, y) => drawEmptyMessage(doc, y, "No logistics operations", margin),
-          (doc, y, items) => drawLogisticsOperationsTable(doc, items, y, margin),
+          (doc, y, items) => clientMode
+            ? drawClientLogisticsTable(doc, items, y, margin, { includeCosts: false, headerColor: BRAND.primary })
+            : drawLogisticsOperationsTable(doc, items, y, margin),
         );
       },
       drawSectionHeader,
@@ -1092,15 +1188,13 @@ export const generateInternalCompanyReport = async (
             return drawEmptyMessage(doc, y, "No parts used", margin);
           }
           const colW = pageWidth - margin * 2;
-          const cw = [colW * 0.5, colW * 0.25, colW * 0.25];
-          let py = drawTableHeader(doc, ["Part", "Qty", "Cost"], cw, margin, y, colW);
+          const cw = clientMode ? [colW * 0.6, colW * 0.4] : [colW * 0.5, colW * 0.25, colW * 0.25];
+          let py = drawTableHeader(doc, clientMode ? ["Part", "Qty"] : ["Part", "Qty", "Cost"], cw, margin, y, colW);
           allParts.forEach((p, i) => {
             py = checkPageBreak(doc, py, 8);
-            py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatPdfCurrencyEn(p.totalCost)], cw, margin, py, colW, i % 2 === 1, [
-              "left",
-              "center",
-              "right",
-            ]);
+            py = drawTableRow(doc, clientMode
+              ? [rtl(p.name), formatEnNumber(p.count)]
+              : [rtl(p.name), formatEnNumber(p.count), formatPdfCurrencyEn(p.totalCost)], cw, margin, py, colW, i % 2 === 1, clientMode ? ["left", "center"] : ["left", "center", "right"]);
           });
           return py + 10;
         },
@@ -1114,6 +1208,15 @@ export const generateInternalCompanyReport = async (
 
   return doc;
 };
+
+/**
+ * Client Report for the whole company: the same layout, colors and style as
+ * the cost report but with every cost figure removed.
+ */
+export const generateClientCompanyReport = async (
+  data: FormData & { created_at?: string },
+  options: InternalReportOptions = {},
+): Promise<jsPDF> => generateInternalCompanyReport(data, { ...options, clientMode: true });
 
 /**
  * Cost Report for the whole company: full costs like the internal report but
