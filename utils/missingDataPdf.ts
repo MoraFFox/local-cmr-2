@@ -4,7 +4,7 @@ import { FormData, Branch, Contact, Barista, ClientBarista } from "../types";
 import { logger } from "./logger";
 import jsPDF from "jspdf";
 import { loadFonts, type LogoAssets } from "./pdfGenerator";
-import { reshapeArabic } from "./arabicText";
+import { configureArabicBidi } from "./pdfTheme";
 import {
   PDFDocument,
   PDFTextField,
@@ -85,10 +85,10 @@ const addTextField = (
   doc.setFontSize(7);
   doc.setFont("Amiri", "bold");
   doc.setTextColor(...COLORS.ink);
-  doc.text(reshapeArabic(label, true), rightEdge, labelY, { align: "right" });
+  doc.text(label, rightEdge, labelY, { align: "right" });
 
   if (required) {
-    const labelWidth = doc.getTextWidth(reshapeArabic(label, true));
+    const labelWidth = doc.getTextWidth(label);
     doc.setTextColor(182, 30, 36);
     doc.text("*", rightEdge - labelWidth - 1, labelY);
     doc.setTextColor(...COLORS.ink);
@@ -128,7 +128,7 @@ const addBinaryCheckboxField = (
   doc.setFontSize(7);
   doc.setFont("Amiri", "bold");
   doc.setTextColor(...COLORS.ink);
-  doc.text(reshapeArabic(label, true), rightEdge, labelY, { align: "right" });
+  doc.text(label, rightEdge, labelY, { align: "right" });
 
   const boxSize = 4;
   const startY = layout.y + 2;
@@ -152,8 +152,7 @@ const addBinaryCheckboxField = (
     doc.setFont("Amiri", "normal");
     doc.setFontSize(8);
     doc.setTextColor(...COLORS.ink);
-    const optionText = reshapeArabic(option, true);
-    doc.text(optionText, x - 2, startY + boxSize - 0.5, { align: "right" });
+    doc.text(option, x - 2, startY + boxSize - 0.5, { align: "right" });
   });
 
   return startY + boxSize + 4;
@@ -171,7 +170,7 @@ const addNumberField = (
   doc.setFontSize(7);
   doc.setFont("Amiri", "bold");
   doc.setTextColor(...COLORS.ink);
-  doc.text(reshapeArabic(label, true), rightEdge, labelY, { align: "right" });
+  doc.text(label, rightEdge, labelY, { align: "right" });
 
   const fieldY = layout.y + 2;
   const fieldHeight = 6;
@@ -278,13 +277,13 @@ const drawHeader = async (doc: jsPDF, data: FormData, pageWidth: number, margin:
   doc.setFontSize(13);
   doc.setFont("Amiri", "bold");
   doc.setTextColor(...COLORS.cream);
-  doc.text(reshapeArabic("طلب استكمال بيانات", true), textBlockRightEdge, 14, { align: "right" });
+  doc.text("طلب استكمال بيانات", textBlockRightEdge, 14, { align: "right" });
 
   // Company name
   doc.setFontSize(9);
   doc.setFont("Amiri", "normal");
   doc.setTextColor(...COLORS.cream);
-  doc.text(reshapeArabic(`الشركة: ${data.companyName || "غير مسماة"}`, true), textBlockRightEdge, 19, { align: "right" });
+  doc.text(`الشركة: ${data.companyName || "غير مسماة"}`, textBlockRightEdge, 19, { align: "right" });
 
   return headerHeight + 5;
 };
@@ -323,7 +322,7 @@ const drawSectionHeader = (doc: jsPDF, title: string, x: number, y: number, page
   doc.setFontSize(9);
   doc.setFont("Amiri", "bold");
   doc.setTextColor(...COLORS.espresso);
-  doc.text(reshapeArabic(title, true), pageWidth - x - 4, y + 4.5, { align: "right" });
+  doc.text(title, pageWidth - x - 4, y + 4.5, { align: "right" });
 
   return y + 10;
 };
@@ -339,7 +338,7 @@ const drawInstructionsBox = (doc: jsPDF, x: number, y: number, pageWidth: number
   doc.setFontSize(7);
   doc.setFont("Amiri", "bold");
   doc.setTextColor(...COLORS.espresso);
-  const instructionText = reshapeArabic("تعليمات: يرجى ملء الحقول التفاعلية التالية بالبيانات المطلوبة وإعادة إرسال الملف.", true);
+  const instructionText = "تعليمات: يرجى ملء الحقول التفاعلية التالية بالبيانات المطلوبة وإعادة إرسال الملف.";
   doc.text(instructionText, pageWidth - margin - 2, y + 4, { align: "right" });
 
   return y + 9;
@@ -850,6 +849,7 @@ export const generateMissingDataPDF = async (
   }
 
   const doc = new jsPDF();
+  configureArabicBidi(doc);
 
   if (!(jsPDF as any).AcroForm?.TextField || !(jsPDF as any).AcroForm?.CheckBox) {
     throw new Error("AcroForm support is not available in this jsPDF build.");
@@ -900,7 +900,7 @@ export const generateMissingDataPDF = async (
     doc.setFont("Amiri", "normal");
     doc.setFontSize(8);
     doc.setTextColor(...COLORS.cream);
-    doc.text(reshapeArabic(`صفحة ${i} من ${pageCount}`, true), pageWidth - margin, doc.internal.pageSize.getHeight() - 5, { align: "right" });
+    doc.text(`صفحة ${i} من ${pageCount}`, pageWidth - margin, doc.internal.pageSize.getHeight() - 5, { align: "right" });
   }
 
   return doc;

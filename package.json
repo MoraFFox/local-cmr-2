@@ -20,6 +20,7 @@
     "@heroicons/react": "^2.2.0",
     "@supabase/supabase-js": "2.44.4",
     "arabic-persian-reshaper": "^1.0.1",
+    "bidi-js": "^1.0.3",
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.8.4",
     "liquid-glass-react": "^1.1.1",

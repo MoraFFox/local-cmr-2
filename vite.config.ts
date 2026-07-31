@@ -91,6 +91,17 @@ export default defineConfig(({ mode }) => {
           // FIX: __dirname is not available in ES modules. Use import.meta.url to get the current file's directory.
           '@': path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.'),
           'react': 'react', // Force single React instance to prevent hooks context errors
+          // bidi-js (1.0.3 is the latest published on npm — no fixed release
+          // exists upstream) ships a broken ESM build: dist/bidi.mjs is
+          // CJS-style with only a default export, so Vite's dep optimizer loses
+          // the named exports (e.g. getEmbeddingLevels, used directly by
+          // utils/arabicText.ts) → 'does not provide an export named X' at
+          // runtime. Alias to the CJS build, which exposes them properly.
+          // Keep this until upstream publishes a fixed ESM build — note that
+          // future `bun install`/upgrade runs will keep resolving 1.0.3 (the
+          // npm "latest"), so do not retry the upgrade. Remove this alias only
+          // if bidi-js ever ships a corrected ESM build.
+          'bidi-js': 'bidi-js/dist/bidi.js',
         }
       },
       test: {
