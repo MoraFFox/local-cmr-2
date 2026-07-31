@@ -372,7 +372,7 @@ export const en: Translations = {
       maintenanceRecords: 'Maintenance Records',
       phoneNumbers: 'Phone Numbers',
       hasBranches: 'Does the company have multiple branches?',
-      usesOurMachines: 'Do they use our machines?',
+      usesOurMachines: 'Machine Status',
       machineAcquired: 'How was the machine acquired?',
       acquired: {
         leased: 'Leased',

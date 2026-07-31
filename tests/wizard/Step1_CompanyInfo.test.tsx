@@ -51,7 +51,7 @@ describe("Step1_CompanyInfo", () => {
       />,
     );
 
-    expect(screen.getByText("هل يستخدمون ماكيناتنا؟")).toBeInTheDocument();
+    expect(screen.getByText("حالة الماكينة")).toBeInTheDocument();
   });
 
   it("hides machine ownership when hasBranches is true", () => {
@@ -64,7 +64,7 @@ describe("Step1_CompanyInfo", () => {
       />,
     );
 
-    expect(screen.queryByText("هل يستخدمون ماكيناتنا؟")).not.toBeInTheDocument();
+    expect(screen.queryByText("حالة الماكينة")).not.toBeInTheDocument();
   });
 
   it("shows ownership type radios when usesOurMachines is true", () => {
@@ -146,6 +146,86 @@ describe("Step1_CompanyInfo", () => {
     );
 
     expect(screen.queryByLabelText("قيمة الإيجار اليومي (ج.م)")).not.toBeInTheDocument();
+  });
+
+  it("shows machine type select with fixed options and saved types", () => {
+    const actions = createMockActions();
+    render(
+      <Step1_CompanyInfo
+        formData={createFormData({
+          hasBranches: false,
+          usesOurMachines: true,
+          machines: [createMachine()],
+        })}
+        actions={actions}
+        newlyAddedId={1}
+        allKnownMachineTypes={["جرايندر", "Delonghi Magnifica S", "ماكينة"]}
+      />,
+    );
+
+    // The type is now a select, not a free-text input
+    const select = screen.getByRole("combobox", { name: "نوع الماكينة (اختياري)" });
+    expect(select).toBeInTheDocument();
+
+    // Fixed options + saved types appear; picking a value calls handleListItemChange
+    expect(screen.getByRole("option", { name: "ماكينة" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "جرايندر" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Delonghi Magnifica S" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "أخرى (اكتب نوع جديد)" })).toBeInTheDocument();
+
+    fireEvent.change(select, { target: { value: "Delonghi Magnifica S" } });
+    expect(actions.handleListItemChange).toHaveBeenCalledWith(
+      expect.objectContaining({ target: expect.objectContaining({ name: "machineType", value: "Delonghi Magnifica S" }) }),
+      "machines",
+      0,
+    );
+  });
+
+  it("reveals a free-text input when 'أخرى' is picked for machine type", () => {
+    const actions = createMockActions();
+    render(
+      <Step1_CompanyInfo
+        formData={createFormData({
+          hasBranches: false,
+          usesOurMachines: true,
+          machines: [createMachine()],
+        })}
+        actions={actions}
+        newlyAddedId={1}
+      />,
+    );
+
+    const select = screen.getByRole("combobox", { name: "نوع الماكينة (اختياري)" });
+    fireEvent.change(select, { target: { value: "other" } });
+
+    // Custom type input appears; typing stores it as machineType
+    const customInput = screen.getByPlaceholderText("اكتب نوع الماكينة الجديد...");
+    fireEvent.change(customInput, { target: { value: "Rancilio Silvia" } });
+    expect(actions.handleListItemChange).toHaveBeenCalledWith(
+      expect.objectContaining({ target: expect.objectContaining({ name: "machineType", value: "Rancilio Silvia" }) }),
+      "machines",
+      0,
+    );
+  });
+
+  it("pre-fills the custom type input when editing a record with a custom type", () => {
+    const actions = createMockActions();
+    render(
+      <Step1_CompanyInfo
+        formData={createFormData({
+          hasBranches: false,
+          usesOurMachines: true,
+          machines: [createMachine({ machineType: "Rancilio Silvia" })],
+        })}
+        actions={actions}
+        newlyAddedId={1}
+        allKnownMachineTypes={["ماكينة", "جرايندر"]}
+      />,
+    );
+
+    const select = screen.getByRole("combobox", { name: "نوع الماكينة (اختياري)" });
+    expect(select).toHaveValue("other");
+    expect(screen.getByDisplayValue("Rancilio Silvia")).toBeInTheDocument();
   });
 
   it("passes formData values to inputs", () => {

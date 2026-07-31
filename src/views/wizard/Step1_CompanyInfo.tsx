@@ -20,6 +20,7 @@ import {
   WrenchScrewdriverIcon,
 } from "@heroicons/react/24/outline";
 import { ContactsSection } from "./ContactsSection";
+import MachineTypeField from "./MachineTypeField";
 import type { WizardStepProps } from "./types";
 import { useT } from "../../../utils/i18n";
 
@@ -116,7 +117,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
       {formData.hasBranches === false && (
         <div className="pt-6 mt-6 border-t border-hairline space-y-6">
           <RadioGroup
-            label="هل يستخدمون ماكيناتنا؟"
+            label="حالة الماكينة"
             name="usesOurMachines"
             value={formData.usesOurMachines}
             onChange={(val) => actions.handleRadioChange("usesOurMachines", val)}
@@ -154,14 +155,17 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
                         suggestions={allKnownMachineNames}
                         helpText={t.tooltips.machineName}
                       />
-                      <TextInput
-                        label="نوع الماكينة (اختياري)"
-                        name="machineType"
-                        data-field={`company.machines.${idx}.machineType`}
+                      <MachineTypeField
                         value={machine.machineType || ""}
-                        onChange={(e) => actions.handleListItemChange(e, "machines", idx)}
-                        placeholder="مثال: Linea Classic"
-                        suggestions={allKnownMachineTypes}
+                        onChange={(v) =>
+                          actions.handleListItemChange(
+                            { target: { name: "machineType", value: v } } as React.ChangeEvent<HTMLInputElement>,
+                            "machines",
+                            idx,
+                          )
+                        }
+                        knownTypes={allKnownMachineTypes}
+                        data-field={`company.machines.${idx}.machineType`}
                         helpText={t.tooltips.machineType}
                       />
                       <TextInput

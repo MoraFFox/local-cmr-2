@@ -378,7 +378,7 @@ export const ar = {
       phoneNumbers: 'أرقام الهواتف',
       // Radio groups
       hasBranches: 'هل لدى الشركة عدة فروع؟',
-      usesOurMachines: 'هل يستخدمون ماكيناتنا؟',
+      usesOurMachines: 'حالة الماكينة',
       machineAcquired: 'كيف تم الحصول على الماكينة؟',
       acquired: { leased: 'إيجار', consumption: 'مقابل الاستهلاك' },
       yes: 'نعم',
