@@ -173,7 +173,7 @@ async function svgToPngDataUrl(svgUrl: string): Promise<LogoImageData | null> {
 /**
  * Load a remote image and convert to base64 data URL
  */
-async function loadImageAsBase64(url: string): Promise<string | null> {
+export async function loadImageAsBase64(url: string): Promise<string | null> {
   // Check cache first
   if (imageCache.has(url)) {
     return imageCache.get(url)!;

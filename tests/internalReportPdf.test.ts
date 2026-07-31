@@ -758,10 +758,16 @@ describe("internal report PDF generation", () => {
     expect(branchDrawn).toContain("Logistics — Machine Transport & Replacement");
     expect(branchDrawn).toContain("Most Used Parts");
 
-    // Info: parts/services bullets keep payer labels but NO prices or totals.
-    expect(branchDrawn).toContain("• 2× Pump A (Company)");
-    expect(branchDrawn).toContain("• 1× Gasket B (Client)");
-    expect(branchDrawn).not.toContain("• 2× Pump A — 200 EGP");
+    // Info: client mode renders each visit as its own detail block (Visit
+    // Summary, Machines, Issues, Parts Replaced, Services Performed tables),
+    // with NO prices or totals anywhere.
+    expect(branchDrawn).toContain("Visit Summary");
+    expect(branchDrawn).toContain("Parts Replaced");
+    expect(branchDrawn).toContain("Services Performed");
+    expect(branchDrawn).toContain("Pump A");
+    expect(branchDrawn).toContain("Gasket B");
+    expect(branchDrawn).toContain("Service X");
+    expect(branchDrawn).not.toContain("200 EGP");
     expect(branchDrawn).not.toContain("Total: 250 EGP");
 
     // No cost figures or cost sections anywhere.
@@ -789,6 +795,16 @@ describe("internal report PDF generation", () => {
     expect(companyDrawn).not.toContain("Record Total");
     expect(companyDrawn).not.toContain("Daily Lease");
 
+    // Client company report keeps an overview of EACH branch (what was done
+    // there) in the new style — info box, visit summary, contacts, staff and
+    // the branch's own maintenance log.
+    expect(companyDrawn).toContain("Branch — Client Probe");
+    expect(companyDrawn).toContain("Branch Information");
+    expect(companyDrawn).toContain("Visit Summary");
+    expect(companyDrawn).toContain("Maintenance Log");
+    expect(companyDrawn).toContain("Assigned Staff");
+    expect(companyDrawn).toContain("Contacts");
+
     // Differential control: the cost report on the SAME data shows all costs.
     drawnStrings.length = 0;
     await generateCostBranchReport("Probe Co", branch, { logisticsOperations });
@@ -798,6 +814,59 @@ describe("internal report PDF generation", () => {
     expect(costDrawn).toContain("• 2× Pump A — 200 EGP");
     expect(costDrawn).toContain("Total Cost");
     expect(costDrawn).toContain("Machine Rental");
+  }, 30000);
+
+  it("branch client report renders per-record detail blocks and photos", async () => {
+    // The client branch report renders each visit as its own detail block
+    // (Visit Summary + Machines/Issues/Parts/Services + photos) — the legacy
+    // branch PDF's per-record treatment in the new brand style, cost-free.
+    const base = generateMockWizardData();
+    const record: MaintenanceRecord = {
+      id: "client-detail-1",
+      maintenanceDate: "2026-07-15",
+      type: "scheduled",
+      isLogisticsVisit: false,
+      hadProblem: true,
+      partsWereReplaced: true,
+      problemSolved: true,
+      partsReplaced: [{ name: "Pump A", count: 2, cost: 100 }],
+      paidBy: "company",
+      baristaName: "Tech 1",
+      visitZone: "cairo",
+      servicesPerformed: [{ name: "Service X", count: 3, cost: 20 }],
+      followUpVisits: [],
+      supervisors: [],
+      dailyLeaseCost: 0,
+      problems: ["Leak"],
+      recommendations: "Replace gasket next visit",
+      notes: "Client complained of noise",
+      photos: [{ url: "https://placehold.co/600x400?text=Before", type: "before" as const }],
+    };
+    const branch: Branch = {
+      ...base.branches[0],
+      branchName: "Detail Probe",
+      maintenanceHistory: [record],
+      machines: [],
+    };
+
+    drawnStrings.length = 0;
+    const doc = await generateClientBranchReport("Probe Co", branch, {});
+    expect(doc.output("arraybuffer").byteLength).toBeGreaterThan(1000);
+    const drawn = drawnStrings.join("\n");
+
+    // Per-record detail blocks in the new style, no costs.
+    expect(drawn).toContain("Visit Summary");
+    expect(drawn).toContain("Parts Replaced");
+    expect(drawn).toContain("Services Performed");
+    expect(drawn).toContain("Recommendations");
+    expect(drawn).toContain("Notes");
+    expect(drawn).toContain("Pump A");
+    expect(drawn).not.toContain("EGP");
+    expect(drawn).not.toContain("Cost Breakdown");
+
+    // Photos render (placeholder when the image can't be fetched in tests).
+    expect(drawn).toContain("Photos");
+    expect(drawn).toContain("Before Photos:");
   }, 30000);
 
   it("visit reports render follow-ups, photos and empty branches without throwing", async () => {

@@ -2,9 +2,9 @@
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { FormData, MaintenanceRecord, Branch, LogisticsOperation } from "../types";
+import { FormData, MaintenanceRecord, Branch, LogisticsOperation, MaintenancePhoto } from "../types";
 import { DateRange, formatDateRangeLabelEn, getReportRecords } from "./dateRangeFilter";
-import { loadFonts, flattenMaintenanceRecords, renderPhotosInPDF } from "./pdfGenerator";
+import { loadFonts, flattenMaintenanceRecords, renderPhotosInPDF, loadImageAsBase64 } from "./pdfGenerator";
 import { partsList, servicesList } from "../constants";
 import {
   aggregateCosts,
@@ -417,6 +417,273 @@ const renderMaintenanceHistoryTable = (
   return (doc as any).lastAutoTable.finalY + 8;
 };
 
+// ── Client-mode helpers: per-record detail blocks + per-branch overviews ──
+
+/**
+ * Preload every maintenance photo referenced by the given records into a
+ * url → dataURL map. The layout engine draws synchronously, so client-mode
+ * record blocks must read photos from this cache instead of fetching.
+ */
+const preloadPhotoDataUrls = async (records: MaintenanceRecord[]): Promise<Map<string, string>> => {
+  const cache = new Map<string, string>();
+  const urls = new Set<string>();
+  const collect = (recs: MaintenanceRecord[]) => {
+    recs.forEach((r) => {
+      (r.photos || []).forEach((p) => urls.add(p.url));
+      if (r.followUpVisits) collect(r.followUpVisits);
+    });
+  };
+  collect(records);
+  await Promise.all(
+    [...urls].map(async (url) => {
+      try {
+        const data = await loadImageAsBase64(url);
+        if (data) cache.set(url, data);
+      } catch {
+        // Photo failed to load — the sync drawer renders a placeholder.
+      }
+    }),
+  );
+  return cache;
+};
+
+/**
+ * Synchronous photo thumbnails (grouped by before/after/legacy) that read
+ * from a preloaded url → dataURL cache. Failed images draw a placeholder box.
+ */
+const drawPhotosSync = (
+  doc: jsPDF,
+  photos: MaintenancePhoto[],
+  startY: number,
+  pageWidth: number,
+  margin: number,
+  cache: Map<string, string>,
+): number => {
+  if (!photos || photos.length === 0) return startY;
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const types: Array<"before" | "after" | "legacy"> = ["before", "after", "legacy"];
+  let currentY = startY;
+
+  for (const type of types) {
+    const filtered = photos.filter((p) => p.type === type);
+    if (filtered.length === 0) continue;
+
+    doc.setFont("Amiri", "bold");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...BRAND.text);
+    pdfText(doc, `${type.charAt(0).toUpperCase()}${type.slice(1)} Photos:`, margin, currentY);
+    currentY += 4;
+
+    const thumbSize = 20;
+    const spacing = 4;
+    let currentX = margin;
+
+    for (const photo of filtered) {
+      if (currentY + thumbSize > pageHeight - margin) {
+        doc.addPage();
+        currentY = margin;
+      }
+      const data = cache.get(photo.url);
+      if (data) {
+        try {
+          // jsPDF's addImage needs an explicit format; derive it from the data
+          // URL so a successful photo load embeds (never hits the legacy
+          // overload with a non-string format, which would crash). Default to
+          // PNG — jsPDF's most reliable decoder — for any unknown type.
+          const imgFormat =
+            data.startsWith("data:image/jpeg") || data.startsWith("data:image/jpg")
+              ? "JPEG"
+              : "PNG";
+          doc.addImage(data, imgFormat, currentX, currentY, thumbSize, thumbSize);
+        } catch {
+          doc.setFillColor(240, 240, 240);
+          doc.setDrawColor(200, 200, 200);
+          doc.rect(currentX, currentY, thumbSize, thumbSize, "FD");
+        }
+      } else {
+        doc.setFillColor(240, 240, 240);
+        doc.setDrawColor(200, 200, 200);
+        doc.rect(currentX, currentY, thumbSize, thumbSize, "FD");
+      }
+      currentX += thumbSize + spacing;
+      if (currentX + thumbSize > pageWidth - margin) {
+        currentX = margin;
+        currentY += thumbSize + 3;
+      }
+    }
+    if (currentX !== margin) currentY += thumbSize + 3;
+    currentY += 3;
+  }
+  return currentY;
+};
+
+/**
+ * Compact record card header — date · type (requested visits in red) with the
+ * resolved status right-aligned, in the new brand style.
+ */
+const drawRecordHeader = (doc: jsPDF, record: MaintenanceRecord, y: number): number => {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 10;
+  const tableW = pageWidth - margin * 2;
+
+  doc.setFillColor(...BRAND.white);
+  doc.setDrawColor(...BRAND.hairline);
+  doc.roundedRect(margin, y, tableW, 9, 2, 2, "FD");
+  doc.setFillColor(...BRAND.primary);
+  doc.rect(margin, y, 2, 9, "F");
+
+  doc.setFont("Amiri", "bold");
+  doc.setFontSize(8.5);
+  doc.setTextColor(...(record.type === "requested" ? BRAND.error : BRAND.text));
+  pdfText(doc, `${formatDateEn(record.maintenanceDate)} — ${record.type === "requested" ? "Requested ●" : "Scheduled"}`, margin + 4, y + 4.5);
+
+  doc.setFont("Amiri", "normal");
+  doc.setFontSize(7);
+  doc.setTextColor(...(record.problemSolved ? ([30, 130, 70] as [number, number, number]) : BRAND.textMuted));
+  pdfText(doc, record.hadProblem ? (record.problemSolved ? "✓ Resolved" : "✗ Unresolved") : "—", pageWidth - margin - 4, y + 4.5, { align: "right" });
+
+  return y + 11;
+};
+
+/**
+ * One maintenance visit rendered as its own detail block — the legacy branch
+ * report's per-record treatment (machines, issues, parts, services, notes,
+ * recommendations) in the new brand style, cost-free, with photos.
+ */
+const renderClientRecordBlock = (
+  doc: jsPDF,
+  record: MaintenanceRecord,
+  y: number,
+  photoCache: Map<string, string>,
+): number => {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 10;
+  let ny = checkPageBreak(doc, y, 14);
+  ny = drawRecordHeader(doc, record, ny);
+  ny = drawVisitDetails(doc, record, ny, false, false);
+  if (record.photos && record.photos.length > 0) {
+    ny = checkPageBreak(doc, ny, 24);
+    ny = drawSectionHeader(doc, "Photos", ny, { icon: "doc" });
+    ny = drawPhotosSync(doc, record.photos, ny + 2, pageWidth, margin, photoCache);
+    ny += 4;
+  }
+  ny += 8;
+  return ny;
+};
+
+const renderClientRecordBlocks = (
+  doc: jsPDF,
+  records: MaintenanceRecord[],
+  y: number,
+  photoCache: Map<string, string>,
+): number => records.reduce((ny, r) => renderClientRecordBlock(doc, r, ny, photoCache), y);
+
+/**
+ * Company client report: one overview section per branch — branch info box,
+ * visit summary (scheduled/requested/total), contacts, assigned staff and the
+ * branch's own maintenance log. Cost figures omitted (client mode).
+ */
+const addClientBranchOverview = (
+  engine: PDFLayoutEngine,
+  branch: Branch,
+  index: number,
+  pageWidth: number,
+  margin: number,
+  hideEmpty: boolean,
+): void => {
+  const branchName = branch.branchName || `Branch ${index + 1}`;
+  const branchRecords = flattenMaintenanceRecords(branch.maintenanceHistory);
+  const scheduled = branchRecords.filter((r) => r.type === "scheduled").length;
+  const requested = branchRecords.filter((r) => r.type === "requested").length;
+
+  engine.addSection(
+    `Branch — ${branchName}`,
+    (section) => {
+      const branchInfo = buildInfoItems(
+        [
+          { label: "Location:", rawValue: branch.location, ignoreIf: "empty", icon: "location" },
+          { label: "Email:", rawValue: branch.email, ignoreIf: "empty", icon: "mail" },
+          { label: "Tax No.:", rawValue: branch.taxNumber, ignoreIf: "empty", icon: "doc" },
+          { label: "Coffee consumption:", rawValue: branch.coffeeConsumptionKg, ignoreIf: "zero", icon: "coffee", format: (v) => `${formatEnNumber(Number(v))} kg/month` },
+          { label: "Maintenance times:", rawValue: branch.allowedMaintenanceTimes, ignoreIf: "empty", icon: "clock" },
+        ],
+        hideEmpty,
+      );
+      if (branchInfo.length > 0) {
+        section.addBlock({
+          estimatedHeight: 40,
+          draw: (doc, y) => {
+            let sy = checkPageBreak(doc, y, 40);
+            sy = drawSectionHeader(doc, "Branch Information", sy, { icon: "home" });
+            sy = drawInfoBox(doc, branchInfo, sy, { x: margin, width: pageWidth - margin * 2 });
+            return sy + 4;
+          },
+        });
+      }
+
+      if (branchRecords.length > 0) {
+        section.addBlock({
+          estimatedHeight: 18,
+          draw: (doc, y) => {
+            const colW = pageWidth - margin * 2;
+            const cw = [colW * 0.33, colW * 0.33, colW * 0.34];
+            let sy = drawSectionHeader(doc, "Visit Summary", y, { icon: "chart" });
+            sy = drawTableHeader(doc, ["Scheduled", "Requested", "Total"], cw, margin, sy, colW);
+            sy = drawTableRow(doc, [formatEnNumber(scheduled), formatEnNumber(requested), formatEnNumber(scheduled + requested)], cw, margin, sy, colW, false, ["center", "center", "center"]);
+            return sy + 6;
+          },
+        });
+      }
+
+      if (branch.contacts.length > 0) {
+        const contacts: ContactInfo[] = branch.contacts.map((c) => ({
+          name: c.name,
+          role: c.customPosition || c.position,
+          phone: c.phoneNumbers.map((p) => p.number).join(" / ") || "—",
+        }));
+        section.addBlock({
+          estimatedHeight: 40,
+          draw: (doc, y) => {
+            let sy = checkPageBreak(doc, y, 40);
+            sy = drawSectionHeader(doc, "Contacts", sy, { icon: "phone" });
+            sy = drawContactCards(doc, contacts, sy, { x: margin, width: pageWidth - margin * 2 });
+            return sy + 4;
+          },
+        });
+      }
+
+      if (branch.baristas && branch.baristas.length > 0) {
+        section.addBlock({
+          estimatedHeight: 20 + branch.baristas.length * 6,
+          draw: (doc, y) => {
+            const colW = pageWidth - margin * 2;
+            const cw = [colW * 0.5, colW * 0.5];
+            let sy = drawSectionHeader(doc, "Assigned Staff", y, { icon: "user" });
+            sy = drawTableHeader(doc, ["Name", "Phone"], cw, margin, sy, colW);
+            branch.baristas.forEach((b, i) => {
+              sy = checkPageBreak(doc, sy, 8);
+              sy = drawTableRow(doc, [rtl(b.name), b.phone || "—"], cw, margin, sy, colW, i % 2 === 1, ["left", "center"]);
+            });
+            return sy + 6;
+          },
+        });
+      }
+
+      if (branchRecords.length > 0) {
+        section.addBlock({
+          estimatedHeight: 40 + Math.min(branchRecords.length, 20) * 8,
+          draw: (doc, y) => {
+            let sy = checkPageBreak(doc, y, 40);
+            sy = drawSectionHeader(doc, "Maintenance Log", sy, { icon: "doc" });
+            return renderMaintenanceHistoryTable(doc, branchRecords.slice(-20), sy, hideEmpty, true, true);
+          },
+        });
+      }
+    },
+    (doc, title, y) => drawSectionHeader(doc, title, y, { icon: "home" }),
+  );
+};
+
 // ═══════════════════════════════════════════
 //  TIER 2: Internal Branch Report (Detailed)
 // ═══════════════════════════════════════════
@@ -473,6 +740,11 @@ export const generateInternalBranchReport = async (
   const startY = drawInternalHeader(doc, companyName, branch.branchName || undefined, assets, period, headerSubtitle);
 
   const engine = new PDFLayoutEngine(doc, startY, { hideEmptyComponents: hideEmpty });
+
+  // Client mode renders each visit as a detail block with photos. The layout
+  // engine draws synchronously, so photos are preloaded before flush and the
+  // per-record blocks read them from this cache.
+  const photoCache = new Map<string, string>();
 
   const costs = aggregateBranchCosts(reportBranch, partsList, servicesList);
   const logisticsCosts = aggregateLogisticsCosts(logisticsOps);
@@ -574,16 +846,19 @@ export const generateInternalBranchReport = async (
     },
   });
 
-  // Maintenance History — 11 columns internally (9 in client mode: cost
-  // columns vanish), Parts/Services carry itemized bullets + total, pruned when empty
+  // Maintenance History — client mode renders each visit as its own detail
+  // block (Machines/Issues/Parts/Services/Notes/Recommendations + photos);
+  // internal/cost modes keep the compact wide table.
   engine.addSection(
     "Detailed Maintenance Log",
     (section) => {
       section.addRepeater(
         allFlatRecords,
-        40 + allFlatRecords.length * 8,
+        clientMode ? 50 + allFlatRecords.length * 40 : 40 + allFlatRecords.length * 8,
         (doc, y) => drawEmptyMessage(doc, y, "No maintenance records", margin),
-        (doc, y, items) => renderMaintenanceHistoryTable(doc, items, y, hideEmpty, !costMode, clientMode),
+        (doc, y, items) => clientMode
+          ? renderClientRecordBlocks(doc, items, y, photoCache)
+          : renderMaintenanceHistoryTable(doc, items, y, hideEmpty, !costMode, clientMode),
       );
     },
     drawSectionHeader,
@@ -772,6 +1047,11 @@ export const generateInternalBranchReport = async (
     },
     drawSectionHeader,
   );
+
+  if (clientMode) {
+    const loaded = await preloadPhotoDataUrls(allFlatRecords);
+    loaded.forEach((data, url) => photoCache.set(url, data));
+  }
 
   engine.flush();
   applyFooters(doc, "CMR System", companyName);
@@ -969,7 +1249,14 @@ export const generateInternalCompanyReport = async (
     branchCostMap.set(b.branchName || "Branch", c.grandTotal + c.totalLeaseRevenue);
   });
 
-  if (!clientMode) {
+  if (clientMode) {
+    // Client company report: an overview of every branch — what was done at
+    // each (info box, visit summary, contacts, staff, and its own maintenance
+    // log), in the new brand style and cost-free.
+    reportData.branches.forEach((branch, bi) => {
+      addClientBranchOverview(engine, branch, bi, pageWidth, margin, hideEmpty);
+    });
+  } else {
     engine.addSection(
       "Branch Comparison",
       (section) => {
@@ -1100,22 +1387,26 @@ export const generateInternalCompanyReport = async (
     drawSectionHeader,
   );
 
-  // Maintenance History (Main Office + Branches)
-  engine.addSection(
-    "Maintenance Log",
-    (section) => {
-      section.addRepeater(
-        allFlatRecords,
-        40 + Math.min(allFlatRecords.length, 20) * 8,
-        (doc, y) => drawEmptyMessage(doc, y, "No maintenance records", margin),
-        (doc, y, items) => {
-          const recentRecords = items.slice(-20);
-          return renderMaintenanceHistoryTable(doc, recentRecords, y, hideEmpty, !costMode, clientMode);
-        },
-      );
-    },
-    drawSectionHeader,
-  );
+  // Maintenance History — in client mode each branch carries its own log inside
+  // its overview section above, so the flat cross-branch log is skipped there
+  // (branch-less companies keep it as the main-office log).
+  if (!(clientMode && reportData.branches.length > 0)) {
+    engine.addSection(
+      "Maintenance Log",
+      (section) => {
+        section.addRepeater(
+          allFlatRecords,
+          40 + Math.min(allFlatRecords.length, 20) * 8,
+          (doc, y) => drawEmptyMessage(doc, y, "No maintenance records", margin),
+          (doc, y, items) => {
+            const recentRecords = items.slice(-20);
+            return renderMaintenanceHistoryTable(doc, recentRecords, y, hideEmpty, !costMode, clientMode);
+          },
+        );
+      },
+      drawSectionHeader,
+    );
+  }
 
   // Machine Logistics — independent standalone section (costs shown except in
   // client mode, which reuses the cost-free client table in brand colors)
