@@ -29,6 +29,7 @@ import {
   MapPinIcon,
   CheckCircleIcon,
   ClipboardDocumentListIcon,
+  TruckIcon,
 } from "@heroicons/react/24/outline";
 import { StarRating, StarRatingDisplay } from "./form-ui/StarRating";
 import { SafeModal } from "./form-ui/SafeModal";
@@ -126,6 +127,7 @@ export const getNewMaintenanceRecord = (
   maintenanceDate: getTodayDateString(),
   notes: "",
   type: parentRecord ? "requested" : "scheduled",
+  isLogisticsVisit: parentRecord?.isLogisticsVisit ?? false,
   hadProblem: true,
   partsWereReplaced: false,
   problemSolved: false,
@@ -199,6 +201,13 @@ const MaintenanceSummary: React.FC<{ record: MaintenanceRecord }> = ({
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
             <ClipboardDocumentListIcon className="w-3 h-3 me-1" />
             {record.followUpVisits?.length} متابعات
+          </span>
+        )}
+
+        {record.isLogisticsVisit && (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-300/60 dark:border-amber-500/40">
+            <TruckIcon className="w-3 h-3 me-1" />
+            زيارة لوجستية
           </span>
         )}
 
@@ -315,6 +324,19 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
         problemSolved: false,
         partsReplaced: [],
         problems: [],
+        followUpVisits: [],
+      };
+    }
+    if (name === "isLogisticsVisit" && checked) {
+      // Logistics visits carry no maintenance work data — only machine logistics.
+      updatedRecord = {
+        ...updatedRecord,
+        hadProblem: false,
+        partsWereReplaced: false,
+        problemSolved: true,
+        partsReplaced: [],
+        problems: [],
+        servicesPerformed: [],
         followUpVisits: [],
       };
     }
@@ -452,6 +474,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
       initiallyOpen={record.id === newlyAddedId}
       onRemove={onRemove}
       titleContent={<MaintenanceSummary record={record} />}
+      className={record.isLogisticsVisit ? 'border-amber-500/60 bg-amber-50/40 dark:border-amber-500/40 dark:bg-amber-500/5' : ''}
     >
       <div className="space-y-6">
         {/* Basic Info Section */}
@@ -461,6 +484,28 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
             المعلومات الأساسية
           </h4>
 
+          {/* Logistics visit toggle */}
+          <div className="flex items-center justify-between gap-3 pb-3 border-b border-hairline dark:border-hairline">
+            <div className="flex items-center gap-2 min-w-0">
+              <TruckIcon className={`w-5 h-5 shrink-0 ${record.isLogisticsVisit ? 'text-amber-500' : 'text-latte'}`} />
+              <div className="min-w-0">
+                <div className={`text-sm font-semibold ${record.isLogisticsVisit ? 'text-amber-700 dark:text-amber-300' : 'text-primary dark:text-cream'}`}>
+                  زيارة لوجستية
+                </div>
+                <div className="text-xs text-latte truncate">فقط لحركة الماكينات — لا تظهر في التقارير</div>
+              </div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={!!record.isLogisticsVisit}
+              onClick={() => handleFieldChange({ target: { name: "isLogisticsVisit", checked: !record.isLogisticsVisit, type: "checkbox" } } as any)}
+              className={`relative w-12 h-7 rounded-full shrink-0 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${record.isLogisticsVisit ? 'bg-amber-500' : 'bg-cream-2 dark:bg-espresso-light border border-hairline dark:border-hairline'}`}
+            >
+              <span className={`absolute top-0.5 start-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform duration-200 ${record.isLogisticsVisit ? 'translate-x-5' : ''}`} />
+            </button>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <TextInput
               label="التاريخ"
@@ -469,13 +514,15 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               value={record.maintenanceDate}
               onChange={handleFieldChange}
             />
-            <TextInput
-              label="الزيارة القادمة"
-              type="date"
-              name="nextVisitDate"
-              value={record.nextVisitDate || ""}
-              onChange={handleFieldChange}
-            />
+            {!record.isLogisticsVisit && (
+              <TextInput
+                label="الزيارة القادمة"
+                type="date"
+                name="nextVisitDate"
+                value={record.nextVisitDate || ""}
+                onChange={handleFieldChange}
+              />
+            )}
 
             {/* Staff Selector */}
             <div className="flex flex-col">
@@ -543,6 +590,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
             </div>
 
             {/* Client Barista Selector - unified responsive */}
+            {!record.isLogisticsVisit && (
             <div className="flex flex-col">
               <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
                 باريستا العميل
@@ -584,8 +632,10 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                 )}
               </div>
             </div>
+            )}
 
             {/* Rating */}
+            {!record.isLogisticsVisit && (
             <StarRating
               value={record.visitRating || 0}
               onChange={handleRatingChange}
@@ -594,8 +644,10 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               showNA
               showNumeric
             />
+            )}
           </div>
 
+          {!record.isLogisticsVisit && (
           <RadioGroup
             label="منطقة الزيارة (رسوم الانتقال)"
             name={`visitZone-${record.id}`}
@@ -611,9 +663,11 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
             }))}
             inline
           />
+          )}
         </div>
 
         {/* Problem Section */}
+        {!record.isLogisticsVisit && (
         <div className="bg-white dark:bg-espresso rounded-xl p-4 space-y-4 border border-ember-500/30 dark:border-ember-500/30">
           <div className="flex items-center justify-between">
             <h4 className="text-sm font-semibold text-primary dark:text-cream flex items-center gap-2">
@@ -769,8 +823,10 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
             </div>
           )}
         </div>
+        )}
 
         {/* Type & Payment Section */}
+        {!record.isLogisticsVisit && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-hairline dark:border-hairline">
           <RadioGroup
             name={`type-${record.id}`}
@@ -807,8 +863,10 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
             placeholder="0.00"
           />
         </div>
+        )}
 
         {/* Machines Section */}
+        {!record.isLogisticsVisit && (
         <div className="pt-4 border-t border-hairline dark:border-hairline">
           <CollapsibleSection title="الماكينات التي تمت صيانتها">
             <div className="space-y-3">
@@ -857,8 +915,10 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
             </div>
           </CollapsibleSection>
         </div>
+        )}
 
         {/* Supervisors Section */}
+        {!record.isLogisticsVisit && (
         <div className="pt-4 border-t border-hairline dark:border-hairline">
           <CollapsibleSection title="بيانات المشرف">
             <div className="space-y-4">
@@ -902,6 +962,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
             </div>
           </CollapsibleSection>
         </div>
+        )}
 
         {/* Machine Logistics Section — always visible */}
         <div className="pt-4 border-t border-hairline dark:border-hairline">
@@ -915,6 +976,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
         </div>
 
         {/* Notes Section */}
+        {!record.isLogisticsVisit && (
         <div className="pt-4 border-t border-hairline dark:border-hairline">
           <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
             ملاحظات (اختياري)
@@ -927,6 +989,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
             className={textAreaClasses}
           />
         </div>
+        )}
       </div>
 
       {/* Quick-add modal (replaces prompt() — audit #54) */}

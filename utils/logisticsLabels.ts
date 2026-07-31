@@ -1,6 +1,7 @@
 /** @format */
 
 import { ServiceRecord, PartRecord } from '../types';
+import { formatEnNumber, formatPdfCurrency } from './costAggregation';
 
 /**
  * Shared logistics operation type labels — single source of truth
@@ -10,6 +11,30 @@ import { ServiceRecord, PartRecord } from '../types';
 /** Format a single service/part line: "الاسم ×2" (count omitted when 1). */
 const formatWorkItem = (name: string, count: number): string =>
   count > 1 ? `${name} ×${count}` : name;
+
+/**
+ * Format a single service/part line with its cost breakdown, e.g.:
+ *   count 1 → "جوان — 100 ج.م"
+ *   count 2 → "جوان ×2 — 100 ج.م × 2 = 200 ج.م"
+ * Falls back to the plain name (with ×count) when the cost is unknown.
+ *
+ * @param currencySuffix Currency label to append, e.g. "ج.م" (default) or "EGP" for English reports.
+ */
+export const formatWorkItemWithCost = (
+  name: string,
+  count: number,
+  cost?: number | null,
+  currencySuffix: string = 'ج.م',
+): string => {
+  const qty = count > 1 ? ` ×${formatEnNumber(count)}` : '';
+  if (cost == null || isNaN(Number(cost))) return `${name}${qty}`;
+  const unit = Number(cost);
+  const total = unit * count;
+  const fmt = (v: number) => `${formatEnNumber(v)} ${currencySuffix}`;
+  return count > 1
+    ? `${name}${qty} — ${fmt(unit)} × ${formatEnNumber(count)} = ${fmt(total)}`
+    : `${name} — ${fmt(unit)}`;
+};
 
 /** The three possible maintenance-work sections. */
 export type MaintenanceSectionKey = 'issues' | 'services' | 'parts';

@@ -119,6 +119,28 @@ export function filterMaintenanceByDateRange(
     });
 }
 
+// ── Logistics-Visit Report Filter ──
+
+/**
+ * Returns a copy of the records with logistics-only visits removed.
+ * Logistics visits (isLogisticsVisit === true) are tracked in the app but
+ * are excluded from every PDF/print report. Recursively strips logistics
+ * follow-ups too.
+ */
+export function getReportRecords(
+  records: MaintenanceRecord[],
+): MaintenanceRecord[] {
+  return records
+    .filter((r) => !r.isLogisticsVisit)
+    .map((r) => {
+      if (!r.followUpVisits || r.followUpVisits.length === 0) return r;
+      return {
+        ...r,
+        followUpVisits: getReportRecords(r.followUpVisits),
+      };
+    });
+}
+
 // ── Period Label ──
 
 const AR_EG_MONTHS = [
@@ -160,6 +182,52 @@ export function formatDateRangeLabel(range: DateRange): string {
 
   if (range.endDate) {
     return `حتى ${formatArabicDate(range.endDate)}`;
+  }
+
+  return "";
+}
+
+// ── English Period Label ──
+
+const EN_MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+function formatEnglishDate(isoStr: string): string {
+  const d = new Date(isoStr);
+  if (isNaN(d.getTime()) || d.getMonth() < 0 || d.getMonth() > 11) {
+    return isoStr; // fallback: return the raw string rather than "undefined"
+  }
+  return `${d.getDate()} ${EN_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+/**
+ * Returns a human-readable English label for a date range
+ * (used by the English internal report header):
+ * - "" for allTime/empty
+ * - "15 July 2026" for a single day
+ * - "1 July — 15 July 2026" for a range
+ */
+export function formatDateRangeLabelEn(range: DateRange): string {
+  if (!range || range.preset === "allTime" || (!range.startDate && !range.endDate)) {
+    return "";
+  }
+
+  if (range.startDate && range.endDate && range.startDate === range.endDate) {
+    return formatEnglishDate(range.startDate);
+  }
+
+  if (range.startDate && range.endDate) {
+    return `${formatEnglishDate(range.startDate)} — ${formatEnglishDate(range.endDate)}`;
+  }
+
+  if (range.startDate) {
+    return `From ${formatEnglishDate(range.startDate)}`;
+  }
+
+  if (range.endDate) {
+    return `Until ${formatEnglishDate(range.endDate)}`;
   }
 
   return "";

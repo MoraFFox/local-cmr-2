@@ -86,6 +86,8 @@ export const ar = {
     reviewSubmit: 'المراجعة والإرسال',
     problemVisit: 'زيارة مشكلة',
     scheduledVisit: 'زيارة دورية',
+    logisticsVisit: 'زيارة لوجستية',
+    logisticsVisitHint: 'فقط لحركة الماكينات — لا تظهر في التقارير',
     visitTypeLabel: 'نوع الزيارة',
     draftSaved: 'تم الحفظ',
     draftSaving: 'جاري الحفظ...',
@@ -526,6 +528,9 @@ export const ar = {
       selectZone: 'اختر المنطقة',
       noPreviousVisits: 'لا توجد زيارات سابقة',
       averageDaysBetweenVisits: 'متوسط {{days}} يوم بين الزيارات',
+      // Logistics visits
+      logisticsVisit: 'زيارة لوجستية',
+      logisticsVisitHint: 'فقط لحركة الماكينات — لا تظهر في التقارير أو ملفات PDF',
       // Zones
       cairo: 'القاهرة (500 ج.م)',
       outsideCairo: 'خارج القاهرة (1500 ج.م)',

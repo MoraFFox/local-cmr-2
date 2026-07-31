@@ -22,6 +22,13 @@ export const formatCurrency = (value: number): string =>
 
 export const formatPdfCurrency = (value: number): string => `${formatEnNumber(value)} ج.م`;
 
+/** English currency used in the English internal report (PDF). */
+export const formatPdfCurrencyEn = (value: number): string => `${formatEnNumber(value)} EGP`;
+
+/** English currency used in the English internal report (HTML print views). */
+export const formatCurrencyEn = (value: number): string =>
+  new Intl.NumberFormat("en-EG", { style: "currency", currency: "EGP", minimumFractionDigits: 0 }).format(value);
+
 // ── Types ──
 
 export interface AggregatedItem {
@@ -111,10 +118,10 @@ const flattenRecords = (records: MaintenanceRecord[]): MaintenanceRecord[] => {
   return result;
 };
 
-const resolvePartCost = (partRecord: PartRecord, partsList: Part[]): number =>
+export const resolvePartCost = (partRecord: PartRecord, partsList: Part[]): number =>
   partRecord.cost ?? partsList.find((p) => p.value === partRecord.name)?.cost ?? 0;
 
-const resolveServiceCost = (serviceRecord: ServiceRecord, servicesList: Service[]): number =>
+export const resolveServiceCost = (serviceRecord: ServiceRecord, servicesList: Service[]): number =>
   serviceRecord.cost ?? servicesList.find((s) => s.value === serviceRecord.name)?.cost ?? 0;
 
 // ── Core Aggregation ──
@@ -255,7 +262,7 @@ export const getTechnicianSummary = (records: MaintenanceRecord[]): TechnicianSu
   const techMap = new Map<string, TechnicianSummary>();
 
   allRecords.forEach((r) => {
-    const name = r.baristaName || "غير معروف";
+    const name = r.baristaName || "Unknown";
     const existing = techMap.get(name) || {
       name,
       visits: 0,
@@ -305,7 +312,7 @@ export const getMachineLeaseSummary = (
     const type = m.machineOwnershipType || "unknown";
     const dailyRate = m.dailyLeaseCost || 0;
     return {
-      name: m.machineName || "ماكينة",
+      name: m.machineName || "Machine",
       type,
       dailyRate,
       daysActive: visitCount,
@@ -358,7 +365,7 @@ export const getBranchCostSummary = (
   return branches.map((branch) => {
     const costs = aggregateBranchCosts(branch, partsList, servicesList);
     return {
-      branchName: branch.branchName || "فرع",
+      branchName: branch.branchName || "Branch",
       visitFees: costs.totalVisitFees,
       partsCost: costs.totalPartsCost,
       servicesCost: costs.totalServicesCost,

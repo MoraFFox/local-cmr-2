@@ -9,11 +9,21 @@ import { ar } from '../utils/arabicTranslations';
 import { partsList, servicesList, problemCategories } from '../constants';
 
 vi.mock('../components/forms/hooks/useAutoSave', () => ({
-  useAutoSave: () => ({
+  useAutoSave: vi.fn(() => makeAutoSaveMock()),
+}));
+
+import { useAutoSave } from '../components/forms/hooks/useAutoSave';
+
+type AutoSaveMock = ReturnType<typeof useAutoSave>;
+// Reusable default so tests can override individual methods and reset afterwards
+// (the vi.mock factory must reference it, hence the hoisted function declaration).
+function makeAutoSaveMock(overrides: Partial<AutoSaveMock> = {}): AutoSaveMock {
+  return {
     isSaving: false, lastSaved: null, hasUnsavedChanges: false, versionCount: 0,
     saveNow: vi.fn(), clearSaved: vi.fn(), restore: vi.fn(), getVersions: vi.fn(), restoreVersion: vi.fn(),
-  }),
-}));
+    ...overrides,
+  };
+}
 
 const allPredefinedProblems = problemCategories.flatMap((cat) => cat.options.map((opt) => opt.value));
 
@@ -212,6 +222,57 @@ describe('MaintenanceRecordEditor (stepper)', () => {
     expect(getStepContent(6)!.textContent).toContain('مطلوب');
   });
 
+  it('logistics visit toggle collapses the stepper to Basic + Logistics only', async () => {
+    const record = generateMockMaintenanceRecord(30, { partsList, servicesList });
+    renderWithProviders(<MaintenanceRecordEditor {...baseProps} record={record} />);
+
+    // Default: all 9 steps are available in the stepper
+    expect(document.querySelector('#step-node-2')).not.toBeNull();
+    expect(document.querySelector('#step-node-7')).not.toBeNull();
+
+    // Toggle logistics visit on
+    const toggle = screen.getByRole('switch');
+    fireEvent.click(toggle);
+
+    // Only Basic (1) and Logistics (7) remain
+    expect(document.querySelector('#step-node-1')).not.toBeNull();
+    expect(document.querySelector('#step-node-7')).not.toBeNull();
+    expect(document.querySelector('#step-node-2')).toBeNull();
+    expect(document.querySelector('#step-node-3')).toBeNull();
+    expect(document.querySelector('#step-node-5')).toBeNull();
+    expect(document.querySelector('#step-node-9')).toBeNull();
+
+    // Step 1 next button goes straight to the logistics step
+    const step1 = getStepContent(1)!;
+    const nextBtn = within(step1).getByRole('button', { name: /لوجستيات الماكينات/ });
+    fireEvent.click(nextBtn);
+    await waitFor(() => expect(getStepContent(7)).toBeInTheDocument());
+    expect(getStepContent(1)).toBeNull();
+  });
+
+  it('logistics visit toggle relaxes technician/supervisor validation', async () => {
+    const record = {
+      ...generateMockMaintenanceRecord(31, { partsList, servicesList }),
+      maintenanceDate: '2025-06-15',
+      baristaName: '', // would normally fail validation
+      supervisors: [], // would normally fail validation
+    };
+    const onSave = vi.fn();
+    renderWithProviders(<MaintenanceRecordEditor {...baseProps} record={record} onSave={onSave} />);
+
+    // Without the toggle, save is blocked by missing barista/supervisor
+    const saveBtn = screen.getByRole('button', { name: ar.ui.maintenanceEditor.save });
+    fireEvent.click(saveBtn);
+    await waitFor(() => expect(onSave).not.toHaveBeenCalled());
+
+    // Enable logistics visit, then save succeeds
+    const toggle = screen.getByRole('switch');
+    fireEvent.click(toggle);
+    fireEvent.click(saveBtn);
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][0].isLogisticsVisit).toBe(true);
+  });
+
   it('navigates using Next/Back buttons', async () => {
     const record = generateMockMaintenanceRecord(10, { partsList, servicesList });
     renderWithProviders(<MaintenanceRecordEditor {...baseProps} record={record} />);
@@ -229,5 +290,43 @@ describe('MaintenanceRecordEditor (stepper)', () => {
     const backBtn = within(step2).getByRole('button', { name: /السابق/ });
     fireEvent.click(backBtn);
     await waitFor(() => expect(getStepContent(1)).toBeInTheDocument());
+  });
+
+  it('restores an auto-saved draft when the editor opens', () => {
+    const record = generateMockMaintenanceRecord(60, { partsList, servicesList });
+    const saved = { ...record, baristaName: 'Restored Tech' };
+
+    vi.mocked(useAutoSave).mockReturnValueOnce(makeAutoSaveMock({ restore: () => saved }));
+
+    renderWithProviders(<MaintenanceRecordEditor {...baseProps} record={record} />);
+
+    // The auto-saved baristaName (not the incoming record's) should be shown
+    expect(screen.getByDisplayValue('Restored Tech')).toBeInTheDocument();
+  });
+
+  it('StrictMode: restore survives the double effect pass and toasts exactly once', () => {
+    const record = generateMockMaintenanceRecord(61, { partsList, servicesList });
+    const saved = { ...record, baristaName: 'Strict Restored' };
+
+    // StrictMode double-invokes render + effects, so the mock must keep
+    // returning the saved draft for every call (not just the first).
+    vi.mocked(useAutoSave).mockImplementation(() => makeAutoSaveMock({ restore: () => saved }));
+
+    render(
+      <React.StrictMode>
+        <ToastProvider>
+          <MaintenanceRecordEditor {...baseProps} record={record} />
+        </ToastProvider>
+      </React.StrictMode>
+    );
+
+    // The merged draft data must survive the record-sync effect's second pass
+    expect(screen.getByDisplayValue('Strict Restored')).toBeInTheDocument();
+
+    // The restoredForIdRef guard must prevent a duplicate restore toast
+    expect(screen.getAllByText('تم استعادة آخر نسخة محفوظة تلقائيًا')).toHaveLength(1);
+
+    // Restore the default mock so later tests are unaffected
+    vi.mocked(useAutoSave).mockImplementation(() => makeAutoSaveMock());
   });
 });

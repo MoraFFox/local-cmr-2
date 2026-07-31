@@ -14,10 +14,18 @@ import {
 import CollapsibleCard from "./CollapsibleCard";
 import Avatar from "./Avatar";
 import { generateCompanyPDF, generateBranchPDF } from "../utils/pdfGenerator";
-import { generateInternalCompanyReport, generateInternalBranchReport } from "../utils/internalReportPdf";
+import {
+  generateInternalCompanyReport,
+  generateInternalBranchReport,
+  generateCostCompanyReport,
+  generateCostBranchReport,
+  generateInternalVisitReport,
+  generateClientVisitReport,
+  generateCostVisitReport,
+} from "../utils/internalReportPdf";
 import { useLogisticsOperations } from "../hooks/useLogisticsOperations";
 import DateRangeExportModal from "./DateRangeExportModal";
-import { DateRange, filterMaintenanceByDateRange } from "../utils/dateRangeFilter";
+import { DateRange, filterMaintenanceByDateRange, getReportRecords } from "../utils/dateRangeFilter";
 import { getVisitZoneLabel } from "../utils/visitZones";
 import { getMachineOwnershipStatus } from "./ReviewStep";
 import {
@@ -56,6 +64,7 @@ import {
   DocumentArrowUpIcon,
   DocumentArrowDownIcon,
   ScaleIcon,
+  TruckIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
 
@@ -233,11 +242,12 @@ const renderPhotoGroup = (
   );
 };
 
-const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
-  record,
-}) => {
+const MaintenanceRecordView: React.FC<{
+  record: MaintenanceRecord;
+  onExport?: (record: MaintenanceRecord, mode: "internal" | "client" | "cost") => void;
+}> = ({ record, onExport }) => {
   return (
-    <div className='border-e-2 border-primary pe-4 py-3 mb-4 bg-cream-2 rounded-s-md'>
+    <div className={`border-e-2 pe-4 py-3 mb-4 rounded-s-md ${record.isLogisticsVisit ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-500/5' : 'border-primary bg-cream-2'}`}>
       {/* Header Row */}
       <div className='flex flex-wrap justify-between ltr:items-start rtl:items-end gap-y-3 gap-x-4'>
         {/* Right side (start of RTL flow): Date, Badges, Next Visit */}
@@ -261,6 +271,12 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
             <span className='bg-cream px-1.5 rounded border border-hairline'>
               <bdi>{record.type}</bdi>
             </span>
+            {record.isLogisticsVisit && (
+              <span className='inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-300/60 dark:border-amber-500/40'>
+                <TruckIcon className="w-3 h-3" />
+                زيارة لوجستية
+              </span>
+            )}
             {record.visitZone && (
               <>
                 <span>•</span>
@@ -277,15 +293,22 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
           )}
         </div>
         
-        {/* Left side (end of RTL flow): Staff Badge */}
-        {record.baristaName && (
-          <div className='shrink-0'>
+        {/* Left side (end of RTL flow): Staff Badge + Visit Export */}
+        <div className='shrink-0 flex flex-wrap items-center gap-2'>
+          {record.baristaName && (
             <span className='text-xs bg-cream px-2.5 py-1.5 border border-hairline rounded text-text flex items-center gap-1.5'>
               <UserIcon className="w-4 h-4 text-latte" />
               <span className='font-bold'>{record.baristaName}</span>
             </span>
-          </div>
-        )}
+          )}
+          {onExport && (
+            <PrintDropdown
+              label='Visit Report'
+              onPrint={(mode) => onExport(record, mode)}
+              className='scale-90 ltr:origin-right rtl:origin-left'
+            />
+          )}
+        </div>
       </div>
 
       {/* Body: Lists and Notes */}
@@ -406,7 +429,7 @@ const MaintenanceRecordView: React.FC<{ record: MaintenanceRecord }> = ({
             زيارات المتابعة
           </p>
           {record.followUpVisits.map((fu) => (
-            <MaintenanceRecordView key={fu.id} record={fu} />
+            <MaintenanceRecordView key={fu.id} record={fu} onExport={onExport} />
           ))}
         </div>
       )}
@@ -444,7 +467,9 @@ const MaintenanceTable: React.FC<{
   records: MaintenanceRecord[];
   hideCosts?: boolean;
 }> = ({ records, hideCosts }) => {
-  if (!records || records.length === 0)
+  // Logistics-only visits are excluded from every printed report.
+  const reportRecords = getReportRecords(records || []);
+  if (!reportRecords || reportRecords.length === 0)
     return <p className='text-xs text-latte italic'>No records found.</p>;
 
   return (
@@ -459,7 +484,7 @@ const MaintenanceTable: React.FC<{
         </tr>
       </thead>
       <tbody className='divide-y divide-slate-200'>
-        {records.map((rec) => (
+        {reportRecords.map((rec) => (
           <React.Fragment key={rec.id}>
             <tr className='break-inside-avoid'>
               <td className='px-2 py-2 align-top'>
@@ -761,7 +786,9 @@ const BranchPrintableDocument: React.FC<{
   branch: Branch;
   hideCosts?: boolean;
 }> = ({ companyName, branch, hideCosts }) => {
-  const stats = getBranchStats(branch.maintenanceHistory);
+  // Logistics-only visits are excluded from every printed report.
+  const reportHistory = getReportRecords(branch.maintenanceHistory || []);
+  const stats = getBranchStats(reportHistory);
 
   return (
     <div
@@ -894,9 +921,9 @@ const BranchPrintableDocument: React.FC<{
           </h3>
         </div>
 
-        {branch.maintenanceHistory.length > 0 ? (
+        {reportHistory.length > 0 ? (
           <div className='space-y-4'>
-            {branch.maintenanceHistory.map((rec) => (
+            {reportHistory.map((rec) => (
               <DetailedRecordPrint
                 key={rec.id}
                 record={rec}
@@ -927,6 +954,15 @@ const PrintableDocument: React.FC<{
   hideCosts?: boolean;
 }> = ({ data, hideCosts }) => {
   const t = useT();
+  // Logistics-only visits are excluded from every printed report.
+  const reportData: FormData = {
+    ...data,
+    maintenanceHistory: getReportRecords(data.maintenanceHistory || []),
+    branches: (data.branches || []).map((b) => ({
+      ...b,
+      maintenanceHistory: getReportRecords(b.maintenanceHistory || []),
+    })),
+  };
   return (
     <div
       id='print-container'
@@ -994,23 +1030,23 @@ const PrintableDocument: React.FC<{
       </PrintSection>
 
       {/* Main Office Maintenance (Only if no branches) */}
-      {!data.hasBranches && data.maintenanceHistory.length > 0 && (
+      {!reportData.hasBranches && reportData.maintenanceHistory.length > 0 && (
         <PrintSection title={t.admin.fields.mainOfficeMaintenanceHistory}>
           <MaintenanceTable
-            records={data.maintenanceHistory}
+            records={reportData.maintenanceHistory}
             hideCosts={hideCosts}
           />
         </PrintSection>
       )}
 
       {/* Branches Section */}
-      {data.hasBranches && (
+      {reportData.hasBranches && (
         <div className='mt-8'>
           <h2 className='text-lg font-bold text-text border-b-2 border-hairline pb-1 mb-4'>
             Branch Details & Maintenance
           </h2>
 
-          {data.branches.map((branch, idx) => {
+          {reportData.branches.map((branch, idx) => {
             const stats = getBranchStats(branch.maintenanceHistory);
             return (
               <div key={branch.id} className='mb-8 break-inside-avoid-page'>
@@ -1099,13 +1135,13 @@ const PrintableDocument: React.FC<{
 
 const PrintDropdown: React.FC<{
   label: string;
-  onPrint: (mode: "internal" | "client") => void;
+  onPrint: (mode: "internal" | "client" | "cost") => void;
   className?: string;
   disabled?: boolean;
 }> = ({ label, onPrint, className, disabled }) => {
   const { open: isOpen, setOpen: setIsOpen, triggerRef, contentRef, style, toggle } = useFloatingMenu();
 
-  const handleSelect = (mode: "internal" | "client") => {
+  const handleSelect = (mode: "internal" | "client" | "cost") => {
     setIsOpen(false);
     onPrint(mode);
   };
@@ -1154,6 +1190,16 @@ const PrintDropdown: React.FC<{
                 Hides all cost information
               </span>
             </button>
+            <button
+              onClick={() => handleSelect("cost")}
+              className='block w-full text-start px-4 py-3 text-sm text-text hover:bg-cream-2 border-t border-hairline'
+              role='menuitem'
+            >
+              <span className='font-bold'>Cost Report</span>
+              <span className='block text-xs text-latte mt-0.5'>
+                Full costs without payer split
+              </span>
+            </button>
           </div>
         </div>,
         document.body
@@ -1183,7 +1229,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
   const [showDateRangeModal, setShowDateRangeModal] = useState(false);
   const [pendingPrintAction, setPendingPrintAction] = useState<{
     type: "full" | "branch";
-    mode: "internal" | "client";
+    mode: "internal" | "client" | "cost";
     branch?: Branch;
   } | null>(null);
 
@@ -1206,14 +1252,56 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
   };
 
   // Intercepted: opens date-range modal instead of generating directly
-  const handlePrintFull = (mode: "internal" | "client") => {
+  const handlePrintFull = (mode: "internal" | "client" | "cost") => {
     setPendingPrintAction({ type: "full", mode });
     setShowDateRangeModal(true);
   };
 
-  const handlePrintBranch = (branch: Branch, mode: "internal" | "client") => {
+  const handlePrintBranch = (branch: Branch, mode: "internal" | "client" | "cost") => {
     setPendingPrintAction({ type: "branch", mode, branch });
     setShowDateRangeModal(true);
+  };
+
+  // Per-visit export — internal (with costs), client (costs hidden) or cost (full costs, no payer split).
+  const handlePrintVisit = async (
+    record: MaintenanceRecord,
+    mode: "internal" | "client" | "cost",
+    branch?: Branch,
+  ) => {
+    if (isGeneratingPDF) return;
+    setIsGeneratingPDF(true);
+    try {
+      const entity = branch
+        ? {
+            branchName: branch.branchName,
+            location: branch.location,
+            email: branch.email,
+            taxNumber: branch.taxNumber,
+          }
+        : {
+            location: submission.location,
+            email: submission.email,
+            taxNumber: submission.taxNumber,
+          };
+      if (mode === "internal") {
+        const doc = await generateInternalVisitReport(submission.companyName, entity, record);
+        const fileName = `${submission.companyName.replace(/\s+/g, "_")}_Visit_${record.maintenanceDate}_Internal_Report.pdf`;
+        doc.save(fileName);
+      } else if (mode === "client") {
+        const doc = await generateClientVisitReport(submission.companyName, entity, record);
+        const fileName = `${submission.companyName.replace(/\s+/g, "_")}_Visit_${record.maintenanceDate}_Client_Report.pdf`;
+        doc.save(fileName);
+      } else {
+        const doc = await generateCostVisitReport(submission.companyName, entity, record);
+        const fileName = `${submission.companyName.replace(/\s+/g, "_")}_Visit_${record.maintenanceDate}_Cost_Report.pdf`;
+        doc.save(fileName);
+      }
+    } catch (error) {
+      logger.error("Error generating visit report", error, "pdf");
+      showToast("فشل إنشاء PDF. يرجى المحاولة مرة أخرى.", "error");
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   // Actual PDF generation after date range is selected
@@ -1234,13 +1322,20 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
           });
           const fileName = `${submission.companyName.replace(/\s+/g, "_")}_Internal_Report_${new Date().toISOString().split("T")[0]}.pdf`;
           doc.save(fileName);
-        } else {
+        } else if (mode === "client") {
           const doc = await generateCompanyPDF(filteredSub, {
             includeCosts: false,
             logisticsOperations: logisticsOps,
             dateRange: range.preset !== "allTime" ? range : undefined,
           });
           const fileName = `${submission.companyName.replace(/\s+/g, "_")}_Client_Report_${new Date().toISOString().split("T")[0]}.pdf`;
+          doc.save(fileName);
+        } else {
+          const doc = await generateCostCompanyReport(filteredSub, {
+            logisticsOperations: logisticsOps,
+            dateRange: range.preset !== "allTime" ? range : undefined,
+          });
+          const fileName = `${submission.companyName.replace(/\s+/g, "_")}_Cost_Report_${new Date().toISOString().split("T")[0]}.pdf`;
           doc.save(fileName);
         }
       } else if (branch) {
@@ -1254,13 +1349,21 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
           );
           const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${filteredBranch.branchName?.replace(/\s+/g, "_")}_Internal_Report_${new Date().toISOString().split("T")[0]}.pdf`;
           doc.save(fileName);
-        } else {
+        } else if (mode === "client") {
           const doc = await generateBranchPDF(
             filteredSub.companyName,
             filteredBranch,
             { includeCosts: false, logisticsOperations: logisticsOps, dateRange: range.preset !== "allTime" ? range : undefined },
           );
           const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${filteredBranch.branchName?.replace(/\s+/g, "_")}_Client_Report_${new Date().toISOString().split("T")[0]}.pdf`;
+          doc.save(fileName);
+        } else {
+          const doc = await generateCostBranchReport(
+            filteredSub.companyName,
+            filteredBranch,
+            { logisticsOperations: logisticsOps, dateRange: range.preset !== "allTime" ? range : undefined },
+          );
+          const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${filteredBranch.branchName?.replace(/\s+/g, "_")}_Cost_Report_${new Date().toISOString().split("T")[0]}.pdf`;
           doc.save(fileName);
         }
       }
@@ -1518,7 +1621,11 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                   <WrenchScrewdriverIcon className='w-5 h-5' /> {t.admin.fields.mainOfficeMaintenance}
                 </h3>
                 {filteredMainHistory.map((r) => (
-                  <MaintenanceRecordView key={r.id} record={r} />
+                  <MaintenanceRecordView
+                    key={r.id}
+                    record={r}
+                    onExport={(rec, mode) => handlePrintVisit(rec, mode)}
+                  />
                 ))}
               </div>
             )}
@@ -1740,7 +1847,11 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                             </h4>
                             {filteredBranchHistory.length > 0 ? (
                               filteredBranchHistory.map((r) => (
-                                <MaintenanceRecordView key={r.id} record={r} />
+                                <MaintenanceRecordView
+                                  key={r.id}
+                                  record={r}
+                                  onExport={(rec, mode) => handlePrintVisit(rec, mode, branch)}
+                                />
                               ))
                             ) : (
                               <p className='text-sm text-latte italic'>

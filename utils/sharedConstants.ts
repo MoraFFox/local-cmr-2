@@ -77,6 +77,7 @@ export const getNewMaintenanceRecord = (id: number): MaintenanceRecord => ({
   maintenanceDate: getTodayDateString(),
   notes: "",
   type: "scheduled",
+  isLogisticsVisit: false,
   hadProblem: false,
   partsWereReplaced: false,
   problemSolved: false,

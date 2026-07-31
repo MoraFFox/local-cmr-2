@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { ar } from '../utils/arabicTranslations';
 import { PlusCircleIcon, TrashIcon, MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, ClockIcon, BookmarkIcon } from '@heroicons/react/24/outline';
 import TechInput from './technician-portal/ui/TechInput'; // Reuse our new input
+import { useSearchRefocus } from '../hooks/useSearchRefocus';
 import { announce } from '../utils/ariaAnnouncer';
 import AddCustomCatalogItemDialog from './AddCustomCatalogItemDialog';
 import { CustomCatalogItem } from '../hooks/useCustomCatalog';
@@ -133,27 +134,10 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [activeSuggestionIndex]);
 
-    // Refocus search input after checkbox/category selection so the user can
-    // keep finding more items without re-clicking (audit issue #19).
-    // ▶ A separate guard prevents refocus when the selection change came from
-    // a custom-problem text input — otherwise the first keystroke in a new
-    // custom field would steal focus to the search bar.
-    const skipRefocusRef = useRef(false);
-    const didMountRef = useRef(false);
-    useEffect(() => {
-        if (!didMountRef.current) {
-            didMountRef.current = true;
-            return;
-        }
-        if (skipRefocusRef.current) {
-            skipRefocusRef.current = false;
-            return;
-        }
-        if ((selectedValues || []).length > 0) {
-            searchInputRef.current?.querySelector('input')?.focus();
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [(selectedValues || []).length]);
+    const { skipRefocusRef, handleMouseDownCapture } = useSearchRefocus({
+        searchInputRef,
+        selectedCount: (selectedValues || []).length,
+    });
 
     const handleCheckboxChange = (value: string) => {
         const currentSelected = selectedValues || [];
@@ -376,7 +360,10 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
     };
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500">
+        <div
+            className="space-y-6 animate-in fade-in duration-500"
+            onMouseDownCapture={handleMouseDownCapture}
+        >
             {/* Search */}
             <div className="relative" ref={searchInputRef}>
                 <TechInput 

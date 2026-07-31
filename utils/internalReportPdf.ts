@@ -3,9 +3,8 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { FormData, MaintenanceRecord, Branch, LogisticsOperation } from "../types";
-import { DateRange, formatDateRangeLabel } from "./dateRangeFilter";
-import { reshapeArabic } from "./arabicText";
-import { loadFonts, flattenMaintenanceRecords } from "./pdfGenerator";
+import { DateRange, formatDateRangeLabelEn, getReportRecords } from "./dateRangeFilter";
+import { loadFonts, flattenMaintenanceRecords, renderPhotosInPDF } from "./pdfGenerator";
 import { partsList, servicesList } from "../constants";
 import {
   aggregateCosts,
@@ -17,11 +16,15 @@ import {
   getBranchCostSummary,
   getRecordCostSummary,
   getProblemFrequency,
-  formatPdfCurrency,
+  resolvePartCost,
+  resolveServiceCost,
+  formatPdfCurrencyEn,
   formatEnNumber,
   AggregatedCosts,
+  AggregatedItem,
   aggregateLogisticsCosts,
 } from "./costAggregation";
+import { getVisitZoneFee } from "./visitZones";
 import {
   BRAND,
   drawInternalHeader,
@@ -37,6 +40,8 @@ import {
   drawTableRow,
   checkPageBreak,
   drawLogisticsOperationsTable,
+  drawIconBadge,
+  pdfText,
   formatDateEn,
   KPICard,
   FinancialCategory,
@@ -44,6 +49,7 @@ import {
   ContactInfo,
   MachineInfo,
   InfoItem,
+  PdfIconName,
 } from "./pdfTheme";
 import {
   isValueEmpty,
@@ -51,114 +57,173 @@ import {
   IgnoreCondition,
 } from "./pdfCompactLayout";
 
+// Keep dynamic Arabic in logical Unicode order. jsPDF's configured Arabic
+// parser/bidi hook shapes and reorders it once when each draw call is emitted.
 const rtl = (text: string | number | null | undefined): string => {
   if (text === null || text === undefined) return "";
-  return reshapeArabic(String(text), true);
+  return String(text);
 };
 
 // ── Helpers ──
 
-const getPaidByLabel = (val: string): string => (val === "company" ? "علينا" : "عميل");
+const getPaidByLabel = (val: string): string => (val === "company" ? "Company" : "Client");
 
 const formatProblemsList = (problems: string[] | undefined): string => {
   if (!problems || problems.length === 0) return "—";
   return problems.map((p) => rtl(p)).join("\n");
 };
 
-const formatPartsList = (parts: { name: string; count: number; paidByClient?: boolean }[] | undefined): string => {
+const formatPartsList = (
+  parts: { name: string; count: number; paidByClient?: boolean }[] | undefined,
+  showPayer = true,
+): string => {
   if (!parts || parts.length === 0) return "—";
   return parts
-    .map((p) => `${formatEnNumber(p.count)}× ${rtl(p.name)} (${getPaidByLabel(p.paidByClient ? "client" : "company")})`)
+    .map((p) => `${formatEnNumber(p.count)}× ${rtl(p.name)}${showPayer ? ` (${getPaidByLabel(p.paidByClient ? "client" : "company")})` : ""}`)
     .join("\n");
 };
 
 const formatServicesList = (
   services: { name: string; count: number; paidByClient?: boolean }[] | undefined,
+  showPayer = true,
 ): string => {
   if (!services || services.length === 0) return "—";
   return services
-    .map((s) => `${formatEnNumber(s.count)}× ${rtl(s.name)} (${getPaidByLabel(s.paidByClient ? "client" : "company")})`)
+    .map((s) => `${formatEnNumber(s.count)}× ${rtl(s.name)}${showPayer ? ` (${getPaidByLabel(s.paidByClient ? "client" : "company")})` : ""}`)
     .join("\n");
 };
 
-const getTypeLabel = (type: string): string => (type === "requested" ? "طارئة" : "مجدولة");
+const getTypeLabel = (type: string): string => (type === "requested" ? "Requested" : "Scheduled");
 
-const buildFinancialCategories = (costs: AggregatedCosts): FinancialCategory[] => {
+/** Merge two aggregated item maps by key, summing counts and totals. */
+const mergeItemMaps = (
+  a: Map<string, AggregatedItem>,
+  b: Map<string, AggregatedItem>,
+): Map<string, AggregatedItem> => {
+  const merged = new Map(a);
+  b.forEach((item, key) => {
+    const existing = merged.get(key);
+    if (existing) {
+      existing.count += item.count;
+      existing.totalCost += item.totalCost;
+    } else {
+      merged.set(key, item);
+    }
+  });
+  return merged;
+};
+
+const buildFinancialCategories = (costs: AggregatedCosts, costMode = false): FinancialCategory[] => {
   const categories: FinancialCategory[] = [];
 
-  if (costs.totalPartsCost > 0 || costs.parts.size > 0) {
-    const partsArr = Array.from(costs.parts.values())
-      .filter((p) => p.totalCost > 0)
-      .sort((a, b) => b.totalCost - a.totalCost);
-    categories.push({
-      title: "قطع الغيار — على حساب الشركة",
-      total: costs.totalPartsCost,
-      lines: partsArr.map((p) => ({
-        name: p.name,
-        detail: `${formatEnNumber(p.count)} قطعة × ${formatPdfCurrency(p.unitCost)}`,
-        total: p.totalCost,
-      })),
-    });
-  }
+  if (costMode) {
+    // Cost Report: no payer attribution — merge company + client into plain
+    // "Parts" / "Services" buckets.
+    const partsAll = mergeItemMaps(costs.parts, costs.clientParts);
+    if (partsAll.size > 0) {
+      const partsArr = Array.from(partsAll.values())
+        .filter((p) => p.totalCost > 0)
+        .sort((a, b) => b.totalCost - a.totalCost);
+      categories.push({
+        title: "Parts",
+        total: costs.totalPartsCost + costs.totalClientPartsCost,
+        lines: partsArr.map((p) => ({
+          name: p.name,
+          detail: `${formatEnNumber(p.count)} × ${formatPdfCurrencyEn(p.unitCost)}`,
+          total: p.totalCost,
+        })),
+      });
+    }
+    const servicesAll = mergeItemMaps(costs.services, costs.clientServices);
+    if (servicesAll.size > 0) {
+      const servicesArr = Array.from(servicesAll.values())
+        .filter((s) => s.totalCost > 0)
+        .sort((a, b) => b.totalCost - a.totalCost);
+      categories.push({
+        title: "Services",
+        total: costs.totalServicesCost + costs.totalClientServicesCost,
+        lines: servicesArr.map((s) => ({
+          name: s.name,
+          detail: `${formatEnNumber(s.count)} × ${formatPdfCurrencyEn(s.unitCost)}`,
+          total: s.totalCost,
+        })),
+      });
+    }
+  } else {
+    if (costs.totalPartsCost > 0 || costs.parts.size > 0) {
+      const partsArr = Array.from(costs.parts.values())
+        .filter((p) => p.totalCost > 0)
+        .sort((a, b) => b.totalCost - a.totalCost);
+      categories.push({
+        title: "Parts — Company Paid",
+        total: costs.totalPartsCost,
+        lines: partsArr.map((p) => ({
+          name: p.name,
+          detail: `${formatEnNumber(p.count)} × ${formatPdfCurrencyEn(p.unitCost)}`,
+          total: p.totalCost,
+        })),
+      });
+    }
 
-  if (costs.totalClientPartsCost > 0 || costs.clientParts.size > 0) {
-    const clientPartsArr = Array.from(costs.clientParts.values())
-      .filter((p) => p.totalCost > 0)
-      .sort((a, b) => b.totalCost - a.totalCost);
-    categories.push({
-      title: "قطع الغيار — على حساب العميل",
-      total: costs.totalClientPartsCost,
-      lines: clientPartsArr.map((p) => ({
-        name: p.name,
-        detail: `${formatEnNumber(p.count)} قطعة × ${formatPdfCurrency(p.unitCost)}`,
-        total: p.totalCost,
-      })),
-    });
-  }
+    if (costs.totalClientPartsCost > 0 || costs.clientParts.size > 0) {
+      const clientPartsArr = Array.from(costs.clientParts.values())
+        .filter((p) => p.totalCost > 0)
+        .sort((a, b) => b.totalCost - a.totalCost);
+      categories.push({
+        title: "Parts — Client Paid",
+        total: costs.totalClientPartsCost,
+        lines: clientPartsArr.map((p) => ({
+          name: p.name,
+          detail: `${formatEnNumber(p.count)} × ${formatPdfCurrencyEn(p.unitCost)}`,
+          total: p.totalCost,
+        })),
+      });
+    }
 
-  if (costs.totalServicesCost > 0 || costs.services.size > 0) {
-    const servicesArr = Array.from(costs.services.values())
-      .filter((s) => s.totalCost > 0)
-      .sort((a, b) => b.totalCost - a.totalCost);
-    categories.push({
-      title: "الخدمات — على حساب الشركة",
-      total: costs.totalServicesCost,
-      lines: servicesArr.map((s) => ({
-        name: s.name,
-        detail: `${formatEnNumber(s.count)} مرة × ${formatPdfCurrency(s.unitCost)}`,
-        total: s.totalCost,
-      })),
-    });
-  }
+    if (costs.totalServicesCost > 0 || costs.services.size > 0) {
+      const servicesArr = Array.from(costs.services.values())
+        .filter((s) => s.totalCost > 0)
+        .sort((a, b) => b.totalCost - a.totalCost);
+      categories.push({
+        title: "Services — Company Paid",
+        total: costs.totalServicesCost,
+        lines: servicesArr.map((s) => ({
+          name: s.name,
+          detail: `${formatEnNumber(s.count)} × ${formatPdfCurrencyEn(s.unitCost)}`,
+          total: s.totalCost,
+        })),
+      });
+    }
 
-  if (costs.totalClientServicesCost > 0 || costs.clientServices.size > 0) {
-    const clientServicesArr = Array.from(costs.clientServices.values())
-      .filter((s) => s.totalCost > 0)
-      .sort((a, b) => b.totalCost - a.totalCost);
-    categories.push({
-      title: "الخدمات — على حساب العميل",
-      total: costs.totalClientServicesCost,
-      lines: clientServicesArr.map((s) => ({
-        name: s.name,
-        detail: `${formatEnNumber(s.count)} مرة × ${formatPdfCurrency(s.unitCost)}`,
-        total: s.totalCost,
-      })),
-    });
+    if (costs.totalClientServicesCost > 0 || costs.clientServices.size > 0) {
+      const clientServicesArr = Array.from(costs.clientServices.values())
+        .filter((s) => s.totalCost > 0)
+        .sort((a, b) => b.totalCost - a.totalCost);
+      categories.push({
+        title: "Services — Client Paid",
+        total: costs.totalClientServicesCost,
+        lines: clientServicesArr.map((s) => ({
+          name: s.name,
+          detail: `${formatEnNumber(s.count)} × ${formatPdfCurrencyEn(s.unitCost)}`,
+          total: s.totalCost,
+        })),
+      });
+    }
   }
 
   if (costs.totalVisitFees > 0) {
     categories.push({
-      title: "رسوم الزيارات",
+      title: "Visit Fees",
       total: costs.totalVisitFees,
-      lines: [{ name: "إجمالي رسوم الزيارات", total: costs.totalVisitFees }],
+      lines: [{ name: "Total Visit Fees", total: costs.totalVisitFees }],
     });
   }
 
   if (costs.totalLeaseRevenue > 0) {
     categories.push({
-      title: "إيجار الماكينات (وارد)",
+      title: costMode ? "Machine Rental" : "Machine Rental (Income)",
       total: costs.totalLeaseRevenue,
-      lines: [{ name: "إجمالي إيرادات التأجير", total: costs.totalLeaseRevenue }],
+      lines: [{ name: costMode ? "Total Machine Rental" : "Total Rental Revenue", total: costs.totalLeaseRevenue }],
     });
   }
 
@@ -188,14 +253,16 @@ const buildKPICards = (
   records: MaintenanceRecord[],
   costs: AggregatedCosts,
   kpis: KPIData,
+  costMode = false,
 ): KPICard[] => {
   const scheduledCount = records.filter((r) => r.type === "scheduled").length;
   const requestedCount = records.filter((r) => r.type === "requested").length;
   const companyPartCount = Array.from(costs.parts.values()).reduce((s, p) => s + p.count, 0);
   const clientPartCount = Array.from(costs.clientParts.values()).reduce((s, p) => s + p.count, 0);
+  const totalPartCount = companyPartCount + clientPartCount;
   const resolutionSub = kpis.totalProblems > 0
-    ? `${formatEnNumber(kpis.problemsResolved)} من ${formatEnNumber(kpis.totalProblems)} تم حلها`
-    : "لا توجد مشاكل";
+    ? `${formatEnNumber(kpis.problemsResolved)} of ${formatEnNumber(kpis.totalProblems)} resolved`
+    : "No problems";
 
   const resolutionVariant: KPICard["variant"] =
     kpis.resolutionRate >= 80 ? "good" : kpis.resolutionRate >= 50 ? "warn" : "default";
@@ -203,34 +270,25 @@ const buildKPICards = (
     kpis.avgVisitRating >= 4 ? "good" : kpis.avgVisitRating >= 3 ? "warn" : "default";
 
   return [
-    { icon: "●", label: "إجمالي الزيارات", value: formatEnNumber(kpis.totalVisits), sublabel: `${formatEnNumber(scheduledCount)} مجدولة · ${formatEnNumber(requestedCount)} طارئة` },
-    { icon: "✓", label: "نسبة حل المشاكل", value: `${formatEnNumber(kpis.resolutionRate)}%`, sublabel: resolutionSub, variant: resolutionVariant },
-    { icon: "◈", label: "قطع الغيار", value: formatEnNumber(kpis.totalPartsUsed), sublabel: `${formatEnNumber(companyPartCount)} علينا · ${formatEnNumber(clientPartCount)} عميل` },
-    { icon: "★", label: "متوسط التقييم", value: kpis.avgVisitRating > 0 ? `${formatEnNumber(kpis.avgVisitRating)}/5` : "-", sublabel: kpis.avgVisitRating >= 4 ? "ممتاز" : kpis.avgVisitRating >= 3 ? "جيد" : kpis.avgVisitRating > 0 ? "مقبول" : "لا تقييمات", variant: ratingVariant },
-    { icon: "◊", label: "صافي التكلفة", value: formatPdfCurrency(costs.grandTotalCompanyCost), sublabel: "شامل كل المصاريف" },
+    { icon: "chart", label: "Total Visits", value: formatEnNumber(kpis.totalVisits), sublabel: `${formatEnNumber(scheduledCount)} Scheduled · ${formatEnNumber(requestedCount)} Requested` },
+    { icon: "check", label: "Resolution Rate", value: `${formatEnNumber(kpis.resolutionRate)}%`, sublabel: resolutionSub, variant: resolutionVariant },
+    { icon: "package", label: "Spare Parts", value: formatEnNumber(kpis.totalPartsUsed), sublabel: costMode ? `${formatEnNumber(totalPartCount)} total` : `${formatEnNumber(companyPartCount)} Company · ${formatEnNumber(clientPartCount)} Client` },
+    { icon: "star", label: "Avg Rating", value: kpis.avgVisitRating > 0 ? `${formatEnNumber(kpis.avgVisitRating)}/5` : "-", sublabel: kpis.avgVisitRating >= 4 ? "Excellent" : kpis.avgVisitRating >= 3 ? "Good" : kpis.avgVisitRating > 0 ? "Fair" : "No ratings", variant: ratingVariant },
+    { icon: "money", label: costMode ? "Total Cost" : "Net Cost", value: formatPdfCurrencyEn(costMode ? costs.grandTotal + costs.totalLeaseRevenue : costs.grandTotalCompanyCost), sublabel: "All costs included" },
   ];
 };
 
-// Reverse a row and columnStyles for RTL autoTable
-const rtlRow = (row: string[]): string[] => [...row].reverse();
-
 // ── Empty-state message helper ──
 const drawEmptyMessage = (doc: jsPDF, y: number, message: string, margin: number): number => {
-  doc.setFont("Amiri", "italic");
+  // "italic" is not registered by loadFonts (only normal/bold), so use normal
+  // to avoid jsPDF warning about an unknown font label.
+  doc.setFont("Amiri", "normal");
   doc.setFontSize(9);
   doc.setTextColor(120, 120, 120);
-  doc.text(rtl(message), doc.internal.pageSize.getWidth() - margin, y + 5, { align: "right" });
+  pdfText(doc, message, margin, y + 5, { align: "left" });
   doc.setFont("Amiri", "normal");
   doc.setTextColor(...BRAND.text);
   return y + 10;
-};
-const rtlStyles = (styles: Record<number, object>): Record<number, object> => {
-  const keys = Object.keys(styles).map(Number).sort((a, b) => a - b);
-  const result: Record<number, object> = {};
-  keys.forEach((k, i) => {
-    result[keys.length - 1 - i] = styles[k];
-  });
-  return result;
 };
 
 // ── Smart info-item builder ──
@@ -238,7 +296,7 @@ interface RawInfoField {
   label: string;
   rawValue: unknown;
   ignoreIf: IgnoreCondition;
-  icon?: string;
+  icon?: PdfIconName;
   format?: (value: unknown) => string;
 }
 
@@ -262,19 +320,19 @@ interface MaintenanceTableColumn {
   format: (r: MaintenanceRecord) => string;
 }
 
-const buildMaintenanceTableColumns = (): MaintenanceTableColumn[] => [
-  { id: "date", label: "التاريخ", accessor: (r) => r.maintenanceDate, ignoreIf: "never", width: 13, format: (r) => formatDateEn(r.maintenanceDate) },      { id: "type", label: "النوع", accessor: (r) => r.type, ignoreIf: "never", width: 12, format: (r) => r.type === "requested" ? rtl(getTypeLabel("requested")) + " ●" : rtl(getTypeLabel(r.type)) },
-  { id: "barista", label: "الفني", accessor: (r) => r.baristaName, ignoreIf: "empty", width: 15, format: (r) => rtl(r.baristaName) || "—" },
-  { id: "zone", label: "المنطقة", accessor: (r) => r.visitZone, ignoreIf: "empty", width: 13, format: (r) => rtl(r.visitZone) || "—" },
-  { id: "problems", label: "المشاكل", accessor: (r) => (r.problems || []).join(""), ignoreIf: "empty", width: 22, format: (r) => formatProblemsList(r.problems) },
-  { id: "solved", label: "تم الحل", accessor: () => "always", ignoreIf: "never", width: 10, format: (r) => (r.problemSolved ? "✓ نعم" : "✗ لا") },
-  { id: "parts", label: "قطع الغيار", accessor: (r) => formatPartsList(r.partsReplaced), ignoreIf: "empty", width: 24, format: (r) => formatPartsList(r.partsReplaced) },
-  { id: "partsCost", label: "تكلفة القطع", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).partsCost, ignoreIf: "zero", width: 11, format: (r) => formatPdfCurrency(getRecordCostSummary(r, partsList, servicesList).partsCost) },
-  { id: "services", label: "الخدمات", accessor: (r) => formatServicesList(r.servicesPerformed), ignoreIf: "empty", width: 24, format: (r) => formatServicesList(r.servicesPerformed) },
-  { id: "servicesCost", label: "تكلفة الخدمات", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).servicesCost, ignoreIf: "zero", width: 11, format: (r) => formatPdfCurrency(getRecordCostSummary(r, partsList, servicesList).servicesCost) },
-  { id: "lease", label: "إيجار يومي", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).leaseCost, ignoreIf: "zero", width: 11, format: (r) => { const c = getRecordCostSummary(r, partsList, servicesList); return c.leaseCost > 0 ? formatPdfCurrency(c.leaseCost) : "—"; } },
-  { id: "total", label: "الإجمالي", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).total, ignoreIf: "never", width: 12, format: (r) => formatPdfCurrency(getRecordCostSummary(r, partsList, servicesList).total) },
-  { id: "rating", label: "التقييم", accessor: (r) => r.visitRating, ignoreIf: "zero", width: 10, format: (r) => (r.visitRating ? `★ ${formatEnNumber(r.visitRating)}` : "—") },
+const buildMaintenanceTableColumns = (showPayer = true): MaintenanceTableColumn[] => [
+  { id: "date", label: "Date", accessor: (r) => r.maintenanceDate, ignoreIf: "never", width: 13, format: (r) => formatDateEn(r.maintenanceDate) },      { id: "type", label: "Type", accessor: (r) => r.type, ignoreIf: "never", width: 12, format: (r) => r.type === "requested" ? rtl(getTypeLabel("requested")) + " ●" : rtl(getTypeLabel(r.type)) },
+  { id: "barista", label: "Technician", accessor: (r) => r.baristaName, ignoreIf: "empty", width: 15, format: (r) => rtl(r.baristaName) || "—" },
+  { id: "zone", label: "Zone", accessor: (r) => r.visitZone, ignoreIf: "empty", width: 13, format: (r) => rtl(r.visitZone) || "—" },
+  { id: "problems", label: "Problems", accessor: (r) => (r.problems || []).join(""), ignoreIf: "empty", width: 22, format: (r) => formatProblemsList(r.problems) },
+  { id: "solved", label: "Resolved", accessor: () => "always", ignoreIf: "never", width: 10, format: (r) => (r.problemSolved ? "✓ Yes" : "✗ No") },
+  { id: "parts", label: "Parts", accessor: (r) => formatPartsList(r.partsReplaced, showPayer), ignoreIf: "empty", width: 24, format: (r) => formatPartsList(r.partsReplaced, showPayer) },
+  { id: "partsCost", label: "Parts Cost", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).partsCost, ignoreIf: "zero", width: 11, format: (r) => formatPdfCurrencyEn(getRecordCostSummary(r, partsList, servicesList).partsCost) },
+  { id: "services", label: "Services", accessor: (r) => formatServicesList(r.servicesPerformed, showPayer), ignoreIf: "empty", width: 24, format: (r) => formatServicesList(r.servicesPerformed, showPayer) },
+  { id: "servicesCost", label: "Services Cost", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).servicesCost, ignoreIf: "zero", width: 11, format: (r) => formatPdfCurrencyEn(getRecordCostSummary(r, partsList, servicesList).servicesCost) },
+  { id: "lease", label: "Daily Lease", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).leaseCost, ignoreIf: "zero", width: 11, format: (r) => { const c = getRecordCostSummary(r, partsList, servicesList); return c.leaseCost > 0 ? formatPdfCurrencyEn(c.leaseCost) : "—"; } },
+  { id: "total", label: "Total", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).total, ignoreIf: "never", width: 12, format: (r) => formatPdfCurrencyEn(getRecordCostSummary(r, partsList, servicesList).total) },
+  { id: "rating", label: "Rating", accessor: (r) => r.visitRating, ignoreIf: "zero", width: 10, format: (r) => (r.visitRating ? `★ ${formatEnNumber(r.visitRating)}` : "—") },
 ];
 
 const renderMaintenanceHistoryTable = (
@@ -282,8 +340,9 @@ const renderMaintenanceHistoryTable = (
   records: MaintenanceRecord[],
   y: number,
   hideEmpty: boolean,
+  showPayer = true,
 ): number => {
-  const allCols = buildMaintenanceTableColumns();
+  const allCols = buildMaintenanceTableColumns(showPayer);
   const activeCols = hideEmpty
     ? allCols.filter((col) => {
         if (col.ignoreIf === "never") return true;
@@ -291,18 +350,16 @@ const renderMaintenanceHistoryTable = (
       })
     : allCols;
 
-  const headRow = rtlRow(activeCols.map((c) => c.label));
-  const rows = records.map((r) => rtlRow(activeCols.map((c) => c.format(r))));
-  const columnStyles = rtlStyles(
-    Object.fromEntries(activeCols.map((c, i) => [i, { cellWidth: c.width }])),
-  );
+  const headRow = activeCols.map((c) => c.label);
+  const rows = records.map((r) => activeCols.map((c) => c.format(r)));
+  const columnStyles = Object.fromEntries(activeCols.map((c, i) => [i, { cellWidth: c.width }]));
 
   autoTable(doc, {
     startY: y,
     head: [headRow],
     body: rows,
     theme: "grid",
-    styles: { fontSize: 5.5, cellPadding: 0.8, font: "Amiri", halign: "right", valign: "middle" },
+    styles: { fontSize: 5.5, cellPadding: 0.8, font: "Amiri", halign: "left", valign: "middle" },
     headStyles: { fillColor: BRAND.primary as [number, number, number], textColor: BRAND.white as [number, number, number], fontStyle: "bold" },
     columnStyles,
     didParseCell: (hookData) => {
@@ -326,6 +383,13 @@ export interface InternalReportOptions {
   logisticsOperations?: LogisticsOperation[];
   /** Date range filter — sets the period label in the header. */
   dateRange?: DateRange;
+  /**
+   * Cost Report mode: full costs shown like the internal report, but with no
+   * payer attribution anywhere (no Company/Client split, no Net Cost, no
+   * Client Invoice Total). The grand total is everything added up — parts,
+   * services, visit fees and machine rental. Header reads "Maintenance Cost Report".
+   */
+  costMode?: boolean;
 }
 
 export const generateInternalBranchReport = async (
@@ -338,29 +402,36 @@ export const generateInternalBranchReport = async (
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 10;
   const hideEmpty = options.hideEmptyComponents ?? true;
+  const costMode = options.costMode ?? false;
   const logisticsOps = options.logisticsOperations ?? [];
 
-  const allFlatRecords = flattenMaintenanceRecords(branch.maintenanceHistory);
+  // Logistics-only visits are tracked in the app but excluded from reports.
+  const reportBranch: Branch = {
+    ...branch,
+    maintenanceHistory: getReportRecords(branch.maintenanceHistory),
+  };
+
+  const allFlatRecords = flattenMaintenanceRecords(reportBranch.maintenanceHistory);
   const period = options.dateRange && (options.dateRange.startDate || options.dateRange.endDate)
-    ? formatDateRangeLabel(options.dateRange)
+    ? formatDateRangeLabelEn(options.dateRange)
     : formatPeriod(allFlatRecords);
-  const startY = drawInternalHeader(doc, companyName, branch.branchName || undefined, assets, period);
+  const startY = drawInternalHeader(doc, companyName, branch.branchName || undefined, assets, period, costMode ? "Maintenance Cost Report" : undefined);
 
   const engine = new PDFLayoutEngine(doc, startY, { hideEmptyComponents: hideEmpty });
 
-  const costs = aggregateBranchCosts(branch, partsList, servicesList);
+  const costs = aggregateBranchCosts(reportBranch, partsList, servicesList);
   const logisticsCosts = aggregateLogisticsCosts(logisticsOps);
-  const kpis = getOperationalKPIs(branch.maintenanceHistory);
-  const zoneBreakdown = getVisitZoneBreakdown(branch.maintenanceHistory);
-  const techSummary = getTechnicianSummary(branch.maintenanceHistory);
-  const machineSummary = getMachineLeaseSummary(branch.machines, branch.maintenanceHistory);
-  const problemFreq = getProblemFrequency(branch.maintenanceHistory);
+  const kpis = getOperationalKPIs(reportBranch.maintenanceHistory);
+  const zoneBreakdown = getVisitZoneBreakdown(reportBranch.maintenanceHistory);
+  const techSummary = getTechnicianSummary(reportBranch.maintenanceHistory);
+  const machineSummary = getMachineLeaseSummary(reportBranch.machines, reportBranch.maintenanceHistory);
+  const problemFreq = getProblemFrequency(reportBranch.maintenanceHistory);
 
   // KPI Cards
   engine.addBlock({
     estimatedHeight: 32,
     draw: (doc, y) => {
-      const cards = buildKPICards(allFlatRecords, costs, kpis);
+      const cards = buildKPICards(allFlatRecords, costs, kpis, costMode);
       return drawKPICards(doc, cards, y);
     },
   });
@@ -373,17 +444,19 @@ export const generateInternalBranchReport = async (
       const rightColX = pageWidth / 2 + 3;
 
       // Right column: financial summary
-      const financeHeaderY = drawSectionHeader(doc, "تفصيل التكاليف", y, {
+      const financeHeaderY = drawSectionHeader(doc, "Cost Breakdown", y, {
         x: rightColX,
         width: leftColW,
+        icon: "money",
       });
-      const financialCategories = buildFinancialCategories(costs);
+      const financialCategories = buildFinancialCategories(costs, costMode);
       let financeY = drawFinancialSummary(
         doc,
         financialCategories,
-        costs.grandTotalCompanyCost,
-        costs.totalClientPartsCost + costs.totalClientServicesCost,
+        costMode ? costs.grandTotal + costs.totalLeaseRevenue : costs.grandTotalCompanyCost,
+        costMode ? 0 : costs.totalClientPartsCost + costs.totalClientServicesCost,
         financeHeaderY,
+        costMode ? { grandTotalLabel: "Total Cost" } : undefined,
       );
 
       // Left column: sidebar
@@ -391,38 +464,38 @@ export const generateInternalBranchReport = async (
 
       if (zoneBreakdown.some((z) => z.visits > 0)) {
         sideY = checkPageBreak(doc, sideY, 35);
-        sideY = drawSectionHeader(doc, "رسوم الزيارات حسب المنطقة", sideY, { x: margin, width: leftColW });
+        sideY = drawSectionHeader(doc, "Visit Fees by Zone", sideY, { x: margin, width: leftColW, icon: "location" });
         sideY = drawZoneTable(doc, zoneBreakdown as ZoneRow[], costs.totalVisitFees, sideY);
       }
 
       if (machineSummary.length > 0) {
         sideY = checkPageBreak(doc, sideY, 35);
-        sideY = drawSectionHeader(doc, "أسطول الماكينات", sideY, { x: margin, width: leftColW });
+        sideY = drawSectionHeader(doc, "Machine Fleet", sideY, { x: margin, width: leftColW, icon: "coffee" });
         const machines: MachineInfo[] = machineSummary.map((m) => ({
           name: m.name,
-          type: m.type === "leased" ? "إيجار" : m.type === "consumption" ? "استهلاك" : "شراء",
+          type: m.type === "leased" ? "Lease" : m.type === "consumption" ? "Consumption" : "Purchase",
           dailyRate: m.dailyRate,
-          metric: `${formatEnNumber(m.daysActive)} يوم`,
+          metric: `${formatEnNumber(m.daysActive)} days`,
           total: m.revenue,
-          icon: m.type === "leased" ? "☕" : m.type === "consumption" ? "⚙" : "M",
+          icon: m.type === "leased" ? "coffee" : m.type === "consumption" ? "cog" : "doc",
         }));
         sideY = drawMachineCards(doc, machines, sideY);
       }
 
       const branchInfo = buildInfoItems(
         [
-          { label: "الموقع:", rawValue: branch.location, ignoreIf: "empty", icon: "" },
-          { label: "البريد:", rawValue: branch.email, ignoreIf: "empty", icon: "✉" },
-          { label: "الرقم الضريبي:", rawValue: branch.taxNumber, ignoreIf: "empty", icon: "#" },
-          { label: "استهلاك القهوة:", rawValue: branch.coffeeConsumptionKg, ignoreIf: "zero", icon: "◎", format: (v) => `${formatEnNumber(Number(v))} كجم/شهر` },
-          { label: "أوقات الصيانة:", rawValue: branch.allowedMaintenanceTimes, ignoreIf: "empty", icon: "◷" },
+          { label: "Location:", rawValue: branch.location, ignoreIf: "empty", icon: "location" },
+          { label: "Email:", rawValue: branch.email, ignoreIf: "empty", icon: "mail" },
+          { label: "Tax No.:", rawValue: branch.taxNumber, ignoreIf: "empty", icon: "doc" },
+          { label: "Coffee consumption:", rawValue: branch.coffeeConsumptionKg, ignoreIf: "zero", icon: "coffee", format: (v) => `${formatEnNumber(Number(v))} kg/month` },
+          { label: "Maintenance times:", rawValue: branch.allowedMaintenanceTimes, ignoreIf: "empty", icon: "clock" },
         ],
         hideEmpty,
       );
 
       if (branchInfo.length > 0) {
         sideY = checkPageBreak(doc, sideY, 40);
-        sideY = drawSectionHeader(doc, "معلومات الفرع", sideY, { x: margin, width: leftColW });
+        sideY = drawSectionHeader(doc, "Branch Information", sideY, { x: margin, width: leftColW, icon: "home" });
         sideY = drawInfoBox(doc, branchInfo, sideY);
       }
 
@@ -433,7 +506,7 @@ export const generateInternalBranchReport = async (
           phone: c.phoneNumbers.map((p) => p.number).join(" / ") || "—",
         }));
         sideY = checkPageBreak(doc, sideY, 40);
-        sideY = drawSectionHeader(doc, "جهات الاتصال", sideY, { x: margin, width: leftColW });
+        sideY = drawSectionHeader(doc, "Contacts", sideY, { x: margin, width: leftColW, icon: "phone" });
         sideY = drawContactCards(doc, contacts, sideY);
       }
 
@@ -443,13 +516,13 @@ export const generateInternalBranchReport = async (
 
   // Maintenance History — 13 columns matching HTML preview, pruned when empty
   engine.addSection(
-    "سجل الصيانة التفصيلي",
+    "Detailed Maintenance Log",
     (section) => {
       section.addRepeater(
         allFlatRecords,
         40 + allFlatRecords.length * 8,
-        (doc, y) => drawEmptyMessage(doc, y, "لا توجد سجلات صيانة", margin),
-        (doc, y, items) => renderMaintenanceHistoryTable(doc, items, y, hideEmpty),
+        (doc, y) => drawEmptyMessage(doc, y, "No maintenance records", margin),
+        (doc, y, items) => renderMaintenanceHistoryTable(doc, items, y, hideEmpty, !costMode),
       );
     },
     drawSectionHeader,
@@ -457,22 +530,22 @@ export const generateInternalBranchReport = async (
 
   // Technician Performance — 6 columns
   engine.addSection(
-    "أداء الفنيين",
+    "Technician Performance",
     (section) => {
       section.addRepeater(
         techSummary,
         40 + techSummary.length * 8,
-        (doc, y) => drawEmptyMessage(doc, y, "لا توجد بيانات فنيين", margin),
+        (doc, y) => drawEmptyMessage(doc, y, "No technician data", margin),
         (doc, y, items) => {
           const tableW = pageWidth - margin * 2;
           const colWidths = [tableW * 0.22, tableW * 0.12, tableW * 0.14, tableW * 0.14, tableW * 0.16, tableW * 0.22];
           const x = margin;
 
-          let nextY = drawTableHeader(doc, ["الفني", "الزيارات", "متوسط التقييم", "قطع الغيار", "إجمالي التكلفة", "المناطق"], colWidths, x, y, tableW);
+          let nextY = drawTableHeader(doc, ["Technician", "Visits", "Avg Rating", "Parts Used", "Total Cost", "Zones"], colWidths, x, y, tableW);
 
           const techMap = new Map<string, { totalCost: number; zones: Record<string, number> }>();
           allFlatRecords.forEach((r) => {
-            const name = r.baristaName || "غير معروف";
+            const name = r.baristaName || "Unknown";
             const recCosts = getRecordCostSummary(r, partsList, servicesList);
             const existing = techMap.get(name) || { totalCost: 0, zones: {} };
             existing.totalCost += recCosts.total;
@@ -490,9 +563,9 @@ export const generateInternalBranchReport = async (
             nextY = checkPageBreak(doc, nextY, 8);
             nextY = drawTableRow(
               doc,
-              [rtl(t.name), formatEnNumber(t.visits), t.avgRating > 0 ? `★ ${formatEnNumber(t.avgRating)}/5` : "-", formatEnNumber(t.partsUsed), formatPdfCurrency(extra.totalCost), zonesStr],
+              [rtl(t.name), formatEnNumber(t.visits), t.avgRating > 0 ? `★ ${formatEnNumber(t.avgRating)}/5` : "-", formatEnNumber(t.partsUsed), formatPdfCurrencyEn(extra.totalCost), zonesStr],
               colWidths, x, nextY, tableW, i % 2 === 1,
-              ["right", "center", "center", "center", "right", "right"],
+              ["left", "center", "center", "center", "right", "right"],
             );
           });
 
@@ -521,13 +594,13 @@ export const generateInternalBranchReport = async (
   });
 
   engine.addSection(
-    "ملخص المشاكل والقطع",
+    "Problems & Parts Summary",
     (section) => {
       section.addBlock({
         estimatedHeight: topProblems.length > 0 || allParts.length > 0 || !hideEmpty ? 80 : 20,
         draw: (doc, y) => {
           if (hideEmpty && topProblems.length === 0 && allParts.length === 0) {
-            return drawEmptyMessage(doc, y, "لا توجد مشاكل أو قطع", margin);
+            return drawEmptyMessage(doc, y, "No problems or parts", margin);
           }
 
           const startY = y;
@@ -535,24 +608,24 @@ export const generateInternalBranchReport = async (
 
           if (!hideEmpty || topProblems.length > 0) {
             const x = margin;
-            let py = drawSectionHeader(doc, "أكثر المشاكل تكراراً", startY);
+            let py = drawSectionHeader(doc, "Most Frequent Problems", startY);
             const cw = [colW * 0.5, colW * 0.2, colW * 0.3];
-            py = drawTableHeader(doc, ["المشكلة", "عدد المرات", "آخر ظهور"], cw, x, py, colW);
+            py = drawTableHeader(doc, ["Problem", "Count", "Last Seen"], cw, x, py, colW);
             topProblems.forEach((p, i) => {
               py = checkPageBreak(doc, py, 8);
-              py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatDateEn(problemLastDate.get(p.name) || "—")], cw, x, py, colW, i % 2 === 1, ["right", "center", "right"]);
+              py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatDateEn(problemLastDate.get(p.name) || "—")], cw, x, py, colW, i % 2 === 1, ["left", "center", "right"]);
             });
           }
 
           if (!hideEmpty || allParts.length > 0) {
             const x = margin + colW + 8;
-            let py = drawSectionHeader(doc, "أكثر القطع استهلاكاً", startY);
+            let py = drawSectionHeader(doc, "Most Used Parts", startY);
             const cw = [colW * 0.5, colW * 0.25, colW * 0.25];
-            py = drawTableHeader(doc, ["القطعة", "الكمية", "التكلفة"], cw, x, py, colW);
+            py = drawTableHeader(doc, ["Part", "Qty", "Cost"], cw, x, py, colW);
             allParts.forEach((p, i) => {
               py = checkPageBreak(doc, py, 8);
-              py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatPdfCurrency(p.totalCost)], cw, x, py, colW, i % 2 === 1, [
-                "right",
+              py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatPdfCurrencyEn(p.totalCost)], cw, x, py, colW, i % 2 === 1, [
+                "left",
                 "center",
                 "right",
               ]);
@@ -569,23 +642,23 @@ export const generateInternalBranchReport = async (
   // Machine Logistics — independent standalone section (with costs)
   if (!hideEmpty || logisticsOps.length > 0) {
     engine.addSection(
-      "اللوجستيات — نقل واستبدال الماكينات",
+      "Logistics — Machine Transport & Replacement",
       (section) => {
         // Cost summary block
         section.addBlock({
           estimatedHeight: logisticsCosts.totalLogisticsCost > 0 ? 35 : 15,
           draw: (doc, y) => {
             if (logisticsCosts.totalLogisticsCost <= 0) {
-              return drawEmptyMessage(doc, y, "لا توجد تكاليف لوجستية", margin);
+              return drawEmptyMessage(doc, y, "No logistics costs", margin);
             }
             const cardW = (pageWidth - margin * 2 - 24) / 5;
             const cardH = 22;
-            const cards = [
-              { label: "إيجار الماكينات", value: formatPdfCurrency(logisticsCosts.totalRentalCost), color: BRAND.primary },
-              { label: "النقل — استلام", value: formatPdfCurrency(logisticsCosts.totalPickupCost), color: BRAND.primaryLight },
-              { label: "النقل — إرجاع", value: formatPdfCurrency(logisticsCosts.totalReturnCost), color: BRAND.info },
-              { label: "تكلفة الصيانة", value: formatPdfCurrency(logisticsCosts.totalMaintenanceCost), color: BRAND.warning },
-              { label: "إجمالي اللوجستيات", value: formatPdfCurrency(logisticsCosts.totalLogisticsCost), color: BRAND.header },
+            const cards: Array<{ label: string; value: string; color: [number, number, number]; icon: PdfIconName }> = [
+              { label: "Machine Rental", value: formatPdfCurrencyEn(logisticsCosts.totalRentalCost), color: BRAND.primary, icon: "calendar" },
+              { label: "Transport — Pickup", value: formatPdfCurrencyEn(logisticsCosts.totalPickupCost), color: BRAND.primaryLight, icon: "truck" },
+              { label: "Transport — Return", value: formatPdfCurrencyEn(logisticsCosts.totalReturnCost), color: BRAND.info, icon: "truck" },
+              { label: "Maintenance Cost", value: formatPdfCurrencyEn(logisticsCosts.totalMaintenanceCost), color: BRAND.warning, icon: "wrench" },
+              { label: "Logistics Total", value: formatPdfCurrencyEn(logisticsCosts.totalLogisticsCost), color: BRAND.header, icon: "money" },
             ];
             cards.forEach((card, i) => {
               const cx = margin + i * (cardW + 6);
@@ -594,14 +667,15 @@ export const generateInternalBranchReport = async (
               doc.roundedRect(cx, y, cardW, cardH, 2, 2, "FD");
               doc.setFillColor(...card.color);
               doc.rect(cx, y, cardW, 3, "F");
+              drawIconBadge(doc, cx + cardW - 7, y + 10, card.icon, card.color, 2.4);
               doc.setFont("Amiri", "bold");
               doc.setFontSize(12);
               doc.setTextColor(...BRAND.text);
-              doc.text(card.value, cx + cardW - 4, y + 13, { align: "right" });
+              pdfText(doc, card.value, cx + 4, y + 13, { align: "left" });
               doc.setFont("Amiri", "bold");
               doc.setFontSize(7);
               doc.setTextColor(...BRAND.textMuted);
-              doc.text(rtl(card.label), cx + cardW - 4, y + 18, { align: "right" });
+              pdfText(doc, card.label, cx + 4, y + 18, { align: "left" });
             });
             return y + cardH + 8;
           },
@@ -611,7 +685,7 @@ export const generateInternalBranchReport = async (
         section.addRepeater(
           logisticsOps,
           45 + logisticsOps.length * 12,
-          (doc, y) => drawEmptyMessage(doc, y, "لا توجد عمليات لوجستية", margin),
+          (doc, y) => drawEmptyMessage(doc, y, "No logistics operations", margin),
           (doc, y, items) => drawLogisticsOperationsTable(doc, items, y, margin),
         );
       },
@@ -620,10 +694,21 @@ export const generateInternalBranchReport = async (
   }
 
   engine.flush();
-  applyFooters(doc, "نظام CMR", companyName);
+  applyFooters(doc, "CMR System", companyName);
 
   return doc;
 };
+
+/**
+ * Cost Report for ONE branch: full costs like the internal report but with no
+ * payer attribution — everything is added up (parts + services + visit fees +
+ * machine rental).
+ */
+export const generateCostBranchReport = async (
+  companyName: string,
+  branch: Branch,
+  options: InternalReportOptions = {},
+): Promise<jsPDF> => generateInternalBranchReport(companyName, branch, { ...options, costMode: true });
 
 // ═══════════════════════════════════════════
 //  TIER 1: Internal Company Report (Overview)
@@ -638,28 +723,39 @@ export const generateInternalCompanyReport = async (
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 10;
   const hideEmpty = options.hideEmptyComponents ?? true;
+  const costMode = options.costMode ?? false;
   const logisticsOps = options.logisticsOperations ?? [];
 
-  const allFlatRecords = flattenMaintenanceRecords(data.maintenanceHistory);
-  data.branches.forEach((b) => allFlatRecords.push(...flattenMaintenanceRecords(b.maintenanceHistory)));
+  // Logistics-only visits are tracked in the app but excluded from reports.
+  const reportData: FormData = {
+    ...data,
+    maintenanceHistory: getReportRecords(data.maintenanceHistory),
+    branches: data.branches.map((b) => ({
+      ...b,
+      maintenanceHistory: getReportRecords(b.maintenanceHistory),
+    })),
+  };
+
+  const allFlatRecords = flattenMaintenanceRecords(reportData.maintenanceHistory);
+  reportData.branches.forEach((b) => allFlatRecords.push(...flattenMaintenanceRecords(b.maintenanceHistory)));
   const period = options.dateRange && (options.dateRange.startDate || options.dateRange.endDate)
-    ? formatDateRangeLabel(options.dateRange)
+    ? formatDateRangeLabelEn(options.dateRange)
     : formatPeriod(allFlatRecords);
-  const startY = drawInternalHeader(doc, data.companyName, undefined, assets, period);
+  const startY = drawInternalHeader(doc, data.companyName, undefined, assets, period, costMode ? "Maintenance Cost Report" : undefined);
 
   const engine = new PDFLayoutEngine(doc, startY, { hideEmptyComponents: hideEmpty });
 
-  const costs = aggregateCosts(data, partsList, servicesList);
+  const costs = aggregateCosts(reportData, partsList, servicesList);
   const logisticsCosts = aggregateLogisticsCosts(logisticsOps);
-  const kpis = getOperationalKPIs(data.maintenanceHistory);
-  const zoneBreakdown = getVisitZoneBreakdown(data.maintenanceHistory);
-  const techSummary = getTechnicianSummary(data.maintenanceHistory);
-  const machineSummary = getMachineLeaseSummary(data.machines, data.maintenanceHistory);
-  const branchSummaries = getBranchCostSummary(data.branches, partsList, servicesList);
-  const problemFreq = getProblemFrequency(data.maintenanceHistory);
+  const kpis = getOperationalKPIs(reportData.maintenanceHistory);
+  const zoneBreakdown = getVisitZoneBreakdown(reportData.maintenanceHistory);
+  const techSummary = getTechnicianSummary(reportData.maintenanceHistory);
+  const machineSummary = getMachineLeaseSummary(reportData.machines, reportData.maintenanceHistory);
+  const branchSummaries = getBranchCostSummary(reportData.branches, partsList, servicesList);
+  const problemFreq = getProblemFrequency(reportData.maintenanceHistory);
 
   // Merge branch-level data
-  data.branches.forEach((branch) => {
+  reportData.branches.forEach((branch) => {
     const branchKPIs = getOperationalKPIs(branch.maintenanceHistory);
     kpis.totalVisits += branchKPIs.totalVisits;
     kpis.totalProblems += branchKPIs.totalProblems;
@@ -700,7 +796,7 @@ export const generateInternalCompanyReport = async (
   engine.addBlock({
     estimatedHeight: 32,
     draw: (doc, y) => {
-      const kpiCards = buildKPICards(allFlatRecords, costs, kpis);
+      const kpiCards = buildKPICards(allFlatRecords, costs, kpis, costMode);
       return drawKPICards(doc, kpiCards, y);
     },
   });
@@ -712,55 +808,57 @@ export const generateInternalCompanyReport = async (
       const leftColW = pageWidth / 2 - margin - 6;
       const rightColX = pageWidth / 2 + 3;
 
-      const financeHeaderY = drawSectionHeader(doc, "تفصيل التكاليف", y, {
+      const financeHeaderY = drawSectionHeader(doc, "Cost Breakdown", y, {
         x: rightColX,
         width: leftColW,
+        icon: "money",
       });
-      const financialCategories = buildFinancialCategories(costs);
+      const financialCategories = buildFinancialCategories(costs, costMode);
       let financeY = drawFinancialSummary(
         doc,
         financialCategories,
-        costs.grandTotalCompanyCost,
-        costs.totalClientPartsCost + costs.totalClientServicesCost,
+        costMode ? costs.grandTotal + costs.totalLeaseRevenue : costs.grandTotalCompanyCost,
+        costMode ? 0 : costs.totalClientPartsCost + costs.totalClientServicesCost,
         financeHeaderY,
+        costMode ? { grandTotalLabel: "Total Cost" } : undefined,
       );
 
       let sideY = y;
 
       if (zoneBreakdown.some((z) => z.visits > 0)) {
         sideY = checkPageBreak(doc, sideY, 35);
-        sideY = drawSectionHeader(doc, "رسوم الزيارات حسب المنطقة", sideY, { x: margin, width: leftColW });
+        sideY = drawSectionHeader(doc, "Visit Fees by Zone", sideY, { x: margin, width: leftColW, icon: "location" });
         sideY = drawZoneTable(doc, zoneBreakdown as ZoneRow[], costs.totalVisitFees, sideY);
       }
 
       if (machineSummary.length > 0) {
         sideY = checkPageBreak(doc, sideY, 35);
-        sideY = drawSectionHeader(doc, "أسطول الماكينات", sideY, { x: margin, width: leftColW });
+        sideY = drawSectionHeader(doc, "Machine Fleet", sideY, { x: margin, width: leftColW, icon: "coffee" });
         const machines: MachineInfo[] = machineSummary.map((m) => ({
           name: m.name,
-          type: m.type === "leased" ? "إيجار" : m.type === "consumption" ? "استهلاك" : "شراء",
+          type: m.type === "leased" ? "Lease" : m.type === "consumption" ? "Consumption" : "Purchase",
           dailyRate: m.dailyRate,
-          metric: `${formatEnNumber(m.daysActive)} يوم`,
+          metric: `${formatEnNumber(m.daysActive)} days`,
           total: m.revenue,
-          icon: m.type === "leased" ? "☕" : m.type === "consumption" ? "⚙" : "M",
+          icon: m.type === "leased" ? "coffee" : m.type === "consumption" ? "cog" : "doc",
         }));
         sideY = drawMachineCards(doc, machines, sideY);
       }
 
       const companyInfo = buildInfoItems(
         [
-          { label: "الموقع:", rawValue: data.location, ignoreIf: "empty", icon: "⌖" },
-          { label: "البريد:", rawValue: data.email, ignoreIf: "empty", icon: "✉" },
-          { label: "الرقم الضريبي:", rawValue: data.taxNumber, ignoreIf: "empty", icon: "#" },
-          { label: "استهلاك القهوة:", rawValue: data.coffeeConsumptionKg, ignoreIf: "zero", icon: "◎", format: (v) => `${formatEnNumber(Number(v))} كجم/شهر` },
-          { label: "أوقات الصيانة:", rawValue: data.allowedMaintenanceTimes, ignoreIf: "empty", icon: "◷" },
+          { label: "Location:", rawValue: data.location, ignoreIf: "empty", icon: "location" },
+          { label: "Email:", rawValue: data.email, ignoreIf: "empty", icon: "mail" },
+          { label: "Tax No.:", rawValue: data.taxNumber, ignoreIf: "empty", icon: "doc" },
+          { label: "Coffee consumption:", rawValue: data.coffeeConsumptionKg, ignoreIf: "zero", icon: "coffee", format: (v) => `${formatEnNumber(Number(v))} kg/month` },
+          { label: "Maintenance times:", rawValue: data.allowedMaintenanceTimes, ignoreIf: "empty", icon: "clock" },
         ],
         hideEmpty,
       );
 
       if (companyInfo.length > 0) {
         sideY = checkPageBreak(doc, sideY, 40);
-        sideY = drawSectionHeader(doc, "معلومات الشركة", sideY, { x: margin, width: leftColW });
+        sideY = drawSectionHeader(doc, "Company Information", sideY, { x: margin, width: leftColW, icon: "home" });
         sideY = drawInfoBox(doc, companyInfo, sideY);
       }
 
@@ -769,27 +867,33 @@ export const generateInternalCompanyReport = async (
   });
 
   // Branch Cost Comparison
+  const branchCostMap = new Map<string, number>();
+  reportData.branches.forEach((b) => {
+    const c = aggregateBranchCosts(b, partsList, servicesList);
+    branchCostMap.set(b.branchName || "Branch", c.grandTotal + c.totalLeaseRevenue);
+  });
+
   engine.addSection(
-    "مقارنة الفروع",
+    "Branch Comparison",
     (section) => {
       section.addRepeater(
         branchSummaries,
         40 + branchSummaries.length * 8,
-        (doc, y) => drawEmptyMessage(doc, y, "لا توجد فروع للمقارنة", margin),
+        (doc, y) => drawEmptyMessage(doc, y, "No branches to compare", margin),
         (doc, y, items) => {
           const tableW = pageWidth - margin * 2;
           const colWidths = [tableW * 0.22, tableW * 0.13, tableW * 0.15, tableW * 0.15, tableW * 0.15, tableW * 0.2];
           const x = margin;
 
-          let nextY = drawTableHeader(doc, ["الفرع", "الزيارات", "رسوم الزيارات", "قطع الغيار", "الخدمات", "صافي التكلفة"], colWidths, x, y, tableW);
+          let nextY = drawTableHeader(doc, ["Branch", "Visits", "Visit Fees", "Parts", "Services", costMode ? "Total Cost" : "Net Cost"], colWidths, x, y, tableW);
 
           items.forEach((bs, i) => {
             nextY = checkPageBreak(doc, nextY, 8);
             nextY = drawTableRow(
               doc,
-              [rtl(bs.branchName), formatEnNumber(bs.visitCount), formatPdfCurrency(bs.visitFees), formatPdfCurrency(bs.partsCost), formatPdfCurrency(bs.servicesCost), formatPdfCurrency(bs.netCost)],
+              [rtl(bs.branchName), formatEnNumber(bs.visitCount), formatPdfCurrencyEn(bs.visitFees), formatPdfCurrencyEn(bs.partsCost), formatPdfCurrencyEn(bs.servicesCost), formatPdfCurrencyEn(costMode ? (branchCostMap.get(bs.branchName) ?? bs.netCost) : bs.netCost)],
               colWidths, x, nextY, tableW, i % 2 === 1,
-              ["right", "center", "right", "right", "right", "right"],
+              ["left", "center", "right", "right", "right", "right"],
             );
           });
 
@@ -802,22 +906,22 @@ export const generateInternalCompanyReport = async (
 
   // Technician Performance
   engine.addSection(
-    "أداء الفنيين",
+    "Technician Performance",
     (section) => {
       section.addRepeater(
         techSummary,
         40 + techSummary.length * 8,
-        (doc, y) => drawEmptyMessage(doc, y, "لا توجد بيانات فنيين", margin),
+        (doc, y) => drawEmptyMessage(doc, y, "No technician data", margin),
         (doc, y, items) => {
           const tableW = pageWidth - margin * 2;
           const colWidths = [tableW * 0.22, tableW * 0.12, tableW * 0.14, tableW * 0.14, tableW * 0.16, tableW * 0.22];
           const x = margin;
 
-          let nextY = drawTableHeader(doc, ["الفني", "الزيارات", "متوسط التقييم", "قطع الغيار", "إجمالي التكلفة", "المناطق"], colWidths, x, y, tableW);
+          let nextY = drawTableHeader(doc, ["Technician", "Visits", "Avg Rating", "Parts Used", "Total Cost", "Zones"], colWidths, x, y, tableW);
 
           const techMap = new Map<string, { totalCost: number; zones: Record<string, number> }>();
           allFlatRecords.forEach((r) => {
-            const name = r.baristaName || "غير معروف";
+            const name = r.baristaName || "Unknown";
             const recCosts = getRecordCostSummary(r, partsList, servicesList);
             const existing = techMap.get(name) || { totalCost: 0, zones: {} };
             existing.totalCost += recCosts.total;
@@ -835,9 +939,9 @@ export const generateInternalCompanyReport = async (
             nextY = checkPageBreak(doc, nextY, 8);
             nextY = drawTableRow(
               doc,
-              [rtl(t.name), formatEnNumber(t.visits), t.avgRating > 0 ? `★ ${formatEnNumber(t.avgRating)}/5` : "-", formatEnNumber(t.partsUsed), formatPdfCurrency(extra.totalCost), zonesStr],
+              [rtl(t.name), formatEnNumber(t.visits), t.avgRating > 0 ? `★ ${formatEnNumber(t.avgRating)}/5` : "-", formatEnNumber(t.partsUsed), formatPdfCurrencyEn(extra.totalCost), zonesStr],
               colWidths, x, nextY, tableW, i % 2 === 1,
-              ["right", "center", "center", "center", "right", "right"],
+              ["left", "center", "center", "center", "right", "right"],
             );
           });
 
@@ -866,13 +970,13 @@ export const generateInternalCompanyReport = async (
   });
 
   engine.addSection(
-    "ملخص المشاكل والقطع",
+    "Problems & Parts Summary",
     (section) => {
       section.addBlock({
         estimatedHeight: topProblems.length > 0 || allParts.length > 0 || !hideEmpty ? 80 : 20,
         draw: (doc, y) => {
           if (hideEmpty && topProblems.length === 0 && allParts.length === 0) {
-            return drawEmptyMessage(doc, y, "لا توجد مشاكل أو قطع", margin);
+            return drawEmptyMessage(doc, y, "No problems or parts", margin);
           }
 
           const startY = y;
@@ -880,24 +984,24 @@ export const generateInternalCompanyReport = async (
 
           if (!hideEmpty || topProblems.length > 0) {
             const x = margin;
-            let py = drawSectionHeader(doc, "أكثر المشاكل تكراراً", startY);
+            let py = drawSectionHeader(doc, "Most Frequent Problems", startY);
             const cw = [colW * 0.5, colW * 0.2, colW * 0.3];
-            py = drawTableHeader(doc, ["المشكلة", "عدد المرات", "آخر ظهور"], cw, x, py, colW);
+            py = drawTableHeader(doc, ["Problem", "Count", "Last Seen"], cw, x, py, colW);
             topProblems.forEach((p, i) => {
               py = checkPageBreak(doc, py, 8);
-              py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatDateEn(problemLastDate.get(p.name) || "—")], cw, x, py, colW, i % 2 === 1, ["right", "center", "right"]);
+              py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatDateEn(problemLastDate.get(p.name) || "—")], cw, x, py, colW, i % 2 === 1, ["left", "center", "right"]);
             });
           }
 
           if (!hideEmpty || allParts.length > 0) {
             const x = margin + colW + 8;
-            let py = drawSectionHeader(doc, "أكثر القطع استهلاكاً", startY);
+            let py = drawSectionHeader(doc, "Most Used Parts", startY);
             const cw = [colW * 0.5, colW * 0.25, colW * 0.25];
-            py = drawTableHeader(doc, ["القطعة", "الكمية", "التكلفة"], cw, x, py, colW);
+            py = drawTableHeader(doc, ["Part", "Qty", "Cost"], cw, x, py, colW);
             allParts.forEach((p, i) => {
               py = checkPageBreak(doc, py, 8);
-              py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatPdfCurrency(p.totalCost)], cw, x, py, colW, i % 2 === 1, [
-                "right",
+              py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatPdfCurrencyEn(p.totalCost)], cw, x, py, colW, i % 2 === 1, [
+                "left",
                 "center",
                 "right",
               ]);
@@ -913,15 +1017,15 @@ export const generateInternalCompanyReport = async (
 
   // Maintenance History (Main Office + Branches)
   engine.addSection(
-    "سجل الصيانة",
+    "Maintenance Log",
     (section) => {
       section.addRepeater(
         allFlatRecords,
         40 + Math.min(allFlatRecords.length, 20) * 8,
-        (doc, y) => drawEmptyMessage(doc, y, "لا توجد سجلات صيانة", margin),
+        (doc, y) => drawEmptyMessage(doc, y, "No maintenance records", margin),
         (doc, y, items) => {
           const recentRecords = items.slice(-20);
-          return renderMaintenanceHistoryTable(doc, recentRecords, y, hideEmpty);
+          return renderMaintenanceHistoryTable(doc, recentRecords, y, hideEmpty, !costMode);
         },
       );
     },
@@ -931,23 +1035,23 @@ export const generateInternalCompanyReport = async (
   // Machine Logistics — independent standalone section (with costs)
   if (!hideEmpty || logisticsOps.length > 0) {
     engine.addSection(
-      "اللوجستيات — نقل واستبدال الماكينات",
+      "Logistics — Machine Transport & Replacement",
       (section) => {
         // Cost summary block
         section.addBlock({
           estimatedHeight: logisticsCosts.totalLogisticsCost > 0 ? 35 : 15,
           draw: (doc, y) => {
             if (logisticsCosts.totalLogisticsCost <= 0) {
-              return drawEmptyMessage(doc, y, "لا توجد تكاليف لوجستية", margin);
+              return drawEmptyMessage(doc, y, "No logistics costs", margin);
             }
             const cardW = (pageWidth - margin * 2 - 24) / 5;
             const cardH = 22;
-            const cards = [
-              { label: "إيجار الماكينات", value: formatPdfCurrency(logisticsCosts.totalRentalCost), color: BRAND.primary },
-              { label: "النقل — استلام", value: formatPdfCurrency(logisticsCosts.totalPickupCost), color: BRAND.primaryLight },
-              { label: "النقل — إرجاع", value: formatPdfCurrency(logisticsCosts.totalReturnCost), color: BRAND.info },
-              { label: "تكلفة الصيانة", value: formatPdfCurrency(logisticsCosts.totalMaintenanceCost), color: BRAND.warning },
-              { label: "إجمالي اللوجستيات", value: formatPdfCurrency(logisticsCosts.totalLogisticsCost), color: BRAND.header },
+            const cards: Array<{ label: string; value: string; color: [number, number, number]; icon: PdfIconName }> = [
+              { label: "Machine Rental", value: formatPdfCurrencyEn(logisticsCosts.totalRentalCost), color: BRAND.primary, icon: "calendar" },
+              { label: "Transport — Pickup", value: formatPdfCurrencyEn(logisticsCosts.totalPickupCost), color: BRAND.primaryLight, icon: "truck" },
+              { label: "Transport — Return", value: formatPdfCurrencyEn(logisticsCosts.totalReturnCost), color: BRAND.info, icon: "truck" },
+              { label: "Maintenance Cost", value: formatPdfCurrencyEn(logisticsCosts.totalMaintenanceCost), color: BRAND.warning, icon: "wrench" },
+              { label: "Logistics Total", value: formatPdfCurrencyEn(logisticsCosts.totalLogisticsCost), color: BRAND.header, icon: "money" },
             ];
             cards.forEach((card, i) => {
               const cx = margin + i * (cardW + 6);
@@ -956,14 +1060,15 @@ export const generateInternalCompanyReport = async (
               doc.roundedRect(cx, y, cardW, cardH, 2, 2, "FD");
               doc.setFillColor(...card.color);
               doc.rect(cx, y, cardW, 3, "F");
+              drawIconBadge(doc, cx + cardW - 7, y + 10, card.icon, card.color, 2.4);
               doc.setFont("Amiri", "bold");
               doc.setFontSize(12);
               doc.setTextColor(...BRAND.text);
-              doc.text(card.value, cx + cardW - 4, y + 13, { align: "right" });
+              pdfText(doc, card.value, cx + 4, y + 13, { align: "left" });
               doc.setFont("Amiri", "bold");
               doc.setFontSize(7);
               doc.setTextColor(...BRAND.textMuted);
-              doc.text(rtl(card.label), cx + cardW - 4, y + 18, { align: "right" });
+              pdfText(doc, card.label, cx + 4, y + 18, { align: "left" });
             });
             return y + cardH + 8;
           },
@@ -973,7 +1078,7 @@ export const generateInternalCompanyReport = async (
         section.addRepeater(
           logisticsOps,
           45 + logisticsOps.length * 12,
-          (doc, y) => drawEmptyMessage(doc, y, "لا توجد عمليات لوجستية", margin),
+          (doc, y) => drawEmptyMessage(doc, y, "No logistics operations", margin),
           (doc, y, items) => drawLogisticsOperationsTable(doc, items, y, margin),
         );
       },
@@ -982,7 +1087,424 @@ export const generateInternalCompanyReport = async (
   }
 
   engine.flush();
-  applyFooters(doc, "نظام CMR", data.companyName);
+  applyFooters(doc, "CMR System", data.companyName);
 
   return doc;
 };
+
+/**
+ * Cost Report for the whole company: full costs like the internal report but
+ * with no payer attribution — everything is added up (parts + services +
+ * visit fees + machine rental).
+ */
+export const generateCostCompanyReport = async (
+  data: FormData & { created_at?: string },
+  options: InternalReportOptions = {},
+): Promise<jsPDF> => generateInternalCompanyReport(data, { ...options, costMode: true });
+
+// ═══════════════════════════════════════════
+//  TIER 4: Per-Visit Report (Internal & Client)
+// ═══════════════════════════════════════════
+
+export interface VisitReportEntity {
+  /** Branch name for the report header (branch visits). */
+  branchName?: string;
+  location?: string;
+  email?: string;
+  taxNumber?: string;
+}
+
+export interface VisitReportOptions {
+  // Per-visit reports always hide empty sections (sections are drawn only
+  // when the record has data), so no options are currently needed.
+}
+
+/**
+ * Itemized cost categories for ONE maintenance visit. In costMode there is no
+ * payer attribution — parts and services are merged into single buckets.
+ */
+const buildVisitCategories = (record: MaintenanceRecord, costMode = false): FinancialCategory[] => {
+  const categories: FinancialCategory[] = [];
+  const parts = record.partsReplaced || [];
+  const services = record.servicesPerformed || [];
+
+  if (costMode) {
+    if (parts.length > 0) {
+      categories.push({
+        title: "Parts",
+        total: parts.reduce((s, p) => s + (p.count || 0) * resolvePartCost(p, partsList), 0),
+        lines: parts.map((p) => ({
+          name: p.name,
+          detail: `${formatEnNumber(p.count || 0)} × ${formatPdfCurrencyEn(resolvePartCost(p, partsList))}`,
+          total: (p.count || 0) * resolvePartCost(p, partsList),
+        })),
+      });
+    }
+    if (services.length > 0) {
+      categories.push({
+        title: "Services",
+        total: services.reduce((s, sv) => s + (sv.count || 0) * resolveServiceCost(sv, servicesList), 0),
+        lines: services.map((sv) => ({
+          name: sv.name,
+          detail: `${formatEnNumber(sv.count || 0)} × ${formatPdfCurrencyEn(resolveServiceCost(sv, servicesList))}`,
+          total: (sv.count || 0) * resolveServiceCost(sv, servicesList),
+        })),
+      });
+    }
+  } else {
+    const companyParts = parts.filter((p) => !p.paidByClient);
+    const clientParts = parts.filter((p) => p.paidByClient);
+    const companyServices = services.filter((s) => !s.paidByClient);
+    const clientServices = services.filter((s) => s.paidByClient);
+
+    if (companyParts.length > 0) {
+      categories.push({
+        title: "Parts — Company Paid",
+        total: companyParts.reduce((s, p) => s + (p.count || 0) * resolvePartCost(p, partsList), 0),
+        lines: companyParts.map((p) => ({
+          name: p.name,
+          detail: `${formatEnNumber(p.count || 0)} × ${formatPdfCurrencyEn(resolvePartCost(p, partsList))}`,
+          total: (p.count || 0) * resolvePartCost(p, partsList),
+        })),
+      });
+    }
+
+    if (clientParts.length > 0) {
+      categories.push({
+        title: "Parts — Client Paid",
+        total: clientParts.reduce((s, p) => s + (p.count || 0) * resolvePartCost(p, partsList), 0),
+        lines: clientParts.map((p) => ({
+          name: p.name,
+          detail: `${formatEnNumber(p.count || 0)} × ${formatPdfCurrencyEn(resolvePartCost(p, partsList))}`,
+          total: (p.count || 0) * resolvePartCost(p, partsList),
+        })),
+      });
+    }
+
+    if (companyServices.length > 0) {
+      categories.push({
+        title: "Services — Company Paid",
+        total: companyServices.reduce((s, sv) => s + (sv.count || 0) * resolveServiceCost(sv, servicesList), 0),
+        lines: companyServices.map((sv) => ({
+          name: sv.name,
+          detail: `${formatEnNumber(sv.count || 0)} × ${formatPdfCurrencyEn(resolveServiceCost(sv, servicesList))}`,
+          total: (sv.count || 0) * resolveServiceCost(sv, servicesList),
+        })),
+      });
+    }
+
+    if (clientServices.length > 0) {
+      categories.push({
+        title: "Services — Client Paid",
+        total: clientServices.reduce((s, sv) => s + (sv.count || 0) * resolveServiceCost(sv, servicesList), 0),
+        lines: clientServices.map((sv) => ({
+          name: sv.name,
+          detail: `${formatEnNumber(sv.count || 0)} × ${formatPdfCurrencyEn(resolveServiceCost(sv, servicesList))}`,
+          total: (sv.count || 0) * resolveServiceCost(sv, servicesList),
+        })),
+      });
+    }
+  }
+
+  const lease = record.dailyLeaseCost || 0;
+  if (lease > 0) {
+    categories.push({
+      title: "Daily Lease",
+      total: lease,
+      lines: [{ name: "Daily lease cost", total: lease }],
+    });
+  }
+
+  const visitFee = getVisitZoneFee(record.visitZone);
+  if (visitFee > 0) {
+    categories.push({
+      title: "Visit Fee",
+      total: visitFee,
+      lines: [{ name: "Visit fee", total: visitFee }],
+    });
+  }
+
+  return categories;
+};
+
+/** Draw all details of one visit record (summary, machines, issues, work, costs). */
+const drawVisitDetails = (
+  doc: jsPDF,
+  record: MaintenanceRecord,
+  y: number,
+  includeCosts: boolean,
+  costMode = false,
+): number => {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 10;
+  const tableW = pageWidth - margin * 2;
+
+  // Visit summary info box (full width, icon per field). "Resolved" only
+  // appears when the visit actually had a problem (mirrors the record UI).
+  const infoItems: InfoItem[] = [
+    { label: "Date:", value: formatDateEn(record.maintenanceDate), icon: "calendar" },
+    { label: "Type:", value: record.type === "requested" ? "Requested" : "Scheduled", icon: "doc" },
+    { label: "Technician:", value: rtl(record.baristaName) || "—", icon: "user" },
+    { label: "Zone:", value: rtl(record.visitZone) || "—", icon: "location" },
+  ];
+  if (!costMode) {
+    infoItems.push({ label: "Paid by:", value: getPaidByLabel(record.paidBy), icon: "money" });
+  }
+  infoItems.push(
+    { label: "Rating:", value: record.visitRating ? `★ ${formatEnNumber(record.visitRating)}/5` : "—", icon: "star" },
+    { label: "Next visit:", value: record.nextVisitDate ? formatDateEn(record.nextVisitDate) : "—", icon: "clock" },
+  );
+  if (record.hadProblem) {
+    infoItems.push({
+      label: "Resolved:",
+      value: record.problemSolved ? "Yes" : "No",
+      icon: record.problemSolved ? "check" : "cross",
+    });
+  }
+  y = drawSectionHeader(doc, "Visit Summary", y, { icon: "calendar" });
+  y = drawInfoBox(doc, infoItems, y, { x: margin, width: tableW });
+  y += 2;
+
+  // Machines
+  if (record.machines && record.machines.length > 0) {
+    y = checkPageBreak(doc, y, 30);
+    y = drawSectionHeader(doc, "Machines", y, { icon: "coffee" });
+    const colW = [tableW * 0.7, tableW * 0.3];
+    y = drawTableHeader(doc, ["Machine", "Qty"], colW, margin, y, tableW);
+    record.machines.forEach((m, i) => {
+      y = checkPageBreak(doc, y, 8);
+      y = drawTableRow(doc, [rtl(m.name), formatEnNumber(m.count || 1)], colW, margin, y, tableW, i % 2 === 1, ["left", "center"]);
+    });
+    y += 4;
+  }
+
+  // Issues
+  if (record.problems && record.problems.length > 0) {
+    y = checkPageBreak(doc, y, 24);
+    y = drawSectionHeader(doc, "Issues", y, { icon: "alert" });
+    record.problems.forEach((p) => {
+      const lines = doc.splitTextToSize(`• ${rtl(p)}`, tableW - 6);
+      lines.forEach((ln) => {
+        y = checkPageBreak(doc, y, 5);
+        doc.setFont("Amiri", "normal");
+        doc.setFontSize(7.5);
+        doc.setTextColor(...BRAND.text);
+        pdfText(doc, ln, margin + 2, y + 1);
+        y += 3.4;
+      });
+    });
+    y += 2;
+  }
+
+  // Parts replaced
+  const parts = record.partsReplaced || [];
+  if (parts.length > 0) {
+    y = checkPageBreak(doc, y, 30);
+    y = drawSectionHeader(doc, "Parts Replaced", y, { icon: "package" });
+    const headers = includeCosts ? ["Part", "Qty", "Unit Cost", "Total"] : ["Part", "Qty"];
+    const colW = includeCosts ? [tableW * 0.45, tableW * 0.1, tableW * 0.2, tableW * 0.25] : [tableW * 0.8, tableW * 0.2];
+    y = drawTableHeader(doc, headers, colW, margin, y, tableW);
+    parts.forEach((p, i) => {
+      const qty = p.count || 0;
+      const unit = resolvePartCost(p, partsList);
+      const cells = includeCosts
+        ? [rtl(p.name), formatEnNumber(qty), formatPdfCurrencyEn(unit), formatPdfCurrencyEn(qty * unit)]
+        : [rtl(p.name), formatEnNumber(qty)];
+      y = checkPageBreak(doc, y, 8);
+      y = drawTableRow(doc, cells, colW, margin, y, tableW, i % 2 === 1, ["left", "center", "right", "right"]);
+    });
+    y += 4;
+  }
+
+  // Services performed
+  const services = record.servicesPerformed || [];
+  if (services.length > 0) {
+    y = checkPageBreak(doc, y, 30);
+    y = drawSectionHeader(doc, "Services Performed", y, { icon: "wrench" });
+    const headers = includeCosts ? ["Service", "Qty", "Unit Cost", "Total"] : ["Service", "Qty"];
+    const colW = includeCosts ? [tableW * 0.45, tableW * 0.1, tableW * 0.2, tableW * 0.25] : [tableW * 0.8, tableW * 0.2];
+    y = drawTableHeader(doc, headers, colW, margin, y, tableW);
+    services.forEach((sv, i) => {
+      const qty = sv.count || 0;
+      const unit = resolveServiceCost(sv, servicesList);
+      const cells = includeCosts
+        ? [rtl(sv.name), formatEnNumber(qty), formatPdfCurrencyEn(unit), formatPdfCurrencyEn(qty * unit)]
+        : [rtl(sv.name), formatEnNumber(qty)];
+      y = checkPageBreak(doc, y, 8);
+      y = drawTableRow(doc, cells, colW, margin, y, tableW, i % 2 === 1, ["left", "center", "right", "right"]);
+    });
+    y += 4;
+  }
+
+  // Cost breakdown (cost reports only)
+  if (includeCosts) {
+    const categories = buildVisitCategories(record, costMode);
+    if (categories.length > 0) {
+      y = checkPageBreak(doc, y, 60);
+      y = drawSectionHeader(doc, "Cost Breakdown", y, { icon: "money" });
+      if (costMode) {
+        // Cost Report: everything added up, no payer split.
+        const total = categories.reduce((s, c) => s + c.total, 0);
+        y = drawFinancialSummary(doc, categories, total, 0, y, {
+          x: margin,
+          width: tableW,
+          grandTotalLabel: "Total Cost",
+        });
+      } else {
+        const companyTotal = categories
+          .filter((c) => !c.title.includes("Client"))
+          .reduce((s, c) => s + c.total, 0) - (record.dailyLeaseCost || 0);
+        const clientTotal = categories
+          .filter((c) => c.title.includes("Client"))
+          .reduce((s, c) => s + c.total, 0);
+        y = drawFinancialSummary(doc, categories, companyTotal, clientTotal, y, { x: margin, width: tableW });
+      }
+      y += 4;
+    }
+  }
+
+  // Recommendations
+  if (record.recommendations) {
+    y = checkPageBreak(doc, y, 20);
+    y = drawSectionHeader(doc, "Recommendations", y, { icon: "star" });
+    const lines = doc.splitTextToSize(rtl(record.recommendations), tableW - 4);
+    doc.setFont("Amiri", "normal");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...BRAND.textSecondary);
+    lines.forEach((ln) => {
+      pdfText(doc, ln, margin + 2, y + 1);
+      y += 3.4;
+    });
+    y += 2;
+  }
+
+  // Notes
+  if (record.notes) {
+    y = checkPageBreak(doc, y, 20);
+    y = drawSectionHeader(doc, "Notes", y, { icon: "doc" });
+    const lines = doc.splitTextToSize(rtl(record.notes), tableW - 4);
+    doc.setFont("Amiri", "normal");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...BRAND.textSecondary);
+    lines.forEach((ln) => {
+      pdfText(doc, ln, margin + 2, y + 1);
+      y += 3.4;
+    });
+    y += 2;
+  }
+
+  // Supervisors
+  if (record.supervisors && record.supervisors.length > 0) {
+    y = checkPageBreak(doc, y, 30);
+    y = drawSectionHeader(doc, "Supervisors", y, { icon: "user" });
+    const contacts: ContactInfo[] = record.supervisors.map((s) => ({
+      name: s.name,
+      role: "Supervisor",
+      phone: s.phone || "—",
+    }));
+    y = drawContactCards(doc, contacts, y);
+    y += 4;
+  }
+
+  return y;
+};
+
+/**
+ * Generate a PDF for ONE maintenance visit. mode "internal" shows full costs
+ * with payer attribution, "client" hides all costs, and "cost" shows full
+ * costs with no payer split. Includes the visit summary, machines, issues,
+ * parts/services with per-item costs (internal/cost), a cost breakdown
+ * (internal/cost), notes, supervisors, follow-up visits and photos.
+ */
+const generateVisitReport = async (
+  companyName: string,
+  entity: VisitReportEntity,
+  record: MaintenanceRecord,
+  mode: "internal" | "client" | "cost",
+  options: VisitReportOptions = {},
+): Promise<jsPDF> => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 10;
+  const tableW = pageWidth - margin * 2;
+  const assets = await loadFonts(doc);
+  const includeCosts = mode !== "client";
+  const costMode = mode === "cost";
+  const period = formatDateEn(record.maintenanceDate);
+  let y = drawInternalHeader(doc, companyName, entity.branchName, assets, period, costMode ? "Maintenance Cost Report" : undefined);
+
+  y = drawVisitDetails(doc, record, y, includeCosts, costMode);
+
+  // Follow-up visits (compact)
+  const followUps = record.followUpVisits || [];
+  if (followUps.length > 0) {
+    y = checkPageBreak(doc, y, 30);
+    y = drawSectionHeader(doc, "Follow-up Visits", y, { icon: "check" });
+    for (const fu of followUps) {
+      y = checkPageBreak(doc, y, 22);
+      doc.setDrawColor(...BRAND.hairline);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 4;
+      const fuType = fu.type === "requested" ? "Requested" : "Scheduled";
+      doc.setFont("Amiri", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(...BRAND.text);
+      pdfText(doc, `${formatDateEn(fu.maintenanceDate)} — ${fuType}`, margin + 2, y);
+      if (fu.baristaName) {
+        doc.setFont("Amiri", "normal");
+        doc.setFontSize(7);
+        doc.setTextColor(...BRAND.textMuted);
+        // pdfText reshapes embedded Arabic internally — pass the raw name.
+        pdfText(doc, `Technician: ${fu.baristaName}`, pageWidth - margin - 2, y, { align: "right" });
+      }
+      y += 4;
+      const summary: string[] = [];
+      if (fu.problems && fu.problems.length > 0) summary.push(`Issues: ${fu.problems.map(rtl).join(", ")}`);
+      if (fu.partsReplaced && fu.partsReplaced.length > 0) summary.push(`Parts: ${fu.partsReplaced.map((p) => `${formatEnNumber(p.count || 1)}× ${rtl(p.name)}`).join(", ")}`);
+      if (fu.servicesPerformed && fu.servicesPerformed.length > 0) summary.push(`Services: ${fu.servicesPerformed.map((s) => `${formatEnNumber(s.count || 1)}× ${rtl(s.name)}`).join(", ")}`);
+      const summaryText = summary.join("  ·  ") || "—";
+      const lines = doc.splitTextToSize(summaryText, tableW - 4);
+      doc.setFont("Amiri", "normal");
+      doc.setFontSize(6.8);
+      doc.setTextColor(...BRAND.textSecondary);
+      lines.forEach((ln) => {
+        y = checkPageBreak(doc, y, 5);
+        pdfText(doc, ln, margin + 4, y);
+        y += 3.2;
+      });
+      y += 3;
+    }
+  }
+
+  // Photos
+  if (record.photos && record.photos.length > 0) {
+    y = checkPageBreak(doc, y, 24);
+    y = drawSectionHeader(doc, "Photos", y, { icon: "doc" });
+    y = await renderPhotosInPDF(doc, record.photos, y + 2, pageWidth, margin);
+    y += 4;
+  }
+
+  applyFooters(doc, "CMR System", companyName);
+  return doc;
+};
+
+export const generateInternalVisitReport = async (
+  companyName: string,
+  entity: VisitReportEntity,
+  record: MaintenanceRecord,
+  options: VisitReportOptions = {},
+): Promise<jsPDF> => generateVisitReport(companyName, entity, record, "internal", options);
+
+export const generateClientVisitReport = async (
+  companyName: string,
+  entity: VisitReportEntity,
+  record: MaintenanceRecord,
+  options: VisitReportOptions = {},
+): Promise<jsPDF> => generateVisitReport(companyName, entity, record, "client", options);
+
+export const generateCostVisitReport = async (
+  companyName: string,
+  entity: VisitReportEntity,
+  record: MaintenanceRecord,
+  options: VisitReportOptions = {},
+): Promise<jsPDF> => generateVisitReport(companyName, entity, record, "cost", options);

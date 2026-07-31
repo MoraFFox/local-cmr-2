@@ -5,7 +5,7 @@ interface TechCardProps {
   title?: React.ReactNode;
   icon?: React.ReactNode;
   className?: string;
-  variant?: 'default' | 'alert' | 'success' | 'active';
+  variant?: 'default' | 'alert' | 'success' | 'active' | 'warning';
   onClick?: () => void;
 }
 
@@ -22,6 +22,7 @@ const TechCard: React.FC<TechCardProps> = ({
           case 'alert': return 'border-ember-500/50';
           case 'success': return 'border-leaf-500/50';
           case 'active': return 'border-primary/50';
+          case 'warning': return 'border-amber-500/50';
           default: return 'border-hairline';
       }
   };
@@ -31,6 +32,7 @@ const TechCard: React.FC<TechCardProps> = ({
         case 'alert': return 'from-espresso to-ember-500/10';
         case 'success': return 'from-espresso to-leaf-500/10';
         case 'active': return 'from-espresso to-copper-500/10';
+        case 'warning': return 'from-espresso to-amber-500/10';
         default: return 'bg-espresso/50';
     }
 };

@@ -17,6 +17,7 @@ import TechInput from './technician-portal/ui/TechInput';
 import AddCustomCatalogItemDialog from './AddCustomCatalogItemDialog';
 import { CustomCatalogItem } from '../hooks/useCustomCatalog';
 import { useToast } from './ToastContext';
+import { useSearchRefocus } from '../hooks/useSearchRefocus';
 // NEW: Phase 2 UX improvements (audit issues #10, #11, #21)
 import { SelectorAvailableItem } from './form-ui/SelectorAvailableItem';
 import { SelectorSelectedChips } from './form-ui/SelectorSelectedChips';
@@ -137,30 +138,10 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
     return grouped;
   }, [filteredOptions]);
 
-  // Refocus search input after adding an item so the user can keep
-  // finding more without re-clicking (audit issue #19).
-  // useEffect guarantees focus after React commits the re-render.
-  // The first-render guard prevents focus from stealing on mount
-  // when editing an existing record with pre-selected items.
-  // ▶ A separate guard prevents refocus when the change came from a
-  // custom item text input — otherwise adding/editing a custom service
-  // steals focus from the newly appeared custom field.
-  const skipRefocusRef = useRef(false);
-  const didMountRef = useRef(false);
-  useEffect(() => {
-    if (!didMountRef.current) {
-      didMountRef.current = true;
-      return;
-    }
-    if (skipRefocusRef.current) {
-      skipRefocusRef.current = false;
-      return;
-    }
-    if (selectedValues.length > 0) {
-      searchInputRef.current?.querySelector('input')?.focus();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedValues.length]);
+  const { skipRefocusRef, handleMouseDownCapture } = useSearchRefocus({
+    searchInputRef,
+    selectedCount: selectedValues.length,
+  });
 
   // NEW: handleAddService now accepts an optional quantity (audit issue #10 —
   // inline quantity selector on the add button means a single action per item
@@ -272,7 +253,10 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
   const totalSelectedCount = selectedValues.length;
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div
+      className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500"
+      onMouseDownCapture={handleMouseDownCapture}
+    >
       
       {/* Controls */}
       <div className="flex gap-2">

@@ -2,8 +2,10 @@
 
 import React, { useMemo } from "react";
 import { LogisticsOperation } from "../types";
-import { aggregateLogisticsCosts, formatCurrency } from "../utils/costAggregation";
-import { LOGISTICS_TYPE_LABELS_AR, formatMachineDescriptionAr } from "../utils/logisticsLabels";
+import { aggregateLogisticsCosts, formatCurrencyEn } from "../utils/costAggregation";
+import { LOGISTICS_TYPE_LABELS_EN, formatMachineDescription, MAINTENANCE_SECTION_LABELS_EN } from "../utils/logisticsLabels";
+import ReportIcon from "./ReportIcon";
+import type { PdfIconName } from "../utils/pdfTheme";
 
 // ── Self-contained card / section helpers (no dependency on InternalReportPrintView) ──
 
@@ -11,9 +13,10 @@ interface FinancialCardProps {
   label: string;
   value: string | number;
   accent?: "crimson" | "blue" | "amber" | "green" | "purple";
+  icon?: PdfIconName;
 }
 
-const FinancialCard: React.FC<FinancialCardProps> = ({ label, value, accent = "crimson" }) => {
+const FinancialCard: React.FC<FinancialCardProps> = ({ label, value, accent = "crimson", icon }) => {
   const borderColors: Record<string, string> = {
     crimson: "border-primary",
     blue: "border-blue-600",
@@ -23,7 +26,10 @@ const FinancialCard: React.FC<FinancialCardProps> = ({ label, value, accent = "c
   };
   return (
     <div className={`bg-white border-t-4 ${borderColors[accent]} border border-hairline rounded-lg p-3 shadow-sm`}>
-      <div className="text-xs text-latte uppercase font-semibold mb-1">{label}</div>
+      <div className="text-xs text-latte uppercase font-semibold mb-1 flex items-center gap-1">
+        {icon && <ReportIcon name={icon} className="w-3.5 h-3.5" />}
+        <span>{label}</span>
+      </div>
       <div className="text-lg font-bold text-text">{value}</div>
     </div>
   );
@@ -39,7 +45,7 @@ const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 interface LogisticsReportSectionProps {
   operations: LogisticsOperation[];
-  /** Section heading. Defaults to Arabic. */
+  /** Section heading. Defaults to English. */
   title?: string;
   /** If true, hides the cost summary cards and shows only the operations table. */
   hideCosts?: boolean;
@@ -56,7 +62,7 @@ interface LogisticsReportSectionProps {
  */
 const LogisticsReportSection: React.FC<LogisticsReportSectionProps> = ({
   operations,
-  title = "اللوجستيات — نقل واستبدال الماكينات",
+  title = "Logistics — Machine Transport & Replacement",
   hideCosts = false,
 }) => {
   const logCosts = useMemo(() => aggregateLogisticsCosts(operations), [operations]);
@@ -70,11 +76,11 @@ const LogisticsReportSection: React.FC<LogisticsReportSectionProps> = ({
       {/* Cost summary cards */}
       {!hideCosts && logCosts.totalLogisticsCost > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
-          <FinancialCard label="إيجار الماكينات البديلة" value={formatCurrency(logCosts.totalRentalCost)} accent="amber" />
-          <FinancialCard label="النقل — استلام" value={formatCurrency(logCosts.totalPickupCost)} accent="blue" />
-          <FinancialCard label="النقل — إرجاع" value={formatCurrency(logCosts.totalReturnCost)} accent="green" />
-          <FinancialCard label="تكلفة الصيانة" value={formatCurrency(logCosts.totalMaintenanceCost)} accent="purple" />
-          <FinancialCard label="إجمالي اللوجستيات" value={formatCurrency(logCosts.totalLogisticsCost)} accent="crimson" />
+          <FinancialCard label="Replacement Machine Rental" value={formatCurrencyEn(logCosts.totalRentalCost)} accent="amber" icon="calendar" />
+          <FinancialCard label="Transport — Pickup" value={formatCurrencyEn(logCosts.totalPickupCost)} accent="blue" icon="truck" />
+          <FinancialCard label="Transport — Return" value={formatCurrencyEn(logCosts.totalReturnCost)} accent="green" icon="truck" />
+          <FinancialCard label="Maintenance Cost" value={formatCurrencyEn(logCosts.totalMaintenanceCost)} accent="purple" icon="wrench" />
+          <FinancialCard label="Logistics Total" value={formatCurrencyEn(logCosts.totalLogisticsCost)} accent="crimson" icon="money" />
         </div>
       )}
 
@@ -82,58 +88,108 @@ const LogisticsReportSection: React.FC<LogisticsReportSectionProps> = ({
       <table className="w-full text-xs border border-hairline mb-6">
         <thead className="bg-primary text-white">
           <tr>
-            <th className="text-end px-3 py-2">نوع العملية</th>
-            <th className="text-end px-3 py-2">الفئة</th>
-            <th className="text-end px-3 py-2">الحالة</th>
-            <th className="text-end px-3 py-2">تاريخ الفتح</th>
-            <th className="text-end px-3 py-2">تاريخ الإغلاق</th>
-            {!hideCosts && <th className="text-end px-3 py-2">الإيجار</th>}
-            {!hideCosts && <th className="text-end px-3 py-2">الصيانة</th>}
-            {!hideCosts && <th className="text-end px-3 py-2">تكلفة النقل</th>}
-            {!hideCosts && <th className="text-end px-3 py-2">الإجمالي</th>}
+            <th className="text-start px-3 py-2">Operation</th>
+            <th className="text-start px-3 py-2">Category</th>
+            <th className="text-start px-3 py-2">Status</th>
+            <th className="text-start px-3 py-2">Open Date</th>
+            <th className="text-start px-3 py-2">Close Date</th>
+            {!hideCosts && <th className="text-end px-3 py-2">Rental</th>}
+            {!hideCosts && <th className="text-end px-3 py-2">Maintenance</th>}
+            {!hideCosts && <th className="text-end px-3 py-2">Transport Cost</th>}
+            {!hideCosts && <th className="text-end px-3 py-2">Total</th>}
           </tr>
         </thead>
         <tbody>
           {operations.map((op) => {
             const transportTotal = (op.pickup_cost || 0) + (op.return_cost || 0);
             const opTotal = (op.total_rental_cost || 0) + transportTotal + (op.maintenance_cost || 0);
+            const issues = op.maintenance_issues || [];
+            const services = op.maintenance_services || [];
+            const parts = op.maintenance_parts || [];
+            const hasStructured = issues.length > 0 || services.length > 0 || parts.length > 0;
+            const showDetails = hasStructured || Boolean(op.work_done);
+            const colCount = hideCosts ? 5 : 9;
             return (
-              <tr key={op.id} className="border-b border-hairline">
-                <td className="px-3 py-2 text-text">
-                  {LOGISTICS_TYPE_LABELS_AR[op.operation_type] || op.operation_type}
-                  {op.maintenance_issues && op.maintenance_issues.length > 0 && (
-                    <div className="text-[10px] text-latte mt-0.5 leading-tight">المشاكل: {op.maintenance_issues.join('، ')}</div>
-                  )}
-                  {op.maintenance_services && op.maintenance_services.length > 0 && (
-                    <div className="text-[10px] text-latte mt-0.5 leading-tight">الخدمات: {op.maintenance_services.map((s) => s.count > 1 ? `${s.name} ×${s.count}` : s.name).join('، ')}</div>
-                  )}
-                  {op.maintenance_parts && op.maintenance_parts.length > 0 && (
-                    <div className="text-[10px] text-latte mt-0.5 leading-tight">القطع: {op.maintenance_parts.map((p) => p.count > 1 ? `${p.name} ×${p.count}` : p.name).join('، ')}</div>
-                  )}
-                  {!op.maintenance_issues?.length && !op.maintenance_services?.length && !op.maintenance_parts?.length && op.work_done && (
-                    <div className="text-[10px] text-latte mt-0.5 leading-tight">{op.work_done}</div>
-                  )}
-                </td>
-                <td className="px-3 py-2 text-text">
-                  <div>{formatMachineDescriptionAr(op.machine_category, op.machine_type) || "-"}</div>
-                  {(op.given_machine_category || op.given_machine_type) && (
-                    <div className="text-[10px] text-latte mt-0.5">
-                      المقدمة: {formatMachineDescriptionAr(op.given_machine_category, op.given_machine_type)}
-                    </div>
-                  )}
-                </td>
-                <td className="px-3 py-2">
-                  <span className={op.status === "open" ? "text-amber-600 font-bold" : "text-green-600 font-bold"}>
-                    {op.status === "open" ? "مفتوحة" : "مغلقة"}
-                  </span>
-                </td>
-                <td className="px-3 py-2 text-text">{op.open_date || "-"}</td>
-                <td className="px-3 py-2 text-text">{op.close_date || "-"}</td>
-                {!hideCosts && <td className="px-3 py-2 text-end font-bold">{formatCurrency(op.total_rental_cost || 0)}</td>}
-                {!hideCosts && <td className="px-3 py-2 text-end">{formatCurrency(op.maintenance_cost || 0)}</td>}
-                {!hideCosts && <td className="px-3 py-2 text-end">{formatCurrency(transportTotal)}</td>}
-                {!hideCosts && <td className="px-3 py-2 text-end font-bold">{formatCurrency(opTotal)}</td>}
-              </tr>
+              <React.Fragment key={op.id}>
+                <tr className="border-b border-hairline">
+                  <td className="px-3 py-2 text-text font-medium">
+                    {LOGISTICS_TYPE_LABELS_EN[op.operation_type] || op.operation_type}
+                  </td>
+                  <td className="px-3 py-2 text-text">
+                    <div>{formatMachineDescription(op.machine_category, op.machine_type) || "-"}</div>
+                    {(op.given_machine_category || op.given_machine_type) && (
+                      <div className="text-[10px] text-latte mt-0.5">
+                        Given: {formatMachineDescription(op.given_machine_category, op.given_machine_type)}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-3 py-2">
+                    <span className={op.status === "open" ? "text-amber-600 font-bold" : "text-green-600 font-bold"}>
+                      {op.status === "open" ? "Open" : "Closed"}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2 text-text">{op.open_date || "-"}</td>
+                  <td className="px-3 py-2 text-text">{op.close_date || "-"}</td>
+                  {!hideCosts && <td className="px-3 py-2 text-end font-bold">{formatCurrencyEn(op.total_rental_cost || 0)}</td>}
+                  {!hideCosts && <td className="px-3 py-2 text-end">{formatCurrencyEn(op.maintenance_cost || 0)}</td>}
+                  {!hideCosts && <td className="px-3 py-2 text-end">{formatCurrencyEn(transportTotal)}</td>}
+                  {!hideCosts && <td className="px-3 py-2 text-end font-bold">{formatCurrencyEn(opTotal)}</td>}
+                </tr>
+                {showDetails && (
+                  <tr className="bg-cream border-b border-hairline">
+                    <td colSpan={colCount} className="px-3 py-2">
+                      <div className="grid grid-cols-[64px_1fr_1fr_1fr] gap-3 items-start">
+                        <div className="text-[10px] font-bold uppercase tracking-wide text-latte pt-0.5 flex items-center gap-1">
+                          <ReportIcon name="doc" className="w-3 h-3" />
+                          <span>Details</span>
+                        </div>
+                        <div className="min-w-0">
+                          {issues.length > 0 && (
+                            <>
+                              <div className="text-[10px] font-bold uppercase text-primary mb-0.5 flex items-center gap-1">
+                                <ReportIcon name="alert" className="w-3 h-3" />
+                                <span>{MAINTENANCE_SECTION_LABELS_EN.issues}</span>
+                              </div>
+                              <ul className="list-disc list-inside text-[10px] text-text leading-snug space-y-0.5">
+                                {issues.map((issue, i) => <li key={i}>{issue}</li>)}
+                              </ul>
+                            </>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          {services.length > 0 && (
+                            <>
+                              <div className="text-[10px] font-bold uppercase text-primary mb-0.5 flex items-center gap-1">
+                                <ReportIcon name="wrench" className="w-3 h-3" />
+                                <span>{MAINTENANCE_SECTION_LABELS_EN.services}</span>
+                              </div>
+                              <ul className="list-disc list-inside text-[10px] text-text leading-snug space-y-0.5">
+                                {services.map((s, i) => <li key={i}>{s.count > 1 ? `${s.name} ×${s.count}` : s.name}</li>)}
+                              </ul>
+                            </>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          {parts.length > 0 && (
+                            <>
+                              <div className="text-[10px] font-bold uppercase text-primary mb-0.5 flex items-center gap-1">
+                                <ReportIcon name="package" className="w-3 h-3" />
+                                <span>{MAINTENANCE_SECTION_LABELS_EN.parts}</span>
+                              </div>
+                              <ul className="list-disc list-inside text-[10px] text-text leading-snug space-y-0.5">
+                                {parts.map((p, i) => <li key={i}>{p.count > 1 ? `${p.name} ×${p.count}` : p.name}</li>)}
+                              </ul>
+                            </>
+                          )}
+                        </div>
+                        {!hasStructured && op.work_done && (
+                          <div className="text-[10px] text-text leading-snug col-span-3">{op.work_done}</div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             );
           })}
         </tbody>

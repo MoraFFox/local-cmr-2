@@ -1,0 +1,15 @@
+Font Awesome Free 6.7.2 — fa-solid-900.ttf
+==========================================
+
+Font Awesome Free is licensed under the SIL Open Font License 1.1
+for the font files, and the Creative Commons Attribution 4.0
+International (CC BY 4.0) license for the icons.
+
+  https://fontawesome.com/license/free
+  https://scripts.sil.org/OFL
+
+This file is used solely to render vector icon glyphs inside
+generated PDF reports. No icons from Font Awesome appear in the
+app's user interface itself.
+
+Attribution: Font Awesome Free 6.7.2 by Fonticons, Inc.

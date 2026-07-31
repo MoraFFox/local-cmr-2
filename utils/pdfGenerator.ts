@@ -1,24 +1,31 @@
 /** @format */
 
 import { FormData, MaintenanceRecord, Branch, MaintenancePhoto, LogisticsOperation } from "../types";
-import { DateRange, formatDateRangeLabel } from "./dateRangeFilter";
+import { DateRange, formatDateRangeLabel, getReportRecords } from "./dateRangeFilter";
 import {
   LOGISTICS_TYPE_LABELS_EN,
   formatMachineDescription,
-  composeMaintenanceWorkEn,
-  getMaintenanceWorkSections,
-  MAINTENANCE_SECTION_LABELS_EN,
 } from "./logisticsLabels";
-import { BRAND } from "./pdfTheme";
+import { BRAND, drawClientLogisticsTable, drawLogisticsDetailsRow, drawIconBadge, FA_FONT_NAME, PdfIconName, configureArabicBidi } from "./pdfTheme";
 import { logger } from "./logger";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { reshapeArabic } from "./arabicText";
-
-/** Helper to reshape dynamic Arabic text for LTR jsPDF rendering. */
+/** Keep dynamic Arabic in logical Unicode order; jsPDF shapes it at draw time. */
 const rtl = (text: string | number | null | undefined): string => {
   if (text === null || text === undefined) return "";
-  return reshapeArabic(String(text), false);
+  return String(text);
+};
+
+/**
+ * Section heading with a scannable icon badge (client-PDF teal accent).
+ * The badge sits left of the title so the report can be skimmed by icon.
+ */
+const drawSectionTitle = (doc: jsPDF, icon: PdfIconName, title: string, y: number, fontSize = 12): void => {
+  drawIconBadge(doc, 11, y - 1, icon, [20, 184, 166], 2.1);
+  doc.setFontSize(fontSize);
+  doc.setFont("Amiri", "bold");
+  doc.setTextColor(0);
+  doc.text(title, 18, y);
 };
 
 /** Format maintenance record details as clean bullet-point text for PDF tables. */
@@ -68,6 +75,7 @@ interface PDFOptions {
 const fontCache: {
   regular: string | null;
   bold: string | null;
+  fa: string | null;
   logo: string | null;
   logoFormat: "PNG" | "JPEG";
   logoWidth: number;
@@ -75,6 +83,7 @@ const fontCache: {
 } = {
   regular: null,
   bold: null,
+  fa: null,
   logo: null,
   logoFormat: "PNG",
   logoWidth: 0,
@@ -352,6 +361,10 @@ export interface LogoAssets {
 }
 
 export const loadFonts = async (doc: jsPDF): Promise<LogoAssets> => {
+  // jsPDF owns Arabic shaping/bidi for every subsequent doc.text call,
+  // including jspdf-autotable's internal calls.
+  configureArabicBidi(doc);
+
   const toBase64 = (buffer: ArrayBuffer) => {
     let binary = "";
     const bytes = new Uint8Array(buffer);
@@ -368,6 +381,10 @@ export const loadFonts = async (doc: jsPDF): Promise<LogoAssets> => {
     doc.addFont("Amiri-Regular.ttf", "Amiri", "normal");
     doc.addFileToVFS("Amiri-Bold.ttf", fontCache.bold);
     doc.addFont("Amiri-Bold.ttf", "Amiri", "bold");
+    if (fontCache.fa) {
+      doc.addFileToVFS("fa-solid-900.ttf", fontCache.fa);
+      doc.addFont("fa-solid-900.ttf", FA_FONT_NAME, "normal");
+    }
     
     return {
       logo: fontCache.logo,
@@ -400,9 +417,10 @@ export const loadFonts = async (doc: jsPDF): Promise<LogoAssets> => {
   };
 
   try {
-    const [regular, bold, svgLogo] = await Promise.all([
+    const [regular, bold, fa, svgLogo] = await Promise.all([
       fetchAsset("/fonts/Amiri-Regular.ttf"),
       fetchAsset("/fonts/Amiri-Bold.ttf"),
+      fetchAsset("/fonts/fa-solid-900.ttf"),
       svgToPngDataUrl("/logo.svg"),
     ]);
 
@@ -420,6 +438,14 @@ export const loadFonts = async (doc: jsPDF): Promise<LogoAssets> => {
       fontCache.bold = boldBase64;
       doc.addFileToVFS("Amiri-Bold.ttf", boldBase64);
       doc.addFont("Amiri-Bold.ttf", "Amiri", "bold");
+    }
+
+    // Fix 4.3: Icon font (Font Awesome Solid) — same embed/cache pattern as Amiri
+    if (fa) {
+      const faBase64 = toBase64(fa);
+      fontCache.fa = faBase64;
+      doc.addFileToVFS("fa-solid-900.ttf", faBase64);
+      doc.addFont("fa-solid-900.ttf", FA_FONT_NAME, "normal");
     }
 
     let logoData: string | null = null;
@@ -483,6 +509,16 @@ export const generateCompanyPDF = async (
   data: FormData & { created_at?: string },
   options: PDFOptions,
 ) => {
+  // Logistics-only visits are tracked in the app but excluded from reports.
+  const reportData: FormData = {
+    ...data,
+    maintenanceHistory: getReportRecords(data.maintenanceHistory || []),
+    branches: (data.branches || []).map((b) => ({
+      ...b,
+      maintenanceHistory: getReportRecords(b.maintenanceHistory || []),
+    })),
+  };
+
   const doc = new jsPDF();
   const assets = await loadFonts(doc);
 
@@ -534,10 +570,7 @@ export const generateCompanyPDF = async (
   yPos += 15;
 
   // Company Info
-  doc.setFontSize(12);
-  doc.setFont("Amiri", "bold");
-  doc.setTextColor(0);
-  doc.text("Company Profile", 14, yPos);
+  drawSectionTitle(doc, "home", "Company Profile", yPos);
   yPos += 8;
 
   doc.setFontSize(9);
@@ -660,7 +693,7 @@ export const generateCompanyPDF = async (
     };
   };
 
-  const stats = getDashboardStats(data);
+  const stats = getDashboardStats(reportData);
   const locationUrl = data.location;
   const isLocationUrl =
     locationUrl?.startsWith("http") || locationUrl?.startsWith("www");
@@ -687,8 +720,17 @@ export const generateCompanyPDF = async (
     body: companyInfo,
     theme: "plain",
     styles: { fontSize: 9, cellPadding: 2, font: "Amiri" },
-    columnStyles: { 0: { fontStyle: "bold", cellWidth: 40 } },
+    columnStyles: {
+      0: { fontStyle: "bold", cellWidth: 40, cellPadding: { left: 7, right: 2, top: 2, bottom: 2 } },
+    },
     didDrawCell: (data: any) => {
+      if (data.section === "body" && data.column.index === 0) {
+        const icons: PdfIconName[] = ["location", "mail", "doc", "chart", "alert", "package", "coffee"];
+        const icon = icons[data.row.index];
+        if (icon) {
+          drawIconBadge(doc, data.cell.x + 3, data.cell.y + data.cell.height / 2, icon, [20, 184, 166], 1.8);
+        }
+      }
       if (
         isLocationUrl &&
         data.section === "body" &&
@@ -706,9 +748,7 @@ export const generateCompanyPDF = async (
   yPos = (doc as any).lastAutoTable.finalY + 10;
 
   // --- Operational Insights ---
-  doc.setFontSize(12);
-  doc.setFont("Amiri", "bold");
-  doc.text("Operational Insights", 14, yPos);
+  drawSectionTitle(doc, "chart", "Operational Insights", yPos);
   yPos += 6;
 
   const insightsData = [
@@ -750,9 +790,7 @@ export const generateCompanyPDF = async (
       yPos = 20;
     }
 
-    doc.setFontSize(12);
-    doc.setFont("Amiri", "bold");
-    doc.text("Visit Summary by Branch", 14, yPos);
+    drawSectionTitle(doc, "user", "Visit Summary by Branch", yPos);
     yPos += 6;
 
     const summaryRows = stats.branchVisitSummary.map((b) => [
@@ -790,9 +828,7 @@ export const generateCompanyPDF = async (
       yPos = 20;
     }
 
-    doc.setFontSize(12);
-    doc.setFont("Amiri", "bold");
-    doc.text("Issues & Parts Breakdown", 14, yPos);
+    drawSectionTitle(doc, "alert", "Issues & Parts Breakdown", yPos);
     yPos += 6;
 
     const breakdownRows: (string | number)[][] = [];
@@ -838,69 +874,18 @@ export const generateCompanyPDF = async (
       yPos = 20;
     }
 
-    doc.setFontSize(12);
-    doc.setFont("Amiri", "bold");
-    doc.text("Machine Logistics", 14, yPos);
+    drawSectionTitle(doc, "truck", "Machine Logistics", yPos);
     yPos += 6;
 
-    const logisticsRows = logisticsOps.map((op, idx) => {
-      // What was done on the machine — structured, labeled sections
-      // (Issues/Services/Parts with bullets); falls back to legacy work_done.
-      const workCell = composeMaintenanceWorkEn(
-        op.maintenance_issues,
-        op.maintenance_services,
-        op.maintenance_parts,
-      );
-      const row: any[] = [
-        `#${idx + 1} ${LOGISTICS_TYPE_LABELS_EN[op.operation_type] || op.operation_type}`,
-        formatMachineDescription(op.machine_category, op.machine_type) || "-",
-        formatMachineDescription(op.given_machine_category, op.given_machine_type) || "-",
-        rtl(workCell || op.work_done || "-"),
-        op.status === "open" ? "Open" : "Closed",
-        op.open_date || "-",
-        op.close_date || "-",
-      ];
-      if (options.includeCosts) {
-        row.push(
-          op.total_rental_cost != null ? formatCurrency(op.total_rental_cost) : "-",
-        );
-        // Maintenance cost is internal-only — exclude it from client-facing totals
-        const clientTotal =
-          op.total_logistics_cost != null
-            ? Math.max(0, op.total_logistics_cost - (op.maintenance_cost ?? 0))
-            : null;
-        row.push(clientTotal != null ? formatCurrency(clientTotal) : "-");
-      }
-      return row;
+    // Summary rows (operation type, client/given machine, status, dates,
+    // rental + client total) with a "Details" band under each operation that
+    // lays out the work performed (Issues | Parts | Services) side-by-side.
+    yPos = drawClientLogisticsTable(doc, logisticsOps, yPos, 14, {
+      includeCosts: !!options.includeCosts,
+      headerColor: [20, 184, 166],
     });
 
-    const logisticsHeaders = ["Operation", "Client Machine", "Given Machine", "Work Done", "Status", "Open Date", "Close Date"];
-    if (options.includeCosts) {
-      logisticsHeaders.push("Rental Cost");
-      logisticsHeaders.push("Total Logistics");
-    }
-
-    autoTable(doc, {
-      startY: yPos,
-      head: [logisticsHeaders],
-      body: logisticsRows,
-      theme: "striped",
-      styles: { fontSize: 8, font: "Amiri", halign: "left" },
-      headStyles: { fillColor: [20, 184, 166] },
-      // Wider content area keeps the 8-column table (with costs) on-page
-      margin: { left: 14, right: 14 },
-      columnStyles: {
-        0: { cellWidth: 30 },
-        1: { cellWidth: 26 },
-        2: { cellWidth: 26 },
-        3: { cellWidth: "auto" },
-        4: { cellWidth: 18, halign: "center" },
-        5: { cellWidth: 24 },
-        6: { cellWidth: 24 },
-      },
-    } as any);
-
-    yPos = (doc as any).lastAutoTable.finalY + 10;
+    yPos += 10;
   }
 
   // Managers' Contacts
@@ -922,9 +907,7 @@ export const generateCompanyPDF = async (
       yPos = 20;
     }
 
-    doc.setFontSize(10);
-    doc.setFont("Amiri", "bold");
-    doc.text("Managers' Contacts", 14, yPos);
+    drawSectionTitle(doc, "phone", "Managers' Contacts", yPos, 10);
     yPos += 6;
 
     const contactRows = managerContacts.map((c) => [
@@ -943,24 +926,28 @@ export const generateCompanyPDF = async (
       theme: "striped",
       styles: { fontSize: 8, font: "Amiri" },
       headStyles: { fillColor: [20, 184, 166] },
-    });
+      columnStyles: { 3: { cellPadding: { left: 6, right: 1, top: 1, bottom: 1 } } },
+      didDrawCell: (data: any) => {
+        if (data.section === "body" && data.column.index === 3) {
+          drawIconBadge(doc, data.cell.x + 2.5, data.cell.y + data.cell.height / 2, "phone", [20, 184, 166], 1.7);
+        }
+      },
+    } as any);
 
     yPos = (doc as any).lastAutoTable.finalY + 10;
   }
 
-  if (!data.hasBranches && data.maintenanceHistory.length > 0) {
+  if (!reportData.hasBranches && reportData.maintenanceHistory.length > 0) {
     if (yPos > 250) {
       doc.addPage();
       yPos = 20;
     }
 
-    doc.setFontSize(12);
-    doc.setFont("Amiri", "bold");
-    doc.text("Main Office Maintenance History", 14, yPos);
+    drawSectionTitle(doc, "doc", "Main Office Maintenance History", yPos);
     yPos += 6;
 
     const allMainOfficeFlat = flattenMaintenanceRecords(
-      data.maintenanceHistory,
+      reportData.maintenanceHistory,
     );
     const maintenanceRows = allMainOfficeFlat.map((r) => {
       const row: any[] = [
@@ -1025,17 +1012,15 @@ export const generateCompanyPDF = async (
     }
   }
 
-  if (data.hasBranches && data.branches.length > 0) {
-    for (let idx = 0; idx < data.branches.length; idx++) {
-      const branch = data.branches[idx];
+  if (reportData.hasBranches && reportData.branches.length > 0) {
+    for (let idx = 0; idx < reportData.branches.length; idx++) {
+      const branch = reportData.branches[idx];
       if (yPos > 250) {
         doc.addPage();
         yPos = 20;
       }
 
-      doc.setFontSize(12);
-      doc.setFont("Amiri", "bold");
-      doc.text(rtl(branch.branchName || `Branch ${idx + 1}`), 14, yPos);
+      drawSectionTitle(doc, "home", rtl(branch.branchName || `Branch ${idx + 1}`), yPos);
       yPos += 5;
 
       doc.setFontSize(9);
@@ -1066,12 +1051,22 @@ export const generateCompanyPDF = async (
         theme: "plain",
         styles: { fontSize: 8, cellPadding: 2, font: "Amiri" }, // Reduced font size slightly for density
         columnStyles: {
-          0: { fontStyle: "bold", cellWidth: 25 }, // Label 1
+          0: { fontStyle: "bold", cellWidth: 25, cellPadding: { left: 7, right: 2, top: 2, bottom: 2 } }, // Label 1
           1: { cellWidth: 65 }, // Value 1
-          2: { fontStyle: "bold", cellWidth: 25 }, // Label 2
+          2: { fontStyle: "bold", cellWidth: 25, cellPadding: { left: 7, right: 2, top: 2, bottom: 2 } }, // Label 2
           3: { cellWidth: 65 }, // Value 2
         },
         didDrawCell: (data: any) => {
+          if (data.section === "body" && (data.column.index === 0 || data.column.index === 2)) {
+            const iconByRow: Record<number, PdfIconName> = {
+              0: data.column.index === 0 ? "location" : "mail",
+              1: data.column.index === 0 ? "doc" : "coffee",
+            };
+            const icon = iconByRow[data.row.index];
+            if (icon) {
+              drawIconBadge(doc, data.cell.x + 3, data.cell.y + data.cell.height / 2, icon, [20, 184, 166], 1.8);
+            }
+          }
           if (
             isLocationUrl &&
             data.section === "body" &&
@@ -1093,9 +1088,7 @@ export const generateCompanyPDF = async (
       yPos = (doc as any).lastAutoTable.finalY + 5;
 
       if (branch.contacts.length > 0) {
-        doc.setFontSize(9);
-        doc.setFont("Amiri", "bold");
-        doc.text("Contacts", 14, yPos);
+        drawSectionTitle(doc, "phone", "Contacts", yPos, 9);
         yPos += 5;
 
         const contactRows = branch.contacts.map((c) => [
@@ -1109,15 +1102,19 @@ export const generateCompanyPDF = async (
           body: contactRows,
           theme: "plain",
           styles: { fontSize: 7, font: "Amiri" },
-        });
+          columnStyles: { 1: { cellPadding: { left: 6, right: 1, top: 1, bottom: 1 } } },
+          didDrawCell: (data: any) => {
+            if (data.section === "body" && data.column.index === 1) {
+              drawIconBadge(doc, data.cell.x + 2.5, data.cell.y + data.cell.height / 2, "phone", [20, 184, 166], 1.7);
+            }
+          },
+        } as any);
 
         yPos = (doc as any).lastAutoTable.finalY + 5;
       }
 
       if (branch.baristas && branch.baristas.length > 0) {
-        doc.setFontSize(9);
-        doc.setFont("Amiri", "bold");
-        doc.text("Assigned Staff", 14, yPos);
+        drawSectionTitle(doc, "user", "Assigned Staff", yPos, 9);
         yPos += 5;
 
         const baristaRows = branch.baristas.map((b) => [
@@ -1131,15 +1128,19 @@ export const generateCompanyPDF = async (
           body: baristaRows,
           theme: "plain",
           styles: { fontSize: 7, font: "Amiri" },
-        });
+          columnStyles: { 1: { cellPadding: { left: 6, right: 1, top: 1, bottom: 1 } } },
+          didDrawCell: (data: any) => {
+            if (data.section === "body" && data.column.index === 1) {
+              drawIconBadge(doc, data.cell.x + 2.5, data.cell.y + data.cell.height / 2, "phone", [20, 184, 166], 1.7);
+            }
+          },
+        } as any);
 
         yPos = (doc as any).lastAutoTable.finalY + 5;
       }
 
       if (branch.maintenanceHistory.length > 0) {
-        doc.setFontSize(10);
-        doc.setFont("Amiri", "bold");
-        doc.text("Maintenance History", 14, yPos);
+        drawSectionTitle(doc, "doc", "Maintenance History", yPos, 10);
         yPos += 5;
 
         const branchFlatRecords = flattenMaintenanceRecords(
@@ -1228,6 +1229,12 @@ export const generateBranchPDF = async (
   branch: Branch,
   options: PDFOptions,
 ) => {
+  // Logistics-only visits are tracked in the app but excluded from reports.
+  const reportBranch: Branch = {
+    ...branch,
+    maintenanceHistory: getReportRecords(branch.maintenanceHistory || []),
+  };
+
   const doc = new jsPDF();
   const assets = await loadFonts(doc);
 
@@ -1266,10 +1273,7 @@ export const generateBranchPDF = async (
 
   yPos += 15;
 
-  doc.setFontSize(12);
-  doc.setFont("Amiri", "bold");
-  doc.setTextColor(0);
-  doc.text("Branch Information", 14, yPos);
+  drawSectionTitle(doc, "home", "Branch Information", yPos);
   yPos += 8;
 
   const locationUrl = branch.location;
@@ -1287,8 +1291,17 @@ export const generateBranchPDF = async (
     body: branchInfo,
     theme: "plain",
     styles: { fontSize: 9, cellPadding: 2, font: "Amiri" },
-    columnStyles: { 0: { fontStyle: "bold", cellWidth: 50 } },
+    columnStyles: {
+      0: { fontStyle: "bold", cellWidth: 50, cellPadding: { left: 7, right: 2, top: 2, bottom: 2 } },
+    },
     didDrawCell: (data: any) => {
+      if (data.section === "body" && data.column.index === 0) {
+        const icons: PdfIconName[] = ["location", "mail", "doc", "coffee"];
+        const icon = icons[data.row.index];
+        if (icon) {
+          drawIconBadge(doc, data.cell.x + 3, data.cell.y + data.cell.height / 2, icon, [20, 184, 166], 1.8);
+        }
+      }
       if (
         isLocationUrl &&
         data.section === "body" &&
@@ -1306,9 +1319,7 @@ export const generateBranchPDF = async (
   yPos = (doc as any).lastAutoTable.finalY + 10;
 
   if (branch.contacts.length > 0) {
-    doc.setFontSize(10);
-    doc.setFont("Amiri", "bold");
-    doc.text("Key Contacts", 14, yPos);
+    drawSectionTitle(doc, "phone", "Key Contacts", yPos, 10);
     yPos += 6;
 
     const contactRows = branch.contacts.map((c) => [
@@ -1324,7 +1335,13 @@ export const generateBranchPDF = async (
       theme: "striped",
       styles: { fontSize: 8, font: "Amiri" },
       headStyles: { fillColor: [20, 184, 166] },
-    });
+      columnStyles: { 2: { cellPadding: { left: 6, right: 1, top: 1, bottom: 1 } } },
+      didDrawCell: (data: any) => {
+        if (data.section === "body" && data.column.index === 2) {
+          drawIconBadge(doc, data.cell.x + 2.5, data.cell.y + data.cell.height / 2, "phone", [20, 184, 166], 1.7);
+        }
+      },
+    } as any);
 
     yPos = (doc as any).lastAutoTable.finalY + 10;
   }
@@ -1335,9 +1352,7 @@ export const generateBranchPDF = async (
       yPos = 20;
     }
 
-    doc.setFontSize(10);
-    doc.setFont("Amiri", "bold");
-    doc.text("Assigned Staff", 14, yPos);
+    drawSectionTitle(doc, "user", "Assigned Staff", yPos, 10);
     yPos += 6;
 
     const baristaRows = branch.baristas.map((b) => [
@@ -1359,18 +1374,16 @@ export const generateBranchPDF = async (
     yPos = (doc as any).lastAutoTable.finalY + 10;
   }
 
-  if (branch.maintenanceHistory.length > 0) {
+  if (reportBranch.maintenanceHistory.length > 0) {
     if (yPos > 240) {
       doc.addPage();
       yPos = 20;
     }
 
-    doc.setFontSize(14);
-    doc.setFont("Amiri", "bold");
-    doc.text("Detailed Maintenance History", 14, yPos);
+    drawSectionTitle(doc, "doc", "Detailed Maintenance History", yPos, 14);
     yPos += 10;
 
-    const allRecords = flattenMaintenanceRecords(branch.maintenanceHistory);
+    const allRecords = flattenMaintenanceRecords(reportBranch.maintenanceHistory);
 
     for (const r of allRecords) {
       if (yPos > 250) {
@@ -1404,10 +1417,11 @@ export const generateBranchPDF = async (
       yPos += 6;
 
       // Staff & Supervisor
+      drawIconBadge(doc, 11, yPos - 1, "user", [20, 184, 166], 1.7);
       doc.setFontSize(9);
       doc.setFont("Amiri", "normal");
       const staffText = `Staff: ${rtl(r.baristaName)}`;
-      doc.text(staffText, 14, yPos);
+      doc.text(staffText, 18, yPos);
       yPos += 6;
 
       // Requested By
@@ -1432,8 +1446,9 @@ export const generateBranchPDF = async (
 
       // Machines
       if (r.machines && r.machines.length > 0) {
+        drawIconBadge(doc, 11, yPos - 1, "coffee", [20, 184, 166], 1.7);
         doc.setFont("Amiri", "bold");
-        doc.text("Machines:", 14, yPos);
+        doc.text("Machines:", 18, yPos);
         doc.setFont("Amiri", "normal");
         const machinesText = r.machines
           .map((m) => `${m.count || 1}x ${rtl(m.name)}`)
@@ -1445,8 +1460,9 @@ export const generateBranchPDF = async (
 
       // Issues
       if (r.problems && r.problems.length > 0) {
+        drawIconBadge(doc, 11, yPos - 1, "alert", [20, 184, 166], 1.7);
         doc.setFont("Amiri", "bold");
-        doc.text("Issues:", 14, yPos);
+        doc.text("Issues:", 18, yPos);
         doc.setFont("Amiri", "normal");
         const issuesText = r.problems.map((p) => rtl(p)).join(", ");
         const splitIssues = doc.splitTextToSize(issuesText, pageWidth - 40);
@@ -1466,8 +1482,9 @@ export const generateBranchPDF = async (
         const partsHeader = ["Part", "Qty"];
         if (options.includeCosts) partsHeader.push("Cost");
 
+        drawIconBadge(doc, 11, yPos - 1, "package", [20, 184, 166], 1.7);
         doc.setFont("Amiri", "bold");
-        doc.text("Parts Replaced:", 14, yPos);
+        doc.text("Parts Replaced:", 18, yPos);
         yPos += 2;
 
         autoTable(doc, {
@@ -1495,8 +1512,9 @@ export const generateBranchPDF = async (
         const servicesHeader = ["Service", "Qty"];
         if (options.includeCosts) servicesHeader.push("Cost");
 
+        drawIconBadge(doc, 11, yPos - 1, "wrench", [20, 184, 166], 1.7);
         doc.setFont("Amiri", "bold");
-        doc.text("Services Performed:", 14, yPos);
+        doc.text("Services Performed:", 18, yPos);
         yPos += 2;
 
         autoTable(doc, {
@@ -1514,8 +1532,9 @@ export const generateBranchPDF = async (
 
       // Notes
       if (r.notes) {
+        drawIconBadge(doc, 11, yPos - 1, "doc", [20, 184, 166], 1.7);
         doc.setFont("Amiri", "bold");
-        doc.text("Notes:", 14, yPos);
+        doc.text("Notes:", 18, yPos);
         doc.setFont("Amiri", "normal");
         const splitNotes = doc.splitTextToSize(rtl(r.notes), pageWidth - 30);
         doc.text(splitNotes, 14, yPos + 5);
@@ -1524,8 +1543,9 @@ export const generateBranchPDF = async (
 
       // Recommendations
       if (r.recommendations) {
+        drawIconBadge(doc, 11, yPos - 1, "star", [20, 184, 166], 1.7);
         doc.setFont("Amiri", "bold");
-        doc.text("Recommendations:", 14, yPos);
+        doc.text("Recommendations:", 18, yPos);
         doc.setFont("Amiri", "normal");
         const splitRecs = doc.splitTextToSize(
           rtl(r.recommendations),
@@ -1563,9 +1583,7 @@ export const generateBranchPDF = async (
       yPos = 20;
     }
 
-    doc.setFontSize(14);
-    doc.setFont("Amiri", "bold");
-    doc.text("Machine Logistics", 14, yPos);
+    drawSectionTitle(doc, "truck", "Machine Logistics", yPos, 14);
     yPos += 10;
 
     logisticsOps.forEach((op, opIdx) => {
@@ -1616,57 +1634,19 @@ export const generateBranchPDF = async (
         yPos += 6;
       });
 
-      // What was done on the machine — structured, labeled sections with
-      // bulleted items (falls back to legacy free-text work_done).
-      const workSections = getMaintenanceWorkSections(
-        op.maintenance_issues,
-        op.maintenance_services,
-        op.maintenance_parts,
-      );
-      if (workSections.length > 0) {
-        workSections.forEach((s) => {
-          if (yPos > 250) {
-            doc.addPage();
-            yPos = 20;
-          }
-
-          doc.setFont("Amiri", "bold");
-          doc.setFontSize(9);
-          doc.setTextColor(0);
-          doc.text(`${MAINTENANCE_SECTION_LABELS_EN[s.key]}:`, 14, yPos);
-          yPos += 5;
-
-          doc.setFont("Amiri", "normal");
-          doc.setFontSize(8.5);
-          doc.setTextColor(80);
-          s.items.forEach((item) => {
-            const itemLines = doc.splitTextToSize(rtl(`  • ${item}`), pageWidth - 30);
-            itemLines.forEach((il) => {
-              doc.text(il, 14, yPos);
-              yPos += 5;
-            });
-          });
-          yPos += 2;
-        });
-        doc.setTextColor(0);
-      } else if (op.work_done) {
-        doc.setFont("Amiri", "normal");
-        doc.setFontSize(8.5);
-        doc.setTextColor(80);
-        const workLines = doc.splitTextToSize(rtl(op.work_done), pageWidth - 30);
-        workLines.forEach((wl) => {
-          doc.text(wl, 14, yPos);
-          yPos += 6;
-        });
-        doc.setTextColor(0);
-      }
+      // What was done on the machine — a compact "Details" band laying the
+      // work performed out as side-by-side columns (Issues | Parts |
+      // Services); falls back to legacy free-text work_done.
+      yPos = drawLogisticsDetailsRow(doc, op, 14, yPos, pageWidth - 28, { showCosts: false });
+      yPos += 5;
 
       if (op.internal_notes) {
+        drawIconBadge(doc, 11, yPos - 1, "doc", [20, 184, 166], 1.7);
         doc.setFont("Amiri", "bold");
-        doc.text("Notes:", 14, yPos);
+        doc.text("Notes:", 18, yPos);
         doc.setFont("Amiri", "normal");
         const splitNotes = doc.splitTextToSize(rtl(op.internal_notes), pageWidth - 30);
-        doc.text(splitNotes, 14, yPos + 5);
+        doc.text(splitNotes, 18, yPos + 5);
         yPos += splitNotes.length * 5 + 5;
       }
 

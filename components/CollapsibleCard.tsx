@@ -9,9 +9,11 @@ interface CollapsibleCardProps {
     removeLabel?: string;
     /** Optional key used by the wizard jump feature to auto-open this card. */
     wizardKey?: string;
+    /** Extra classes for the card container (e.g. logistics-visit amber tint). */
+    className?: string;
 }
 
-const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ titleContent, children, initiallyOpen = false, onRemove, removeLabel = 'حذف', wizardKey }) => {
+const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ titleContent, children, initiallyOpen = false, onRemove, removeLabel = 'حذف', wizardKey, className = '' }) => {
     const [isOpen, setIsOpen] = useState(initiallyOpen);
     const [hasBeenOpened, setHasBeenOpened] = useState(initiallyOpen);
 
@@ -37,7 +39,7 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ titleContent, childre
     const shouldRenderChildren = isOpen || hasBeenOpened;
 
     return (
-        <div className={`border border-hairline rounded-xl bg-cream shadow-md transition-all duration-300 hover:shadow-lg ${isOpen ? 'shadow-lg' : 'shadow-md'}`}>
+        <div className={`border border-hairline rounded-xl bg-cream shadow-md transition-all duration-300 hover:shadow-lg ${isOpen ? 'shadow-lg' : 'shadow-md'} ${className}`}>
             <div
                 role="button"
                 tabIndex={0}

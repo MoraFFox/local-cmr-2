@@ -1,15 +1,8 @@
 import React, { useMemo } from 'react';
 import { useLogisticsOperations, calculateDailyRentalPrice } from '../../hooks/useLogisticsOperations';
 import { LOGISTICS_TYPE_LABELS_AR } from '../../utils/logisticsLabels';
-import {
-  TruckIcon,
-  ArrowRightIcon,
-  ArrowLeftIcon,
-  CheckCircleIcon,
-  ExclamationCircleIcon,
-  CalendarIcon,
-  CurrencyDollarIcon,
-} from '@heroicons/react/24/outline';
+import ReportIcon from '../../components/ReportIcon';
+import type { PdfIconName } from '../../utils/pdfTheme';
 import EmptyState from '../../components/EmptyState';
 
 interface LogisticsTimelineViewProps {
@@ -17,9 +10,9 @@ interface LogisticsTimelineViewProps {
   customerName?: string;
 }
 
-const STATUS_BADGES: Record<string, { label: string; className: string; icon: React.ElementType }> = {
-  open: { label: 'مفتوحة', className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', icon: ExclamationCircleIcon },
-  closed: { label: 'مغلقة', className: 'bg-leaf-100 text-leaf-700 dark:bg-leaf-500/10 dark:text-leaf-300', icon: CheckCircleIcon },
+const STATUS_BADGES: Record<string, { label: string; className: string; icon: PdfIconName }> = {
+  open: { label: 'مفتوحة', className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', icon: 'alert' },
+  closed: { label: 'مغلقة', className: 'bg-leaf-100 text-leaf-700 dark:bg-leaf-500/10 dark:text-leaf-300', icon: 'check' },
 };
 
 const LogisticsTimelineView: React.FC<LogisticsTimelineViewProps> = ({ customerId, customerName }) => {
@@ -52,11 +45,11 @@ const LogisticsTimelineView: React.FC<LogisticsTimelineViewProps> = ({ customerI
         {customerName && <p className="text-sm text-latte mt-1">{customerName}</p>}
         <div className="flex items-center gap-4 mt-3">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-900/20 rounded-full text-sm font-medium text-amber-700 dark:text-amber-400">
-            <ExclamationCircleIcon className="w-4 h-4" />
+            <ReportIcon name="alert" className="w-4 h-4" />
             {openCount} مفتوحة
           </span>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-leaf-50 dark:bg-leaf-500/10 rounded-full text-sm font-medium text-leaf-700 dark:text-leaf-300">
-            <CheckCircleIcon className="w-4 h-4" />
+            <ReportIcon name="check" className="w-4 h-4" />
             {closedCount} مغلقة
           </span>
         </div>
@@ -65,7 +58,7 @@ const LogisticsTimelineView: React.FC<LogisticsTimelineViewProps> = ({ customerI
       {sorted.length === 0 ? (
         <EmptyState
           variant="page"
-          icon={<TruckIcon />}
+          icon={<ReportIcon name="truck" className="w-6 h-6" />}
           title="لا توجد عمليات لوجستية"
           message="ستظهر هنا جميع العمليات اللوجستية المرتبطة بهذا العميل بمجرد إضافتها من سجلات الصيانة"
         />
@@ -73,7 +66,6 @@ const LogisticsTimelineView: React.FC<LogisticsTimelineViewProps> = ({ customerI
         <div className="space-y-4">
           {sorted.map((op) => {
             const status = STATUS_BADGES[op.status] || STATUS_BADGES.closed;
-            const StatusIcon = status.icon;
             return (
               <div
                 key={op.id}
@@ -85,13 +77,13 @@ const LogisticsTimelineView: React.FC<LogisticsTimelineViewProps> = ({ customerI
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <TruckIcon className={`w-6 h-6 ${op.status === 'open' ? 'text-amber-500' : 'text-latte'}`} />
+                    <ReportIcon name="truck" className={`w-6 h-6 ${op.status === 'open' ? 'text-amber-500' : 'text-latte'}`} />
                     <div>
                       <h3 className="font-semibold text-primary dark:text-white">
                         {LOGISTICS_TYPE_LABELS_AR[op.operation_type] || op.operation_type}
                       </h3>
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${status.className}`}>
-                        <StatusIcon className="w-3 h-3" />
+                        <ReportIcon name={status.icon} className="w-3 h-3" />
                         {status.label}
                       </span>
                     </div>
@@ -104,19 +96,19 @@ const LogisticsTimelineView: React.FC<LogisticsTimelineViewProps> = ({ customerI
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                   {op.machine_category && (
                     <div className="flex items-center gap-2 text-latte">
-                      <CalendarIcon className="w-4 h-4" />
+                      <ReportIcon name="truck" className="w-4 h-4" />
                       <span>ماكينة العميل: {op.machine_category}{op.machine_type ? ` · ${op.machine_type}` : ''}</span>
                     </div>
                   )}
                   {(op.given_machine_category || op.given_machine_type) && (
                     <div className="flex items-center gap-2 text-latte">
-                      <CalendarIcon className="w-4 h-4" />
+                      <ReportIcon name="truck" className="w-4 h-4" />
                       <span>الماكينة المقدمة: {[op.given_machine_category, op.given_machine_type].filter(Boolean).join(' · ')}</span>
                     </div>
                   )}
                   {op.monthly_rental_price != null && (
                     <div className="flex items-center gap-2 text-latte">
-                      <CurrencyDollarIcon className="w-4 h-4" />
+                      <ReportIcon name="money" className="w-4 h-4" />
                       <span>
                         شهري: {op.monthly_rental_price.toLocaleString()} ج.م · يومي: {calculateDailyRentalPrice(op.monthly_rental_price).toLocaleString()} ج.م
                       </span>
@@ -124,7 +116,7 @@ const LogisticsTimelineView: React.FC<LogisticsTimelineViewProps> = ({ customerI
                   )}
                   {op.total_rental_cost != null && (
                     <div className="flex items-center gap-2 text-primary dark:text-latte/70 font-medium">
-                      <CurrencyDollarIcon className="w-4 h-4 text-leaf-500" />
+                      <ReportIcon name="money" className="w-4 h-4 text-leaf-500" />
                       <span>إجمالي الإيجار: {op.total_rental_cost.toLocaleString()} ج.م</span>
                     </div>
                   )}

@@ -178,6 +178,12 @@ export interface MaintenanceRecord {
   maintenanceDate: string;
   notes?: string;
   type: "requested" | "scheduled";
+  /**
+   * Logistics-only visit (machine pickup/delivery/replacement).
+   * Tracked in the app (highlighted amber with a truck icon) but excluded
+   * from every PDF/print report — it carries no maintenance work data.
+   */
+  isLogisticsVisit?: boolean;
   hadProblem: boolean;
   partsWereReplaced: boolean;
   problemSolved: boolean;
@@ -245,6 +251,8 @@ export interface PortalSubmission {
   photo_urls?: string[];
   photo_entries?: PortalPhotoEntry[];
   technician_id?: string;
+  /** Logistics-only visit flag (mirrors MaintenanceRecord.isLogisticsVisit). */
+  is_logistics_visit?: boolean;
 }
 
 // ============================================

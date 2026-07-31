@@ -365,11 +365,90 @@ describe('MachineLogisticsSection', () => {
     // Both open and closed cards show given machine info
     expect(screen.getAllByText(/الماكينة المقدمة:/).length).toBe(2);
 
-    // Closed op: maintenance cost + structured issues/services/parts shown
+    // Operations are numbered sequentially (matching the PDF reports)
+    expect(screen.getByText('#1')).toBeInTheDocument();
+    expect(screen.getByText('#2')).toBeInTheDocument();
+
+    // Closed op: maintenance cost + structured labeled sections shown
     expect(screen.getByText(/تكلفة الصيانة: 500 ج\.م/)).toBeInTheDocument();
-    expect(screen.getByText(/المشاكل: هاندات غير نظيفة/)).toBeInTheDocument();
-    expect(screen.getByText(/الخدمات: تغيير جوانات/)).toBeInTheDocument();
-    expect(screen.getByText(/القطع: جوان/)).toBeInTheDocument();
+    expect(screen.getByText('المشاكل:')).toBeInTheDocument();
+    expect(screen.getByText('الخدمات:')).toBeInTheDocument();
+    expect(screen.getByText('القطع:')).toBeInTheDocument();
+
+    // Bulleted items render individually (like the PDF sections)
+    expect(screen.getByText('هاندات غير نظيفة')).toBeInTheDocument();
+    expect(screen.getByText('تغيير جوانات')).toBeInTheDocument();
+    expect(screen.getByText('جوان')).toBeInTheDocument();
+  });
+
+  it('falls back to legacy work_done text when no structured close data exists', async () => {
+    const legacyClosedOp: LogisticsOperation = {
+      ...openOp,
+      id: 7,
+      status: 'closed',
+      close_date: '2026-06-25',
+      maintenance_cost: 300,
+      work_done: 'المشاكل: تسريب مياة | الخدمات: غسيل كامل',
+    };
+    mockHook([legacyClosedOp]);
+    renderWithProviders(<MachineLogisticsSection {...baseProps} />);
+
+    expect(screen.getByText(/الأعمال: المشاكل: تسريب مياة/)).toBeInTheDocument();
+  });
+
+  it('opens a printable work order for a single operation with structured details', async () => {
+    mockHook([openOp, closedOp]);
+    renderWithProviders(<MachineLogisticsSection {...baseProps} />);
+
+    // Both open and closed cards expose a print action
+    const printButtons = screen.getAllByText('طباعة أمر العمل');
+    expect(printButtons.length).toBe(2);
+
+    // Print the closed operation (#2 — carries the structured close data)
+    fireEvent.click(printButtons[1]);
+
+    await waitFor(() => {
+      expect(screen.getByText('أمر عمل لوجستي')).toBeInTheDocument();
+    });
+
+    // Numbered operation + type + status shown
+    expect(screen.getByText('#2')).toBeInTheDocument();
+    expect(screen.getByText('استلام ماكينة + تسليم بديلة')).toBeInTheDocument();
+    expect(screen.getByText('مغلقة')).toBeInTheDocument();
+
+    // Machines section
+    expect(screen.getByText('الماكينات')).toBeInTheDocument();
+    expect(screen.getByText(/ماكينة قهوة/)).toBeInTheDocument();
+
+    // Costs section (label and value render as separate spans)
+    expect(screen.getByText('التكاليف')).toBeInTheDocument();
+    expect(screen.getByText('تكلفة الصيانة:')).toBeInTheDocument();
+    expect(screen.getByText('500 ج.م')).toBeInTheDocument();
+
+    // Structured work sections with bullets (matches PDF format)
+    expect(screen.getByText('المشاكل:')).toBeInTheDocument();
+    expect(screen.getByText('الخدمات:')).toBeInTheDocument();
+    expect(screen.getByText('القطع:')).toBeInTheDocument();
+    expect(screen.getByText('هاندات غير نظيفة')).toBeInTheDocument();
+    expect(screen.getByText('تغيير جوانات')).toBeInTheDocument();
+    expect(screen.getByText('جوان')).toBeInTheDocument();
+  });
+
+  it('returns to the timeline when going back from the work order', async () => {
+    mockHook([openOp]);
+    renderWithProviders(<MachineLogisticsSection {...baseProps} />);
+
+    fireEvent.click(screen.getByText('طباعة أمر العمل'));
+    await waitFor(() => {
+      expect(screen.getByText('أمر عمل لوجستي')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('رجوع'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/عمليات لوجستية مفتوحة \(1\)/)).toBeInTheDocument();
+      expect(screen.queryByText('أمر عمل لوجستي')).not.toBeInTheDocument();
+    });
   });
 
   it('lets the user edit maintenance fields on a closed operation', async () => {

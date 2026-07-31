@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { MaintenanceRecord } from '../types';
-import { 
+import { MaintenanceRecord } from '../types';import {
   PencilIcon, 
   CheckCircleIcon,
   CalendarIcon,
@@ -9,7 +8,8 @@ import {
   ChevronRightIcon,
   ExclamationCircleIcon,
   WrenchIcon,
-  WrenchScrewdriverIcon
+  WrenchScrewdriverIcon,
+  TruckIcon
 } from '@heroicons/react/24/outline';
 import { StarRatingDisplay } from './form-ui/StarRating';
 import QuickActionsMenu from './QuickActionsMenu';
@@ -58,6 +58,14 @@ const formatDate = createDateFormatter();
 
 // Hoisted so both the desktop table row and the mobile card reuse them.
 const getStatusBadge = (rec: MaintenanceRecord) => {
+  if (rec.isLogisticsVisit) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-300/60 dark:border-amber-500/40">
+        <TruckIcon className="w-3 h-3" />
+        Logistics
+      </span>
+    );
+  }
   if (rec.problemSolved) {
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-leaf-50 text-leaf-700 dark:bg-leaf-500/10 dark:text-leaf-300">
@@ -128,7 +136,7 @@ const MaintenanceRecordRow = React.memo(({
 }: MaintenanceRecordRowProps) => {
   const handleDelete = () => onDelete?.(record.id, actualIndex);
   return (
-    <tr className="hover:bg-cream dark:hover:bg-espresso-light/50/50 transition-colors">
+    <tr className={`hover:bg-cream dark:hover:bg-espresso-light/50/50 transition-colors ${record.isLogisticsVisit ? 'bg-amber-50/70 dark:bg-amber-500/5' : ''}`}>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center gap-2">
           <CalendarIcon className="w-4 h-4 text-latte" />
@@ -210,7 +218,7 @@ const MaintenanceRecordCardMobile: React.FC<MaintenanceRecordRowProps> = ({
 }) => {
   const handleDelete = () => onDelete?.(record.id, actualIndex);
   return (
-  <div className="bg-cream dark:bg-espresso-light rounded-xl border border-hairline dark:border-hairline p-4 shadow-sm">
+  <div className={`bg-cream dark:bg-espresso-light rounded-xl border p-4 shadow-sm ${record.isLogisticsVisit ? 'border-amber-500/60 dark:border-amber-500/40 bg-amber-50/70 dark:bg-amber-500/5' : 'border-hairline dark:border-hairline'}`}>
     {/* Top row: date + status */}
     <div className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-2 min-w-0">

@@ -6,6 +6,7 @@ import {
   CalendarIcon,
   CheckBadgeIcon,
   PencilIcon,
+  TruckIcon,
 } from '@heroicons/react/24/outline';
 import TechCard from './ui/TechCard';
 import TechButton from './ui/TechButton';
@@ -88,12 +89,19 @@ const Step3Summary: React.FC<Step3SummaryProps> = ({
             <div className={`p-3 rounded-lg border flex items-center gap-3 ${
                 step2Data.visitType === 'problem'
                 ? 'bg-ember-500/10 border-ember-500/30 text-ember-700'
+                : step2Data.visitType === 'logistics'
+                ? 'bg-amber-500/10 border-amber-500/30 text-amber-700'
                 : 'bg-leaf-500/10 border-leaf-500/30 text-leaf-600'
             }`}>
                {step2Data.visitType === 'problem' ? (
                    <>
                      <div className="p-1 bg-ember-500/20 rounded"><WrenchScrewdriverIcon className="w-5 h-5"/></div>
                      <span className="font-bold">{ar.portal.problemVisit}</span>
+                   </>
+               ) : step2Data.visitType === 'logistics' ? (
+                   <>
+                     <div className="p-1 bg-amber-500/20 rounded"><TruckIcon className="w-5 h-5"/></div>
+                     <span className="font-bold">{ar.portal.logisticsVisit}</span>
                    </>
                ) : (
                    <>

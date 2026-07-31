@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface TechButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'warning';
   fullWidth?: boolean;
   icon?: React.ReactNode;
 }
@@ -26,6 +26,8 @@ const TechButton: React.FC<TechButtonProps> = ({
                 return 'bg-ember-500/10 text-ember-700 border border-ember-500/50 hover:bg-ember-500/20 active:bg-ember-500/30';
             case 'ghost':
                 return 'bg-transparent text-latte hover:text-primary active:bg-primary/5';
+            case 'warning':
+                return 'bg-amber-500/10 text-amber-700 border border-amber-500/50 hover:bg-amber-500/20 active:bg-amber-500/30';
         }
     };
 

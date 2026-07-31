@@ -82,6 +82,15 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [confirmPhotoDelete, setConfirmPhotoDelete] = useState<{ isOpen: boolean; url: string; category: string } | null>(null);
 
+  /** Logistics-only visits carry no maintenance work data — just date + technician + machine logistics. */
+  const isLogisticsVisit = !!editedRecord.isLogisticsVisit;
+
+  // When logistics mode is on, only Basic Info + Machine Logistics steps are shown.
+  const visibleSteps = useMemo<StepperStep[]>(
+    () => (isLogisticsVisit ? STEPPER_STEPS.filter((s) => s.id === 1 || s.id === 7) : STEPPER_STEPS),
+    [isLogisticsVisit],
+  );
+
   const { highlightedSection, jumpToSection, jumpToFirstError } = useSectionJump({
     fieldSectionMapping: {
       maintenanceDate: 'basic', baristaName: 'basic', clientBaristaName: 'basic', visitRating: 'basic', visitZone: 'basic',
@@ -100,23 +109,29 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
     storageKey: `maintenance-record-${record.id}-last-section`,
   });
 
-  // Auto-save
+  // Auto-save — short debounce so in-progress edits are persisted quickly,
+  // and a pagehide/beforeunload flush (inside the hook) protects the last
+  // keystrokes when the tab/browser is closed abruptly.
   const autoSave = useAutoSave(`maintenance-record-${record.id}`, editedRecord, {
-    debounceMs: 30000,
+    debounceMs: 2000,
     onSave: (data) => logger.info('Auto-saved maintenance record', { id: data.id }, 'autosave'),
     onSaveError: (error) => logger.error('Auto-save failed', error, 'autosave'),
     enabled: true,
   });
 
-  // Validation
-  const validation = useFormValidation(editedRecord, {
-    maintenanceDate: { required: true },
-    baristaName: { required: true, minLength: 2 },
-    supervisors: { custom: (value) => {
-      if (!Array.isArray(value) || value.length === 0) return 'مطلوب مشرف واحد على الأقل';
-      return value.some((s: any) => !s.name?.trim()) ? 'جميع أسماء المشرفين مطلوبة' : null;
-    }},
-  }, { mode: 'onBlur', showSummary: true, validateOnMount: false });
+  // Validation — technician + supervisor are optional for logistics visits.
+  const validationRules = useMemo(() => {
+    const rules: Record<string, any> = { maintenanceDate: { required: true } };
+    if (!isLogisticsVisit) {
+      rules.baristaName = { required: true, minLength: 2 };
+      rules.supervisors = { custom: (value: any) => {
+        if (!Array.isArray(value) || value.length === 0) return 'مطلوب مشرف واحد على الأقل';
+        return value.some((s: any) => !s.name?.trim()) ? 'جميع أسماء المشرفين مطلوبة' : null;
+      }};
+    }
+    return rules;
+  }, [isLogisticsVisit]);
+  const validation = useFormValidation(editedRecord, validationRules, { mode: 'onBlur', showSummary: true, validateOnMount: false });
 
   // Re-sync when record prop changes
   useEffect(() => {
@@ -125,9 +140,42 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
     setCurrentStep(1);
   }, [record]);
 
-  // Step navigation
-  const goToNextStep = useCallback(() => setCurrentStep(prev => Math.min(prev + 1, STEPPER_STEPS.length)), []);
-  const goToPrevStep = useCallback(() => setCurrentStep(prev => Math.max(prev - 1, 1)), []);
+  // Restore auto-saved in-progress edits when the editor opens for a record
+  // (e.g. the user closed the tab mid-edit and came back). Runs after the
+  // record-sync effect above so a saved draft wins over the incoming record.
+  // A JSON equality guard skips a spurious restore (and toast) when the saved
+  // draft is identical to the incoming record. The draft is merged over the
+  // incoming record so fields added to the schema after the draft was saved
+  // (e.g. isLogisticsVisit) are never silently dropped.
+  // Guard so React StrictMode's double-mount in dev does not fire the
+  // restore toast twice for the same record.
+  const restoredForIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (restoredForIdRef.current === record.id) return;
+    restoredForIdRef.current = record.id;
+    const saved = autoSave.restore();
+    if (saved && JSON.stringify(saved) !== JSON.stringify(record)) {
+      setEditedRecord({ ...record, ...saved });
+      showToast('تم استعادة آخر نسخة محفوظة تلقائيًا', 'info');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [record.id]);
+
+  // Step navigation — walks the visible steps (logistics mode only has 1 and 7)
+  const goToNextStep = useCallback(() => {
+    setCurrentStep(prev => {
+      const idx = visibleSteps.findIndex((s) => s.id === prev);
+      const next = visibleSteps[idx + 1];
+      return next ? next.id : prev;
+    });
+  }, [visibleSteps]);
+  const goToPrevStep = useCallback(() => {
+    setCurrentStep(prev => {
+      const idx = visibleSteps.findIndex((s) => s.id === prev);
+      const prevStep = visibleSteps[idx - 1];
+      return prevStep ? prevStep.id : prev;
+    });
+  }, [visibleSteps]);
 
   // Field handlers
   const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -148,6 +196,31 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
   const handlePartsChange = (parts: any[]) => setEditedRecord(prev => ({ ...prev, partsReplaced: parts }));
   const handleProblemsChange = (problems: string[]) => setEditedRecord(prev => ({ ...prev, problems }));
   const handleRadioChange = (name: string, value: any) => { setEditedRecord(prev => ({ ...prev, [name]: value })); if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' })); };
+
+  // Toggle logistics-visit mode: strip all maintenance work fields and snap to step 1.
+  const toggleLogisticsVisit = (checked: boolean) => {
+    setEditedRecord(prev => {
+      let updated: MaintenanceRecord = { ...prev, isLogisticsVisit: checked };
+      if (checked) {
+        updated = {
+          ...updated,
+          hadProblem: false,
+          partsWereReplaced: false,
+          problemSolved: true,
+          partsReplaced: [],
+          problems: [],
+          servicesPerformed: [],
+          followUpVisits: [],
+          // Zone fee + client rating don't apply to logistics-only visits.
+          visitZone: null,
+          visitRating: 0,
+        };
+      }
+      return updated;
+    });
+    if (checked) setCurrentStep(1);
+    validation.resetValidation();
+  };
 
   const {
     parts: mergedPartsList,
@@ -206,13 +279,25 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
 
   const handleSave = () => {
     validation.handleSubmit(
-      () => { onSave(editedRecord); showToast('تم حفظ السجل بنجاح', 'success'); },
+      () => {
+        onSave(editedRecord);
+        // The edit is now persisted upstream — drop the autosave so a stale
+        // draft is not restored the next time this record is opened.
+        autoSave.clearSaved();
+        showToast('تم حفظ السجل بنجاح', 'success');
+      },
       (errors) => { showToast('يرجى تصحيح الأخطاء قبل الحفظ', 'error'); jumpToFirstError(errors); }
     )();
   };
 
   // Completed steps for Stepper visual feedback
   const completedSteps = useMemo(() => {
+    if (isLogisticsVisit) {
+      const completed: number[] = [];
+      if (editedRecord.maintenanceDate) completed.push(1);
+      completed.push(7);
+      return completed;
+    }
     const completed: number[] = [];
     if (editedRecord.maintenanceDate && editedRecord.baristaName) completed.push(1);
     if (!editedRecord.hadProblem || (editedRecord.problems && editedRecord.problems.length > 0)) completed.push(2);
@@ -223,10 +308,14 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
     if (editedRecord.notes || editedRecord.recommendations) completed.push(8);
     if (editedRecord.photos && editedRecord.photos.length > 0) completed.push(9);
     return completed;
-  }, [editedRecord]);
+  }, [editedRecord, isLogisticsVisit]);
 
-  // Shared section wrapper
-  const sectionClass = (stepId: number) => `bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden ${highlightedSection === STEP_TO_SECTION[stepId] ? 'animate-section-jump-highlight' : ''}`;
+  // Shared section wrapper — logistics steps get an amber tint so it's obvious
+  // this visit is excluded from reports.
+  const sectionClass = (stepId: number) => {
+    const logisticsStep = isLogisticsVisit && (stepId === 1 || stepId === 7);
+    return `bg-cream dark:bg-espresso rounded-xl overflow-hidden border ${logisticsStep ? 'border-amber-500/50 dark:border-amber-500/40' : 'border-hairline dark:border-hairline'} ${highlightedSection === STEP_TO_SECTION[stepId] ? 'animate-section-jump-highlight' : ''}`;
+  };
 
   return (
     <div className="space-y-6">
@@ -239,9 +328,33 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         }} title={t.ui.maintenanceEditor.validationTitle} />
       )}
 
+      {/* Logistics visit toggle — always visible so technicians can switch modes mid-edit */}
+      <div className={`rounded-xl border p-4 transition-colors ${isLogisticsVisit ? 'bg-amber-50/70 dark:bg-amber-500/5 border-amber-500/40 dark:border-amber-500/40' : 'bg-cream dark:bg-espresso border-hairline dark:border-hairline'}`}>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <TruckIcon className={`w-6 h-6 shrink-0 transition-colors ${isLogisticsVisit ? 'text-amber-500' : 'text-latte'}`} />
+            <div>
+              <div className={`text-sm font-semibold ${isLogisticsVisit ? 'text-amber-800 dark:text-amber-300' : 'text-primary dark:text-white'}`}>
+                {t.ui.maintenanceEditor.logisticsVisit}
+              </div>
+              <div className="text-xs text-latte mt-0.5">{t.ui.maintenanceEditor.logisticsVisitHint}</div>
+            </div>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={isLogisticsVisit}
+            onClick={() => toggleLogisticsVisit(!isLogisticsVisit)}
+            className={`relative w-12 h-7 rounded-full shrink-0 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${isLogisticsVisit ? 'bg-amber-500' : 'bg-cream-2 dark:bg-espresso-light border border-hairline dark:border-hairline'}`}
+          >
+            <span className={`absolute top-0.5 start-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform duration-200 ${isLogisticsVisit ? 'translate-x-5' : ''}`} />
+          </button>
+        </div>
+      </div>
+
       {/* Stepper */}
       <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline p-4">
-        <Stepper steps={STEPPER_STEPS} currentStep={currentStep} onChange={setCurrentStep} layout="horizontal" completedSteps={completedSteps} />
+        <Stepper steps={visibleSteps} currentStep={currentStep} onChange={setCurrentStep} layout="horizontal" completedSteps={completedSteps} />
       </div>
 
       {/* === STEP 1: Basic Info === */}
@@ -275,7 +388,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 )}
               </div>
               <div className="md:col-span-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.myTechnician}<RequiredFieldBadge /></label>
+                <label className="flex items-center gap-2 text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.myTechnician}{!isLogisticsVisit && <RequiredFieldBadge />}</label>
                 <div className="relative">
                   <UserIcon className="absolute start-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
                   {baristas.length > 0 ? (
@@ -303,36 +416,40 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                   )}
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.clientBaristaPerformanceRating}</label>
-                <StarRating value={editedRecord.visitRating || 0} onChange={(v) => setEditedRecord(prev => ({ ...prev, visitRating: v }))} size="lg" showNA showNumeric />
-              </div>
-              <div>
-                <label className="flex items-center justify-between text-sm font-medium text-primary dark:text-latte/70 mb-2">
-                  <span>{t.ui.maintenanceEditor.visitZone}</span>
-                  <button
-                    type="button"
-                    onClick={() => setIsZoneManagerOpen(true)}
-                    className="text-xs text-primary hover:text-hover underline"
-                  >
-                    إدارة المناطق
-                  </button>
-                </label>
-                <div className="relative">
-                  <MapPinIcon className="absolute start-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
-                  <select name="visitZone" value={editedRecord.visitZone || ''} onChange={handleFieldChange} className="w-full ps-10 pe-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline">
-                    <option value="">{t.ui.maintenanceEditor.selectZone}</option>
-                    {zones.map((z) => (
-                      <option key={z.key} value={z.key}>{z.label} ({z.fee.toLocaleString()} جم)</option>
-                    ))}
-                  </select>
+              {!isLogisticsVisit && (
+                <div>
+                  <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.clientBaristaPerformanceRating}</label>
+                  <StarRating value={editedRecord.visitRating || 0} onChange={(v) => setEditedRecord(prev => ({ ...prev, visitRating: v }))} size="lg" showNA showNumeric />
                 </div>
-              </div>
+              )}
+              {!isLogisticsVisit && (
+                <div>
+                  <label className="flex items-center justify-between text-sm font-medium text-primary dark:text-latte/70 mb-2">
+                    <span>{t.ui.maintenanceEditor.visitZone}</span>
+                    <button
+                      type="button"
+                      onClick={() => setIsZoneManagerOpen(true)}
+                      className="text-xs text-primary hover:text-hover underline"
+                    >
+                      إدارة المناطق
+                    </button>
+                  </label>
+                  <div className="relative">
+                    <MapPinIcon className="absolute start-3 top-1/2 -translate-y-1/2 w-5 h-5 text-latte" />
+                    <select name="visitZone" value={editedRecord.visitZone || ''} onChange={handleFieldChange} className="w-full ps-10 pe-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline">
+                      <option value="">{t.ui.maintenanceEditor.selectZone}</option>
+                      {zones.map((z) => (
+                        <option key={z.key} value={z.key}>{z.label} ({z.fee.toLocaleString()} جم)</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
             <span></span>
-            <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{STEPPER_STEPS[1].name}<ChevronLeftIcon className="w-4 h-4" /></button>
+            <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{visibleSteps[1] ? visibleSteps[1].name : ''}<ChevronLeftIcon className="w-4 h-4" /></button>
           </div>
         </div>
       )}
@@ -499,7 +616,11 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
           </div>
           <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
             <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
-            <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{STEPPER_STEPS[7].name}<ChevronLeftIcon className="w-4 h-4" /></button>
+            {visibleSteps[2] ? (
+              <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{visibleSteps[2].name}<ChevronLeftIcon className="w-4 h-4" /></button>
+            ) : (
+              <span className="text-xs text-latte">الخطوة الأخيرة</span>
+            )}
           </div>
         </div>
       )}

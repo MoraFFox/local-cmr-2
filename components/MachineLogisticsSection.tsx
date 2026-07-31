@@ -1,15 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import {
-  TruckIcon,
   ArrowRightIcon,
   ArrowLeftIcon,
-  CheckCircleIcon,
-  ExclamationCircleIcon,
   PencilSquareIcon,
   TrashIcon,
+  PrinterIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  TruckIcon,
 } from '@heroicons/react/24/outline';
+import ReportIcon from './ReportIcon';
 import { useLogisticsOperations, useCompanyMachines, calculateDailyRentalPrice } from '../hooks/useLogisticsOperations';
 import { useToast } from './ToastContext';
 import EmptyState from './EmptyState';
@@ -19,6 +19,8 @@ import PartsSelector from './PartsSelector';
 import { useMergedCatalog } from '../hooks/useCustomCatalog';
 import { allPredefinedProblems } from '../utils/sharedConstants';
 import { getSuggestedServices, getSuggestedParts } from '../utils/problemSuggestions';
+import { getMaintenanceWorkSections, MAINTENANCE_SECTION_LABELS_AR } from '../utils/logisticsLabels';
+import LogisticsWorkOrder from './LogisticsWorkOrder';
 import type { LogisticsOperation, CompanyMachine, ServiceRecord, PartRecord } from '../types';
 
 interface MachineLogisticsSectionProps {
@@ -153,6 +155,58 @@ const MaintenanceCostAutoHint: React.FC<{
   );
 };
 
+/**
+ * Renders the maintenance performed on a machine (issues/services/parts) as
+ * structured, labeled sections with bulleted items — matching the PDF report
+ * format. Falls back to the legacy free-text work_done when structured data
+ * is absent.
+ */
+const MaintenanceWorkSections: React.FC<{
+  issues?: string[];
+  services?: ServiceRecord[];
+  parts?: PartRecord[];
+  fallback?: string;
+}> = ({ issues, services, parts, fallback }) => {
+  const sections = getMaintenanceWorkSections(issues, services, parts);
+
+  if (sections.length === 0) {
+    if (!fallback) return null;
+    return (
+      <p className="text-xs text-latte mt-1">الأعمال: {fallback}</p>
+    );
+  }
+
+  return (
+    <div className="mt-2 space-y-2">
+      {sections.map((s) => (
+        <div
+          key={s.key}
+          className="rounded-md bg-white/70 dark:bg-espresso/40 border border-hairline dark:border-hairline px-3 py-2"
+        >
+          <p className="text-[11px] font-semibold text-primary dark:text-copper-300 mb-1">
+            {MAINTENANCE_SECTION_LABELS_AR[s.key]}:
+          </p>
+          <ul className="space-y-0.5">
+            {s.items.map((item, i) => (
+              <li key={i} className="flex items-start gap-1.5 text-xs text-latte">
+                <span className="text-primary/60 dark:text-copper-300/60 mt-px">•</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+/** Small numbered circle for an operation; auto-width so double-digit numbers stay readable. */
+const OpNumberBadge: React.FC<{ number: number }> = ({ number }) => (
+  <span className="inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-primary/10 dark:bg-primary/20 text-primary dark:text-copper-300 text-[10px] font-bold shrink-0">
+    #{number}
+  </span>
+);
+
 const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
   customerId,
   recordId,
@@ -173,6 +227,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
   const [editingOpId, setEditingOpId] = useState<number | null>(null);
   const [showCloseForm, setShowCloseForm] = useState<number | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [printOpId, setPrintOpId] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   // Form state for new/edit operation
@@ -430,18 +485,21 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
     return action ? action.title : type;
   };
 
+  /** Sequential operation number across the whole list — matches the PDF reports. */
+  const getOpNumber = (op: LogisticsOperation): number => operations.indexOf(op) + 1;
+
   const getStatusBadge = (status: string) => {
     if (status === 'open') {
       return (
         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-          <ExclamationCircleIcon className="w-3 h-3 me-1" />
+          <ReportIcon name="alert" className="w-3 h-3 me-1" />
           مفتوحة
         </span>
       );
     }
     return (
       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-leaf-50 text-leaf-700 dark:bg-leaf-500/10 dark:text-leaf-300">
-        <CheckCircleIcon className="w-3 h-3 me-1" />
+        <ReportIcon name="check" className="w-3 h-3 me-1" />
         مغلقة
       </span>
     );
@@ -612,6 +670,18 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
     );
   }
 
+  // Printable single-operation work order (hand to a technician on-site)
+  const printOp = printOpId != null ? operations.find((o) => o.id === printOpId) : undefined;
+  if (printOp) {
+    return (
+      <LogisticsWorkOrder
+        operation={printOp}
+        opNumber={getOpNumber(printOp)}
+        onBack={() => setPrintOpId(null)}
+      />
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Open Operations */}
@@ -626,8 +696,11 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
               className="p-4 bg-cream dark:bg-espresso-light/50 rounded-lg border border-amber-500/30 dark:border-amber-500/20"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-medium text-primary dark:text-white">
-                  {getOperationTypeLabel(op.operation_type)}
+                <span className="flex items-center gap-2">
+                  <OpNumberBadge number={getOpNumber(op)} />
+                  <span className="font-medium text-primary dark:text-white">
+                    {getOperationTypeLabel(op.operation_type)}
+                  </span>
                 </span>
                 {getStatusBadge(op.status)}
               </div>
@@ -642,6 +715,14 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                     className="text-xs font-medium text-leaf-600 dark:text-leaf-400 hover:text-leaf-700 dark:hover:text-leaf-300 transition-colors"
                   >
                     إغلاق هذه العملية
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPrintOpId(op.id)}
+                    className="inline-flex items-center gap-1 text-xs font-medium text-latte hover:text-primary transition-colors"
+                  >
+                    <PrinterIcon className="w-3.5 h-3.5" />
+                    طباعة أمر العمل
                   </button>
                   <button
                     type="button"
@@ -700,7 +781,8 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                 className="p-3 bg-cream dark:bg-espresso-light/30 rounded-lg border border-hairline"
               >
                 <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <span className="text-sm text-primary dark:text-latte/70">
+                  <span className="flex items-center gap-2 text-sm text-primary dark:text-latte/70">
+                    <OpNumberBadge number={getOpNumber(op)} />
                     {getOperationTypeLabel(op.operation_type)}
                   </span>
                   {getStatusBadge(op.status)}
@@ -709,18 +791,12 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                 {op.maintenance_cost != null && (
                   <div className="text-xs text-latte mt-1 space-y-0.5">
                     <div>تكلفة الصيانة: {op.maintenance_cost.toLocaleString()} ج.م</div>
-                    {op.maintenance_issues && op.maintenance_issues.length > 0 && (
-                      <div>المشاكل: {op.maintenance_issues.join('، ')}</div>
-                    )}
-                    {op.maintenance_services && op.maintenance_services.length > 0 && (
-                      <div>الخدمات: {op.maintenance_services.map((s) => s.count > 1 ? `${s.name} ×${s.count}` : s.name).join('، ')}</div>
-                    )}
-                    {op.maintenance_parts && op.maintenance_parts.length > 0 && (
-                      <div>القطع: {op.maintenance_parts.map((p) => p.count > 1 ? `${p.name} ×${p.count}` : p.name).join('، ')}</div>
-                    )}
-                    {!op.maintenance_issues?.length && !op.maintenance_services?.length && !op.maintenance_parts?.length && op.work_done && (
-                      <div>الأعمال: {op.work_done}</div>
-                    )}
+                    <MaintenanceWorkSections
+                      issues={op.maintenance_issues}
+                      services={op.maintenance_services}
+                      parts={op.maintenance_parts}
+                      fallback={op.work_done}
+                    />
                   </div>
                 )}
                 {op.total_logistics_cost != null && (
@@ -728,7 +804,15 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                     التكلفة الإجمالية: {op.total_logistics_cost.toLocaleString()} ج.م
                   </div>
                 )}
-                <div className="mt-2 flex gap-3">
+                <div className="mt-2 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPrintOpId(op.id)}
+                    className="inline-flex items-center gap-1 text-xs font-medium text-latte hover:text-primary transition-colors"
+                  >
+                    <PrinterIcon className="w-3.5 h-3.5" />
+                    طباعة أمر العمل
+                  </button>
                   <button
                     type="button"
                     onClick={() => fillFormFromOperation(op)}
@@ -1164,7 +1248,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
       {!selectedAction && editingOpId == null && openOps.length === 0 && closedOps.length === 0 && !isLoading && (
         <EmptyState
           variant="inline"
-          icon={<TruckIcon />}
+          icon={<ReportIcon name="truck" className="w-6 h-6" />}
           title="لا توجد عمليات لوجستية"
           message="أضف عملية لوجستية جديدة لتتبع حركة الماكينات بين العميل والشركة"
         />

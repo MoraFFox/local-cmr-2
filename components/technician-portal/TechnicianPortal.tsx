@@ -276,6 +276,8 @@ const TechnicianPortal: React.FC<TechnicianPortalProps> = ({
       case 1:
         return step1Data.companyId !== null && step1Data.branchId !== null && step1Data.visitZone !== null;
       case 2: {
+        // Logistics visits need no work details, photos, or supervisor info.
+        if (step2Data.visitType === 'logistics') return true;
         const hasRequiredWork = step2Data.visitType === 'problem'
           ? (step2Data.problems.length > 0 || step2Data.servicesPerformed.length > 0)
           : step2Data.servicesPerformed.length > 0;
@@ -285,6 +287,8 @@ const TechnicianPortal: React.FC<TechnicianPortalProps> = ({
         return hasRequiredWork && hasBeforePhoto && hasAfterPhoto && hasSupervisor;
       }
       case 3: {
+        // Logistics visits skip photo/supervisor requirements in review too.
+        if (step2Data.visitType === 'logistics') return true;
         const hasBeforePhoto = step2Data.photos.some(p => p.type === 'before');
         const hasAfterPhoto = step2Data.photos.some(p => p.type === 'after');
         const hasSupervisor = !!(step2Data.clientSupervisorName?.trim() && step2Data.clientSupervisorPhone?.trim());
@@ -303,6 +307,7 @@ const TechnicianPortal: React.FC<TechnicianPortalProps> = ({
         if (!step1Data.visitZone) return ar.errors.selectZone;
         return null;
       case 2: {
+        if (step2Data.visitType === 'logistics') return null;
         if (step2Data.visitType === 'problem') {
           if (step2Data.problems.length === 0 && step2Data.servicesPerformed.length === 0) {
             return ar.errors.selectProblems;
@@ -319,6 +324,7 @@ const TechnicianPortal: React.FC<TechnicianPortalProps> = ({
         return null;
       }
       case 3: {
+        if (step2Data.visitType === 'logistics') return null;
         if (!step2Data.photos.some(p => p.type === 'before')) return ar.errors.requireBeforePhoto;
         if (!step2Data.photos.some(p => p.type === 'after')) return ar.errors.requireAfterPhoto;
         if (!step2Data.clientSupervisorName?.trim()) return ar.errors.requireSupervisorName;
@@ -347,15 +353,17 @@ const TechnicianPortal: React.FC<TechnicianPortalProps> = ({
   };
 
   const handleSubmit = async () => {
-    // Validation: require before/after photos and supervisor info
+    const isLogisticsVisit = step2Data.visitType === 'logistics';
+
+    // Validation: require before/after photos and supervisor info (not for logistics visits)
     const beforePhotos = step2Data.photos.filter(p => p.type === 'before');
     const afterPhotos = step2Data.photos.filter(p => p.type === 'after');
 
     const errors: string[] = [];
-    if (beforePhotos.length === 0) errors.push('صورة قبل الصيانة مطلوبة');
-    if (afterPhotos.length === 0) errors.push('صورة بعد الصيانة مطلوبة');
-    if (!step2Data.clientSupervisorName?.trim()) errors.push('اسم مشرف العميل مطلوب');
-    if (!step2Data.clientSupervisorPhone?.trim()) errors.push('رقم هاتف المشرف مطلوب');
+    if (!isLogisticsVisit && beforePhotos.length === 0) errors.push('صورة قبل الصيانة مطلوبة');
+    if (!isLogisticsVisit && afterPhotos.length === 0) errors.push('صورة بعد الصيانة مطلوبة');
+    if (!isLogisticsVisit && !step2Data.clientSupervisorName?.trim()) errors.push('اسم مشرف العميل مطلوب');
+    if (!isLogisticsVisit && !step2Data.clientSupervisorPhone?.trim()) errors.push('رقم هاتف المشرف مطلوب');
 
     if (errors.length > 0) {
       showToast(errors.join('\n'), 'error');
@@ -464,6 +472,7 @@ const TechnicianPortal: React.FC<TechnicianPortalProps> = ({
         notes: step2Data.notes,
         photo_urls: photoUrls,
         photo_entries: photoEntries,
+        is_logistics_visit: isLogisticsVisit,
         company_id: step1Data.companyId,
         branch_id: step1Data.branchId,
         technician_id: technician?.id,
@@ -585,7 +594,7 @@ const TechnicianPortal: React.FC<TechnicianPortalProps> = ({
         />
         
         {/* Floating elements */}
-        {currentStep === 2 && (
+        {currentStep === 2 && step2Data.visitType !== 'logistics' && (
             <FloatingCameraFAB
                 onCameraOpen={() => setIsCameraOpen(true)}
                 photoCount={step2Data.photos.length}

@@ -26,7 +26,7 @@ import { problemCategories } from '../../constants';
 import { getSuggestedServices, getSuggestedParts } from '../../utils/problemSuggestions';
 
 export interface Step2WorkLogData {
-  visitType: 'problem' | 'scheduled';
+  visitType: 'problem' | 'scheduled' | 'logistics';
   hadProblem: boolean;
   problems: string[];
   servicesPerformed: { name: string; count: number }[];
@@ -78,8 +78,20 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
   maintenanceDate,
 }) => {
   const t = useT();
-  const handleVisitTypeChange = (type: 'problem' | 'scheduled') => {
-    if (type === 'scheduled') {
+  const handleVisitTypeChange = (type: 'problem' | 'scheduled' | 'logistics') => {
+    if (type === 'logistics') {
+      // Logistics visits carry no maintenance work — only machine logistics.
+      onChange({
+        ...data,
+        visitType: type,
+        hadProblem: false,
+        problems: [],
+        servicesPerformed: [],
+        partsWereReplaced: false,
+        partsReplaced: [],
+        problemSolved: true,
+      });
+    } else if (type === 'scheduled') {
       onChange({
         ...data,
         visitType: type,
@@ -174,7 +186,7 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
         icon={<WrenchScrewdriverIcon/>}
         variant="primary"
       >
-         <div className="grid grid-cols-2 gap-4">
+         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <TechButton 
                 variant={data.visitType === 'problem' ? 'danger' : 'secondary'}
                 onClick={() => handleVisitTypeChange('problem')}
@@ -192,6 +204,15 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
                 <WrenchScrewdriverIcon className="w-8 h-8" />
                 <span className="text-sm font-bold">{t.portal.scheduledVisit}</span>
             </TechButton>
+
+            <TechButton 
+                variant={data.visitType === 'logistics' ? 'warning' : 'secondary'}
+                onClick={() => handleVisitTypeChange('logistics')}
+                className="flex flex-col items-center justify-center h-24 gap-2"
+            >
+                <TruckIcon className="w-8 h-8" />
+                <span className="text-sm font-bold">{t.portal.logisticsVisit}</span>
+            </TechButton>
          </div>
 
          {data.visitType === 'scheduled' && (
@@ -200,6 +221,16 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
                 <div className="text-sm text-primary">
                     <p className="font-bold">{t.portal.routineMaintenance}</p>
                     <p className="opacity-80">{t.portal.routineHint}</p>
+                </div>
+            </div>
+         )}
+
+         {data.visitType === 'logistics' && (
+            <div className="mt-4 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-3 animate-in fade-in">
+                <TruckIcon className="w-6 h-6 text-amber-500" />
+                <div className="text-sm text-amber-700">
+                    <p className="font-bold">{t.portal.logisticsVisit}</p>
+                    <p className="opacity-80">{t.portal.logisticsVisitHint}</p>
                 </div>
             </div>
          )}
@@ -217,7 +248,8 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
         </TechCard>
       )}
 
-      {/* 3. Protocols Executed (Services) */}
+      {/* 3. Protocols Executed (Services) — skipped for logistics visits */}
+      {data.visitType !== 'logistics' && (
       <TechCard title={t.tactical.executionLog} icon={<WrenchScrewdriverIcon />} variant="active">
         <ServiceSelector
            options={servicesToUse}
@@ -226,6 +258,7 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
            suggestedValues={suggestedServices}
         />
       </TechCard>
+      )}
 
       {/* 4. Equipment Replacement (If Problem Visit) */}
       {data.visitType === 'problem' && (
@@ -298,7 +331,8 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
          </TechCard>
       )}
 
-      {/* 6. Photos - Before/After (Required) */}
+      {/* 6. Photos - Before/After (Required) — skipped for logistics visits */}
+      {data.visitType !== 'logistics' && (
       <TechCard title={t.tactical.evidenceLocker} icon={<CameraIcon />}>
          <div className="space-y-4">
             {/* Before Photos */}
@@ -358,8 +392,10 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
             </div>
          </div>
       </TechCard>
+      )}
 
-      {/* 7. Client Supervisor Contact */}
+      {/* 7. Client Supervisor Contact — skipped for logistics visits */}
+      {data.visitType !== 'logistics' && (
       <TechCard title={t.tactical.clientContact} icon={<UserIcon />} variant="active">
         <div className="space-y-4">
           <TechInput
@@ -382,10 +418,11 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
           />
         </div>
       </TechCard>
+      )}
 
-      {/* 8. Machine Logistics */}
+      {/* 8. Machine Logistics — the only work recorded for logistics visits */}
       {customerId != null && maintenanceDate && (
-        <TechCard title="لوجستيات الماكينات" icon={<TruckIcon />} variant="active">
+        <TechCard title="لوجستيات الماكينات" icon={<TruckIcon />} variant={data.visitType === 'logistics' ? 'warning' : 'active'}>
           <MachineLogisticsSection
             customerId={customerId}
             recordId={recordId}

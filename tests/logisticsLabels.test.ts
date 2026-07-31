@@ -3,6 +3,7 @@ import {
   composeMaintenanceWork,
   composeMaintenanceWorkEn,
   getMaintenanceWorkSections,
+  formatWorkItemWithCost,
   formatMachineDescription,
   formatMachineDescriptionAr,
 } from '../utils/logisticsLabels';
@@ -58,6 +59,26 @@ describe('getMaintenanceWorkSections', () => {
     expect(getMaintenanceWorkSections([], [], [{ name: 'شاور', count: 1 }])).toEqual([
       { key: 'parts', items: ['شاور'] },
     ]);
+  });
+});
+
+describe('formatWorkItemWithCost', () => {
+  it('formats a single item with its unit cost', () => {
+    expect(formatWorkItemWithCost('جوان', 1, 100)).toBe('جوان — 100 ج.م');
+  });
+
+  it('breaks down unit × count = total for multi-quantity items', () => {
+    expect(formatWorkItemWithCost('جوان', 2, 100)).toBe('جوان ×2 — 100 ج.م × 2 = 200 ج.م');
+  });
+
+  it('omits the cost when it is unknown or missing', () => {
+    expect(formatWorkItemWithCost('جوان', 1)).toBe('جوان');
+    expect(formatWorkItemWithCost('جوان', 3, null)).toBe('جوان ×3');
+  });
+
+  it('uses the given currency suffix for English reports', () => {
+    expect(formatWorkItemWithCost('Gasket', 1, 100, 'EGP')).toBe('Gasket — 100 EGP');
+    expect(formatWorkItemWithCost('Gasket', 2, 100, 'EGP')).toBe('Gasket ×2 — 100 EGP × 2 = 200 EGP');
   });
 });
 

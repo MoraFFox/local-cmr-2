@@ -47,6 +47,7 @@ export const mapPortalToMaintenance = (
     maintenanceDate: sub.maintenance_date,
     notes: sub.notes || "",
     type: sub.type as "requested" | "scheduled",
+    isLogisticsVisit: sub.is_logistics_visit || false,
     hadProblem: sub.had_problem || false,
     partsWereReplaced: sub.parts_were_replaced || false,
     problemSolved: sub.problem_solved || false,
