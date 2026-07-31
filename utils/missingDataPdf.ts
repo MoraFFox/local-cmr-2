@@ -576,7 +576,7 @@ const getCompanyProfileFields = (data: FormData): MissingField[] => {
         key: "company.usesOurMachines",
         label: "هل يستخدمون ماكيناتنا؟",
         type: "select",
-        options: ["نعم", "لا"],
+        options: ["مكينتنا", "مكينة العميل"],
       });
     }
 
@@ -619,7 +619,7 @@ const getBranchProfileFields = (branch: Branch, prefix: string): MissingField[] 
       key: `${prefix}.usesOurMachines`,
       label: "هل يستخدمون ماكيناتنا؟",
       type: "select",
-      options: ["نعم", "لا"],
+      options: ["مكينتنا", "مكينة العميل"],
     });
   }
 
@@ -943,13 +943,18 @@ export const parseMissingDataPDF = async (
               const baseName = name.slice(0, lastUnderscore);
               const optionIndex = Number(name.slice(lastUnderscore + 1));
               const isOwnershipType = baseName.endsWith("machineOwnershipType");
+              const isUsesOurMachines = baseName.endsWith("usesOurMachines");
               const optionValue = isOwnershipType
                 ? optionIndex === 0
                   ? "شراء"
                   : "إيجار"
-                : optionIndex === 0
-                  ? "نعم"
-                  : "لا";
+                : isUsesOurMachines
+                  ? optionIndex === 0
+                    ? "مكينتنا"
+                    : "مكينة العميل"
+                  : optionIndex === 0
+                    ? "نعم"
+                    : "لا";
               result[baseName] = optionValue;
             } else {
               result[name] = "true";
@@ -1056,7 +1061,8 @@ export const applyParsedMissingData = (
           if (field === "hasBranches") {
             (updated as any)[field] = value === "نعم";
           } else if (field === "usesOurMachines") {
-            (updated as any)[field] = value === "نعم";
+            // Accept both the new labels and the legacy نعم/لا from older PDFs
+            (updated as any)[field] = value === "مكينتنا" || value === "نعم";
           } else if (field === "machineOwnershipType") {
             (updated as any)[field] = value === "شراء" ? "bought" : value === "إيجار" ? "leased" : undefined;
           } else if (field === "dailyLeaseCost") {
@@ -1118,7 +1124,8 @@ export const applyParsedMissingData = (
         } else {
           const field = parts[2];
           if (field === "usesOurMachines") {
-            branch.usesOurMachines = value === "نعم";
+            // Accept both the new labels and the legacy نعم/لا from older PDFs
+            branch.usesOurMachines = value === "مكينتنا" || value === "نعم";
           } else if (field === "machineOwnershipType") {
             branch.machineOwnershipType = value === "شراء" ? "bought" : value === "إيجار" ? "leased" : undefined;
           } else if (field === "dailyLeaseCost") {

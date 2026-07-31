@@ -112,7 +112,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
             value={branch.usesOurMachines}
             onChange={(val) => actions.handleListItemChange(
               { target: { name: "usesOurMachines", value: val } } as React.ChangeEvent<HTMLInputElement>, "branches", index)}
-            options={[{ label: "نعم", value: true }, { label: "لا", value: false }]} inline
+            options={[{ label: "مكينتنا", value: true }, { label: "مكينة العميل", value: false }]} inline
           />
           {branch.usesOurMachines === true && (
             <div className="mt-4 space-y-4">

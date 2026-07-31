@@ -105,17 +105,17 @@ const MachineList = ({
     return <span>Not specified</span>;
   }
   if (entity.usesOurMachines === false) {
-    return <span>No</span>;
+    return <span>مكينة العميل</span>;
   }
 
   if (!entity.machines || entity.machines.length === 0) {
-    return <span>Yes (No machines added)</span>;
+    return <span>مكينتنا (لا توجد ماكينات مضافة)</span>;
   }
 
   return (
     <div className="space-y-2 mt-1 w-full">
       {entity.machines.map((m, idx) => {
-        let typeStr = "Acquisition type not specified";
+        let typeStr = "نوع الاستحواذ غير محدد";
         if (m.machineOwnershipType) {
           typeStr = m.machineOwnershipType.charAt(0).toUpperCase() + m.machineOwnershipType.slice(1);
         }

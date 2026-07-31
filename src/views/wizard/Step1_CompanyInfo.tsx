@@ -122,8 +122,8 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
             value={formData.usesOurMachines}
             onChange={(val) => actions.handleRadioChange("usesOurMachines", val)}
             options={[
-              { label: "نعم", value: true },
-              { label: "لا", value: false },
+              { label: "مكينتنا", value: true },
+              { label: "مكينة العميل", value: false },
             ]}
             inline
           />

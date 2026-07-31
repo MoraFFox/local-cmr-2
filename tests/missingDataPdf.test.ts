@@ -103,6 +103,21 @@ describe('getMissingFields', () => {
     const result = getMissingFields(data, { scope: 'company' });
 
     expect(result.company.some((f) => f.key === 'company.usesOurMachines')).toBe(true);
+    const field = result.company.find((f) => f.key === 'company.usesOurMachines');
+    expect(field?.options).toEqual(['مكينتنا', 'مكينة العميل']);
+  });
+
+  it('uses the new options for branch usesOurMachines select', () => {
+    const branch = createBranch({ usesOurMachines: null });
+    const data = createBaseFormData({
+      hasBranches: true,
+      branches: [branch],
+    });
+
+    const result = getMissingFields(data, { scope: 'company' });
+
+    const field = result.branches[0].find((f) => f.key === 'branch.0.usesOurMachines');
+    expect(field?.options).toEqual(['مكينتنا', 'مكينة العميل']);
   });
 
   it('detects missing machine ownership type when machines are used', () => {
@@ -317,11 +332,23 @@ describe('applyParsedMissingData', () => {
 
     const result = applyParsedMissingData(data, {
       'company.hasBranches': 'نعم',
-      'company.usesOurMachines': 'لا',
+      'company.usesOurMachines': 'مكينة العميل',
     });
 
     expect(result.hasBranches).toBe(true);
     expect(result.usesOurMachines).toBe(false);
+  });
+
+  it('still accepts legacy نعم/لا values from older PDFs', () => {
+    const data = createBaseFormData({ usesOurMachines: null });
+
+    const legacyYes = applyParsedMissingData(data, { 'company.usesOurMachines': 'نعم' });
+    expect(legacyYes.usesOurMachines).toBe(true);
+
+    const legacyNo = applyParsedMissingData(createBaseFormData({ usesOurMachines: null }), {
+      'company.usesOurMachines': 'لا',
+    });
+    expect(legacyNo.usesOurMachines).toBe(false);
   });
 
   it('converts machine ownership type select values', () => {
@@ -672,7 +699,7 @@ describe('parseMissingDataPDF', () => {
     expect(result['company.hasBranches']).toBe('نعم');
   });
 
-  it('maps checked no checkbox to "لا"', async () => {
+  it('maps checked no checkbox to "مكينة العميل"', async () => {
     const pdfBuffer = await createTestPDF([
       { name: 'company.usesOurMachines_0', type: 'checkbox', checked: false },
       { name: 'company.usesOurMachines_1', type: 'checkbox', checked: true },
@@ -680,7 +707,7 @@ describe('parseMissingDataPDF', () => {
 
     const result = await parseMissingDataPDF(pdfBuffer);
 
-    expect(result['company.usesOurMachines']).toBe('لا');
+    expect(result['company.usesOurMachines']).toBe('مكينة العميل');
   });
 
   it('maps checked ownership type checkboxes correctly', async () => {
@@ -702,7 +729,7 @@ describe('parseMissingDataPDF', () => {
 
     const result = await parseMissingDataPDF(pdfBuffer);
 
-    expect(result['branch.0.usesOurMachines']).toBe('نعم');
+    expect(result['branch.0.usesOurMachines']).toBe('مكينتنا');
   });
 
   it('reads text field values', async () => {

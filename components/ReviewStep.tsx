@@ -91,14 +91,14 @@ export const getMachineOwnershipStatus = (
     return "Not specified";
   }
   if (entity.usesOurMachines === false) {
-    return "لا";
+    return "مكينة العميل";
   }
   if (entity.usesOurMachines === true) {
     if (entity.machineOwnershipType) {
       const type =
         entity.machineOwnershipType.charAt(0).toUpperCase() +
         entity.machineOwnershipType.slice(1);
-      let status = `Yes (${type})`;
+      let status = `مكينتنا (${type})`;
       if (
         !hideCosts &&
         (entity.machineOwnershipType === "leased" ||
@@ -109,7 +109,7 @@ export const getMachineOwnershipStatus = (
       }
       return status;
     }
-    return "Yes (Acquisition type not specified)";
+    return "مكينتنا (نوع الاستحواذ غير محدد)";
   }
   return "Not specified";
 };
