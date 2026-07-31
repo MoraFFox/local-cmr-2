@@ -1,9 +1,38 @@
 /** @format */
 
+import { ServiceRecord, PartRecord } from '../types';
+
 /**
  * Shared logistics operation type labels — single source of truth
  * for both React HTML reports and jsPDF generators.
  */
+
+/** Format a single service/part line: "الاسم ×2" (count omitted when 1). */
+const formatWorkItem = (name: string, count: number): string =>
+  count > 1 ? `${name} ×${count}` : name;
+
+/**
+ * Compose a human-readable Arabic summary of the maintenance performed
+ * (issues + services + parts). Used to populate the legacy `work_done`
+ * column so older report surfaces keep displaying something meaningful.
+ */
+export function composeMaintenanceWork(
+  issues: string[] = [],
+  services: ServiceRecord[] = [],
+  parts: PartRecord[] = [],
+): string {
+  const sections: string[] = [];
+  if (issues.length > 0) {
+    sections.push(`المشاكل: ${issues.join('، ')}`);
+  }
+  if (services.length > 0) {
+    sections.push(`الخدمات: ${services.map((s) => formatWorkItem(s.name, s.count)).join('، ')}`);
+  }
+  if (parts.length > 0) {
+    sections.push(`القطع: ${parts.map((p) => formatWorkItem(p.name, p.count)).join('، ')}`);
+  }
+  return sections.join(' | ');
+}
 
 /** Full Arabic labels used in internal HTML reports and the logistics timeline. */
 export const LOGISTICS_TYPE_LABELS_AR: Record<string, string> = {

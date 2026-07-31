@@ -4,6 +4,7 @@ import { render, screen, fireEvent, waitFor, cleanup } from './testUtils';
 import MachineLogisticsSection from '../components/MachineLogisticsSection';
 import { ToastProvider } from '../components/ToastContext';
 import type { LogisticsOperation } from '../types';
+import { partsList, servicesList, problemCategories } from '../constants';
 
 // Mock the hooks
 vi.mock('../hooks/useLogisticsOperations', async () => {
@@ -28,6 +29,26 @@ vi.mock('../hooks/useLogisticsOperations', async () => {
       updateMachine: vi.fn(),
       deleteMachine: vi.fn(),
       refresh: vi.fn(),
+    })),
+  };
+});
+
+// Mock the merged catalog (parts/services/problem lists) so the selectors render
+// the standard constants deterministically without hitting Supabase.
+vi.mock('../hooks/useCustomCatalog', async () => {
+  const actual = await vi.importActual('../hooks/useCustomCatalog');
+  return {
+    ...actual,
+    useMergedCatalog: vi.fn(() => ({
+      parts: partsList,
+      services: servicesList,
+      problemCategoriesWithCustoms: problemCategories,
+      isLoading: false,
+      error: null,
+      refresh: vi.fn(),
+      addItem: vi.fn(),
+      updateItem: vi.fn(),
+      deleteItem: vi.fn(),
     })),
   };
 });
@@ -63,7 +84,10 @@ const closedOp: LogisticsOperation = {
   close_date: '2026-06-20',
   total_logistics_cost: 4000,
   maintenance_cost: 500,
-  work_done: 'تغيير قطع غيار',
+  maintenance_issues: ['هاندات غير نظيفة'],
+  maintenance_services: [{ name: 'تغيير جوانات', count: 1, cost: 400, paidByClient: false }],
+  maintenance_parts: [{ name: 'جوان', count: 1, cost: 100, paidByClient: false }],
+  work_done: 'المشاكل: هاندات غير نظيفة | الخدمات: تغيير جوانات | القطع: جوان',
 };
 
 describe('MachineLogisticsSection', () => {
@@ -197,7 +221,7 @@ describe('MachineLogisticsSection', () => {
     });
   });
 
-  it('requires maintenance cost and work done to close an operation', async () => {
+  it('requires maintenance cost and at least one issue to close an operation', async () => {
     mockHook([openOp]);
     renderWithProviders(<MachineLogisticsSection {...baseProps} />);
 
@@ -213,19 +237,16 @@ describe('MachineLogisticsSection', () => {
       screen.getByText('يجب إدخال تكلفة الصيانة (رقم موجب)'),
     ).toBeInTheDocument();
 
-    // Fill in cost but no work done
+    // Fill in cost but no issue → issues validation error
     const costInput = screen.getByPlaceholderText('0.00');
     fireEvent.change(costInput, { target: { value: '750' } });
     fireEvent.click(screen.getByText('تأكيد الإغلاق'));
     expect(
-      screen.getByText('يجب توضيح الأعمال المنفذة على الماكينة'),
+      screen.getByText('يجب اختيار مشكلة واحدة على الأقل'),
     ).toBeInTheDocument();
 
-    // Fill work done and close successfully
-    fireEvent.change(
-      screen.getByPlaceholderText(/مثال: تغيير قطع غيار/),
-      { target: { value: 'تغيير مجموعة التحضير' } },
-    );
+    // Select an issue (Common chip in CheckboxGroup) and close successfully
+    fireEvent.click(screen.getByText('هاندات غير نظيفة'));
     fireEvent.click(screen.getByText('تأكيد الإغلاق'));
 
     const hook = vi.mocked(useLogisticsOperations);
@@ -234,21 +255,49 @@ describe('MachineLogisticsSection', () => {
         closed_by_record_id: 100,
         close_date: '2026-06-11',
         maintenance_cost: 750,
-        work_done: 'تغيير مجموعة التحضير',
+        maintenance_issues: ['هاندات غير نظيفة'],
+        maintenance_services: [],
+        maintenance_parts: [],
       });
     });
   });
 
-  it('shows given machine and maintenance info on operation cards', async () => {
+  it('keeps services and parts sections toggled off by default in the close form', async () => {
+    mockHook([openOp]);
+    renderWithProviders(<MachineLogisticsSection {...baseProps} />);
+
+    fireEvent.click(screen.getByText('إغلاق هذه العملية'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/تكلفة الصيانة المنفذة على ماكينة العميل/)).toBeInTheDocument();
+    });
+
+    // Issues section is always visible (required)
+    expect(screen.getByText('المشاكل المكتشفة على الماكينة')).toBeInTheDocument();
+
+    // Services & parts bodies hidden by default
+    expect(screen.queryByTestId('close-services-body')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('close-parts-body')).not.toBeInTheDocument();
+
+    // Toggling them shows the selectors
+    fireEvent.click(screen.getByText('الخدمات المنفذة'));
+    expect(screen.getByTestId('close-services-body')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('قطع الغيار المستبدلة'));
+    expect(screen.getByTestId('close-parts-body')).toBeInTheDocument();
+  });
+
+  it('shows given machine and structured maintenance info on operation cards', async () => {
     mockHook([openOp, closedOp]);
     renderWithProviders(<MachineLogisticsSection {...baseProps} />);
 
     // Both open and closed cards show given machine info
     expect(screen.getAllByText(/الماكينة المقدمة:/).length).toBe(2);
 
-    // Closed op: maintenance cost + work done shown
+    // Closed op: maintenance cost + structured issues/services/parts shown
     expect(screen.getByText(/تكلفة الصيانة: 500 ج\.م/)).toBeInTheDocument();
-    expect(screen.getByText(/الأعمال: تغيير قطع غيار/)).toBeInTheDocument();
+    expect(screen.getByText(/المشاكل: هاندات غير نظيفة/)).toBeInTheDocument();
+    expect(screen.getByText(/الخدمات: تغيير جوانات/)).toBeInTheDocument();
+    expect(screen.getByText(/القطع: جوان/)).toBeInTheDocument();
   });
 
   it('lets the user edit maintenance fields on a closed operation', async () => {
@@ -264,17 +313,20 @@ describe('MachineLogisticsSection', () => {
     // Pre-filled with existing close data
     const costInput = screen.getByDisplayValue('500');
     fireEvent.change(costInput, { target: { value: '650' } });
-    fireEvent.change(
-      screen.getByDisplayValue('تغيير قطع غيار'),
-      { target: { value: 'تغيير مجموعة التحضير + تنظيف' } },
-    );
+    // Add a second issue
+    fireEvent.click(screen.getByText('ضغط الماكينة غير منضبط'));
     fireEvent.click(screen.getByText('حفظ التعديلات'));
 
     const hook = vi.mocked(useLogisticsOperations);
     await waitFor(() => {
       expect(hook.mock.results[0].value.updateOperation).toHaveBeenCalledWith(
         2,
-        expect.objectContaining({ maintenance_cost: 650, work_done: 'تغيير مجموعة التحضير + تنظيف' }),
+        expect.objectContaining({
+          maintenance_cost: 650,
+          maintenance_issues: ['هاندات غير نظيفة', 'ضغط الماكينة غير منضبط'],
+          maintenance_services: [{ name: 'تغيير جوانات', count: 1, cost: 400, paidByClient: false }],
+          maintenance_parts: [{ name: 'جوان', count: 1, cost: 100, paidByClient: false }],
+        }),
       );
     });
   });

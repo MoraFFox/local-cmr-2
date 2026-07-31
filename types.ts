@@ -86,6 +86,13 @@ export interface LogisticsOperation {
   pickup_cost?: number;
   return_cost?: number;
   maintenance_cost?: number;
+  /** Problems/issues found on the client's machine (required at close). */
+  maintenance_issues?: string[];
+  /** Services performed on the client's machine (optional). */
+  maintenance_services?: ServiceRecord[];
+  /** Parts changed on the client's machine (optional). */
+  maintenance_parts?: PartRecord[];
+  /** Composed summary of issues + services + parts (backward-compat display). */
   work_done?: string;
   total_logistics_cost?: number;
   internal_notes?: string;

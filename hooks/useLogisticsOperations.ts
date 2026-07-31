@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
-import { LogisticsOperation, CompanyMachine } from '../types';
+import { LogisticsOperation, CompanyMachine, ServiceRecord, PartRecord } from '../types';
 import { logger } from '../utils/logger';
+import { composeMaintenanceWork } from '../utils/logisticsLabels';
 
 /**
  * Calculate rental duration between two maintenance record visit dates.
@@ -54,8 +55,12 @@ export interface CloseOperationData {
   close_date: string; // maintenanceDate of the closing record
   /** Cost of maintenance performed on the client's machine (internal, always company-paid). */
   maintenance_cost: number;
-  /** What was done to the client's machine (parts changed, services performed, etc.). */
-  work_done: string;
+  /** Problems/issues found on the client's machine — required. */
+  maintenance_issues: string[];
+  /** Services performed on the client's machine — optional. */
+  maintenance_services?: ServiceRecord[];
+  /** Parts changed on the client's machine — optional. */
+  maintenance_parts?: PartRecord[];
 }
 
 /** Fields editable after creation (both open and closed operations). */
@@ -73,6 +78,10 @@ export interface UpdateLogisticsOperationInput {
   internal_notes?: string;
   /** Only meaningful for closed operations. */
   maintenance_cost?: number;
+  maintenance_issues?: string[];
+  maintenance_services?: ServiceRecord[];
+  maintenance_parts?: PartRecord[];
+  /** Composed summary (issues/services/parts) for backward-compat display. */
   work_done?: string;
 }
 
@@ -176,6 +185,9 @@ export function useLogisticsOperations(customerId: number | null) {
         const { data: userData } = await supabase.auth.getUser();
         const userId = userData.user?.id;
 
+        const maintenanceServices = closeData.maintenance_services ?? [];
+        const maintenanceParts = closeData.maintenance_parts ?? [];
+
         const { data, error: supaError } = await supabase
           .from('logistics_operations')
           .update({
@@ -188,7 +200,10 @@ export function useLogisticsOperations(customerId: number | null) {
             billable_days: billableDays,
             total_rental_cost: rentalCost,
             maintenance_cost: Math.max(0, closeData.maintenance_cost),
-            work_done: closeData.work_done,
+            maintenance_issues: closeData.maintenance_issues ?? [],
+            maintenance_services: maintenanceServices,
+            maintenance_parts: maintenanceParts,
+            work_done: composeMaintenanceWork(closeData.maintenance_issues, maintenanceServices, maintenanceParts),
             closed_by: userId,
           })
           .eq('id', operationId)
@@ -228,6 +243,18 @@ export function useLogisticsOperations(customerId: number | null) {
             // Only overwrite close-time data when explicitly provided, so an edit that
             // omits maintenance fields never wipes them from a closed operation.
             ...(input.maintenance_cost != null ? { maintenance_cost: Math.max(0, input.maintenance_cost) } : {}),
+            ...(input.maintenance_issues != null ? { maintenance_issues: input.maintenance_issues } : {}),
+            ...(input.maintenance_services != null ? { maintenance_services: input.maintenance_services } : {}),
+            ...(input.maintenance_parts != null ? { maintenance_parts: input.maintenance_parts } : {}),
+            // Re-compose the legacy work_done summary whenever the structured
+            // close data changes, so the column never goes stale on edits.
+            ...(input.maintenance_issues != null || input.maintenance_services != null || input.maintenance_parts != null
+              ? { work_done: composeMaintenanceWork(
+                  input.maintenance_issues ?? [],
+                  input.maintenance_services ?? [],
+                  input.maintenance_parts ?? [],
+                ) }
+              : {}),
             ...(input.work_done != null ? { work_done: input.work_done } : {}),
             updated_at: new Date().toISOString(),
           })

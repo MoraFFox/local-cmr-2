@@ -7,11 +7,19 @@ import {
   ExclamationCircleIcon,
   PencilSquareIcon,
   TrashIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
 } from '@heroicons/react/24/outline';
 import { useLogisticsOperations, useCompanyMachines, calculateDailyRentalPrice } from '../hooks/useLogisticsOperations';
 import { useToast } from './ToastContext';
 import EmptyState from './EmptyState';
-import type { LogisticsOperation, CompanyMachine } from '../types';
+import CheckboxGroup from './CheckboxGroup';
+import ServiceSelector from './ServiceSelector';
+import PartsSelector from './PartsSelector';
+import { useMergedCatalog } from '../hooks/useCustomCatalog';
+import { allPredefinedProblems } from '../utils/sharedConstants';
+import { getSuggestedServices, getSuggestedParts } from '../utils/problemSuggestions';
+import type { LogisticsOperation, CompanyMachine, ServiceRecord, PartRecord } from '../types';
 
 interface MachineLogisticsSectionProps {
   customerId: number | null;
@@ -81,6 +89,12 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
   const { operations, isLoading, createOperation, closeOperation, updateOperation, deleteOperation, refresh } =
     useLogisticsOperations(customerId);
   const { machines: companyMachines } = useCompanyMachines();
+  const {
+    parts: mergedPartsList,
+    services: mergedServicesList,
+    problemCategoriesWithCustoms,
+    addItem,
+  } = useMergedCatalog();
 
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
   const [editingOpId, setEditingOpId] = useState<number | null>(null);
@@ -104,11 +118,22 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
     internal_notes: '',
     // Close-time data — only editable when editing a closed operation
     maintenance_cost: '',
-    work_done: '',
+    maintenance_issues: [] as string[],
+    maintenance_services: [] as ServiceRecord[],
+    maintenance_parts: [] as PartRecord[],
+    maintenance_services_open: false,
+    maintenance_parts_open: false,
   });
 
-  // Close form state (maintenance cost + work done — required)
-  const [closeForm, setCloseForm] = useState({ maintenance_cost: '', work_done: '' });
+  // Close form state (maintenance cost + issues required; services/parts optional toggles)
+  const [closeForm, setCloseForm] = useState({
+    maintenance_cost: '',
+    issues: [] as string[],
+    services: [] as ServiceRecord[],
+    parts: [] as PartRecord[],
+    servicesOpen: false,
+    partsOpen: false,
+  });
 
   const openOps = useMemo(() => operations.filter((o) => o.status === 'open'), [operations]);
   const closedOps = useMemo(() => operations.filter((o) => o.status === 'closed'), [operations]);
@@ -141,9 +166,20 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
       return_cost: '',
       internal_notes: '',
       maintenance_cost: '',
-      work_done: '',
+      maintenance_issues: [],
+      maintenance_services: [],
+      maintenance_parts: [],
+      maintenance_services_open: false,
+      maintenance_parts_open: false,
     });
-    setCloseForm({ maintenance_cost: '', work_done: '' });
+    setCloseForm({
+      maintenance_cost: '',
+      issues: [],
+      services: [],
+      parts: [],
+      servicesOpen: false,
+      partsOpen: false,
+    });
   };
 
   /** Resolve the stored category: 'other' → the typed custom text. */
@@ -173,7 +209,11 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
       return_cost: op.return_cost != null && op.return_cost > 0 ? String(op.return_cost) : '',
       internal_notes: op.internal_notes || '',
       maintenance_cost: op.maintenance_cost != null ? String(op.maintenance_cost) : '',
-      work_done: op.work_done || '',
+      maintenance_issues: op.maintenance_issues ?? [],
+      maintenance_services: op.maintenance_services ?? [],
+      maintenance_parts: op.maintenance_parts ?? [],
+      maintenance_services_open: (op.maintenance_services?.length ?? 0) > 0,
+      maintenance_parts_open: (op.maintenance_parts?.length ?? 0) > 0,
     });
     setShowCloseForm(null);
     setDeleteConfirmId(null);
@@ -206,10 +246,17 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
 
       if (editingOp) {
         // Validate close-time data on closed-op edits (matches the close form)
-        if (editingOp.status === 'closed' && formData.maintenance_cost !== '' && isNaN(Number(formData.maintenance_cost))) {
-          showToast('تكلفة الصيانة يجب أن تكون رقماً صحيحاً', 'error');
-          setIsSaving(false);
-          return;
+        if (editingOp.status === 'closed') {
+          if (formData.maintenance_cost !== '' && isNaN(Number(formData.maintenance_cost))) {
+            showToast('تكلفة الصيانة يجب أن تكون رقماً صحيحاً', 'error');
+            setIsSaving(false);
+            return;
+          }
+          if (formData.maintenance_issues.length === 0) {
+            showToast('يجب اختيار مشكلة واحدة على الأقل', 'error');
+            setIsSaving(false);
+            return;
+          }
         }
         await updateOperation(editingOp.id, {
           ...base,
@@ -219,10 +266,12 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
             editingOp.status === 'closed' && formData.maintenance_cost !== ''
               ? Number(formData.maintenance_cost)
               : undefined,
-          work_done:
-            editingOp.status === 'closed'
-              ? formData.work_done.trim()
-              : undefined,
+          maintenance_issues:
+            editingOp.status === 'closed' ? formData.maintenance_issues : undefined,
+          maintenance_services:
+            editingOp.status === 'closed' ? formData.maintenance_services : undefined,
+          maintenance_parts:
+            editingOp.status === 'closed' ? formData.maintenance_parts : undefined,
         });
         showToast('تم تحديث العملية اللوجستية بنجاح', 'success');
       } else {
@@ -240,19 +289,25 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
 
   const openCloseForm = (operationId: number) => {
     setShowCloseForm(operationId);
-    setCloseForm({ maintenance_cost: '', work_done: '' });
+    setCloseForm({
+      maintenance_cost: '',
+      issues: [],
+      services: [],
+      parts: [],
+      servicesOpen: false,
+      partsOpen: false,
+    });
     setDeleteConfirmId(null);
   };
 
   const handleClose = async (operationId: number) => {
     const cost = Number(closeForm.maintenance_cost);
-    const workDone = closeForm.work_done.trim();
     if (!closeForm.maintenance_cost || isNaN(cost) || cost < 0) {
       showToast('يجب إدخال تكلفة الصيانة (رقم موجب)', 'error');
       return;
     }
-    if (!workDone) {
-      showToast('يجب توضيح الأعمال المنفذة على الماكينة', 'error');
+    if (closeForm.issues.length === 0) {
+      showToast('يجب اختيار مشكلة واحدة على الأقل', 'error');
       return;
     }
     setIsSaving(true);
@@ -261,11 +316,20 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
         closed_by_record_id: recordId,
         close_date: maintenanceDate,
         maintenance_cost: cost,
-        work_done: workDone,
+        maintenance_issues: closeForm.issues,
+        maintenance_services: closeForm.services,
+        maintenance_parts: closeForm.parts,
       });
       showToast('تم إغلاق العملية اللوجستية بنجاح', 'success');
       setShowCloseForm(null);
-      setCloseForm({ maintenance_cost: '', work_done: '' });
+      setCloseForm({
+        maintenance_cost: '',
+        issues: [],
+        services: [],
+        parts: [],
+        servicesOpen: false,
+        partsOpen: false,
+      });
       refresh();
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'فشل إغلاق العملية', 'error');
@@ -331,7 +395,10 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
     </div>
   );
 
-  const renderCloseForm = (op: LogisticsOperation) => (
+  const renderCloseForm = (op: LogisticsOperation) => {
+    const suggestedServices = getSuggestedServices(closeForm.issues, mergedServicesList);
+    const suggestedParts = getSuggestedParts(closeForm.issues, mergedPartsList);
+    return (
     <div className="mt-3 p-3 bg-white dark:bg-espresso rounded-lg border border-hairline space-y-3">
       <p className="text-sm text-primary dark:text-latte/70">
         سيتم إغلاق هذه العملية باستخدام تاريخ الزيارة الحالي ({maintenanceDate}).
@@ -357,17 +424,82 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
         />
       </div>
 
-      <div>
+      {/* Issues — required */}
+      <div className="p-3 rounded-lg border border-hairline dark:border-hairline">
         <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-          الأعمال المنفذة على الماكينة <span className="text-red-500">*</span>
+          المشاكل المكتشفة على الماكينة <span className="text-red-500">*</span>
         </label>
-        <textarea
-          value={closeForm.work_done}
-          onChange={(e) => setCloseForm((f) => ({ ...f, work_done: e.target.value }))}
-          rows={2}
-          className={INPUT_CLASS + ' resize-none'}
-          placeholder="مثال: تغيير قطع غيار، صيانة، تنظيف عام..."
+        <p className="text-xs text-latte mb-2">اختر واحدة على الأقل من المشاكل التي تم اكتشافها</p>
+        <CheckboxGroup
+          categories={problemCategoriesWithCustoms}
+          selectedValues={closeForm.issues}
+          onChange={(issues) => setCloseForm((f) => ({ ...f, issues }))}
+          predefinedProblems={allPredefinedProblems}
+          onAddCustom={(item) => addItem({ ...item, type: 'problem' })}
+          existingCategories={problemCategoriesWithCustoms.map((c) => c.title)}
         />
+      </div>
+
+      {/* Services — toggle, off by default */}
+      <div data-testid="close-services-toggle" className="rounded-lg border border-hairline dark:border-hairline overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setCloseForm((f) => ({ ...f, servicesOpen: !f.servicesOpen }))}
+          className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-primary dark:text-latte/70 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
+        >
+          <span className="flex items-center gap-2">
+            الخدمات المنفذة
+            {closeForm.services.length > 0 && (
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary dark:text-copper-300">
+                {closeForm.services.length}
+              </span>
+            )}
+          </span>
+          {closeForm.servicesOpen ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
+        </button>
+        {closeForm.servicesOpen && (
+          <div data-testid="close-services-body" className="border-t border-hairline dark:border-hairline p-3">
+            <ServiceSelector
+              options={mergedServicesList}
+              selectedValues={closeForm.services}
+              onChange={(services) => setCloseForm((f) => ({ ...f, services }))}
+              suggestedValues={suggestedServices}
+              onAddCustom={(item) => addItem({ ...item, type: 'service' })}
+              existingCategories={Array.from(new Set(mergedServicesList.map((s) => s.category)))}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Parts — toggle, off by default */}
+      <div data-testid="close-parts-toggle" className="rounded-lg border border-hairline dark:border-hairline overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setCloseForm((f) => ({ ...f, partsOpen: !f.partsOpen }))}
+          className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-primary dark:text-latte/70 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
+        >
+          <span className="flex items-center gap-2">
+            قطع الغيار المستبدلة
+            {closeForm.parts.length > 0 && (
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary dark:text-copper-300">
+                {closeForm.parts.length}
+              </span>
+            )}
+          </span>
+          {closeForm.partsOpen ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
+        </button>
+        {closeForm.partsOpen && (
+          <div data-testid="close-parts-body" className="border-t border-hairline dark:border-hairline p-3">
+            <PartsSelector
+              options={mergedPartsList}
+              selectedValues={closeForm.parts}
+              onChange={(parts) => setCloseForm((f) => ({ ...f, parts }))}
+              suggestedValues={suggestedParts}
+              onAddCustom={(item) => addItem({ ...item, type: 'part' })}
+              existingCategories={[]}
+            />
+          </div>
+        )}
       </div>
 
       <div className="flex gap-2">
@@ -389,7 +521,8 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
         </button>
       </div>
     </div>
-  );
+    );
+  };
 
   if (isLoading) {
     return (
@@ -495,9 +628,20 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                 </div>
                 {renderMachineDetails(op)}
                 {op.maintenance_cost != null && (
-                  <div className="text-xs text-latte mt-1">
-                    تكلفة الصيانة: {op.maintenance_cost.toLocaleString()} ج.م
-                    {op.work_done && <span className="block mt-0.5">الأعمال: {op.work_done}</span>}
+                  <div className="text-xs text-latte mt-1 space-y-0.5">
+                    <div>تكلفة الصيانة: {op.maintenance_cost.toLocaleString()} ج.م</div>
+                    {op.maintenance_issues && op.maintenance_issues.length > 0 && (
+                      <div>المشاكل: {op.maintenance_issues.join('، ')}</div>
+                    )}
+                    {op.maintenance_services && op.maintenance_services.length > 0 && (
+                      <div>الخدمات: {op.maintenance_services.map((s) => s.count > 1 ? `${s.name} ×${s.count}` : s.name).join('، ')}</div>
+                    )}
+                    {op.maintenance_parts && op.maintenance_parts.length > 0 && (
+                      <div>القطع: {op.maintenance_parts.map((p) => p.count > 1 ? `${p.name} ×${p.count}` : p.name).join('، ')}</div>
+                    )}
+                    {!op.maintenance_issues?.length && !op.maintenance_services?.length && !op.maintenance_parts?.length && op.work_done && (
+                      <div>الأعمال: {op.work_done}</div>
+                    )}
                   </div>
                 )}
                 {op.total_logistics_cost != null && (
@@ -808,33 +952,97 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
           {editingOp && editingOp.status === 'closed' && (
             <div className="p-3 rounded-lg border border-hairline dark:border-hairline space-y-3">
               <h6 className="text-xs font-semibold text-primary dark:text-latte/70">بيانات الإغلاق</h6>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-                    تكلفة الصيانة (ج.م)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formData.maintenance_cost}
-                    onChange={(e) => setFormData((f) => ({ ...f, maintenance_cost: e.target.value }))}
-                    className={INPUT_CLASS}
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-                    الأعمال المنفذة على الماكينة
-                  </label>
-                  <textarea
-                    value={formData.work_done}
-                    onChange={(e) => setFormData((f) => ({ ...f, work_done: e.target.value }))}
-                    rows={2}
-                    className={INPUT_CLASS + ' resize-none'}
-                    placeholder="مثال: تغيير قطع غيار، صيانة..."
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
+                  تكلفة الصيانة (ج.م)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.maintenance_cost}
+                  onChange={(e) => setFormData((f) => ({ ...f, maintenance_cost: e.target.value }))}
+                  className={INPUT_CLASS}
+                  placeholder="0.00"
+                />
+              </div>
+
+              {/* Issues — required */}
+              <div className="p-3 rounded-lg border border-hairline dark:border-hairline">
+                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
+                  المشاكل المكتشفة على الماكينة <span className="text-red-500">*</span>
+                </label>
+                <p className="text-xs text-latte mb-2">اختر واحدة على الأقل من المشاكل التي تم اكتشافها</p>
+                <CheckboxGroup
+                  categories={problemCategoriesWithCustoms}
+                  selectedValues={formData.maintenance_issues}
+                  onChange={(issues) => setFormData((f) => ({ ...f, maintenance_issues: issues }))}
+                  predefinedProblems={allPredefinedProblems}
+                  onAddCustom={(item) => addItem({ ...item, type: 'problem' })}
+                  existingCategories={problemCategoriesWithCustoms.map((c) => c.title)}
+                />
+              </div>
+
+              {/* Services — toggle, off by default */}
+              <div className="rounded-lg border border-hairline dark:border-hairline overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setFormData((f) => ({ ...f, maintenance_services_open: !f.maintenance_services_open }))}
+                  className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-primary dark:text-latte/70 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    الخدمات المنفذة
+                    {formData.maintenance_services.length > 0 && (
+                      <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary dark:text-copper-300">
+                        {formData.maintenance_services.length}
+                      </span>
+                    )}
+                  </span>
+                  {formData.maintenance_services_open ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
+                </button>
+                {formData.maintenance_services_open && (
+                  <div className="border-t border-hairline dark:border-hairline p-3">
+                    <ServiceSelector
+                      options={mergedServicesList}
+                      selectedValues={formData.maintenance_services}
+                      onChange={(services) => setFormData((f) => ({ ...f, maintenance_services: services }))}
+                      suggestedValues={getSuggestedServices(formData.maintenance_issues, mergedServicesList)}
+                      onAddCustom={(item) => addItem({ ...item, type: 'service' })}
+                      existingCategories={Array.from(new Set(mergedServicesList.map((s) => s.category)))}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Parts — toggle, off by default */}
+              <div className="rounded-lg border border-hairline dark:border-hairline overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setFormData((f) => ({ ...f, maintenance_parts_open: !f.maintenance_parts_open }))}
+                  className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-primary dark:text-latte/70 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    قطع الغيار المستبدلة
+                    {formData.maintenance_parts.length > 0 && (
+                      <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary dark:text-copper-300">
+                        {formData.maintenance_parts.length}
+                      </span>
+                    )}
+                  </span>
+                  {formData.maintenance_parts_open ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
+                </button>
+                {formData.maintenance_parts_open && (
+                  <div className="border-t border-hairline dark:border-hairline p-3">
+                    <PartsSelector
+                      options={mergedPartsList}
+                      selectedValues={formData.maintenance_parts}
+                      onChange={(parts) => setFormData((f) => ({ ...f, maintenance_parts: parts }))}
+                      suggestedValues={getSuggestedParts(formData.maintenance_issues, mergedPartsList)}
+                      onAddCustom={(item) => addItem({ ...item, type: 'part' })}
+                      existingCategories={[]}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           )}

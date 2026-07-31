@@ -101,7 +101,16 @@ const LogisticsReportSection: React.FC<LogisticsReportSectionProps> = ({
               <tr key={op.id} className="border-b border-hairline">
                 <td className="px-3 py-2 text-text">
                   {LOGISTICS_TYPE_LABELS_AR[op.operation_type] || op.operation_type}
-                  {op.work_done && (
+                  {op.maintenance_issues && op.maintenance_issues.length > 0 && (
+                    <div className="text-[10px] text-latte mt-0.5 leading-tight">المشاكل: {op.maintenance_issues.join('، ')}</div>
+                  )}
+                  {op.maintenance_services && op.maintenance_services.length > 0 && (
+                    <div className="text-[10px] text-latte mt-0.5 leading-tight">الخدمات: {op.maintenance_services.map((s) => s.count > 1 ? `${s.name} ×${s.count}` : s.name).join('، ')}</div>
+                  )}
+                  {op.maintenance_parts && op.maintenance_parts.length > 0 && (
+                    <div className="text-[10px] text-latte mt-0.5 leading-tight">القطع: {op.maintenance_parts.map((p) => p.count > 1 ? `${p.name} ×${p.count}` : p.name).join('، ')}</div>
+                  )}
+                  {!op.maintenance_issues?.length && !op.maintenance_services?.length && !op.maintenance_parts?.length && op.work_done && (
                     <div className="text-[10px] text-latte mt-0.5 leading-tight">{op.work_done}</div>
                   )}
                 </td>

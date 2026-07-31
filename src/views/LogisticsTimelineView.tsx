@@ -142,8 +142,21 @@ const LogisticsTimelineView: React.FC<LogisticsTimelineViewProps> = ({ customerI
                   </div>
                 )}
 
-                {op.status === 'closed' && op.work_done && (
-                  <p className="mt-2 text-xs text-latte/80">الأعمال المنفذة: {op.work_done}</p>
+                {op.status === 'closed' && (op.work_done || op.maintenance_issues?.length) && (
+                  <div className="mt-2 space-y-0.5 text-xs text-latte/80">
+                    {op.maintenance_issues && op.maintenance_issues.length > 0 && (
+                      <p>المشاكل: {op.maintenance_issues.join('، ')}</p>
+                    )}
+                    {op.maintenance_services && op.maintenance_services.length > 0 && (
+                      <p>الخدمات: {op.maintenance_services.map((s) => s.count > 1 ? `${s.name} ×${s.count}` : s.name).join('، ')}</p>
+                    )}
+                    {op.maintenance_parts && op.maintenance_parts.length > 0 && (
+                      <p>القطع: {op.maintenance_parts.map((p) => p.count > 1 ? `${p.name} ×${p.count}` : p.name).join('، ')}</p>
+                    )}
+                    {!op.maintenance_issues?.length && !op.maintenance_services?.length && !op.maintenance_parts?.length && op.work_done && (
+                      <p>الأعمال المنفذة: {op.work_done}</p>
+                    )}
+                  </div>
                 )}
 
                 {op.internal_notes && (
