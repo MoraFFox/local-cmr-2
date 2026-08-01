@@ -260,14 +260,22 @@ describe("internal report PDF generation", () => {
     };
     drawLogisticsDetailsRow(doc, op, 10, 40, 190, { showCosts: true });
 
-    const item = "تغيير جوانات — 400 EGP";
-    // Wrapping receives logical Unicode, not presentation forms.
-    expect(captured).toContain(item);
-    expect(captured).not.toContain(reshapeArabic(item, false));
+    const mainItem = "1 تغيير جوانات";
+    const subtitleName = "تغيير جوانات";
+    const subtitleCost = "= 400 EGP";
+    // Wrapping receives logical Unicode, not presentation forms. The subtitle
+    // is intentionally split into an Arabic name and an LTR price fragment so
+    // bidi cannot move the currency before the Arabic text.
+    expect(captured).toContain(mainItem);
+    expect(captured).toContain(subtitleName);
+    expect(captured).not.toContain(reshapeArabic(mainItem, false));
+    expect(captured).not.toContain(reshapeArabic(subtitleName, false));
     // The final doc.text payload is shaped and reordered exactly once. The
     // pre-process payload must be joined logical forms, not raw or twice
     // reversed presentation forms.
-    expect(preProcessText).toContain("ﺗﻐﻴﻴﺮ ﺟﻮﺍﻧﺎﺕ — 400 EGP");
+    expect(preProcessText).toContain("1 ﺗﻐﻴﻴﺮ ﺟﻮﺍﻧﺎﺕ");
+    expect(preProcessText).toContain("ﺗﻐﻴﻴﺮ ﺟﻮﺍﻧﺎﺕ");
+    expect(preProcessText).toContain(subtitleCost);
     expect(preProcessOptions).toContainEqual(expect.objectContaining({
       isInputVisual: false,
       isInputRtl: true,
@@ -275,6 +283,72 @@ describe("internal report PDF generation", () => {
       isOutputRtl: false,
     }));
     expect(finalText.length).toBeGreaterThan(0);
+  });
+
+  it("keeps separators below the complete item block with breathing room", () => {
+    const doc = new jsPDF();
+    const register = (file: string, name: string, style: string) => {
+      const abs = path.join(process.cwd(), "public", "fonts", file);
+      const b64 = fs.readFileSync(abs).toString("base64");
+      doc.addFileToVFS(file, b64);
+      doc.addFont(file, name, style);
+    };
+    register("Amiri-Regular.ttf", "Amiri", "normal");
+    register("Amiri-Bold.ttf", "Amiri", "bold");
+    register("fa-solid-900.ttf", "FA", "normal");
+
+    const drawnText: Array<{ value: string; x: number; y: number }> = [];
+    const horizontalLines: number[] = [];
+    const bandRects: Array<{ y: number; height: number }> = [];
+    const originalText = doc.text.bind(doc);
+    vi.spyOn(doc, "text").mockImplementation(((text: string | string[], x: number, y: number, options?: any) => {
+      const value = Array.isArray(text) ? text.join("\\n") : text;
+      drawnText.push({ value, x, y });
+      return originalText(text as any, x, y, options);
+    }) as any);
+    const originalRect = doc.rect.bind(doc);
+    vi.spyOn(doc, "rect").mockImplementation(((x: number, y: number, width: number, height: number, style?: any) => {
+      bandRects.push({ y, height });
+      return originalRect(x, y, width, height, style);
+    }) as any);
+    const originalLine = doc.line.bind(doc);
+    vi.spyOn(doc, "line").mockImplementation(((x1: number, y1: number, x2: number, y2: number) => {
+      if (x2 > x1 && y1 === y2) horizontalLines.push(y1);
+      return originalLine(x1, y1, x2, y2);
+    }) as any);
+
+    drawLogisticsDetailsRow(doc, {
+      id: 1,
+      customer_id: 1,
+      operation_type: "pickup_only",
+      status: "closed",
+      maintenance_issues: [],
+      maintenance_services: [
+        { name: "Long Service ".repeat(24), count: 1, cost: 10 },
+        { name: "Service B", count: 1, cost: 20 },
+      ],
+      maintenance_parts: [],
+      work_done: "",
+      internal_notes: "",
+    }, 10, 40, 190, { showCosts: true });
+
+    const longItemTexts = drawnText.filter(({ value }) => value.includes("Long Service"));
+    const nextItemMain = drawnText.find(({ value }) => value === "1 Service B");
+    expect(longItemTexts.length).toBeGreaterThan(2); // wrapped main + wrapped subtitle
+    expect(nextItemMain).toBeDefined();
+    expect(horizontalLines.length).toBe(1);
+    const separatorY = horizontalLines[0];
+    const lastLongTextY = Math.max(...longItemTexts.map(({ y }) => y));
+    // The separator must be below every wrapped line of the long item, and
+    // the next item's main row must start well below the separator. The
+    // minimum clearance catches a rule that merely misses the baseline while
+    // still crossing the glyph ink.
+    expect(separatorY).toBeGreaterThan(lastLongTextY);
+    expect((nextItemMain as { y: number }).y).toBeGreaterThan(separatorY + 1);
+    // The enclosing Details band must also extend below all rendered content.
+    expect(bandRects).toHaveLength(1);
+    expect(bandRects[0].y + bandRects[0].height).toBeGreaterThan(lastLongTextY + 2);
+    expect(bandRects[0].y + bandRects[0].height).toBeGreaterThan((nextItemMain as { y: number }).y);
   });
 
   it("logistics tables shape Arabic machine descriptions (custom categories/types)", () => {
@@ -517,15 +591,16 @@ describe("internal report PDF generation", () => {
     expect(doc.output("arraybuffer").byteLength).toBeGreaterThan(1000);
     const drawn = drawnStrings.join("\n");
 
-    // Each item is a boxed block: breakdown left, per-item cost in the right
-    // sub-column, with a subtle per-unit subtitle underneath.
-    expect(drawn).toContain("• 2× Pump A (By Midos)");
+    // Each item is a boxed block: breakdown left (qty + name), per-item total
+    // cost in the right sub-column, with a per-unit subtitle underneath that
+    // names the item and its unit price.
+    expect(drawn).toContain("2 Pump A (By Midos)");
     expect(drawn).toContain("200 EGP");
-    expect(drawn).toContain("@ 100 EGP each");
-    expect(drawn).toContain("• 1× Gasket B (By Client)");
+    expect(drawn).toContain("Pump A = 100 EGP");
+    expect(drawn).toContain("1 Gasket B (By Client)");
     expect(drawn).toContain("50 EGP");
-    expect(drawn).toContain("@ 50 EGP each");
-    expect(drawn).toContain("• 3× Service X (By Midos)");
+    expect(drawn).toContain("Gasket B = 50 EGP");
+    expect(drawn).toContain("3 Service X (By Midos)");
     expect(drawn).toContain("60 EGP");
     // Each column ends with its subtotal row (left label + right cost).
     expect(drawnStrings.some((s) => s === "Total")).toBe(true);
@@ -542,9 +617,9 @@ describe("internal report PDF generation", () => {
     drawnStrings.length = 0;
     await generateCostBranchReport("Probe Co", branch, {});
     const costDrawn = drawnStrings.join("\n");
-    expect(costDrawn).toContain("• 2× Pump A");
+    expect(costDrawn).toContain("2 Pump A");
     expect(costDrawn).toContain("200 EGP");
-    expect(costDrawn).toContain("• 1× Gasket B");
+    expect(costDrawn).toContain("1 Gasket B");
     expect(costDrawn).not.toContain("(By Midos)");
     expect(costDrawn).not.toContain("(By Client)");
   }, 30000);
@@ -578,24 +653,24 @@ describe("internal report PDF generation", () => {
     expect(problems[0].sepBelow).toBe(true);
     expect(problems[1].sepBelow).toBeFalsy();
 
-    // Parts (costs on): main line = breakdown left + item cost right, then a
-    // muted per-unit subtitle, separators between items, then a bold Total row
-    // with a separator above.
+    // Parts (costs on): main line = qty + name left + item total right, then a
+    // muted per-unit subtitle naming the item, separators between items, then
+    // a bold Total row with a separator above.
     const parts = buildMaintenanceItemCell(record, "parts", true, true);
-    expect(parts[0]).toMatchObject({ left: "• 2× Pump A (By Midos)", right: "200 EGP" });
-    expect(parts[1]).toMatchObject({ left: "@ 100 EGP each", style: "muted", sepBelow: true });
-    expect(parts[2]).toMatchObject({ left: "• 1× Gasket B (By Client)", right: "50 EGP" });
-    expect(parts[3]).toMatchObject({ left: "@ 50 EGP each", style: "muted", sepBelow: false });
+    expect(parts[0]).toMatchObject({ left: "2 Pump A (By Midos)", right: "200 EGP" });
+    expect(parts[1]).toMatchObject({ left: "Pump A = 100 EGP", style: "muted", sepBelow: true });
+    expect(parts[2]).toMatchObject({ left: "1 Gasket B (By Client)", right: "50 EGP" });
+    expect(parts[3]).toMatchObject({ left: "Gasket B = 50 EGP", style: "muted", sepBelow: false });
     expect(parts[4]).toMatchObject({ left: "Total", right: "250 EGP", style: "bold", sepAbove: true });
 
     // costMode: payer labels stripped from the breakdown side.
     const costParts = buildMaintenanceItemCell(record, "parts", false, true);
-    expect(costParts[0].left).toBe("• 2× Pump A");
+    expect(costParts[0].left).toBe("2 Pump A");
     expect(costParts[0].right).toBe("200 EGP");
 
     // Client mode: no costs — no right sub-column, no subtitles, no Total row.
     const clientParts = buildMaintenanceItemCell(record, "parts", true, false);
-    expect(clientParts[0]).toMatchObject({ left: "• 2× Pump A (By Midos)", right: undefined });
+    expect(clientParts[0]).toMatchObject({ left: "2 Pump A (By Midos)", right: undefined });
     expect(clientParts.some((r) => r.style === "muted" || r.style === "bold")).toBe(false);
     expect(clientParts.every((r) => r.right === undefined)).toBe(true);
 
@@ -603,7 +678,7 @@ describe("internal report PDF generation", () => {
     expect(buildMaintenanceItemCell(record, "date", true, true)).toEqual([]);
   });
 
-  it("drops Avg Rating KPI, adds logistics to Total Cost KPI, and moves Most Used Parts last", async () => {
+  it("drops Avg Rating KPI, adds logistics to Total Cost KPI, and no longer renders Most Used Parts", async () => {
     // Deterministic dataset:
     //   parts 2×100 (company) + 1×50 (client) = 250, services 3×20 = 60
     //   visit fee cairo = 500, daily lease = 120
@@ -670,10 +745,9 @@ describe("internal report PDF generation", () => {
     // 2) Total/Net Cost KPI includes the logistics section costs.
     expect(drawn).toContain("1,290 EGP");
 
-    // 3) Most Used Parts renders AFTER the logistics section (it closes the report).
-    const logisticsIdx = drawnStrings.lastIndexOf("Logistics — Machine Transport & Replacement");
-    const partsIdx = drawnStrings.lastIndexOf("Most Used Parts");
-    expect(partsIdx).toBeGreaterThan(logisticsIdx);
+    // 3) The "Most Used Parts" summary section is gone — the same data still
+    //    shows up in the maintenance log / cost breakdown instead.
+    expect(drawn).not.toContain("Most Used Parts");
 
     // Same guarantees hold for the company-level report (shared section logic).
     const costData: FormData = {
@@ -690,9 +764,187 @@ describe("internal report PDF generation", () => {
     // Performance table builds from top-level maintenanceHistory, which is
     // empty here, so its header is absent rather than rendered once.)
     expect(companyDrawn).toContain("1,290 EGP");
-    expect(drawnStrings.lastIndexOf("Most Used Parts")).toBeGreaterThan(
-      drawnStrings.lastIndexOf("Logistics — Machine Transport & Replacement"),
-    );
+    expect(companyDrawn).not.toContain("Most Used Parts");
+  }, 30000);
+
+  it("cost breakdown splits logistics under a yellow 'Midos In House Maintenance' group", async () => {
+    // Deterministic dataset:
+    //   maintenance: parts 2×100 + 1×50 = 250, services 3×20 = 60,
+    //   visit fee cairo = 500, daily lease = 120 ⇒ grandTotalCompanyCost = 640
+    //   logistics: rental 300 + pickup 100 + return 100 + maintenance 150 = 650
+    //     (itemized as Part Z 1×50 + Service Y 2×50, so the 150 maintenance
+    //     cost is fully covered by the itemized parts+services)
+    //   ⇒ breakdown grand total = 640 + 650 = 1,290 EGP
+    const base = generateMockWizardData();
+    const record: MaintenanceRecord = {
+      id: "group-probe-1",
+      maintenanceDate: "2026-07-15",
+      type: "scheduled",
+      isLogisticsVisit: false,
+      hadProblem: true,
+      partsWereReplaced: true,
+      problemSolved: true,
+      partsReplaced: [
+        { name: "Pump A", count: 2, cost: 100 },
+        { name: "Gasket B", count: 1, cost: 50, paidByClient: true },
+      ],
+      paidBy: "company",
+      baristaName: "Tech 1",
+      visitZone: "cairo",
+      servicesPerformed: [{ name: "Service X", count: 3, cost: 20 }],
+      followUpVisits: [],
+      supervisors: [],
+      dailyLeaseCost: 120,
+      problems: ["Leak"],
+    };
+    const branch: Branch = {
+      ...base.branches[0],
+      branchName: "Group Probe",
+      maintenanceHistory: [record],
+      machines: [],
+    };
+    const logisticsOperations: LogisticsOperation[] = [
+      {
+        id: 1,
+        customer_id: 1,
+        operation_type: "pickup_and_deliver",
+        status: "closed",
+        machine_category: "coffee",
+        total_rental_cost: 300,
+        maintenance_cost: 150,
+        pickup_cost: 100,
+        return_cost: 100,
+        total_logistics_cost: 650,
+        maintenance_issues: [],
+        maintenance_services: [{ name: "Service Y", count: 2, cost: 50 }],
+        maintenance_parts: [{ name: "Part Z", count: 1, cost: 50 }],
+        work_done: "",
+        internal_notes: "",
+      },
+    ];
+
+    drawnStrings.length = 0;
+    const doc = await generateInternalBranchReport("Probe Co", branch, { logisticsOperations });
+    expect(doc.output("arraybuffer").byteLength).toBeGreaterThan(1000);
+    const drawn = drawnStrings.join("\n");
+
+    // 1) The maintenance rows sit under their own group header.
+    expect(drawn).toContain("Maintenance Visits");
+    // 2) The logistics rows sit under the yellow "Midos In House Maintenance" header.
+    expect(drawn).toContain("Midos In House Maintenance");
+    // 3) The logistics group itemizes transportation, parts and services.
+    expect(drawn).toContain("Transportation");
+    expect(drawn).toContain("Transport — Pickup");
+    expect(drawn).toContain("Transport — Return");
+    expect(drawn).toContain("Part Z");
+    expect(drawn).toContain("Service Y");
+    // 4) The "Maintenance Visits" group header carries its own subtotal row
+    //    (parts 250 + services 60 + visit fees 500 + lease 120 = 930 EGP) — a
+    //    value only the grouped financial summary renders (the KPI card shows
+    //    the net 1,290 figure instead), so this uniquely proves the group rows.
+    expect(drawn).toContain("930 EGP");
+    // 5) The breakdown grand total covers EVERYTHING (maintenance + logistics).
+    expect(drawn).toContain("1,290 EGP");
+
+    // The same grouped breakdown holds for the cost report (company level).
+    const costData: FormData = {
+      ...base,
+      companyName: "Probe Co",
+      maintenanceHistory: [],
+      branches: [branch],
+    };
+    drawnStrings.length = 0;
+    await generateCostCompanyReport(costData, { logisticsOperations });
+    const costDrawn = drawnStrings.join("\n");
+    expect(costDrawn).toContain("Maintenance Visits");
+    expect(costDrawn).toContain("Midos In House Maintenance");
+    expect(costDrawn).toContain("Transportation");
+    // Cost mode adds everything up: 250 + 60 + 500 + 120 + 650 = 1,580 EGP.
+    expect(costDrawn).toContain("1,580 EGP");
+
+    // Client reports strip every cost figure — no logistics group, no headers.
+    drawnStrings.length = 0;
+    await generateClientBranchReport("Probe Co", branch, { logisticsOperations });
+    const clientDrawn = drawnStrings.join("\n");
+    expect(clientDrawn).not.toContain("Midos In House Maintenance");
+    expect(clientDrawn).not.toContain("Transportation");
+    expect(clientDrawn).not.toContain("EGP");
+  }, 30000);
+
+  it("a very tall cost breakdown paginates instead of overflowing the page", async () => {
+    // Regression: the Cost Breakdown table grows past one page once the
+    // in-house logistics group itemizes many parts/services (a 30+ row group
+    // was overflowing past the bottom margin). drawFinancialSummary must now
+    // split the table across pages and repeat its "Item | Details | Amount"
+    // column header on each segment, exactly like the maintenance-log table.
+    const base = generateMockWizardData();
+    const record: MaintenanceRecord = {
+      id: "paginate-probe-1",
+      maintenanceDate: "2026-07-15",
+      type: "scheduled",
+      isLogisticsVisit: false,
+      hadProblem: false,
+      partsWereReplaced: false,
+      problemSolved: false,
+      partsReplaced: [],
+      paidBy: "company",
+      baristaName: "Tech 1",
+      visitZone: "cairo", // 500 EGP visit fee keeps the Maintenance Visits group present
+      servicesPerformed: [],
+      followUpVisits: [],
+      supervisors: [],
+      dailyLeaseCost: 0,
+      problems: [],
+    };
+    const branch: Branch = {
+      ...base.branches[0],
+      branchName: "Pagination Probe",
+      maintenanceHistory: [record],
+      machines: [],
+    };
+    // One closed logistics op whose itemized work fills well over a page:
+    // 30 parts + 30 services (50 EGP each) = 3,000 EGP of itemized work,
+    // matching maintenance_cost so no legacy remainder line appears.
+    const parts = Array.from({ length: 30 }, (_, i) => ({ name: `Part ${i + 1}`, count: 1, cost: 50 }));
+    const services = Array.from({ length: 30 }, (_, i) => ({ name: `Service ${i + 1}`, count: 1, cost: 50 }));
+    const logisticsOperations: LogisticsOperation[] = [
+      {
+        id: 1,
+        customer_id: 1,
+        operation_type: "pickup_and_deliver",
+        status: "closed",
+        machine_category: "coffee",
+        total_rental_cost: 300,
+        maintenance_cost: 3000,
+        pickup_cost: 100,
+        return_cost: 100,
+        total_logistics_cost: 3500,
+        maintenance_issues: [],
+        maintenance_services: services,
+        maintenance_parts: parts,
+        work_done: "",
+        internal_notes: "",
+      },
+    ];
+
+    drawnStrings.length = 0;
+    const doc = await generateInternalBranchReport("Probe Co", branch, { logisticsOperations });
+    expect(doc.output("arraybuffer").byteLength).toBeGreaterThan(1000);
+    // The breakdown spans at least two pages.
+    expect(doc.getNumberOfPages()).toBeGreaterThan(1);
+
+    const drawn = drawnStrings.join("\n");
+    // The "Amount" column header is unique to the financial summary's header
+    // row, so it must appear once per page segment — proof the table repeated
+    // its header after the page break instead of running off the page.
+    expect(drawnStrings.filter((s) => s === "Amount").length).toBeGreaterThanOrEqual(2);
+    // All the logistics rows still render, plus the group header and the
+    // grand total — nothing lost to the page boundary.
+    expect(drawn).toContain("Midos In House Maintenance");
+    expect(drawn).toContain("Part 1");
+    expect(drawn).toContain("Part 30");
+    expect(drawn).toContain("Service 30");
+    expect(drawn).toContain("Net Cost to Company");
   }, 30000);
 
   it("cost PDF reports drop the Resolution Rate KPI (internal report keeps it)", async () => {
@@ -820,9 +1072,9 @@ describe("internal report PDF generation", () => {
     expect(branchDrawn).toContain("Spare Parts");
     expect(branchDrawn).toContain("Detailed Maintenance Log");
     expect(branchDrawn).toContain("Technician Performance");
-    expect(branchDrawn).toContain("Most Frequent Problems");
+    expect(branchDrawn).not.toContain("Most Frequent Problems");
     expect(branchDrawn).toContain("Logistics — Machine Transport & Replacement");
-    expect(branchDrawn).toContain("Most Used Parts");
+    expect(branchDrawn).not.toContain("Most Used Parts");
 
     // Info: client mode renders each visit as its own detail block (Visit
     // Summary, Machines, Issues, Parts Replaced, Services Performed tables),
@@ -877,7 +1129,7 @@ describe("internal report PDF generation", () => {
     const costDrawn = drawnStrings.join("\n");
     expect(costDrawn).toContain("EGP");
     expect(costDrawn).toContain("Cost Breakdown");
-    expect(costDrawn).toContain("• 2× Pump A");
+    expect(costDrawn).toContain("2 Pump A");
     expect(costDrawn).toContain("200 EGP");
     expect(costDrawn).toContain("Total Cost");
     expect(costDrawn).toContain("Machine Rental");
@@ -1108,17 +1360,22 @@ describe("empty-state suppression (phase 03)", () => {
     const data = generateMockWizardData();
     // Blank the zone too — the mock's cairo zone has a non-zero visit fee, so
     // a truly zero-cost record must have no zone, no parts, no services, no lease.
+    // Top-level records are blanked as well: the company report aggregates them
+    // into the Cost Breakdown, so un-blanked top-level cairo records would keep
+    // it rendering.
+    const blankRecords = (rs: MaintenanceRecord[]) => (rs || []).map((r) => ({
+      ...r,
+      partsReplaced: [],
+      servicesPerformed: [],
+      dailyLeaseCost: 0,
+      visitZone: "",
+    }));
     const zeroCost = {
       ...data,
+      maintenanceHistory: blankRecords(data.maintenanceHistory),
       branches: data.branches.map((b) => ({
         ...b,
-        maintenanceHistory: (b.maintenanceHistory || []).map((r) => ({
-          ...r,
-          partsReplaced: [],
-          servicesPerformed: [],
-          dailyLeaseCost: 0,
-          visitZone: "",
-        })),
+        maintenanceHistory: blankRecords(b.maintenanceHistory),
       })),
     };
     drawnStrings.length = 0;
@@ -1127,6 +1384,14 @@ describe("empty-state suppression (phase 03)", () => {
     const drawn = drawnStrings.join("\n");
     expect(drawn).not.toContain("Cost Breakdown");
     expect(drawn).not.toContain("Visit Fees by Zone");
+
+    // The company report must hide the empty Cost Breakdown the same way
+    // (D-09 applies to both blocks; this locked in a past asymmetry where the
+    // company report drew a shell "Cost Breakdown" header on zero costs).
+    drawnStrings.length = 0;
+    await generateInternalCompanyReport(zeroCost, {});
+    const companyDrawn = drawnStrings.join("\n");
+    expect(companyDrawn).not.toContain("Cost Breakdown");
   }, 30000);
 
   it("derived rows with 0 visits are dropped from the zone table (D-07)", async () => {

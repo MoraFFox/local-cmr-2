@@ -14,13 +14,13 @@ import {
   getOperationalKPIs,
   getBranchCostSummary,
   getRecordCostSummary,
-  getProblemFrequency,
   resolvePartCost,
   resolveServiceCost,
   formatPdfCurrencyEn,
   formatEnNumber,
   AggregatedCosts,
   AggregatedItem,
+  AggregatedLogisticsCosts,
   aggregateLogisticsCosts,
 } from "./costAggregation";
 import { getVisitZoneFee } from "./visitZones";
@@ -45,6 +45,7 @@ import {
   formatDateEn,
   KPICard,
   FinancialCategory,
+  FinancialLine,
   ZoneRow,
   ContactInfo,
   MachineInfo,
@@ -81,7 +82,9 @@ const formatPartsList = (
   showCosts = true,
 ): string => {
   if (!parts || parts.length === 0) return NO_DATA_LABEL;
-  const lines = parts.map((p) => {
+  // Top counts first — the most-used parts lead the breakdown.
+  const sortedParts = [...parts].sort((a, b) => (b.count || 0) - (a.count || 0));
+  const lines = sortedParts.map((p) => {
     const qty = p.count || 0;
     const payer = showPayer ? ` (${getPaidByLabel(p.paidByClient ? "client" : "company")})` : "";
     if (!showCosts) return `• ${formatEnNumber(qty)}× ${rtl(p.name)}${payer}`;
@@ -101,7 +104,9 @@ const formatServicesList = (
   showCosts = true,
 ): string => {
   if (!services || services.length === 0) return NO_DATA_LABEL;
-  const lines = services.map((s) => {
+  // Top counts first — the most-performed services lead the breakdown.
+  const sortedServices = [...services].sort((a, b) => (b.count || 0) - (a.count || 0));
+  const lines = sortedServices.map((s) => {
     const qty = s.count || 0;
     const payer = showPayer ? ` (${getPaidByLabel(s.paidByClient ? "client" : "company")})` : "";
     if (!showCosts) return `• ${formatEnNumber(qty)}× ${rtl(s.name)}${payer}`;
@@ -246,6 +251,96 @@ const buildFinancialCategories = (costs: AggregatedCosts, costMode = false): Fin
       title: costMode ? "Machine Rental" : "Machine Rental (Income)",
       total: costs.totalLeaseRevenue,
       lines: [{ name: costMode ? "Total Machine Rental" : "Total Rental Revenue", total: costs.totalLeaseRevenue }],
+    });
+  }
+
+  // Group tag — the maintenance-visit rows sit under their own header so the
+  // logistics ("Midos In House Maintenance") group reads as a separate block.
+  return categories.map((c) => ({ ...c, group: "Maintenance Visits" }));
+};
+
+/**
+ * Cost categories for the in-house logistics group ("Midos In House
+ * Maintenance"): transportation (pickup + return), parts and services
+ * performed on the client's machine, plus the replacement machine rental.
+ * Each category is tagged with the yellow-highlighted group header so the
+ * logistics rows are visually distinct from the maintenance-visit rows above.
+ */
+const buildLogisticsCategories = (logisticsCosts: AggregatedLogisticsCosts): FinancialCategory[] => {
+  const group = "Midos In House Maintenance";
+  const groupHighlight = true;
+  const categories: FinancialCategory[] = [];
+
+  // Transportation = pickup + return
+  const transportTotal = logisticsCosts.totalPickupCost + logisticsCosts.totalReturnCost;
+  if (transportTotal > 0) {
+    const lines: FinancialLine[] = [];
+    if (logisticsCosts.totalPickupCost > 0) {
+      lines.push({ name: "Transport — Pickup", total: logisticsCosts.totalPickupCost });
+    }
+    if (logisticsCosts.totalReturnCost > 0) {
+      lines.push({ name: "Transport — Return", total: logisticsCosts.totalReturnCost });
+    }
+    categories.push({ title: "Transportation", total: transportTotal, lines, group, groupHighlight });
+  }
+
+  // Itemized parts changed on the client's machine (in-house work)
+  const partsArr = Array.from(logisticsCosts.parts.values())
+    .filter((p) => p.totalCost > 0)
+    .sort((a, b) => b.totalCost - a.totalCost);
+  if (partsArr.length > 0) {
+    categories.push({
+      title: "Parts",
+      total: logisticsCosts.totalPartsCost,
+      lines: partsArr.map((p) => ({
+        name: p.name,
+        detail: `${formatEnNumber(p.count)} × ${formatPdfCurrencyEn(p.unitCost)}`,
+        total: p.totalCost,
+      })),
+      group,
+      groupHighlight,
+    });
+  }
+
+  // Itemized services performed on the client's machine
+  const servicesArr = Array.from(logisticsCosts.services.values())
+    .filter((s) => s.totalCost > 0)
+    .sort((a, b) => b.totalCost - a.totalCost);
+  if (servicesArr.length > 0) {
+    categories.push({
+      title: "Services",
+      total: logisticsCosts.totalServicesCost,
+      lines: servicesArr.map((s) => ({
+        name: s.name,
+        detail: `${formatEnNumber(s.count)} × ${formatPdfCurrencyEn(s.unitCost)}`,
+        total: s.totalCost,
+      })),
+      group,
+      groupHighlight,
+    });
+  }
+
+  // Legacy/extra maintenance cost not already covered by itemized parts+services
+  const itemizedWork = logisticsCosts.totalPartsCost + logisticsCosts.totalServicesCost;
+  const maintenanceRemainder = logisticsCosts.totalMaintenanceCost - itemizedWork;
+  if (maintenanceRemainder > 0) {
+    categories.push({
+      title: "Maintenance",
+      total: maintenanceRemainder,
+      lines: [{ name: "Maintenance Cost", total: maintenanceRemainder }],
+      group,
+      groupHighlight,
+    });
+  }
+
+  // Replacement machine rental
+  if (logisticsCosts.totalRentalCost > 0) {
+    categories.push({
+      title: "Machine Rental",
+      total: logisticsCosts.totalRentalCost,
+      lines: [{ name: "Replacement Machine Rental", total: logisticsCosts.totalRentalCost }],
+      group,
+      groupHighlight,
     });
   }
 
@@ -416,9 +511,12 @@ export const buildMaintenanceItemCell = (
 
   const items = isParts ? record.partsReplaced || [] : record.servicesPerformed || [];
   if (items.length === 0) return [];
+  // Top counts first — the most-used parts / most-performed services lead
+  // each boxed breakdown cell.
+  const sortedItems = [...items].sort((a, b) => (b.count || 0) - (a.count || 0));
 
   const rows: MaintenanceCellRow[] = [];
-  items.forEach((item, i) => {
+  sortedItems.forEach((item, i) => {
     const qty = item.count || 0;
     const unitCost = isParts
       ? resolvePartCost(item, partsList)
@@ -429,19 +527,21 @@ export const buildMaintenanceItemCell = (
       : "";
     const last = i === items.length - 1;
 
-    // Main line: breakdown left, item total cost in the right sub-column.
+    // Main line: breakdown left (qty + name), item total cost in the right
+    // sub-column — e.g. "3 hands B | 300 EGP".
     rows.push({
-      left: `• ${formatEnNumber(qty)}× ${rtl(item.name)}${payer}`,
+      left: `${formatEnNumber(qty)} ${rtl(item.name)}${payer}`,
       right: showCosts ? formatPdfCurrencyEn(itemTotal) : undefined,
       // When there is no unit cost to subtitle (unknown/0), the separator
       // rides on the main line so items stay boxed off.
       sepBelow: !last && (!showCosts || unitCost <= 0),
     });
 
-    // Subtle per-unit subtitle underneath each item (cost modes only).
+    // Subtle per-unit subtitle underneath each item (cost modes only) —
+    // e.g. "hands B = 100 EGP" so the unit price reads as one clear line.
     if (showCosts && unitCost > 0) {
       rows.push({
-        left: `@ ${formatPdfCurrencyEn(unitCost)} each`,
+        left: `${rtl(item.name)} = ${formatPdfCurrencyEn(unitCost)}`,
         style: "muted",
         sepBelow: !last,
       });
@@ -1005,49 +1105,21 @@ export const generateInternalBranchReport = async (
   const zoneBreakdown = getVisitZoneBreakdown(reportBranch.maintenanceHistory);
   const techSummary = getTechnicianSummary(reportBranch.maintenanceHistory);
   const machineSummary = getMachineLeaseSummary(reportBranch.machines, reportBranch.maintenanceHistory);
-  const problemFreq = getProblemFrequency(reportBranch.maintenanceHistory);
 
-  // KPI Cards
+  // Two-column layout: sidebar + finance. The KPI cards that used to sit in a
+  // full-width strip above now fill the sidebar's empty space under the Branch
+  // Information box, so the Cost Breakdown column gets the full first-page
+  // height. The sidebar is drawn FIRST so the finance column's internal page
+  // breaks (a very tall breakdown) never displace the sidebar onto later pages.
   engine.addBlock({
-    estimatedHeight: 32,
-    draw: (doc, y) => {
-      const cards = buildKPICards(allFlatRecords, costs, kpis, costMode, logisticsCosts.totalLogisticsCost, clientMode);
-      return drawKPICards(doc, cards, y);
-    },
-  });
-
-  // Two-column layout: finance + sidebar
-  engine.addBlock({
-    estimatedHeight: 130,
+    estimatedHeight: 200,
     draw: (doc, y) => {
       const leftColW = pageWidth / 2 - margin - 6;
       const rightColX = pageWidth / 2 + 3;
 
-      // Right column: financial summary (client report has NO costs at all).
-      // D-09: the whole Cost Breakdown section vanishes when every category
-      // total is 0 — no header, no shell.
-      let financeY = y;
-      if (!clientMode) {
-        const financialCategories = buildFinancialCategories(costs, costMode);
-        if (financialCategories.some((c) => c.total > 0)) {
-          const financeHeaderY = drawSectionHeader(doc, "Cost Breakdown", y, {
-            x: rightColX,
-            width: leftColW,
-            icon: "money",
-          });
-          financeY = drawFinancialSummary(
-            doc,
-            financialCategories,
-            costMode ? costs.grandTotal + costs.totalLeaseRevenue : costs.grandTotalCompanyCost,
-            costMode ? 0 : costs.totalClientPartsCost + costs.totalClientServicesCost,
-            financeHeaderY,
-            costMode ? { grandTotalLabel: "Total Cost" } : undefined,
-          );
-        }
-      }
-
-      // Left column: sidebar. The client report drops the cost-bearing
-      // sections (zone fees + machine fleet) and uses the full width.
+      // ── Left column: sidebar (drawn first) ──
+      const blockStartPage = doc.getNumberOfPages();
+      const sidePagesBefore = blockStartPage;
       let sideY = y;
       const contentW = clientMode ? pageWidth - margin * 2 : leftColW;
 
@@ -1055,7 +1127,8 @@ export const generateInternalBranchReport = async (
       const zoneRows = filterEmptyRows(zoneBreakdown, [
         { accessor: (z) => z.visits, ignoreIf: "zero" },
         { accessor: (z) => z.total, ignoreIf: "zero" },
-      ]).rows;
+      ]).rows
+        .sort((a, b) => b.visits - a.visits);
       if (!clientMode && zoneRows.length > 0) {
         sideY = checkPageBreak(doc, sideY, 35);
         sideY = drawSectionHeader(doc, "Visit Fees by Zone", sideY, { x: margin, width: leftColW, icon: "location" });
@@ -1066,7 +1139,8 @@ export const generateInternalBranchReport = async (
       const fleetRows = filterEmptyRows(machineSummary, [
         { accessor: (m) => m.daysActive, ignoreIf: "zero" },
         { accessor: (m) => m.revenue, ignoreIf: "zero" },
-      ]).rows;
+      ]).rows
+        .sort((a, b) => b.revenue - a.revenue);
       if (!clientMode && fleetRows.length > 0) {
         sideY = checkPageBreak(doc, sideY, 35);
         sideY = drawSectionHeader(doc, "Machine Fleet", sideY, { x: margin, width: leftColW, icon: "coffee" });
@@ -1098,6 +1172,19 @@ export const generateInternalBranchReport = async (
         sideY = drawInfoBox(doc, branchInfo, sideY, { x: margin, width: contentW });
       }
 
+      // KPI cards — moved from the top strip into the sidebar's empty space
+      // under the company info. They render as a compact 2-column grid in the
+      // half-width sidebar; client reports (full-width sidebar) keep a single
+      // row so the cards stay legible.
+      const kpiCards = buildKPICards(allFlatRecords, costs, kpis, costMode, logisticsCosts.totalLogisticsCost, clientMode);
+      if (kpiCards.length > 0) {
+        sideY = checkPageBreak(doc, sideY, 30);
+        sideY = drawKPICards(doc, kpiCards, sideY, {
+          width: contentW,
+          columns: clientMode ? kpiCards.length : 2,
+        });
+      }
+
       // D-07: drop contact rows with no name/phone.
       const contactRows = filterEmptyRows(branch.contacts, [
         { accessor: (c) => c.name, ignoreIf: "empty" },
@@ -1113,7 +1200,49 @@ export const generateInternalBranchReport = async (
         sideY = drawSectionHeader(doc, "Contacts", sideY, { x: margin, width: contentW, icon: "phone" });
         sideY = drawContactCards(doc, contacts, sideY, { x: margin, width: contentW });
       }
+      const sideLastPage = doc.getNumberOfPages();
+      const sideMovedPages = sideLastPage > sidePagesBefore;
 
+      // ── Right column: financial summary (client report has NO costs at all).
+      // Drawn LAST so its internal page breaks own the final page state. When
+      // the sidebar spilled to a later page, jump back to the block's first
+      // page so the finance column starts at the same top as the sidebar. D-09:
+      // the whole Cost Breakdown section vanishes when every category total is
+      // 0 — no header, no shell. ──
+      if (sideMovedPages) doc.setPage(blockStartPage);
+      const financePagesBefore = doc.getNumberOfPages();
+      let financeY = y;
+      if (!clientMode) {
+        const financialCategories = [
+          ...buildFinancialCategories(costs, costMode),
+          ...buildLogisticsCategories(logisticsCosts),
+        ];
+        if (financialCategories.some((c) => c.total > 0)) {
+          const financeHeaderY = drawSectionHeader(doc, "Cost Breakdown", y, {
+            x: rightColX,
+            width: leftColW,
+            icon: "money",
+          });
+          financeY = drawFinancialSummary(
+            doc,
+            financialCategories,
+            (costMode ? costs.grandTotal + costs.totalLeaseRevenue : costs.grandTotalCompanyCost) + logisticsCosts.totalLogisticsCost,
+            costMode ? 0 : costs.totalClientPartsCost + costs.totalClientServicesCost,
+            financeHeaderY,
+            costMode ? { grandTotalLabel: "Total Cost" } : undefined,
+          );
+        }
+      }
+      const financeMovedPages = doc.getNumberOfPages() > financePagesBefore;
+
+      // Return a Y that lives on the page the doc is currently on. The finance
+      // column owns the final page when it spilled; otherwise, if the sidebar
+      // spilled, the next block continues below the sidebar on ITS last page.
+      if (financeMovedPages) return financeY + 8;
+      if (sideMovedPages) {
+        doc.setPage(sideLastPage);
+        return sideY + 8;
+      }
       return Math.max(financeY, sideY) + 8;
     },
   });
@@ -1139,10 +1268,11 @@ export const generateInternalBranchReport = async (
   engine.addSection(
     "Technician Performance",
     (section) => {
-      // D-07: drop technician rows with 0 visits.
+      // D-07: drop technician rows with 0 visits, then top visit-counts first.
       const techRows = filterEmptyRows(techSummary, [
         { accessor: (t) => t.visits, ignoreIf: "zero" },
-      ]).rows;
+      ]).rows
+        .sort((a, b) => b.visits - a.visits);
       section.addRepeater(
         techRows,
         40 + techRows.length * 8,
@@ -1192,50 +1322,6 @@ export const generateInternalBranchReport = async (
           return nextY + 10;
         },
       );
-    },
-    drawSectionHeader,
-  );
-
-  // Top Problems & Parts
-  const topProblems = problemFreq.slice(0, 5);
-  // D-07: keep only parts rows with a non-zero count.
-  const allParts = filterEmptyRows(
-    Array.from(costs.parts.values()).concat(Array.from(costs.clientParts.values())),
-    [{ accessor: (p) => p.count, ignoreIf: "zero" }],
-  ).rows
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 5);
-
-  const problemLastDate = new Map<string, string>();
-  allFlatRecords.forEach((r) => {
-    (r.problems || []).forEach((p) => {
-      const current = problemLastDate.get(p);
-      if (!current || new Date(r.maintenanceDate) > new Date(current)) {
-        problemLastDate.set(p, r.maintenanceDate);
-      }
-    });
-  });
-
-  engine.addSection(
-    "Most Frequent Problems",
-    (section) => {
-      if (hideEmpty && topProblems.length === 0) {
-        // D-04: an empty section vanishes completely — no header, no message.
-        return;
-      }
-      section.addBlock({
-        estimatedHeight: 60,
-        draw: (doc, y) => {
-          const colW = pageWidth - margin * 2;
-          const cw = [colW * 0.5, colW * 0.2, colW * 0.3];
-          let py = drawTableHeader(doc, ["Problem", "Count", "Last Seen"], cw, margin, y, colW);
-          topProblems.forEach((p, i) => {
-            py = checkPageBreak(doc, py, 8);
-            py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), (problemLastDate.get(p.name) ? formatDateEn(problemLastDate.get(p.name)!) : NO_DATA_LABEL)], cw, margin, py, colW, i % 2 === 1, ["left", "center", "right"]);
-          });
-          return py + 10;
-        },
-      });
     },
     drawSectionHeader,
   );
@@ -1296,33 +1382,6 @@ export const generateInternalBranchReport = async (
       drawSectionHeader,
     );
   }
-
-  // Most Used Parts — closes the report (requested to be the last section)
-  engine.addSection(
-    "Most Used Parts",
-    (section) => {
-      if (hideEmpty && allParts.length === 0) {
-        // D-04: an empty section vanishes completely — no header, no message.
-        return;
-      }
-      section.addBlock({
-        estimatedHeight: 60,
-        draw: (doc, y) => {
-          const colW = pageWidth - margin * 2;
-          const cw = clientMode ? [colW * 0.6, colW * 0.4] : [colW * 0.5, colW * 0.25, colW * 0.25];
-          let py = drawTableHeader(doc, clientMode ? ["Part", "Qty"] : ["Part", "Qty", "Cost"], cw, margin, y, colW);
-          allParts.forEach((p, i) => {
-            py = checkPageBreak(doc, py, 8);
-            py = drawTableRow(doc, clientMode
-              ? [rtl(p.name), formatEnNumber(p.count)]
-              : [rtl(p.name), formatEnNumber(p.count), formatPdfCurrencyEn(p.totalCost)], cw, margin, py, colW, i % 2 === 1, clientMode ? ["left", "center"] : ["left", "center", "right"]);
-          });
-          return py + 10;
-        },
-      });
-    },
-    drawSectionHeader,
-  );
 
   if (clientMode) {
     const loaded = await preloadPhotoDataUrls(allFlatRecords);
@@ -1399,8 +1458,8 @@ export const generateInternalCompanyReport = async (
   const zoneBreakdown = getVisitZoneBreakdown(reportData.maintenanceHistory);
   const techSummary = getTechnicianSummary(reportData.maintenanceHistory);
   const machineSummary = getMachineLeaseSummary(reportData.machines, reportData.maintenanceHistory);
-  const branchSummaries = getBranchCostSummary(reportData.branches, partsList, servicesList);
-  const problemFreq = getProblemFrequency(reportData.maintenanceHistory);
+  const branchSummaries = getBranchCostSummary(reportData.branches, partsList, servicesList)
+    .sort((a, b) => b.visitCount - a.visitCount);
 
   // Merge branch-level data
   reportData.branches.forEach((branch) => {
@@ -1429,51 +1488,24 @@ export const generateInternalCompanyReport = async (
       }
     });
 
-    const branchProblems = getProblemFrequency(branch.maintenanceHistory);
-    branchProblems.forEach((bp) => {
-      const existing = problemFreq.find((p) => p.name === bp.name);
-      if (existing) existing.count += bp.count;
-      else problemFreq.push(bp);
-    });
-    problemFreq.sort((a, b) => b.count - a.count);
   });
 
   kpis.resolutionRate = kpis.totalProblems > 0 ? Math.round((kpis.problemsResolved / kpis.totalProblems) * 100) : 100;
 
-  // KPI Cards
+  // Two-column layout: sidebar + finance. The KPI cards that used to sit in a
+  // full-width strip above now fill the sidebar's empty space under the Company
+  // Information box, so the Cost Breakdown column gets the full first-page
+  // height. The sidebar is drawn FIRST so the finance column's internal page
+  // breaks (a very tall breakdown) never displace the sidebar onto later pages.
   engine.addBlock({
-    estimatedHeight: 32,
-    draw: (doc, y) => {
-      const kpiCards = buildKPICards(allFlatRecords, costs, kpis, costMode, logisticsCosts.totalLogisticsCost, clientMode);
-      return drawKPICards(doc, kpiCards, y);
-    },
-  });
-
-  // Two-column layout: finance + sidebar
-  engine.addBlock({
-    estimatedHeight: 130,
+    estimatedHeight: 200,
     draw: (doc, y) => {
       const leftColW = pageWidth / 2 - margin - 6;
       const rightColX = pageWidth / 2 + 3;
 
-      let financeY = y;
-      if (!clientMode) {
-        const financeHeaderY = drawSectionHeader(doc, "Cost Breakdown", y, {
-          x: rightColX,
-          width: leftColW,
-          icon: "money",
-        });
-        const financialCategories = buildFinancialCategories(costs, costMode);
-        financeY = drawFinancialSummary(
-          doc,
-          financialCategories,
-          costMode ? costs.grandTotal + costs.totalLeaseRevenue : costs.grandTotalCompanyCost,
-          costMode ? 0 : costs.totalClientPartsCost + costs.totalClientServicesCost,
-          financeHeaderY,
-          costMode ? { grandTotalLabel: "Total Cost" } : undefined,
-        );
-      }
-
+      // ── Left column: sidebar (drawn first) ──
+      const blockStartPage = doc.getNumberOfPages();
+      const sidePagesBefore = blockStartPage;
       let sideY = y;
       const contentW = clientMode ? pageWidth - margin * 2 : leftColW;
 
@@ -1481,7 +1513,8 @@ export const generateInternalCompanyReport = async (
       const zoneRows = filterEmptyRows(zoneBreakdown, [
         { accessor: (z) => z.visits, ignoreIf: "zero" },
         { accessor: (z) => z.total, ignoreIf: "zero" },
-      ]).rows;
+      ]).rows
+        .sort((a, b) => b.visits - a.visits);
       if (!clientMode && zoneRows.length > 0) {
         sideY = checkPageBreak(doc, sideY, 35);
         sideY = drawSectionHeader(doc, "Visit Fees by Zone", sideY, { x: margin, width: leftColW, icon: "location" });
@@ -1492,7 +1525,8 @@ export const generateInternalCompanyReport = async (
       const fleetRows = filterEmptyRows(machineSummary, [
         { accessor: (m) => m.daysActive, ignoreIf: "zero" },
         { accessor: (m) => m.revenue, ignoreIf: "zero" },
-      ]).rows;
+      ]).rows
+        .sort((a, b) => b.revenue - a.revenue);
       if (!clientMode && fleetRows.length > 0) {
         sideY = checkPageBreak(doc, sideY, 35);
         sideY = drawSectionHeader(doc, "Machine Fleet", sideY, { x: margin, width: leftColW, icon: "coffee" });
@@ -1524,6 +1558,61 @@ export const generateInternalCompanyReport = async (
         sideY = drawInfoBox(doc, companyInfo, sideY, { x: margin, width: contentW });
       }
 
+      // KPI cards — moved from the top strip into the sidebar's empty space
+      // under the company info. They render as a compact 2-column grid in the
+      // half-width sidebar; client reports (full-width sidebar) keep a single
+      // row so the cards stay legible.
+      const kpiCards = buildKPICards(allFlatRecords, costs, kpis, costMode, logisticsCosts.totalLogisticsCost, clientMode);
+      if (kpiCards.length > 0) {
+        sideY = checkPageBreak(doc, sideY, 30);
+        sideY = drawKPICards(doc, kpiCards, sideY, {
+          width: contentW,
+          columns: clientMode ? kpiCards.length : 2,
+        });
+      }
+      const sideLastPage = doc.getNumberOfPages();
+      const sideMovedPages = sideLastPage > sidePagesBefore;
+
+      // ── Right column: financial summary (client report has NO costs at all).
+      // Drawn LAST so its internal page breaks own the final page state. When
+      // the sidebar spilled to a later page, jump back to the block's first
+      // page so the finance column starts at the same top as the sidebar. ──
+      if (sideMovedPages) doc.setPage(blockStartPage);
+      const financePagesBefore = doc.getNumberOfPages();
+      let financeY = y;
+      if (!clientMode) {
+        // D-09: like the branch report, the whole Cost Breakdown section
+        // vanishes when every category total is 0 — no header, no shell.
+        const financialCategories = [
+          ...buildFinancialCategories(costs, costMode),
+          ...buildLogisticsCategories(logisticsCosts),
+        ];
+        if (financialCategories.some((c) => c.total > 0)) {
+          const financeHeaderY = drawSectionHeader(doc, "Cost Breakdown", y, {
+            x: rightColX,
+            width: leftColW,
+            icon: "money",
+          });
+          financeY = drawFinancialSummary(
+            doc,
+            financialCategories,
+            (costMode ? costs.grandTotal + costs.totalLeaseRevenue : costs.grandTotalCompanyCost) + logisticsCosts.totalLogisticsCost,
+            costMode ? 0 : costs.totalClientPartsCost + costs.totalClientServicesCost,
+            financeHeaderY,
+            costMode ? { grandTotalLabel: "Total Cost" } : undefined,
+          );
+        }
+      }
+      const financeMovedPages = doc.getNumberOfPages() > financePagesBefore;
+
+      // Return a Y that lives on the page the doc is currently on. The finance
+      // column owns the final page when it spilled; otherwise, if the sidebar
+      // spilled, the next block continues below the sidebar on ITS last page.
+      if (financeMovedPages) return financeY + 8;
+      if (sideMovedPages) {
+        doc.setPage(sideLastPage);
+        return sideY + 8;
+      }
       return Math.max(financeY, sideY) + 8;
     },
   });
@@ -1578,10 +1667,11 @@ export const generateInternalCompanyReport = async (
   engine.addSection(
     "Technician Performance",
     (section) => {
-      // D-07: drop technician rows with 0 visits.
+      // D-07: drop technician rows with 0 visits, then top visit-counts first.
       const techRows = filterEmptyRows(techSummary, [
         { accessor: (t) => t.visits, ignoreIf: "zero" },
-      ]).rows;
+      ]).rows
+        .sort((a, b) => b.visits - a.visits);
       section.addRepeater(
         techRows,
         40 + techRows.length * 8,
@@ -1631,50 +1721,6 @@ export const generateInternalCompanyReport = async (
           return nextY + 10;
         },
       );
-    },
-    drawSectionHeader,
-  );
-
-  // Top Problems & Parts
-  const topProblems = problemFreq.slice(0, 5);
-  // D-07: keep only parts rows with a non-zero count.
-  const allParts = filterEmptyRows(
-    Array.from(costs.parts.values()).concat(Array.from(costs.clientParts.values())),
-    [{ accessor: (p) => p.count, ignoreIf: "zero" }],
-  ).rows
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 5);
-
-  const problemLastDate = new Map<string, string>();
-  allFlatRecords.forEach((r) => {
-    (r.problems || []).forEach((p) => {
-      const current = problemLastDate.get(p);
-      if (!current || new Date(r.maintenanceDate) > new Date(current)) {
-        problemLastDate.set(p, r.maintenanceDate);
-      }
-    });
-  });
-
-  engine.addSection(
-    "Most Frequent Problems",
-    (section) => {
-      if (hideEmpty && topProblems.length === 0) {
-        // D-04: an empty section vanishes completely — no header, no message.
-        return;
-      }
-      section.addBlock({
-        estimatedHeight: 60,
-        draw: (doc, y) => {
-          const colW = pageWidth - margin * 2;
-          const cw = [colW * 0.5, colW * 0.2, colW * 0.3];
-          let py = drawTableHeader(doc, ["Problem", "Count", "Last Seen"], cw, margin, y, colW);
-          topProblems.forEach((p, i) => {
-            py = checkPageBreak(doc, py, 8);
-            py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), (problemLastDate.get(p.name) ? formatDateEn(problemLastDate.get(p.name)!) : NO_DATA_LABEL)], cw, margin, py, colW, i % 2 === 1, ["left", "center", "right"]);
-          });
-          return py + 10;
-        },
-      });
     },
     drawSectionHeader,
   );
@@ -1755,33 +1801,6 @@ export const generateInternalCompanyReport = async (
       drawSectionHeader,
     );
   }
-
-  // Most Used Parts — closes the report (requested to be the last section)
-  engine.addSection(
-    "Most Used Parts",
-    (section) => {
-      if (hideEmpty && allParts.length === 0) {
-        // D-04: an empty section vanishes completely — no header, no message.
-        return;
-      }
-      section.addBlock({
-        estimatedHeight: 60,
-        draw: (doc, y) => {
-          const colW = pageWidth - margin * 2;
-          const cw = clientMode ? [colW * 0.6, colW * 0.4] : [colW * 0.5, colW * 0.25, colW * 0.25];
-          let py = drawTableHeader(doc, clientMode ? ["Part", "Qty"] : ["Part", "Qty", "Cost"], cw, margin, y, colW);
-          allParts.forEach((p, i) => {
-            py = checkPageBreak(doc, py, 8);
-            py = drawTableRow(doc, clientMode
-              ? [rtl(p.name), formatEnNumber(p.count)]
-              : [rtl(p.name), formatEnNumber(p.count), formatPdfCurrencyEn(p.totalCost)], cw, margin, py, colW, i % 2 === 1, clientMode ? ["left", "center"] : ["left", "center", "right"]);
-          });
-          return py + 10;
-        },
-      });
-    },
-    drawSectionHeader,
-  );
 
   engine.flush();
   applyFooters(doc, "CMR System", data.companyName);
@@ -1973,8 +1992,10 @@ const drawVisitDetails = (
   y = drawInfoBox(doc, infoItems, y, { x: margin, width: tableW });
   y += 2;
 
-  // Machines — drop zero-count / blank-name rows (D-07)
-  const machines = (record.machines || []).filter((m) => (m.count || 0) > 0 && !!m.name);
+  // Machines — drop zero-count / blank-name rows (D-07), top counts first.
+  const machines = (record.machines || [])
+    .filter((m) => (m.count || 0) > 0 && !!m.name)
+    .sort((a, b) => (b.count || 0) - (a.count || 0));
   if (machines.length > 0) {
     y = checkPageBreak(doc, y, 30);
     y = drawSectionHeader(doc, "Machines", y, { icon: "coffee" });
@@ -2006,7 +2027,9 @@ const drawVisitDetails = (
   }
 
   // Parts replaced — drop zero-count rows so no useless "0 × …" lines render (D-07)
-  const parts = (record.partsReplaced || []).filter((p) => (p.count || 0) > 0);
+  const parts = (record.partsReplaced || [])
+    .filter((p) => (p.count || 0) > 0)
+    .sort((a, b) => (b.count || 0) - (a.count || 0));
   if (parts.length > 0) {
     y = checkPageBreak(doc, y, 30);
     y = drawSectionHeader(doc, "Parts Replaced", y, { icon: "package" });
@@ -2026,7 +2049,9 @@ const drawVisitDetails = (
   }
 
   // Services performed — drop zero-count rows so no useless "0 × …" lines render (D-07)
-  const services = (record.servicesPerformed || []).filter((sv) => (sv.count || 0) > 0);
+  const services = (record.servicesPerformed || [])
+    .filter((sv) => (sv.count || 0) > 0)
+    .sort((a, b) => (b.count || 0) - (a.count || 0));
   if (services.length > 0) {
     y = checkPageBreak(doc, y, 30);
     y = drawSectionHeader(doc, "Services Performed", y, { icon: "wrench" });

@@ -5,7 +5,12 @@ import type { LogoAssets } from "./pdfGenerator";
 import { logger } from "./logger";
 import { formatPdfCurrencyEn, formatEnNumber } from "./costAggregation";
 import { LogisticsOperation } from "../types";
-import { LOGISTICS_TYPE_LABELS_EN, formatMachineDescription, formatWorkItemWithCost, MAINTENANCE_SECTION_LABELS_EN } from "./logisticsLabels";
+import {
+  LOGISTICS_TYPE_LABELS_EN,
+  formatMachineDescription,
+  getLogisticsWorkItemDisplay,
+  MAINTENANCE_SECTION_LABELS_EN,
+} from "./logisticsLabels";
 
 // ── White / Black / Crimson Red Palette (matches company logo) ──
 export const BRAND = {
@@ -33,6 +38,11 @@ export const BRAND = {
   text: [20, 20, 20] as [number, number, number],
   textMuted: [120, 120, 120] as [number, number, number],
   textSecondary: [100, 100, 100] as [number, number, number],
+
+  // Yellow highlight — used for the "Midos In House Maintenance" cost group
+  // so in-house logistics costs stand out from maintenance-visit rows.
+  highlight: [255, 233, 133] as [number, number, number],
+  highlightDark: [150, 110, 20] as [number, number, number],
 
   // Semantic variants (all within the white/black/crimson theme)
   success: [20, 20, 20] as [number, number, number],
@@ -403,8 +413,6 @@ const SECTION_ICON_BY_TITLE: Record<string, PdfIconName> = {
   "Detailed Maintenance Log": "doc",
   "Maintenance Log": "doc",
   "Technician Performance": "user",
-  "Most Frequent Problems": "alert",
-  "Most Used Parts": "package",
   "Branch Comparison": "chart",
   "Logistics — Machine Transport & Replacement": "truck",
 };
@@ -461,27 +469,40 @@ const variantColor = (variant: KPICard["variant"]): [number, number, number] => 
   }
 };
 
-export const drawKPICards = (doc: jsPDF, cards: KPICard[], y: number): number => {
+export const drawKPICards = (
+  doc: jsPDF,
+  cards: KPICard[],
+  y: number,
+  options?: { width?: number; columns?: number },
+): number => {
   const pageWidth = doc.internal.pageSize.getWidth();
   const cardCount = cards.length;
   const gap = 3;
-  const availableWidth = pageWidth - MARGIN * 2 - gap * (cardCount - 1);
-  const cardW = availableWidth / cardCount;
+  // Default: one full-width row. With `columns` (and a narrower `width`) the
+  // cards render as a compact grid — used when they live in the half-width
+  // sidebar under the company info instead of the top full-width strip.
+  const columns = Math.min(options?.columns ?? cardCount, cardCount);
+  const containerW = options?.width ?? pageWidth - MARGIN * 2;
   const cardH = 25;
+  const gridRows = Math.ceil(cardCount / columns);
+  const cardW = (containerW - gap * (columns - 1)) / columns;
 
   cards.forEach((card, i) => {
-    const x = MARGIN + i * (cardW + gap);
+    const col = i % columns;
+    const row = Math.floor(i / columns);
+    const x = MARGIN + col * (cardW + gap);
+    const yPos = y + row * (cardH + gap);
     const borderColor = variantColor(card.variant);
 
     doc.setFillColor(...BRAND.white);
     doc.setDrawColor(...BRAND.hairline);
-    doc.roundedRect(x, y, cardW, cardH, 2, 2, "FD");
+    doc.roundedRect(x, yPos, cardW, cardH, 2, 2, "FD");
 
     doc.setFillColor(...borderColor);
-    doc.rect(x, y, cardW, 2.5, "F");
+    doc.rect(x, yPos, cardW, 2.5, "F");
 
     // Icon badge (top-right corner) so the card is scannable at a glance
-    drawIconBadge(doc, x + cardW - 7, y + 9, card.icon, borderColor, 2.6);
+    drawIconBadge(doc, x + cardW - 7, yPos + 9, card.icon, borderColor, 2.6);
 
     // Value (already formatted; do NOT reshape currency strings). Shrink the
     // font until it fits left of the badge so long values like a large Net
@@ -495,13 +516,13 @@ export const drawKPICards = (doc: jsPDF, cards: KPICard[], y: number): number =>
       valueSize -= 1;
       doc.setFontSize(valueSize);
     }
-    pdfText(doc, card.value, x + 5, y + 13, { align: "left" });
+    pdfText(doc, card.value, x + 5, yPos + 13, { align: "left" });
 
     // Label
     doc.setFont("Amiri", "bold");
     doc.setFontSize(7.5);
     doc.setTextColor(...BRAND.textMuted);
-    pdfText(doc, card.label, x + 5, y + 18, { align: "left" });
+    pdfText(doc, card.label, x + 5, yPos + 18, { align: "left" });
 
     // Sublabel
     if (card.sublabel) {
@@ -509,11 +530,11 @@ export const drawKPICards = (doc: jsPDF, cards: KPICard[], y: number): number =>
       doc.setFontSize(6.5);
       const subColor = card.variant === "good" ? BRAND.success : card.variant === "warn" ? BRAND.warning : BRAND.textMuted;
       doc.setTextColor(...subColor);
-      pdfText(doc, card.sublabel, x + 5, y + 22, { align: "left" });
+      pdfText(doc, card.sublabel, x + 5, yPos + 22, { align: "left" });
     }
   });
 
-  return y + cardH + 8;
+  return y + gridRows * (cardH + gap) - gap + 8;
 };
 
 // ── Financial Summary (3-column table) ──
@@ -529,6 +550,14 @@ export interface FinancialCategory {
   title: string;
   total: number;
   lines: FinancialLine[];
+  /**
+   * Optional group header label shown above the category (e.g. "Maintenance
+   * Visits" vs "Midos In House Maintenance"). When a category's group differs
+   * from the previous one, a bold group row is drawn before the category.
+   */
+  group?: string;
+  /** When true, the group header row is highlighted in yellow (logistics). */
+  groupHighlight?: boolean;
 }
 
 export const drawFinancialSummary = (
@@ -548,30 +577,97 @@ export const drawFinancialSummary = (
   const colDetailW = tableW * 0.26;
   const colItemW = tableW - colAmountW - colDetailW;
 
-  let totalRows = 2;
+  // Count one extra row per distinct group header (e.g. "Maintenance Visits"
+  // and the yellow "Midos In House Maintenance" logistics group).
+  const groupHeaders = new Set(categories.map((c) => c.group).filter(Boolean));
+  let totalRows = 2 + groupHeaders.size;
   categories.forEach((c) => (totalRows += 1 + c.lines.length));
   if (clientTotal > 0) totalRows += 1;
   const totalH = Math.max(totalRows * rowH + 14, 60);
 
-  doc.setFillColor(...BRAND.cream);
-  doc.setDrawColor(...BRAND.hairline);
-  doc.roundedRect(x, y, tableW, totalH, 2, 2, "FD");
+  // ── Pagination ──
+  // The breakdown can be much taller than one page (e.g. once the in-house
+  // logistics group itemizes parts/services), so the cream box is drawn as one
+  // segment per page, the "Item | Details | Amount" column header repeats
+  // after a page break (the same treatment the maintenance-log table uses),
+  // and every row paints its own cream band so the box background survives
+  // page splits. Rows never run past the bottom margin.
+  const drawHeaderRow = (hy: number): number => {
+    doc.setFillColor(...BRAND.primary);
+    doc.rect(x, hy, tableW, rowH, "F");
+    doc.setFont("Amiri", "bold");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...BRAND.white);
+    pdfText(doc, "Item", x + 4, hy + 4, { align: "left" });
+    pdfText(doc, "Details", x + colItemW + 4, hy + 4, { align: "left" });
+    pdfText(doc, "Amount", x + tableW - 4, hy + 4, { align: "right" });
+    return hy + rowH;
+  };
 
+  // Cream band behind a row — keeps the box background continuous even though
+  // the single rounded box can no longer span multiple pages.
+  const paintRowBand = (ry: number): void => {
+    doc.setFillColor(...BRAND.cream);
+    doc.rect(x, ry, tableW, rowH, "F");
+  };
+
+  // Box border for one page segment (stroke only; the fill is painted per row).
+  const strokeSegment = (top: number, bottom: number): void => {
+    if (bottom - top <= 0) return;
+    doc.setDrawColor(...BRAND.hairline);
+    doc.setLineWidth(0.2);
+    doc.roundedRect(x, top, tableW, bottom - top, 2, 2, "S");
+  };
+
+  let segTop = y; // box top on the current page
   let rowY = y + 5;
+  let paginated = false;
 
-  // Table headers (LTR: item | detail | amount)
-  doc.setFillColor(...BRAND.primary);
-  doc.rect(x, rowY, tableW, rowH, "F");
-  doc.setFont("Amiri", "bold");
-  doc.setFontSize(7.5);
-  doc.setTextColor(...BRAND.white);
-  pdfText(doc, "Item", x + 4, rowY + 4, { align: "left" });
-  pdfText(doc, "Details", x + colItemW + 4, rowY + 4, { align: "left" });
-  pdfText(doc, "Amount", x + tableW - 4, rowY + 4, { align: "right" });
-  rowY += rowH;
+  // Advance to the next row; when it would cross the bottom margin, close the
+  // box segment on the current page, open a fresh one and repeat the header.
+  const nextRow = (needed: number = rowH + 2): void => {
+    const prevY = rowY;
+    rowY = checkPageBreak(doc, rowY, needed);
+    if (rowY < prevY) {
+      strokeSegment(segTop, prevY);
+      paginated = true;
+      segTop = rowY;
+      // Repeat the column header at the top of the fresh segment.
+      paintRowBand(segTop);
+      rowY = drawHeaderRow(segTop + 5);
+    }
+  };
 
+  // Page 1: cream box strip above the header, then the column header row.
+  paintRowBand(y);
+  rowY = drawHeaderRow(y + 5);
+
+  let currentGroup: string | undefined;
   categories.forEach((category) => {
+    // Group header row — drawn when the group changes so the breakdown reads
+    // as: "Maintenance Visits" … then "Midos In House Maintenance" (yellow).
+    if (category.group && category.group !== currentGroup) {
+      const groupTotal = categories
+        .filter((c) => c.group === category.group)
+        .reduce((s, c) => s + c.total, 0);
+      nextRow();
+      paintRowBand(rowY);
+      doc.setFillColor(...(category.groupHighlight ? BRAND.highlight : BRAND.cream2));
+      doc.setDrawColor(...(category.groupHighlight ? BRAND.highlightDark : BRAND.hairlineDark));
+      doc.setLineWidth(0.3);
+      doc.rect(x, rowY, tableW, rowH, "FD");
+      doc.setFont("Amiri", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(...BRAND.text);
+      pdfText(doc, category.group, x + 4, rowY + 4, { align: "left" });
+      pdfText(doc, formatPdfCurrencyEn(groupTotal), x + tableW - 4, rowY + 4, { align: "right" });
+      rowY += rowH;
+      currentGroup = category.group;
+    }
+
     // Category header row
+    nextRow();
+    paintRowBand(rowY);
     doc.setFillColor(...BRAND.cream2);
     doc.rect(x, rowY, tableW, rowH, "F");
     doc.setFont("Amiri", "bold");
@@ -583,6 +679,8 @@ export const drawFinancialSummary = (
 
     // Lines
     category.lines.forEach((line, idx) => {
+      nextRow();
+      paintRowBand(rowY);
       if (idx % 2 === 1) {
         doc.setFillColor(...BRAND.white);
         doc.rect(x, rowY, tableW, rowH, "F");
@@ -604,6 +702,9 @@ export const drawFinancialSummary = (
   });
 
   // Grand total
+  nextRow(rowH + 6);
+  doc.setFillColor(...BRAND.cream);
+  doc.rect(x, rowY, tableW, rowH + 5, "F");
   doc.setDrawColor(...BRAND.primary);
   doc.line(x + 2, rowY + 1, x + tableW - 2, rowY + 1);
   rowY += 3;
@@ -616,6 +717,8 @@ export const drawFinancialSummary = (
 
   // Client total
   if (clientTotal > 0) {
+    nextRow();
+    paintRowBand(rowY);
     doc.setFont("Amiri", "bold");
     doc.setFontSize(8);
     doc.setTextColor(...BRAND.warning);
@@ -624,7 +727,16 @@ export const drawFinancialSummary = (
     rowY += rowH;
   }
 
-  return Math.max(y + totalH, rowY + 4);
+  // Close the box on the final page. When everything fit on one page, keep
+  // the legacy minimum box height; after pagination the box ends at the last
+  // row of the final page (the returned Y lives on that page).
+  const finalBottom = paginated ? rowY + 4 : Math.max(y + totalH, rowY + 4);
+  if (finalBottom > rowY) {
+    doc.setFillColor(...BRAND.cream);
+    doc.rect(x, rowY, tableW, finalBottom - rowY, "F");
+  }
+  strokeSegment(segTop, finalBottom);
+  return finalBottom;
 };
 
 // ── Visit Zone Table ──
@@ -922,6 +1034,64 @@ export const formatDateEn = (date: string | Date): string => {
   return `${day} ${month} ${year}`;
 };
 
+// ── Bold grid (matches the maintenance-log table style) ──
+// The maintenance log table (renderMaintenanceHistoryTable in
+// internalReportPdf.ts) uses a darker, heavier grid so every column and row
+// boundary reads clearly. The logistics tables below share the same
+// treatment: rows are boxed (left/right edges), column boundaries are heavy,
+// and the header gets white dividers aligned to the grid underneath.
+
+const LOGISTICS_GRID_COLOR = BRAND.hairlineDark;
+const LOGISTICS_GRID_WIDTH = 0.35;
+
+/** Draw the bold grid lines for one table row (boxed + column boundaries). */
+const drawBoldGridRow = (
+  doc: jsPDF,
+  x: number,
+  y: number,
+  rowH: number,
+  tableW: number,
+  colWidths: number[],
+): void => {
+  doc.setDrawColor(...LOGISTICS_GRID_COLOR);
+  doc.setLineWidth(LOGISTICS_GRID_WIDTH);
+  // Box the row: left edge, every column boundary, right edge. Boundaries
+  // that would coincide with the right edge are skipped — the right edge is
+  // drawn once at the end (filtered columns don't span the full width).
+  doc.line(x, y, x, y + rowH);
+  let cx = x;
+  for (let i = 0; i < colWidths.length; i++) {
+    cx += colWidths[i];
+    if (cx < x + tableW) {
+      doc.line(cx, y, cx, y + rowH);
+    }
+  }
+  doc.line(x + tableW, y, x + tableW, y + rowH);
+};
+
+/** White header dividers + bold bottom rule, aligned to the grid below. */
+const drawBoldHeaderGrid = (
+  doc: jsPDF,
+  x: number,
+  y: number,
+  headerH: number,
+  tableW: number,
+  colWidths: number[],
+): void => {
+  doc.setDrawColor(...LOGISTICS_GRID_COLOR);
+  doc.setLineWidth(LOGISTICS_GRID_WIDTH);
+  doc.line(x, y + headerH, x + tableW, y + headerH);
+  let hx = x;
+  for (let i = 0; i < colWidths.length; i++) {
+    hx += colWidths[i];
+    if (hx < x + tableW) {
+      doc.setDrawColor(...BRAND.white);
+      doc.setLineWidth(0.2);
+      doc.line(hx, y + 1.2, hx, y + headerH - 1.2);
+    }
+  }
+};
+
 // ── Logistics Details sub-row (shared between internal & client reports) ──
 
 /**
@@ -948,26 +1118,33 @@ export const drawLogisticsDetailsRow = (
   const services = op.maintenance_services ?? [];
   const parts = op.maintenance_parts ?? [];
 
-  const sections: Array<{ key: "issues" | "services" | "parts"; items: string[] }> = [];
-  if (issues.length > 0) sections.push({ key: "issues", items: issues });
+  type DetailItem = {
+    name: string;
+    count: number;
+    unitCost?: number;
+    totalCost?: number;
+  };
+  const sections: Array<{ key: "issues" | "services" | "parts"; items: DetailItem[] }> = [];
+  if (issues.length > 0) {
+    sections.push({
+      key: "issues",
+      items: issues.map((name) => ({ name, count: 1 })),
+    });
+  }
   if (services.length > 0) {
     sections.push({
       key: "services",
-      items: services.map((s) =>
-        showCosts
-          ? formatWorkItemWithCost(s.name, s.count, s.cost, "EGP")
-          : s.count > 1 ? `${s.name} ×${s.count}` : s.name,
-      ),
+      items: services
+        .map((s) => getLogisticsWorkItemDisplay(s.name, s.count, s.cost, "service"))
+        .sort((a, b) => b.count - a.count),
     });
   }
   if (parts.length > 0) {
     sections.push({
       key: "parts",
-      items: parts.map((p) =>
-        showCosts
-          ? formatWorkItemWithCost(p.name, p.count, p.cost, "EGP")
-          : p.count > 1 ? `${p.name} ×${p.count}` : p.name,
-      ),
+      items: parts
+        .map((p) => getLogisticsWorkItemDisplay(p.name, p.count, p.cost, "part"))
+        .sort((a, b) => b.count - a.count),
     });
   }
   const hasLegacy = sections.length === 0 && Boolean(op.work_done);
@@ -980,66 +1157,164 @@ export const drawLogisticsDetailsRow = (
   const lineH = 3.1;
   const headerH = 4.5;
   const padY = 2;
+  // Keep each item as a real visual block: subtitle, breathing room, rule,
+  // then breathing room before the next item's main row. The previous 0.8mm
+  // gap put the rule almost on top of wrapped Arabic subtitles.
+  // `itemY` is advanced to the next hypothetical baseline after each text
+  // line. Place the separator halfway between the last baseline and the next
+  // baseline; placing it after `itemY` makes it cross the next item's glyphs.
+  const separatorOffset = lineH / 2;
+  // Extra baseline-space after the separator keeps the next item's ascenders
+  // clear of the rule while remaining compact.
+  const itemGap = 1.8;
+  const mainFontSize = 5.5;
+  const subtitleFontSize = 4.8;
+  const costColW = showCosts ? 14 : 0;
+  const leftW = Math.max(8, colW - 9 - costColW);
 
-  // Wrap each section's items to its column width (doc.text does not wrap).
-  // Items are drawn at cx + 7 (after the section badge), so wrap at colW - 9
-  // to keep lines inside the column instead of spilling into the next one.
-  doc.setFont("Amiri", "normal");
-  doc.setFontSize(5.5);
-  const wrapped = sections.map((s) => {
-    const lines: string[] = [];
-    // Keep items in logical order while wrapping. The draw call below routes
-    // each resulting line through jsPDF's native Arabic shaping/bidi hook.
-    s.items.forEach((item) => doc.splitTextToSize(rtl(item), colW - 9).forEach((ln) => lines.push(ln)));
-    return lines;
-  });
+  type RenderItem = {
+    item: DetailItem;
+    mainLines: string[];
+    /** Arabic item-name lines rendered separately from the LTR price. */
+    subtitleNameLines: string[];
+    /** LTR price fragment (e.g. "= 350 EGP") rendered at the right edge. */
+    subtitleCostText?: string;
+    totalText?: string;
+    hasSubtitle: boolean;
+  };
+  const renderedSections: RenderItem[][] = sections.map((section) =>
+    section.items.map((item) => {
+      const main = `${formatEnNumber(item.count)} ${item.name}`;
+      const hasSubtitle = item.unitCost !== undefined && showCosts;
+
+      // Measure each line using the same font size used when it is drawn. Do
+      // not measure or draw the Arabic name and Latin price as one mixed RTL
+      // string: jsPDF's bidi pass can legitimately move the price to the front
+      // (or split EGP onto another line). They are separate visual fragments:
+      // Arabic name on the left, "= 350 EGP" on the right.
+      doc.setFont("Amiri", "normal");
+      doc.setFontSize(mainFontSize);
+      const mainLines = doc.splitTextToSize(rtl(main), leftW);
+      doc.setFontSize(subtitleFontSize);
+      const subtitleNameLines = hasSubtitle
+        ? doc.splitTextToSize(rtl(item.name), leftW)
+        : [];
+
+      return {
+        item,
+        mainLines,
+        subtitleNameLines,
+        subtitleCostText: hasSubtitle ? `= ${formatPdfCurrencyEn(item.unitCost)}` : undefined,
+        totalText: item.totalCost !== undefined && showCosts
+          ? formatPdfCurrencyEn(item.totalCost)
+          : undefined,
+        hasSubtitle,
+      };
+    }),
+  );
   const legacyLines = hasLegacy ? doc.splitTextToSize(rtl(op.work_done as string), width - 20) : [];
-  const maxLines = Math.max(0, ...wrapped.map((w) => w.length), legacyLines.length);
-  const rowH = Math.max(9, padY + headerH + maxLines * lineH + 2);
 
-  // Keep the band on the page — start a new page when it would run past the bottom.
+  const maxSectionH = Math.max(
+    0,
+    ...renderedSections.map((items) =>
+      items.reduce((acc, rendered) => {
+        const itemHeight = rendered.mainLines.length * lineH
+          + (rendered.hasSubtitle ? rendered.subtitleNameLines.length * lineH : 0);
+        return acc + itemHeight;
+      }, 0) + Math.max(0, items.length - 1) * itemGap,
+    ),
+    legacyLines.length * lineH,
+  );
+  const rowH = Math.max(9, padY + headerH + 1 + maxSectionH + 1);
+
   const pageHeight = doc.internal.pageSize.getHeight();
   if (y + rowH > pageHeight - 14) {
     doc.addPage();
     y = 14;
   }
 
-  // Band background
   doc.setFillColor(...BRAND.cream);
-  doc.setDrawColor(...BRAND.hairline);
-  doc.roundedRect(x, y, width, rowH, 1.5, 1.5, "FD");
+  doc.setDrawColor(...LOGISTICS_GRID_COLOR);
+  doc.setLineWidth(LOGISTICS_GRID_WIDTH);
+  doc.rect(x, y, width, rowH, "FD");
 
-  // "Details" label (left)
   doc.setFont("Amiri", "bold");
   doc.setFontSize(5.5);
   doc.setTextColor(...BRAND.textMuted);
   pdfText(doc, "Details", x + 3, y + padY + 3, { align: "left" });
+  doc.setDrawColor(...LOGISTICS_GRID_COLOR);
+  doc.setLineWidth(LOGISTICS_GRID_WIDTH);
+  doc.line(x + labelW, y, x + labelW, y + rowH);
 
-  // One column per section, each with a small vector icon (Issues=alert,
-  // Services=wrench, Parts=package) so the band is scannable at a glance.
-  sections.forEach((s, si) => {
+  sections.forEach((section, si) => {
     const cx = x + labelW + si * (colW + colGap);
-    const sectionIcon: PdfIconName = s.key === "issues" ? "alert" : s.key === "services" ? "wrench" : "package";
+    const sectionIcon: PdfIconName = section.key === "issues" ? "alert" : section.key === "services" ? "wrench" : "package";
     drawIconBadge(doc, cx + 3, y + padY + 2.8, sectionIcon, BRAND.primary, 1.5);
     doc.setFont("Amiri", "bold");
     doc.setFontSize(5.8);
     doc.setTextColor(...BRAND.primary);
-    pdfText(doc, `${MAINTENANCE_SECTION_LABELS_EN[s.key]}:`, cx + 7, y + padY + 2.5, { align: "left" });
+    pdfText(doc, `${MAINTENANCE_SECTION_LABELS_EN[section.key]}:`, cx + 7, y + padY + 2.5, { align: "left" });
+    if (showCosts && section.key !== "issues") {
+      doc.setFont("Amiri", "normal");
+      doc.setFontSize(4.2);
+      doc.setTextColor(...BRAND.textMuted);
+      pdfText(doc, "Cost", cx + colW - 3, y + padY + 2.5, { align: "right" });
+    }
+
+    if (si < sections.length - 1) {
+      doc.setDrawColor(...LOGISTICS_GRID_COLOR);
+      doc.setLineWidth(LOGISTICS_GRID_WIDTH);
+      doc.line(cx + colW + colGap / 2, y, cx + colW + colGap / 2, y + rowH);
+    }
+
     doc.setFont("Amiri", "normal");
-    doc.setFontSize(5.5);
+    doc.setFontSize(mainFontSize);
     doc.setTextColor(...BRAND.textSecondary);
-    wrapped[si].forEach((ln, li) => {
-      pdfText(doc, ln, cx + 7, y + padY + headerH + 1 + li * lineH, { align: "left" });
+    let itemY = y + padY + headerH + 1;
+    renderedSections[si].forEach((rendered, itemIndex) => {
+      // Re-apply the main-row font after every subtitle. Without this reset,
+      // the next item inherited the subtitle's smaller font and its baseline
+      // appeared visually too close to the separator.
+      doc.setFont("Amiri", "normal");
+      doc.setFontSize(mainFontSize);
+      doc.setTextColor(...BRAND.textSecondary);
+      rendered.mainLines.forEach((line, lineIndex) => {
+        pdfText(doc, line, cx + 7, itemY, { align: "left" });
+        if (lineIndex === 0 && rendered.totalText) {
+          pdfText(doc, rendered.totalText, cx + colW - 3, itemY, { align: "right" });
+        }
+        itemY += lineH;
+      });
+      rendered.subtitleNameLines.forEach((line, subtitleIndex) => {
+        doc.setFont("Amiri", "normal");
+        doc.setFontSize(subtitleFontSize);
+        doc.setTextColor(...BRAND.textMuted);
+        pdfText(doc, line, cx + 7, itemY, { align: "left" });
+        // Keep the price on the same baseline as the first subtitle line and
+        // render it as an LTR-only fragment, avoiding Arabic/Latin bidi mixing.
+        if (subtitleIndex === 0 && rendered.subtitleCostText) {
+          pdfText(doc, rendered.subtitleCostText, cx + colW - 3, itemY, { align: "right" });
+        }
+        itemY += lineH;
+      });
+      if (itemIndex < renderedSections[si].length - 1) {
+        doc.setDrawColor(...BRAND.hairline);
+        doc.setLineWidth(0.12);
+        // `itemY` now points one line-height below the last rendered baseline.
+        // Draw the rule back inside the gap, then advance to the next item's
+        // baseline. This guarantees the rule cannot cross the next item.
+        doc.line(cx + 7, itemY - lineH + separatorOffset, cx + colW - 3, itemY - lineH + separatorOffset);
+        itemY += itemGap;
+      }
     });
   });
 
-  // Legacy free-text fallback
   if (legacyLines.length > 0) {
     doc.setFont("Amiri", "normal");
     doc.setFontSize(5.5);
     doc.setTextColor(...BRAND.textSecondary);
-    legacyLines.forEach((ln, li) => {
-      pdfText(doc, ln, x + labelW + 2, y + padY + 3 + li * lineH, { align: "left" });
+    legacyLines.forEach((line, index) => {
+      pdfText(doc, line, x + labelW + 2, y + padY + headerH + 1 + index * lineH, { align: "left" });
     });
   }
 
@@ -1068,15 +1343,22 @@ export const drawLogisticsOperationsTable = (
   const lineH = 3.1;
   const minRowH = 9;
 
-  let nextY = drawTableHeader(
-    doc,
-    ["Operation", "Category", "Status", "Open Date", "Close Date", "Rental", "Maintenance", "Total Cost"],
-    colWidths, x, y, tableW,
-  );
+  // Header + bold grid, redrawn after a page break so boxed rows on later
+  // pages keep their column labels (same as the maintenance-log renderer).
+  const drawHeaderAt = (hy: number): number => {
+    const ny = drawTableHeader(
+      doc,
+      ["Operation", "Category", "Status", "Open Date", "Close Date", "Rental", "Maintenance", "Total Cost"],
+      colWidths, x, hy, tableW,
+    );
+    drawBoldHeaderGrid(doc, x, hy, 8, tableW, colWidths);
+    return ny;
+  };
+  let nextY = drawHeaderAt(y);
 
   operations.forEach((op, i) => {
-    const clientMachine = formatMachineDescription(op.machine_category, op.machine_type) || "—";
-    const givenMachine = formatMachineDescription(op.given_machine_category, op.given_machine_type);
+    const clientMachine = formatMachineDescription(op.machine_category, op.machine_type, op.machine_name) || "—";
+    const givenMachine = formatMachineDescription(op.given_machine_category, op.given_machine_type, op.given_machine_name);
 
     // Wrap machine descriptions within the category column so long labels
     // don't bleed into adjacent columns (doc.text does not wrap). Shape each
@@ -1096,11 +1378,15 @@ export const drawLogisticsOperationsTable = (
     const contentLines = clientLines.length + givenLines.length;
     const rowH = Math.max(minRowH, contentLines * lineH + 4);
 
+    const prevY = nextY;
     nextY = checkPageBreak(doc, nextY, rowH + 2);
+    if (nextY < prevY) nextY = drawHeaderAt(nextY);
     if (i % 2 === 1) {
       doc.setFillColor(...BRAND.cream);
       doc.rect(x, nextY, tableW, rowH, "F");
     }
+    // Bold boxed grid around the summary row.
+    drawBoldGridRow(doc, x, nextY, rowH, tableW, colWidths);
 
     const cells = [
       LOGISTICS_TYPE_LABELS_EN[op.operation_type] || op.operation_type,
@@ -1162,12 +1448,8 @@ export const drawLogisticsOperationsTable = (
     });
 
     // Details band below the row — Issues | Parts | Services as side-by-side
-    // columns with per-item cost breakdowns (internal report).
-    nextY = drawLogisticsDetailsRow(doc, op, x, nextY + rowH + 1, tableW, { showCosts: true });
-
-    // Hairline separator between operation blocks for easier tracking
-    doc.setDrawColor(...BRAND.hairline);
-    doc.line(x, nextY - 1, x + tableW, nextY - 1);
+    // boxed columns with per-item cost breakdowns (internal report).
+    nextY = drawLogisticsDetailsRow(doc, op, x, nextY + rowH, tableW, { showCosts: true });
   });
 
   return nextY + 10;
@@ -1208,22 +1490,28 @@ export const drawClientLogisticsTable = (
     ? [tableW * 0.14, tableW * 0.17, tableW * 0.15, tableW * 0.09, tableW * 0.12, tableW * 0.12, tableW * 0.10, tableW * 0.11]
     : [tableW * 0.16, tableW * 0.21, tableW * 0.19, tableW * 0.10, tableW * 0.17, tableW * 0.17];
 
-  // Header row (client theme color, e.g. teal for the client PDFs)
-  doc.setFillColor(...headerColor);
-  doc.rect(x, y, tableW, 8, "F");
-  let hx = x;
-  headers.forEach((header, i) => {
-    doc.setFont("Amiri", "bold");
-    doc.setFontSize(8);
-    doc.setTextColor(...BRAND.white);
-    pdfText(doc, header, hx + 2, y + 5, { align: "left" });
-    hx += colWidths[i];
-  });
-  let nextY = y + 8;
+  // Header row (client theme color, e.g. teal for the client PDFs), redrawn
+  // after a page break so boxed rows on later pages keep their column labels.
+  const drawHeaderAt = (hy: number): number => {
+    doc.setFillColor(...headerColor);
+    doc.rect(x, hy, tableW, 8, "F");
+    let hx = x;
+    headers.forEach((header, i) => {
+      doc.setFont("Amiri", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(...BRAND.white);
+      pdfText(doc, header, hx + 2, hy + 5, { align: "left" });
+      hx += colWidths[i];
+    });
+    // Bold grid under the header (white dividers + heavy bottom rule).
+    drawBoldHeaderGrid(doc, x, hy, 8, tableW, colWidths);
+    return hy + 8;
+  };
+  let nextY = drawHeaderAt(y);
 
   operations.forEach((op, i) => {
-    const clientMachine = formatMachineDescription(op.machine_category, op.machine_type) || "—";
-    const givenMachine = formatMachineDescription(op.given_machine_category, op.given_machine_type);
+    const clientMachine = formatMachineDescription(op.machine_category, op.machine_type, op.machine_name) || "—";
+    const givenMachine = formatMachineDescription(op.given_machine_category, op.given_machine_type, op.given_machine_name);
 
     // Wrap machine descriptions within their columns (doc.text does not wrap).
     // Shape each value through rtl() first — custom Arabic categories/types
@@ -1245,11 +1533,15 @@ export const drawClientLogisticsTable = (
     const contentLines = Math.max(clientLines.length, givenLines.length, typeLines.length);
     const rowH = Math.max(minRowH, contentLines * lineH + 4);
 
+    const prevY = nextY;
     nextY = checkPageBreak(doc, nextY, rowH + 2);
+    if (nextY < prevY) nextY = drawHeaderAt(nextY);
     if (i % 2 === 1) {
       doc.setFillColor(...BRAND.cream);
       doc.rect(x, nextY, tableW, rowH, "F");
     }
+    // Bold boxed grid around the summary row.
+    drawBoldGridRow(doc, x, nextY, rowH, tableW, colWidths);
 
     // Column 0 lines (operation type, bold, wrapped). The #N number is drawn
     // below ALL type lines (after the loop) so it never collides with a
@@ -1319,11 +1611,7 @@ export const drawClientLogisticsTable = (
 
     // Details band below the row — Issues | Parts | Services (no maintenance
     // costs shown to the client).
-    nextY = drawLogisticsDetailsRow(doc, op, x, nextY + rowH + 1, tableW, { showCosts: false });
-
-    // Hairline separator between operation blocks for easier tracking
-    doc.setDrawColor(...BRAND.hairline);
-    doc.line(x, nextY - 1, x + tableW, nextY - 1);
+    nextY = drawLogisticsDetailsRow(doc, op, x, nextY + rowH, tableW, { showCosts: false });
   });
 
   return nextY + 10;

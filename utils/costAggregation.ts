@@ -444,6 +444,12 @@ export interface AggregatedLogisticsCosts {
   totalLogisticsCost: number;
   openCount: number;
   closedCount: number;
+  /** Itemized parts changed on the client's machines (maintenance_parts). */
+  parts: Map<string, AggregatedItem>;
+  /** Itemized services performed on the client's machines (maintenance_services). */
+  services: Map<string, AggregatedItem>;
+  totalPartsCost: number;
+  totalServicesCost: number;
 }
 
 export const aggregateLogisticsCosts = (
@@ -455,6 +461,8 @@ export const aggregateLogisticsCosts = (
   let totalMaintenanceCost = 0;
   let openCount = 0;
   let closedCount = 0;
+  const parts = new Map<string, AggregatedItem>();
+  const services = new Map<string, AggregatedItem>();
 
   operations.forEach((op) => {
     if (op.status === 'open') openCount++;
@@ -464,8 +472,29 @@ export const aggregateLogisticsCosts = (
     totalPickupCost += op.pickup_cost ?? 0;
     totalReturnCost += op.return_cost ?? 0;
     totalMaintenanceCost += op.maintenance_cost ?? 0;
+
+    // Itemize the maintenance work performed on the client's machine so the
+    // cost breakdown can show Parts and Services lines for in-house work.
+    (op.maintenance_parts ?? []).forEach((pr) => {
+      const unitCost = pr.cost ?? 0;
+      const key = getKey(pr.name, unitCost);
+      const existing = parts.get(key) || { name: pr.name, count: 0, totalCost: 0, unitCost };
+      existing.count += pr.count || 0;
+      existing.totalCost += (pr.count || 0) * unitCost;
+      parts.set(key, existing);
+    });
+    (op.maintenance_services ?? []).forEach((sr) => {
+      const unitCost = sr.cost ?? 0;
+      const key = getKey(sr.name, unitCost);
+      const existing = services.get(key) || { name: sr.name, count: 0, totalCost: 0, unitCost };
+      existing.count += sr.count || 0;
+      existing.totalCost += (sr.count || 0) * unitCost;
+      services.set(key, existing);
+    });
   });
 
+  const totalPartsCost = Array.from(parts.values()).reduce((sum, p) => sum + p.totalCost, 0);
+  const totalServicesCost = Array.from(services.values()).reduce((sum, s) => sum + s.totalCost, 0);
   const totalLogisticsCost = totalRentalCost + totalPickupCost + totalReturnCost + totalMaintenanceCost;
 
   return {
@@ -476,5 +505,9 @@ export const aggregateLogisticsCosts = (
     totalLogisticsCost,
     openCount,
     closedCount,
+    parts,
+    services,
+    totalPartsCost,
+    totalServicesCost,
   };
 };
