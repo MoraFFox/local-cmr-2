@@ -53,8 +53,8 @@ export const SelectorSelectedChips: React.FC<SelectorSelectedChipsProps> = ({
   onQuantityChange,
   onPayerChange,
   onNameChange,
-  midosLabel = "Mido's",
-  clientLabel = 'Client',
+  midosLabel = "By Midos",
+  clientLabel = 'By Client',
 }) => {
   if (items.length === 0) {
     return (

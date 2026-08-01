@@ -48,7 +48,7 @@ export const formatMaintenanceDetails = (r: MaintenanceRecord): string => {
     const items = r.partsReplaced
       .map((p) => {
         const paidBy =
-          p.paidByClient === true ? "Client" : p.paidByClient === false ? "Mido's" : "-";
+          p.paidByClient === true ? "By Client" : p.paidByClient === false ? "By Midos" : "-";
         return `  • ${p.count || 1}x ${rtl(p.name)} (${paidBy})`;
       })
       .join("\n");
@@ -296,7 +296,7 @@ const formatCurrency = (value: number) =>
   }).format(value);
 
 const getPaidByLabel = (val: string) =>
-  val === "company" ? "Mido's" : "Client";
+  val === "company" ? "By Midos" : "By Client";
 
 const getMachineStatus = (
   entity: {
@@ -1451,8 +1451,8 @@ export const generateBranchPDF = async (
         doc.text("Machines:", 18, yPos);
         doc.setFont("Amiri", "normal");
         const machinesText = r.machines
-          .map((m) => `${m.count || 1}x ${rtl(m.name)}`)
-          .join(", ");
+          .map((m) => `  • ${m.count || 1}x ${rtl(m.name)}`)
+          .join("\n");
         const splitMachines = doc.splitTextToSize(machinesText, pageWidth - 40);
         doc.text(splitMachines, 35, yPos);
         yPos += splitMachines.length * 5 + 2;
@@ -1464,7 +1464,7 @@ export const generateBranchPDF = async (
         doc.setFont("Amiri", "bold");
         doc.text("Issues:", 18, yPos);
         doc.setFont("Amiri", "normal");
-        const issuesText = r.problems.map((p) => rtl(p)).join(", ");
+        const issuesText = r.problems.map((p) => `  • ${rtl(p)}`).join("\n");
         const splitIssues = doc.splitTextToSize(issuesText, pageWidth - 40);
         doc.text(splitIssues, 35, yPos);
         yPos += splitIssues.length * 5 + 2;

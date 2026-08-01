@@ -15,6 +15,8 @@ import {
   generateInternalVisitReport,
   generateClientVisitReport,
   generateCostVisitReport,
+  generateBatchReport,
+  BatchExportItem,
 } from "../utils/internalReportPdf";
 import { generateCompanyPDF, generateBranchPDF } from "../utils/pdfGenerator";
 import { generateMockWizardData } from "../utils/mockData";
@@ -513,9 +515,9 @@ describe("internal report PDF generation", () => {
     const drawn = drawnStrings.join("\n");
 
     // Each item is a bullet with its own line cost.
-    expect(drawn).toContain("• 2× Pump A — 200 EGP (Company)");
-    expect(drawn).toContain("• 1× Gasket B — 50 EGP (Client)");
-    expect(drawn).toContain("• 3× Service X — 60 EGP (Company)");
+    expect(drawn).toContain("• 2× Pump A — 200 EGP (By Midos)");
+    expect(drawn).toContain("• 1× Gasket B — 50 EGP (By Client)");
+    expect(drawn).toContain("• 3× Service X — 60 EGP (By Midos)");
     // Each column ends with its subtotal.
     expect(drawn).toContain("Total: 250 EGP");
     expect(drawn).toContain("Total: 60 EGP");
@@ -533,8 +535,8 @@ describe("internal report PDF generation", () => {
     const costDrawn = drawnStrings.join("\n");
     expect(costDrawn).toContain("• 2× Pump A — 200 EGP");
     expect(costDrawn).toContain("• 1× Gasket B — 50 EGP");
-    expect(costDrawn).not.toContain("(Company)");
-    expect(costDrawn).not.toContain("(Client)");
+    expect(costDrawn).not.toContain("(By Midos)");
+    expect(costDrawn).not.toContain("(By Client)");
   }, 30000);
 
   it("drops Avg Rating KPI, adds logistics to Total Cost KPI, and moves Most Used Parts last", async () => {
@@ -875,12 +877,112 @@ describe("internal report PDF generation", () => {
     const record = {
       ...base,
       followUpVisits: [
-        { ...base, id: "fu-1", maintenanceDate: "2026-07-10" },
+        {
+          ...base,
+          id: "fu-1",
+          maintenanceDate: "2026-07-10",
+          problems: ["Leak", "Noise"],
+          partsReplaced: [{ name: "Pump A", count: 2, cost: 100 }],
+          servicesPerformed: [{ name: "Service X", count: 3, cost: 20 }],
+        },
       ],
       photos: [{ url: "https://placehold.co/600x400?text=Before", type: "before" as const }],
     };
+
+    drawnStrings.length = 0;
     const doc = await generateInternalVisitReport(data.companyName, {}, record);
     const out = doc.output("arraybuffer");
     expect(out.byteLength).toBeGreaterThan(1000);
+    const drawn = drawnStrings.join("\n");
+
+    // Follow-up work items render as one row each inside the summary cell —
+    // a bullet per issue/part/service, never a comma-run on a single line.
+    expect(drawn).toContain("Issues:");
+    expect(drawn).toContain("  • Leak");
+    expect(drawn).toContain("  • Noise");
+    expect(drawn).toContain("Parts:");
+    expect(drawn).toContain("  • 2× Pump A");
+    expect(drawn).toContain("Services:");
+    expect(drawn).toContain("  • 3× Service X");
+    // No comma-joined run of multiple work items remains.
+    expect(drawn).not.toContain("Issues: Leak, Noise");
+  }, 30000);
+
+  it("generateBatchReport produces a cover, summary table and detail blocks for each mode", async () => {
+    const base = generateMockWizardData();
+    const recA = { ...base.maintenanceHistory[0], id: "batch-a", type: "requested" as const };
+    const recB = { ...base.branches[0].maintenanceHistory[0], id: "batch-b", type: "scheduled" as const };
+    const items: BatchExportItem[] = [
+      {
+        record: recA,
+        companyId: 1,
+        companyName: "Alpha Co",
+        branchId: -1,
+        branchName: "Main Office",
+      },
+      {
+        record: recB,
+        companyId: 1,
+        companyName: "Alpha Co",
+        branchId: 5,
+        branchName: "Branch Five",
+      },
+    ];
+
+    // Cost mode: cover summary + summary table + costed detail blocks.
+    drawnStrings.length = 0;
+    const doc = await generateBatchReport(items, {
+      mode: "cost",
+      grouped: true,
+      includeSummaryTable: true,
+      filterDescription: "All requested visits",
+    });
+    expect(doc.output("arraybuffer").byteLength).toBeGreaterThan(1000);
+    const drawn = drawnStrings.join("\n");
+    // Cover sheet documents the batch.
+    expect(drawn).toContain("Batch Summary");
+    expect(drawn).toContain("Records:");
+    expect(drawn).toContain("Selection:");
+    expect(drawn).toContain("All requested visits");
+    // Summary table lists every selected record.
+    expect(drawn).toContain("Records Summary");
+    expect(drawn).toContain("Alpha Co");
+    expect(drawn).toContain("Branch Five");
+    // Grouped sections carry company — branch titles.
+    expect(drawn).toContain("Alpha Co — Main Office");
+    expect(drawn).toContain("Alpha Co — Branch Five");
+    // Detail blocks with per-record costs (cost mode has no payer split).
+    expect(drawn).toContain("Visit Summary");
+    expect(drawn).toContain("Cost Breakdown");
+    expect(drawn).toContain("Total Cost");
+  }, 30000);
+
+  it("generateBatchReport client mode strips every cost figure", async () => {
+    const base = generateMockWizardData();
+    const rec = { ...base.branches[0].maintenanceHistory[0], id: "batch-client-1" };
+    const items: BatchExportItem[] = [
+      {
+        record: rec,
+        companyId: 1,
+        companyName: "Alpha Co",
+        branchId: 5,
+        branchName: "Branch Five",
+      },
+    ];
+
+    drawnStrings.length = 0;
+    const doc = await generateBatchReport(items, {
+      mode: "client",
+      includeSummaryTable: true,
+    });
+    expect(doc.output("arraybuffer").byteLength).toBeGreaterThan(1000);
+    const drawn = drawnStrings.join("\n");
+    expect(drawn).toContain("Batch Summary");
+    expect(drawn).toContain("Records Summary");
+    expect(drawn).toContain("Visit Summary");
+    // No financial figures anywhere — no cover total, no cost column, no breakdown.
+    expect(drawn).not.toContain("EGP");
+    expect(drawn).not.toContain("Cost Breakdown");
+    expect(drawn).not.toContain("Total Cost");
   }, 30000);
 });

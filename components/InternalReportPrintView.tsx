@@ -27,7 +27,7 @@ import { getReportRecords } from "../utils/dateRangeFilter";
 // ── Helpers ──
 
 const getPaidByLabel = (val: string) =>
-  val === "company" ? "Mido's" : "Client";
+  val === "company" ? "By Midos" : "By Client";
 
 const formatDate = (date = new Date()) =>
   date.toLocaleDateString("en-GB", {

@@ -67,7 +67,7 @@ const rtl = (text: string | number | null | undefined): string => {
 
 // ── Helpers ──
 
-const getPaidByLabel = (val: string): string => (val === "company" ? "Company" : "Client");
+const getPaidByLabel = (val: string): string => (val === "company" ? "By Midos" : "By Client");
 
 const formatProblemsList = (problems: string[] | undefined): string => {
   if (!problems || problems.length === 0) return "—";
@@ -1875,11 +1875,22 @@ const generateVisitReport = async (
         pdfText(doc, `Technician: ${fu.baristaName}`, pageWidth - margin - 2, y, { align: "right" });
       }
       y += 4;
+      // Each work item on its own row so the reader can scan every issue,
+      // part and service as a separate line instead of one comma-run.
       const summary: string[] = [];
-      if (fu.problems && fu.problems.length > 0) summary.push(`Issues: ${fu.problems.map(rtl).join(", ")}`);
-      if (fu.partsReplaced && fu.partsReplaced.length > 0) summary.push(`Parts: ${fu.partsReplaced.map((p) => `${formatEnNumber(p.count || 1)}× ${rtl(p.name)}`).join(", ")}`);
-      if (fu.servicesPerformed && fu.servicesPerformed.length > 0) summary.push(`Services: ${fu.servicesPerformed.map((s) => `${formatEnNumber(s.count || 1)}× ${rtl(s.name)}`).join(", ")}`);
-      const summaryText = summary.join("  ·  ") || "—";
+      if (fu.problems && fu.problems.length > 0) {
+        summary.push("Issues:");
+        fu.problems.forEach((p) => summary.push(`  • ${rtl(p)}`));
+      }
+      if (fu.partsReplaced && fu.partsReplaced.length > 0) {
+        summary.push("Parts:");
+        fu.partsReplaced.forEach((p) => summary.push(`  • ${formatEnNumber(p.count || 1)}× ${rtl(p.name)}`));
+      }
+      if (fu.servicesPerformed && fu.servicesPerformed.length > 0) {
+        summary.push("Services:");
+        fu.servicesPerformed.forEach((s) => summary.push(`  • ${formatEnNumber(s.count || 1)}× ${rtl(s.name)}`));
+      }
+      const summaryText = summary.join("\n") || "—";
       const lines = doc.splitTextToSize(summaryText, tableW - 4);
       doc.setFont("Amiri", "normal");
       doc.setFontSize(6.8);
@@ -1925,3 +1936,204 @@ export const generateCostVisitReport = async (
   record: MaintenanceRecord,
   options: VisitReportOptions = {},
 ): Promise<jsPDF> => generateVisitReport(companyName, entity, record, "cost", options);
+
+// ═══════════════════════════════════════════
+//  TIER 5: Bulk Export (selected records)
+// ═══════════════════════════════════════════
+
+export interface BatchExportItem {
+  record: MaintenanceRecord;
+  companyId: number | string;
+  companyName: string;
+  branchId: number;
+  branchName: string;
+}
+
+export interface BatchReportOptions {
+  /** client (no costs) | cost (all costs, no payer split) | internal (costs + payer). */
+  mode: "client" | "cost" | "internal";
+  /** Group the detail blocks under one section per company → branch. */
+  grouped?: boolean;
+  /** Include a summary table of every selected record on the cover page. */
+  includeSummaryTable?: boolean;
+  /** Human-readable description of how the records were selected (cover line). */
+  filterDescription?: string;
+  /** Cover-page title. Defaults to "Bulk Export". */
+  batchTitle?: string;
+}
+
+/**
+ * Bulk export of a user-selected set of records. Reuses the exact building
+ * blocks of the other reports: branded header, KPI-free cover summary, an
+ * optional summary table, then per-record detail blocks (cost-free in client
+ * mode with photos; full costs in cost/internal modes via drawVisitDetails).
+ */
+export const generateBatchReport = async (
+  items: BatchExportItem[],
+  options: BatchReportOptions = { mode: "internal" },
+): Promise<jsPDF> => {
+  const doc = new jsPDF();
+  const assets = await loadFonts(doc);
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 10;
+  const hideEmpty = true;
+  const clientMode = options.mode === "client";
+  const costMode = options.mode === "cost";
+
+  const records = items.map((i) => i.record);
+  const period = formatPeriod(records);
+  const batchTitle = options.batchTitle || "Bulk Export";
+  const headerSubtitle = clientMode ? "Client Report" : costMode ? "Maintenance Cost Report" : undefined;
+  const startY = drawInternalHeader(doc, batchTitle, undefined, assets, period, headerSubtitle);
+
+  const engine = new PDFLayoutEngine(doc, startY, { hideEmptyComponents: hideEmpty });
+
+  const companyCount = new Set(items.map((i) => i.companyName)).size;
+  const branchCount = new Set(items.map((i) => `${i.companyId}-${i.branchId}`)).size;
+  const totalCost = records.reduce(
+    (sum, r) => sum + getRecordCostSummary(r, partsList, servicesList).total,
+    0,
+  );
+
+  // ── Cover summary (the batch's "what you exported" sheet) ──
+  engine.addSection(
+    "Batch Summary",
+    (section) => {
+      section.addBlock({
+        estimatedHeight: 50,
+        draw: (doc, y) => {
+          const infoItems: InfoItem[] = [
+            { label: "Records:", value: formatEnNumber(records.length), icon: "doc" },
+            { label: "Companies:", value: formatEnNumber(companyCount), icon: "home" },
+            { label: "Branches:", value: formatEnNumber(branchCount), icon: "location" },
+            { label: "Period:", value: period, icon: "calendar" },
+            ...(options.filterDescription
+              ? [{ label: "Selection:", value: options.filterDescription, icon: "check" as PdfIconName }]
+              : []),
+          ];
+          if (!clientMode) {
+            infoItems.push({
+              label: costMode ? "Total Cost:" : "Net Cost:",
+              value: formatPdfCurrencyEn(totalCost),
+              icon: "money",
+            });
+          }
+          let sy = checkPageBreak(doc, y, 40);
+          sy = drawSectionHeader(doc, "Batch Summary", sy, { icon: "chart" });
+          sy = drawInfoBox(doc, infoItems, sy, { x: margin, width: pageWidth - margin * 2 });
+          return sy + 4;
+        },
+      });
+    },
+    drawSectionHeader,
+  );
+
+  // ── Optional summary table (every selected record at a glance) ──
+  if (options.includeSummaryTable) {
+    engine.addSection(
+      "Records Summary",
+      (section) => {
+        section.addBlock({
+          estimatedHeight: 20 + items.length * 8,
+          draw: (doc, y) => {
+            const colW = pageWidth - margin * 2;
+            const cols = clientMode
+              ? ["Date", "Company", "Branch", "Technician", "Type", "Status"]
+              : ["Date", "Company", "Branch", "Technician", "Type", "Status", "Cost"];
+            const colWidths = clientMode
+              ? [colW * 0.13, colW * 0.2, colW * 0.17, colW * 0.16, colW * 0.11, colW * 0.13]
+              : [colW * 0.11, colW * 0.18, colW * 0.15, colW * 0.13, colW * 0.1, colW * 0.13, colW * 0.12];
+            const aligns: Array<"left" | "center" | "right"> = clientMode
+              ? ["left", "left", "left", "left", "center", "center"]
+              : ["left", "left", "left", "left", "center", "center", "right"];
+            let nextY = drawTableHeader(doc, cols, colWidths, margin, y, colW);
+            items.forEach((it, i) => {
+              const r = it.record;
+              const status = r.hadProblem
+                ? r.problemSolved ? "Resolved" : "Unresolved"
+                : "Routine";
+              const baseCells = [
+                formatDateEn(r.maintenanceDate),
+                rtl(it.companyName),
+                rtl(it.branchName),
+                rtl(r.baristaName) || "—",
+                getTypeLabel(r.type),
+                status,
+              ];
+              const cells = clientMode
+                ? baseCells
+                : [...baseCells, formatPdfCurrencyEn(getRecordCostSummary(r, partsList, servicesList).total)];
+              nextY = checkPageBreak(doc, nextY, 8);
+              nextY = drawTableRow(doc, cells, colWidths, margin, nextY, colW, i % 2 === 1, aligns);
+            });
+            return nextY + 10;
+          },
+        });
+      },
+      drawSectionHeader,
+    );
+  }
+
+  // Photos must be preloaded before the synchronous layout flush in client mode.
+  const photoCache = new Map<string, string>();
+  if (clientMode) {
+    const loaded = await preloadPhotoDataUrls(records);
+    loaded.forEach((data, url) => photoCache.set(url, data));
+  }
+
+  const renderDetailBlocks = (doc: jsPDF, y: number, list: BatchExportItem[]): number => {
+    if (clientMode) {
+      return renderClientRecordBlocks(doc, list.map((i) => i.record), y, photoCache);
+    }
+    let ny = y;
+    list.forEach((it) => {
+      ny = checkPageBreak(doc, ny, 14);
+      ny = drawRecordHeader(doc, it.record, ny);
+      ny = drawVisitDetails(doc, it.record, ny, true, costMode);
+      ny += 8;
+    });
+    return ny;
+  };
+
+  // ── Detail blocks: grouped by company → branch, or flat ──
+  if (options.grouped) {
+    const groups = new Map<string, BatchExportItem[]>();
+    items.forEach((it) => {
+      const key = `${it.companyId}::${it.branchId}`;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(it);
+    });
+    groups.forEach((groupItems) => {
+      const first = groupItems[0];
+      engine.addSection(
+        `${first.companyName} — ${first.branchName}`,
+        (section) => {
+          section.addRepeater(
+            groupItems,
+            clientMode ? 50 + groupItems.length * 40 : 40 + groupItems.length * 12,
+            (doc, y) => drawEmptyMessage(doc, y, "No records", margin),
+            (doc, y, list) => renderDetailBlocks(doc, y, list),
+          );
+        },
+        drawSectionHeader,
+      );
+    });
+  } else {
+    engine.addSection(
+      "Records",
+      (section) => {
+        section.addRepeater(
+          items,
+          clientMode ? 50 + items.length * 40 : 40 + items.length * 12,
+          (doc, y) => drawEmptyMessage(doc, y, "No records", margin),
+          (doc, y, list) => renderDetailBlocks(doc, y, list),
+        );
+      },
+      drawSectionHeader,
+    );
+  }
+
+  engine.flush();
+  applyFooters(doc, "CMR System", batchTitle);
+  return doc;
+};

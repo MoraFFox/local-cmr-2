@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { FormData, MaintenanceRecord } from '../types';
 import {
   MagnifyingGlassIcon,
@@ -15,9 +15,22 @@ import {
   WrenchScrewdriverIcon,
   MapPinIcon,
   ClockIcon,
+  DocumentArrowDownIcon,
+  SparklesIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 import { StarRatingDisplay } from './form-ui/StarRating';
 import EmptyState from './EmptyState';
+import BulkExportModal, { BulkExportMode } from './BulkExportModal';
+import { generateBatchReport, BatchExportItem } from '../utils/internalReportPdf';
+import {
+  getRecordCostSummary,
+  resolvePartCost,
+  resolveServiceCost,
+  formatEnNumber,
+} from '../utils/costAggregation';
+import { partsList, servicesList } from '../constants';
+import { exportToCSV, CSVColumn } from '../utils/importExport';
 
 // ── Types ──
 
@@ -129,6 +142,16 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
 
+  // ── Selection State ──
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
+  const [isBulkOpen, setIsBulkOpen] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [showSmartSelect, setShowSmartSelect] = useState(false);
+  const [costMin, setCostMin] = useState('');
+  const [costMax, setCostMax] = useState('');
+  const [costBasis, setCostBasis] = useState<'total' | 'company'>('total');
+  const [presetTech, setPresetTech] = useState('');
+
   // ── Flatten all records ──
   const allRecords = useMemo<FlattenedRecord[]>(() => {
     const result: FlattenedRecord[] = [];
@@ -167,6 +190,12 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
     submissions.forEach((s) => { if (s.id) seen.set(s.id, s.companyName || 'Unnamed'); });
     return Array.from(seen.entries()).map(([id, name]) => ({ id, name }));
   }, [submissions]);
+
+  const technicianOptions = useMemo(() => {
+    const set = new Set<string>();
+    allRecords.forEach((fr) => { if (fr.record.baristaName) set.add(fr.record.baristaName); });
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [allRecords]);
 
   // ── Filtered + sorted records ──
   const filteredRecords = useMemo(() => {
@@ -271,6 +300,147 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
   // Reset to page 1 when filters change
   useEffect(() => { setCurrentPage(1); }, [searchTerm, startDate, endDate, statusFilters, selectedCompanyIds, technicianFilter, typeFilters, sortBy, sortOrder]);
 
+  // ── Selection helpers ──
+  const keyOf = useCallback((fr: FlattenedRecord) => `${fr.companyId}-${fr.branchId}-${fr.record.id}`, []);
+
+  const toggleSelection = useCallback((key: string) => {
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  }, []);
+
+  const clearSelection = useCallback(() => setSelectedKeys(new Set()), []);
+
+  const selectedItems = useMemo<BatchExportItem[]>(
+    () =>
+      allRecords
+        .filter((fr) => selectedKeys.has(keyOf(fr)))
+        .map((fr) => ({
+          record: fr.record,
+          companyId: fr.companyId,
+          companyName: fr.companyName,
+          branchId: fr.branchId,
+          branchName: fr.branchName,
+        })),
+    [allRecords, selectedKeys, keyOf],
+  );
+
+  const selectedTotalCost = useMemo(
+    () => selectedItems.reduce((s, it) => s + getRecordCostSummary(it.record, partsList, servicesList).total, 0),
+    [selectedItems],
+  );
+
+  // Page-level selection (header checkbox)
+  const pageKeys = paginatedRecords.map(keyOf);
+  const allPageSelected = pageKeys.length > 0 && pageKeys.every((k) => selectedKeys.has(k));
+  const somePageSelected = pageKeys.some((k) => selectedKeys.has(k));
+
+  const togglePageSelection = useCallback(() => {
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      if (allPageSelected) {
+        pageKeys.forEach((k) => next.delete(k));
+      } else {
+        pageKeys.forEach((k) => next.add(k));
+      }
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allPageSelected, pageKeys]);
+
+  // Select everything matching the current filters (not just the visible page)
+  const selectAllMatching = useCallback(() => {
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      filteredRecords.forEach((fr) => next.add(keyOf(fr)));
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filteredRecords, keyOf]);
+
+  // ── Smart presets ("Grab" buttons that ADD matching records) ──
+  const grabRecords = useCallback((pred: (fr: FlattenedRecord) => boolean) => {
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      filteredRecords.filter(pred).forEach((fr) => next.add(keyOf(fr)));
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filteredRecords, keyOf]);
+
+  const companyCostOf = useCallback((r: MaintenanceRecord): number => {
+    const parts = (r.partsReplaced || [])
+      .filter((p) => !p.paidByClient)
+      .reduce((s, p) => s + (p.count || 0) * resolvePartCost(p, partsList), 0);
+    const services = (r.servicesPerformed || [])
+      .filter((sv) => !sv.paidByClient)
+      .reduce((s, sv) => s + (sv.count || 0) * resolveServiceCost(sv, servicesList), 0);
+    return parts + services;
+  }, []);
+
+  const grabByCostRange = useCallback(() => {
+    const min = costMin.trim() ? Number(costMin) : -Infinity;
+    const max = costMax.trim() ? Number(costMax) : Infinity;
+    if (isNaN(min) || isNaN(max)) return;
+    grabRecords((fr) => {
+      const cost = costBasis === 'company'
+        ? companyCostOf(fr.record)
+        : getRecordCostSummary(fr.record, partsList, servicesList).total;
+      return cost >= min && cost <= max;
+    });
+  }, [costMin, costMax, costBasis, grabRecords, companyCostOf]);
+
+  const grabTechnician = useCallback(() => {
+    if (!presetTech) return;
+    grabRecords((fr) => fr.record.baristaName === presetTech);
+  }, [presetTech, grabRecords]);
+
+  // ── Export handlers ──
+  const handleExportPDF = useCallback(async (mode: BulkExportMode, grouped: boolean, includeSummary: boolean) => {
+    if (selectedItems.length === 0) return;
+    setIsGenerating(true);
+    try {
+      const doc = await generateBatchReport(selectedItems, {
+        mode,
+        grouped,
+        includeSummaryTable: includeSummary,
+        filterDescription: 'Selected records from All Records',
+        batchTitle: 'Bulk Export',
+      });
+      const date = new Date().toISOString().slice(0, 10);
+      doc.save(`bulk-export-${mode}-${date}.pdf`);
+      setIsBulkOpen(false);
+    } catch (err) {
+      console.error('Bulk PDF export failed:', err);
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [selectedItems]);
+
+  const handleExportCSV = useCallback(() => {
+    if (selectedItems.length === 0) return;
+    const columns: CSVColumn[] = [
+      { header: 'Date', accessor: (it) => it.record.maintenanceDate },
+      { header: 'Company', accessor: (it) => it.companyName },
+      { header: 'Branch', accessor: (it) => it.branchName },
+      { header: 'Technician', accessor: (it) => it.record.baristaName },
+      { header: 'Type', accessor: (it) => it.record.type },
+      { header: 'Had Problem', accessor: (it) => it.record.hadProblem ? 'Yes' : 'No' },
+      { header: 'Problems', accessor: (it) => (it.record.problems || []).join('; ') },
+      { header: 'Parts', accessor: (it) => (it.record.partsReplaced || []).map((p) => p.name).join('; ') },
+      { header: 'Services', accessor: (it) => (it.record.servicesPerformed || []).map((s) => s.name).join('; ') },
+      { header: 'Problem Solved', accessor: (it) => it.record.problemSolved ? 'Yes' : 'No' },
+      { header: 'Paid By', accessor: (it) => it.record.paidBy },
+      { header: 'Visit Zone', accessor: (it) => it.record.visitZone },
+      { header: 'Rating', accessor: (it) => it.record.visitRating },
+      { header: 'Cost (EGP)', accessor: (it) => getRecordCostSummary(it.record, partsList, servicesList).total },
+      { header: 'Notes', accessor: (it) => it.record.notes },
+    ];
+    exportToCSV(selectedItems, columns, `bulk-export-${new Date().toISOString().slice(0, 10)}.csv`);
+  }, [selectedItems]);
+
   const handleSort = (field: SortField) => {
     if (sortBy === field) {
       setSortOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
@@ -318,8 +488,20 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
     setTypeFilters(new Set());
   };
 
+  const renderCheckbox = (checked: boolean, onChange: () => void, indeterminate = false, label = 'Select record') => (
+    <input
+      type="checkbox"
+      checked={checked}
+      ref={(el) => { if (el) el.indeterminate = indeterminate; }}
+      onChange={(e) => { e.stopPropagation(); onChange(); }}
+      onClick={(e) => e.stopPropagation()}
+      aria-label={label}
+      className="w-4 h-4 rounded border-hairline text-primary focus:ring-primary/30 cursor-pointer shrink-0"
+    />
+  );
+
   return (
-    <div className="w-full max-w-7xl mx-auto">
+    <div className="w-full max-w-7xl mx-auto pb-28">
       {/* Header */}
       <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <div>
@@ -328,7 +510,117 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
             {filteredRecords.length === 0 ? 'No records' : `${filteredRecords.length} records across ${submissions.length} companies`}
           </p>
         </div>
+        <button
+          onClick={() => setShowSmartSelect((v) => !v)}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-semibold shrink-0 transition-colors self-start sm:self-auto ${
+            showSmartSelect
+              ? 'bg-primary/10 border-primary text-primary'
+              : 'bg-cream dark:bg-espresso border-hairline text-latte hover:bg-surface-elevated'
+          }`}
+        >
+          <SparklesIcon className="w-5 h-5" />
+          Smart Select
+        </button>
       </header>
+
+      {/* Smart Select panel */}
+      {showSmartSelect && (
+        <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline p-4 mb-6 animate-fade-in">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <h2 className="text-sm font-bold text-primary dark:text-white flex items-center gap-1.5">
+              <SparklesIcon className="w-4 h-4" />
+              Grab matching records
+            </h2>
+            {selectedKeys.size > 0 && (
+              <button
+                onClick={clearSelection}
+                className="text-xs font-medium text-latte hover:text-ember-600 underline transition-colors"
+              >
+                Clear selection ({selectedKeys.size})
+              </button>
+            )}
+          </div>
+
+          {/* Preset grab buttons */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            <PresetButton onClick={() => grabRecords((fr) => fr.record.type === 'requested')} label="Requested" />
+            <PresetButton onClick={() => grabRecords((fr) => fr.record.type === 'scheduled')} label="Scheduled" />
+            <PresetButton onClick={() => grabRecords((fr) => fr.record.hadProblem && fr.record.problemSolved)} label="Resolved" />
+            <PresetButton onClick={() => grabRecords((fr) => fr.record.hadProblem && !fr.record.problemSolved)} label="Unresolved" />
+            <PresetButton onClick={() => grabRecords((fr) => fr.record.visitRating != null && fr.record.visitRating > 0 && fr.record.visitRating <= 2)} label="Rated ≤ 2★" />
+            <PresetButton onClick={() => grabRecords((fr) => !fr.record.visitRating || fr.record.visitRating === 0)} label="Unrated" />
+            <PresetButton onClick={selectAllMatching} label={`Select all ${filteredRecords.length} matching`} accent />
+          </div>
+
+          {/* Cost range */}
+          <div className="flex flex-wrap items-center gap-3 border-t border-hairline dark:border-hairline pt-4">
+            <span className="text-xs font-bold uppercase text-latte">Cost range</span>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min="0"
+                value={costMin}
+                onChange={(e) => setCostMin(e.target.value)}
+                placeholder="Min"
+                className="input-base w-24 px-3 py-1.5 text-sm"
+              />
+              <span className="text-latte text-sm">to</span>
+              <input
+                type="number"
+                min="0"
+                value={costMax}
+                onChange={(e) => setCostMax(e.target.value)}
+                placeholder="Max"
+                className="input-base w-24 px-3 py-1.5 text-sm"
+              />
+            </div>
+            <div className="flex rounded-lg border border-hairline dark:border-hairline overflow-hidden">
+              {(['total', 'company'] as const).map((b) => (
+                <button
+                  key={b}
+                  onClick={() => setCostBasis(b)}
+                  className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                    costBasis === b
+                      ? 'bg-primary text-white'
+                      : 'bg-cream dark:bg-espresso text-latte hover:bg-surface-elevated'
+                  }`}
+                >
+                  {b === 'total' ? 'Total cost' : 'Company cost'}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={grabByCostRange}
+              className="px-4 py-1.5 rounded-lg text-xs font-bold bg-primary text-white hover:bg-hover transition-colors"
+            >
+              Grab by cost
+            </button>
+            <span className="text-[11px] text-latte">Company cost = company-paid parts + services</span>
+          </div>
+
+          {/* Technician batch */}
+          <div className="flex flex-wrap items-center gap-3 border-t border-hairline dark:border-hairline pt-4 mt-4">
+            <span className="text-xs font-bold uppercase text-latte">Technician</span>
+            <select
+              value={presetTech}
+              onChange={(e) => setPresetTech(e.target.value)}
+              className="input-base px-3 py-1.5 text-sm max-w-[220px]"
+            >
+              <option value="">Pick a technician…</option>
+              {technicianOptions.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+            <button
+              onClick={grabTechnician}
+              disabled={!presetTech}
+              className="px-4 py-1.5 rounded-lg text-xs font-bold bg-primary text-white hover:bg-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Grab tech's visits
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Active filter chips */}
       {(activeFilterCount > 0 || searchTerm) && (
@@ -488,6 +780,9 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
               <table className="w-full">
                 <thead className="bg-cream dark:bg-espresso/50 border-b border-hairline dark:border-hairline">
                   <tr>
+                    <th className="px-4 py-3 w-10">
+                      {renderCheckbox(allPageSelected, togglePageSelection, somePageSelected && !allPageSelected, 'Select all on page')}
+                    </th>
                     <SortableHeader field="date" label="Date" sortBy={sortBy} sortOrder={sortOrder} handleSort={handleSort} />
                     <SortableHeader field="company" label="Company" sortBy={sortBy} sortOrder={sortOrder} handleSort={handleSort} />
                     <SortableHeader field="branch" label="Branch" sortBy={sortBy} sortOrder={sortOrder} handleSort={handleSort} />
@@ -499,89 +794,117 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                  {paginatedRecords.map((fr) => (
-                    <tr key={`${fr.companyId}-${fr.branchId}-${fr.record.id}`} className="hover:bg-cream dark:hover:bg-espresso-light/50 transition-colors">
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <CalendarIcon className="w-4 h-4 text-latte shrink-0" />
-                          <span className="text-sm text-primary dark:text-white">{formatDate(fr.record.maintenanceDate)}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          <BuildingOfficeIcon className="w-4 h-4 text-latte shrink-0" />
-                          <span className="text-sm text-primary dark:text-white truncate max-w-[140px]">{fr.companyName}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          <MapPinIcon className="w-4 h-4 text-latte shrink-0" />
-                          <span className="text-sm text-primary dark:text-white truncate max-w-[120px]">{fr.branchName}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          <UserIcon className="w-4 h-4 text-latte shrink-0" />
-                          <span className="text-sm text-primary dark:text-white truncate max-w-[120px]">
-                            {getTechnicianDisplayName
-                              ? getTechnicianDisplayName(fr.record)
-                              : fr.record.baristaName || '-'}
+                  {paginatedRecords.map((fr) => {
+                    const key = keyOf(fr);
+                    const isSelected = selectedKeys.has(key);
+                    return (
+                      <tr
+                        key={key}
+                        onClick={() => toggleSelection(key)}
+                        className={`cursor-pointer transition-colors ${
+                          isSelected
+                            ? 'bg-primary/5 dark:bg-primary/10'
+                            : 'hover:bg-cream dark:hover:bg-espresso-light/50'
+                        }`}
+                      >
+                        <td className="px-4 py-3 w-10">
+                          {renderCheckbox(isSelected, () => toggleSelection(key), false, `Select record ${formatDate(fr.record.maintenanceDate)}`)}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <CalendarIcon className="w-4 h-4 text-latte shrink-0" />
+                            <span className="text-sm text-primary dark:text-white">{formatDate(fr.record.maintenanceDate)}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="flex items-center gap-1.5">
+                            <BuildingOfficeIcon className="w-4 h-4 text-latte shrink-0" />
+                            <span className="text-sm text-primary dark:text-white truncate max-w-[140px]">{fr.companyName}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="flex items-center gap-1.5">
+                            <MapPinIcon className="w-4 h-4 text-latte shrink-0" />
+                            <span className="text-sm text-primary dark:text-white truncate max-w-[120px]">{fr.branchName}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="flex items-center gap-1.5">
+                            <UserIcon className="w-4 h-4 text-latte shrink-0" />
+                            <span className="text-sm text-primary dark:text-white truncate max-w-[120px]">
+                              {getTechnicianDisplayName
+                                ? getTechnicianDisplayName(fr.record)
+                                : fr.record.baristaName || '-'}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">{getStatusBadge(fr.record)}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          {fr.record.visitRating ? <StarRatingDisplay value={fr.record.visitRating} size="xs" /> : <span className="text-latte text-sm">-</span>}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <span className="text-sm text-primary dark:text-latte">
+                            {fr.record.servicesPerformed.length > 0 ? `${fr.record.servicesPerformed.length} svc` : '-'}
                           </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">{getStatusBadge(fr.record)}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        {fr.record.visitRating ? <StarRatingDisplay value={fr.record.visitRating} size="xs" /> : <span className="text-latte text-sm">-</span>}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <span className="text-sm text-primary dark:text-latte">
-                          {fr.record.servicesPerformed.length > 0 ? `${fr.record.servicesPerformed.length} svc` : '-'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          <ClockIcon className="w-3.5 h-3.5 text-latte shrink-0" />
-                          <span className="text-xs text-latte dark:text-latte">{formatDate(fr.record.lastModified)}</span>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="flex items-center gap-1.5">
+                            <ClockIcon className="w-3.5 h-3.5 text-latte shrink-0" />
+                            <span className="text-xs text-latte dark:text-latte">{formatDate(fr.record.lastModified)}</span>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
 
             {/* Mobile cards */}
             <div className="md:hidden space-y-3 p-3">
-              {paginatedRecords.map((fr) => (
-                <div key={`${fr.companyId}-${fr.branchId}-${fr.record.id}`} className="bg-cream dark:bg-espresso-light rounded-xl border border-hairline dark:border-hairline p-4 shadow-sm">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <CalendarIcon className="w-4 h-4 text-latte shrink-0" />
-                      <span className="text-sm font-medium text-primary dark:text-white">{formatDate(fr.record.maintenanceDate)}</span>
+              {paginatedRecords.map((fr) => {
+                const key = keyOf(fr);
+                const isSelected = selectedKeys.has(key);
+                return (
+                  <div
+                    key={key}
+                    onClick={() => toggleSelection(key)}
+                    className={`cursor-pointer bg-cream dark:bg-espresso-light rounded-xl border p-4 shadow-sm transition-colors ${
+                      isSelected
+                        ? 'border-primary ring-1 ring-primary/30'
+                        : 'border-hairline dark:border-hairline'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        {renderCheckbox(isSelected, () => toggleSelection(key), false, `Select record ${formatDate(fr.record.maintenanceDate)}`)}
+                        <CalendarIcon className="w-4 h-4 text-latte shrink-0" />
+                        <span className="text-sm font-medium text-primary dark:text-white">{formatDate(fr.record.maintenanceDate)}</span>
+                      </div>
+                      {getStatusBadge(fr.record)}
                     </div>
-                    {getStatusBadge(fr.record)}
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-latte">
-                    <span className="flex items-center gap-1"><BuildingOfficeIcon className="w-3 h-3" />{fr.companyName}</span>
-                    <span className="flex items-center gap-1"><MapPinIcon className="w-3 h-3" />{fr.branchName}</span>
-                  </div>
-                  <div className="mt-2 flex items-center gap-2 text-xs text-latte">
-                    <UserIcon className="w-3.5 h-3.5 shrink-0" />
-                    <span className="text-primary dark:text-white truncate">
-                      {getTechnicianDisplayName ? getTechnicianDisplayName(fr.record) : fr.record.baristaName || '-'}
-                    </span>
-                  </div>
-                  <div className="mt-2 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {fr.record.visitRating ? <StarRatingDisplay value={fr.record.visitRating} size="xs" /> : <span className="text-latte text-xs">-</span>}
-                      <span className="text-xs text-latte">{fr.record.servicesPerformed.length} svc</span>
+                    <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-latte">
+                      <span className="flex items-center gap-1"><BuildingOfficeIcon className="w-3 h-3" />{fr.companyName}</span>
+                      <span className="flex items-center gap-1"><MapPinIcon className="w-3 h-3" />{fr.branchName}</span>
                     </div>
-                    {fr.record.lastModified && (
-                      <span className="text-[10px] text-latte/70">Edited {formatDate(fr.record.lastModified)}</span>
-                    )}
+                    <div className="mt-2 flex items-center gap-2 text-xs text-latte">
+                      <UserIcon className="w-3.5 h-3.5 shrink-0" />
+                      <span className="text-primary dark:text-white truncate">
+                        {getTechnicianDisplayName ? getTechnicianDisplayName(fr.record) : fr.record.baristaName || '-'}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {fr.record.visitRating ? <StarRatingDisplay value={fr.record.visitRating} size="xs" /> : <span className="text-latte text-xs">-</span>}
+                        <span className="text-xs text-latte">{fr.record.servicesPerformed.length} svc</span>
+                      </div>
+                      {fr.record.lastModified && (
+                        <span className="text-[10px] text-latte/70">Edited {formatDate(fr.record.lastModified)}</span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Pagination */}
@@ -627,6 +950,45 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
           </>
         )}
       </div>
+
+      {/* Sticky selection bar */}
+      {selectedKeys.size > 0 && (
+        <div className="fixed bottom-5 inset-x-0 z-50 flex justify-center px-4 pointer-events-none">
+          <div className="pointer-events-auto flex items-center gap-4 bg-primary text-white rounded-2xl shadow-2xl px-5 py-3 animate-fade-in max-w-full flex-wrap justify-center">
+            <span className="text-sm font-bold whitespace-nowrap">{selectedKeys.size} selected</span>
+            <span className="hidden sm:inline text-white/70">·</span>
+            <span className="text-sm font-semibold whitespace-nowrap">
+              Total cost: <span className="font-bold">EGP {formatEnNumber(selectedTotalCost)}</span>
+            </span>
+            <div className="flex items-center gap-2 ms-1">
+              <button
+                onClick={() => setIsBulkOpen(true)}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold text-primary bg-white hover:bg-cream transition-colors"
+              >
+                <DocumentArrowDownIcon className="w-4 h-4" />
+                Export
+              </button>
+              <button
+                onClick={clearSelection}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white/90 hover:bg-white/15 transition-colors"
+                aria-label="Clear selection"
+              >
+                <TrashIcon className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk export modal */}
+      <BulkExportModal
+        isOpen={isBulkOpen}
+        onClose={() => setIsBulkOpen(false)}
+        items={selectedItems}
+        isGenerating={isGenerating}
+        onExportPDF={handleExportPDF}
+        onExportCSV={handleExportCSV}
+      />
     </div>
   );
 };
@@ -657,6 +1019,19 @@ const Chip: React.FC<{
       <XMarkIcon className="w-3 h-3" />
     </button>
   </span>
+);
+
+const PresetButton: React.FC<{ onClick: () => void; label: string; accent?: boolean }> = ({ onClick, label, accent }) => (
+  <button
+    onClick={onClick}
+    className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all duration-150 hover:-translate-y-0.5 ${
+      accent
+        ? 'bg-primary text-white hover:bg-hover shadow-md hover:shadow-lg'
+        : 'bg-white dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-latte hover:border-primary/40 hover:text-primary dark:hover:text-white'
+    }`}
+  >
+    {label}
+  </button>
 );
 
 export default GlobalRecordsPage;

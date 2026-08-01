@@ -246,7 +246,7 @@ const MaintenanceRecordReview: React.FC<{
         <Detail label="Notes" value={record.notes} />
         <Detail
           label="الدفع بواسطة"
-          value={record.paidBy === "company" ? "Mido's" : "الشركة"}
+          value={record.paidBy === "company" ? "By Midos" : "By Client"}
         />
 
         {record.machines && record.machines.length > 0 && (
@@ -304,7 +304,7 @@ const MaintenanceRecordReview: React.FC<{
                           {s.count}x {s.name}{" "}
                           {s.paidByClient && (
                             <span className="text-xs font-semibold text-primary">
-                              (Paid by Client)
+                              (By Client)
                             </span>
                           )}
                         </li>
@@ -328,7 +328,7 @@ const MaintenanceRecordReview: React.FC<{
                         {p.count}x {p.name}{" "}
                         {p.paidByClient && (
                           <span className="text-xs font-semibold text-primary">
-                            (Paid by Client)
+                            (By Client)
                           </span>
                         )}
                       </li>

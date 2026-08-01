@@ -153,7 +153,7 @@ const MachineList = ({
 };
 
 const getPaidByLabel = (val: string) =>
-  val === "company" ? "Mido's" : "Company";
+  val === "company" ? "By Midos" : "By Client";
 
 // --- SCREEN COMPONENTS (UI) ---
 
