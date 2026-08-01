@@ -10,6 +10,7 @@ import { BRAND, drawClientLogisticsTable, drawLogisticsDetailsRow, drawIconBadge
 import { logger } from "./logger";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { NO_DATA_LABEL } from "./pdfCompactLayout";
 /** Keep dynamic Arabic in logical Unicode order; jsPDF shapes it at draw time. */
 const rtl = (text: string | number | null | undefined): string => {
   if (text === null || text === undefined) return "";
@@ -287,6 +288,42 @@ export async function renderPhotosInPDF(
 
   return currentY;
 }
+
+/**
+ * Phase-03 legacy-table helpers (D-02/D-07/D-10/D-11):
+ *  - isBlankCell: a legacy cell is "empty" when it is null/undefined, a blank
+ *    string, or the legacy "—"/"-" placeholder.
+ *  - filterBlankRows: drop entirely-empty rows from derived tables. Never
+ *    applied to maintenance-record tables (D-08 keeps every record row).
+ *  - pruneBlankColumns: drop columns whose every cell is blank, returning the
+ *    surviving columns indexed by their ORIGINAL positions so columnStyles
+ *    can be rebuilt per surviving column (avoids autoTable overflow warnings).
+ */
+const isBlankCell = (value: unknown): boolean => {
+  if (value === null || value === undefined) return true;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed === "" || trimmed === "—" || trimmed === "-";
+  }
+  return false;
+};
+
+const filterBlankRows = (rows: (string | number)[][]): (string | number)[][] =>
+  rows.filter((row) => !(Array.isArray(row) && row.every(isBlankCell)));
+
+const pruneBlankColumns = (
+  rows: (string | number)[][],
+): { rows: (string | number)[][]; kept: number[] } => {
+  if (rows.length === 0) return { rows, kept: [] };
+  const colCount = Math.max(...rows.map((r) => r.length));
+  const kept = Array.from({ length: colCount }, (_, i) => i).filter(
+    (i) => rows.some((r) => !isBlankCell(r[i])),
+  );
+  return {
+    rows: rows.map((r) => kept.map((i) => r[i])),
+    kept,
+  };
+};
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("ar-EG", {
@@ -699,9 +736,9 @@ export const generateCompanyPDF = async (
     locationUrl?.startsWith("http") || locationUrl?.startsWith("www");
 
   const companyInfo = [
-    ["Location", isLocationUrl ? "View Location" : rtl(locationUrl) || "-"],
-    ["Email", rtl(data.email) || "-"],
-    ["Tax Number", rtl(data.taxNumber) || "-"],
+    ["Location", isLocationUrl ? "View Location" : rtl(locationUrl) || NO_DATA_LABEL],
+    ["Email", rtl(data.email) || NO_DATA_LABEL],
+    ["Tax Number", rtl(data.taxNumber) || NO_DATA_LABEL],
     ["Total Visits", stats.totalVisits.toString()],
     ["Total Issues", stats.totalIssuesCount.toString()],
     ["Parts Changed", stats.totalPartsCount.toString()],
@@ -717,7 +754,7 @@ export const generateCompanyPDF = async (
   autoTable(doc, {
     startY: yPos,
     head: [],
-    body: companyInfo,
+    body: filterBlankRows(companyInfo),
     theme: "plain",
     styles: { fontSize: 9, cellPadding: 2, font: "Amiri" },
     columnStyles: {
@@ -774,7 +811,7 @@ export const generateCompanyPDF = async (
   autoTable(doc, {
     startY: yPos,
     head: [["Metric", "Result"]],
-    body: insightsData,
+    body: filterBlankRows(insightsData),
     theme: "striped",
     styles: { fontSize: 9, font: "Amiri", halign: "left" },
     headStyles: { fillColor: [50, 60, 70] },
@@ -800,22 +837,27 @@ export const generateCompanyPDF = async (
       (b.requested + b.scheduled).toString(),
     ]);
 
-    autoTable(doc, {
-      startY: yPos,
-      head: [["Branch", "Requested", "Scheduled", "Total"]],
-      body: summaryRows,
-      theme: "striped",
-      styles: { fontSize: 8, font: "Amiri", halign: "left" },
-      headStyles: { fillColor: [50, 60, 70] },
-      columnStyles: {
-        0: { cellWidth: "auto" },
-        1: { cellWidth: 30, halign: "center" },
-        2: { cellWidth: 30, halign: "center" },
-        3: { cellWidth: 30, halign: "center" },
-      },
-    });
-
-    yPos = (doc as any).lastAutoTable.finalY + 10;
+    const { rows: summaryKept, kept: summaryCols } = pruneBlankColumns(summaryRows);
+    const summaryRowsKept = filterBlankRows(summaryKept);
+    if (summaryRowsKept.length > 0) {
+      autoTable(doc, {
+        startY: yPos,
+        head: [["Branch", "Requested", "Scheduled", "Total"]].map((h) =>
+          summaryCols.map((i) => h[i]),
+        ),
+        body: summaryRowsKept,
+        theme: "striped",
+        styles: { fontSize: 8, font: "Amiri", halign: "left" },
+        headStyles: { fillColor: [50, 60, 70] },
+        columnStyles: {
+          0: { cellWidth: "auto" },
+          1: { cellWidth: 30, halign: "center" },
+          2: { cellWidth: 30, halign: "center" },
+          3: { cellWidth: 30, halign: "center" },
+        },
+      });
+      yPos = (doc as any).lastAutoTable.finalY + 10;
+    }
   }
 
   // --- Issues & Parts Breakdown ---
@@ -848,22 +890,29 @@ export const generateCompanyPDF = async (
       ]);
     }
 
-    autoTable(doc, {
-      startY: yPos,
-      head: [["Issue", "Count", "Part", "Qty"]],
-      body: breakdownRows,
-      theme: "striped",
-      styles: { fontSize: 8, font: "Amiri", halign: "left" },
-      headStyles: { fillColor: [50, 60, 70] },
-      columnStyles: {
-        0: { cellWidth: "auto" },
-        1: { cellWidth: 20, halign: "center" },
-        2: { cellWidth: "auto" },
-        3: { cellWidth: 20, halign: "center" },
-      },
-    });
-
-    yPos = (doc as any).lastAutoTable.finalY + 10;
+    const { rows: breakdownKept, kept: breakdownCols } = pruneBlankColumns(breakdownRows);
+    const breakdownRowsKept = filterBlankRows(breakdownKept);
+    if (breakdownRowsKept.length > 0) {
+      const breakdownStyles: Record<number, { cellWidth: string | number; halign?: string }> = {};
+      breakdownCols.forEach((orig, newIdx) => {
+        breakdownStyles[newIdx] =
+          orig % 2 === 0
+            ? { cellWidth: "auto" }
+            : { cellWidth: 20, halign: "center" };
+      });
+      autoTable(doc, {
+        startY: yPos,
+        head: [["Issue", "Count", "Part", "Qty"]].map((h) =>
+          breakdownCols.map((i) => h[i]),
+        ),
+        body: breakdownRowsKept,
+        theme: "striped",
+        styles: { fontSize: 8, font: "Amiri", halign: "left" },
+        headStyles: { fillColor: [50, 60, 70] },
+        columnStyles: breakdownStyles as any,
+      });
+      yPos = (doc as any).lastAutoTable.finalY + 10;
+    }
   }
 
   // --- Machine Logistics ---
@@ -919,22 +968,24 @@ export const generateCompanyPDF = async (
       c.phoneNumbers?.map((p) => p.number).join(", ") || "-",
     ]);
 
-    autoTable(doc, {
-      startY: yPos,
-      head: [["Name", "Position", "Email", "Phone"]],
-      body: contactRows,
-      theme: "striped",
-      styles: { fontSize: 8, font: "Amiri" },
-      headStyles: { fillColor: [20, 184, 166] },
-      columnStyles: { 3: { cellPadding: { left: 6, right: 1, top: 1, bottom: 1 } } },
-      didDrawCell: (data: any) => {
-        if (data.section === "body" && data.column.index === 3) {
-          drawIconBadge(doc, data.cell.x + 2.5, data.cell.y + data.cell.height / 2, "phone", [20, 184, 166], 1.7);
-        }
-      },
-    } as any);
-
-    yPos = (doc as any).lastAutoTable.finalY + 10;
+    const contactRowsKept = filterBlankRows(contactRows);
+    if (contactRowsKept.length > 0) {
+      autoTable(doc, {
+        startY: yPos,
+        head: [["Name", "Position", "Email", "Phone"]],
+        body: contactRowsKept,
+        theme: "striped",
+        styles: { fontSize: 8, font: "Amiri" },
+        headStyles: { fillColor: [20, 184, 166] },
+        columnStyles: { 3: { cellPadding: { left: 6, right: 1, top: 1, bottom: 1 } } },
+        didDrawCell: (data: any) => {
+          if (data.section === "body" && data.column.index === 3) {
+            drawIconBadge(doc, data.cell.x + 2.5, data.cell.y + data.cell.height / 2, "phone", [20, 184, 166], 1.7);
+          }
+        },
+      } as any);
+      yPos = (doc as any).lastAutoTable.finalY + 10;
+    }
   }
 
   if (!reportData.hasBranches && reportData.maintenanceHistory.length > 0) {
@@ -953,8 +1004,8 @@ export const generateCompanyPDF = async (
       const row: any[] = [
         r.maintenanceDate,
         r.type === "requested" ? "Requested" : "Scheduled",
-        r.type === "requested" ? rtl(r.clientBaristaName) || "-" : "-",
-        rtl(r.baristaName) || "-",
+        r.type === "requested" ? rtl(r.clientBaristaName) || NO_DATA_LABEL : NO_DATA_LABEL,
+        rtl(r.baristaName) || NO_DATA_LABEL,
         getPaidByLabel(r.paidBy),
       ];
 
@@ -1032,13 +1083,13 @@ export const generateCompanyPDF = async (
       const branchInfo = [
         [
           "Location",
-          isLocationUrl ? "View Location" : rtl(locationUrl) || "-",
+          isLocationUrl ? "View Location" : rtl(locationUrl) || NO_DATA_LABEL,
           "Email",
-          rtl(branch.email) || "-",
+          rtl(branch.email) || NO_DATA_LABEL,
         ],
         [
           "Tax ID",
-          rtl(branch.taxNumber) || "-",
+          rtl(branch.taxNumber) || NO_DATA_LABEL,
           "Machine Ownership",
           getMachineStatus(branch, !options.includeCosts),
         ],
@@ -1047,7 +1098,7 @@ export const generateCompanyPDF = async (
       autoTable(doc, {
         startY: yPos,
         head: [],
-        body: branchInfo,
+        body: filterBlankRows(branchInfo),
         theme: "plain",
         styles: { fontSize: 8, cellPadding: 2, font: "Amiri" }, // Reduced font size slightly for density
         columnStyles: {
@@ -1096,21 +1147,23 @@ export const generateCompanyPDF = async (
           c.phoneNumbers[0]?.number || "-",
         ]);
 
-        autoTable(doc, {
-          startY: yPos,
-          head: [["Name", "Phone"]],
-          body: contactRows,
-          theme: "plain",
-          styles: { fontSize: 7, font: "Amiri" },
-          columnStyles: { 1: { cellPadding: { left: 6, right: 1, top: 1, bottom: 1 } } },
-          didDrawCell: (data: any) => {
-            if (data.section === "body" && data.column.index === 1) {
-              drawIconBadge(doc, data.cell.x + 2.5, data.cell.y + data.cell.height / 2, "phone", [20, 184, 166], 1.7);
-            }
-          },
-        } as any);
-
-        yPos = (doc as any).lastAutoTable.finalY + 5;
+        const contactRowsKept = filterBlankRows(contactRows);
+        if (contactRowsKept.length > 0) {
+          autoTable(doc, {
+            startY: yPos,
+            head: [["Name", "Phone"]],
+            body: contactRowsKept,
+            theme: "plain",
+            styles: { fontSize: 7, font: "Amiri" },
+            columnStyles: { 1: { cellPadding: { left: 6, right: 1, top: 1, bottom: 1 } } },
+            didDrawCell: (data: any) => {
+              if (data.section === "body" && data.column.index === 1) {
+                drawIconBadge(doc, data.cell.x + 2.5, data.cell.y + data.cell.height / 2, "phone", [20, 184, 166], 1.7);
+              }
+            },
+          } as any);
+          yPos = (doc as any).lastAutoTable.finalY + 5;
+        }
       }
 
       if (branch.baristas && branch.baristas.length > 0) {
@@ -1122,21 +1175,23 @@ export const generateCompanyPDF = async (
           b.phone || "-",
         ]);
 
-        autoTable(doc, {
-          startY: yPos,
-          head: [["Name", "Phone"]],
-          body: baristaRows,
-          theme: "plain",
-          styles: { fontSize: 7, font: "Amiri" },
-          columnStyles: { 1: { cellPadding: { left: 6, right: 1, top: 1, bottom: 1 } } },
-          didDrawCell: (data: any) => {
-            if (data.section === "body" && data.column.index === 1) {
-              drawIconBadge(doc, data.cell.x + 2.5, data.cell.y + data.cell.height / 2, "phone", [20, 184, 166], 1.7);
-            }
-          },
-        } as any);
-
-        yPos = (doc as any).lastAutoTable.finalY + 5;
+        const baristaRowsKept = filterBlankRows(baristaRows);
+        if (baristaRowsKept.length > 0) {
+          autoTable(doc, {
+            startY: yPos,
+            head: [["Name", "Phone"]],
+            body: baristaRowsKept,
+            theme: "plain",
+            styles: { fontSize: 7, font: "Amiri" },
+            columnStyles: { 1: { cellPadding: { left: 6, right: 1, top: 1, bottom: 1 } } },
+            didDrawCell: (data: any) => {
+              if (data.section === "body" && data.column.index === 1) {
+                drawIconBadge(doc, data.cell.x + 2.5, data.cell.y + data.cell.height / 2, "phone", [20, 184, 166], 1.7);
+              }
+            },
+          } as any);
+          yPos = (doc as any).lastAutoTable.finalY + 5;
+        }
       }
 
       if (branch.maintenanceHistory.length > 0) {
@@ -1150,8 +1205,8 @@ export const generateCompanyPDF = async (
           const row: any[] = [
             r.maintenanceDate,
             r.type === "requested" ? "● Requested" : "Scheduled",
-            r.type === "requested" ? rtl(r.clientBaristaName) || "-" : "-",
-            rtl(r.baristaName) || "-",
+            r.type === "requested" ? rtl(r.clientBaristaName) || NO_DATA_LABEL : NO_DATA_LABEL,
+            rtl(r.baristaName) || NO_DATA_LABEL,
             getPaidByLabel(r.paidBy),
           ];
 
@@ -1279,16 +1334,16 @@ export const generateBranchPDF = async (
   const locationUrl = branch.location;
   const isLocationUrl =
     locationUrl?.startsWith("http") || locationUrl?.startsWith("www");    const branchInfo = [
-    ["Location", isLocationUrl ? "View Location" : rtl(locationUrl) || "-"],
-    ["Email", rtl(branch.email) || "-"],
-    ["Tax ID", rtl(branch.taxNumber) || "-"],
+    ["Location", isLocationUrl ? "View Location" : rtl(locationUrl) || NO_DATA_LABEL],
+    ["Email", rtl(branch.email) || NO_DATA_LABEL],
+    ["Tax ID", rtl(branch.taxNumber) || NO_DATA_LABEL],
     ["Machine Ownership", getMachineStatus(branch, !options.includeCosts)],
   ];
 
   autoTable(doc, {
     startY: yPos,
     head: [],
-    body: branchInfo,
+    body: filterBlankRows(branchInfo),
     theme: "plain",
     styles: { fontSize: 9, cellPadding: 2, font: "Amiri" },
     columnStyles: {
@@ -1327,23 +1382,24 @@ export const generateBranchPDF = async (
       rtl(c.position === "custom" ? c.customPosition || c.position : c.position),
       c.phoneNumbers.map((p) => p.number).join(", "),
     ]);
-
-    autoTable(doc, {
-      startY: yPos,
-      head: [["Name", "Position", "Phone"]],
-      body: contactRows,
-      theme: "striped",
-      styles: { fontSize: 8, font: "Amiri" },
-      headStyles: { fillColor: [20, 184, 166] },
-      columnStyles: { 2: { cellPadding: { left: 6, right: 1, top: 1, bottom: 1 } } },
-      didDrawCell: (data: any) => {
-        if (data.section === "body" && data.column.index === 2) {
-          drawIconBadge(doc, data.cell.x + 2.5, data.cell.y + data.cell.height / 2, "phone", [20, 184, 166], 1.7);
-        }
-      },
-    } as any);
-
-    yPos = (doc as any).lastAutoTable.finalY + 10;
+    const contactRowsKept = filterBlankRows(contactRows);
+    if (contactRowsKept.length > 0) {
+      autoTable(doc, {
+        startY: yPos,
+        head: [["Name", "Position", "Phone"]],
+        body: contactRowsKept,
+        theme: "striped",
+        styles: { fontSize: 8, font: "Amiri" },
+        headStyles: { fillColor: [20, 184, 166] },
+        columnStyles: { 2: { cellPadding: { left: 6, right: 1, top: 1, bottom: 1 } } },
+        didDrawCell: (data: any) => {
+          if (data.section === "body" && data.column.index === 2) {
+            drawIconBadge(doc, data.cell.x + 2.5, data.cell.y + data.cell.height / 2, "phone", [20, 184, 166], 1.7);
+          }
+        },
+      } as any);
+      yPos = (doc as any).lastAutoTable.finalY + 10;
+    }
   }
 
   if (branch.baristas && branch.baristas.length > 0) {
@@ -1357,21 +1413,22 @@ export const generateBranchPDF = async (
 
     const baristaRows = branch.baristas.map((b) => [
       rtl(b.name),
-      b.phone || "-",
-      rtl(b.notes) || "-",
+      b.phone || NO_DATA_LABEL,
+      rtl(b.notes) || NO_DATA_LABEL,
     ]);
-
-    autoTable(doc, {
-      startY: yPos,
-      head: [["Name", "Phone", "Notes"]],
-      body: baristaRows,
-      theme: "striped",
-      styles: { fontSize: 8, font: "Amiri" },
-      headStyles: { fillColor: [20, 184, 166] },
-      columnStyles: { 2: { cellWidth: 60 } },
-    });
-
-    yPos = (doc as any).lastAutoTable.finalY + 10;
+    const baristaRowsKept = filterBlankRows(baristaRows);
+    if (baristaRowsKept.length > 0) {
+      autoTable(doc, {
+        startY: yPos,
+        head: [["Name", "Phone", "Notes"]],
+        body: baristaRowsKept,
+        theme: "striped",
+        styles: { fontSize: 8, font: "Amiri" },
+        headStyles: { fillColor: [20, 184, 166] },
+        columnStyles: { 2: { cellWidth: 60 } },
+      });
+      yPos = (doc as any).lastAutoTable.finalY + 10;
+    }
   }
 
   if (reportBranch.maintenanceHistory.length > 0) {
@@ -1487,17 +1544,20 @@ export const generateBranchPDF = async (
         doc.text("Parts Replaced:", 18, yPos);
         yPos += 2;
 
-        autoTable(doc, {
-          startY: yPos,
-          head: [partsHeader],
-          body: partsBody,
-          theme: "plain",
-          styles: { fontSize: 8, font: "Amiri", cellPadding: 1 },
-          headStyles: { fillColor: [240, 240, 240], textColor: 50 },
-          margin: { left: 14, right: 14 },
-          columnStyles: { 0: { cellWidth: "auto" } },
-        } as any);
-        yPos = (doc as any).lastAutoTable.finalY + 5;
+        const partsBodyKept = filterBlankRows(partsBody);
+        if (partsBodyKept.length > 0) {
+          autoTable(doc, {
+            startY: yPos,
+            head: [partsHeader],
+            body: partsBodyKept,
+            theme: "plain",
+            styles: { fontSize: 8, font: "Amiri", cellPadding: 1 },
+            headStyles: { fillColor: [240, 240, 240], textColor: 50 },
+            margin: { left: 14, right: 14 },
+            columnStyles: { 0: { cellWidth: "auto" } },
+          } as any);
+          yPos = (doc as any).lastAutoTable.finalY + 5;
+        }
       }
 
       // Services Performed Table
@@ -1517,17 +1577,20 @@ export const generateBranchPDF = async (
         doc.text("Services Performed:", 18, yPos);
         yPos += 2;
 
-        autoTable(doc, {
-          startY: yPos,
-          head: [servicesHeader],
-          body: servicesBody,
-          theme: "plain",
-          styles: { fontSize: 8, font: "Amiri", cellPadding: 1 },
-          headStyles: { fillColor: [240, 240, 240], textColor: 50 },
-          margin: { left: 14, right: 14 },
-          columnStyles: { 0: { cellWidth: "auto" } },
-        } as any);
-        yPos = (doc as any).lastAutoTable.finalY + 5;
+        const servicesBodyKept = filterBlankRows(servicesBody);
+        if (servicesBodyKept.length > 0) {
+          autoTable(doc, {
+            startY: yPos,
+            head: [servicesHeader],
+            body: servicesBodyKept,
+            theme: "plain",
+            styles: { fontSize: 8, font: "Amiri", cellPadding: 1 },
+            headStyles: { fillColor: [240, 240, 240], textColor: 50 },
+            margin: { left: 14, right: 14 },
+            columnStyles: { 0: { cellWidth: "auto" } },
+          } as any);
+          yPos = (doc as any).lastAutoTable.finalY + 5;
+        }
       }
 
       // Notes
