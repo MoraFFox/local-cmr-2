@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
 import { SafeModal } from './form-ui/SafeModal';
-import { ar } from '../utils/arabicTranslations';
 import { SIDEBAR_TOGGLE_SHORTCUT } from '../utils/sharedConstants';
+import { useLanguage } from '../utils/LanguageContext';
 
 interface KeyboardShortcut {
   keyLabel: string;
@@ -49,20 +49,23 @@ function isHelpShortcut(event: KeyboardEvent): boolean {
   return event.key === '?' || (event.key === '/' && event.shiftKey);
 }
 
-const SHORTCUTS: KeyboardShortcut[] = [
-  {
-    keyLabel: ar.ui.formProgress.jumpToNextIncompleteShortcut,
-    description: ar.ui.formProgress.jumpToNextIncomplete,
-  },
-  {
-    keyLabel: SIDEBAR_TOGGLE_SHORTCUT.label,
-    description: 'توسيع / طي القائمة الجانبية',
-  },
-  {
-    keyLabel: '?',
-    description: ar.common.keyboardShortcutsHint,
-  },
-];
+function useShortcuts(): KeyboardShortcut[] {
+  const { t } = useLanguage();
+  return [
+    {
+      keyLabel: t.ui.formProgress.jumpToNextIncompleteShortcut,
+      description: t.ui.formProgress.jumpToNextIncomplete,
+    },
+    {
+      keyLabel: SIDEBAR_TOGGLE_SHORTCUT.label,
+      description: t.admin.sidebar.sidebarToggle,
+    },
+    {
+      keyLabel: '?',
+      description: t.common.keyboardShortcutsHint,
+    },
+  ];
+}
 
 /**
  * Global keyboard shortcuts help modal.
@@ -88,20 +91,27 @@ export const KeyboardShortcutsHelpProvider: React.FC<{ children: React.ReactNode
 /**
  * Button that opens the keyboard shortcuts help overlay.
  */
-export const KeyboardShortcutsHelpButton: React.FC<{ className?: string }> = ({ className }) => {
+export const KeyboardShortcutsHelpButton: React.FC<
+  Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children' | 'type'>
+> = ({ className, ...buttonProps }) => {
   const { isOpen, open } = useKeyboardShortcutsHelpContext();
+  const { t } = useLanguage();
 
   return (
     <button
+      {...buttonProps}
       type="button"
-      onClick={open}
+      onClick={(event) => {
+        buttonProps.onClick?.(event);
+        open();
+      }}
       className={className}
-      aria-label={ar.common.keyboardShortcuts}
-      title={ar.common.keyboardShortcuts}
+      aria-label={buttonProps['aria-label'] ?? t.admin.sidebar.keyboardShortcuts}
+      title={buttonProps.title ?? t.admin.sidebar.keyboardShortcuts}
       aria-haspopup="dialog"
       aria-expanded={isOpen}
     >
-      <QuestionMarkCircleIcon className="w-6 h-6" />
+      <QuestionMarkCircleIcon className="w-6 h-6 shrink-0" aria-hidden="true" />
     </button>
   );
 };
@@ -112,6 +122,8 @@ export const KeyboardShortcutsHelpButton: React.FC<{ className?: string }> = ({ 
  */
 const KeyboardShortcutsHelpModal: React.FC = () => {
   const { isOpen, open, close } = useKeyboardShortcutsHelpContext();
+  const { t } = useLanguage();
+  const shortcuts = useShortcuts();
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -133,14 +145,14 @@ const KeyboardShortcutsHelpModal: React.FC = () => {
       onClose={close}
       type="info"
       size="md"
-      title={ar.common.keyboardShortcuts}
+      title={t.admin.sidebar.keyboardShortcuts}
       closeOnBackdropClick
     >
       <div className="space-y-4">
-        <p className="text-sm text-latte">{ar.common.keyboardShortcutsDescription}</p>
+        <p className="text-sm text-latte">{t.common.keyboardShortcutsDescription}</p>
 
         <ul className="divide-y divide-hairline dark:divide-hairline rounded-lg border border-hairline dark:border-hairline overflow-hidden">
-          {SHORTCUTS.map((shortcut, index) => (
+          {shortcuts.map((shortcut, index) => (
             <li
               key={index}
               className="flex items-center justify-between gap-4 px-4 py-3 bg-cream dark:bg-espresso-light"
@@ -154,7 +166,7 @@ const KeyboardShortcutsHelpModal: React.FC = () => {
         </ul>
 
         <p className="text-xs text-latte/70">
-          {ar.ui.formProgress.shortcutTypingGuard}
+          {t.ui.formProgress.shortcutTypingGuard}
         </p>
       </div>
     </SafeModal>

@@ -1,4 +1,5 @@
 import { Part, Service } from './types';
+import type { Translations } from './utils/arabicTranslations';
 
 export type ViewKey =
   | "history"
@@ -13,23 +14,58 @@ export type ViewKey =
   | "logistics-timeline"
   | "all-records";
 
+/** Icon identities available to sidebar navigation items. */
+export type SidebarIconName =
+  | "ClockIcon"
+  | "UsersIcon"
+  | "UserGroupIcon"
+  | "ClipboardDocumentListIcon"
+  | "PlusIcon"
+  | "Cog6ToothIcon"
+  | "HomeIcon"
+  | "DocumentTextIcon";
+
 export interface NavItem {
   key: ViewKey;
   path: string;
-  label: string;
-  iconName: "HomeIcon" | "UsersIcon" | "UserGroupIcon" | "DocumentTextIcon" | "Cog6ToothIcon";
+  /** Key into the translated `admin.sidebar` namespace. */
+  labelKey: keyof Translations['admin']['sidebar'];
+  iconName: SidebarIconName;
   inSidebar: boolean;
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { key: "history", path: "/", label: "السجل", iconName: "HomeIcon", inSidebar: true },
-  { key: "baristas", path: "/baristas", label: "أداء الباريستا", iconName: "UsersIcon", inSidebar: true },
-  { key: "technicians", path: "/users", label: "إدارة الفنيين", iconName: "UserGroupIcon", inSidebar: true },
-  { key: "all-records", path: "/records", label: "كل السجلات", iconName: "DocumentTextIcon", inSidebar: true },
-  { key: "form", path: "/companies/new", label: "نموذج جديد", iconName: "DocumentTextIcon", inSidebar: true },
-  { key: "machines", path: "/settings", label: "الإعدادات", iconName: "Cog6ToothIcon", inSidebar: true },
-  { key: "print", path: "/print", label: "طباعة", iconName: "DocumentTextIcon", inSidebar: false },
+  { key: "history", path: "/", labelKey: "history", iconName: "ClockIcon", inSidebar: true },
+  { key: "baristas", path: "/baristas", labelKey: "baristas", iconName: "UsersIcon", inSidebar: true },
+  { key: "technicians", path: "/users", labelKey: "technicians", iconName: "UserGroupIcon", inSidebar: true },
+  { key: "all-records", path: "/records", labelKey: "allRecords", iconName: "ClipboardDocumentListIcon", inSidebar: true },
+  { key: "form", path: "/companies/new", labelKey: "newCompany", iconName: "PlusIcon", inSidebar: false },
+  { key: "machines", path: "/settings", labelKey: "settings", iconName: "Cog6ToothIcon", inSidebar: true },
+  { key: "print", path: "/print", labelKey: "newCompany", iconName: "DocumentTextIcon", inSidebar: false },
 ];
+
+/**
+ * Whether a sidebar navigation item represents the current view.
+ * Nested company/barista/settings routes map to their parent sidebar item.
+ */
+export function isSidebarItemActive(
+  item: NavItem,
+  view: ViewKey,
+  pathname: string,
+): boolean {
+  if (item.key === "baristas") {
+    return view === "baristas" || view === "barista-details";
+  }
+  if (item.key === "history") {
+    return view === "history";
+  }
+  if (item.key === "machines") {
+    return view === "machines" || pathname === "/settings/machines";
+  }
+  if (item.key === "technicians") return view === "technicians";
+  if (item.key === "all-records") return view === "all-records";
+  return view === item.key;
+}
 
 export const pathToView = (pathname: string): ViewKey => {
   if (pathname === "/") return "history";

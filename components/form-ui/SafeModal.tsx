@@ -52,6 +52,8 @@ interface SafeModalProps {
   className?: string;
   /** aria-label for accessibility */
   ariaLabel?: string;
+  /** Localized accessible label for the close button. */
+  closeLabel?: string;
   /** Render a custom header (replaces the default title bar). When provided,
    *  `title` is ignored and no default header is rendered. The function
    *  receives SafeModal's internal `handleClose` so custom close buttons go
@@ -148,6 +150,7 @@ export const SafeModal: React.FC<SafeModalProps> = ({
   closeOnBackdropClick,
   className = '',
   ariaLabel,
+  closeLabel = 'Close modal',
   renderHeader,
   renderFooter,
   bodyClassName = '',
@@ -273,7 +276,7 @@ export const SafeModal: React.FC<SafeModalProps> = ({
                 type="button"
                 onClick={handleClose}
                 className="p-2 text-latte hover:text-primary rounded-lg hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                aria-label="Close modal"
+                aria-label={closeLabel}
               >
                 <XMarkIcon className="w-5 h-5" />
               </button>

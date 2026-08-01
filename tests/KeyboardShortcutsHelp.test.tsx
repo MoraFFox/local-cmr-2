@@ -1,8 +1,10 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '../tests/testUtils';
 import { KeyboardShortcutsHelpProvider, KeyboardShortcutsHelpButton } from '../components/KeyboardShortcutsHelp';
 import { ar } from '../utils/arabicTranslations';
+
+const helpLabel = ar.admin.sidebar.keyboardShortcuts;
 
 describe('KeyboardShortcutsHelp', () => {
   it('opens the modal when the ? key is pressed outside an input', () => {
@@ -18,7 +20,7 @@ describe('KeyboardShortcutsHelp', () => {
 
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeInTheDocument();
-    expect(dialog).toHaveTextContent(ar.common.keyboardShortcuts);
+    expect(dialog).toHaveTextContent(helpLabel);
   });
 
   it('opens the modal when Shift+/ is pressed', () => {
@@ -78,7 +80,7 @@ describe('KeyboardShortcutsHelp', () => {
       </KeyboardShortcutsHelpProvider>
     );
 
-    fireEvent.click(screen.getByRole('button', { name: ar.common.keyboardShortcuts }));
+    fireEvent.click(screen.getByRole('button', { name: helpLabel }));
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
@@ -123,6 +125,7 @@ describe('KeyboardShortcutsHelp', () => {
     const dialog = screen.getByRole('dialog');
     expect(dialog).toHaveTextContent(ar.ui.formProgress.jumpToNextIncomplete);
     expect(dialog).toHaveTextContent(ar.common.keyboardShortcutsHint);
+    expect(dialog).toHaveTextContent(ar.admin.sidebar.sidebarToggle);
     expect(dialog).toHaveTextContent('Alt + J');
   });
 
@@ -146,7 +149,7 @@ describe('KeyboardShortcutsHelp', () => {
       </KeyboardShortcutsHelpProvider>
     );
 
-    fireEvent.click(screen.getByRole('button', { name: ar.common.keyboardShortcuts }));
+    fireEvent.click(screen.getByRole('button', { name: helpLabel }));
 
     const closeButton = screen.getByRole('button', { name: /close modal/i });
     expect(document.activeElement).toBe(closeButton);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, fireEvent, act } from './testUtils';
+import { render, screen, waitFor, fireEvent, act, within } from './testUtils';
 import { MemoryRouter } from 'react-router-dom';
 import type { Draft } from '../hooks/useDrafts';
 import type { FormData } from '../types';
@@ -34,10 +34,17 @@ vi.mock('../src/views/SettingsView', () => ({
   default: () => <div data-testid="settings-view">Settings View</div>,
 }));
 
-// Mock Sidebar (eager import, not lazy)
-vi.mock('../src/views/Sidebar', () => ({
-  default: () => <nav data-testid="sidebar">Sidebar</nav>,
-}));
+// Mock Sidebar (eager import, not lazy). A hoisted flag lets the mobile-drawer
+// tests opt into the real sidebar content instead of the stub.
+const { useRealSidebar } = vi.hoisted(() => ({ useRealSidebar: { current: false } }));
+
+vi.mock('../src/views/Sidebar', async () => {
+  const { default: RealSidebarContent } = await import('../src/views/Sidebar');
+  return {
+    default: (props: Record<string, unknown>) =>
+      useRealSidebar.current ? React.createElement(RealSidebarContent, props) : React.createElement('nav', { 'data-testid': 'sidebar' }, 'Sidebar'),
+  };
+});
 
 // Mock hooks used by App
 vi.mock('../hooks/useTheme', () => ({
@@ -115,6 +122,15 @@ vi.mock('../utils/sharedConstants', () => ({
     { id: 1, name: 'معلومات الشركة' },
     { id: 2, name: 'الفروع' },
   ],
+  // Used by the real SidebarContent in the mobile-drawer tests.
+  SIDEBAR_TOGGLE_SHORTCUT: {
+    label: 'Ctrl+Shift+S',
+    ctrl: true,
+    shift: true,
+    alt: false,
+    meta: false,
+    key: 's',
+  },
 }));
 
 // Mock KeyboardShortcutsHelp
@@ -167,6 +183,58 @@ describe('App — Lazy Loading & Suspense', () => {
       // The sidebar is rendered twice: once in the desktop aside, once in the mobile aside
       const sidebars = screen.getAllByTestId('sidebar');
       expect(sidebars).toHaveLength(2);
+    });
+  });
+
+  describe('mobile drawer (real sidebar)', () => {
+    afterEach(() => {
+      useRealSidebar.current = false;
+      localStorage.clear();
+    });
+
+    it('opens the drawer expanded with full labels even when desktop state is collapsed', async () => {
+      useRealSidebar.current = true;
+      localStorage.setItem('cmr-sidebar-expanded', 'false');
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <App />
+        </MemoryRouter>,
+      );
+      // Open the drawer via the hamburger.
+      const hamburger = screen.getByRole('button', { name: 'القائمة' });
+      fireEvent.click(hamburger);
+      // The mobile drawer is always expanded regardless of the persisted
+      // desktop collapse preference, so its CTA shows the full label.
+      await waitFor(() => {
+        const drawer = document.getElementById('mobile-sidebar')!;
+        expect(within(drawer).getByTestId('add-company-button')).toHaveTextContent(/إضافة شركة/);
+      });
+      // Focus moved to the drawer close button.
+      const closeButton = screen.getByRole('button', { name: /إغلاق القائمة/ });
+      expect(document.activeElement).toBe(closeButton);
+    });
+
+    it('closes the drawer on Escape and restores focus to the hamburger', async () => {
+      useRealSidebar.current = true;
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <App />
+        </MemoryRouter>,
+      );
+      const hamburger = screen.getByRole('button', { name: 'القائمة' });
+      fireEvent.click(hamburger);
+      await waitFor(() => {
+        const drawer = document.getElementById('mobile-sidebar')!;
+        expect(within(drawer).getByTestId('add-company-button')).toBeInTheDocument();
+      });
+      const drawer = document.getElementById('mobile-sidebar')!;
+      fireEvent.keyDown(drawer, { key: 'Escape' });
+      await waitFor(() => {
+        // The drawer closes: it becomes inert and is removed from the focus
+        // order, and focus returns to the hamburger trigger.
+        expect(drawer).toHaveAttribute('aria-hidden', 'true');
+      });
+      expect(document.activeElement).toBe(hamburger);
     });
   });
 

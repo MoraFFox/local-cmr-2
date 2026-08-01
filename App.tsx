@@ -164,6 +164,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuCloseRef = React.useRef<HTMLButtonElement>(null);
   const mobileMenuButtonRef = React.useRef<HTMLButtonElement>(null);
+  const mobileSidebarRef = React.useRef<HTMLElement>(null);
   const wasMobileMenuOpenRef = React.useRef(false);
 
   // Persist sidebar expand/collapse preference.
@@ -201,7 +202,8 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   }, []);
 
   // Move focus to the mobile drawer close button when it opens and back to the
-  // hamburger button when it closes (a11y)
+  // hamburger button when it closes (a11y). While open, trap Tab/Shift+Tab
+  // inside the drawer and close it with Escape.
   React.useEffect(() => {
     if (isMobileMenuOpen) {
       mobileMenuCloseRef.current?.focus();
@@ -209,6 +211,42 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
       mobileMenuButtonRef.current?.focus();
     }
     wasMobileMenuOpenRef.current = isMobileMenuOpen;
+  }, [isMobileMenuOpen]);
+
+  React.useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const drawer = mobileSidebarRef.current;
+    if (!drawer) return;
+
+    const getFocusable = () =>
+      Array.from(
+        drawer.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ) as HTMLElement[];
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setIsMobileMenuOpen(false);
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const focusable = getFocusable();
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    drawer.addEventListener('keydown', handleKeyDown);
+    return () => drawer.removeEventListener('keydown', handleKeyDown);
   }, [isMobileMenuOpen]);
   const [deleteCandidateId, setDeleteCandidateId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -805,6 +843,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
     theme,
     drafts,
     currentDraftId,
+    pathname: location.pathname,
     handleViewChange,
     handleLoadDraft,
     handleDeleteDraft,
@@ -833,7 +872,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
           isSidebarExpanded ? "w-56 xl:w-64" : "w-20"
         }`}
       >
-        <SidebarContent {...sidebarProps} />
+        <SidebarContent {...sidebarProps} presentation="desktop" />
       </aside>
 
       {/* Mobile Sidebar */}
@@ -849,28 +888,31 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
           }`}
         />
         <aside
+          ref={mobileSidebarRef}
           id="mobile-sidebar"
           role="dialog"
-          aria-label="القائمة"
+          aria-label={t.admin.sidebar.menu}
           aria-hidden={!isMobileMenuOpen}
           aria-modal={isMobileMenuOpen}
+          inert={isMobileMenuOpen ? undefined : true}
           onClick={(e) => e.stopPropagation()}
           className={`absolute top-0 start-0 h-full w-64 chrome border-e border-brass/20 shadow-xl transition-transform duration-300 ease-in-out flex flex-col ${
             isMobileMenuOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"
           }`}
         >
-          <div className="flex items-center justify-between p-4 border-b border-brass/20">
-            <span className="font-bold text-on-chrome">القائمة</span>
+          <div className="flex items-center justify-between p-4 border-b border-brass/20 shrink-0">
+            <span className="font-bold text-on-chrome">{t.admin.sidebar.menu}</span>
             <button
               ref={mobileMenuCloseRef}
+              type="button"
               onClick={() => setIsMobileMenuOpen(false)}
-              aria-label="إغلاق القائمة"
+              aria-label={t.admin.sidebar.closeMenu}
               className="p-2 rounded-md text-on-chrome/70 hover:text-on-chrome hover:bg-espresso-light transition-colors"
             >
-              <XMarkIcon className="h-6 w-6" />
+              <XMarkIcon className="h-6 w-6" aria-hidden="true" />
             </button>
           </div>
-          <SidebarContent {...sidebarProps} />
+          <SidebarContent {...sidebarProps} presentation="mobile" isSidebarExpanded={true} />
         </aside>
       </div>
 
@@ -887,35 +929,38 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
           <div className="w-1/4 flex ltr:justify-start rtl:justify-end items-center gap-1">
             <button
               ref={mobileMenuButtonRef}
+              type="button"
               onClick={() => setIsMobileMenuOpen(true)}
-              aria-label="القائمة"
+              aria-label={t.admin.sidebar.menu}
               aria-expanded={isMobileMenuOpen}
               aria-controls="mobile-sidebar"
               className="p-2 -me-2 rounded-md text-on-chrome/70 hover:text-on-chrome hover:bg-espresso-light transition-colors shrink-0"
             >
-              <Bars3Icon className="h-6 w-6" />
+              <Bars3Icon className="h-6 w-6" aria-hidden="true" />
             </button>
             <button
+              type="button"
               onClick={toggleTheme}
               className="p-2 rounded-md text-on-chrome/70 hover:text-on-chrome hover:bg-espresso-light transition-colors shrink-0"
               aria-label={
-                theme === "light" ? "الوضع الليلي" : "الوضع النهاري"
+                theme === "light" ? t.admin.sidebar.switchToDark : t.admin.sidebar.switchToLight
               }
               title={
-                theme === "light" ? "الوضع الليلي" : "الوضع النهاري"
+                theme === "light" ? t.admin.sidebar.switchToDark : t.admin.sidebar.switchToLight
               }
             >
               {theme === "light" ? (
-                <MoonIcon className="h-5 w-5" />
+                <MoonIcon className="h-5 w-5" aria-hidden="true" />
               ) : (
-                <SunIcon className="h-5 w-5" />
+                <SunIcon className="h-5 w-5" aria-hidden="true" />
               )}
             </button>
             <button
+              type="button"
               onClick={toggleLanguage}
               className="p-2 rounded-md text-on-chrome/70 hover:text-on-chrome hover:bg-espresso-light transition-colors shrink-0 text-xs font-bold"
-              aria-label={language === 'ar' ? 'English' : 'العربية'}
-              title={language === 'ar' ? 'English' : 'العربية'}
+              aria-label={language === 'ar' ? t.admin.sidebar.switchToEnglish : t.admin.sidebar.switchToArabic}
+              title={language === 'ar' ? t.admin.sidebar.switchToEnglish : t.admin.sidebar.switchToArabic}
             >
               <span className="text-xs font-bold tracking-wider">{language === 'ar' ? 'EN' : 'AR'}</span>
             </button>
@@ -931,7 +976,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
           <div className="w-1/4 flex justify-end">
             <img
               src="/logo.svg"
-              alt="شعار ميدوز"
+              alt={t.admin.appName}
               className="h-9 w-auto object-contain shrink-0 -ms-2"
             />
           </div>
