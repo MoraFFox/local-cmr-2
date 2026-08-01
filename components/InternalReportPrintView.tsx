@@ -23,6 +23,7 @@ import ReportIcon from "./ReportIcon";
 import type { PdfIconName } from "../utils/pdfTheme";
 import { partsList, servicesList } from "../constants";
 import { getReportRecords } from "../utils/dateRangeFilter";
+import { NO_DATA_LABEL } from "../utils/pdfCompactLayout";
 
 // ── Helpers ──
 
@@ -107,7 +108,7 @@ const PrintRecordCard: React.FC<{ record: MaintenanceRecord }> = ({ record }) =>
         <div className='grid grid-cols-3 gap-2 mb-2'>
           <div>
             <span className='text-latte font-semibold block'>Technician</span>
-            <span className='text-text font-medium'>{record.baristaName || "-"}</span>
+            <span className='text-text font-medium'>{record.baristaName || NO_DATA_LABEL}</span>
           </div>
           <div>
             <span className='text-latte font-semibold block'>Paid By</span>
@@ -217,6 +218,12 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
 
   const parts = useMemo(() => Array.from<AggregatedItem>(costs.parts.values()), [costs.parts]);
   const services = useMemo(() => Array.from<AggregatedItem>(costs.services.values()), [costs.services]);
+  // getTechnicianSummary always emits a row (falling back to "Unknown" for
+  // blank names) — drop rows with no real technician or zero visits (D-07).
+  const meaningfulTechs = techs.filter((t) => t.name !== "Unknown" && t.visits > 0);
+  // getVisitZoneBreakdown returns every configured zone (visits 0 when
+  // unused) — only visited zones are meaningful (D-07).
+  const visitedZones = zones.filter((z) => z.visits > 0);
 
   return (
     <div dir="ltr" className='internal-report-page font-sans text-text bg-white w-full max-w-[210mm] mx-auto p-8'>
@@ -246,25 +253,31 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
         <FinancialCard label='Net Cost' icon='money' value={formatCurrencyEn(costs.grandTotalCompanyCost)} accent='crimson' />
       </div>
 
-      {/* Financial Summary */}
-      <SectionTitle icon='money'>Financial Summary</SectionTitle>
-      <div className='bg-cream border border-hairline rounded-lg p-4 mb-6'>
-        <div className='grid grid-cols-3 gap-4 mb-4'>
-          <FinancialCard label='Visit Fees' icon='location' value={formatCurrencyEn(costs.totalVisitFees)} accent='amber' />
-          <FinancialCard label='Parts (Company)' icon='package' value={formatCurrencyEn(costs.totalPartsCost)} accent='crimson' />
-          <FinancialCard label='Services (Company)' icon='wrench' value={formatCurrencyEn(costs.totalServicesCost)} accent='crimson' />
-        </div>
-        {(costs.totalClientPartsCost > 0 || costs.totalClientServicesCost > 0) && (
-          <div className='grid grid-cols-2 gap-4 mb-4 pt-4 border-t border-hairline'>
-            <FinancialCard label='Parts (Client)' icon='package' value={formatCurrencyEn(costs.totalClientPartsCost)} accent='blue' />
-            <FinancialCard label='Services (Client)' icon='wrench' value={formatCurrencyEn(costs.totalClientServicesCost)} accent='blue' />
+      {/* Financial Summary — omitted entirely when every figure is zero (D-11) */}
+      {costs.totalVisitFees + costs.totalPartsCost + costs.totalServicesCost +
+        costs.totalClientPartsCost + costs.totalClientServicesCost +
+        costs.totalLeaseRevenue + costs.grandTotalCompanyCost > 0 && (
+        <>
+          <SectionTitle icon='money'>Financial Summary</SectionTitle>
+          <div className='bg-cream border border-hairline rounded-lg p-4 mb-6'>
+            <div className='grid grid-cols-3 gap-4 mb-4'>
+              <FinancialCard label='Visit Fees' icon='location' value={formatCurrencyEn(costs.totalVisitFees)} accent='amber' />
+              <FinancialCard label='Parts (Company)' icon='package' value={formatCurrencyEn(costs.totalPartsCost)} accent='crimson' />
+              <FinancialCard label='Services (Company)' icon='wrench' value={formatCurrencyEn(costs.totalServicesCost)} accent='crimson' />
+            </div>
+            {(costs.totalClientPartsCost > 0 || costs.totalClientServicesCost > 0) && (
+              <div className='grid grid-cols-2 gap-4 mb-4 pt-4 border-t border-hairline'>
+                <FinancialCard label='Parts (Client)' icon='package' value={formatCurrencyEn(costs.totalClientPartsCost)} accent='blue' />
+                <FinancialCard label='Services (Client)' icon='wrench' value={formatCurrencyEn(costs.totalClientServicesCost)} accent='blue' />
+              </div>
+            )}
+            <div className='grid grid-cols-2 gap-4 pt-4 border-t-2 border-primary mt-4'>
+              <FinancialCard label='Rental Revenue' icon='coffee' value={formatCurrencyEn(costs.totalLeaseRevenue)} accent='green' />
+              <FinancialCard label='Company Net Cost' icon='money' value={formatCurrencyEn(costs.grandTotalCompanyCost)} accent='crimson' />
+            </div>
           </div>
-        )}
-        <div className='grid grid-cols-2 gap-4 pt-4 border-t-2 border-primary mt-4'>
-          <FinancialCard label='Rental Revenue' icon='coffee' value={formatCurrencyEn(costs.totalLeaseRevenue)} accent='green' />
-          <FinancialCard label='Company Net Cost' icon='money' value={formatCurrencyEn(costs.grandTotalCompanyCost)} accent='crimson' />
-        </div>
-      </div>
+        </>
+      )}
 
       {/* Parts & Services breakdowns */}
       {parts.length > 0 && (
@@ -319,42 +332,50 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
         </>
       )}
 
-      {/* Visit zones */}
-      <SectionTitle icon='location'>Visit Zone Fees</SectionTitle>
-      <div className='grid grid-cols-3 gap-3 mb-6'>
-        {zones.map((z) => (
-          <div key={z.zone} className='bg-white border border-hairline rounded-lg p-3 text-center'>
-            <div className='text-xs text-latte uppercase font-semibold'>{z.label}</div>
-            <div className='text-sm font-bold text-text mt-1'>{z.visits} visits</div>
-            <div className='text-xs text-latte'>{formatCurrencyEn(z.total)}</div>
+      {/* Visit zones — zero-visit zone cards are dropped (D-07); section vanishes when none survive (D-04) */}
+      {visitedZones.length > 0 && (
+        <>
+          <SectionTitle icon='location'>Visit Zone Fees</SectionTitle>
+          <div className='grid grid-cols-3 gap-3 mb-6'>
+            {visitedZones.map((z) => (
+              <div key={z.zone} className='bg-white border border-hairline rounded-lg p-3 text-center'>
+                <div className='text-xs text-latte uppercase font-semibold'>{z.label}</div>
+                <div className='text-sm font-bold text-text mt-1'>{z.visits} visits</div>
+                <div className='text-xs text-latte'>{formatCurrencyEn(z.total)}</div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
 
-      {/* Technicians */}
-      <SectionTitle icon='user'>Technician Performance</SectionTitle>
-      <table className='w-full text-xs border border-hairline mb-6'>
-        <thead className='bg-cream text-latte uppercase'>
-          <tr>
-            <th className='text-start px-3 py-2'>Technician</th>
-            <th className='text-end px-3 py-2'>Visits</th>
-            <th className='text-end px-3 py-2'>Rating</th>
-            <th className='text-end px-3 py-2'>Parts Used</th>
-            <th className='text-end px-3 py-2'>Resolved</th>
-          </tr>
-        </thead>
-        <tbody>
-          {techs.map((t) => (
-            <tr key={t.name} className='border-b border-hairline'>
-              <td className='px-3 py-2 text-text font-medium'>{t.name}</td>
-              <td className='px-3 py-2 text-end'>{t.visits}</td>
-              <td className='px-3 py-2 text-end'>{t.avgRating > 0 ? `${t.avgRating}/5` : "-"}</td>
-              <td className='px-3 py-2 text-end'>{t.partsUsed}</td>
-              <td className='px-3 py-2 text-end'>{t.problemsResolved}/{t.totalProblems}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {/* Technicians — section vanishes when no technician rows survive (D-07) */}
+      {meaningfulTechs.length > 0 && (
+        <>
+          <SectionTitle icon='user'>Technician Performance</SectionTitle>
+          <table className='w-full text-xs border border-hairline mb-6'>
+            <thead className='bg-cream text-latte uppercase'>
+              <tr>
+                <th className='text-start px-3 py-2'>Technician</th>
+                <th className='text-end px-3 py-2'>Visits</th>
+                <th className='text-end px-3 py-2'>Rating</th>
+                <th className='text-end px-3 py-2'>Parts Used</th>
+                <th className='text-end px-3 py-2'>Resolved</th>
+              </tr>
+            </thead>
+            <tbody>
+              {meaningfulTechs.map((t) => (
+                <tr key={t.name} className='border-b border-hairline'>
+                  <td className='px-3 py-2 text-text font-medium'>{t.name}</td>
+                  <td className='px-3 py-2 text-end'>{t.visits}</td>
+                  <td className='px-3 py-2 text-end'>{t.avgRating > 0 ? `${t.avgRating}/5` : NO_DATA_LABEL}</td>
+                  <td className='px-3 py-2 text-end'>{t.partsUsed}</td>
+                  <td className='px-3 py-2 text-end'>{t.problemsResolved}/{t.totalProblems}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
 
       {/* Top problems */}
       {problems.length > 0 && (
@@ -373,11 +394,15 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
       {/* Logistics Operations */}
       <LogisticsReportSection operations={logisticsOperations ?? []} />
 
-      {/* Maintenance history */}
-      <SectionTitle icon='doc'>Maintenance Log</SectionTitle>
-      {reportBranch.maintenanceHistory.map((record) => (
-        <PrintRecordCard key={record.id} record={record} />
-      ))}
+      {/* Maintenance history — keeps every record row (D-08); section vanishes when empty (D-04) */}
+      {reportBranch.maintenanceHistory.length > 0 && (
+        <>
+          <SectionTitle icon='doc'>Maintenance Log</SectionTitle>
+          {reportBranch.maintenanceHistory.map((record) => (
+            <PrintRecordCard key={record.id} record={record} />
+          ))}
+        </>
+      )}
 
       {/* Footer */}
       <div className='mt-12 pt-4 border-t border-hairline text-center text-[10px] text-latte'>
@@ -423,6 +448,12 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, log
 
   const companyParts = useMemo(() => Array.from<AggregatedItem>(costs.parts.values()), [costs.parts]);
   const companyServices = useMemo(() => Array.from<AggregatedItem>(costs.services.values()), [costs.services]);
+  // getTechnicianSummary always emits a row (falling back to "Unknown" for
+  // blank names) — drop rows with no real technician or zero visits (D-07).
+  const meaningfulTechs = techs.filter((t) => t.name !== "Unknown" && t.visits > 0);
+  // getVisitZoneBreakdown returns every configured zone (visits 0 when
+  // unused) — only visited zones are meaningful (D-07).
+  const visitedZones = zones.filter((z) => z.visits > 0);
 
   return (
     <div dir="ltr" className='internal-report-page font-sans text-text bg-white w-full max-w-[210mm] mx-auto p-8'>
@@ -451,25 +482,31 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, log
         <FinancialCard label='Net Cost' icon='money' value={formatCurrencyEn(costs.grandTotalCompanyCost)} accent='crimson' />
       </div>
 
-      {/* Financial Summary */}
-      <SectionTitle icon='money'>Financial Summary</SectionTitle>
-      <div className='bg-cream border border-hairline rounded-lg p-4 mb-6'>
-        <div className='grid grid-cols-3 gap-4 mb-4'>
-          <FinancialCard label='Visit Fees' icon='location' value={formatCurrencyEn(costs.totalVisitFees)} accent='amber' />
-          <FinancialCard label='Parts (Company)' icon='package' value={formatCurrencyEn(costs.totalPartsCost)} accent='crimson' />
-          <FinancialCard label='Services (Company)' icon='wrench' value={formatCurrencyEn(costs.totalServicesCost)} accent='crimson' />
-        </div>
-        {(costs.totalClientPartsCost > 0 || costs.totalClientServicesCost > 0) && (
-          <div className='grid grid-cols-2 gap-4 mb-4 pt-4 border-t border-hairline'>
-            <FinancialCard label='Parts (Client)' icon='package' value={formatCurrencyEn(costs.totalClientPartsCost)} accent='blue' />
-            <FinancialCard label='Services (Client)' icon='wrench' value={formatCurrencyEn(costs.totalClientServicesCost)} accent='blue' />
+      {/* Financial Summary — omitted entirely when every figure is zero (D-11) */}
+      {costs.totalVisitFees + costs.totalPartsCost + costs.totalServicesCost +
+        costs.totalClientPartsCost + costs.totalClientServicesCost +
+        costs.totalLeaseRevenue + costs.grandTotalCompanyCost > 0 && (
+        <>
+          <SectionTitle icon='money'>Financial Summary</SectionTitle>
+          <div className='bg-cream border border-hairline rounded-lg p-4 mb-6'>
+            <div className='grid grid-cols-3 gap-4 mb-4'>
+              <FinancialCard label='Visit Fees' icon='location' value={formatCurrencyEn(costs.totalVisitFees)} accent='amber' />
+              <FinancialCard label='Parts (Company)' icon='package' value={formatCurrencyEn(costs.totalPartsCost)} accent='crimson' />
+              <FinancialCard label='Services (Company)' icon='wrench' value={formatCurrencyEn(costs.totalServicesCost)} accent='crimson' />
+            </div>
+            {(costs.totalClientPartsCost > 0 || costs.totalClientServicesCost > 0) && (
+              <div className='grid grid-cols-2 gap-4 mb-4 pt-4 border-t border-hairline'>
+                <FinancialCard label='Parts (Client)' icon='package' value={formatCurrencyEn(costs.totalClientPartsCost)} accent='blue' />
+                <FinancialCard label='Services (Client)' icon='wrench' value={formatCurrencyEn(costs.totalClientServicesCost)} accent='blue' />
+              </div>
+            )}
+            <div className='grid grid-cols-2 gap-4 pt-4 border-t-2 border-primary mt-4'>
+              <FinancialCard label='Rental Revenue' icon='coffee' value={formatCurrencyEn(costs.totalLeaseRevenue)} accent='green' />
+              <FinancialCard label='Company Net Cost' icon='money' value={formatCurrencyEn(costs.grandTotalCompanyCost)} accent='crimson' />
+            </div>
           </div>
-        )}
-        <div className='grid grid-cols-2 gap-4 pt-4 border-t-2 border-primary mt-4'>
-          <FinancialCard label='Rental Revenue' icon='coffee' value={formatCurrencyEn(costs.totalLeaseRevenue)} accent='green' />
-          <FinancialCard label='Company Net Cost' icon='money' value={formatCurrencyEn(costs.grandTotalCompanyCost)} accent='crimson' />
-        </div>
-      </div>
+        </>
+      )}
 
       {/* Parts & Services breakdowns */}
       {companyParts.length > 0 && (
@@ -549,7 +586,7 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, log
                   <td className='px-3 py-2 text-end'>{formatCurrencyEn(bc.totalPartsCost)}</td>
                   <td className='px-3 py-2 text-end'>{formatCurrencyEn(bc.totalServicesCost)}</td>
                   <td className='px-3 py-2 text-end font-bold'>{formatCurrencyEn(bc.grandTotalCompanyCost)}</td>
-                  <td className='px-3 py-2 text-end text-latte'>—</td>
+                  <td className='px-3 py-2 text-end text-latte'>{NO_DATA_LABEL}</td>
                 </tr>
               ))}
             </tbody>
@@ -564,7 +601,7 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, log
                 <td className='px-3 py-2 text-end text-primary'>
                   {(() => {
                     const logC = aggregateLogisticsCosts(logisticsOperations ?? []);
-                    return logC.totalLogisticsCost > 0 ? formatCurrencyEn(logC.totalLogisticsCost) : '—';
+                    return logC.totalLogisticsCost > 0 ? formatCurrencyEn(logC.totalLogisticsCost) : NO_DATA_LABEL;
                   })()}
                 </td>
               </tr>
@@ -573,42 +610,50 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, log
         </>
       )}
 
-      {/* Visit zones */}
-      <SectionTitle icon='location'>Visit Zone Fees</SectionTitle>
-      <div className='grid grid-cols-3 gap-3 mb-6'>
-        {zones.map((z) => (
-          <div key={z.zone} className='bg-white border border-hairline rounded-lg p-3 text-center'>
-            <div className='text-xs text-latte uppercase font-semibold'>{z.label}</div>
-            <div className='text-sm font-bold text-text mt-1'>{z.visits} visits</div>
-            <div className='text-xs text-latte'>{formatCurrencyEn(z.total)}</div>
+      {/* Visit zones — zero-visit zone cards are dropped (D-07); section vanishes when none survive (D-04) */}
+      {visitedZones.length > 0 && (
+        <>
+          <SectionTitle icon='location'>Visit Zone Fees</SectionTitle>
+          <div className='grid grid-cols-3 gap-3 mb-6'>
+            {visitedZones.map((z) => (
+              <div key={z.zone} className='bg-white border border-hairline rounded-lg p-3 text-center'>
+                <div className='text-xs text-latte uppercase font-semibold'>{z.label}</div>
+                <div className='text-sm font-bold text-text mt-1'>{z.visits} visits</div>
+                <div className='text-xs text-latte'>{formatCurrencyEn(z.total)}</div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
 
-      {/* Technicians */}
-      <SectionTitle icon='user'>Technician Performance</SectionTitle>
-      <table className='w-full text-xs border border-hairline mb-6'>
-        <thead className='bg-cream text-latte uppercase'>
-          <tr>
-            <th className='text-start px-3 py-2'>Technician</th>
-            <th className='text-end px-3 py-2'>Visits</th>
-            <th className='text-end px-3 py-2'>Rating</th>
-            <th className='text-end px-3 py-2'>Parts Used</th>
-            <th className='text-end px-3 py-2'>Resolved</th>
-          </tr>
-        </thead>
-        <tbody>
-          {techs.map((t) => (
-            <tr key={t.name} className='border-b border-hairline'>
-              <td className='px-3 py-2 text-text font-medium'>{t.name}</td>
-              <td className='px-3 py-2 text-end'>{t.visits}</td>
-              <td className='px-3 py-2 text-end'>{t.avgRating > 0 ? `${t.avgRating}/5` : "-"}</td>
-              <td className='px-3 py-2 text-end'>{t.partsUsed}</td>
-              <td className='px-3 py-2 text-end'>{t.problemsResolved}/{t.totalProblems}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {/* Technicians — section vanishes when no technician rows survive (D-07) */}
+      {meaningfulTechs.length > 0 && (
+        <>
+          <SectionTitle icon='user'>Technician Performance</SectionTitle>
+          <table className='w-full text-xs border border-hairline mb-6'>
+            <thead className='bg-cream text-latte uppercase'>
+              <tr>
+                <th className='text-start px-3 py-2'>Technician</th>
+                <th className='text-end px-3 py-2'>Visits</th>
+                <th className='text-end px-3 py-2'>Rating</th>
+                <th className='text-end px-3 py-2'>Parts Used</th>
+                <th className='text-end px-3 py-2'>Resolved</th>
+              </tr>
+            </thead>
+            <tbody>
+              {meaningfulTechs.map((t) => (
+                <tr key={t.name} className='border-b border-hairline'>
+                  <td className='px-3 py-2 text-text font-medium'>{t.name}</td>
+                  <td className='px-3 py-2 text-end'>{t.visits}</td>
+                  <td className='px-3 py-2 text-end'>{t.avgRating > 0 ? `${t.avgRating}/5` : NO_DATA_LABEL}</td>
+                  <td className='px-3 py-2 text-end'>{t.partsUsed}</td>
+                  <td className='px-3 py-2 text-end'>{t.problemsResolved}/{t.totalProblems}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
 
       {/* Top problems */}
       {problems.length > 0 && (
