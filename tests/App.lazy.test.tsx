@@ -30,6 +30,9 @@ vi.mock('../src/views/MaintenanceEditView', () => ({
 vi.mock('../src/views/UserAccessView', () => ({
   default: () => <div data-testid="user-access-view">User Access View</div>,
 }));
+vi.mock('../src/views/SettingsView', () => ({
+  default: () => <div data-testid="settings-view">Settings View</div>,
+}));
 
 // Mock Sidebar (eager import, not lazy)
 vi.mock('../src/views/Sidebar', () => ({
@@ -193,6 +196,13 @@ describe('App — Lazy Loading & Suspense', () => {
       renderApp('/companies/new');
       await waitFor(() => {
         expect(screen.getByTestId('form-view')).toBeInTheDocument();
+      });
+    });
+
+    it('renders the settings view at /settings', async () => {
+      renderApp('/settings');
+      await waitFor(() => {
+        expect(screen.getByTestId('settings-view')).toBeInTheDocument();
       });
     });
   });

@@ -16,7 +16,7 @@ const BaristaDetailsView = lazy(() => import("./src/views/BaristaDetailsView"));
 const MaintenanceEditView = lazy(() => import("./src/views/MaintenanceEditView"));
 const UserAccessView = lazy(() => import("./src/views/UserAccessView"));
 const GlobalRecordsView = lazy(() => import("./src/views/GlobalRecordsView"));
-const CompanyMachinesSettings = lazy(() => import("./src/views/CompanyMachinesSettings"));
+const SettingsView = lazy(() => import("./src/views/SettingsView"));
 const LogisticsTimelineView = lazy(() => import("./src/views/LogisticsTimelineView"));
 
 import type { FormData, MaintenanceRecord } from "./types";
@@ -67,6 +67,7 @@ const VIEW_TITLE_MAP: Partial<Record<ViewKey, keyof import('./utils/arabicTransl
   baristas: 'baristaPerformance',
   'barista-details': 'baristaPerformance',
   technicians: 'accessMgmt',
+  machines: 'settings',
   history: 'history',
   'maintenance-edit': 'details',
   'all-records': 'history',
@@ -741,7 +742,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
       case "machines":
         return (
           <Suspense fallback={<LoadingState inline />}>
-            <CompanyMachinesSettings />
+            <SettingsView />
           </Suspense>
         );
       case "logistics-timeline":

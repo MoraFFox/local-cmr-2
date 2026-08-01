@@ -454,6 +454,7 @@ export const ar = {
       details: 'تفاصيل السجل',
       baristaPerformance: 'أداء الباريستا',
       accessMgmt: 'إدارة المستخدمين',
+      settings: 'الإعدادات',
       history: 'سجل عمليات الإرسال',
       form: 'النموذج',
     },

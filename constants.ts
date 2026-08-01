@@ -27,7 +27,7 @@ export const NAV_ITEMS: NavItem[] = [
   { key: "technicians", path: "/users", label: "إدارة الفنيين", iconName: "UserGroupIcon", inSidebar: true },
   { key: "all-records", path: "/records", label: "كل السجلات", iconName: "DocumentTextIcon", inSidebar: true },
   { key: "form", path: "/companies/new", label: "نموذج جديد", iconName: "DocumentTextIcon", inSidebar: true },
-  { key: "machines", path: "/settings/machines", label: "إدارة الماكينات", iconName: "Cog6ToothIcon", inSidebar: true },
+  { key: "machines", path: "/settings", label: "الإعدادات", iconName: "Cog6ToothIcon", inSidebar: true },
   { key: "print", path: "/print", label: "طباعة", iconName: "DocumentTextIcon", inSidebar: false },
 ];
 
@@ -37,7 +37,8 @@ export const pathToView = (pathname: string): ViewKey => {
   if (pathname.startsWith("/baristas/")) return "barista-details";
   if (pathname === "/baristas") return "baristas";
   if (pathname === "/users") return "technicians";
-  if (pathname === "/settings/machines") return "machines";
+  // The old /settings/machines URL is kept working for existing bookmarks.
+  if (pathname === "/settings" || pathname === "/settings/machines") return "machines";
   if (pathname === "/companies/new") return "form";
   if (pathname === "/print") return "print";
   if (/^\/companies\/[^/]+\/maintenance$/.test(pathname)) return "maintenance-edit";

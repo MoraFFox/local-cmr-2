@@ -442,6 +442,7 @@ export const en: Translations = {
       details: 'Record Details',
       baristaPerformance: 'Barista Performance',
       accessMgmt: 'User Management',
+      settings: 'Settings',
       history: 'Submission History',
       form: 'Form',
     },
