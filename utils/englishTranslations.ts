@@ -375,6 +375,7 @@ export const en: Translations = {
       draftWarehouse: 'Warehouse',
       draftClientBaristas: 'Client baristas',
       draftAcquisition: 'Machine acquisition',
+      draftDailyLeaseCost: 'Daily cost',
       draftOwnershipLeased: 'Leased',
       draftOwnershipConsumption: 'Consumption-based',
       draftOwnershipBought: 'Owned',

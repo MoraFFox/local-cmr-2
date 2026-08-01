@@ -376,6 +376,7 @@ export const ar = {
       draftWarehouse: 'المخزن',
       draftClientBaristas: 'باريستا العميل',
       draftAcquisition: 'اقتناء الماكينات',
+      draftDailyLeaseCost: 'التكلفة اليومية',
       draftOwnershipLeased: 'إيجار',
       draftOwnershipConsumption: 'مقابل الاستهلاك',
       draftOwnershipBought: 'مملوكة',

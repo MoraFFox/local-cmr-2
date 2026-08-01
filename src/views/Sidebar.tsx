@@ -72,10 +72,10 @@ interface SidebarContentProps {
 }
 
 const utilityButtonClass = (colorClass: string) =>
-  `w-full flex items-center gap-3 p-3 rounded-md text-sm font-semibold border transition-colors ${colorClass}`;
+  `w-full min-h-[44px] flex items-center gap-3 p-3 rounded-lg text-sm font-semibold border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 ${colorClass}`;
 
 const collapsedIconButtonClass =
-  "w-10 h-10 min-w-10 mx-auto p-0 flex items-center justify-center shrink-0 rounded-md";
+  "w-11 h-11 min-w-[44px] min-h-[44px] mx-auto p-0 flex items-center justify-center shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60";
 
 const collapsibleButtonClass = (colorClass: string, isSidebarExpanded: boolean) =>
   isSidebarExpanded
@@ -121,7 +121,7 @@ const SidebarContent = React.memo<SidebarContentProps>(({
   setCurrentStep,
   setView,
 }: SidebarContentProps) => {
-  const { t, dir } = useLanguage();
+  const { t } = useLanguage();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [isSheetsSyncing, setIsSheetsSyncing] = useState(false);
@@ -156,7 +156,9 @@ const SidebarContent = React.memo<SidebarContentProps>(({
 
   // Collapsed rail tooltips open outward from the sidebar edge: right in LTR,
   // left in RTL.
-  const tooltipPlacement = dir === "rtl" ? "start" : "end";
+  // The sidebar lives at logical `start-0`; the tooltip must always open
+  // toward its logical outside edge (`end`) in both RTL and LTR.
+  const tooltipPlacement = "end" as const;
 
   return (
     <>
@@ -169,7 +171,7 @@ const SidebarContent = React.memo<SidebarContentProps>(({
           <button
             type="button"
             onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
-            className={`absolute top-1/2 -translate-y-1/2 flex items-center justify-center w-10 h-10 rounded-md text-muted-chrome hover:text-on-chrome hover:bg-espresso-light/30 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors ${
+            className={`absolute top-1/2 -translate-y-1/2 flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] rounded-lg text-muted-chrome border border-transparent hover:text-on-chrome hover:bg-espresso-light/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 transition-colors ${
               isSidebarExpanded ? "start-2" : "start-1/2 ltr:-translate-x-1/2 rtl:translate-x-1/2"
             }`}
             aria-expanded={isSidebarExpanded}
@@ -218,7 +220,7 @@ const SidebarContent = React.memo<SidebarContentProps>(({
                     handleAddNew();
                   }
                 }}
-                className={`btn-primary !w-10 !h-10 !min-w-10 !min-h-0 !p-0 flex items-center justify-center gap-2 text-sm font-bold ${collapsedIconButtonClass}`}
+                className={`btn-primary !w-11 !h-11 !min-w-[44px] !min-h-[44px] !p-0 flex items-center justify-center gap-2 text-sm font-bold ${collapsedIconButtonClass}`}
 
                 aria-label={s.addNewCompany}
                 data-testid="add-company-button"
@@ -233,23 +235,23 @@ const SidebarContent = React.memo<SidebarContentProps>(({
           const Icon = ICONS[item.iconName];
           const label = s[item.labelKey];
           const isActive = isSidebarItemActive(item, view as ViewKey, pathname ?? "");
-          return (
+          const navButton = (
             <button
               key={item.key}
               type="button"
               onClick={() => handleViewChange(item.key as SidebarNavView)}
               className={`group relative flex items-center text-sm font-medium transition-all duration-300 overflow-hidden ${
                 isSidebarExpanded
-                  ? "w-full gap-3 p-2.5 rounded-lg"
+                  ? "w-full min-h-[44px] gap-3 p-2.5 rounded-lg"
                   : `${collapsedIconButtonClass} gap-3`
               } ${
                 isActive
-                  ? "text-on-chrome ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-copper-500/15 to-transparent ltr:shadow-[inset_-3px_0_0_0_#B87333] rtl:shadow-[inset_3px_0_0_0_#B87333]"
+                  ? "text-on-chrome bg-primary/15 border border-primary/30 ltr:shadow-[inset_-3px_0_0_0_#B87333] rtl:shadow-[inset_3px_0_0_0_#B87333]"
                   : "text-muted-chrome hover:bg-espresso-light/40 hover:text-on-chrome"
               }`}
               aria-current={isActive ? "page" : undefined}
               aria-label={label}
-              title={label}
+              title={isSidebarExpanded ? label : undefined}
             >
               {!isActive && (
                 <div className="absolute inset-0 ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-cream/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
@@ -265,11 +267,16 @@ const SidebarContent = React.memo<SidebarContentProps>(({
               <span
                 className={`truncate transition-all duration-300 ${
                   isActive ? "font-bold tracking-wide" : ""
-                } ${!isSidebarExpanded ? "lg:hidden" : ""}`}
+                } ${!isSidebarExpanded ? "hidden" : ""}`}
               >
                 {label}
               </span>
             </button>
+          );
+          return isSidebarExpanded ? navButton : (
+            <SidebarTooltip key={item.key} label={label} placement={tooltipPlacement} triggerClassName="w-full justify-center">
+              {navButton}
+            </SidebarTooltip>
           );
         })}
 
@@ -301,11 +308,12 @@ const SidebarContent = React.memo<SidebarContentProps>(({
       </nav>
 
       {/* ── Pinned footer: utilities ── */}
-      <div className="p-2 shrink-0 space-y-2">
-        <div className="brass-hairline mx-2" />
+      <div className="p-2 pb-3 shrink-0 space-y-2 max-h-[50vh] overflow-y-auto custom-scrollbar" role="group" aria-label={s.utilities}>
+        <div className="brass-hairline w-full" />
 
         {drafts.length > 0 && !isSidebarExpanded && (
-          <CompactDrafts
+          <SidebarTooltip label={`${s.openDrafts} (${drafts.length})`} placement={tooltipPlacement} triggerClassName="w-full justify-center">
+            <CompactDrafts
             drafts={drafts}
             currentDraftId={currentDraftId}
             openLabel={s.openDrafts}
@@ -319,6 +327,7 @@ const SidebarContent = React.memo<SidebarContentProps>(({
             draftWarehouseLabel={s.draftWarehouse}
             draftClientBaristasLabel={s.draftClientBaristas}
             draftAcquisitionLabel={s.draftAcquisition}
+            draftDailyLeaseCostLabel={s.draftDailyLeaseCost}
             draftOwnershipLabels={{
               leased: s.draftOwnershipLeased,
               consumption: s.draftOwnershipConsumption,
@@ -353,9 +362,16 @@ const SidebarContent = React.memo<SidebarContentProps>(({
             onLoad={handleLoadDraft}
             onDelete={handleDeleteDraft}
           />
+          </SidebarTooltip>
         )}
 
-        <ThemeToggle theme={theme} toggleTheme={toggleTheme} expanded={isSidebarExpanded} />
+        {isSidebarExpanded ? (
+          <ThemeToggle theme={theme} toggleTheme={toggleTheme} expanded />
+        ) : (
+          <SidebarTooltip label={theme === "light" ? s.switchToDark : s.switchToLight} placement={tooltipPlacement} triggerClassName="w-full justify-center">
+            <ThemeToggle theme={theme} toggleTheme={toggleTheme} expanded={false} />
+          </SidebarTooltip>
+        )}
 
         {toggleLanguage && language && (
           isSidebarExpanded ? (
@@ -429,7 +445,7 @@ const SidebarContent = React.memo<SidebarContentProps>(({
               className={utilityButtonClass("border-ember-500/30 bg-ember-500/10 text-ember-300 hover:bg-ember-500/20")}
               title={s.logout}
             >
-              <ArrowLeftOnRectangleIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
+              <ArrowLeftOnRectangleIcon className="h-5 w-5 shrink-0 rtl:-scale-x-100" aria-hidden="true" />
               <span className="truncate">{s.logout}</span>
             </button>
           ) : (
@@ -440,7 +456,7 @@ const SidebarContent = React.memo<SidebarContentProps>(({
                 className={collapsibleButtonClass("border-ember-500/30 bg-ember-500/10 text-ember-300 hover:bg-ember-500/20", isSidebarExpanded)}
                 aria-label={s.logout}
               >
-                <ArrowLeftOnRectangleIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
+                <ArrowLeftOnRectangleIcon className="h-5 w-5 shrink-0 rtl:-scale-x-100" aria-hidden="true" />
               </button>
             </SidebarTooltip>
           )
@@ -494,19 +510,22 @@ const DraftRow: React.FC<DraftRowProps> = ({ draft, current, locale, deleteDraft
   const { t } = useLanguage();
   return (
     <div
-      onClick={onLoad}
-      className={`group flex items-center justify-between p-2 rounded-md text-sm cursor-pointer transition-colors ${
+      className={`group flex items-center justify-between rounded-md text-sm transition-colors ${
         current ? "bg-espresso-light border-e-2 border-primary text-on-chrome" : "text-muted-chrome hover:bg-espresso-light/40 hover:text-on-chrome"
       }`}
     >
-      <div className="flex flex-col truncate min-w-0">
+      <button
+        type="button"
+        onClick={onLoad}
+        className="flex min-h-[44px] min-w-0 flex-1 flex-col items-start truncate p-2 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+      >
         <span className="font-medium truncate">{draft.formData.companyName || t.admin.sidebar.untitledCompany}</span>
         <span className="stamp-id opacity-70 text-xs">{formatDraftDate(draft.timestamp, locale)}</span>
-      </div>
+      </button>
       <button
         type="button"
         onClick={(e) => onDelete(e)}
-        className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-1 text-muted-chrome hover:text-ember-400 transition-all"
+        className="min-w-[44px] min-h-[44px] flex items-center justify-center opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 focus-visible:opacity-100 text-muted-chrome hover:text-ember-400 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
         title={deleteDraftLabel}
         aria-label={deleteDraftLabel}
       >
@@ -518,6 +537,12 @@ const DraftRow: React.FC<DraftRowProps> = ({ draft, current, locale, deleteDraft
 
 interface CompactDraftsProps {
   drafts: Draft[];
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  onMouseEnter?: React.MouseEventHandler<HTMLButtonElement>;
+  onMouseLeave?: React.MouseEventHandler<HTMLButtonElement>;
+  onFocus?: React.FocusEventHandler<HTMLButtonElement>;
+  onBlur?: React.FocusEventHandler<HTMLButtonElement>;
+  'aria-describedby'?: string;
   currentDraftId: string | null;
   openLabel: string;
   closeLabel: string;
@@ -530,6 +555,7 @@ interface CompactDraftsProps {
   draftWarehouseLabel: string;
   draftClientBaristasLabel: string;
   draftAcquisitionLabel: string;
+  draftDailyLeaseCostLabel: string;
   draftOwnershipLabels: {
     leased: string;
     consumption: string;
@@ -573,6 +599,12 @@ interface CompactDraftsProps {
 const CompactDrafts: React.FC<CompactDraftsProps> = ({
   drafts,
   currentDraftId,
+  onClick,
+  onMouseEnter,
+  onMouseLeave,
+  onFocus,
+  onBlur,
+  'aria-describedby': ariaDescribedBy,
   openLabel,
   closeLabel,
   draftsLabel,
@@ -584,6 +616,7 @@ const CompactDrafts: React.FC<CompactDraftsProps> = ({
   draftWarehouseLabel,
   draftClientBaristasLabel,
   draftAcquisitionLabel,
+  draftDailyLeaseCostLabel,
   draftOwnershipLabels,
   draftNotesLabel,
   draftCoffeeLabel,
@@ -619,16 +652,27 @@ const CompactDrafts: React.FC<CompactDraftsProps> = ({
     <>
       <button
         type="button"
-        onClick={() => setIsOpen(true)}
-        className={`${collapsedIconButtonClass} relative text-sm font-semibold border border-hairline/50 bg-cream/50 dark:bg-espresso-light/30 text-latte hover:text-on-chrome hover:bg-espresso-light/40 transition-colors`}
-        aria-label={isOpen ? closeLabel : openLabel}
+        onClick={(event) => {
+          setIsOpen((open) => !open);
+          onClick?.(event);
+        }}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        className={`${collapsedIconButtonClass} relative border border-hairline/50 bg-cream/50 dark:bg-espresso-light/30 text-latte hover:text-on-chrome hover:bg-espresso-light/40 transition-colors`}
+        aria-label={isOpen ? closeLabel : `${openLabel} (${drafts.length})`}
+        aria-describedby={ariaDescribedBy}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        title={openLabel}
       >
         <FolderOpenIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
-        <span className="absolute -top-1 -end-1 min-w-[1.25rem] h-5 px-1 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center">
-          {drafts.length}
+        <span
+          aria-hidden="true"
+          data-testid="draft-count-badge"
+          className="absolute -top-1 -end-1 min-w-5 h-5 px-1 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center leading-none"
+        >
+          {drafts.length > 99 ? "99+" : drafts.length}
         </span>
       </button>
 
@@ -669,17 +713,23 @@ const CompactDrafts: React.FC<CompactDraftsProps> = ({
               ...(draft.formData.warehouse?.contacts ?? []).map((contact) => contact.name),
             ].filter(Boolean) as string[];
             const clientBaristaNames = [
-              ...(draft.formData.clientBaristas ?? []).map((barista) => [barista.name, barista.phone].filter(Boolean).join(" · ")),
+              ...(draft.formData.clientBaristas ?? []).map((barista) => [barista.name, barista.phone, barista.notes].filter(Boolean).join(" · ")),
               ...(draft.formData.branches ?? []).flatMap((branch) =>
-                (branch.clientBaristas ?? []).map((barista) => [barista.name, barista.phone].filter(Boolean).join(" · ")),
+                (branch.clientBaristas ?? []).map((barista) => [barista.name, barista.phone, barista.notes].filter(Boolean).join(" · ")),
               ),
             ];
+            const formatAcquisition = (ownershipType?: "leased" | "consumption" | "bought", dailyLeaseCost?: number) => [
+              ownershipType === "leased" ? draftOwnershipLabels.leased : undefined,
+              ownershipType === "consumption" ? draftOwnershipLabels.consumption : undefined,
+              ownershipType === "bought" ? draftOwnershipLabels.bought : undefined,
+              dailyLeaseCost != null
+                ? `${draftDailyLeaseCostLabel}: ${new Intl.NumberFormat(locale === "ar" ? "ar-EG" : "en-US", { style: "currency", currency: "EGP" }).format(dailyLeaseCost)}`
+                : undefined,
+            ].filter(Boolean).join(" · ");
             const acquisitionDetails = [
-              draft.formData.machineOwnershipType === "leased" ? draftOwnershipLabels.leased : undefined,
-              draft.formData.machineOwnershipType === "consumption" ? draftOwnershipLabels.consumption : undefined,
-              draft.formData.machineOwnershipType === "bought" ? draftOwnershipLabels.bought : undefined,
-              draft.formData.dailyLeaseCost != null ? String(draft.formData.dailyLeaseCost) : undefined,
-            ].filter(Boolean) as string[];
+              formatAcquisition(draft.formData.machineOwnershipType, draft.formData.dailyLeaseCost),
+              ...(draft.formData.branches ?? []).map((branch) => formatAcquisition(branch.machineOwnershipType, branch.dailyLeaseCost)),
+            ].filter(Boolean);
             const notesDetails = [
               draft.formData.allowedMaintenanceTimes ? `${draftAllowedTimesLabel}: ${draft.formData.allowedMaintenanceTimes}` : undefined,
               draft.formData.coffeeConsumptionKg != null ? `${draftCoffeeLabel}: ${draft.formData.coffeeConsumptionKg}` : undefined,
@@ -687,13 +737,23 @@ const CompactDrafts: React.FC<CompactDraftsProps> = ({
             const maintenance = (draft.formData.maintenanceHistory?.length ?? 0) +
               (draft.formData.branches?.reduce((total, branch) => total + (branch.maintenanceHistory?.length ?? 0), 0) ?? 0);
             const branchNames = draft.formData.branches?.map((branch) =>
-              [branch.branchName || untitledLabel, branch.location].filter(Boolean).join(" · "),
+              [
+                branch.branchName || untitledLabel,
+                branch.location,
+                branch.email,
+                branch.taxNumber,
+              ].filter(Boolean).join(" · "),
             ) ?? [];
             const machineNames = [
               ...(draft.formData.machines ?? []).map((machine) =>
                 [
                   machine.machineName || machine.machineOption || untitledLabel,
                   machine.machineType,
+                  machine.machineOwnershipType === "leased" ? draftOwnershipLabels.leased :
+                    machine.machineOwnershipType === "consumption" ? draftOwnershipLabels.consumption : undefined,
+                  machine.dailyLeaseCost != null
+                    ? `${draftDailyLeaseCostLabel}: ${new Intl.NumberFormat(locale === "ar" ? "ar-EG" : "en-US", { style: "currency", currency: "EGP" }).format(machine.dailyLeaseCost)}`
+                    : undefined,
                   machine.machineOwner === "ours"
                     ? draftMachineStatusLabel.ours
                     : machine.machineOwner === "client"
@@ -706,6 +766,11 @@ const CompactDrafts: React.FC<CompactDraftsProps> = ({
                   [
                     machine.machineName || machine.machineOption || untitledLabel,
                     machine.machineType,
+                    machine.machineOwnershipType === "leased" ? draftOwnershipLabels.leased :
+                      machine.machineOwnershipType === "consumption" ? draftOwnershipLabels.consumption : undefined,
+                    machine.dailyLeaseCost != null
+                      ? `${draftDailyLeaseCostLabel}: ${new Intl.NumberFormat(locale === "ar" ? "ar-EG" : "en-US", { style: "currency", currency: "EGP" }).format(machine.dailyLeaseCost)}`
+                      : undefined,
                     machine.machineOwner === "ours"
                       ? draftMachineStatusLabel.ours
                       : machine.machineOwner === "client"
@@ -716,16 +781,16 @@ const CompactDrafts: React.FC<CompactDraftsProps> = ({
               ),
             ];
             const baristaNames = [
-              ...(draft.formData.baristas ?? []).map((barista) => [barista.name || untitledLabel, barista.phone].filter(Boolean).join(" · ")),
+              ...(draft.formData.baristas ?? []).map((barista) => [barista.name || untitledLabel, barista.phone, barista.notes].filter(Boolean).join(" · ")),
               ...(draft.formData.branches ?? []).flatMap((branch) =>
-                (branch.baristas ?? []).map((barista) => [barista.name || untitledLabel, barista.phone].filter(Boolean).join(" · ")),
+                (branch.baristas ?? []).map((barista) => [barista.name || untitledLabel, barista.phone, barista.notes].filter(Boolean).join(" · ")),
               ),
             ];
             const contactNames = [
-              ...(draft.formData.contacts ?? []).map((contact) => [contact.name || untitledLabel, contact.phoneNumbers?.map((phone) => phone.number).join(", ")].filter(Boolean).join(" · ")),
-              ...(draft.formData.warehouse?.contacts ?? []).map((contact) => [contact.name || untitledLabel, contact.phoneNumbers?.map((phone) => phone.number).join(", ")].filter(Boolean).join(" · ")),
+              ...(draft.formData.contacts ?? []).map((contact) => [contact.name || untitledLabel, contact.position, contact.customPosition, contact.email, contact.phoneNumbers?.map((phone) => phone.number).join(", ")].filter(Boolean).join(" · ")),
+              ...(draft.formData.warehouse?.contacts ?? []).map((contact) => [contact.name || untitledLabel, contact.position, contact.customPosition, contact.email, contact.phoneNumbers?.map((phone) => phone.number).join(", ")].filter(Boolean).join(" · ")),
               ...(draft.formData.branches ?? []).flatMap((branch) =>
-                (branch.contacts ?? []).map((contact) => [contact.name || untitledLabel, contact.phoneNumbers?.map((phone) => phone.number).join(", ")].filter(Boolean).join(" · ")),
+                (branch.contacts ?? []).map((contact) => [contact.name || untitledLabel, contact.position, contact.customPosition, contact.email, contact.phoneNumbers?.map((phone) => phone.number).join(", ")].filter(Boolean).join(" · ")),
               ),
             ];
             const maintenanceDates = [
@@ -768,7 +833,7 @@ const CompactDrafts: React.FC<CompactDraftsProps> = ({
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h3 className="truncate text-base font-bold text-primary dark:text-white">{companyName}</h3>
+                    <h3 className="break-words text-base font-bold text-primary dark:text-white">{companyName}</h3>
                     <p className="mt-1 text-xs text-latte/70 stamp-id">{draft.id}</p>
                   </div>
                   {currentDraftId === draft.id && (
@@ -781,23 +846,23 @@ const CompactDrafts: React.FC<CompactDraftsProps> = ({
                 <dl className="mt-3 grid gap-x-4 gap-y-2 text-sm sm:grid-cols-2">
                   <div className="min-w-0">
                     <dt className="text-xs text-latte/70">{draftCompanyLabel}</dt>
-                    <dd className="truncate text-latte">{companyName}</dd>
+                    <dd className="break-words text-latte">{companyName}</dd>
                   </div>
                   <div className="min-w-0">
                     <dt className="text-xs text-latte/70">{draftEmailLabel}</dt>
-                    <dd className="truncate text-latte" dir="ltr">{email}</dd>
+                    <dd className="break-words text-latte" dir="ltr">{email}</dd>
                   </div>
                   <div className="min-w-0">
                     <dt className="text-xs text-latte/70">{draftTaxLabel}</dt>
-                    <dd className="truncate text-latte">{taxNumber}</dd>
+                    <dd className="break-words whitespace-normal text-latte">{taxNumber}</dd>
                   </div>
                   <div className="min-w-0">
                     <dt className="text-xs text-latte/70">{draftLocationLabel}</dt>
-                    <dd className="truncate text-latte">{location}</dd>
+                    <dd className="break-words text-latte">{location}</dd>
                   </div>
                   <div className="min-w-0">
                     <dt className="text-xs text-latte/70">{draftMachineStatusTitle}</dt>
-                    <dd className="truncate text-latte">{machineStatus}</dd>
+                    <dd className="break-words whitespace-normal text-latte">{machineStatus}</dd>
                   </div>
                   <div>
                     <dt className="text-xs text-latte/70">{draftStepLabel}</dt>
@@ -830,7 +895,7 @@ const CompactDrafts: React.FC<CompactDraftsProps> = ({
                 </dl>
 
                 <details className="mt-4 rounded-lg border border-hairline/60 bg-cream/40 dark:bg-espresso-light/20">
-                  <summary className="cursor-pointer px-3 py-2 text-sm font-semibold text-primary dark:text-white">
+                  <summary className="flex min-h-[44px] cursor-pointer items-center px-3 py-2 text-sm font-semibold text-primary dark:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60">
                     {draftFullDetailsLabel}
                   </summary>
                   <div className="grid gap-3 border-t border-hairline/50 p-3 text-sm sm:grid-cols-2">
@@ -839,7 +904,7 @@ const CompactDrafts: React.FC<CompactDraftsProps> = ({
                         <h4 className="text-xs font-semibold text-latte/70">{label}</h4>
                         {values.length > 0 ? (
                           <ul className="mt-1 space-y-1 text-latte">
-                            {values.map((value, index) => <li key={`${String(label)}-${index}`} className="truncate">{value}</li>)}
+                            {values.map((value, index) => <li key={`${String(label)}-${index}`} className="break-words whitespace-normal">{value}</li>)}
                           </ul>
                         ) : (
                           <p className="mt-1 text-latte/60">{draftNoDetailsLabel}</p>
@@ -856,7 +921,7 @@ const CompactDrafts: React.FC<CompactDraftsProps> = ({
                       setIsOpen(false);
                       onLoad(draft);
                     }}
-                    className="btn-primary min-h-[44px] flex-1 sm:flex-none"
+                    className="btn-primary min-h-[44px] flex-1 sm:flex-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
                   >
                     {loadLabel}
                   </button>

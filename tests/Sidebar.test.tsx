@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, cleanup, within } from './testUtils';
+import { render, screen, fireEvent, waitFor, cleanup, within, act } from './testUtils';
 import SidebarContent from '../src/views/Sidebar';
 import { ToastProvider } from '../components/ToastContext';
 import { useLanguage } from '../utils/LanguageContext';
@@ -159,6 +159,9 @@ describe('Sidebar', () => {
     drafts[0].formData.branches = [{
       branchName: 'Downtown Branch',
       location: 'Nasr City',
+      machineOwnershipType: 'leased',
+      dailyLeaseCost: 125,
+      machines: [],
     } as FormData['branches'][number]];
     drafts[0].formData.machines = [{
       machineName: 'La Marzocco',
@@ -169,10 +172,10 @@ describe('Sidebar', () => {
     renderSidebar({ isSidebarExpanded: false, drafts, handleLoadDraft });
 
     const toggle = screen.getByRole('button', { name: /فتح المسودات/ });
-    expect(toggle).toHaveClass('w-10', 'h-10', 'min-w-10');
+    expect(toggle).toHaveClass('w-11', 'h-11', 'min-w-[44px]', 'min-h-[44px]');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
-    toggle.focus();
+    act(() => toggle.focus());
     fireEvent.click(toggle);
     const dialog = screen.getByRole('dialog', { name: 'المسودات' });
     expect(dialog).toBeInTheDocument();
@@ -188,6 +191,7 @@ describe('Sidebar', () => {
     fireEvent.click(fullDetails);
     expect(within(dialog).getByText('Downtown Branch · Nasr City')).toBeInTheDocument();
     expect(within(dialog).getByText('La Marzocco · Espresso · ماكينات ميدوز')).toBeInTheDocument();
+    expect(within(dialog).getByText(/إيجار · التكلفة اليومية/)).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: 'تحميل المسودة' })).toHaveLength(2);
 
     fireEvent.keyDown(document, { key: 'Escape' });
@@ -215,7 +219,7 @@ describe('Sidebar', () => {
     const controls = [
       screen.getByTestId('add-company-button'),
       screen.getByRole('button', { name: 'السجل' }),
-      screen.getByRole('button', { name: 'فتح المسودات' }),
+      screen.getByRole('button', { name: 'فتح المسودات (1)' }),
       screen.getByRole('button', { name: 'الوضع الليلي' }),
       screen.getByRole('button', { name: 'التبديل إلى الإنجليزية' }),
       screen.getByRole('button', { name: 'help' }),
@@ -224,18 +228,80 @@ describe('Sidebar', () => {
     ];
 
     controls.forEach((control) => {
-      expect(control).toHaveClass('w-10', 'h-10', 'min-w-10', 'mx-auto');
+      expect(control).toHaveClass('w-11', 'h-11', 'min-w-[44px]', 'min-h-[44px]', 'mx-auto');
     });
 
     const collapseToggle = screen.getByRole('button', { name: 'فتح الشريط الجانبي' });
-    expect(collapseToggle).toHaveClass('w-10', 'h-10', 'start-1/2', 'ltr:-translate-x-1/2', 'rtl:translate-x-1/2');
+    expect(collapseToggle).toHaveClass('w-11', 'h-11', 'min-w-[44px]', 'min-h-[44px]', 'start-1/2', 'ltr:-translate-x-1/2', 'rtl:translate-x-1/2');
   });
 
   it('keeps collapsed tooltip triggers centered in their full-width wrappers', () => {
+    renderSidebar({ isSidebarExpanded: false, drafts: [makeDraft('d1', 'Company A')] });
+
+    const controls = [
+      screen.getByTestId('add-company-button'),
+      screen.getByRole('button', { name: 'السجل' }),
+      screen.getByRole('button', { name: 'فتح المسودات (1)' }),
+      screen.getByRole('button', { name: 'الوضع الليلي' }),
+      screen.getByRole('button', { name: 'التبديل إلى الإنجليزية' }),
+      screen.getByRole('button', { name: 'help' }),
+      screen.getByRole('button', { name: 'مزامنة Sheets' }),
+      screen.getByRole('button', { name: 'تسجيل الخروج' }),
+    ];
+
+    controls.forEach((control) => {
+      expect(control.parentElement).toHaveClass('w-full', 'justify-center');
+    });
+  });
+
+  it('uses the same custom tooltip for collapsed navigation and utilities', () => {
     renderSidebar({ isSidebarExpanded: false });
 
-    const addButton = screen.getByTestId('add-company-button');
-    expect(addButton.parentElement).toHaveClass('w-full', 'justify-center');
+    const history = screen.getByRole('button', { name: 'السجل' });
+    fireEvent.focus(history);
+    expect(screen.getByRole('tooltip')).toHaveTextContent('السجل');
+    expect(screen.getByRole('tooltip').parentElement).toBe(document.body);
+    fireEvent.blur(history);
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+
+    const theme = screen.getByRole('button', { name: 'الوضع الليلي' });
+    fireEvent.focus(theme);
+    expect(screen.getByRole('tooltip')).toHaveTextContent('الوضع الليلي');
+    fireEvent.blur(theme);
+  });
+
+  it('hides a focused tooltip before opening the drafts modal', () => {
+    renderSidebar({ isSidebarExpanded: false, drafts: [makeDraft('d1', 'Company A')] });
+    const toggle = screen.getByRole('button', { name: 'فتح المسودات (1)' });
+
+    fireEvent.focus(toggle);
+    expect(screen.getByRole('tooltip')).toHaveTextContent('فتح المسودات (1)');
+    fireEvent.click(toggle);
+
+    expect(screen.getByRole('dialog', { name: 'المسودات' })).toBeInTheDocument();
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+  });
+
+  it('announces the draft count and caps large badges', () => {
+    const drafts = Array.from({ length: 100 }, (_, index) => makeDraft(`d${index}`, `Company ${index}`));
+    renderSidebar({ isSidebarExpanded: false, drafts });
+
+    const toggle = screen.getByRole('button', { name: 'فتح المسودات (100)' });
+    expect(toggle).toBeInTheDocument();
+    expect(toggle).toHaveAttribute('aria-label', 'فتح المسودات (100)');
+    expect(screen.getByTestId('draft-count-badge')).toHaveTextContent('99+');
+  });
+
+  it('makes expanded draft rows keyboard-focusable buttons', () => {
+    const handleLoadDraft = vi.fn();
+    renderSidebar({ drafts: [makeDraft('d1', 'Company A')], handleLoadDraft });
+
+    const rowButton = screen.getByRole('button', { name: /Company A/ });
+    expect(rowButton).toHaveAttribute('type', 'button');
+    rowButton.focus();
+    expect(document.activeElement).toBe(rowButton);
+    fireEvent.click(rowButton);
+    expect(handleLoadDraft).toHaveBeenCalledTimes(1);
   });
 
   it('requires confirmation before logout is executed', () => {
