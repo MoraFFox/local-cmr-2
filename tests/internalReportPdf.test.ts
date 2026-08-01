@@ -17,6 +17,7 @@ import {
   generateCostVisitReport,
   generateBatchReport,
   BatchExportItem,
+  buildMaintenanceItemCell,
 } from "../utils/internalReportPdf";
 import { generateCompanyPDF, generateBranchPDF } from "../utils/pdfGenerator";
 import { generateMockWizardData } from "../utils/mockData";
@@ -478,9 +479,10 @@ describe("internal report PDF generation", () => {
     expect(internalDrawn).toContain("Net Cost to Company");
   }, 30000);
 
-  it("maintenance log table renders Parts/Services as bullets with per-item cost and a Total line", async () => {
+  it("maintenance log table boxes Parts/Services items with a cost sub-column and Total line", async () => {
     // Regression: the Parts and Services columns must itemize every entry as a
-    // bullet with its own line cost (count × unit) and end with a Total line.
+    // boxed block — breakdown left, item cost in a right sub-column, subtle
+    // per-unit subtitle, hairline separators between items, and a Total line.
     const base = generateMockWizardData();
     const record: MaintenanceRecord = {
       id: "bullet-probe-1",
@@ -515,13 +517,19 @@ describe("internal report PDF generation", () => {
     expect(doc.output("arraybuffer").byteLength).toBeGreaterThan(1000);
     const drawn = drawnStrings.join("\n");
 
-    // Each item is a bullet with its own line cost.
-    expect(drawn).toContain("• 2× Pump A — 200 EGP (By Midos)");
-    expect(drawn).toContain("• 1× Gasket B — 50 EGP (By Client)");
-    expect(drawn).toContain("• 3× Service X — 60 EGP (By Midos)");
-    // Each column ends with its subtotal.
-    expect(drawn).toContain("Total: 250 EGP");
-    expect(drawn).toContain("Total: 60 EGP");
+    // Each item is a boxed block: breakdown left, per-item cost in the right
+    // sub-column, with a subtle per-unit subtitle underneath.
+    expect(drawn).toContain("• 2× Pump A (By Midos)");
+    expect(drawn).toContain("200 EGP");
+    expect(drawn).toContain("@ 100 EGP each");
+    expect(drawn).toContain("• 1× Gasket B (By Client)");
+    expect(drawn).toContain("50 EGP");
+    expect(drawn).toContain("@ 50 EGP each");
+    expect(drawn).toContain("• 3× Service X (By Midos)");
+    expect(drawn).toContain("60 EGP");
+    // Each column ends with its subtotal row (left label + right cost).
+    expect(drawnStrings.some((s) => s === "Total")).toBe(true);
+    expect(drawn).toContain("250 EGP");
     // The standalone cost columns were removed, so the totals live inside the
     // Parts/Services cells rather than in dedicated columns.
     expect(drawn).not.toContain("Parts Cost");
@@ -534,11 +542,66 @@ describe("internal report PDF generation", () => {
     drawnStrings.length = 0;
     await generateCostBranchReport("Probe Co", branch, {});
     const costDrawn = drawnStrings.join("\n");
-    expect(costDrawn).toContain("• 2× Pump A — 200 EGP");
-    expect(costDrawn).toContain("• 1× Gasket B — 50 EGP");
+    expect(costDrawn).toContain("• 2× Pump A");
+    expect(costDrawn).toContain("200 EGP");
+    expect(costDrawn).toContain("• 1× Gasket B");
     expect(costDrawn).not.toContain("(By Midos)");
     expect(costDrawn).not.toContain("(By Client)");
   }, 30000);
+
+  it("buildMaintenanceItemCell boxes items with separators and a cost sub-column", () => {
+    const record: MaintenanceRecord = {
+      id: "cell-probe",
+      maintenanceDate: "2026-07-15",
+      type: "scheduled",
+      isLogisticsVisit: false,
+      hadProblem: true,
+      partsWereReplaced: true,
+      problemSolved: true,
+      partsReplaced: [
+        { name: "Pump A", count: 2, cost: 100 },
+        { name: "Gasket B", count: 1, cost: 50, paidByClient: true },
+      ],
+      paidBy: "company",
+      baristaName: "Tech 1",
+      visitZone: "cairo",
+      servicesPerformed: [{ name: "Service X", count: 3, cost: 20 }],
+      followUpVisits: [],
+      supervisors: [],
+      dailyLeaseCost: 0,
+      problems: ["Leak", "Noise"],
+    };
+
+    // Problems: one bullet per issue, hairline between items, none after the last.
+    const problems = buildMaintenanceItemCell(record, "problems", true, true);
+    expect(problems.map((r) => r.left)).toEqual(["• Leak", "• Noise"]);
+    expect(problems[0].sepBelow).toBe(true);
+    expect(problems[1].sepBelow).toBeFalsy();
+
+    // Parts (costs on): main line = breakdown left + item cost right, then a
+    // muted per-unit subtitle, separators between items, then a bold Total row
+    // with a separator above.
+    const parts = buildMaintenanceItemCell(record, "parts", true, true);
+    expect(parts[0]).toMatchObject({ left: "• 2× Pump A (By Midos)", right: "200 EGP" });
+    expect(parts[1]).toMatchObject({ left: "@ 100 EGP each", style: "muted", sepBelow: true });
+    expect(parts[2]).toMatchObject({ left: "• 1× Gasket B (By Client)", right: "50 EGP" });
+    expect(parts[3]).toMatchObject({ left: "@ 50 EGP each", style: "muted", sepBelow: false });
+    expect(parts[4]).toMatchObject({ left: "Total", right: "250 EGP", style: "bold", sepAbove: true });
+
+    // costMode: payer labels stripped from the breakdown side.
+    const costParts = buildMaintenanceItemCell(record, "parts", false, true);
+    expect(costParts[0].left).toBe("• 2× Pump A");
+    expect(costParts[0].right).toBe("200 EGP");
+
+    // Client mode: no costs — no right sub-column, no subtitles, no Total row.
+    const clientParts = buildMaintenanceItemCell(record, "parts", true, false);
+    expect(clientParts[0]).toMatchObject({ left: "• 2× Pump A (By Midos)", right: undefined });
+    expect(clientParts.some((r) => r.style === "muted" || r.style === "bold")).toBe(false);
+    expect(clientParts.every((r) => r.right === undefined)).toBe(true);
+
+    // Non-list columns fall through to the plain formatter (empty result).
+    expect(buildMaintenanceItemCell(record, "date", true, true)).toEqual([]);
+  });
 
   it("drops Avg Rating KPI, adds logistics to Total Cost KPI, and moves Most Used Parts last", async () => {
     // Deterministic dataset:
@@ -814,7 +877,8 @@ describe("internal report PDF generation", () => {
     const costDrawn = drawnStrings.join("\n");
     expect(costDrawn).toContain("EGP");
     expect(costDrawn).toContain("Cost Breakdown");
-    expect(costDrawn).toContain("• 2× Pump A — 200 EGP");
+    expect(costDrawn).toContain("• 2× Pump A");
+    expect(costDrawn).toContain("200 EGP");
     expect(costDrawn).toContain("Total Cost");
     expect(costDrawn).toContain("Machine Rental");
   }, 30000);
@@ -1169,5 +1233,69 @@ describe("empty-state suppression (phase 03)", () => {
     const drawn = drawnStrings.join("\n");
     expect(drawn).not.toContain("Net Cost:");
     expect(drawn).not.toContain("Total Cost:");
+  }, 30000);
+
+  it("per-visit reports drop zero-count parts/services rows (D-07)", async () => {
+    const base = generateMockWizardData();
+    const rec = {
+      ...base.branches[0].maintenanceHistory[0],
+      id: "visit-zero-1",
+      partsReplaced: [
+        { name: "gasket", count: 2, cost: 50 },
+        { name: "filter", count: 0, cost: 100 },
+      ],
+      servicesPerformed: [
+        { name: "cleaning", count: 1, cost: 120 },
+        { name: "test run", count: 0, cost: 30 },
+      ],
+      machines: [
+        { id: 1, name: "La Marzocco", count: 1 },
+        { id: 2, name: "Ghost Machine", count: 0 },
+      ],
+    };
+    drawnStrings.length = 0;
+    const doc = await generateInternalVisitReport(base.companyName, {}, rec);
+    expect(doc.output("arraybuffer").byteLength).toBeGreaterThan(1000);
+    const drawn = drawnStrings.join("\n");
+    // Valid rows render; zero-count rows and the empty machine never appear.
+    expect(drawn).toContain("gasket");
+    expect(drawn).toContain("cleaning");
+    expect(drawn).toContain("La Marzocco");
+    expect(drawn).not.toContain("filter");
+    expect(drawn).not.toContain("test run");
+    expect(drawn).not.toContain("Ghost Machine");
+  }, 30000);
+
+  it("sparse per-visit report renders no empty section headings (D-04)", async () => {
+    const base = generateMockWizardData();
+    const rec = {
+      ...base.branches[0].maintenanceHistory[0],
+      id: "visit-sparse-1",
+      hadProblem: false,
+      problems: [],
+      partsReplaced: [],
+      servicesPerformed: [],
+      machines: [],
+      supervisors: [],
+      recommendations: undefined,
+      notes: undefined,
+      dailyLeaseCost: 0,
+      // The mock's cairo zone carries a visit fee — blank it for a zero-cost visit.
+      visitZone: "",
+    };
+    drawnStrings.length = 0;
+    const doc = await generateInternalVisitReport(base.companyName, {}, rec);
+    expect(doc.output("arraybuffer").byteLength).toBeGreaterThan(1000);
+    const drawn = drawnStrings.join("\n");
+    // Only the Visit Summary box renders; every empty section heading is absent.
+    expect(drawn).toContain("Visit Summary");
+    expect(drawn).not.toContain("Machines");
+    expect(drawn).not.toContain("Issues");
+    expect(drawn).not.toContain("Parts Replaced");
+    expect(drawn).not.toContain("Services Performed");
+    expect(drawn).not.toContain("Cost Breakdown");
+    expect(drawn).not.toContain("Recommendations");
+    expect(drawn).not.toContain("Notes");
+    expect(drawn).not.toContain("Supervisors");
   }, 30000);
 });

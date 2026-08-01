@@ -1,7 +1,6 @@
 /** @format */
 
 import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import { FormData, MaintenanceRecord, Branch, LogisticsOperation, MaintenancePhoto } from "../types";
 import { DateRange, formatDateRangeLabelEn, getReportRecords } from "./dateRangeFilter";
 import { loadFonts, flattenMaintenanceRecords, renderPhotosInPDF, loadImageAsBase64 } from "./pdfGenerator";
@@ -370,6 +369,103 @@ const buildMaintenanceTableColumns = (showPayer = true, clientMode = false): Mai
   return cols;
 };
 
+// ── Boxed maintenance-log cell model ──
+// One text row inside a Parts/Services/Problems cell. `left` is the breakdown
+// sub-column, `right` the cost sub-column (drawn right-aligned), `style` picks
+// muted subtitle vs. bold total rendering, and the sep flags draw the subtle
+// hairline that boxes each item off.
+
+export interface MaintenanceCellRow {
+  left: string;
+  right?: string;
+  style?: "normal" | "muted" | "bold";
+  size?: number;
+  sepAbove?: boolean;
+  sepBelow?: boolean;
+}
+
+export type CellRow = MaintenanceCellRow;
+
+/**
+ * Build the boxed cell rows for the Parts/Services/Problems columns of the
+ * maintenance log. Each item renders as its own block: a main line split into
+ * two sub-columns (breakdown left, cost right) plus a subtle per-unit subtitle,
+ * with a hairline separator boxing each item off. Problems render one bullet
+ * per issue the same way. Returns [] for any other column so the caller falls
+ * back to the plain-text formatter.
+ */
+export const buildMaintenanceItemCell = (
+  record: MaintenanceRecord,
+  colId: string,
+  showPayer: boolean,
+  showCosts: boolean,
+): MaintenanceCellRow[] => {
+  // Problems: one bullet per issue, hairline between items.
+  if (colId === "problems") {
+    const problems = record.problems || [];
+    if (problems.length === 0) return [];
+    return problems.map((p, i) => ({
+      left: `• ${rtl(p)}`,
+      sepBelow: i < problems.length - 1,
+    }));
+  }
+
+  const isParts = colId === "parts";
+  const isServices = colId === "services";
+  if (!isParts && !isServices) return [];
+
+  const items = isParts ? record.partsReplaced || [] : record.servicesPerformed || [];
+  if (items.length === 0) return [];
+
+  const rows: MaintenanceCellRow[] = [];
+  items.forEach((item, i) => {
+    const qty = item.count || 0;
+    const unitCost = isParts
+      ? resolvePartCost(item, partsList)
+      : resolveServiceCost(item, servicesList);
+    const itemTotal = qty * unitCost;
+    const payer = showPayer
+      ? ` (${getPaidByLabel(item.paidByClient ? "client" : "company")})`
+      : "";
+    const last = i === items.length - 1;
+
+    // Main line: breakdown left, item total cost in the right sub-column.
+    rows.push({
+      left: `• ${formatEnNumber(qty)}× ${rtl(item.name)}${payer}`,
+      right: showCosts ? formatPdfCurrencyEn(itemTotal) : undefined,
+      // When there is no unit cost to subtitle (unknown/0), the separator
+      // rides on the main line so items stay boxed off.
+      sepBelow: !last && (!showCosts || unitCost <= 0),
+    });
+
+    // Subtle per-unit subtitle underneath each item (cost modes only).
+    if (showCosts && unitCost > 0) {
+      rows.push({
+        left: `@ ${formatPdfCurrencyEn(unitCost)} each`,
+        style: "muted",
+        sepBelow: !last,
+      });
+    }
+  });
+
+  // Column subtotal, boxed off with a separator above.
+  if (showCosts) {
+    const total = items.reduce((sum, item) => {
+      const unit = isParts
+        ? resolvePartCost(item, partsList)
+        : resolveServiceCost(item, servicesList);
+      return sum + (item.count || 0) * unit;
+    }, 0);
+    rows.push({
+      left: "Total",
+      right: formatPdfCurrencyEn(total),
+      style: "bold",
+      sepAbove: true,
+    });
+  }
+  return rows;
+};
+
 const renderMaintenanceHistoryTable = (
   doc: jsPDF,
   records: MaintenanceRecord[],
@@ -386,26 +482,187 @@ const renderMaintenanceHistoryTable = (
       })
     : allCols;
 
-  const headRow = activeCols.map((c) => c.label);
-  const rows = records.map((r) => activeCols.map((c) => c.format(r)));
-  const columnStyles = Object.fromEntries(activeCols.map((c, i) => [i, { cellWidth: c.width }]));
+  // ── Manual maintenance-log table (boxed item cells) ──
+  // Parts/Services cells render each item as its own block: a main line split
+  // into two sub-columns (breakdown left, cost right) plus a subtle per-unit
+  // subtitle, with a hairline separator boxing each item off. Problems render
+  // one bullet per issue the same way. Drawn manually because autoTable cannot
+  // express per-line alignment, sub-columns or inner separators.
 
-  autoTable(doc, {
-    startY: y,
-    head: [headRow],
-    body: rows,
-    theme: "grid",
-    styles: { fontSize: 5.5, cellPadding: 0.8, font: "Amiri", halign: "left", valign: "middle" },
-    headStyles: { fillColor: BRAND.primary as [number, number, number], textColor: BRAND.white as [number, number, number], fontStyle: "bold" },
-    columnStyles,
-    didParseCell: (hookData) => {
-      if (hookData.row.section === 'body' && records[hookData.row.index]?.type === 'requested') {
-        hookData.cell.styles.textColor = BRAND.error;
+  const headerH = 6;
+  const padX = 1;
+  const padY = 0.8;
+  const mainFs = 5.5;
+  const subFs = 4.8;
+  const mainLh = 2.4;
+  const subLh = 2.0;
+  const sepGap = 1.2;
+  const costColW = 12;
+  // Bolder column/row grid so each column and row boundary reads clearly —
+  // darker than the subtle inner item separators (sepAbove/sepBelow).
+  const gridColor = BRAND.hairlineDark;
+  const gridWidth = 0.35;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 10;
+  const tableW = pageWidth - margin * 2;
+  const x = margin;
+  const labels = activeCols.map((c) => c.label);
+  const colWidths = activeCols.map((c) => c.width);
+  // Which columns reserve a right-aligned cost sub-column (Parts/Services in
+  // cost modes only) — constant across records, used by both the header and
+  // the row loop.
+  const hasCostCols = activeCols.map((col) => (col.id === "parts" || col.id === "services") && !clientMode);
+
+  const buildCell = (record: MaintenanceRecord, col: MaintenanceTableColumn, showCosts: boolean): MaintenanceCellRow[] => {
+    const itemCell = buildMaintenanceItemCell(record, col.id, showPayer, showCosts);
+    if (itemCell.length > 0) return itemCell;
+    return [{ left: col.format(record) }];
+  };
+
+  const measureCell = (rows: CellRow[], leftW: number, rightW: number): number => {
+    let h = padY * 2;
+    rows.forEach((row) => {
+      const fs = row.size || (row.style === "muted" ? subFs : mainFs);
+      const lh = row.style === "muted" ? subLh : mainLh;
+      doc.setFont("Amiri", row.style === "bold" ? "bold" : "normal");
+      doc.setFontSize(fs);
+      const leftLines = row.left ? doc.splitTextToSize(rtl(row.left), leftW) : [];
+      const rightLines = row.right && rightW > 0 ? doc.splitTextToSize(rtl(row.right), rightW) : [];
+      h += Math.max(1, leftLines.length, rightLines.length) * lh;
+      if (row.sepBelow) h += sepGap;
+      if (row.sepAbove) h += sepGap;
+    });
+    return h;
+  };
+
+  const drawCell = (
+    rows: CellRow[],
+    colX: number,
+    colW: number,
+    cellY: number,
+    rowH: number,
+    hasCostCol: boolean,
+    textColor: [number, number, number],
+  ): void => {
+    const leftW = Math.max(4, colW - padX * 2 - (hasCostCol ? costColW : 0));
+    const rightW = hasCostCol ? costColW : 0;
+    const contentH = measureCell(rows, leftW, rightW);
+    let cy = cellY + Math.max(0, (rowH - contentH) / 2) + padY;
+    rows.forEach((row) => {
+      const fs = row.size || (row.style === "muted" ? subFs : mainFs);
+      const lh = row.style === "muted" ? subLh : mainLh;
+      if (row.sepAbove) {
+        cy += sepGap * 0.4;
+        doc.setDrawColor(...BRAND.hairlineDark);
+        doc.setLineWidth(0.2);
+        doc.line(colX + 1, cy, colX + colW - 1, cy);
+        cy += sepGap * 0.6;
       }
-    },
-  } as any);
+      doc.setFont("Amiri", row.style === "bold" ? "bold" : "normal");
+      doc.setFontSize(fs);
+      doc.setTextColor(...(row.style === "muted" ? BRAND.textMuted : textColor));
+      const leftLines = row.left ? doc.splitTextToSize(rtl(row.left), leftW) : [];
+      const rightLines = row.right && rightW > 0 ? doc.splitTextToSize(rtl(row.right), rightW) : [];
+      const n = Math.max(1, leftLines.length, rightLines.length);
+      leftLines.forEach((ln, i) => pdfText(doc, ln, colX + padX, cy + lh * 0.85 + i * lh, { align: "left" }));
+      rightLines.forEach((ln, i) => pdfText(doc, ln, colX + colW - padX, cy + lh * 0.85 + i * lh, { align: "right" }));
+      cy += n * lh;
+      if (row.sepBelow) {
+        cy += sepGap * 0.5;
+        doc.setDrawColor(...BRAND.hairline);
+        doc.setLineWidth(0.12);
+        doc.line(colX + 1, cy, colX + colW - 1, cy);
+        cy += sepGap * 0.5;
+      }
+    });
+  };
 
-  return (doc as any).lastAutoTable.finalY + 8;
+  // Header bar (drawn again after a page break so the columns stay labeled)
+  const drawHeader = (atY: number): number => {
+    doc.setFillColor(...BRAND.primary);
+    doc.rect(x, atY, tableW, headerH, "F");
+    // White dividers mirroring the boxed grid below: left edge, every column
+    // boundary, and the right edge.
+    const dividerX = (dx: number) => {
+      doc.setDrawColor(...BRAND.white);
+      doc.setLineWidth(0.2);
+      doc.line(dx, atY + 1.2, dx, atY + headerH - 1.2);
+    };
+    dividerX(x);
+    let hx = x;
+    labels.forEach((label, i) => {
+      doc.setFont("Amiri", "bold");
+      doc.setFontSize(mainFs);
+      doc.setTextColor(...BRAND.white);
+      pdfText(doc, label, hx + 1, atY + 4, { align: "left" });
+      const w = colWidths[i];
+      const colEnd = hx + w;
+      // Column boundary divider (skipped if it coincides with the right edge,
+      // which is drawn once at the end).
+      if (colEnd < x + tableW) dividerX(colEnd);
+      // The Parts/Services cells split into a breakdown side and a right-aligned
+      // cost sub-column — mark that boundary in the header too.
+      if (hasCostCols[i]) {
+        doc.setDrawColor(...BRAND.white);
+        doc.setLineWidth(0.15);
+        doc.line(colEnd - costColW, atY + 1.2, colEnd - costColW, atY + headerH - 1.2);
+        doc.setFont("Amiri", "normal");
+        doc.setFontSize(4.2);
+        pdfText(doc, "Cost", colEnd - 0.8, atY + 3.2, { align: "right" });
+      }
+      hx = colEnd;
+    });
+    dividerX(x + tableW);
+    doc.setDrawColor(...gridColor);
+    doc.setLineWidth(gridWidth);
+    doc.line(x, atY + headerH, x + tableW, atY + headerH);
+    return atY + headerH;
+  };
+  let nextY = drawHeader(y);
+
+  records.forEach((record, i) => {
+    const cells = activeCols.map((col) => buildCell(record, col, !clientMode));
+    let rowH = 6;
+    cells.forEach((cell, ci) => {
+      const leftW = Math.max(4, colWidths[ci] - padX * 2 - (hasCostCols[ci] ? costColW : 0));
+      const rightW = hasCostCols[ci] ? costColW : 0;
+      rowH = Math.max(rowH, measureCell(cell, leftW, rightW));
+    });
+    const prevY = nextY;
+    nextY = checkPageBreak(doc, nextY, rowH);
+    if (nextY < prevY) nextY = drawHeader(nextY);
+    if (i % 2 === 1) {
+      doc.setFillColor(...BRAND.cream);
+      doc.rect(x, nextY, tableW, rowH, "F");
+    }
+    doc.setDrawColor(...gridColor);
+    doc.setLineWidth(gridWidth);
+    // Box each row: left edge, every column boundary, and the right edge.
+    // Boundaries that would coincide with the right edge are skipped — the
+    // right edge is drawn once at the end, so filtered columns (which don't
+    // span the full table width) still close the box.
+    doc.line(x, nextY, x, nextY + rowH);
+    let cx = x;
+    for (let ci = 0; ci < colWidths.length; ci++) {
+      cx += colWidths[ci];
+      if (cx < x + tableW) {
+        doc.line(cx, nextY, cx, nextY + rowH);
+      }
+    }
+    doc.line(x + tableW, nextY, x + tableW, nextY + rowH);
+    const textColor: [number, number, number] = record.type === "requested" ? BRAND.error : BRAND.text;
+    cx = x;
+    cells.forEach((cell, ci) => {
+      drawCell(cell, cx, colWidths[ci], nextY, rowH, hasCostCols[ci], textColor);
+      cx += colWidths[ci];
+    });
+    doc.setDrawColor(...gridColor);
+    doc.setLineWidth(gridWidth);
+    doc.line(x, nextY + rowH, x + tableW, nextY + rowH);
+    nextY += rowH;
+  });
+
+  return nextY + 8;
 };
 
 // ── Client-mode helpers: per-record detail blocks + per-branch overviews ──
@@ -1574,8 +1831,10 @@ export interface VisitReportOptions {
  */
 const buildVisitCategories = (record: MaintenanceRecord, costMode = false): FinancialCategory[] => {
   const categories: FinancialCategory[] = [];
-  const parts = record.partsReplaced || [];
-  const services = record.servicesPerformed || [];
+  // Zero-count items are useless rows (D-07) — drop them before the cost
+  // lines are built so "0 × …" never renders in the Cost Breakdown either.
+  const parts = (record.partsReplaced || []).filter((p) => (p.count || 0) > 0);
+  const services = (record.servicesPerformed || []).filter((sv) => (sv.count || 0) > 0);
 
   if (costMode) {
     if (parts.length > 0) {
@@ -1714,13 +1973,14 @@ const drawVisitDetails = (
   y = drawInfoBox(doc, infoItems, y, { x: margin, width: tableW });
   y += 2;
 
-  // Machines
-  if (record.machines && record.machines.length > 0) {
+  // Machines — drop zero-count / blank-name rows (D-07)
+  const machines = (record.machines || []).filter((m) => (m.count || 0) > 0 && !!m.name);
+  if (machines.length > 0) {
     y = checkPageBreak(doc, y, 30);
     y = drawSectionHeader(doc, "Machines", y, { icon: "coffee" });
     const colW = [tableW * 0.7, tableW * 0.3];
     y = drawTableHeader(doc, ["Machine", "Qty"], colW, margin, y, tableW);
-    record.machines.forEach((m, i) => {
+    machines.forEach((m, i) => {
       y = checkPageBreak(doc, y, 8);
       y = drawTableRow(doc, [rtl(m.name), formatEnNumber(m.count || 1)], colW, margin, y, tableW, i % 2 === 1, ["left", "center"]);
     });
@@ -1745,8 +2005,8 @@ const drawVisitDetails = (
     y += 2;
   }
 
-  // Parts replaced
-  const parts = record.partsReplaced || [];
+  // Parts replaced — drop zero-count rows so no useless "0 × …" lines render (D-07)
+  const parts = (record.partsReplaced || []).filter((p) => (p.count || 0) > 0);
   if (parts.length > 0) {
     y = checkPageBreak(doc, y, 30);
     y = drawSectionHeader(doc, "Parts Replaced", y, { icon: "package" });
@@ -1765,8 +2025,8 @@ const drawVisitDetails = (
     y += 4;
   }
 
-  // Services performed
-  const services = record.servicesPerformed || [];
+  // Services performed — drop zero-count rows so no useless "0 × …" lines render (D-07)
+  const services = (record.servicesPerformed || []).filter((sv) => (sv.count || 0) > 0);
   if (services.length > 0) {
     y = checkPageBreak(doc, y, 30);
     y = drawSectionHeader(doc, "Services Performed", y, { icon: "wrench" });
@@ -1915,12 +2175,18 @@ const generateVisitReport = async (
         fu.problems.forEach((p) => summary.push(`  • ${rtl(p)}`));
       }
       if (fu.partsReplaced && fu.partsReplaced.length > 0) {
-        summary.push("Parts:");
-        fu.partsReplaced.forEach((p) => summary.push(`  • ${formatEnNumber(p.count || 1)}× ${rtl(p.name)}`));
+        const fuParts = fu.partsReplaced.filter((p) => (p.count || 0) > 0);
+        if (fuParts.length > 0) {
+          summary.push("Parts:");
+          fuParts.forEach((p) => summary.push(`  • ${formatEnNumber(p.count)}× ${rtl(p.name)}`));
+        }
       }
       if (fu.servicesPerformed && fu.servicesPerformed.length > 0) {
-        summary.push("Services:");
-        fu.servicesPerformed.forEach((s) => summary.push(`  • ${formatEnNumber(s.count || 1)}× ${rtl(s.name)}`));
+        const fuServices = fu.servicesPerformed.filter((s) => (s.count || 0) > 0);
+        if (fuServices.length > 0) {
+          summary.push("Services:");
+          fuServices.forEach((s) => summary.push(`  • ${formatEnNumber(s.count)}× ${rtl(s.name)}`));
+        }
       }
       const summaryText = summary.join("\n") || NO_DATA_LABEL;
       const lines = doc.splitTextToSize(summaryText, tableW - 4);
