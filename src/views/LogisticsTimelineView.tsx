@@ -97,13 +97,13 @@ const LogisticsTimelineView: React.FC<LogisticsTimelineViewProps> = ({ customerI
                   {op.machine_category && (
                     <div className="flex items-center gap-2 text-latte">
                       <ReportIcon name="truck" className="w-4 h-4" />
-                      <span>ماكينة العميل: {op.machine_category}{op.machine_type ? ` · ${op.machine_type}` : ''}</span>
+                      <span>ماكينة العميل: {[op.machine_name, op.machine_category, op.machine_type].filter(Boolean).join(' · ')}</span>
                     </div>
                   )}
-                  {(op.given_machine_category || op.given_machine_type) && (
+                  {(op.given_machine_category || op.given_machine_type || op.given_machine_name) && (
                     <div className="flex items-center gap-2 text-latte">
                       <ReportIcon name="truck" className="w-4 h-4" />
-                      <span>الماكينة المقدمة: {[op.given_machine_category, op.given_machine_type].filter(Boolean).join(' · ')}</span>
+                      <span>الماكينة المقدمة: {[op.given_machine_name, op.given_machine_category, op.given_machine_type].filter(Boolean).join(' · ')}</span>
                     </div>
                   )}
                   {op.monthly_rental_price != null && (

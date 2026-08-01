@@ -1,7 +1,11 @@
 /** @format */
 
 import { ServiceRecord, PartRecord } from '../types';
-import { formatEnNumber, formatPdfCurrency } from './costAggregation';
+import { partsList, servicesList } from '../constants';
+import { formatEnNumber } from './costAggregation';
+
+const compareLogisticsWorkItems = (a: LogisticsWorkItemDisplay, b: LogisticsWorkItemDisplay): number =>
+  b.count - a.count || a.name.localeCompare(b.name);
 
 /**
  * Shared logistics operation type labels — single source of truth
@@ -11,6 +15,55 @@ import { formatEnNumber, formatPdfCurrency } from './costAggregation';
 /** Format a single service/part line: "الاسم ×2" (count omitted when 1). */
 const formatWorkItem = (name: string, count: number): string =>
   count > 1 ? `${name} ×${count}` : name;
+
+export type LogisticsWorkItemKind = 'part' | 'service';
+
+export interface LogisticsWorkItemDisplay {
+  name: string;
+  count: number;
+  unitCost?: number;
+  totalCost?: number;
+}
+
+/**
+ * Resolve a logistics item's unit cost. Saved operation values take priority;
+ * standard catalog entries provide a fallback for older operations that were
+ * saved before item costs were persisted. Unknown custom items stay unpriced.
+ */
+export const resolveLogisticsWorkItemCost = (
+  name: string,
+  explicitCost: number | null | undefined,
+  kind: LogisticsWorkItemKind,
+): number | undefined => {
+  if (explicitCost !== null && explicitCost !== undefined && Number.isFinite(Number(explicitCost))) {
+    return Number(explicitCost);
+  }
+
+  const catalog = kind === 'part' ? partsList : servicesList;
+  const normalizedName = name.trim().toLocaleLowerCase();
+  const match = catalog.find((item) =>
+    item.value.trim().toLocaleLowerCase() === normalizedName ||
+    item.label.trim().toLocaleLowerCase() === normalizedName,
+  );
+  return match?.cost;
+};
+
+/** Build a quantity/unit/total view model shared by HTML and PDF logistics reports. */
+export const getLogisticsWorkItemDisplay = (
+  name: string,
+  count: number,
+  explicitCost: number | null | undefined,
+  kind: LogisticsWorkItemKind,
+): LogisticsWorkItemDisplay => {
+  const safeCount = Number.isFinite(Number(count)) ? Number(count) : 0;
+  const unitCost = resolveLogisticsWorkItemCost(name, explicitCost, kind);
+  return {
+    name,
+    count: safeCount,
+    unitCost,
+    totalCost: unitCost === undefined ? undefined : unitCost * safeCount,
+  };
+};
 
 /**
  * Format a single service/part line with its cost breakdown, e.g.:
@@ -45,6 +98,7 @@ export interface MaintenanceWorkSection {
   /** Pre-formatted items: "الاسم" or "الاسم ×2". */
   items: string[];
 }
+
 
 /** Arabic section labels (internal reports / HTML). */
 export const MAINTENANCE_SECTION_LABELS_AR: Record<MaintenanceSectionKey, string> = {
@@ -146,7 +200,7 @@ export const LOGISTICS_STATUS_LABELS: Record<string, { label: string }> = {
 export const MACHINE_CATEGORY_LABELS_EN: Record<string, string> = {
   coffee: 'Coffee Machine',
   grinder: 'Grinder',
-  other: 'Other',
+  other: 'Custom',
 };
 
 /** English labels for machine systems (client-facing PDFs). */
@@ -157,14 +211,16 @@ export const MACHINE_SYSTEM_LABELS_EN: Record<string, string> = {
 };
 
 /**
- * Format a machine description (category + system) for client-facing PDFs.
- * Falls back to the raw stored value when the value is unknown/custom.
+ * Format a machine description (name + category + system) for client-facing
+ * PDFs. Falls back to the raw stored value when the value is unknown/custom.
  */
 export const formatMachineDescription = (
   category?: string | null,
   system?: string | null,
+  name?: string | null,
 ): string => {
   const parts = [
+    name ? name.trim() : '',
     category ? MACHINE_CATEGORY_LABELS_EN[category] || category : '',
     system ? MACHINE_SYSTEM_LABELS_EN[system] || system : '',
   ].filter(Boolean);
@@ -175,7 +231,7 @@ export const formatMachineDescription = (
 export const MACHINE_CATEGORY_LABELS_AR: Record<string, string> = {
   coffee: 'ماكينة قهوة',
   grinder: 'مطحنة',
-  other: 'أخرى',
+  other: 'مخصص',
 };
 
 /** Arabic labels for machine systems (internal reports). */
@@ -186,14 +242,16 @@ export const MACHINE_SYSTEM_LABELS_AR: Record<string, string> = {
 };
 
 /**
- * Format a machine description (category + system) for Arabic internal reports.
- * Falls back to the raw stored value when the value is unknown/custom.
+ * Format a machine description (name + category + system) for Arabic internal
+ * reports. Falls back to the raw stored value when the value is unknown/custom.
  */
 export const formatMachineDescriptionAr = (
   category?: string | null,
   system?: string | null,
+  name?: string | null,
 ): string => {
   const parts = [
+    name ? name.trim() : '',
     category ? MACHINE_CATEGORY_LABELS_AR[category] || category : '',
     system ? MACHINE_SYSTEM_LABELS_AR[system] || system : '',
   ].filter(Boolean);

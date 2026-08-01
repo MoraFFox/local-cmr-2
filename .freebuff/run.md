@@ -22,10 +22,12 @@ For the in-thread live preview, run the server detached with logging and bind to
 
 ```bash
 cd "E:/my projects/local-CMR-main"
-nohup bun run dev --port 3000 --host 127.0.0.1 > .freebuff/preview-<thread-id>.log 2>&1 &
-echo $! > .freebuff/preview.pid
+nohup bun run dev --port 3000 --host 127.0.0.1 > .freebuff/preview-<thread-id>.log 2>&1 < /dev/null &
+# Wait for Vite, then record the actual listening PID (not always the shell's $!).
+netstat -ano | grep ':3000 ' | grep LISTENING
 ```
 
-- Use port 3000 when free; otherwise pick an explicit free port (3001 was used previously when 3000 was occupied).
-- Confirm the port is listening before registering: `netstat -ano | grep ':3000 ' | grep LISTENING`
+- Use port 3000 when free; otherwise pick an explicit free port (3001, 3002, etc.) and adapt the command and checks.
+- Confirm the port is listening and use the PID from the `LISTENING` row when registering the preview; on Windows/Git Bash, `$!` can be the wrapper shell rather than Vite's process.
+- Confirm the URL answers before registration: `curl -I http://127.0.0.1:<port>/`
 - The Vite log shows the actual URL (e.g. `http://127.0.0.1:3000/`).

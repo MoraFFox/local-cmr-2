@@ -17,6 +17,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useContactPositions } from "../../../utils/contactPositions";
 import ContactPositionManager from "../../../components/ContactPositionManager";
+import PortalSelect from "../../../components/form-ui/PortalSelect";
 import { useT } from "../../../utils/i18n";
 import type { FormData, Contact } from "../../../types";
 import type { ContactPath, WizardStepActions } from "./types";
@@ -87,24 +88,20 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                       إدارة المسميات
                     </button>
                   </label>
-                  <div className="relative group focus-within:text-primary">
-                    <div className="absolute inset-y-0 end-0 pe-3.5 flex items-center pointer-events-none text-latte">
-                      <BriefcaseIcon className="w-4 h-4" aria-hidden="true" />
-                    </div>
-                    <select
-                      name="position"
-                      data-field={fieldPrefix ? `${fieldPrefix}.${contactIndex}.position` : undefined}
-                      value={contact.position}
-                      onChange={(e) => actions.handleContactChange(e, path, contactIndex)}
-                      className="block w-full pe-14 h-[50px] bg-cream text-base text-primary rounded-lg placeholder-latte focus:outline-none focus:ring-2 border border-hairline focus:border-primary focus:ring-primary/20 transition-colors appearance-none"
-                    >
-                      {contactPositions.map((pos) => (
-                        <option key={pos.value} value={pos.value}>
-                          {pos.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <PortalSelect
+                    name="position"
+                    dataField={fieldPrefix ? `${fieldPrefix}.${contactIndex}.position` : undefined}
+                    ariaLabel="المسمى الوظيفي"
+                    value={contact.position}
+                    options={contactPositions.map((pos) => ({ value: pos.value, label: pos.label }))}
+                    onChange={(v) =>
+                      actions.handleContactChange(
+                        { target: { name: "position", value: v } } as React.ChangeEvent<HTMLInputElement>,
+                        path,
+                        contactIndex,
+                      )
+                    }
+                  />
                 </div>
                 {contact.position === "custom" && (
                   <TextInput

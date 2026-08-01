@@ -30,6 +30,15 @@ vi.mock('../hooks/useLogisticsOperations', async () => {
       deleteMachine: vi.fn(),
       refresh: vi.fn(),
     })),
+    useMachineNames: vi.fn(() => ({
+      names: [],
+      isLoading: false,
+      error: null,
+      addMachineName: vi.fn(),
+      deleteMachineName: vi.fn(),
+      mergeMachineNames: vi.fn(),
+      refresh: vi.fn(),
+    })),
   };
 });
 
@@ -53,7 +62,7 @@ vi.mock('../hooks/useCustomCatalog', async () => {
   };
 });
 
-import { useLogisticsOperations } from '../hooks/useLogisticsOperations';
+import { useLogisticsOperations, useCompanyMachines, useMachineNames } from '../hooks/useLogisticsOperations';
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(<ToastProvider>{ui}</ToastProvider>);
@@ -105,6 +114,28 @@ describe('MachineLogisticsSection', () => {
       deleteOperation: vi.fn(),
       refresh: vi.fn(),
     });
+    // Restore the empty inventory so tests that stub useCompanyMachines
+    // (e.g. the replacement-machine auto-fill test) don't leak state.
+    vi.mocked(useCompanyMachines).mockReturnValue({
+      machines: [],
+      isLoading: false,
+      error: null,
+      addMachine: vi.fn(),
+      updateMachine: vi.fn(),
+      deleteMachine: vi.fn(),
+      refresh: vi.fn(),
+    });
+    // Restore the empty saved machine names so tests that stub useMachineNames
+    // (e.g. the suggestions dropdown test) don't leak state.
+    vi.mocked(useMachineNames).mockReturnValue({
+      names: [],
+      isLoading: false,
+      error: null,
+      addMachineName: vi.fn(),
+      deleteMachineName: vi.fn(),
+      mergeMachineNames: vi.fn(),
+      refresh: vi.fn(),
+    });
   });
 
   const mockHook = (ops: LogisticsOperation[]) => {
@@ -145,13 +176,105 @@ describe('MachineLogisticsSection', () => {
     fireEvent.click(screen.getByText('استلام ماكينة + تسليم بديلة'));
 
     await waitFor(() => {
-      expect(screen.getByText('ماكينة العميل (المستلمة)')).toBeInTheDocument();
-      // Both client and given machine sections render category/system selects
-      expect(screen.getAllByText('فئة الماكينة').length).toBeGreaterThanOrEqual(2);
-      expect(screen.getAllByText('نظام الماكينة').length).toBeGreaterThanOrEqual(2);
-      expect(screen.getByText('الماكينة المقدمة للعميل')).toBeInTheDocument();
+      expect(screen.getByText('Client Machine (Received)')).toBeInTheDocument();
+      // Both client and given machine sections render name/type/system fields
+      expect(screen.getAllByText('Machine Name').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getAllByText('Machine Type').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getAllByText('Machine System').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getByText('Given Machine (Delivered to Client)')).toBeInTheDocument();
       expect(screen.getByText('حفظ العملية اللوجستية')).toBeInTheDocument();
     });
+  });
+
+  it('saves the machine name fields when creating an operation', async () => {
+    renderWithProviders(<MachineLogisticsSection {...baseProps} />);
+
+    fireEvent.click(screen.getByText('استلام ماكينة + تسليم بديلة'));
+
+    await waitFor(() => {
+      expect(screen.getByText('حفظ العملية اللوجستية')).toBeInTheDocument();
+    });
+
+    // Client + given machine name inputs
+    const nameInputs = screen.getAllByPlaceholderText('e.g. La Marzocco Linea');
+    expect(nameInputs.length).toBe(2);
+    fireEvent.change(nameInputs[0], { target: { value: 'La Marzocco Linea' } });
+    fireEvent.change(nameInputs[1], { target: { value: 'Mazzer Super Jolly' } });
+
+    fireEvent.click(screen.getByText('حفظ العملية اللوجستية'));
+
+    const hook = vi.mocked(useLogisticsOperations);
+    await waitFor(() => {
+      expect(hook.mock.results[0].value.createOperation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          machine_name: 'La Marzocco Linea',
+          given_machine_name: 'Mazzer Super Jolly',
+        }),
+        100,
+      );
+    });
+  });
+
+  it('auto-fills the given machine name from the selected inventory machine', async () => {
+    vi.mocked(useCompanyMachines).mockReturnValue({
+      machines: [{ id: 5, name: 'Mazzer Super Jolly', category: 'grinder', machine_type: 'automatic', status: 'available', monthly_rental_price: 2000 }],
+      isLoading: false,
+      error: null,
+      addMachine: vi.fn(),
+      updateMachine: vi.fn(),
+      deleteMachine: vi.fn(),
+      refresh: vi.fn(),
+    });
+
+    renderWithProviders(<MachineLogisticsSection {...baseProps} />);
+
+    fireEvent.click(screen.getByText('استلام ماكينة + تسليم بديلة'));
+
+    await waitFor(() => {
+      expect(screen.getByText('حفظ العملية اللوجستية')).toBeInTheDocument();
+    });
+
+    // Pick the inventory machine as replacement
+    const replacementSelect = screen.getByText('الماكينة البديلة (من المخزن)').closest('div')?.querySelector('select');
+    expect(replacementSelect).toBeTruthy();
+    fireEvent.change(replacementSelect as HTMLSelectElement, { target: { value: '5' } });
+
+    await waitFor(() => {
+      const givenName = screen.getAllByPlaceholderText('e.g. La Marzocco Linea')[1];
+      expect((givenName as HTMLInputElement).value).toBe('Mazzer Super Jolly');
+    });
+  });
+
+  it('suggests saved machine names in the name field dropdown', async () => {
+    vi.mocked(useMachineNames).mockReturnValue({
+      names: [{ id: 1, name: 'La Marzocco Linea' }, { id: 2, name: 'Mazzer Super Jolly' }],
+      isLoading: false,
+      error: null,
+      addMachineName: vi.fn(),
+      deleteMachineName: vi.fn(),
+      mergeMachineNames: vi.fn(),
+      refresh: vi.fn(),
+    });
+
+    renderWithProviders(<MachineLogisticsSection {...baseProps} />);
+
+    fireEvent.click(screen.getByText('استلام ماكينة + تسليم بديلة'));
+
+    await waitFor(() => {
+      expect(screen.getByText('حفظ العملية اللوجستية')).toBeInTheDocument();
+    });
+
+    // Focus the client-machine name field → dropdown lists saved names
+    const nameInputs = screen.getAllByPlaceholderText('e.g. La Marzocco Linea');
+    fireEvent.focus(nameInputs[0]);
+
+    await waitFor(() => {
+      expect(screen.getByText('Mazzer Super Jolly')).toBeInTheDocument();
+    });
+
+    // Selecting a suggestion fills the field
+    fireEvent.click(screen.getByText('Mazzer Super Jolly'));
+    expect((nameInputs[0] as HTMLInputElement).value).toBe('Mazzer Super Jolly');
   });
 
   it('hides the given machine section for pickup_only operations', async () => {
@@ -160,21 +283,21 @@ describe('MachineLogisticsSection', () => {
     fireEvent.click(screen.getByText('استلام ماكينة العميل فقط'));
 
     await waitFor(() => {
-      expect(screen.getByText('ماكينة العميل (المستلمة)')).toBeInTheDocument();
-      expect(screen.queryByText('الماكينة المقدمة للعميل')).not.toBeInTheDocument();
+      expect(screen.getByText('Client Machine (Received)')).toBeInTheDocument();
+      expect(screen.queryByText('Given Machine (Delivered to Client)')).not.toBeInTheDocument();
     });
   });
 
-  it('shows a custom category text input when "أخرى" is selected', async () => {
+  it('shows a custom category text input when "Custom" is selected', async () => {
     renderWithProviders(<MachineLogisticsSection {...baseProps} />);
 
     fireEvent.click(screen.getByText('استلام ماكينة العميل فقط'));
 
-    const selects = await screen.findAllByDisplayValue('ماكينة قهوة');
+    const selects = await screen.findAllByDisplayValue('Coffee Machine');
     fireEvent.change(selects[0], { target: { value: 'other' } });
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('اكتب الفئة الجديدة...')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Type custom type...')).toBeInTheDocument();
     });
   });
 

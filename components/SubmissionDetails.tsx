@@ -10,6 +10,7 @@ import {
   Contact,
   Barista,
   MaintenancePhoto,
+  Machine,
 } from "../types";
 import CollapsibleCard from "./CollapsibleCard";
 import Avatar from "./Avatar";
@@ -104,10 +105,47 @@ const MachineList = ({
 }: {
   entity: {
     usesOurMachines: boolean | null;
-    machines?: any[];
+    hasMultipleMachines?: boolean | null;
+    machines?: Machine[];
   };
   hideCosts?: boolean;
 }) => {
+  // Mixed machine fleet: each machine carries its own owner status.
+  if (entity.hasMultipleMachines === true) {
+    if (!entity.machines || entity.machines.length === 0) {
+      return <span>ماكينات مختلطة</span>;
+    }
+    return (
+      <div className="space-y-2 mt-1 w-full">
+        {entity.machines.map((m, idx) => {
+          const isClientMachine = m.machineOwner === "client";
+          let typeStr = isClientMachine ? "مكينة العميل" : "مكينتنا";
+          if (!isClientMachine && m.machineOwnershipType) {
+            typeStr = `مكينتنا (${m.machineOwnershipType.charAt(0).toUpperCase() + m.machineOwnershipType.slice(1)})`;
+          }
+
+          let costStr = "";
+          if (!hideCosts && !isClientMachine && (m.machineOwnershipType === "leased" || m.machineOwnershipType === "consumption") && m.dailyLeaseCost) {
+            costStr = ` - ${new Intl.NumberFormat("ar-EG", { style: "currency", currency: "EGP" }).format(m.dailyLeaseCost)} / day`;
+          }
+
+          const extras = [m.machineName, m.machineType, m.machineOption].filter(Boolean);
+          let extrasStr = "";
+          if (extras.length > 0) {
+            extrasStr = ` | ${extras.join(" - ")}`;
+          }
+
+          return (
+            <div key={idx} className="text-sm bg-cream-2 border border-hairline p-2 rounded w-full">
+              <div className="font-semibold text-primary">{typeStr}{costStr}</div>
+              {extrasStr && <div className="text-latte mt-1">{extrasStr.replace(" | ", "")}</div>}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
   if (
     entity.usesOurMachines === null ||
     typeof entity.usesOurMachines === "undefined"
@@ -1066,11 +1104,13 @@ const PrintableDocument: React.FC<{
                   <PrintField
                     label='Machines'
                     value={
-                      branch.usesOurMachines
-                        ? branch.machineOwnershipType === "leased"
-                          ? "Leased"
-                          : "Bought"
-                        : "No"
+                      branch.hasMultipleMachines
+                        ? "Mixed"
+                        : branch.usesOurMachines
+                          ? branch.machineOwnershipType === "leased"
+                            ? "Leased"
+                            : "Bought"
+                          : "No"
                     }
                   />
                   <PrintField label='Maint. Visits' value={stats.visitCount} />
@@ -1786,7 +1826,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                             </div>
 
                             {/* Machine Status */}
-                            {branch.usesOurMachines && (
+                            {(branch.usesOurMachines || branch.hasMultipleMachines) && (
                               <div className='w-full'>
                                 <div className='flex items-center gap-2 mb-2'>
                                   <WrenchScrewdriverIcon className='w-4 h-4 text-latte' />

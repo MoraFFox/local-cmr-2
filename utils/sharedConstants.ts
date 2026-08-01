@@ -34,6 +34,7 @@ export const initialFormData: FormData = {
   location: "",
   hasBranches: false,
   usesOurMachines: null,
+  hasMultipleMachines: null,
   branchCount: 0,
   branches: [],
   warehouse: {

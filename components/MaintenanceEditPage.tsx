@@ -27,7 +27,6 @@ interface MaintenanceEditPageProps {
   servicesList: any[];
   problemCategories: any[];
   allPredefinedProblems: string[];
-  isSidebarExpanded: boolean;
 }
 
 // Verify the supplied index still points to the intended record before
@@ -43,6 +42,8 @@ const canDeleteByIndex = (
   recordIndex < history.length &&
   history[recordIndex].id === recordId;
 
+const isDevEnvironment = () => import.meta.env.DEV;
+
 const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
   submission,
   onBack,
@@ -50,8 +51,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
   partsList,
   servicesList,
   problemCategories,
-  allPredefinedProblems,
-  isSidebarExpanded
+  allPredefinedProblems
 }) => {
   const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null);
   const [editingRecord, setEditingRecord] = useState<MaintenanceRecord | null>(null);
@@ -120,7 +120,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
   }, [selectedBranchId, branches]);
 
   const handleFillMockData = useCallback(() => {
-    if (!editingRecord) return;
+    if (!isDevEnvironment() || !editingRecord) return;
 
     const mockRecord = generateMockMaintenanceRecord(editingRecord.id, {
       partsList,
@@ -135,6 +135,8 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
 
   // Listen for the dev-only mock-maintenance event from the debug panel.
   useEffect(() => {
+    if (!isDevEnvironment()) return;
+
     const handler = () => {
       if (editingRecord) {
         handleFillMockData();
@@ -428,7 +430,9 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                 <button
                   onClick={() => handleNavigateRecord('prev')}
                   disabled={stagingNewRecord || editingRecordIndex === 0}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white/10 text-white transition-colors backdrop-blur-sm"
+                  title={stagingNewRecord || editingRecordIndex === 0 ? 'لا يوجد سجل سابق' : 'السجل السابق'}
+                  aria-label="السابق"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white/10 disabled:text-white/50 text-white transition-colors backdrop-blur-sm"
                 >
                   <ChevronLeftIcon className="w-5 h-5" />
                   <span className="hidden sm:inline">السابق</span>
@@ -439,7 +443,9 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                 <button
                   onClick={() => handleNavigateRecord('next')}
                   disabled={stagingNewRecord || editingRecordIndex === selectedBranch.maintenanceHistory.length - 1}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white/10 text-white transition-colors backdrop-blur-sm"
+                  title={stagingNewRecord || editingRecordIndex === selectedBranch.maintenanceHistory.length - 1 ? 'لا يوجد سجل لاحق' : 'السجل التالي'}
+                  aria-label="التالي"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white/10 disabled:text-white/50 text-white transition-colors backdrop-blur-sm"
                 >
                   <span className="hidden sm:inline">التالي</span>
                   <ChevronRightIcon className="w-5 h-5" />
@@ -454,7 +460,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                   <span className="hidden sm:inline font-medium">إضافة</span>
                 </button>
 
-                {editingRecord && (
+                {isDevEnvironment() && editingRecord && (
                   <button
                     onClick={handleFillMockData}
                     className="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-100 border border-amber-400/30 transition-colors backdrop-blur-sm"
@@ -469,7 +475,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
         </div>
         </div>
         
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div data-testid="maintenance-editor-shell" className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <MaintenanceRecordEditor
             record={editingRecord}
             onSave={handleSaveRecord}
@@ -482,7 +488,6 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
             clientBaristas={selectedBranch.clientBaristas}
             lastVisitDate={lastVisitDate}
             averageDays={averageDaysBetweenMaintenance}
-            isSidebarExpanded={isSidebarExpanded}
             customerId={localSubmission.id ?? null}
           />
         </div>

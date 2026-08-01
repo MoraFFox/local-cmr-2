@@ -11,6 +11,7 @@
  */
 import React, { useState, useEffect, useId } from "react";
 import { HelpTooltip } from "../../../components/form-ui/HelpTooltip";
+import PortalSelect from "../../../components/form-ui/PortalSelect";
 
 interface MachineTypeFieldProps {
   value?: string;
@@ -67,13 +68,19 @@ const MachineTypeField: React.FC<MachineTypeFieldProps> = ({
         </label>
         {helpText && <HelpTooltip text={helpText} variant="inline" size="sm" />}
       </div>
-      <select
+      <PortalSelect
         id={inputId}
         name={name}
-        data-field={dataField}
+        dataField={dataField}
+        ariaLabel="نوع الماكينة (اختياري)"
+        placeholder="اختر النوع..."
         value={selectValue}
-        onChange={(e) => {
-          const v = e.target.value;
+        options={[
+          { value: "", label: "اختر النوع..." },
+          ...options.map((t) => ({ value: t, label: t })),
+          { value: OTHER_TYPE, label: "أخرى (اكتب نوع جديد)" },
+        ]}
+        onChange={(v) => {
           if (v === OTHER_TYPE) {
             setIsOther(true);
             onChange("");
@@ -82,16 +89,7 @@ const MachineTypeField: React.FC<MachineTypeFieldProps> = ({
             onChange(v);
           }
         }}
-        className="w-full ps-3 pe-10 py-3 bg-cream dark:bg-espresso-light text-base text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
-      >
-        <option value="">اختر النوع...</option>
-        {options.map((t) => (
-          <option key={t} value={t}>
-            {t}
-          </option>
-        ))}
-        <option value={OTHER_TYPE}>أخرى (اكتب نوع جديد)</option>
-      </select>
+      />
       {isOther && (
         <input
           type="text"

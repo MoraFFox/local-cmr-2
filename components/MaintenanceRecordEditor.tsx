@@ -46,7 +46,6 @@ interface MaintenanceRecordEditorProps {
   clientBaristas?: ClientBarista[];
   lastVisitDate?: Date | null;
   averageDays?: number | null;
-  isSidebarExpanded?: boolean;
   customerId?: number | null;
 }
 
@@ -69,7 +68,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
   record, onSave, onCancel, partsList, servicesList,
   problemCategories, allPredefinedProblems,
   baristas = [], clientBaristas = [],
-  lastVisitDate, averageDays, isSidebarExpanded = false,
+  lastVisitDate, averageDays,
   customerId = null
 }) => {
   const { showToast } = useToast();
@@ -347,7 +346,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             onClick={() => toggleLogisticsVisit(!isLogisticsVisit)}
             className={`relative w-12 h-7 rounded-full shrink-0 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${isLogisticsVisit ? 'bg-amber-500' : 'bg-cream-2 dark:bg-espresso-light border border-hairline dark:border-hairline'}`}
           >
-            <span className={`absolute top-0.5 start-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform duration-200 ${isLogisticsVisit ? 'translate-x-5' : ''}`} />
+            <span className={`absolute top-0.5 start-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform duration-200 ${isLogisticsVisit ? 'ltr:translate-x-5 rtl:-translate-x-5' : ''}`} />
           </button>
         </div>
       </div>
@@ -731,22 +730,22 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         </div>
       )}
 
-      {/* Action Bar */}
-      <div className={`fixed bottom-0 start-0 end-0 ${isSidebarExpanded ? 'lg:end-64' : 'lg:end-20'} bg-cream/90 dark:bg-espresso/90 backdrop-blur-lg border-t border-hairline dark:border-hairline shadow-lg z-50 transition-all duration-300`}>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-          <div className="flex items-center justify-between gap-3">
-            <button onClick={onCancel} className="flex items-center justify-center gap-2 min-h-[44px] px-4 sm:px-5 py-2.5 text-primary dark:text-latte font-medium hover:text-primary dark:hover:text-white hover:bg-cream dark:hover:bg-espresso-light/50 rounded-lg transition-colors">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-              <span className="hidden sm:inline">{t.ui.maintenanceEditor.cancel}</span>
-            </button>
-            <button onClick={handleSave} className="btn-primary rounded-lg min-h-[44px] px-5 sm:px-6 py-2.5 shadow-lg">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              <span>{t.ui.maintenanceEditor.save}</span>
-            </button>
-          </div>
+      {/* Action Bar — stays attached to the editor instead of covering the viewport. */}
+      <div
+        data-testid="maintenance-editor-action-bar"
+        className="w-full rounded-xl bg-cream/95 dark:bg-espresso/95 border border-hairline dark:border-hairline shadow-lg mt-2 p-3 sm:p-4"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <button onClick={onCancel} className="flex items-center justify-center gap-2 min-h-[44px] px-4 sm:px-5 py-2.5 text-primary dark:text-latte font-medium hover:text-primary dark:hover:text-white hover:bg-cream dark:hover:bg-espresso-light/50 rounded-lg transition-colors">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            <span className="hidden sm:inline">{t.ui.maintenanceEditor.cancel}</span>
+          </button>
+          <button onClick={handleSave} className="btn-primary rounded-lg min-h-[44px] px-5 sm:px-6 py-2.5 shadow-lg">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            <span>{t.ui.maintenanceEditor.save}</span>
+          </button>
         </div>
       </div>
-      <div className="h-24"></div>
 
       <ConfirmDialog isOpen={!!confirmPhotoDelete?.isOpen} onClose={() => setConfirmPhotoDelete(null)} onConfirm={() => { if (confirmPhotoDelete) { handlePhotoRemove({ url: confirmPhotoDelete.url, type: confirmPhotoDelete.category as any }); } setConfirmPhotoDelete(null); }} title="إزالة الصورة" aria-label="إزالة الصورة" message="هل أنت متأكد من رغبتك في إزالة هذه الصورة؟ لا يمكن التراجع عن هذا الإجراء." confirmLabel="نعم، إزالة" />
 

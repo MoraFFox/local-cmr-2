@@ -12,6 +12,7 @@ import Button from "../../../components/ui/Button";
 import MaintenanceRecordCard from "../../../components/MaintenanceRecordCard";
 import { ContactsSection } from "./ContactsSection";
 import { BranchBaristaSection } from "./BranchBaristaSection";
+import PortalSelect from "../../../components/form-ui/PortalSelect";
 import {
   BuildingStorefrontIcon, EnvelopeIcon, DocumentTextIcon, MapPinIcon,
   CurrencyDollarIcon, ScaleIcon, PlusCircleIcon, UserGroupIcon, WrenchScrewdriverIcon,
@@ -107,14 +108,24 @@ export const BranchCard: React.FC<BranchCardProps> = ({
           placeholder="مثال: 50" icon={<ScaleIcon />}
           helpText={t.tooltips.coffeeConsumption}
         />
-        <div className="md:col-span-2">
-          <RadioGroup label="هل يستخدمون ماكيناتنا؟" name={`usesOurMachines-${branch.id}`}
-            value={branch.usesOurMachines}
+        <div className="md:col-span-2 space-y-4">
+          {/* NEW: mixed machine fleet toggle — asked BEFORE the single-machine status */}
+          <RadioGroup label="هل لدى العميل أكثر من ماكينة؟" name={`hasMultipleMachines-${branch.id}`}
+            value={branch.hasMultipleMachines}
             onChange={(val) => actions.handleListItemChange(
-              { target: { name: "usesOurMachines", value: val } } as React.ChangeEvent<HTMLInputElement>, "branches", index)}
-            options={[{ label: "مكينتنا", value: true }, { label: "مكينة العميل", value: false }]} inline
+              { target: { name: "hasMultipleMachines", value: val } } as React.ChangeEvent<HTMLInputElement>, "branches", index)}
+            options={[{ label: "نعم", value: true }, { label: "لا", value: false }]} inline
           />
-          {branch.usesOurMachines === true && (
+          {/* Single machine flow (including legacy records without hasMultipleMachines) */}
+          {branch.hasMultipleMachines !== true && (
+            <RadioGroup label="هل يستخدمون ماكيناتنا؟" name={`usesOurMachines-${branch.id}`}
+              value={branch.usesOurMachines}
+              onChange={(val) => actions.handleListItemChange(
+                { target: { name: "usesOurMachines", value: val } } as React.ChangeEvent<HTMLInputElement>, "branches", index)}
+              options={[{ label: "مكينتنا", value: true }, { label: "مكينة العميل", value: false }]} inline
+            />
+          )}
+          {(branch.hasMultipleMachines === true || branch.usesOurMachines === true) && (
             <div className="mt-4 space-y-4">
               <div className="flex justify-between items-center mb-4">
                 <h4 className="text-lg font-bold text-primary tracking-tight">الماكينات</h4>
@@ -133,6 +144,15 @@ export const BranchCard: React.FC<BranchCardProps> = ({
                     titleContent={<span className="font-semibold">{machine.machineName || "ماكينة جديدة"}</span>}
                   >
                     <div className="space-y-4">
+                      {/* NEW: per-machine ownership status — only in mixed mode */}
+                      {branch.hasMultipleMachines === true && (
+                        <RadioGroup label="حالة الماكينة" name={`machineOwner-${machine.id}`}
+                          value={machine.machineOwner === "client" ? "client" : "ours"}
+                          onChange={(val) => actions.handleNestedListItemChange(
+                            { target: { name: "machineOwner", value: val } } as React.ChangeEvent<HTMLInputElement>, index, "machines", idx)}
+                          options={[{ label: "مكينة العميل", value: "client" }, { label: "مكينة ميدوز", value: "ours" }]} inline
+                        />
+                      )}
                       <TextInput
                         label="اسم الماكينة (اختياري)"
                         name="machineName"
@@ -163,20 +183,26 @@ export const BranchCard: React.FC<BranchCardProps> = ({
                         suggestions={allKnownMachineOptions}
                         helpText={t.tooltips.machineOption}
                       />
-                      <div>
-                        <label className="block text-sm font-medium text-primary mb-2">كيف تم الحصول على الماكينة؟</label>
-                        <select
-                          name="machineOwnershipType"
-                          data-field={`branch.${index}.machines.${idx}.machineOwnershipType`}
-                          value={machine.machineOwnershipType || "leased"}
-                          onChange={(e) => actions.handleNestedListItemChange(e, index, "machines", idx)}
-                          className="w-full ps-3 pe-10 py-3 bg-cream dark:bg-espresso-light text-base text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
-                        >
-                          <option value="leased">إيجار</option>
-                          <option value="consumption">مقابل الاستهلاك</option>
-                        </select>
-                      </div>
-                      {(machine.machineOwnershipType === "leased" || machine.machineOwnershipType === "consumption") && (
+                      {/* Rent options only appear for Mido's machines (single mode, or mixed-mode machineOwner === ours) */}
+                      {(branch.hasMultipleMachines !== true || machine.machineOwner !== "client") && (
+                        <div>
+                          <label className="block text-sm font-medium text-primary mb-2">كيف تم الحصول على الماكينة؟</label>
+                          <PortalSelect
+                            name="machineOwnershipType"
+                            dataField={`branch.${index}.machines.${idx}.machineOwnershipType`}
+                            ariaLabel="كيف تم الحصول على الماكينة؟"
+                            value={machine.machineOwnershipType || "leased"}
+                            options={[
+                              { value: "leased", label: "إيجار" },
+                              { value: "consumption", label: "مقابل الاستهلاك" },
+                            ]}
+                            onChange={(v) => actions.handleNestedListItemChange(
+                              { target: { name: "machineOwnershipType", value: v } } as React.ChangeEvent<HTMLInputElement>, index, "machines", idx)}
+                          />
+                        </div>
+                      )}
+                      {(branch.hasMultipleMachines !== true || machine.machineOwner !== "client") &&
+                        (machine.machineOwnershipType === "leased" || machine.machineOwnershipType === "consumption") && (
                         <TextInput
                           label={machine.machineOwnershipType === "leased" ? "قيمة الإيجار اليومي (ج.م)" : "القيمة اليومية (ج.م)"}
                           name="dailyLeaseCost"

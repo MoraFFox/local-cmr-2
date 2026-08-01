@@ -21,6 +21,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { ContactsSection } from "./ContactsSection";
 import MachineTypeField from "./MachineTypeField";
+import PortalSelect from "../../../components/form-ui/PortalSelect";
 import type { WizardStepProps } from "./types";
 import { useT } from "../../../utils/i18n";
 
@@ -116,18 +117,34 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
       </div>
       {formData.hasBranches === false && (
         <div className="pt-6 mt-6 border-t border-hairline space-y-6">
+          {/* NEW: mixed machine fleet toggle — asked BEFORE the single-machine status */}
           <RadioGroup
-            label="حالة الماكينة"
-            name="usesOurMachines"
-            value={formData.usesOurMachines}
-            onChange={(val) => actions.handleRadioChange("usesOurMachines", val)}
+            label="هل لدى العميل أكثر من ماكينة؟"
+            name="hasMultipleMachines"
+            value={formData.hasMultipleMachines}
+            onChange={(val) => actions.handleRadioChange("hasMultipleMachines", val)}
             options={[
-              { label: "مكينتنا", value: true },
-              { label: "مكينة العميل", value: false },
+              { label: "نعم", value: true },
+              { label: "لا", value: false },
             ]}
             inline
           />
-          {formData.usesOurMachines === true && (
+          {/* Single machine flow (including legacy records without hasMultipleMachines) */}
+          {formData.hasMultipleMachines !== true && (
+            <RadioGroup
+              label="حالة الماكينة"
+              name="usesOurMachines"
+              value={formData.usesOurMachines}
+              onChange={(val) => actions.handleRadioChange("usesOurMachines", val)}
+              options={[
+                { label: "مكينتنا", value: true },
+                { label: "مكينة العميل", value: false },
+              ]}
+              inline
+            />
+          )}
+          {/* Machine list shows directly in mixed mode, or under usesOurMachines === true in single mode */}
+          {(formData.hasMultipleMachines === true || formData.usesOurMachines === true) && (
             <div className="mt-4 space-y-4">
               <div className="flex justify-between items-center mb-4">
                 <h4 className="text-lg font-bold text-primary tracking-tight">الماكينات</h4>
@@ -145,6 +162,26 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
                     titleContent={<span className="font-semibold">{machine.machineName || "ماكينة جديدة"}</span>}
                   >
                     <div className="space-y-4">
+                      {/* NEW: per-machine ownership status — only in mixed mode */}
+                      {formData.hasMultipleMachines === true && (
+                        <RadioGroup
+                          label="حالة الماكينة"
+                          name={`machineOwner-${machine.id}`}
+                          value={machine.machineOwner === "client" ? "client" : "ours"}
+                          onChange={(v) =>
+                            actions.handleListItemChange(
+                              { target: { name: "machineOwner", value: v } } as React.ChangeEvent<HTMLInputElement>,
+                              "machines",
+                              idx,
+                            )
+                          }
+                          options={[
+                            { label: "مكينة العميل", value: "client" },
+                            { label: "مكينة ميدوز", value: "ours" },
+                          ]}
+                          inline
+                        />
+                      )}
                       <TextInput
                         label="اسم الماكينة (اختياري)"
                         name="machineName"
@@ -178,20 +215,31 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
                         suggestions={allKnownMachineOptions}
                         helpText={t.tooltips.machineOption}
                       />
-                      <div>
-                        <label className="block text-sm font-medium text-primary mb-2">كيف تم الحصول على الماكينة؟</label>
-                        <select
-                          name="machineOwnershipType"
-                          data-field={`company.machines.${idx}.machineOwnershipType`}
-                          value={machine.machineOwnershipType || "leased"}
-                          onChange={(e) => actions.handleListItemChange(e, "machines", idx)}
-                          className="w-full ps-3 pe-10 py-3 bg-cream dark:bg-espresso-light text-base text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
-                        >
-                          <option value="leased">إيجار</option>
-                          <option value="consumption">مقابل الاستهلاك</option>
-                        </select>
-                      </div>
-                      {(machine.machineOwnershipType === "leased" || machine.machineOwnershipType === "consumption") && (
+                      {/* Rent options only appear for Mido's machines (single mode, or mixed-mode machineOwner === ours) */}
+                      {(formData.hasMultipleMachines !== true || machine.machineOwner !== "client") && (
+                        <div>
+                          <label className="block text-sm font-medium text-primary mb-2">كيف تم الحصول على الماكينة؟</label>
+                          <PortalSelect
+                            name="machineOwnershipType"
+                            dataField={`company.machines.${idx}.machineOwnershipType`}
+                            ariaLabel="كيف تم الحصول على الماكينة؟"
+                            value={machine.machineOwnershipType || "leased"}
+                            options={[
+                              { value: "leased", label: "إيجار" },
+                              { value: "consumption", label: "مقابل الاستهلاك" },
+                            ]}
+                            onChange={(v) =>
+                              actions.handleListItemChange(
+                                { target: { name: "machineOwnershipType", value: v } } as React.ChangeEvent<HTMLInputElement>,
+                                "machines",
+                                idx,
+                              )
+                            }
+                          />
+                        </div>
+                      )}
+                      {(formData.hasMultipleMachines !== true || machine.machineOwner !== "client") &&
+                        (machine.machineOwnershipType === "leased" || machine.machineOwnershipType === "consumption") && (
                         <TextInput
                           label={machine.machineOwnershipType === "leased" ? "قيمة الإيجار اليومي (ج.م)" : "القيمة اليومية (ج.م)"}
                           name="dailyLeaseCost"

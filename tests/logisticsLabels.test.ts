@@ -6,7 +6,37 @@ import {
   formatWorkItemWithCost,
   formatMachineDescription,
   formatMachineDescriptionAr,
+  resolveLogisticsWorkItemCost,
+  getLogisticsWorkItemDisplay,
 } from '../utils/logisticsLabels';
+
+describe('logistics work item display', () => {
+  it('prefers saved costs, falls back to the catalog, and calculates totals', () => {
+    expect(resolveLogisticsWorkItemCost('جوان', undefined, 'part')).toBe(100);
+    expect(resolveLogisticsWorkItemCost('جوان', 125, 'part')).toBe(125);
+    expect(getLogisticsWorkItemDisplay('جوان', 3, undefined, 'part')).toEqual({
+      name: 'جوان',
+      count: 3,
+      unitCost: 100,
+      totalCost: 300,
+    });
+  });
+
+  it('keeps explicit zero costs and leaves unknown custom items unpriced', () => {
+    expect(getLogisticsWorkItemDisplay('Custom part', 2, 0, 'part')).toEqual({
+      name: 'Custom part',
+      count: 2,
+      unitCost: 0,
+      totalCost: 0,
+    });
+    expect(getLogisticsWorkItemDisplay('Custom part', 2, undefined, 'part')).toEqual({
+      name: 'Custom part',
+      count: 2,
+      unitCost: undefined,
+      totalCost: undefined,
+    });
+  });
+});
 
 describe('composeMaintenanceWork', () => {
   it('composes issues, services and parts into one summary', () => {
@@ -110,10 +140,34 @@ describe('formatMachineDescription', () => {
   it('returns empty string when nothing is provided', () => {
     expect(formatMachineDescription()).toBe('');
   });
+
+  it('prepends the machine name when provided', () => {
+    expect(formatMachineDescription('coffee', 'automatic', 'La Marzocco Linea')).toBe(
+      'La Marzocco Linea · Coffee Machine · Automatic',
+    );
+  });
+
+  it('ignores a blank machine name', () => {
+    expect(formatMachineDescription('grinder', undefined, '   ')).toBe('Grinder');
+  });
+
+  it('maps the custom type to "Custom"', () => {
+    expect(formatMachineDescription('other')).toBe('Custom');
+  });
 });
 
 describe('formatMachineDescriptionAr', () => {
   it('combines Arabic category and system labels', () => {
     expect(formatMachineDescriptionAr('grinder', 'semi_automatic')).toBe('مطحنة · نصف أوتوماتيك');
+  });
+
+  it('maps the custom type to "مخصص"', () => {
+    expect(formatMachineDescriptionAr('other')).toBe('مخصص');
+  });
+
+  it('prepends the machine name when provided', () => {
+    expect(formatMachineDescriptionAr('coffee', 'manual', 'Mazzer Super Jolly')).toBe(
+      'Mazzer Super Jolly · ماكينة قهوة · يدوي',
+    );
   });
 });

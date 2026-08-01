@@ -10,7 +10,8 @@ import {
   TruckIcon,
 } from '@heroicons/react/24/outline';
 import ReportIcon from './ReportIcon';
-import { useLogisticsOperations, useCompanyMachines, calculateDailyRentalPrice } from '../hooks/useLogisticsOperations';
+import { useLogisticsOperations, useCompanyMachines, useMachineNames, calculateDailyRentalPrice } from '../hooks/useLogisticsOperations';
+import TextInput from './TextInput';
 import { useToast } from './ToastContext';
 import EmptyState from './EmptyState';
 import CheckboxGroup from './CheckboxGroup';
@@ -54,20 +55,20 @@ const LOGISTICS_ACTIONS = [
 ];
 
 const MACHINE_CATEGORIES = [
-  { value: 'coffee', label: 'ماكينة قهوة' },
-  { value: 'grinder', label: 'مطحنة' },
-  { value: 'other', label: 'أخرى' },
+  { value: 'coffee', label: 'Coffee Machine' },
+  { value: 'grinder', label: 'Grinder' },
+  { value: 'other', label: 'Custom' },
 ];
 
 const MACHINE_OWNERSHIP = [
-  { value: 'customer', label: 'ماكينة عميل' },
-  { value: 'company', label: 'ماكينة شركة' },
+  { value: 'customer', label: 'Customer Machine' },
+  { value: 'company', label: 'Company Machine' },
 ];
 
 const MACHINE_TYPES = [
-  { value: 'manual', label: 'يدوي' },
-  { value: 'automatic', label: 'أوتوماتيك' },
-  { value: 'semi_automatic', label: 'نصف أوتوماتيك' },
+  { value: 'manual', label: 'Manual' },
+  { value: 'automatic', label: 'Automatic' },
+  { value: 'semi_automatic', label: 'Semi-Auto' },
 ];
 
 const SUBTITLE_CLASS = 'text-xs text-latte';
@@ -216,6 +217,12 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
   const { operations, isLoading, createOperation, closeOperation, updateOperation, deleteOperation, refresh } =
     useLogisticsOperations(customerId);
   const { machines: companyMachines } = useCompanyMachines();
+  // Saved machine names/brands offered as suggestions in the name fields.
+  const { names: savedMachineNames } = useMachineNames();
+  const machineNameSuggestions = useMemo(
+    () => savedMachineNames.map((n) => n.name),
+    [savedMachineNames],
+  );
   const {
     parts: mergedPartsList,
     services: mergedServicesList,
@@ -233,10 +240,12 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
   // Form state for new/edit operation
   const [formData, setFormData] = useState({
     machine_category: 'coffee',
+    machine_name: '',
     machine_category_other: '',
     machine_ownership: 'customer',
     machine_type: 'manual',
     given_machine_category: 'coffee',
+    given_machine_name: '',
     given_machine_category_other: '',
     given_machine_type: 'manual',
     replacement_machine_id: null as number | null,
@@ -282,10 +291,12 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
     setDeleteConfirmId(null);
     setFormData({
       machine_category: 'coffee',
+      machine_name: '',
       machine_category_other: '',
       machine_ownership: 'customer',
       machine_type: 'manual',
       given_machine_category: 'coffee',
+      given_machine_name: '',
       given_machine_category_other: '',
       given_machine_type: 'manual',
       replacement_machine_id: null,
@@ -325,10 +336,12 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
     setEditingOpId(op.id);
     setFormData({
       machine_category: cat,
+      machine_name: op.machine_name || '',
       machine_category_other: cat === 'other' ? op.machine_category || '' : '',
       machine_ownership: op.machine_ownership || 'customer',
       machine_type: op.machine_type || 'manual',
       given_machine_category: givenCat,
+      given_machine_name: op.given_machine_name || '',
       given_machine_category_other: givenCat === 'other' ? op.given_machine_category || '' : '',
       given_machine_type: op.given_machine_type || 'manual',
       replacement_machine_id: op.replacement_machine_id ?? null,
@@ -355,6 +368,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
         operation_type: activeType,
         open_date: maintenanceDate,
         machine_category: resolveCategory(formData.machine_category, formData.machine_category_other),
+        machine_name: formData.machine_name.trim() || undefined,
         machine_ownership: formData.machine_ownership,
         machine_type: formData.machine_type,
         // No machine is given for pickup_only — don't store a default description
@@ -362,6 +376,8 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
           activeType !== 'pickup_only'
             ? resolveCategory(formData.given_machine_category, formData.given_machine_category_other)
             : undefined,
+        given_machine_name:
+          activeType !== 'pickup_only' ? formData.given_machine_name.trim() || undefined : undefined,
         given_machine_type: activeType !== 'pickup_only' ? formData.given_machine_type : undefined,
         replacement_machine_id: formData.replacement_machine_id,
         monthly_rental_price: needsRentalPrice && formData.monthly_rental_price
@@ -509,13 +525,13 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
     <div className="text-xs text-latte space-y-0.5">
       <div className="flex items-center gap-1.5">
         <span className="font-medium text-primary dark:text-latte/70">ماكينة العميل:</span>
-        <span>{getCategoryLabel(op.machine_category)}</span>
+        <span>{op.machine_name ? `${op.machine_name} — ` : ''}{getCategoryLabel(op.machine_category)}</span>
         {op.machine_type && <span>· {getTypeLabel(op.machine_type)}</span>}
       </div>
-      {(op.given_machine_category || op.given_machine_type) && (
+      {(op.given_machine_category || op.given_machine_type || op.given_machine_name) && (
         <div className="flex items-center gap-1.5">
           <span className="font-medium text-primary dark:text-latte/70">الماكينة المقدمة:</span>
-          <span>{getCategoryLabel(op.given_machine_category)}</span>
+          <span>{op.given_machine_name ? `${op.given_machine_name} — ` : ''}{getCategoryLabel(op.given_machine_category)}</span>
           {op.given_machine_type && <span>· {getTypeLabel(op.given_machine_type)}</span>}
         </div>
       )}
@@ -907,12 +923,23 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
           {/* Client machine (taken from client) */}
           <div className="p-3 rounded-lg border border-hairline dark:border-hairline space-y-3">
             <h6 className="text-xs font-semibold text-primary dark:text-latte/70">
-              ماكينة العميل (المستلمة)
+              Client Machine (Received)
             </h6>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <TextInput
+                  label="Machine Name"
+                  name="machine_name"
+                  value={formData.machine_name}
+                  onChange={(e) => setFormData((f) => ({ ...f, machine_name: e.target.value }))}
+                  suggestions={machineNameSuggestions}
+                  placeholder="e.g. La Marzocco Linea"
+                />
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-                  فئة الماكينة
+                  Machine Type
                 </label>
                 <select
                   value={formData.machine_category}
@@ -929,14 +956,14 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                     value={formData.machine_category_other}
                     onChange={(e) => setFormData((f) => ({ ...f, machine_category_other: e.target.value }))}
                     className={INPUT_CLASS + ' mt-2'}
-                    placeholder="اكتب الفئة الجديدة..."
+                    placeholder="Type custom type..."
                   />
                 )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-                  نظام الماكينة
+                  Machine System
                 </label>
                 <select
                   value={formData.machine_type}
@@ -951,7 +978,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
 
               <div>
                 <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-                  ملكية الماكينة
+                  Machine Ownership
                 </label>
                 <select
                   value={formData.machine_ownership}
@@ -970,12 +997,23 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
           {activeType !== 'pickup_only' && (
           <div className="p-3 rounded-lg border border-hairline dark:border-hairline space-y-3">
             <h6 className="text-xs font-semibold text-primary dark:text-latte/70">
-              الماكينة المقدمة للعميل
+              Given Machine (Delivered to Client)
             </h6>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <TextInput
+                  label="Machine Name"
+                  name="given_machine_name"
+                  value={formData.given_machine_name}
+                  onChange={(e) => setFormData((f) => ({ ...f, given_machine_name: e.target.value }))}
+                  suggestions={machineNameSuggestions}
+                  placeholder="e.g. La Marzocco Linea"
+                />
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-                  فئة الماكينة
+                  Machine Type
                 </label>
                 <select
                   value={formData.given_machine_category}
@@ -992,14 +1030,14 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                     value={formData.given_machine_category_other}
                     onChange={(e) => setFormData((f) => ({ ...f, given_machine_category_other: e.target.value }))}
                     className={INPUT_CLASS + ' mt-2'}
-                    placeholder="اكتب الفئة الجديدة..."
+                    placeholder="Type custom type..."
                   />
                 )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-                  نظام الماكينة
+                  Machine System
                 </label>
                 <select
                   value={formData.given_machine_type}
@@ -1042,6 +1080,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                       given_machine_category_other: selected && !MACHINE_CATEGORIES.some((c) => c.value === selected.category)
                         ? selected.category
                         : f.given_machine_category_other,
+                      given_machine_name: selected?.name || f.given_machine_name,
                       given_machine_type: selected?.machine_type || f.given_machine_type,
                     }));
                   }}

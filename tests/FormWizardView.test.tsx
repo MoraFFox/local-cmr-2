@@ -105,4 +105,76 @@ describe("FormWizardView", () => {
     // Without branches, 6 visible steps are shown; company info (1) is completed before warehouse (3).
     expect(progress.getByText(/1\s*\/\s*6\s*مكتمل/)).toBeInTheDocument();
   });
+
+  it("switching to multiple machines resets usesOurMachines and tags existing machines", () => {
+    const setFormData = vi.fn();
+    render(
+      <FormWizardView
+        {...baseProps}
+        setFormData={setFormData}
+        formData={{
+          ...initialFormData,
+          hasBranches: false,
+          hasMultipleMachines: null,
+          usesOurMachines: true,
+          machines: [{ id: 1, machineName: "La Marzocco" }],
+        }}
+      />,
+    );
+
+    // Trigger the multi-machine radio "نعم" (value true) — index 1 because
+    // the "hasBranches" radio group also has a "نعم" option rendered earlier.
+    const yesRadio = screen.getAllByRole("radio", { name: "نعم" })[1];
+    fireEvent.click(yesRadio);
+
+    expect(setFormData).toHaveBeenCalled();
+    const updater = setFormData.mock.calls[0][0];
+    // Invoke the updater with the same machine-bearing formData that was rendered
+    const next = updater({
+      ...initialFormData,
+      hasBranches: false,
+      hasMultipleMachines: null,
+      usesOurMachines: true,
+      machines: [{ id: 1, machineName: "La Marzocco" }],
+    });
+    expect(next.hasMultipleMachines).toBe(true);
+    expect(next.usesOurMachines).toBeNull();
+    // Existing machine gets a default machineOwner of "ours"
+    expect(next.machines[0].machineOwner).toBe("ours");
+  });
+
+  it("switching away from multiple machines clears the machine list", () => {
+    const setFormData = vi.fn();
+    render(
+      <FormWizardView
+        {...baseProps}
+        setFormData={setFormData}
+        formData={{
+          ...initialFormData,
+          hasBranches: false,
+          hasMultipleMachines: true,
+          usesOurMachines: null,
+          machines: [{ id: 1, machineName: "La Marzocco", machineOwner: "ours" }],
+        }}
+      />,
+    );
+
+    // Trigger the multi-machine radio "لا" (value false) — index 1 because
+    // the "hasBranches" radio group also has a "لا" option rendered earlier.
+    const noRadio = screen.getAllByRole("radio", { name: "لا" })[1];
+    fireEvent.click(noRadio);
+
+    expect(setFormData).toHaveBeenCalled();
+    const updater = setFormData.mock.calls[0][0];
+    // Invoke the updater with the same machine-bearing formData that was rendered
+    const next = updater({
+      ...initialFormData,
+      hasBranches: false,
+      hasMultipleMachines: true,
+      usesOurMachines: null,
+      machines: [{ id: 1, machineName: "La Marzocco", machineOwner: "ours" }],
+    });
+    expect(next.hasMultipleMachines).toBe(false);
+    expect(next.machines).toEqual([]);
+  });
 });

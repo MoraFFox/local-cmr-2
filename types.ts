@@ -61,6 +61,14 @@ export interface CompanyMachine {
   updated_at?: string;
 }
 
+/** A saved machine name/brand offered as a suggestion in the logistics form. */
+export interface MachineNameEntry {
+  id: number;
+  name: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface LogisticsOperation {
   id: number;
   customer_id: number;
@@ -71,9 +79,13 @@ export interface LogisticsOperation {
   operation_type: 'pickup_and_deliver' | 'deliver_only' | 'pickup_only';
   status: 'open' | 'closed';
   machine_category?: string;
+  /** Name/brand of the client's machine (free text). */
+  machine_name?: string;
   machine_ownership?: string;
   machine_type?: string;
   given_machine_category?: string;
+  /** Name/brand of the given (replacement) machine (free text). */
+  given_machine_name?: string;
   given_machine_type?: string;
   replacement_machine_id?: number | null;
   monthly_rental_price?: number;
@@ -120,6 +132,13 @@ export interface Machine {
   machineName?: string;
   machineType?: string;
   machineOption?: string;
+  /**
+   * Ownership of this individual machine: "ours" = Mido's machine
+   * (rent/lease options apply), "client" = the client's own machine
+   * (no rent options). Used when a company/branch has a MIXED machine
+   * fleet (hasMultipleMachines = true).
+   */
+  machineOwner?: "ours" | "client";
   machineOwnershipType?: "leased" | "consumption";
   dailyLeaseCost?: number;
 }
@@ -134,6 +153,8 @@ export interface Branch {
   baristas: Barista[];
   clientBaristas: ClientBarista[];
   usesOurMachines: boolean | null;
+  /** When true, the branch has a mixed machine fleet — each machine carries its own machineOwner status. */
+  hasMultipleMachines?: boolean | null;
   machines: Machine[];
   machineOwnershipType?: "leased" | "consumption" | "bought";
   dailyLeaseCost?: number;
@@ -214,6 +235,8 @@ export interface FormData {
   location: string;
   hasBranches: boolean | null;
   usesOurMachines: boolean | null;
+  /** When true, the company has a mixed machine fleet — each machine carries its own machineOwner status. */
+  hasMultipleMachines?: boolean | null;
   machines: Machine[];
   machineOwnershipType?: "leased" | "consumption" | "bought";
   dailyLeaseCost?: number;

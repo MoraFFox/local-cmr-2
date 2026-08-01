@@ -8,6 +8,7 @@ import type {
   MaintenanceRecord,
   Contact,
   Branch,
+  Machine,
 } from "../../types";
 
 import Stepper from "../../components/ui/Stepper";
@@ -137,6 +138,17 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
         newState.usesOurMachines = null; newState.machines = [];
       } else if (name === "hasBranches") { newState.branches = []; newState.branchCount = 0; }
       if (name === "usesOurMachines" && value === false) { newState.machines = []; }
+      if (name === "hasMultipleMachines") {
+        // Switching between single and mixed machine fleets: the single-machine
+        // status is only meaningful for the single flow, and a mixed fleet
+        // keeps machines but marks them individually.
+        if (value === true) {
+          newState.usesOurMachines = null;
+          newState.machines = (newState.machines || []).map((m) => ({ ...m, machineOwner: m.machineOwner || "ours" }));
+        } else {
+          newState.machines = [];
+        }
+      }
       return newState;
     });
   }, [setFormData]);
@@ -239,10 +251,10 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
     setFormData((prev) => {
       let ni: unknown;
       switch (ln) {
-        case "branches": ni = { id: nid, branchName: `Branch ${prev.branches.length + 1}`, contacts: [], email: prev.email, location: prev.location, taxNumber: prev.taxNumber, usesOurMachines: null, machines: [], baristas: [], clientBaristas: [], maintenanceHistory: [] }; break;
+        case "branches": ni = { id: nid, branchName: `Branch ${prev.branches.length + 1}`, contacts: [], email: prev.email, location: prev.location, taxNumber: prev.taxNumber, usesOurMachines: null, hasMultipleMachines: null, machines: [], baristas: [], clientBaristas: [], maintenanceHistory: [] }; break;
         case "baristas": ni = { id: nid, name: "", phone: "", notes: "" }; break;
         case "maintenanceHistory": ni = getNewMaintenanceRecord(nid); break;
-        case "machines": ni = { id: nid, machineName: "", machineType: "", machineOption: "", machineOwnershipType: "leased", dailyLeaseCost: 0 }; break;
+        case "machines": ni = { id: nid, machineName: "", machineType: "", machineOption: "", machineOwner: "ours", machineOwnershipType: "leased", dailyLeaseCost: 0 }; break;
       }
       return { ...prev, [ln]: [...prev[ln], ni] };
     });
@@ -257,8 +269,9 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
     setFormData((prev) => {
       const list = [...prev[ln]] as Record<string, unknown>[];
       list[i] = { ...list[i], [name]: type === "checkbox" ? checked : value };
-      if (ln === "branches") { const item = list[i] as Record<string, unknown>; if (name === "usesOurMachines" && value === false) { item.machines = []; } }
-      if (ln === "machines" && name === "machineOwnershipType" && value !== "leased") { delete list[i].dailyLeaseCost; }
+      if (ln === "branches") { const item = list[i] as Record<string, unknown>; if (name === "usesOurMachines" && value === false) { item.machines = []; } if (name === "hasMultipleMachines" && value === true) { item.usesOurMachines = null; item.machines = (item.machines as Machine[] | undefined)?.map((m) => ({ ...m, machineOwner: m.machineOwner || "ours" })) || []; } else if (name === "hasMultipleMachines") { item.machines = []; } }
+      // Client-owned machines never have a rent value (the rent UI is hidden).
+      if (ln === "machines" && name === "machineOwner" && value === "client") { delete list[i].dailyLeaseCost; }
       return { ...prev, [ln]: list };
     });
   }, [setFormData]);
@@ -269,7 +282,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
       const nb = [...prev.branches]; const br = { ...nb[bi] };
       if (ln === "baristas") { (br as Branch & { baristas: Barista[] }).baristas = [...br.baristas, { id: nid, name: "", phone: "", notes: "" }]; }
       else if (ln === "clientBaristas") { (br as Branch & { clientBaristas: ClientBarista[] }).clientBaristas = [...br.clientBaristas, { id: nid, name: "", phone: "", notes: "" }]; }
-      else if (ln === "machines") { br.machines = [...(br.machines || []), { id: nid, machineName: "", machineType: "", machineOption: "", machineOwnershipType: "leased", dailyLeaseCost: 0 }]; }
+      else if (ln === "machines") { br.machines = [...(br.machines || []), { id: nid, machineName: "", machineType: "", machineOption: "", machineOwner: "ours", machineOwnershipType: "leased", dailyLeaseCost: 0 }]; }
       else { br.maintenanceHistory = [...br.maintenanceHistory, getNewMaintenanceRecord(nid)]; }
       nb[bi] = br; return { ...prev, branches: nb };
     });
@@ -288,7 +301,8 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
       const nb = [...prev.branches]; const br = { ...nb[bi] };
       const list = [...(br[ln] as Record<string, unknown>[])];
       list[ii] = { ...list[ii], [name]: value }; 
-      if (ln === "machines" && name === "machineOwnershipType" && value !== "leased") { delete list[ii].dailyLeaseCost; }
+      // Client-owned machines never have a rent value (the rent UI is hidden).
+      if (ln === "machines" && name === "machineOwner" && value === "client") { delete list[ii].dailyLeaseCost; }
       br[ln] = list; nb[bi] = br;
       return { ...prev, branches: nb };
     });

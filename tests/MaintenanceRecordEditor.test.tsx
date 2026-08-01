@@ -222,6 +222,18 @@ describe('MaintenanceRecordEditor (stepper)', () => {
     expect(getStepContent(6)!.textContent).toContain('مطلوب');
   });
 
+  it('renders save and cancel actions as a full-width floating footer in the editor flow', () => {
+    const record = generateMockMaintenanceRecord(29, { partsList, servicesList });
+    renderWithProviders(<MaintenanceRecordEditor {...baseProps} record={record} />);
+
+    const actionBar = screen.getByTestId('maintenance-editor-action-bar');
+    const activeStep = getStepContent(1)!;
+    expect(actionBar).toHaveClass('w-full', 'rounded-xl', 'shadow-lg');
+    expect(actionBar).not.toHaveClass('fixed', 'sticky', 'bottom-0');
+    expect(activeStep.compareDocumentPosition(actionBar) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.queryByTestId('maintenance-editor-bottom-clearance')).not.toBeInTheDocument();
+  });
+
   it('logistics visit toggle collapses the stepper to Basic + Logistics only', async () => {
     const record = generateMockMaintenanceRecord(30, { partsList, servicesList });
     renderWithProviders(<MaintenanceRecordEditor {...baseProps} record={record} />);
@@ -248,6 +260,23 @@ describe('MaintenanceRecordEditor (stepper)', () => {
     fireEvent.click(nextBtn);
     await waitFor(() => expect(getStepContent(7)).toBeInTheDocument());
     expect(getStepContent(1)).toBeNull();
+  });
+
+  it('moves the logistics toggle thumb toward the left when enabled in RTL', () => {
+    const record = generateMockMaintenanceRecord(32, { partsList, servicesList });
+    renderWithProviders(<MaintenanceRecordEditor {...baseProps} record={record} />);
+
+    const toggle = screen.getByRole('switch');
+    const thumb = toggle.querySelector('span')!;
+    const classesBefore = thumb.className.split(/\s+/);
+    expect(classesBefore).not.toContain('translate-x-5');
+
+    fireEvent.click(toggle);
+
+    const classesAfter = thumb.className.split(/\s+/);
+    expect(classesAfter).toContain('ltr:translate-x-5');
+    expect(classesAfter).toContain('rtl:-translate-x-5');
+    expect(classesAfter).not.toContain('translate-x-5');
   });
 
   it('logistics visit toggle relaxes technician/supervisor validation', async () => {

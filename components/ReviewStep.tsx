@@ -8,6 +8,7 @@ import {
   Service,
   PartRecord,
   ServiceRecord,
+  Machine,
 } from "../types";
 import Card from "./Card";
 import Avatar from "./Avatar";
@@ -79,11 +80,21 @@ const ContactReview: React.FC<{ contacts: Contact[] }> = ({ contacts }) => {
 export const getMachineOwnershipStatus = (
   entity: {
     usesOurMachines: boolean | null;
+    hasMultipleMachines?: boolean | null;
+    machines?: Machine[];
     machineOwnershipType?: "leased" | "consumption";
     dailyLeaseCost?: number;
   },
   hideCosts = false,
 ) => {
+  // Mixed machine fleet: each machine carries its own owner status.
+  if (entity.hasMultipleMachines === true) {
+    const machines = entity.machines || [];
+    if (machines.length === 0) return "ماكينات مختلطة";
+    const ours = machines.filter((m) => m.machineOwner !== "client").length;
+    const client = machines.filter((m) => m.machineOwner === "client").length;
+    return `ماكينات مختلطة (ميدوز: ${ours}، العميل: ${client})`;
+  }
   if (
     entity.usesOurMachines === null ||
     typeof entity.usesOurMachines === "undefined"

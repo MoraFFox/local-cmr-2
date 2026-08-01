@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
-import type { CSSProperties, RefObject } from 'react';
+import type { CSSProperties, RefObject, SetStateAction } from 'react';
 
 /**
  * Anchor a floating menu/popover to a trigger element, rendered through a portal
@@ -28,11 +28,13 @@ export interface FloatingMenuOptions {
    * many anchors. Pass an `onOpenChange`-style writer via `setOpen`.
    */
   controlledOpen?: boolean;
+  /** Called when an outside click or Escape requests a controlled menu close. */
+  onOpenChange?: (open: boolean) => void;
 }
 
 export interface FloatingMenuResult {
   open: boolean;
-  setOpen: (open: boolean) => void;
+  setOpen: (open: SetStateAction<boolean>) => void;
   triggerRef: RefObject<HTMLElement | null>;
   contentRef: RefObject<HTMLElement | null>;
   /** Inline style to spread onto the portal content: { top, left } or { visibility:'hidden' }. */
@@ -42,11 +44,24 @@ export interface FloatingMenuResult {
 }
 
 export function useFloatingMenu(opts: FloatingMenuOptions = {}): FloatingMenuResult {
-  const { menuWidth = 224, gap = 8, edgeMargin = 8, controlledOpen } = opts;
+  const {
+    menuWidth = 224,
+    gap = 8,
+    edgeMargin = 8,
+    controlledOpen,
+    onOpenChange,
+  } = opts;
 
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
-  const setOpen = setInternalOpen; // uncontrolled callers; controlled ones carry state in via controlledOpen
+  const setOpen = useCallback((next: SetStateAction<boolean>) => {
+    if (controlledOpen !== undefined) {
+      const nextValue = typeof next === 'function' ? next(open) : next;
+      onOpenChange?.(nextValue);
+    } else {
+      setInternalOpen(next);
+    }
+  }, [controlledOpen, onOpenChange, open]);
   const triggerRef = useRef<HTMLElement | null>(null);
   const contentRef = useRef<HTMLElement | null>(null);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
@@ -80,7 +95,9 @@ export function useFloatingMenu(opts: FloatingMenuOptions = {}): FloatingMenuRes
     setPos({ top, left });
   }, [menuWidth, gap, edgeMargin]);
 
-  // Position when opening; refresh on scroll/resize while open.
+  // Position when opening; refresh on scroll/resize while open. Observe the
+  // portal content too: filtering an autocomplete can change its height and
+  // require a fresh above/below flip near the viewport edge.
   useLayoutEffect(() => {
     if (!open) {
       setPos(null);
@@ -96,10 +113,16 @@ export function useFloatingMenu(opts: FloatingMenuOptions = {}): FloatingMenuRes
       lastWidthRef.current = window.innerWidth;
       compute();
     };
+    const resizeObserver = typeof ResizeObserver !== 'undefined' && contentRef.current
+      ? new ResizeObserver(compute)
+      : null;
+    if (resizeObserver && contentRef.current) resizeObserver.observe(contentRef.current);
+
     window.addEventListener('scroll', handleScroll, true);
     window.addEventListener('resize', handleResize);
     return () => {
       cancelAnimationFrame(raf);
+      resizeObserver?.disconnect();
       window.removeEventListener('scroll', handleScroll, true);
       window.removeEventListener('resize', handleResize);
     };
@@ -123,13 +146,13 @@ export function useFloatingMenu(opts: FloatingMenuOptions = {}): FloatingMenuRes
       document.removeEventListener('mousedown', onMouseDown);
       document.removeEventListener('keydown', onKey);
     };
-  }, [open]);
+  }, [open, setOpen]);
 
   const style: CSSProperties = pos
     ? { top: `${pos.top}px`, left: `${pos.left}px` }
     : { visibility: 'hidden' };
 
-  const toggle = useCallback(() => setOpen((o) => !o), []);
+  const toggle = useCallback(() => setOpen((o) => !o), [setOpen]);
 
   return { open, setOpen, triggerRef, contentRef, style, toggle };
 }

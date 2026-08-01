@@ -3,6 +3,8 @@ import {
   calculateRentalDuration,
   calculateDailyRentalPrice,
   calculateBillableDays,
+  normalizeMachineName,
+  findDuplicateNameGroups,
 } from '../../hooks/useLogisticsOperations';
 
 describe('calculateRentalDuration', () => {
@@ -79,5 +81,60 @@ describe('calculateBillableDays', () => {
 
   it('returns 0 for zero days', () => {
     expect(calculateBillableDays({ days: 0 })).toBe(0);
+  });
+});
+
+describe('normalizeMachineName', () => {
+  it('trims, collapses internal whitespace, and lowercases', () => {
+    expect(normalizeMachineName('  La  Marzocco   Linea ')).toBe('la marzocco linea');
+  });
+
+  it('handles already-clean names', () => {
+    expect(normalizeMachineName('Mazzer Super Jolly')).toBe('mazzer super jolly');
+  });
+
+  it('returns empty string for whitespace-only input', () => {
+    expect(normalizeMachineName('   ')).toBe('');
+  });
+});
+
+describe('findDuplicateNameGroups', () => {
+  const entry = (id: number, name: string) => ({ id, name });
+
+  it('groups case-insensitive duplicates', () => {
+    const groups = findDuplicateNameGroups([
+      entry(1, 'La Marzocco'),
+      entry(2, 'la marzocco'),
+      entry(3, 'Mazzer'),
+    ]);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].map((n) => n.id)).toEqual([1, 2]);
+  });
+
+  it('groups whitespace variants of the same brand', () => {
+    const groups = findDuplicateNameGroups([
+      entry(1, 'Mazzer  Super'),
+      entry(2, ' mazzer super '),
+    ]);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].map((n) => n.id)).toEqual([1, 2]);
+  });
+
+  it('returns no groups when all names are unique', () => {
+    const groups = findDuplicateNameGroups([
+      entry(1, 'La Marzocco'),
+      entry(2, 'Mazzer'),
+      entry(3, 'Nuova Simonelli'),
+    ]);
+    expect(groups).toHaveLength(0);
+  });
+
+  it('ignores empty/whitespace-only names', () => {
+    const groups = findDuplicateNameGroups([entry(1, '   '), entry(2, 'La Marzocco')]);
+    expect(groups).toHaveLength(0);
+  });
+
+  it('handles an empty list', () => {
+    expect(findDuplicateNameGroups([])).toHaveLength(0);
   });
 });

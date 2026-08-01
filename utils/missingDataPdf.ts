@@ -570,7 +570,37 @@ const getCompanyProfileFields = (data: FormData): MissingField[] => {
   }
 
   if (!data.hasBranches) {
-    if (data.usesOurMachines === null || data.usesOurMachines === undefined) {
+    if (data.hasMultipleMachines === true) {
+      // Mixed machine fleet: there is no single usesOurMachines value —
+      // validate each machine's owner (and rent fields for Mido's machines).
+      (data.machines || []).forEach((m, i) => {
+        if (isMissing(m.machineOwner)) {
+          fields.push({
+            key: `company.machines.${i}.machineOwner`,
+            label: "حالة الماكينة",
+            type: "select",
+            options: ["مكينة العميل", "مكينة ميدوز"],
+          });
+        }
+        if (m.machineOwner !== "client") {
+          if (isMissing(m.machineOwnershipType)) {
+            fields.push({
+              key: `company.machines.${i}.machineOwnershipType`,
+              label: "كيف تم الحصول على الماكينة؟",
+              type: "select",
+              options: ["إيجار", "مقابل الاستهلاك"],
+            });
+          }
+          if (m.machineOwnershipType === "leased" && isMissing(m.dailyLeaseCost)) {
+            fields.push({
+              key: `company.machines.${i}.dailyLeaseCost`,
+              label: "قيمة الإيجار اليومي (ج.م)",
+              type: "number",
+            });
+          }
+        }
+      });
+    } else if (data.usesOurMachines === null || data.usesOurMachines === undefined) {
       fields.push({
         key: "company.usesOurMachines",
         label: "هل يستخدمون ماكيناتنا؟",
@@ -579,7 +609,7 @@ const getCompanyProfileFields = (data: FormData): MissingField[] => {
       });
     }
 
-    if (data.usesOurMachines === true) {
+    if (data.hasMultipleMachines !== true && data.usesOurMachines === true) {
       if (isMissing(data.machineOwnershipType)) {
         fields.push({
           key: "company.machineOwnershipType",
@@ -613,7 +643,37 @@ const getBranchProfileFields = (branch: Branch, prefix: string): MissingField[] 
   if (isMissing(branch.location))
     fields.push({ key: `${prefix}.location`, label: "موقع الفرع", type: "text" });
 
-  if (branch.usesOurMachines === null || branch.usesOurMachines === undefined) {
+  if (branch.hasMultipleMachines === true) {
+    // Mixed machine fleet: validate each machine's owner (and rent fields for
+    // Mido's machines). No single usesOurMachines value applies.
+    (branch.machines || []).forEach((m, i) => {
+      if (isMissing(m.machineOwner)) {
+        fields.push({
+          key: `${prefix}.machines.${i}.machineOwner`,
+          label: "حالة الماكينة",
+          type: "select",
+          options: ["مكينة العميل", "مكينة ميدوز"],
+        });
+      }
+      if (m.machineOwner !== "client") {
+        if (isMissing(m.machineOwnershipType)) {
+          fields.push({
+            key: `${prefix}.machines.${i}.machineOwnershipType`,
+            label: "كيف تم الحصول على الماكينة؟",
+            type: "select",
+            options: ["إيجار", "مقابل الاستهلاك"],
+          });
+        }
+        if (m.machineOwnershipType === "leased" && isMissing(m.dailyLeaseCost)) {
+          fields.push({
+            key: `${prefix}.machines.${i}.dailyLeaseCost`,
+            label: "قيمة الإيجار اليومي (ج.م)",
+            type: "number",
+          });
+        }
+      }
+    });
+  } else if (branch.usesOurMachines === null || branch.usesOurMachines === undefined) {
     fields.push({
       key: `${prefix}.usesOurMachines`,
       label: "هل يستخدمون ماكيناتنا؟",
@@ -622,7 +682,7 @@ const getBranchProfileFields = (branch: Branch, prefix: string): MissingField[] 
     });
   }
 
-  if (branch.usesOurMachines === true) {
+  if (branch.hasMultipleMachines !== true && branch.usesOurMachines === true) {
     if (isMissing(branch.machineOwnershipType)) {
       fields.push({
         key: `${prefix}.machineOwnershipType`,
@@ -944,17 +1004,27 @@ export const parseMissingDataPDF = async (
               const optionIndex = Number(name.slice(lastUnderscore + 1));
               const isOwnershipType = baseName.endsWith("machineOwnershipType");
               const isUsesOurMachines = baseName.endsWith("usesOurMachines");
-              const optionValue = isOwnershipType
+              const isMachineOwner = baseName.endsWith("machineOwner");
+              const isPerMachine = baseName.includes(".machines.");
+              const optionValue = isMachineOwner
                 ? optionIndex === 0
-                  ? "شراء"
-                  : "إيجار"
-                : isUsesOurMachines
-                  ? optionIndex === 0
-                    ? "مكينتنا"
-                    : "مكينة العميل"
-                  : optionIndex === 0
-                    ? "نعم"
-                    : "لا";
+                  ? "مكينة العميل"
+                  : "مكينة ميدوز"
+                : isOwnershipType
+                  ? isPerMachine
+                    ? optionIndex === 0
+                      ? "إيجار"
+                      : "مقابل الاستهلاك"
+                    : optionIndex === 0
+                      ? "شراء"
+                      : "إيجار"
+                  : isUsesOurMachines
+                    ? optionIndex === 0
+                      ? "مكينتنا"
+                      : "مكينة العميل"
+                    : optionIndex === 0
+                      ? "نعم"
+                      : "لا";
               result[baseName] = optionValue;
             } else {
               result[name] = "true";
@@ -1056,6 +1126,29 @@ export const applyParsedMissingData = (
           }
           if (field === "name") updated.clientBaristas[index].name = value;
           if (field === "phone") updated.clientBaristas[index].phone = value;
+        } else if (parts[1] === "machines") {
+          // Mixed-fleet per-machine fields: company.machines.N.<field>
+          const index = Number(parts[2]);
+          const field = parts[3];
+          if (!updated.machines[index]) {
+            updated.machines[index] = {
+              id: Date.now() + index,
+              machineName: "",
+              machineType: "",
+              machineOption: "",
+              machineOwner: "ours",
+              machineOwnershipType: "leased" as const,
+            };
+          }
+          if (field === "machineOwner") {
+            updated.machines[index].machineOwner = value === "مكينة العميل" ? "client" : "ours";
+          } else if (field === "machineOwnershipType") {
+            updated.machines[index].machineOwnershipType = value === "مقابل الاستهلاك" ? "consumption" : value === "إيجار" ? "leased" : undefined;
+          } else if (field === "dailyLeaseCost") {
+            updated.machines[index].dailyLeaseCost = Number(value) || undefined;
+          } else {
+            (updated.machines[index] as any)[field] = value;
+          }
         } else {
           const field = parts[1];
           if (field === "hasBranches") {
@@ -1121,6 +1214,29 @@ export const applyParsedMissingData = (
           }
           if (field === "name") branch.clientBaristas[index].name = value;
           if (field === "phone") branch.clientBaristas[index].phone = value;
+        } else if (parts[2] === "machines") {
+          // Mixed-fleet per-machine fields: branch.N.machines.M.<field>
+          const index = Number(parts[3]);
+          const field = parts[4];
+          if (!branch.machines[index]) {
+            branch.machines[index] = {
+              id: Date.now() + index,
+              machineName: "",
+              machineType: "",
+              machineOption: "",
+              machineOwner: "ours",
+              machineOwnershipType: "leased" as const,
+            };
+          }
+          if (field === "machineOwner") {
+            branch.machines[index].machineOwner = value === "مكينة العميل" ? "client" : "ours";
+          } else if (field === "machineOwnershipType") {
+            branch.machines[index].machineOwnershipType = value === "مقابل الاستهلاك" ? "consumption" : value === "إيجار" ? "leased" : undefined;
+          } else if (field === "dailyLeaseCost") {
+            branch.machines[index].dailyLeaseCost = Number(value) || undefined;
+          } else {
+            (branch.machines[index] as any)[field] = value;
+          }
         } else {
           const field = parts[2];
           if (field === "usesOurMachines") {

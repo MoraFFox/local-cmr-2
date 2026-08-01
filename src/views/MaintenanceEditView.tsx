@@ -8,12 +8,11 @@ export interface MaintenanceEditViewProps {
   setView: React.Dispatch<React.SetStateAction<string>>;
   handleUpdateCompany: (updatedCompany: any) => void;
   allPredefinedProblems: string[];
-  isSidebarExpanded: boolean;
 }
 
 const MaintenanceEditView: React.FC<MaintenanceEditViewProps> = ({
   selectedSubmission, setSelectedSubmission, setView, handleUpdateCompany,
-  allPredefinedProblems, isSidebarExpanded
+  allPredefinedProblems
 }) => {
   if (!selectedSubmission) return null;
   return (
@@ -31,7 +30,6 @@ const MaintenanceEditView: React.FC<MaintenanceEditViewProps> = ({
       servicesList={servicesList}
       problemCategories={problemCategories}
       allPredefinedProblems={allPredefinedProblems}
-      isSidebarExpanded={isSidebarExpanded}
     />
   );
 };

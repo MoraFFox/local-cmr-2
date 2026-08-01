@@ -145,6 +145,80 @@ describe('getMissingFields', () => {
     expect(result.company.some((f) => f.key === 'company.dailyLeaseCost')).toBe(true);
   });
 
+  it('does not flag usesOurMachines as missing for a mixed machine fleet', () => {
+    const data = createBaseFormData({
+      hasBranches: false,
+      hasMultipleMachines: true,
+      usesOurMachines: null,
+      machines: [{ id: 1, machineName: 'Machine A', machineOwner: 'ours', machineOwnershipType: 'leased', dailyLeaseCost: 100 }],
+    });
+
+    const result = getMissingFields(data, { scope: 'company' });
+
+    expect(result.company.some((f) => f.key === 'company.usesOurMachines')).toBe(false);
+  });
+
+  it('flags missing per-machine owner in mixed fleet mode', () => {
+    const data = createBaseFormData({
+      hasBranches: false,
+      hasMultipleMachines: true,
+      usesOurMachines: null,
+      machines: [{ id: 1, machineName: 'Machine A' }],
+    });
+
+    const result = getMissingFields(data, { scope: 'company' });
+
+    expect(result.company.some((f) => f.key === 'company.machines.0.machineOwner')).toBe(true);
+  });
+
+  it('flags missing lease cost for a Midos machine in mixed fleet mode', () => {
+    const data = createBaseFormData({
+      hasBranches: false,
+      hasMultipleMachines: true,
+      usesOurMachines: null,
+      machines: [{ id: 1, machineName: 'Machine A', machineOwner: 'ours', machineOwnershipType: 'leased', dailyLeaseCost: undefined }],
+    });
+
+    const result = getMissingFields(data, { scope: 'company' });
+
+    expect(result.company.some((f) => f.key === 'company.machines.0.dailyLeaseCost')).toBe(true);
+  });
+
+  it('does not flag rent fields for a client-owned machine in mixed fleet mode', () => {
+    const data = createBaseFormData({
+      hasBranches: false,
+      hasMultipleMachines: true,
+      usesOurMachines: null,
+      machines: [{ id: 1, machineName: 'Client Machine', machineOwner: 'client' }],
+    });
+
+    const result = getMissingFields(data, { scope: 'company' });
+
+    expect(result.company.some((f) => f.key === 'company.machines.0.machineOwnershipType')).toBe(false);
+    expect(result.company.some((f) => f.key === 'company.machines.0.dailyLeaseCost')).toBe(false);
+  });
+
+  it('applies per-machine owner and rent fields from parsed mixed-fleet data', () => {
+    const data = createBaseFormData({
+      hasBranches: false,
+      hasMultipleMachines: true,
+      usesOurMachines: null,
+      machines: [],
+    });
+
+    const result = applyParsedMissingData(data, {
+      'company.machines.0.machineOwner': 'مكينة العميل',
+      'company.machines.1.machineOwner': 'مكينة ميدوز',
+      'company.machines.1.machineOwnershipType': 'إيجار',
+      'company.machines.1.dailyLeaseCost': '150',
+    });
+
+    expect(result.machines[0].machineOwner).toBe('client');
+    expect(result.machines[1].machineOwner).toBe('ours');
+    expect(result.machines[1].machineOwnershipType).toBe('leased');
+    expect(result.machines[1].dailyLeaseCost).toBe(150);
+  });
+
   it('generates contact slots when contacts array is empty', () => {
     const data = createBaseFormData({ contacts: [] });
     const result = getMissingFields(data, { scope: 'company' });
@@ -751,6 +825,18 @@ describe('parseMissingDataPDF', () => {
     const result = await parseMissingDataPDF(pdfBuffer);
 
     expect(result['company.hasBranches']).toBeUndefined();
+  });
+
+  it('parses mixed-fleet per-machine checkbox options', async () => {
+    const pdfBuffer = await createTestPDF([
+      { name: 'company.machines.0.machineOwner_0', type: 'checkbox', checked: true },
+      { name: 'company.machines.0.machineOwnershipType_1', type: 'checkbox', checked: true },
+    ]);
+
+    const result = await parseMissingDataPDF(pdfBuffer);
+
+    expect(result['company.machines.0.machineOwner']).toBe('مكينة العميل');
+    expect(result['company.machines.0.machineOwnershipType']).toBe('مقابل الاستهلاك');
   });
 });
 

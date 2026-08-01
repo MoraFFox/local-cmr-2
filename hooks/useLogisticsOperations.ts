@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
-import { LogisticsOperation, CompanyMachine, ServiceRecord, PartRecord } from '../types';
+import { LogisticsOperation, CompanyMachine, MachineNameEntry, ServiceRecord, PartRecord } from '../types';
 import { logger } from '../utils/logger';
 import { composeMaintenanceWork } from '../utils/logisticsLabels';
 
@@ -37,10 +37,12 @@ export function calculateBillableDays(duration: { days: number }): number {
 export interface CreateLogisticsOperationInput {
   operation_type: 'pickup_and_deliver' | 'deliver_only' | 'pickup_only';
   machine_category?: string;
+  machine_name?: string;
   machine_ownership?: string;
   machine_type?: string;
   /** Machine given to the client (replacement) — category and system. */
   given_machine_category?: string;
+  given_machine_name?: string;
   given_machine_type?: string;
   replacement_machine_id?: number | null;
   monthly_rental_price?: number;
@@ -67,9 +69,11 @@ export interface CloseOperationData {
 export interface UpdateLogisticsOperationInput {
   operation_type: 'pickup_and_deliver' | 'deliver_only' | 'pickup_only';
   machine_category?: string;
+  machine_name?: string;
   machine_ownership?: string;
   machine_type?: string;
   given_machine_category?: string;
+  given_machine_name?: string;
   given_machine_type?: string;
   replacement_machine_id?: number | null;
   monthly_rental_price?: number;
@@ -137,9 +141,11 @@ export function useLogisticsOperations(customerId: number | null) {
             operation_type: input.operation_type,
             status: 'open',
             machine_category: input.machine_category ?? null,
+            machine_name: input.machine_name ?? null,
             machine_ownership: input.machine_ownership ?? null,
             machine_type: input.machine_type ?? null,
             given_machine_category: input.given_machine_category ?? null,
+            given_machine_name: input.given_machine_name ?? null,
             given_machine_type: input.given_machine_type ?? null,
             replacement_machine_id: input.replacement_machine_id ?? null,
             monthly_rental_price: input.monthly_rental_price != null ? Math.max(0, input.monthly_rental_price) : null,
@@ -231,9 +237,11 @@ export function useLogisticsOperations(customerId: number | null) {
           .update({
             operation_type: input.operation_type,
             machine_category: input.machine_category ?? null,
+            machine_name: input.machine_name ?? null,
             machine_ownership: input.machine_ownership ?? null,
             machine_type: input.machine_type ?? null,
             given_machine_category: input.given_machine_category ?? null,
+            given_machine_name: input.given_machine_name ?? null,
             given_machine_type: input.given_machine_type ?? null,
             replacement_machine_id: input.replacement_machine_id ?? null,
             monthly_rental_price: input.monthly_rental_price != null ? Math.max(0, input.monthly_rental_price) : null,
@@ -419,5 +427,153 @@ export function useCompanyMachines() {
     updateMachine,
     deleteMachine,
     refresh: fetchMachines,
+  };
+}
+
+/**
+ * Normalize a machine name for duplicate detection: trim edges, collapse
+ * internal whitespace, and lowercase. Case/whitespace variants of the same
+ * brand ("La Marzocco" vs "la  marzocco") map to one key.
+ */
+export function normalizeMachineName(name: string): string {
+  return name.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+/**
+ * Group machine names into case/whitespace-insensitive duplicate groups.
+ * Returns only groups with 2+ members, each group ordered by the input order.
+ */
+export function findDuplicateNameGroups(names: MachineNameEntry[]): MachineNameEntry[][] {
+  const byKey = new Map<string, MachineNameEntry[]>();
+  names.forEach((n) => {
+    const key = normalizeMachineName(n.name);
+    if (!key) return;
+    const list = byKey.get(key) ?? [];
+    list.push(n);
+    byKey.set(key, list);
+  });
+  return Array.from(byKey.values()).filter((g) => g.length > 1);
+}
+
+/**
+ * Hook for managing saved machine names/brands. These are offered as
+ * suggestions in the logistics form's Machine Name fields and managed from
+ * the company machines settings page.
+ */
+export function useMachineNames() {
+  const [names, setNames] = useState<MachineNameEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchNames = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { data, error: supaError } = await supabase
+        .from('machine_names')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (supaError) throw new Error(supaError.message);
+      setNames((data as MachineNameEntry[]) ?? []);
+    } catch (err) {
+      const e = err instanceof Error ? err : new Error(String(err));
+      logger.error('Failed to fetch machine names', e, 'logistics');
+      setError(e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchNames();
+  }, [fetchNames]);
+
+  const addMachineName = useCallback(
+    async (name: string): Promise<MachineNameEntry | null> => {
+      const trimmed = name.trim();
+      if (!trimmed) return null;
+      // Friendly duplicate guard — the DB UNIQUE constraint is the backstop,
+      // but surfacing a clear Arabic message beats a raw Postgres 23505 error.
+      if (names.some((n) => n.name.toLowerCase() === trimmed.toLowerCase())) {
+        throw new Error('اسم الماكينة محفوظ بالفعل');
+      }
+      try {
+        const { data, error: supaError } = await supabase
+          .from('machine_names')
+          .insert({ name: trimmed })
+          .select()
+          .single();
+
+        if (supaError) {
+          // Map the DB-level unique-violation (23505) to a friendly Arabic message
+          // as a backstop for races/other sessions the local guard can't see.
+          throw supaError.code === '23505'
+            ? new Error('اسم الماكينة محفوظ بالفعل')
+            : new Error(supaError.message);
+        }
+        const newName = data as MachineNameEntry;
+        setNames((prev) =>
+          [...prev, newName].sort((a, b) => a.name.localeCompare(b.name)),
+        );
+        return newName;
+      } catch (err) {
+        const e = err instanceof Error ? err : new Error('فشل إضافة اسم الماكينة');
+        logger.error('Failed to add machine name', e, 'logistics');
+        throw e;
+      }
+    },
+    [names],
+  );
+
+  const deleteMachineName = useCallback(async (id: number): Promise<void> => {
+    try {
+      const { error: supaError } = await supabase
+        .from('machine_names')
+        .delete()
+        .eq('id', id);
+
+      if (supaError) throw new Error(supaError.message);
+      setNames((prev) => prev.filter((n) => n.id !== id));
+    } catch (err) {
+      const e = err instanceof Error ? err : new Error('فشل حذف اسم الماكينة');
+      logger.error('Failed to delete machine name', e, 'logistics');
+      throw e;
+    }
+  }, []);
+
+  /**
+   * Consolidate near-duplicate names into one: keep the entry with `keepId`
+   * and delete the rest in a single query.
+   */
+  const mergeMachineNames = useCallback(
+    async (keepId: number, duplicateIds: number[]): Promise<void> => {
+      if (duplicateIds.length === 0) return;
+      try {
+        const { error: supaError } = await supabase
+          .from('machine_names')
+          .delete()
+          .in('id', duplicateIds);
+
+        if (supaError) throw new Error(supaError.message);
+        const drop = new Set(duplicateIds);
+        setNames((prev) => prev.filter((n) => n.id === keepId || !drop.has(n.id)));
+      } catch (err) {
+        const e = err instanceof Error ? err : new Error('فشل دمج أسماء الماكينات');
+        logger.error('Failed to merge machine names', e, 'logistics');
+        throw e;
+      }
+    },
+    [],
+  );
+
+  return {
+    names,
+    isLoading,
+    error,
+    addMachineName,
+    deleteMachineName,
+    mergeMachineNames,
+    refresh: fetchNames,
   };
 }

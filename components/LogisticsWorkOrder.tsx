@@ -85,10 +85,10 @@ const LogisticsWorkOrder: React.FC<LogisticsWorkOrderProps> = ({
 }) => {
   const typeLabel = LOGISTICS_TYPE_LABELS_AR[op.operation_type] || op.operation_type;
   const statusLabel = LOGISTICS_STATUS_LABELS[op.status]?.label || op.status;
-  const clientMachine = formatMachineDescriptionAr(op.machine_category, op.machine_type) || '—';
+  const clientMachine = formatMachineDescriptionAr(op.machine_category, op.machine_type, op.machine_name) || '—';
   const givenMachine =
-    op.given_machine_category || op.given_machine_type
-      ? formatMachineDescriptionAr(op.given_machine_category, op.given_machine_type)
+    op.given_machine_category || op.given_machine_type || op.given_machine_name
+      ? formatMachineDescriptionAr(op.given_machine_category, op.given_machine_type, op.given_machine_name)
       : null;
   const dailyRental =
     op.monthly_rental_price != null ? calculateDailyRentalPrice(op.monthly_rental_price) : null;

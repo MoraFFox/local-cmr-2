@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useCompanyMachines } from '../../hooks/useLogisticsOperations';
+import React, { useState, useMemo } from 'react';
+import { useCompanyMachines, useMachineNames, findDuplicateNameGroups, normalizeMachineName } from '../../hooks/useLogisticsOperations';
 import { useToast } from '../../components/ToastContext';
-import { CompanyMachine } from '../../types';
+import { CompanyMachine, MachineNameEntry } from '../../types';
 import {
   PlusCircleIcon,
   TrashIcon,
@@ -45,11 +45,19 @@ const emptyMachineForm = {
 const CompanyMachinesSettings: React.FC = () => {
   const { showToast } = useToast();
   const { machines, isLoading, addMachine, updateMachine, deleteMachine, refresh } = useCompanyMachines();
+  // Saved machine names/brands shown as suggestions in the logistics form.
+  const { names: savedMachineNames, addMachineName, deleteMachineName, mergeMachineNames } = useMachineNames();
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyMachineForm);
   const [isSaving, setIsSaving] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [newName, setNewName] = useState('');
+  const [isAddingName, setIsAddingName] = useState(false);
+  const [deleteNameId, setDeleteNameId] = useState<number | null>(null);
+  // Per duplicate group: the id of the name to keep (keyed by normalized name).
+  const [mergeChoices, setMergeChoices] = useState<Record<string, number>>({});
+  const [isMerging, setIsMerging] = useState(false);
 
   const openAdd = () => {
     setEditId(null);
@@ -110,6 +118,67 @@ const CompanyMachinesSettings: React.FC = () => {
       showToast(err instanceof Error ? err.message : 'فشل حذف الماكينة', 'error');
     }
     setDeleteId(null);
+  };
+
+  const handleAddName = async () => {
+    if (!newName.trim()) {
+      showToast('اكتب اسم الماكينة أولاً', 'error');
+      return;
+    }
+    setIsAddingName(true);
+    try {
+      await addMachineName(newName.trim());
+      setNewName('');
+      showToast('تم حفظ اسم الماكينة', 'success');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'فشل حفظ اسم الماكينة', 'error');
+    } finally {
+      setIsAddingName(false);
+    }
+  };
+
+  const handleDeleteName = async () => {
+    if (deleteNameId === null) return;
+    try {
+      await deleteMachineName(deleteNameId);
+      showToast('تم حذف اسم الماكينة', 'success');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'فشل حذف اسم الماكينة', 'error');
+    }
+    setDeleteNameId(null);
+  };
+
+  // Case/whitespace-insensitive duplicate groups among saved names.
+  const duplicateGroups = useMemo(
+    () => findDuplicateNameGroups(savedMachineNames),
+    [savedMachineNames],
+  );
+
+  // All members of a group share the same normalized key.
+  const getGroupKey = (group: MachineNameEntry[]) => normalizeMachineName(group[0].name);
+
+  // Default: keep the first member of each group unless the user picked another.
+  const getKeepId = (group: MachineNameEntry[]) => mergeChoices[getGroupKey(group)] ?? group[0].id;
+
+  const handleMergeGroup = async (group: MachineNameEntry[]) => {
+    const keepId = getKeepId(group);
+    const duplicateIds = group.filter((n) => n.id !== keepId).map((n) => n.id);
+    if (duplicateIds.length === 0) return;
+    setIsMerging(true);
+    try {
+      await mergeMachineNames(keepId, duplicateIds);
+      showToast('تم دمج الأسماء المكررة', 'success');
+      // Drop the resolved group's choice — the keeper remains, duplicates are gone.
+      setMergeChoices((prev) => {
+        const next = { ...prev };
+        delete next[getGroupKey(group)];
+        return next;
+      });
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'فشل دمج الأسماء المكررة', 'error');
+    } finally {
+      setIsMerging(false);
+    }
   };
 
   const getStatusLabel = (status: string) => STATUS_OPTIONS.find(s => s.value === status)?.label || status;
@@ -199,6 +268,126 @@ const CompanyMachinesSettings: React.FC = () => {
           ))}
         </div>
       )}
+
+      {/* Saved Machine Names — suggested in the logistics form's Machine Name fields */}
+      <div className="mt-10 bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline p-5">
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-bold text-primary dark:text-white">أسماء الماكينات المحفوظة</h2>
+            <p className="text-sm text-latte mt-1">تظهر كاقتراحات عند إدخال اسم الماكينة في نموذج العمليات اللوجستية</p>
+          </div>
+        </div>
+        <div className="flex gap-2 mb-4">
+          <input
+            type="text"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleAddName();
+              }
+            }}
+            className="flex-1 px-3 py-2 bg-white dark:bg-espresso text-primary dark:text-white rounded-lg border border-hairline dark:border-hairline text-sm"
+            placeholder="اكتب اسم ماكينة جديد..."
+            disabled={isAddingName}
+          />
+          <button
+            type="button"
+            onClick={handleAddName}
+            disabled={isAddingName}
+            className="btn-primary flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
+          >
+            <PlusCircleIcon className="w-4 h-4" />
+            {isAddingName ? 'جاري الحفظ...' : 'إضافة'}
+          </button>
+        </div>
+        {savedMachineNames.length === 0 ? (
+          <EmptyState
+            variant="inline"
+            icon={<TruckIcon className="w-5 h-5" />}
+            title="لا توجد أسماء محفوظة"
+            message="أضف أسماء الماكينات التي تتعامل معها لتظهر كاقتراحات عند إدخال اسم الماكينة"
+          />
+        ) : (
+          <ul className="space-y-2">
+            {savedMachineNames.map((n) => (
+              <li
+                key={n.id}
+                className="flex items-center justify-between gap-2 bg-white dark:bg-espresso border border-hairline dark:border-hairline rounded-lg px-3 py-2"
+              >
+                <span className="text-sm text-primary dark:text-white">{n.name}</span>
+                <button
+                  type="button"
+                  onClick={() => setDeleteNameId(n.id)}
+                  className="p-1.5 text-latte hover:text-ember-500 rounded-lg hover:bg-ember-50 dark:hover:bg-ember-500/10 transition-colors"
+                  title="حذف"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {/* Merge near-duplicates — case/whitespace-insensitive groups found in the saved names */}
+        {duplicateGroups.length > 0 && (
+          <div className="mt-5 pt-5 border-t border-hairline dark:border-hairline">
+            <div className="flex items-center gap-2 mb-1">
+              <ExclamationCircleIcon className="w-4 h-4 text-amber-500" />
+              <h3 className="text-sm font-bold text-primary dark:text-white">أسماء مكررة</h3>
+            </div>
+            <p className="text-xs text-latte mb-4">
+              تم العثور على أسماء متشابهة — اختر الاسم الذي تريد الاحتفاظ به وسيتم حذف الباقي.
+            </p>
+            <div className="space-y-3">
+              {duplicateGroups.map((group) => {
+                const keepId = getKeepId(group);
+                const groupKey = getGroupKey(group);
+                return (
+                  <div
+                    key={groupKey}
+                    className="bg-white dark:bg-espresso border border-hairline dark:border-hairline rounded-lg p-3"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <select
+                        value={keepId}
+                        onChange={(e) =>
+                          setMergeChoices((prev) => ({ ...prev, [groupKey]: Number(e.target.value) }))
+                        }
+                        disabled={isMerging}
+                        aria-label="الاسم الذي سيتم الاحتفاظ به"
+                        className="flex-1 min-w-[180px] px-3 py-2 bg-cream dark:bg-espresso-light text-sm text-primary dark:text-white rounded-lg border border-hairline dark:border-hairline focus:outline-none focus:ring-2 focus:ring-primary"
+                      >
+                        {group.map((n) => (
+                          <option key={n.id} value={n.id}>
+                            {n.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => handleMergeGroup(group)}
+                        disabled={isMerging}
+                        className="px-4 py-2 rounded-lg text-sm font-medium bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:hover:bg-amber-900/50 transition-colors disabled:opacity-50"
+                      >
+                        {isMerging ? 'جاري الدمج...' : 'دمج'}
+                      </button>
+                    </div>
+                    <p className="mt-2 text-xs text-latte">
+                      سيتم حذف:{' '}
+                      {group
+                        .filter((n) => n.id !== keepId)
+                        .map((n) => n.name)
+                        .join('، ') || '—'}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Add/Edit Modal */}
       <SafeModal
@@ -302,6 +491,14 @@ const CompanyMachinesSettings: React.FC = () => {
         onConfirm={handleDelete}
         title="تأكيد الحذف"
         message="هل أنت متأكد من حذف هذه الماكينة؟ لا يمكن التراجع عن هذا الإجراء."
+        confirmLabel="حذف"
+      />
+      <ConfirmDialog
+        isOpen={deleteNameId !== null}
+        onClose={() => setDeleteNameId(null)}
+        onConfirm={handleDeleteName}
+        title="تأكيد حذف الاسم"
+        message="هل أنت متأكد من حذف اسم الماكينة هذا؟ لا يمكن التراجع عن هذا الإجراء."
         confirmLabel="حذف"
       />
     </div>

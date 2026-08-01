@@ -54,6 +54,99 @@ describe("Step1_CompanyInfo", () => {
     expect(screen.getByText("حالة الماكينة")).toBeInTheDocument();
   });
 
+  it("shows the multiple-machines question before the single-machine status", () => {
+    const actions = createMockActions();
+    render(
+      <Step1_CompanyInfo
+        formData={createFormData({ hasBranches: false })}
+        actions={actions}
+        newlyAddedId={null}
+      />,
+    );
+
+    expect(screen.getByText("هل لدى العميل أكثر من ماكينة؟")).toBeInTheDocument();
+    // The single-machine status radio still shows when the multi toggle is unanswered
+    expect(screen.getByText("حالة الماكينة")).toBeInTheDocument();
+  });
+
+  it("hides the single-machine status and shows per-machine owner radios in mixed mode", () => {
+    const actions = createMockActions();
+    render(
+      <Step1_CompanyInfo
+        formData={createFormData({
+          hasBranches: false,
+          hasMultipleMachines: true,
+          usesOurMachines: null,
+          machines: [createMachine({ id: 1, machineName: "La Marzocco" })],
+        })}
+        actions={actions}
+        newlyAddedId={1}
+      />,
+    );
+
+    // The single-machine status radio disappears in mixed mode
+    expect(screen.queryByText("هل يستخدمون ماكيناتنا؟")).not.toBeInTheDocument();
+    // Per-machine owner radios appear: client's machine / Midos machine
+    expect(screen.getByText("مكينة العميل")).toBeInTheDocument();
+    expect(screen.getByText("مكينة ميدوز")).toBeInTheDocument();
+  });
+
+  it("shows rent options for a Midos-owned machine in mixed mode", () => {
+    const actions = createMockActions();
+    render(
+      <Step1_CompanyInfo
+        formData={createFormData({
+          hasBranches: false,
+          hasMultipleMachines: true,
+          usesOurMachines: null,
+          machines: [createMachine({ id: 1, machineOwner: "ours", machineOwnershipType: "leased", dailyLeaseCost: 150 })],
+        })}
+        actions={actions}
+        newlyAddedId={1}
+      />,
+    );
+
+    expect(screen.getByText("كيف تم الحصول على الماكينة؟")).toBeInTheDocument();
+    expect(screen.getByLabelText("قيمة الإيجار اليومي (ج.م)")).toBeInTheDocument();
+  });
+
+  it("hides rent options for a client-owned machine in mixed mode", () => {
+    const actions = createMockActions();
+    render(
+      <Step1_CompanyInfo
+        formData={createFormData({
+          hasBranches: false,
+          hasMultipleMachines: true,
+          usesOurMachines: null,
+          machines: [createMachine({ id: 1, machineOwner: "client", machineOwnershipType: "leased", dailyLeaseCost: 150 })],
+        })}
+        actions={actions}
+        newlyAddedId={1}
+      />,
+    );
+
+    expect(screen.queryByText("كيف تم الحصول على الماكينة؟")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("قيمة الإيجار اليومي (ج.م)")).not.toBeInTheDocument();
+  });
+
+  it("shows the machine list in mixed mode even when usesOurMachines is null", () => {
+    const actions = createMockActions();
+    render(
+      <Step1_CompanyInfo
+        formData={createFormData({
+          hasBranches: false,
+          hasMultipleMachines: true,
+          usesOurMachines: null,
+        })}
+        actions={actions}
+        newlyAddedId={null}
+      />,
+    );
+
+    expect(screen.getByText("الماكينات")).toBeInTheDocument();
+    expect(screen.getByText("لا توجد ماكينات")).toBeInTheDocument();
+  });
+
   it("hides machine ownership when hasBranches is true", () => {
     const actions = createMockActions();
     render(
@@ -163,17 +256,19 @@ describe("Step1_CompanyInfo", () => {
       />,
     );
 
-    // The type is now a select, not a free-text input
+    // The type is now a portal-based select, not a free-text input
     const select = screen.getByRole("combobox", { name: "نوع الماكينة (اختياري)" });
     expect(select).toBeInTheDocument();
 
-    // Fixed options + saved types appear; picking a value calls handleListItemChange
+    // Options render once the menu is opened (portal to body)
+    fireEvent.click(select);
     expect(screen.getByRole("option", { name: "ماكينة" })).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "جرايندر" })).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "Delonghi Magnifica S" })).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "أخرى (اكتب نوع جديد)" })).toBeInTheDocument();
 
-    fireEvent.change(select, { target: { value: "Delonghi Magnifica S" } });
+    // Picking a value calls handleListItemChange
+    fireEvent.click(screen.getByRole("option", { name: "Delonghi Magnifica S" }));
     expect(actions.handleListItemChange).toHaveBeenCalledWith(
       expect.objectContaining({ target: expect.objectContaining({ name: "machineType", value: "Delonghi Magnifica S" }) }),
       "machines",
@@ -196,7 +291,8 @@ describe("Step1_CompanyInfo", () => {
     );
 
     const select = screen.getByRole("combobox", { name: "نوع الماكينة (اختياري)" });
-    fireEvent.change(select, { target: { value: "other" } });
+    fireEvent.click(select);
+    fireEvent.click(screen.getByRole("option", { name: "أخرى (اكتب نوع جديد)" }));
 
     // Custom type input appears; typing stores it as machineType
     const customInput = screen.getByPlaceholderText("اكتب نوع الماكينة الجديد...");
@@ -224,8 +320,40 @@ describe("Step1_CompanyInfo", () => {
     );
 
     const select = screen.getByRole("combobox", { name: "نوع الماكينة (اختياري)" });
-    expect(select).toHaveValue("other");
+    // The trigger shows the "أخرى" option while the custom value is kept in state
+    expect(select).toHaveTextContent("أخرى (اكتب نوع جديد)");
     expect(screen.getByDisplayValue("Rancilio Silvia")).toBeInTheDocument();
+  });
+
+  it("shows saved machine names as suggestions in the Machine Name field", () => {
+    const actions = createMockActions();
+    render(
+      <Step1_CompanyInfo
+        formData={createFormData({
+          hasBranches: false,
+          usesOurMachines: true,
+          machines: [createMachine()],
+        })}
+        actions={actions}
+        newlyAddedId={1}
+        allKnownMachineNames={["La Marzocco Linea", "Mazzer Super Jolly"]}
+      />,
+    );
+
+    // Focus the machine name combobox → saved names appear in the dropdown
+    const nameInput = screen.getByPlaceholderText("مثال: La Marzocco");
+    fireEvent.focus(nameInput);
+    expect(screen.getByText("Mazzer Super Jolly")).toBeInTheDocument();
+
+    // Selecting a saved name fills the field via handleListItemChange
+    fireEvent.click(screen.getByText("Mazzer Super Jolly"));
+    expect(actions.handleListItemChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        target: expect.objectContaining({ name: "machineName", value: "Mazzer Super Jolly" }),
+      }),
+      "machines",
+      0,
+    );
   });
 
   it("passes formData values to inputs", () => {

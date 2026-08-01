@@ -250,6 +250,9 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
   // portal so CollapsibleCard's overflow-hidden can't clip it.
   const typoMenu = useFloatingMenu({
     controlledOpen: typoSuggestion !== null,
+    onOpenChange: (open) => {
+      if (!open) setTypoSuggestion(null);
+    },
     menuWidth: 320, // full-width suggestions can be wide
   });
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
@@ -502,7 +505,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               onClick={() => handleFieldChange({ target: { name: "isLogisticsVisit", checked: !record.isLogisticsVisit, type: "checkbox" } } as any)}
               className={`relative w-12 h-7 rounded-full shrink-0 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${record.isLogisticsVisit ? 'bg-amber-500' : 'bg-cream-2 dark:bg-espresso-light border border-hairline dark:border-hairline'}`}
             >
-              <span className={`absolute top-0.5 start-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform duration-200 ${record.isLogisticsVisit ? 'translate-x-5' : ''}`} />
+              <span className={`absolute top-0.5 start-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform duration-200 ${record.isLogisticsVisit ? 'ltr:translate-x-5 rtl:-translate-x-5' : ''}`} />
             </button>
           </div>
 

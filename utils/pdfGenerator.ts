@@ -34,7 +34,8 @@ export const formatMaintenanceDetails = (r: MaintenanceRecord): string => {
   const sections: string[] = [];
 
   if (r.machines && r.machines.length > 0) {
-    const items = r.machines
+    const items = [...r.machines]
+      .sort((a, b) => (b.count || 0) - (a.count || 0))
       .map((m) => `  • ${m.count || 1}x ${rtl(m.name)}`)
       .join("\n");
     sections.push(`Machines:\n${items}`);
@@ -46,7 +47,8 @@ export const formatMaintenanceDetails = (r: MaintenanceRecord): string => {
   }
 
   if (r.partsReplaced && r.partsReplaced.length > 0) {
-    const items = r.partsReplaced
+    const items = [...r.partsReplaced]
+      .sort((a, b) => (b.count || 0) - (a.count || 0))
       .map((p) => {
         const paidBy =
           p.paidByClient === true ? "By Client" : p.paidByClient === false ? "By Midos" : "-";
@@ -57,7 +59,8 @@ export const formatMaintenanceDetails = (r: MaintenanceRecord): string => {
   }
 
   if (r.servicesPerformed && r.servicesPerformed.length > 0) {
-    const items = r.servicesPerformed
+    const items = [...r.servicesPerformed]
+      .sort((a, b) => (b.count || 0) - (a.count || 0))
       .map((s) => `  • ${s.count || 1}x ${rtl(s.name)}`)
       .join("\n");
     sections.push(`Services:\n${items}`);
@@ -690,19 +693,6 @@ export const generateCompanyPDF = async (
       processRecords(b.maintenanceHistory || []);
     });
 
-    // Top Computation
-    const getTop = (record: Record<string, number>) => {
-      let max = 0;
-      let name = "-";
-      Object.entries(record).forEach(([key, val]) => {
-        if (val > max) {
-          max = val;
-          name = key;
-        }
-      });
-      return { name, count: max };
-    };
-
     const sortBreakdown = (record: Record<string, number>) =>
       Object.entries(record)
         .map(([name, count]) => ({ name, count }))
@@ -717,10 +707,6 @@ export const generateCompanyPDF = async (
         totalPartsCost,
         totalServicesCost,
         grandTotal: totalLeaseCost + totalPartsCost + totalServicesCost,
-      },
-      insights: {
-        topIssue: getTop(issueCounts),
-        topPart: getTop(partCounts),
       },
       breakdown: {
         issues: sortBreakdown(issueCounts),
@@ -797,15 +783,6 @@ export const generateCompanyPDF = async (
       "Total Parts Consumed",
       stats.totalPartsCount.toString(),
     ],
-    [
-      "Most Frequent Issue",
-      `${rtl(stats.insights.topIssue.name)} (${stats.insights.topIssue.count})`,
-    ],
-    [
-      "Most Consumed Part",
-      `${rtl(stats.insights.topPart.name)} (${stats.insights.topPart.count})`,
-    ],
-
   ];
 
   autoTable(doc, {
@@ -830,12 +807,14 @@ export const generateCompanyPDF = async (
     drawSectionTitle(doc, "user", "Visit Summary by Branch", yPos);
     yPos += 6;
 
-    const summaryRows = stats.branchVisitSummary.map((b) => [
-      rtl(b.name),
-      b.requested.toString(),
-      b.scheduled.toString(),
-      (b.requested + b.scheduled).toString(),
-    ]);
+    const summaryRows = [...stats.branchVisitSummary]
+      .sort((a, b) => (b.requested + b.scheduled) - (a.requested + a.scheduled))
+      .map((b) => [
+        rtl(b.name),
+        b.requested.toString(),
+        b.scheduled.toString(),
+        (b.requested + b.scheduled).toString(),
+      ]);
 
     const { rows: summaryKept, kept: summaryCols } = pruneBlankColumns(summaryRows);
     const summaryRowsKept = filterBlankRows(summaryKept);
@@ -1507,7 +1486,8 @@ export const generateBranchPDF = async (
         doc.setFont("Amiri", "bold");
         doc.text("Machines:", 18, yPos);
         doc.setFont("Amiri", "normal");
-        const machinesText = r.machines
+        const machinesText = [...r.machines]
+          .sort((a, b) => (b.count || 0) - (a.count || 0))
           .map((m) => `  • ${m.count || 1}x ${rtl(m.name)}`)
           .join("\n");
         const splitMachines = doc.splitTextToSize(machinesText, pageWidth - 40);
@@ -1674,8 +1654,8 @@ export const generateBranchPDF = async (
       doc.setFontSize(9);
       doc.setFont("Amiri", "normal");
       const details: string[] = [];
-      const clientMachine = formatMachineDescription(op.machine_category, op.machine_type);
-      const givenMachine = formatMachineDescription(op.given_machine_category, op.given_machine_type);
+      const clientMachine = formatMachineDescription(op.machine_category, op.machine_type, op.machine_name);
+      const givenMachine = formatMachineDescription(op.given_machine_category, op.given_machine_type, op.given_machine_name);
       if (clientMachine) details.push(`Client Machine: ${clientMachine}`);
       if (givenMachine) details.push(`Given Machine: ${givenMachine}`);
       if (op.open_date) details.push(`Open Date: ${op.open_date}`);

@@ -51,6 +51,7 @@ import { useNetworkStatus } from "./hooks/useNetworkStatus";
 import { useDrafts } from "./hooks/useDrafts";
 import { useTechnicians } from "./hooks/useTechnicians";
 import { useSubmissions } from "./hooks/useSubmissions";
+import { useMachineNames } from "./hooks/useLogisticsOperations";
 import { useOfflineQueue } from "./hooks/useOfflineQueue";
 import { LoadingState } from "./components/ui/LoadingState";
 
@@ -85,6 +86,9 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   const { theme, toggleTheme } = useTheme();
   const { language, toggleLanguage, t, dir } = useLanguage();
   const isOnline = useNetworkStatus();
+  // Saved machine names/brands (managed from the machines settings page) are
+  // merged into the wizard's machine-name suggestions below.
+  const { names: savedMachineNames } = useMachineNames();
   const { isSyncing, processOfflineQueue } = useOfflineQueue();
   const { techniciansMap, getTechnicianDisplayName } = useTechnicians(isOnline);
   const {
@@ -299,6 +303,11 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
     const types = new Set<string>();
     const options = new Set<string>(["Manual", "Automatic", "Semi-Auto"]);
 
+    // Saved machine names from the machine_names table (settings page).
+    savedMachineNames.forEach((n) => {
+      if (n.name) names.add(n.name);
+    });
+
     submissions.forEach(sub => {
       sub.machines?.forEach(m => {
         if (m.machineName) names.add(m.machineName);
@@ -320,7 +329,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
       allKnownMachineTypes: Array.from(types).sort(),
       allKnownMachineOptions: Array.from(options).sort()
     };
-  }, [submissions]);
+  }, [submissions, savedMachineNames]);
 
   // ── Draft actions ──
   const handleLoadDraft = useCallback((draft: Draft) => {
@@ -715,11 +724,9 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
           <MaintenanceEditView
             selectedSubmission={selectedSubmission}
             setSelectedSubmission={setSelectedSubmission}
-            setView={setViewWrapper}
-            handleUpdateCompany={updateCompany}
-            allPredefinedProblems={allPredefinedProblems}
-            isSidebarExpanded={isSidebarExpanded}
-          />
+            setView={setViewWrapper}             handleUpdateCompany={updateCompany}
+             allPredefinedProblems={allPredefinedProblems}
+           />
         );
       case "technicians":
         return <UserAccessView />;

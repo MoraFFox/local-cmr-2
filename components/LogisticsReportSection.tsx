@@ -3,7 +3,12 @@
 import React, { useMemo } from "react";
 import { LogisticsOperation } from "../types";
 import { aggregateLogisticsCosts, formatCurrencyEn } from "../utils/costAggregation";
-import { LOGISTICS_TYPE_LABELS_EN, formatMachineDescription, MAINTENANCE_SECTION_LABELS_EN } from "../utils/logisticsLabels";
+import {
+  LOGISTICS_TYPE_LABELS_EN,
+  formatMachineDescription,
+  getLogisticsWorkItemDisplay,
+  MAINTENANCE_SECTION_LABELS_EN,
+} from "../utils/logisticsLabels";
 import ReportIcon from "./ReportIcon";
 import type { PdfIconName } from "../utils/pdfTheme";
 
@@ -40,6 +45,63 @@ const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     {children}
   </h3>
 );
+
+interface LogisticsDetailItemProps {
+  name: string;
+  count: number;
+  unitCost?: number;
+  totalCost?: number;
+  hideCosts: boolean;
+}
+
+/** One readable quantity/cost block used inside the logistics Details row. */
+const LogisticsDetailItem: React.FC<LogisticsDetailItemProps> = ({
+  name,
+  count,
+  unitCost,
+  totalCost,
+  hideCosts,
+}) => (
+  <div className="border-b border-hairline last:border-b-0 py-1.5 first:pt-0 last:pb-0">
+    <div className="flex items-baseline justify-between gap-2 text-[10px] leading-snug">
+      <span className="font-medium text-text min-w-0 break-words">{count} {name}</span>
+      {!hideCosts && totalCost !== undefined && (
+        <span className="font-bold text-text whitespace-nowrap">{formatCurrencyEn(totalCost)}</span>
+      )}
+    </div>
+    {!hideCosts && unitCost !== undefined && (
+      <div className="text-[9px] text-latte mt-0.5 break-words">{name} = {formatCurrencyEn(unitCost)}</div>
+    )}
+  </div>
+);
+
+interface LogisticsDetailColumnProps {
+  kind: "services" | "parts";
+  items: Array<{ name: string; count: number; cost?: number }>;
+  hideCosts: boolean;
+}
+
+const LogisticsDetailColumn: React.FC<LogisticsDetailColumnProps> = ({ kind, items, hideCosts }) => {
+  const displayItems = items
+    .map((item) => getLogisticsWorkItemDisplay(item.name, item.count, item.cost, kind === "parts" ? "part" : "service"))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+
+  if (displayItems.length === 0) return null;
+
+  return (
+    <div className="min-w-0">
+      <div className="text-[10px] font-bold uppercase text-primary mb-1 flex items-center gap-1">
+        <ReportIcon name={kind === "parts" ? "package" : "wrench"} className="w-3 h-3" />
+        <span>{MAINTENANCE_SECTION_LABELS_EN[kind]}</span>
+      </div>
+      <div>
+        {displayItems.map((item, index) => (
+          <LogisticsDetailItem key={`${item.name}-${index}`} {...item} hideCosts={hideCosts} />
+        ))}
+      </div>
+    </div>
+  );
+};
 
 // ── Main component ──
 
@@ -116,10 +178,10 @@ const LogisticsReportSection: React.FC<LogisticsReportSectionProps> = ({
                     {LOGISTICS_TYPE_LABELS_EN[op.operation_type] || op.operation_type}
                   </td>
                   <td className="px-3 py-2 text-text">
-                    <div>{formatMachineDescription(op.machine_category, op.machine_type) || "-"}</div>
-                    {(op.given_machine_category || op.given_machine_type) && (
+                    <div>{formatMachineDescription(op.machine_category, op.machine_type, op.machine_name) || "-"}</div>
+                    {(op.given_machine_category || op.given_machine_type || op.given_machine_name) && (
                       <div className="text-[10px] text-latte mt-0.5">
-                        Given: {formatMachineDescription(op.given_machine_category, op.given_machine_type)}
+                        Given: {formatMachineDescription(op.given_machine_category, op.given_machine_type, op.given_machine_name)}
                       </div>
                     )}
                   </td>
@@ -156,32 +218,8 @@ const LogisticsReportSection: React.FC<LogisticsReportSectionProps> = ({
                             </>
                           )}
                         </div>
-                        <div className="min-w-0">
-                          {services.length > 0 && (
-                            <>
-                              <div className="text-[10px] font-bold uppercase text-primary mb-0.5 flex items-center gap-1">
-                                <ReportIcon name="wrench" className="w-3 h-3" />
-                                <span>{MAINTENANCE_SECTION_LABELS_EN.services}</span>
-                              </div>
-                              <ul className="list-disc list-inside text-[10px] text-text leading-snug space-y-0.5">
-                                {services.map((s, i) => <li key={i}>{s.count > 1 ? `${s.name} ×${s.count}` : s.name}</li>)}
-                              </ul>
-                            </>
-                          )}
-                        </div>
-                        <div className="min-w-0">
-                          {parts.length > 0 && (
-                            <>
-                              <div className="text-[10px] font-bold uppercase text-primary mb-0.5 flex items-center gap-1">
-                                <ReportIcon name="package" className="w-3 h-3" />
-                                <span>{MAINTENANCE_SECTION_LABELS_EN.parts}</span>
-                              </div>
-                              <ul className="list-disc list-inside text-[10px] text-text leading-snug space-y-0.5">
-                                {parts.map((p, i) => <li key={i}>{p.count > 1 ? `${p.name} ×${p.count}` : p.name}</li>)}
-                              </ul>
-                            </>
-                          )}
-                        </div>
+                        <LogisticsDetailColumn kind="services" items={services} hideCosts={hideCosts} />
+                        <LogisticsDetailColumn kind="parts" items={parts} hideCosts={hideCosts} />
                         {!hasStructured && op.work_done && (
                           <div className="text-[10px] text-text leading-snug col-span-3">{op.work_done}</div>
                         )}
