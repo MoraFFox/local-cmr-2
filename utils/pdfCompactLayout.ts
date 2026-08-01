@@ -22,6 +22,41 @@ import jsPDF from "jspdf";
 export type IgnoreCondition = "null" | "empty" | "zero" | "never";
 
 /**
+ * Placeholder rendered in surviving empty cells (D-10). Replaces the legacy
+ * "—" so readers know the cell is intentionally empty rather than missing.
+ */
+export const NO_DATA_LABEL = "no data";
+
+/**
+ * Column descriptor used for whole-row emptiness checks. Accessors return the
+ * raw cell value; ignoreIf decides which rule treats it as empty.
+ */
+export interface RowCheckColumn<T> {
+  accessor: (row: T) => unknown;
+  ignoreIf: IgnoreCondition;
+}
+
+/**
+ * True when EVERY column of the row is empty per its ignoreIf rule (D-07).
+ * Callers that must keep a row type regardless (D-08 maintenance records)
+ * simply do not pass that row type through this predicate.
+ */
+export const isRowEmpty = <T>(row: T, columns: RowCheckColumn<T>[]): boolean =>
+  columns.every((col) => isValueEmpty(col.accessor(row), col.ignoreIf));
+
+/**
+ * Return the rows that survive the all-empty check plus how many were removed.
+ * Never mutates the input array (D-07).
+ */
+export const filterEmptyRows = <T>(
+  rows: T[],
+  columns: RowCheckColumn<T>[],
+): { rows: T[]; removed: number } => {
+  const kept = rows.filter((row) => !isRowEmpty(row, columns));
+  return { rows: kept, removed: rows.length - kept.length };
+};
+
+/**
  * Check whether a value should be considered empty for PDF layout purposes.
  *
  * @param value The raw value to evaluate.
@@ -153,23 +188,20 @@ export class PDFLayoutEngine {
    */
   /**
    * Add a list/repeater block.
-   * - In compact mode (hideEmptyComponents=true) with no data, it renders a
-   *   compact "No items" placeholder instead of an empty shell.
+   * - In compact mode (hideEmptyComponents=true) with no data, it adds NO
+   *   block at all (D-04) — the surrounding addSection then skips its header
+   *   too, so empty sections vanish completely (no "No X" message).
    * - In draft mode (hideEmptyComponents=false) with no data, it renders the
-   *   full items block so placeholders are preserved.
+   *   full items block so placeholders are preserved (D-05).
    * - When data is present, it always renders the full items block.
    */
   addRepeater<T>(
     data: T[],
     estimatedHeight: number,
-    drawEmpty: (doc: jsPDF, y: number) => number,
     drawItems: (doc: jsPDF, y: number, items: T[]) => number,
   ): void {
+    // D-04: an empty section in a generated report must vanish completely.
     if (this.options.hideEmptyComponents && data.length === 0) {
-      this.addBlock({
-        estimatedHeight: 10,
-        draw: drawEmpty,
-      });
       return;
     }
     this.addBlock({
@@ -204,10 +236,6 @@ export class PDFLayoutEngine {
     this.blocks.push(...childEngine.blocks);
   }
 
-  /**
-   * Add a list/repeater block. If the data is empty, a compact "No items"
-   * message is rendered instead of an empty table/shell.
-   */
   /**
    * Flush all buffered blocks to the PDF, applying page breaks and
    * keep-with-next logic.

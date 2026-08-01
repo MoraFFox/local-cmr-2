@@ -20,6 +20,7 @@ import {
 } from "../utils/internalReportPdf";
 import { generateCompanyPDF, generateBranchPDF } from "../utils/pdfGenerator";
 import { generateMockWizardData } from "../utils/mockData";
+import { isRowEmpty, filterEmptyRows, NO_DATA_LABEL } from "../utils/pdfCompactLayout";
 
 // Capture every string drawn into any jsPDF doc created in this file. The
 // reports embed the Amiri font, whose encoding makes the raw PDF bytes NOT
@@ -984,5 +985,189 @@ describe("internal report PDF generation", () => {
     expect(drawn).not.toContain("EGP");
     expect(drawn).not.toContain("Cost Breakdown");
     expect(drawn).not.toContain("Total Cost");
+  }, 30000);
+});
+
+describe("empty-state suppression (phase 03)", () => {
+  it("isRowEmpty treats 0/null/empty as empty per D-02 and returns true only for all-empty rows", () => {
+    const cols = [
+      { accessor: (r: { a: unknown; b: unknown }) => r.a, ignoreIf: "empty" as const },
+      { accessor: (r: { a: unknown; b: unknown }) => r.b, ignoreIf: "zero" as const },
+    ];
+    // All-empty row → true
+    expect(isRowEmpty({ a: "", b: 0 }, cols)).toBe(true);
+    expect(isRowEmpty({ a: null, b: 0 }, cols)).toBe(true);
+    expect(isRowEmpty({ a: undefined, b: "" }, cols)).toBe(true);
+    // A row with one non-empty cell → false
+    expect(isRowEmpty({ a: "x", b: 0 }, cols)).toBe(false);
+    expect(isRowEmpty({ a: "", b: 5 }, cols)).toBe(false);
+  });
+
+  it("filterEmptyRows drops all-empty rows and never mutates the input", () => {
+    const cols = [{ accessor: (r: { n: number }) => r.n, ignoreIf: "zero" as const }];
+    const rows = [{ n: 0 }, { n: 3 }, { n: 0 }, { n: 9 }];
+    const { rows: kept, removed } = filterEmptyRows(rows, cols);
+    expect(removed).toBe(2);
+    expect(kept.map((r) => r.n)).toEqual([3, 9]);
+    expect(rows).toHaveLength(4); // input untouched
+    expect(NO_DATA_LABEL).toBe("no data");
+  });
+
+  it("a report with no problems renders no 'Most Frequent Problems' header and no placeholder", async () => {
+    const data = generateMockWizardData();
+    const noProblems = {
+      ...data,
+      branches: data.branches.map((b) => ({
+        ...b,
+        maintenanceHistory: (b.maintenanceHistory || []).map((r) => ({
+          ...r,
+          problems: [],
+          partsReplaced: [],
+          servicesPerformed: [],
+        })),
+      })),
+    };
+    drawnStrings.length = 0;
+    const doc = await generateInternalCompanyReport(noProblems, {});
+    expect(doc.output("arraybuffer").byteLength).toBeGreaterThan(1000);
+    const drawn = drawnStrings.join("\n");
+    // D-04: the section itself vanishes — no header, no table header.
+    expect(drawn).not.toContain("Most Frequent Problems");
+    expect(drawn).not.toContain("Problems");
+    expect(drawn).not.toContain("Most Used Parts");
+    // KPI cards still render at 0 (D-06) — and the Resolution Rate sublabel
+    // legitimately reads "No problems", so we must NOT assert its absence.
+    expect(drawn).toContain("Spare Parts");
+  }, 30000);
+
+  it("a zero-cost report renders no Cost Breakdown section (D-09)", async () => {
+    const data = generateMockWizardData();
+    // Blank the zone too — the mock's cairo zone has a non-zero visit fee, so
+    // a truly zero-cost record must have no zone, no parts, no services, no lease.
+    const zeroCost = {
+      ...data,
+      branches: data.branches.map((b) => ({
+        ...b,
+        maintenanceHistory: (b.maintenanceHistory || []).map((r) => ({
+          ...r,
+          partsReplaced: [],
+          servicesPerformed: [],
+          dailyLeaseCost: 0,
+          visitZone: "",
+        })),
+      })),
+    };
+    drawnStrings.length = 0;
+    const doc = await generateInternalBranchReport(data.companyName, zeroCost.branches[0], {});
+    expect(doc.output("arraybuffer").byteLength).toBeGreaterThan(1000);
+    const drawn = drawnStrings.join("\n");
+    expect(drawn).not.toContain("Cost Breakdown");
+    expect(drawn).not.toContain("Visit Fees by Zone");
+  }, 30000);
+
+  it("derived rows with 0 visits are dropped from the zone table (D-07)", async () => {
+    const data = generateMockWizardData();
+    // Both mock branches use the cairo zone; force the breakdown to include a
+    // zero-visit zone by adding an empty zone to the second branch's records.
+    const mixed = {
+      ...data,
+      branches: data.branches.map((b, bi) => ({
+        ...b,
+        maintenanceHistory: (b.maintenanceHistory || []).map((r) => ({
+          ...r,
+          visitZone: bi === 0 ? "cairo" : "alex",
+        })),
+      })),
+    };
+    drawnStrings.length = 0;
+    const doc = await generateInternalBranchReport(data.companyName, mixed.branches[0], {});
+    expect(doc.output("arraybuffer").byteLength).toBeGreaterThan(1000);
+    const drawn = drawnStrings.join("\n");
+    // The zone table may render, but it must not contain a row for a zone the
+    // branch never visited.
+    expect(drawn).not.toContain("alex");
+  }, 30000);
+
+  it("maintenance records with only a date still render (D-08)", async () => {
+    const data = generateMockWizardData();
+    const dateOnly = {
+      ...data,
+      branches: [
+        {
+          ...data.branches[0],
+          maintenanceHistory: [
+            {
+              id: "date-only",
+              maintenanceDate: "2026-06-15",
+              type: "scheduled" as const,
+              hadProblem: false,
+              problemSolved: false,
+              partsWereReplaced: false,
+              paidBy: "company" as const,
+              supervisors: [],
+              baristaName: "",
+              visitZone: "",
+              problems: [],
+              partsReplaced: [],
+              servicesPerformed: [],
+            },
+          ],
+        },
+      ],
+    };
+    drawnStrings.length = 0;
+    const doc = await generateInternalBranchReport(data.companyName, dateOnly.branches[0], {});
+    expect(doc.output("arraybuffer").byteLength).toBeGreaterThan(1000);
+    const drawn = drawnStrings.join("\n");
+    expect(drawn).toContain("15 Jun 2026");
+  }, 30000);
+
+  it("surviving empty cells render 'no data' instead of the old dash (D-10)", async () => {
+    const data = generateMockWizardData();
+    // Keep one record with a technician so the Technician column survives, and
+    // blank the technician on another so its cell shows "no data".
+    const mixed = {
+      ...data,
+      branches: data.branches.map((b) => ({
+        ...b,
+        maintenanceHistory: (b.maintenanceHistory || []).map((r, i) => ({
+          ...r,
+          baristaName: i === 0 ? "" : r.baristaName,
+        })),
+      })),
+    };
+    drawnStrings.length = 0;
+    const doc = await generateInternalCompanyReport(mixed, {});
+    expect(doc.output("arraybuffer").byteLength).toBeGreaterThan(1000);
+    const drawn = drawnStrings.join("\n");
+    expect(drawn).toContain(NO_DATA_LABEL);
+  }, 30000);
+
+  it("batch cover omits the total-cost line when the total is 0 (D-12)", async () => {
+    const base = generateMockWizardData();
+    const rec = {
+      ...base.branches[0].maintenanceHistory[0],
+      id: "batch-zero-1",
+      partsReplaced: [],
+      servicesPerformed: [],
+      dailyLeaseCost: 0,
+      // The mock's cairo zone carries a visit fee, so blank it for a true zero total.
+      visitZone: "",
+    };
+    const items: BatchExportItem[] = [
+      {
+        record: rec,
+        companyId: 1,
+        companyName: "Alpha Co",
+        branchId: 5,
+        branchName: "Branch Five",
+      },
+    ];
+    drawnStrings.length = 0;
+    const doc = await generateBatchReport(items, { mode: "internal", includeSummaryTable: true });
+    expect(doc.output("arraybuffer").byteLength).toBeGreaterThan(1000);
+    const drawn = drawnStrings.join("\n");
+    expect(drawn).not.toContain("Net Cost:");
+    expect(drawn).not.toContain("Total Cost:");
   }, 30000);
 });

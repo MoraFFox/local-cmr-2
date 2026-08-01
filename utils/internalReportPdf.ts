@@ -56,6 +56,8 @@ import {
   isValueEmpty,
   PDFLayoutEngine,
   IgnoreCondition,
+  NO_DATA_LABEL,
+  filterEmptyRows,
 } from "./pdfCompactLayout";
 
 // Keep dynamic Arabic in logical Unicode order. jsPDF's configured Arabic
@@ -70,7 +72,7 @@ const rtl = (text: string | number | null | undefined): string => {
 const getPaidByLabel = (val: string): string => (val === "company" ? "By Midos" : "By Client");
 
 const formatProblemsList = (problems: string[] | undefined): string => {
-  if (!problems || problems.length === 0) return "—";
+  if (!problems || problems.length === 0) return NO_DATA_LABEL;
   return problems.map((p) => rtl(p)).join("\n");
 };
 
@@ -79,7 +81,7 @@ const formatPartsList = (
   showPayer = true,
   showCosts = true,
 ): string => {
-  if (!parts || parts.length === 0) return "—";
+  if (!parts || parts.length === 0) return NO_DATA_LABEL;
   const lines = parts.map((p) => {
     const qty = p.count || 0;
     const payer = showPayer ? ` (${getPaidByLabel(p.paidByClient ? "client" : "company")})` : "";
@@ -99,7 +101,7 @@ const formatServicesList = (
   showPayer = true,
   showCosts = true,
 ): string => {
-  if (!services || services.length === 0) return "—";
+  if (!services || services.length === 0) return NO_DATA_LABEL;
   const lines = services.map((s) => {
     const qty = s.count || 0;
     const payer = showPayer ? ` (${getPaidByLabel(s.paidByClient ? "client" : "company")})` : "";
@@ -253,9 +255,9 @@ const buildFinancialCategories = (costs: AggregatedCosts, costMode = false): Fin
 
 
 const formatPeriod = (records: MaintenanceRecord[]): string => {
-  if (records.length === 0) return "—";
+  if (records.length === 0) return NO_DATA_LABEL;
   const dates = records.map((r) => new Date(r.maintenanceDate)).filter((d) => !isNaN(d.getTime()));
-  if (dates.length === 0) return "—";
+  if (dates.length === 0) return NO_DATA_LABEL;
   dates.sort((a, b) => a.getTime() - b.getTime());
   return `${formatDateEn(dates[0])} — ${formatDateEn(dates[dates.length - 1])}`;
 };
@@ -309,19 +311,6 @@ const buildKPICards = (
   return cards;
 };
 
-// ── Empty-state message helper ──
-const drawEmptyMessage = (doc: jsPDF, y: number, message: string, margin: number): number => {
-  // "italic" is not registered by loadFonts (only normal/bold), so use normal
-  // to avoid jsPDF warning about an unknown font label.
-  doc.setFont("Amiri", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(120, 120, 120);
-  pdfText(doc, message, margin, y + 5, { align: "left" });
-  doc.setFont("Amiri", "normal");
-  doc.setTextColor(...BRAND.text);
-  return y + 10;
-};
-
 // ── Smart info-item builder ──
 interface RawInfoField {
   label: string;
@@ -336,7 +325,7 @@ const buildInfoItems = (fields: RawInfoField[], hideEmpty: boolean): InfoItem[] 
     .filter((field) => !hideEmpty || !isValueEmpty(field.rawValue, field.ignoreIf))
     .map((field) => ({
       label: field.label,
-      value: field.format ? field.format(field.rawValue) : String(field.rawValue || "—"),
+      value: field.format ? field.format(field.rawValue) : String(field.rawValue || NO_DATA_LABEL),
       icon: field.icon,
     }));
 };
@@ -362,20 +351,22 @@ const buildMaintenanceTableColumns = (showPayer = true, clientMode = false): Mai
   const cols: MaintenanceTableColumn[] = [
     { id: "date", label: "Date", accessor: (r) => r.maintenanceDate, ignoreIf: "never", width: 13, format: (r) => formatDateEn(r.maintenanceDate) },
     { id: "type", label: "Type", accessor: (r) => r.type, ignoreIf: "never", width: 12, format: (r) => r.type === "requested" ? rtl(getTypeLabel("requested")) + " ●" : rtl(getTypeLabel(r.type)) },
-    { id: "barista", label: "Technician", accessor: (r) => r.baristaName, ignoreIf: "empty", width: 15, format: (r) => rtl(r.baristaName) || "—" },
-    { id: "zone", label: "Zone", accessor: (r) => r.visitZone, ignoreIf: "empty", width: 13, format: (r) => rtl(r.visitZone) || "—" },
+    { id: "barista", label: "Technician", accessor: (r) => r.baristaName, ignoreIf: "empty", width: 15, format: (r) => rtl(r.baristaName) || NO_DATA_LABEL },
+    { id: "zone", label: "Zone", accessor: (r) => r.visitZone, ignoreIf: "empty", width: 13, format: (r) => rtl(r.visitZone) || NO_DATA_LABEL },
     { id: "problems", label: "Problems", accessor: (r) => (r.problems || []).join(""), ignoreIf: "empty", width: 22, format: (r) => formatProblemsList(r.problems) },
     { id: "solved", label: "Resolved", accessor: () => "always", ignoreIf: "never", width: 10, format: (r) => (r.problemSolved ? "✓ Yes" : "✗ No") },
-    { id: "parts", label: "Parts", accessor: (r) => formatPartsList(r.partsReplaced, showPayer, showCosts), ignoreIf: "empty", width: partsW, format: (r) => formatPartsList(r.partsReplaced, showPayer, showCosts) },
-    { id: "services", label: "Services", accessor: (r) => formatServicesList(r.servicesPerformed, showPayer, showCosts), ignoreIf: "empty", width: servicesW, format: (r) => formatServicesList(r.servicesPerformed, showPayer, showCosts) },
+    // Accessors return the RAW arrays so an all-empty column prunes via
+    // isValueEmpty(..., "empty") (D-07) — formatting happens only in `format`.
+    { id: "parts", label: "Parts", accessor: (r) => r.partsReplaced, ignoreIf: "empty", width: partsW, format: (r) => formatPartsList(r.partsReplaced, showPayer, showCosts) },
+    { id: "services", label: "Services", accessor: (r) => r.servicesPerformed, ignoreIf: "empty", width: servicesW, format: (r) => formatServicesList(r.servicesPerformed, showPayer, showCosts) },
   ];
   if (!clientMode) {
     cols.push(
-      { id: "lease", label: "Daily Lease", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).leaseCost, ignoreIf: "zero", width: 11, format: (r) => { const c = getRecordCostSummary(r, partsList, servicesList); return c.leaseCost > 0 ? formatPdfCurrencyEn(c.leaseCost) : "—"; } },
+      { id: "lease", label: "Daily Lease", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).leaseCost, ignoreIf: "zero", width: 11, format: (r) => { const c = getRecordCostSummary(r, partsList, servicesList); return c.leaseCost > 0 ? formatPdfCurrencyEn(c.leaseCost) : NO_DATA_LABEL; } },
       { id: "total", label: "Record Total", accessor: (r) => getRecordCostSummary(r, partsList, servicesList).total, ignoreIf: "never", width: 14, format: (r) => formatPdfCurrencyEn(getRecordCostSummary(r, partsList, servicesList).total) },
     );
   }
-  cols.push({ id: "rating", label: "Rating", accessor: (r) => r.visitRating, ignoreIf: "zero", width: 10, format: (r) => (r.visitRating ? `★ ${formatEnNumber(r.visitRating)}` : "—") });
+  cols.push({ id: "rating", label: "Rating", accessor: (r) => r.visitRating, ignoreIf: "zero", width: 10, format: (r) => (r.visitRating ? `★ ${formatEnNumber(r.visitRating)}` : NO_DATA_LABEL) });
   return cols;
 };
 
@@ -540,7 +531,7 @@ const drawRecordHeader = (doc: jsPDF, record: MaintenanceRecord, y: number): num
   doc.setFont("Amiri", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...(record.problemSolved ? ([30, 130, 70] as [number, number, number]) : BRAND.textMuted));
-  pdfText(doc, record.hadProblem ? (record.problemSolved ? "✓ Resolved" : "✗ Unresolved") : "—", pageWidth - margin - 4, y + 4.5, { align: "right" });
+  pdfText(doc, record.hadProblem ? (record.problemSolved ? "✓ Resolved" : "✗ Unresolved") : NO_DATA_LABEL, pageWidth - margin - 4, y + 4.5, { align: "right" });
 
   return y + 11;
 };
@@ -635,11 +626,16 @@ const addClientBranchOverview = (
         });
       }
 
-      if (branch.contacts.length > 0) {
-        const contacts: ContactInfo[] = branch.contacts.map((c) => ({
+      // D-07: drop contact rows with no name/phone.
+      const contactRows = filterEmptyRows(branch.contacts, [
+        { accessor: (c) => c.name, ignoreIf: "empty" },
+        { accessor: (c) => c.phoneNumbers.map((p) => p.number).join(" / "), ignoreIf: "empty" },
+      ]).rows;
+      if (contactRows.length > 0) {
+        const contacts: ContactInfo[] = contactRows.map((c) => ({
           name: c.name,
           role: c.customPosition || c.position,
-          phone: c.phoneNumbers.map((p) => p.number).join(" / ") || "—",
+          phone: c.phoneNumbers.map((p) => p.number).join(" / ") || NO_DATA_LABEL,
         }));
         section.addBlock({
           estimatedHeight: 40,
@@ -662,7 +658,7 @@ const addClientBranchOverview = (
             sy = drawTableHeader(doc, ["Name", "Phone"], cw, margin, sy, colW);
             branch.baristas.forEach((b, i) => {
               sy = checkPageBreak(doc, sy, 8);
-              sy = drawTableRow(doc, [rtl(b.name), b.phone || "—"], cw, margin, sy, colW, i % 2 === 1, ["left", "center"]);
+              sy = drawTableRow(doc, [rtl(b.name), b.phone || NO_DATA_LABEL], cw, margin, sy, colW, i % 2 === 1, ["left", "center"]);
             });
             return sy + 6;
           },
@@ -770,23 +766,27 @@ export const generateInternalBranchReport = async (
       const leftColW = pageWidth / 2 - margin - 6;
       const rightColX = pageWidth / 2 + 3;
 
-      // Right column: financial summary (client report has NO costs at all)
+      // Right column: financial summary (client report has NO costs at all).
+      // D-09: the whole Cost Breakdown section vanishes when every category
+      // total is 0 — no header, no shell.
       let financeY = y;
       if (!clientMode) {
-        const financeHeaderY = drawSectionHeader(doc, "Cost Breakdown", y, {
-          x: rightColX,
-          width: leftColW,
-          icon: "money",
-        });
         const financialCategories = buildFinancialCategories(costs, costMode);
-        financeY = drawFinancialSummary(
-          doc,
-          financialCategories,
-          costMode ? costs.grandTotal + costs.totalLeaseRevenue : costs.grandTotalCompanyCost,
-          costMode ? 0 : costs.totalClientPartsCost + costs.totalClientServicesCost,
-          financeHeaderY,
-          costMode ? { grandTotalLabel: "Total Cost" } : undefined,
-        );
+        if (financialCategories.some((c) => c.total > 0)) {
+          const financeHeaderY = drawSectionHeader(doc, "Cost Breakdown", y, {
+            x: rightColX,
+            width: leftColW,
+            icon: "money",
+          });
+          financeY = drawFinancialSummary(
+            doc,
+            financialCategories,
+            costMode ? costs.grandTotal + costs.totalLeaseRevenue : costs.grandTotalCompanyCost,
+            costMode ? 0 : costs.totalClientPartsCost + costs.totalClientServicesCost,
+            financeHeaderY,
+            costMode ? { grandTotalLabel: "Total Cost" } : undefined,
+          );
+        }
       }
 
       // Left column: sidebar. The client report drops the cost-bearing
@@ -794,16 +794,26 @@ export const generateInternalBranchReport = async (
       let sideY = y;
       const contentW = clientMode ? pageWidth - margin * 2 : leftColW;
 
-      if (!clientMode && zoneBreakdown.some((z) => z.visits > 0)) {
+      // D-07: drop zone rows with 0 visits / 0 total before drawing.
+      const zoneRows = filterEmptyRows(zoneBreakdown, [
+        { accessor: (z) => z.visits, ignoreIf: "zero" },
+        { accessor: (z) => z.total, ignoreIf: "zero" },
+      ]).rows;
+      if (!clientMode && zoneRows.length > 0) {
         sideY = checkPageBreak(doc, sideY, 35);
         sideY = drawSectionHeader(doc, "Visit Fees by Zone", sideY, { x: margin, width: leftColW, icon: "location" });
-        sideY = drawZoneTable(doc, zoneBreakdown as ZoneRow[], costs.totalVisitFees, sideY);
+        sideY = drawZoneTable(doc, zoneRows as ZoneRow[], costs.totalVisitFees, sideY);
       }
 
-      if (!clientMode && machineSummary.length > 0) {
+      // D-07: drop machine-fleet rows with no activity (0 days / 0 revenue).
+      const fleetRows = filterEmptyRows(machineSummary, [
+        { accessor: (m) => m.daysActive, ignoreIf: "zero" },
+        { accessor: (m) => m.revenue, ignoreIf: "zero" },
+      ]).rows;
+      if (!clientMode && fleetRows.length > 0) {
         sideY = checkPageBreak(doc, sideY, 35);
         sideY = drawSectionHeader(doc, "Machine Fleet", sideY, { x: margin, width: leftColW, icon: "coffee" });
-        const machines: MachineInfo[] = machineSummary.map((m) => ({
+        const machines: MachineInfo[] = fleetRows.map((m) => ({
           name: m.name,
           type: m.type === "leased" ? "Lease" : m.type === "consumption" ? "Consumption" : "Purchase",
           dailyRate: m.dailyRate,
@@ -831,11 +841,16 @@ export const generateInternalBranchReport = async (
         sideY = drawInfoBox(doc, branchInfo, sideY, { x: margin, width: contentW });
       }
 
-      if (branch.contacts.length > 0) {
-        const contacts: ContactInfo[] = branch.contacts.map((c) => ({
+      // D-07: drop contact rows with no name/phone.
+      const contactRows = filterEmptyRows(branch.contacts, [
+        { accessor: (c) => c.name, ignoreIf: "empty" },
+        { accessor: (c) => c.phoneNumbers.map((p) => p.number).join(" / "), ignoreIf: "empty" },
+      ]).rows;
+      if (contactRows.length > 0) {
+        const contacts: ContactInfo[] = contactRows.map((c) => ({
           name: c.name,
           role: c.customPosition || c.position,
-          phone: c.phoneNumbers.map((p) => p.number).join(" / ") || "—",
+          phone: c.phoneNumbers.map((p) => p.number).join(" / ") || NO_DATA_LABEL,
         }));
         sideY = checkPageBreak(doc, sideY, 40);
         sideY = drawSectionHeader(doc, "Contacts", sideY, { x: margin, width: contentW, icon: "phone" });
@@ -855,7 +870,6 @@ export const generateInternalBranchReport = async (
       section.addRepeater(
         allFlatRecords,
         clientMode ? 50 + allFlatRecords.length * 40 : 40 + allFlatRecords.length * 8,
-        (doc, y) => drawEmptyMessage(doc, y, "No maintenance records", margin),
         (doc, y, items) => clientMode
           ? renderClientRecordBlocks(doc, items, y, photoCache)
           : renderMaintenanceHistoryTable(doc, items, y, hideEmpty, !costMode, clientMode),
@@ -868,10 +882,13 @@ export const generateInternalBranchReport = async (
   engine.addSection(
     "Technician Performance",
     (section) => {
+      // D-07: drop technician rows with 0 visits.
+      const techRows = filterEmptyRows(techSummary, [
+        { accessor: (t) => t.visits, ignoreIf: "zero" },
+      ]).rows;
       section.addRepeater(
-        techSummary,
-        40 + techSummary.length * 8,
-        (doc, y) => drawEmptyMessage(doc, y, "No technician data", margin),
+        techRows,
+        40 + techRows.length * 8,
         (doc, y, items) => {
           const tableW = pageWidth - margin * 2;
           const colWidths = clientMode
@@ -899,7 +916,7 @@ export const generateInternalBranchReport = async (
             const extra = techMap.get(t.name) || { totalCost: 0, zones: {} };
             const zonesStr = Object.entries(extra.zones)
               .map(([zone, count]) => `${rtl(zone)} (${formatEnNumber(count)})`)
-              .join(" · ") || "—";
+              .join(" · ") || NO_DATA_LABEL;
             nextY = checkPageBreak(doc, nextY, 8);
             const cells = clientMode
               ? [rtl(t.name), formatEnNumber(t.visits), t.avgRating > 0 ? `★ ${formatEnNumber(t.avgRating)}/5` : "-", formatEnNumber(t.partsUsed), zonesStr]
@@ -924,8 +941,11 @@ export const generateInternalBranchReport = async (
 
   // Top Problems & Parts
   const topProblems = problemFreq.slice(0, 5);
-  const allParts = Array.from(costs.parts.values())
-    .concat(Array.from(costs.clientParts.values()))
+  // D-07: keep only parts rows with a non-zero count.
+  const allParts = filterEmptyRows(
+    Array.from(costs.parts.values()).concat(Array.from(costs.clientParts.values())),
+    [{ accessor: (p) => p.count, ignoreIf: "zero" }],
+  ).rows
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
 
@@ -942,18 +962,19 @@ export const generateInternalBranchReport = async (
   engine.addSection(
     "Most Frequent Problems",
     (section) => {
+      if (hideEmpty && topProblems.length === 0) {
+        // D-04: an empty section vanishes completely — no header, no message.
+        return;
+      }
       section.addBlock({
-        estimatedHeight: topProblems.length > 0 || !hideEmpty ? 60 : 20,
+        estimatedHeight: 60,
         draw: (doc, y) => {
-          if (hideEmpty && topProblems.length === 0) {
-            return drawEmptyMessage(doc, y, "No problems", margin);
-          }
           const colW = pageWidth - margin * 2;
           const cw = [colW * 0.5, colW * 0.2, colW * 0.3];
           let py = drawTableHeader(doc, ["Problem", "Count", "Last Seen"], cw, margin, y, colW);
           topProblems.forEach((p, i) => {
             py = checkPageBreak(doc, py, 8);
-            py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatDateEn(problemLastDate.get(p.name) || "—")], cw, margin, py, colW, i % 2 === 1, ["left", "center", "right"]);
+            py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), (problemLastDate.get(p.name) ? formatDateEn(problemLastDate.get(p.name)!) : NO_DATA_LABEL)], cw, margin, py, colW, i % 2 === 1, ["left", "center", "right"]);
           });
           return py + 10;
         },
@@ -968,14 +989,12 @@ export const generateInternalBranchReport = async (
     engine.addSection(
       "Logistics — Machine Transport & Replacement",
       (section) => {
-        // Cost summary block — internal/cost reports only
-        if (!clientMode) {
+        // Cost summary block — internal/cost reports only. In compact mode a
+        // zero-cost block vanishes (D-09) so no empty placeholder reaches the page.
+        if (!clientMode && (!hideEmpty || logisticsCosts.totalLogisticsCost > 0)) {
           section.addBlock({
-            estimatedHeight: logisticsCosts.totalLogisticsCost > 0 ? 35 : 15,
+            estimatedHeight: 35,
             draw: (doc, y) => {
-              if (logisticsCosts.totalLogisticsCost <= 0) {
-                return drawEmptyMessage(doc, y, "No logistics costs", margin);
-              }
               const cardW = (pageWidth - margin * 2 - 24) / 5;
               const cardH = 22;
               const cards: Array<{ label: string; value: string; color: [number, number, number]; icon: PdfIconName }> = [
@@ -1012,7 +1031,6 @@ export const generateInternalBranchReport = async (
         section.addRepeater(
           logisticsOps,
           45 + logisticsOps.length * 12,
-          (doc, y) => drawEmptyMessage(doc, y, "No logistics operations", margin),
           (doc, y, items) => clientMode
             ? drawClientLogisticsTable(doc, items, y, margin, { includeCosts: false, headerColor: BRAND.primary })
             : drawLogisticsOperationsTable(doc, items, y, margin),
@@ -1026,12 +1044,13 @@ export const generateInternalBranchReport = async (
   engine.addSection(
     "Most Used Parts",
     (section) => {
+      if (hideEmpty && allParts.length === 0) {
+        // D-04: an empty section vanishes completely — no header, no message.
+        return;
+      }
       section.addBlock({
-        estimatedHeight: allParts.length > 0 || !hideEmpty ? 60 : 20,
+        estimatedHeight: 60,
         draw: (doc, y) => {
-          if (hideEmpty && allParts.length === 0) {
-            return drawEmptyMessage(doc, y, "No parts used", margin);
-          }
           const colW = pageWidth - margin * 2;
           const cw = clientMode ? [colW * 0.6, colW * 0.4] : [colW * 0.5, colW * 0.25, colW * 0.25];
           let py = drawTableHeader(doc, clientMode ? ["Part", "Qty"] : ["Part", "Qty", "Cost"], cw, margin, y, colW);
@@ -1201,16 +1220,26 @@ export const generateInternalCompanyReport = async (
       let sideY = y;
       const contentW = clientMode ? pageWidth - margin * 2 : leftColW;
 
-      if (!clientMode && zoneBreakdown.some((z) => z.visits > 0)) {
+      // D-07: drop zone rows with 0 visits / 0 total before drawing.
+      const zoneRows = filterEmptyRows(zoneBreakdown, [
+        { accessor: (z) => z.visits, ignoreIf: "zero" },
+        { accessor: (z) => z.total, ignoreIf: "zero" },
+      ]).rows;
+      if (!clientMode && zoneRows.length > 0) {
         sideY = checkPageBreak(doc, sideY, 35);
         sideY = drawSectionHeader(doc, "Visit Fees by Zone", sideY, { x: margin, width: leftColW, icon: "location" });
-        sideY = drawZoneTable(doc, zoneBreakdown as ZoneRow[], costs.totalVisitFees, sideY);
+        sideY = drawZoneTable(doc, zoneRows as ZoneRow[], costs.totalVisitFees, sideY);
       }
 
-      if (!clientMode && machineSummary.length > 0) {
+      // D-07: drop machine-fleet rows with no activity (0 days / 0 revenue).
+      const fleetRows = filterEmptyRows(machineSummary, [
+        { accessor: (m) => m.daysActive, ignoreIf: "zero" },
+        { accessor: (m) => m.revenue, ignoreIf: "zero" },
+      ]).rows;
+      if (!clientMode && fleetRows.length > 0) {
         sideY = checkPageBreak(doc, sideY, 35);
         sideY = drawSectionHeader(doc, "Machine Fleet", sideY, { x: margin, width: leftColW, icon: "coffee" });
-        const machines: MachineInfo[] = machineSummary.map((m) => ({
+        const machines: MachineInfo[] = fleetRows.map((m) => ({
           name: m.name,
           type: m.type === "leased" ? "Lease" : m.type === "consumption" ? "Consumption" : "Purchase",
           dailyRate: m.dailyRate,
@@ -1263,7 +1292,6 @@ export const generateInternalCompanyReport = async (
         section.addRepeater(
           branchSummaries,
           40 + branchSummaries.length * 8,
-          (doc, y) => drawEmptyMessage(doc, y, "No branches to compare", margin),
           (doc, y, items) => {
             const tableW = pageWidth - margin * 2;
             const colWidths = [tableW * 0.22, tableW * 0.13, tableW * 0.15, tableW * 0.15, tableW * 0.15, tableW * 0.2];
@@ -1293,10 +1321,13 @@ export const generateInternalCompanyReport = async (
   engine.addSection(
     "Technician Performance",
     (section) => {
+      // D-07: drop technician rows with 0 visits.
+      const techRows = filterEmptyRows(techSummary, [
+        { accessor: (t) => t.visits, ignoreIf: "zero" },
+      ]).rows;
       section.addRepeater(
-        techSummary,
-        40 + techSummary.length * 8,
-        (doc, y) => drawEmptyMessage(doc, y, "No technician data", margin),
+        techRows,
+        40 + techRows.length * 8,
         (doc, y, items) => {
           const tableW = pageWidth - margin * 2;
           const colWidths = clientMode
@@ -1324,7 +1355,7 @@ export const generateInternalCompanyReport = async (
             const extra = techMap.get(t.name) || { totalCost: 0, zones: {} };
             const zonesStr = Object.entries(extra.zones)
               .map(([zone, count]) => `${rtl(zone)} (${formatEnNumber(count)})`)
-              .join(" · ") || "—";
+              .join(" · ") || NO_DATA_LABEL;
             nextY = checkPageBreak(doc, nextY, 8);
             const cells = clientMode
               ? [rtl(t.name), formatEnNumber(t.visits), t.avgRating > 0 ? `★ ${formatEnNumber(t.avgRating)}/5` : "-", formatEnNumber(t.partsUsed), zonesStr]
@@ -1349,8 +1380,11 @@ export const generateInternalCompanyReport = async (
 
   // Top Problems & Parts
   const topProblems = problemFreq.slice(0, 5);
-  const allParts = Array.from(costs.parts.values())
-    .concat(Array.from(costs.clientParts.values()))
+  // D-07: keep only parts rows with a non-zero count.
+  const allParts = filterEmptyRows(
+    Array.from(costs.parts.values()).concat(Array.from(costs.clientParts.values())),
+    [{ accessor: (p) => p.count, ignoreIf: "zero" }],
+  ).rows
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
 
@@ -1367,18 +1401,19 @@ export const generateInternalCompanyReport = async (
   engine.addSection(
     "Most Frequent Problems",
     (section) => {
+      if (hideEmpty && topProblems.length === 0) {
+        // D-04: an empty section vanishes completely — no header, no message.
+        return;
+      }
       section.addBlock({
-        estimatedHeight: topProblems.length > 0 || !hideEmpty ? 60 : 20,
+        estimatedHeight: 60,
         draw: (doc, y) => {
-          if (hideEmpty && topProblems.length === 0) {
-            return drawEmptyMessage(doc, y, "No problems", margin);
-          }
           const colW = pageWidth - margin * 2;
           const cw = [colW * 0.5, colW * 0.2, colW * 0.3];
           let py = drawTableHeader(doc, ["Problem", "Count", "Last Seen"], cw, margin, y, colW);
           topProblems.forEach((p, i) => {
             py = checkPageBreak(doc, py, 8);
-            py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), formatDateEn(problemLastDate.get(p.name) || "—")], cw, margin, py, colW, i % 2 === 1, ["left", "center", "right"]);
+            py = drawTableRow(doc, [rtl(p.name), formatEnNumber(p.count), (problemLastDate.get(p.name) ? formatDateEn(problemLastDate.get(p.name)!) : NO_DATA_LABEL)], cw, margin, py, colW, i % 2 === 1, ["left", "center", "right"]);
           });
           return py + 10;
         },
@@ -1397,7 +1432,6 @@ export const generateInternalCompanyReport = async (
         section.addRepeater(
           allFlatRecords,
           40 + Math.min(allFlatRecords.length, 20) * 8,
-          (doc, y) => drawEmptyMessage(doc, y, "No maintenance records", margin),
           (doc, y, items) => {
             const recentRecords = items.slice(-20);
             return renderMaintenanceHistoryTable(doc, recentRecords, y, hideEmpty, !costMode, clientMode);
@@ -1414,14 +1448,12 @@ export const generateInternalCompanyReport = async (
     engine.addSection(
       "Logistics — Machine Transport & Replacement",
       (section) => {
-        // Cost summary block — internal/cost reports only
-        if (!clientMode) {
+        // Cost summary block — internal/cost reports only. In compact mode a
+        // zero-cost block vanishes (D-09) so no empty placeholder reaches the page.
+        if (!clientMode && (!hideEmpty || logisticsCosts.totalLogisticsCost > 0)) {
           section.addBlock({
-            estimatedHeight: logisticsCosts.totalLogisticsCost > 0 ? 35 : 15,
+            estimatedHeight: 35,
             draw: (doc, y) => {
-              if (logisticsCosts.totalLogisticsCost <= 0) {
-                return drawEmptyMessage(doc, y, "No logistics costs", margin);
-              }
               const cardW = (pageWidth - margin * 2 - 24) / 5;
               const cardH = 22;
               const cards: Array<{ label: string; value: string; color: [number, number, number]; icon: PdfIconName }> = [
@@ -1458,7 +1490,6 @@ export const generateInternalCompanyReport = async (
         section.addRepeater(
           logisticsOps,
           45 + logisticsOps.length * 12,
-          (doc, y) => drawEmptyMessage(doc, y, "No logistics operations", margin),
           (doc, y, items) => clientMode
             ? drawClientLogisticsTable(doc, items, y, margin, { includeCosts: false, headerColor: BRAND.primary })
             : drawLogisticsOperationsTable(doc, items, y, margin),
@@ -1472,12 +1503,13 @@ export const generateInternalCompanyReport = async (
   engine.addSection(
     "Most Used Parts",
     (section) => {
+      if (hideEmpty && allParts.length === 0) {
+        // D-04: an empty section vanishes completely — no header, no message.
+        return;
+      }
       section.addBlock({
-        estimatedHeight: allParts.length > 0 || !hideEmpty ? 60 : 20,
+        estimatedHeight: 60,
         draw: (doc, y) => {
-          if (hideEmpty && allParts.length === 0) {
-            return drawEmptyMessage(doc, y, "No parts used", margin);
-          }
           const colW = pageWidth - margin * 2;
           const cw = clientMode ? [colW * 0.6, colW * 0.4] : [colW * 0.5, colW * 0.25, colW * 0.25];
           let py = drawTableHeader(doc, clientMode ? ["Part", "Qty"] : ["Part", "Qty", "Cost"], cw, margin, y, colW);
@@ -1661,15 +1693,15 @@ const drawVisitDetails = (
   const infoItems: InfoItem[] = [
     { label: "Date:", value: formatDateEn(record.maintenanceDate), icon: "calendar" },
     { label: "Type:", value: record.type === "requested" ? "Requested" : "Scheduled", icon: "doc" },
-    { label: "Technician:", value: rtl(record.baristaName) || "—", icon: "user" },
-    { label: "Zone:", value: rtl(record.visitZone) || "—", icon: "location" },
+    { label: "Technician:", value: rtl(record.baristaName) || NO_DATA_LABEL, icon: "user" },
+    { label: "Zone:", value: rtl(record.visitZone) || NO_DATA_LABEL, icon: "location" },
   ];
   if (!costMode) {
     infoItems.push({ label: "Paid by:", value: getPaidByLabel(record.paidBy), icon: "money" });
   }
   infoItems.push(
-    { label: "Rating:", value: record.visitRating ? `★ ${formatEnNumber(record.visitRating)}/5` : "—", icon: "star" },
-    { label: "Next visit:", value: record.nextVisitDate ? formatDateEn(record.nextVisitDate) : "—", icon: "clock" },
+    { label: "Rating:", value: record.visitRating ? `★ ${formatEnNumber(record.visitRating)}/5` : NO_DATA_LABEL, icon: "star" },
+    { label: "Next visit:", value: record.nextVisitDate ? formatDateEn(record.nextVisitDate) : NO_DATA_LABEL, icon: "clock" },
   );
   if (record.hadProblem) {
     infoItems.push({
@@ -1817,7 +1849,7 @@ const drawVisitDetails = (
     const contacts: ContactInfo[] = record.supervisors.map((s) => ({
       name: s.name,
       role: "Supervisor",
-      phone: s.phone || "—",
+      phone: s.phone || NO_DATA_LABEL,
     }));
     y = drawContactCards(doc, contacts, y);
     y += 4;
@@ -1890,7 +1922,7 @@ const generateVisitReport = async (
         summary.push("Services:");
         fu.servicesPerformed.forEach((s) => summary.push(`  • ${formatEnNumber(s.count || 1)}× ${rtl(s.name)}`));
       }
-      const summaryText = summary.join("\n") || "—";
+      const summaryText = summary.join("\n") || NO_DATA_LABEL;
       const lines = doc.splitTextToSize(summaryText, tableW - 4);
       doc.setFont("Amiri", "normal");
       doc.setFontSize(6.8);
@@ -2011,7 +2043,7 @@ export const generateBatchReport = async (
               ? [{ label: "Selection:", value: options.filterDescription, icon: "check" as PdfIconName }]
               : []),
           ];
-          if (!clientMode) {
+          if (!clientMode && totalCost > 0) {
             infoItems.push({
               label: costMode ? "Total Cost:" : "Net Cost:",
               value: formatPdfCurrencyEn(totalCost),
@@ -2056,7 +2088,7 @@ export const generateBatchReport = async (
                 formatDateEn(r.maintenanceDate),
                 rtl(it.companyName),
                 rtl(it.branchName),
-                rtl(r.baristaName) || "—",
+                rtl(r.baristaName) || NO_DATA_LABEL,
                 getTypeLabel(r.type),
                 status,
               ];
@@ -2111,7 +2143,6 @@ export const generateBatchReport = async (
           section.addRepeater(
             groupItems,
             clientMode ? 50 + groupItems.length * 40 : 40 + groupItems.length * 12,
-            (doc, y) => drawEmptyMessage(doc, y, "No records", margin),
             (doc, y, list) => renderDetailBlocks(doc, y, list),
           );
         },
@@ -2125,7 +2156,6 @@ export const generateBatchReport = async (
         section.addRepeater(
           items,
           clientMode ? 50 + items.length * 40 : 40 + items.length * 12,
-          (doc, y) => drawEmptyMessage(doc, y, "No records", margin),
           (doc, y, list) => renderDetailBlocks(doc, y, list),
         );
       },
