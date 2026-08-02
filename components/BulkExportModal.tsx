@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   XMarkIcon,
   DocumentArrowDownIcon,
+  DocumentTextIcon,
   TableCellsIcon,
   Squares2X2Icon,
   ListBulletIcon,
@@ -19,6 +20,8 @@ interface BulkExportModalProps {
   isGenerating?: boolean;
   onExportPDF: (mode: BulkExportMode, grouped: boolean, includeSummary: boolean) => void;
   onExportCSV: () => void;
+  /** Optional — when provided, a "Export Word" (.docx) button is shown. */
+  onExportWord?: (mode: BulkExportMode, grouped: boolean, includeSummary: boolean) => void;
   title?: string;
 }
 
@@ -39,6 +42,7 @@ const BulkExportModal: React.FC<BulkExportModalProps> = ({
   isGenerating = false,
   onExportPDF,
   onExportCSV,
+  onExportWord,
   title = "Bulk Export",
 }) => {
   const [mode, setMode] = useState<BulkExportMode>("cost");
@@ -202,6 +206,17 @@ const BulkExportModal: React.FC<BulkExportModalProps> = ({
             <TableCellsIcon className="w-4 h-4" />
             CSV
           </button>
+          {onExportWord && (
+            <button
+              type="button"
+              onClick={() => onExportWord(mode, grouped, includeSummary)}
+              disabled={isGenerating || items.length === 0}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-primary dark:text-white bg-white dark:bg-espresso-light border border-hairline dark:border-hairline rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:border-primary/40"
+            >
+              <DocumentTextIcon className="w-4 h-4" />
+              Export Word
+            </button>
+          )}
           <button
             type="button"
             onClick={() => onExportPDF(mode, grouped, includeSummary)}

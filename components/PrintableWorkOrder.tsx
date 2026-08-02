@@ -1,5 +1,5 @@
-import React from 'react';
-import { PrinterIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
+import React, { useState } from 'react';
+import { PrinterIcon, ArrowUturnLeftIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import { Part, Service } from '../types';
 
 interface PrintableWorkOrderProps {
@@ -74,6 +74,22 @@ interface ItemGroup {
 
 const PrintableWorkOrder: React.FC<PrintableWorkOrderProps> = ({ onBack, partsList, servicesList }) => {
     
+    const [exportingWord, setExportingWord] = useState(false);
+
+    const handleExportWord = async () => {
+        if (exportingWord) return;
+        setExportingWord(true);
+        try {
+            const { generateWorkOrderWordReport, downloadWordDoc } = await import('../utils/wordExport');
+            const doc = await generateWorkOrderWordReport(partsList, servicesList);
+            await downloadWordDoc(doc, `Maintenance_Work_Order_${new Date().toISOString().slice(0, 10)}.docx`);
+        } catch (error) {
+            console.error('Error generating Word work order', error);
+        } finally {
+            setExportingWord(false);
+        }
+    };
+
     const serviceGroups = servicesList.reduce((acc, service) => {
         const category = service.category || 'General';
         if (!acc[category]) acc[category] = [];
@@ -92,6 +108,14 @@ const PrintableWorkOrder: React.FC<PrintableWorkOrderProps> = ({ onBack, partsLi
     return (
         <div className="bg-cream-2 dark:bg-espresso p-4 sm:p-8 print:p-0 print:bg-white">
             <div className="fixed bottom-4 start-4 z-30 flex flex-col gap-3 print:hidden">
+                <button
+                    onClick={handleExportWord}
+                    disabled={exportingWord}
+                    className="flex items-center gap-2 bg-primary text-white font-bold py-3 px-5 rounded-full hover:bg-copper-700 transition-colors shadow-lg transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <DocumentArrowDownIcon className="w-6 h-6"/>
+                    <span>Export Word</span>
+                </button>
                 <button
                     onClick={() => window.print()}
                     className="flex items-center gap-2 bg-hover text-white font-bold py-3 px-5 rounded-full hover:bg-copper-700 transition-colors shadow-lg transform active:scale-95"

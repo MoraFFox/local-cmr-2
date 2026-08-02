@@ -123,6 +123,7 @@
   "Export",
   "Export Full Report",
   "Export PDF",
+  "Export Word",
   "Export Summary Report",
   "Export as CSV",
   "Export as JSON",
@@ -398,6 +399,7 @@
   "Warehouse",
   "Work Details",
   "Work Done",
+  "Word",
   "Work Performed",
   "admin@example.com",
   "company@example.com",
@@ -427,5 +429,14 @@
   "🐛 Debug",
   "📋 Mock Wizard",
   "🔧 Mock Maint",
-  "🔧 Mock Tech"
+  "🔧 Mock Tech",
+  "استكمال (PDF)",
+  "استكمال (Word)",
+  "استكمال بيانات ناقصة (PDF)",
+  "استكمال بيانات ناقصة (Word)",
+  "English",
+  "قالب تصدير Word",
+  "عناوين الأقسام والجداول في تقارير Word.",
+  "يُعرض الشعار أعلى التقارير المصدرة. التنسيقات المدعومة: PNG / JPG",
+  "يظهر في نهاية كل تقرير Word. اتركه فارغاً لاستخدام التذييل الافتراضي."
 ]

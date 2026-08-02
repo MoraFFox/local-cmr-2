@@ -283,7 +283,7 @@ const renderPhotoGroup = (
 
 const MaintenanceRecordView: React.FC<{
   record: MaintenanceRecord;
-  onExport?: (record: MaintenanceRecord, mode: "internal" | "client" | "cost") => void;
+  onExport?: (record: MaintenanceRecord, mode: "internal" | "client" | "cost", format: "pdf" | "word") => void;
 }> = ({ record, onExport }) => {
   return (
     <div className={`border-e-2 pe-4 py-3 mb-4 rounded-s-md ${record.isLogisticsVisit ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-500/5' : 'border-primary bg-cream-2'}`}>
@@ -343,7 +343,7 @@ const MaintenanceRecordView: React.FC<{
           {onExport && (
             <PrintDropdown
               label='Visit Report'
-              onPrint={(mode) => onExport(record, mode)}
+              onPrint={(mode, format) => onExport(record, mode, format)}
               className='scale-90 ltr:origin-right rtl:origin-left'
             />
           )}
@@ -1176,15 +1176,15 @@ const PrintableDocument: React.FC<{
 
 const PrintDropdown: React.FC<{
   label: string;
-  onPrint: (mode: "internal" | "client" | "cost") => void;
+  onPrint: (mode: "internal" | "client" | "cost", format: "pdf" | "word") => void;
   className?: string;
   disabled?: boolean;
 }> = ({ label, onPrint, className, disabled }) => {
   const { open: isOpen, setOpen: setIsOpen, triggerRef, contentRef, style, toggle } = useFloatingMenu();
 
-  const handleSelect = (mode: "internal" | "client" | "cost") => {
+  const handleSelect = (mode: "internal" | "client" | "cost", format: "pdf" | "word") => {
     setIsOpen(false);
-    onPrint(mode);
+    onPrint(mode, format);
   };
 
   return (
@@ -1207,40 +1207,40 @@ const PrintDropdown: React.FC<{
       {isOpen && createPortal(
         <div
           ref={contentRef}
-          className='fixed w-56 rounded-md shadow-lg bg-cream border border-hairline focus:outline-none z-[9999] overflow-hidden'
+          className='fixed w-72 rounded-md shadow-lg bg-cream border border-hairline focus:outline-none z-[9999] overflow-hidden'
           style={style}
         >
           <div className='py-1' role='menu' aria-orientation='vertical'>
-            <button
-              onClick={() => handleSelect("internal")}
-              className='block w-full text-start px-4 py-3 text-sm text-text hover:bg-cream-2'
-              role='menuitem'
-            >
-              <span className='font-bold'>Internal Report</span>
-              <span className='block text-xs text-latte mt-0.5'>
-                Includes all costs & financial data
-              </span>
-            </button>
-            <button
-              onClick={() => handleSelect("client")}
-              className='block w-full text-start px-4 py-3 text-sm text-text hover:bg-cream-2 border-t border-hairline'
-              role='menuitem'
-            >
-              <span className='font-bold'>Client Report</span>
-              <span className='block text-xs text-latte mt-0.5'>
-                Hides all cost information
-              </span>
-            </button>
-            <button
-              onClick={() => handleSelect("cost")}
-              className='block w-full text-start px-4 py-3 text-sm text-text hover:bg-cream-2 border-t border-hairline'
-              role='menuitem'
-            >
-              <span className='font-bold'>Cost Report</span>
-              <span className='block text-xs text-latte mt-0.5'>
-                Full costs without payer split
-              </span>
-            </button>
+            {(
+              [
+                { value: "internal", name: "Internal Report", desc: "Includes all costs & financial data" },
+                { value: "client", name: "Client Report", desc: "Hides all cost information" },
+                { value: "cost", name: "Cost Report", desc: "Full costs without payer split" },
+              ] as const
+            ).map((md, idx) => (
+              <div key={md.value} className={`px-4 py-3 ${idx > 0 ? "border-t border-hairline" : ""}`}>
+                <div className='flex items-center justify-between gap-2 mb-1.5'>
+                  <span className='text-sm text-text font-bold'>{md.name}</span>
+                  <div className='flex gap-1.5 shrink-0'>
+                    <button
+                      type='button'
+                      onClick={() => handleSelect(md.value, "pdf")}
+                      className='px-2.5 py-1 text-xs font-bold rounded border border-hairline bg-white dark:bg-espresso-light text-text hover:border-primary/50 hover:text-primary transition-colors'
+                    >
+                      PDF
+                    </button>
+                    <button
+                      type='button'
+                      onClick={() => handleSelect(md.value, "word")}
+                      className='px-2.5 py-1 text-xs font-bold rounded border border-hairline bg-white dark:bg-espresso-light text-text hover:border-primary/50 hover:text-primary transition-colors'
+                    >
+                      Word
+                    </button>
+                  </div>
+                </div>
+                <p className='text-xs text-latte'>{md.desc}</p>
+              </div>
+            ))}
           </div>
         </div>,
         document.body
@@ -1271,6 +1271,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
   const [pendingPrintAction, setPendingPrintAction] = useState<{
     type: "full" | "branch";
     mode: "internal" | "client" | "cost";
+    format: "pdf" | "word";
     branch?: Branch;
   } | null>(null);
 
@@ -1293,13 +1294,13 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
   };
 
   // Intercepted: opens date-range modal instead of generating directly
-  const handlePrintFull = (mode: "internal" | "client" | "cost") => {
-    setPendingPrintAction({ type: "full", mode });
+  const handlePrintFull = (mode: "internal" | "client" | "cost", format: "pdf" | "word") => {
+    setPendingPrintAction({ type: "full", mode, format });
     setShowDateRangeModal(true);
   };
 
-  const handlePrintBranch = (branch: Branch, mode: "internal" | "client" | "cost") => {
-    setPendingPrintAction({ type: "branch", mode, branch });
+  const handlePrintBranch = (branch: Branch, mode: "internal" | "client" | "cost", format: "pdf" | "word") => {
+    setPendingPrintAction({ type: "branch", mode, branch, format });
     setShowDateRangeModal(true);
   };
 
@@ -1307,6 +1308,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
   const handlePrintVisit = async (
     record: MaintenanceRecord,
     mode: "internal" | "client" | "cost",
+    format: "pdf" | "word",
     branch?: Branch,
   ) => {
     if (isGeneratingPDF) return;
@@ -1324,22 +1326,28 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
             email: submission.email,
             taxNumber: submission.taxNumber,
           };
-      if (mode === "internal") {
+      const modeLabel = mode === "internal" ? "Internal" : mode === "client" ? "Client" : "Cost";
+      const baseName = `${submission.companyName.replace(/\s+/g, "_")}_Visit_${record.maintenanceDate}_${modeLabel}_Report`;
+      if (format === "word") {
+        const { generateVisitWordReport, downloadWordDoc } = await import("../utils/wordExport");
+        const doc = await generateVisitWordReport(submission.companyName, entity, record, {
+          clientMode: mode === "client",
+          costMode: mode === "cost",
+        });
+        await downloadWordDoc(doc, `${baseName}.docx`);
+      } else if (mode === "internal") {
         const doc = await generateInternalVisitReport(submission.companyName, entity, record);
-        const fileName = `${submission.companyName.replace(/\s+/g, "_")}_Visit_${record.maintenanceDate}_Internal_Report.pdf`;
-        doc.save(fileName);
+        doc.save(`${baseName}.pdf`);
       } else if (mode === "client") {
         const doc = await generateClientVisitReport(submission.companyName, entity, record);
-        const fileName = `${submission.companyName.replace(/\s+/g, "_")}_Visit_${record.maintenanceDate}_Client_Report.pdf`;
-        doc.save(fileName);
+        doc.save(`${baseName}.pdf`);
       } else {
         const doc = await generateCostVisitReport(submission.companyName, entity, record);
-        const fileName = `${submission.companyName.replace(/\s+/g, "_")}_Visit_${record.maintenanceDate}_Cost_Report.pdf`;
-        doc.save(fileName);
+        doc.save(`${baseName}.pdf`);
       }
     } catch (error) {
       logger.error("Error generating visit report", error, "pdf");
-      showToast("فشل إنشاء PDF. يرجى المحاولة مرة أخرى.", "error");
+      showToast("فشل إنشاء التقرير. يرجى المحاولة مرة أخرى.", "error");
     } finally {
       setIsGeneratingPDF(false);
     }
@@ -1351,10 +1359,41 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
     setShowDateRangeModal(false);
     setIsGeneratingPDF(true);
 
-    const { type, mode, branch } = pendingPrintAction;
+    const { type, mode, branch, format } = pendingPrintAction;
     const filteredSub = getFilteredSubmission(range);
 
     try {
+      // Word export — lazy-load the docx generator (keeps the PDF bundle untouched)
+      if (format === "word") {
+        const word = await import("../utils/wordExport");
+        const dateStr = new Date().toISOString().split("T")[0];
+        const modeLabel = mode === "internal" ? "Internal" : mode === "client" ? "Client" : "Cost";
+        if (type === "full") {
+          const doc = await word.generateCompanyWordReport(filteredSub, {
+            logisticsOperations: logisticsOps,
+            dateRange: range.preset !== "allTime" ? range : undefined,
+            clientMode: mode === "client",
+            costMode: mode === "cost",
+          });
+          await word.downloadWordDoc(
+            doc,
+            `${submission.companyName.replace(/\s+/g, "_")}_${modeLabel}_Report_${dateStr}.docx`,
+          );
+        } else if (branch) {
+          const filteredBranch = filteredSub.branches.find((b) => b.id === branch.id) || branch;
+          const doc = await word.generateBranchWordReport(filteredSub.companyName, filteredBranch, {
+            logisticsOperations: logisticsOps,
+            dateRange: range.preset !== "allTime" ? range : undefined,
+            clientMode: mode === "client",
+            costMode: mode === "cost",
+          });
+          await word.downloadWordDoc(
+            doc,
+            `${submission.companyName.replace(/\s+/g, "_")}_${filteredBranch.branchName?.replace(/\s+/g, "_")}_${modeLabel}_Report_${dateStr}.docx`,
+          );
+        }
+        return;
+      }
       if (type === "full") {
         if (mode === "internal") {
           const doc = await generateInternalCompanyReport(filteredSub, {
@@ -1409,7 +1448,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
       }
     } catch (error) {
       logger.error("Error generating PDF", error, "pdf");
-      showToast("فشل إنشاء PDF. يرجى المحاولة مرة أخرى.", "error");
+      showToast("فشل إنشاء التقرير. يرجى المحاولة مرة أخرى.", "error");
     } finally {
       setIsGeneratingPDF(false);
       setPendingPrintAction(null);
@@ -1435,6 +1474,27 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
     } catch (error) {
       logger.error("Error generating missing data PDF", error, "pdf");
       showToast("فشل إنشاء PDF. يرجى المحاولة مرة أخرى.", "error");
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
+  const handleGenerateMissingDataWord = async (scope: "company" | "branch", branchId?: number) => {
+    if (isGeneratingPDF) return;
+    setIsGeneratingPDF(true);
+    try {
+      const { generateMissingDataWordReport, downloadWordDoc } = await import("../utils/wordExport");
+      const doc = await generateMissingDataWordReport(submission, { scope, branchId, mode: "dynamic" });
+      if (!doc) {
+        showToast("لا توجد بيانات ناقصة لاستكمالها.", "info");
+        return;
+      }
+      const scopeLabel = scope === "company" ? "Company" : "Branch";
+      const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${scopeLabel}_Missing_Data_${new Date().toISOString().split("T")[0]}.docx`;
+      await downloadWordDoc(doc, fileName);
+    } catch (error) {
+      logger.error("Error generating missing data Word report", error, "pdf");
+      showToast("فشل إنشاء التقرير. يرجى المحاولة مرة أخرى.", "error");
     } finally {
       setIsGeneratingPDF(false);
     }
@@ -1522,7 +1582,15 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
               className='flex items-center gap-2 bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-hover transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed'
             >
               <DocumentArrowDownIcon className='w-5 h-5' />
-              استكمال بيانات ناقصة
+              استكمال بيانات ناقصة (PDF)
+            </button>
+            <button
+              onClick={() => handleGenerateMissingDataWord("company")}
+              disabled={isGeneratingPDF}
+              className='flex items-center gap-2 bg-primary/10 text-primary hover:bg-primary/20 font-bold py-2 px-4 rounded-lg transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed'
+            >
+              <DocumentArrowDownIcon className='w-5 h-5' />
+              استكمال بيانات ناقصة (Word)
             </button>
             <PrintDropdown
               label='Export Full Report'
@@ -1664,7 +1732,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                   <MaintenanceRecordView
                     key={r.id}
                     record={r}
-                    onExport={(rec, mode) => handlePrintVisit(rec, mode)}
+                    onExport={(rec, mode, format) => handlePrintVisit(rec, mode, format)}
                   />
                 ))}
               </div>
@@ -1730,12 +1798,20 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                                 className='flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed'
                               >
                                 <DocumentArrowDownIcon className='w-4 h-4' />
-                                استكمال
+                                استكمال (PDF)
+                              </button>
+                              <button
+                                onClick={() => handleGenerateMissingDataWord("branch", branch.id)}
+                                disabled={isGeneratingPDF}
+                                className='flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed'
+                              >
+                                <DocumentArrowDownIcon className='w-4 h-4' />
+                                استكمال (Word)
                               </button>
                               <PrintDropdown
                                 label='Print Branch'
-                                onPrint={(mode) =>
-                                  handlePrintBranch(branch, mode)
+                                onPrint={(mode, format) =>
+                                  handlePrintBranch(branch, mode, format)
                                 }
                                 className='scale-90 ltr:origin-right rtl:origin-left'
                                 disabled={isGeneratingPDF}
@@ -1762,12 +1838,20 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                               className='flex items-center justify-center gap-2 bg-primary/10 text-primary hover:bg-primary/20 font-bold py-2 px-4 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed w-full'
                             >
                               <DocumentArrowDownIcon className='w-4 h-4' />
-                              استكمال
+                              استكمال (PDF)
+                            </button>
+                            <button
+                              onClick={() => handleGenerateMissingDataWord("branch", branch.id)}
+                              disabled={isGeneratingPDF}
+                              className='flex items-center justify-center gap-2 bg-primary/10 text-primary hover:bg-primary/20 font-bold py-2 px-4 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed w-full'
+                            >
+                              <DocumentArrowDownIcon className='w-4 h-4' />
+                              استكمال (Word)
                             </button>
                             <PrintDropdown
                               label='Print Branch Report'
-                              onPrint={(mode) =>
-                                handlePrintBranch(branch, mode)
+                              onPrint={(mode, format) =>
+                                handlePrintBranch(branch, mode, format)
                               }
                               className='w-full'
                               disabled={isGeneratingPDF}
@@ -1890,7 +1974,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                                 <MaintenanceRecordView
                                   key={r.id}
                                   record={r}
-                                  onExport={(rec, mode) => handlePrintVisit(rec, mode, branch)}
+                                  onExport={(rec, mode, format) => handlePrintVisit(rec, mode, format, branch)}
                                 />
                               ))
                             ) : (

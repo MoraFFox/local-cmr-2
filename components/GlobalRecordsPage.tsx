@@ -419,6 +419,28 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
     }
   }, [selectedItems]);
 
+  const handleExportWord = useCallback(async (mode: BulkExportMode, grouped: boolean, includeSummary: boolean) => {
+    if (selectedItems.length === 0) return;
+    setIsGenerating(true);
+    try {
+      const { generateBatchWordReport, downloadWordDoc } = await import('../utils/wordExport');
+      const doc = await generateBatchWordReport(selectedItems, {
+        mode,
+        grouped,
+        includeSummaryTable: includeSummary,
+        filterDescription: 'Selected records from All Records',
+        batchTitle: 'Bulk Export',
+      });
+      const date = new Date().toISOString().slice(0, 10);
+      await downloadWordDoc(doc, `bulk-export-${mode}-${date}.docx`);
+      setIsBulkOpen(false);
+    } catch (err) {
+      console.error('Bulk Word export failed:', err);
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [selectedItems]);
+
   const handleExportCSV = useCallback(() => {
     if (selectedItems.length === 0) return;
     const columns: CSVColumn[] = [
@@ -988,6 +1010,7 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
         isGenerating={isGenerating}
         onExportPDF={handleExportPDF}
         onExportCSV={handleExportCSV}
+        onExportWord={handleExportWord}
       />
     </div>
   );

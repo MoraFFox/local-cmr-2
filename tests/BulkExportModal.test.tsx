@@ -137,6 +137,36 @@ describe("BulkExportModal", () => {
     expect(screen.queryByText(/Combined total/)).toBeNull();
   });
 
+  it("calls onExportWord with the selected mode, grouping and summary flag", () => {
+    const mockOnExportWord = vi.fn();
+    render(
+      <BulkExportModal
+        isOpen={true}
+        onClose={mockOnClose}
+        items={makeItems(2)}
+        onExportPDF={mockOnExportPDF}
+        onExportCSV={mockOnExportCSV}
+        onExportWord={mockOnExportWord}
+      />,
+    );
+    fireEvent.click(screen.getByText("Client"));
+    fireEvent.click(screen.getByText("Export Word"));
+    expect(mockOnExportWord).toHaveBeenCalledWith("client", true, true);
+  });
+
+  it("hides the Word button when onExportWord is not provided", () => {
+    render(
+      <BulkExportModal
+        isOpen={true}
+        onClose={mockOnClose}
+        items={makeItems(1)}
+        onExportPDF={mockOnExportPDF}
+        onExportCSV={mockOnExportCSV}
+      />,
+    );
+    expect(screen.queryByText("Export Word")).toBeNull();
+  });
+
   it("calls onClose when the X button is clicked", () => {
     render(
       <BulkExportModal

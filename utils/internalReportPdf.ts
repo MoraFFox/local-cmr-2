@@ -140,7 +140,7 @@ const mergeItemMaps = (
   return merged;
 };
 
-const buildFinancialCategories = (costs: AggregatedCosts, costMode = false): FinancialCategory[] => {
+export const buildFinancialCategories = (costs: AggregatedCosts, costMode = false): FinancialCategory[] => {
   const categories: FinancialCategory[] = [];
 
   if (costMode) {
@@ -266,7 +266,7 @@ const buildFinancialCategories = (costs: AggregatedCosts, costMode = false): Fin
  * Each category is tagged with the yellow-highlighted group header so the
  * logistics rows are visually distinct from the maintenance-visit rows above.
  */
-const buildLogisticsCategories = (logisticsCosts: AggregatedLogisticsCosts): FinancialCategory[] => {
+export const buildLogisticsCategories = (logisticsCosts: AggregatedLogisticsCosts): FinancialCategory[] => {
   const group = "Midos In House Maintenance";
   const groupHighlight = true;
   const categories: FinancialCategory[] = [];
