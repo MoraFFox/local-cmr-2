@@ -136,7 +136,9 @@ vi.mock('../utils/sharedConstants', () => ({
 // Mock KeyboardShortcutsHelp
 vi.mock('../components/KeyboardShortcutsHelp', () => ({
   KeyboardShortcutsHelpProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  KeyboardShortcutsHelpButton: () => null,
+  KeyboardShortcutsHelpButton: ({ className }: { className?: string }) => (
+    <button type="button" aria-label="اختصارات لوحة المفاتيح" className={className} />
+  ),
 }));
 
 // Mock LoadingState
@@ -235,6 +237,20 @@ describe('App — Lazy Loading & Suspense', () => {
         expect(drawer).toHaveAttribute('aria-hidden', 'true');
       });
       expect(document.activeElement).toBe(hamburger);
+    });
+  });
+
+  describe('mobile header', () => {
+    it('uses flexible side columns and hides secondary actions on narrow screens', async () => {
+      renderApp('/');
+
+      const header = screen.getByRole('banner');
+      await screen.findByTestId('history-view');
+      expect(header).toHaveClass('grid');
+      expect(header).toHaveClass('grid-cols-[auto_minmax(0,1fr)_auto]');
+      expect(header.querySelector('h1')).toHaveClass('min-w-0', 'truncate');
+      expect(screen.getByRole('button', { name: 'اختصارات لوحة المفاتيح' })).toHaveClass('hidden', 'sm:flex');
+      expect(header.querySelector('.w-1\\/4')).not.toBeInTheDocument();
     });
   });
 

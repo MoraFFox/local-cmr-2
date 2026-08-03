@@ -925,8 +925,8 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
       >
         {/* Mobile Header */}
         <OfflineBanner />
-        <header role="banner" className="sticky top-0 z-30 flex items-center justify-between lg:hidden h-16 chrome border-b border-brass/20 px-4 shrink-0">
-          <div className="w-1/4 flex ltr:justify-start rtl:justify-end items-center gap-1">
+        <header role="banner" className="sticky top-0 z-30 grid h-16 w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center chrome border-b border-brass/20 px-2 sm:px-4 lg:hidden shrink-0">
+          <div className="min-w-0 flex items-center gap-0">
             <button
               ref={mobileMenuButtonRef}
               type="button"
@@ -934,14 +934,14 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
               aria-label={t.admin.sidebar.menu}
               aria-expanded={isMobileMenuOpen}
               aria-controls="mobile-sidebar"
-              className="p-2 -me-2 rounded-md text-on-chrome/70 hover:text-on-chrome hover:bg-espresso-light transition-colors shrink-0"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md p-2 text-on-chrome/70 hover:bg-espresso-light hover:text-on-chrome transition-colors"
             >
               <Bars3Icon className="h-6 w-6" aria-hidden="true" />
             </button>
             <button
               type="button"
               onClick={toggleTheme}
-              className="p-2 rounded-md text-on-chrome/70 hover:text-on-chrome hover:bg-espresso-light transition-colors shrink-0"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md p-2 text-on-chrome/70 hover:bg-espresso-light hover:text-on-chrome transition-colors"
               aria-label={
                 theme === "light" ? t.admin.sidebar.switchToDark : t.admin.sidebar.switchToLight
               }
@@ -958,26 +958,24 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
             <button
               type="button"
               onClick={toggleLanguage}
-              className="p-2 rounded-md text-on-chrome/70 hover:text-on-chrome hover:bg-espresso-light transition-colors shrink-0 text-xs font-bold"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md p-2 text-xs font-bold text-on-chrome/70 hover:bg-espresso-light hover:text-on-chrome transition-colors"
               aria-label={language === 'ar' ? t.admin.sidebar.switchToEnglish : t.admin.sidebar.switchToArabic}
               title={language === 'ar' ? t.admin.sidebar.switchToEnglish : t.admin.sidebar.switchToArabic}
             >
               <span className="text-xs font-bold tracking-wider">{language === 'ar' ? 'EN' : 'AR'}</span>
             </button>
-            <KeyboardShortcutsHelpButton className="p-2 rounded-md text-on-chrome/70 hover:text-on-chrome hover:bg-espresso-light transition-colors shrink-0" />
+            <KeyboardShortcutsHelpButton className="hidden sm:flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-on-chrome/70 hover:bg-espresso-light hover:text-on-chrome transition-colors" />
           </div>
 
-          <div className="flex-1 flex items-center justify-center overflow-hidden">
-            <h1 className="text-lg font-bold text-on-chrome truncate">
-              {mobileTitle}
-            </h1>
-          </div>
+          <h1 className="min-w-0 max-w-[45vw] truncate px-2 text-center text-base font-bold text-on-chrome sm:max-w-none sm:text-lg">
+            {mobileTitle}
+          </h1>
 
-          <div className="w-1/4 flex justify-end">
+          <div className="min-w-0 flex justify-end">
             <img
               src="/logo.svg"
               alt={t.admin.appName}
-              className="h-9 w-auto object-contain shrink-0 -ms-2"
+              className="h-8 w-auto max-w-[84px] shrink-0 object-contain sm:h-9"
             />
           </div>
         </header>
