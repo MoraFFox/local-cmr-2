@@ -1,6 +1,6 @@
 /** @format */
 
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import React, { useState, useMemo, useRef, useEffect, useId } from "react";
 import { createPortal } from "react-dom";
 import { useFloatingMenu } from "../hooks/useFloatingMenu";
 import {
@@ -97,6 +97,73 @@ const getBranchStats = (records: MaintenanceRecord[]) => {
 
   traverse(records);
   return { visitCount, partsMap };
+};
+
+const formatSummaryDate = (value: string | null) => {
+  if (!value) return null;
+
+  // Maintenance dates are calendar dates, not instants. Parse date-only values
+  // in local time so users west of UTC do not see the previous day.
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+  const date = dateOnly
+    ? new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]))
+    : new Date(value);
+
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
+};
+
+const getMaintenanceSummary = (records: MaintenanceRecord[]) => {
+  const visits: MaintenanceRecord[] = [];
+
+  const collect = (recs: MaintenanceRecord[]) => {
+    recs.forEach((record) => {
+      if (record.isLogisticsVisit) return;
+      visits.push(record);
+      if (record.followUpVisits) collect(record.followUpVisits);
+    });
+  };
+
+  collect(records || []);
+  const dates = visits.map((record) => record.maintenanceDate).filter(Boolean).sort();
+
+  return {
+    visitCount: visits.length,
+    latestVisit: formatSummaryDate(dates[dates.length - 1] || null),
+    openIssues: visits.filter((record) => record.hadProblem && !record.problemSolved).length,
+  };
+};
+
+const SummaryMetric: React.FC<{
+  label: string;
+  value: React.ReactNode;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  tone?: "default" | "warning";
+  testId?: string;
+}> = ({ label, value, icon: Icon, tone = "default", testId }) => (
+  <div className={`rounded-xl border p-3 ${tone === "warning" ? "border-amber-500/30 bg-amber-500/10" : "border-hairline bg-cream-2/50"}`} data-testid={testId}>
+    <div className="flex items-center gap-2 text-xs font-semibold text-latte">
+      <Icon className={`h-4 w-4 ${tone === "warning" ? "text-amber-500" : "text-primary"}`} aria-hidden="true" />
+      <span>{label}</span>
+    </div>
+    <div className="mt-1 text-lg font-bold text-text">{value}</div>
+  </div>
+);
+
+const InfoTile: React.FC<{
+  label: string;
+  value: React.ReactNode;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+}> = ({ label, value, icon: Icon }) => {
+  if (value === null || value === undefined || value === "") return null;
+  return (
+    <div className="min-w-0 rounded-xl border border-hairline bg-cream-2/40 p-3">
+      <div className="flex items-center gap-2 text-xs font-semibold text-latte">
+        <Icon className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+        <span>{label}</span>
+      </div>
+      <div className="mt-1 break-words text-sm font-semibold text-text">{value}</div>
+    </div>
+  );
 };
 
 const MachineList = ({
@@ -218,31 +285,60 @@ const InfoRow = ({
   );
 };
 
-const ContactList = ({ contacts }: { contacts: Contact[] }) => {
-  if (!contacts || contacts.length === 0)
-    return <p className='text-xs text-latte italic'>No contacts listed.</p>;
+const ContactList = ({
+  contacts,
+  emptyTitle = 'No contacts listed',
+  emptyMessage = 'Add a contact for this location to make follow-up easier.',
+}: {
+  contacts: Contact[];
+  emptyTitle?: string;
+  emptyMessage?: string;
+}) => {
+  if (!contacts || contacts.length === 0) {
+    return (
+      <div className='flex min-h-[132px] flex-col items-center justify-center rounded-xl border border-dashed border-hairline bg-cream-2/40 px-4 py-5 text-center'>
+        <UserGroupIcon className='mb-2 h-7 w-7 text-latte/70' aria-hidden='true' />
+        <p className='text-sm font-semibold text-text'>{emptyTitle}</p>
+        <p className='mt-1 max-w-xs text-xs leading-relaxed text-latte'>{emptyMessage}</p>
+      </div>
+    );
+  }
+
   return (
-    <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2'>
+    <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
       {contacts.map((c) => (
         <div
           key={c.id}
-          className='bg-cream-2 p-2 rounded border border-hairline'
+          className='flex min-w-0 items-start gap-3 rounded-xl border border-hairline bg-cream-2/60 p-3 transition-colors hover:border-primary/40'
         >
-          <p className='font-bold text-text text-sm'>
-            {c.name}
-          </p>
-          <p className='text-xs text-latte uppercase font-semibold mb-1'>
-            {c.position === "custom" ? c.customPosition : c.position}
-          </p>
-          {c.phoneNumbers.map((p) => (
-            <div
-              key={p.id}
-              className='flex items-center gap-1 text-xs text-text'
-            >
-              <PhoneIcon className='w-3 h-3 text-latte' />
-              {p.number}
-            </div>
-          ))}
+          <Avatar name={c.name} />
+          <div className='min-w-0 flex-1'>
+            <p className='break-words text-sm font-bold leading-snug text-text' title={c.name}>
+              {c.name}
+            </p>
+            <p className='mb-2 break-words text-xs font-semibold leading-snug text-latte'>
+              {c.position === "custom" ? c.customPosition : c.position}
+            </p>
+            {c.email && (
+              <a
+                href={`mailto:${c.email}`}
+                className='flex items-center gap-1 break-all text-xs text-text transition-colors hover:text-primary'
+              >
+                <EnvelopeIcon className='h-3 w-3 shrink-0 text-latte' />
+                {c.email}
+              </a>
+            )}
+            {c.phoneNumbers.map((p) => (
+              <a
+                key={p.id}
+                href={`tel:${p.number}`}
+                className='flex items-center gap-1 text-xs text-text transition-colors hover:text-primary'
+              >
+                <PhoneIcon className='h-3 w-3 shrink-0 text-latte' />
+                {p.number}
+              </a>
+            ))}
+          </div>
         </div>
       ))}
     </div>
@@ -285,78 +381,89 @@ const MaintenanceRecordView: React.FC<{
   record: MaintenanceRecord;
   onExport?: (record: MaintenanceRecord, mode: "internal" | "client" | "cost", format: "pdf" | "word") => void;
 }> = ({ record, onExport }) => {
+  const t = useT();
+  const hasOpenIssue = Boolean(record.hadProblem && !record.problemSolved);
+  const accentClass = record.isLogisticsVisit
+    ? 'border-amber-500/70 bg-amber-500/[0.04]'
+    : hasOpenIssue
+      ? 'border-ember-500/70 bg-ember-500/[0.035]'
+      : 'border-primary/60 bg-cream-2/60';
+
   return (
-    <div className={`border-e-2 pe-4 py-3 mb-4 rounded-s-md ${record.isLogisticsVisit ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-500/5' : 'border-primary bg-cream-2'}`}>
+    <article className={`relative mb-4 rounded-xl border-s-4 p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5 ${accentClass}`}>
       {/* Header Row */}
-      <div className='flex flex-wrap justify-between ltr:items-start rtl:items-end gap-y-3 gap-x-4'>
-        {/* Right side (start of RTL flow): Date, Badges, Next Visit */}
-        <div className='flex flex-col gap-1.5'>
+      <div className='flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between'>
+        {/* Visit identity and status */}
+        <div className='min-w-0 flex-1'>
           <div className='flex flex-wrap items-center gap-2'>
-            <span className='font-bold text-text' dir="ltr">
+            <span className='text-base font-bold text-text' dir="ltr">
               {record.maintenanceDate}
             </span>
-            {record.dailyLeaseCost && (
-              <span className='text-xs bg-amber-500/10 px-1.5 py-0.5 rounded text-amber-500 border border-amber-500/20 flex items-center gap-1'>
-                <BanknotesIcon className="w-3.5 h-3.5" />
-                {record.dailyLeaseCost} ج.م.
-              </span>
-            )}
-            <span className='text-xs bg-primary/10 px-1.5 py-0.5 rounded text-text border border-primary/20'>
-              جهة الدفع: {getPaidByLabel(record.paidBy)}
-            </span>
-          </div>
-          
-          <div className='flex flex-wrap items-center gap-1.5 text-xs text-latte'>
-            <span className='bg-cream px-1.5 rounded border border-hairline'>
+            <span className='rounded-full border border-hairline bg-cream px-2 py-0.5 text-[11px] font-semibold text-latte'>
               <bdi>{record.type}</bdi>
             </span>
             {record.isLogisticsVisit && (
-              <span className='inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-300/60 dark:border-amber-500/40'>
-                <TruckIcon className="w-3 h-3" />
-                زيارة لوجستية
+              <span className='inline-flex items-center gap-1 rounded-full border border-amber-300/60 bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-700 dark:border-amber-500/40 dark:bg-amber-900/30 dark:text-amber-300'>
+                <TruckIcon className="h-3 w-3" />
+                {t.admin.recordDetails.logisticsVisit}
+              </span>
+            )}
+            {hasOpenIssue && (
+              <span className='inline-flex items-center gap-1 rounded-full border border-ember-500/30 bg-ember-500/10 px-2 py-0.5 text-[11px] font-bold text-ember-700 dark:text-ember-300'>
+                <ExclamationCircleIcon className='h-3 w-3' />
+                {t.admin.recordDetails.openIssue}
+              </span>
+            )}
+          </div>
+
+          <div className='mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-latte'>
+            {record.baristaName && (
+              <span className='inline-flex items-center gap-1 font-semibold text-text'>
+                <UserIcon className="h-3.5 w-3.5 text-latte" />
+                {record.baristaName}
               </span>
             )}
             {record.visitZone && (
-              <>
-                <span>•</span>
-                <span><bdi>{getVisitZoneLabel(record.visitZone)}</bdi></span>
-              </>
+              <span><bdi>{getVisitZoneLabel(record.visitZone)}</bdi></span>
+            )}
+            <span className='rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-text'>
+              {t.admin.recordDetails.paidBy}: {record.paidBy === 'company' ? t.ui.maintenanceEditor.companyPays : t.ui.maintenanceEditor.customerPays}
+            </span>
+            {record.dailyLeaseCost && (
+              <span className='inline-flex items-center gap-1 rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-amber-500'>
+                <BanknotesIcon className="h-3.5 w-3.5" />
+                {record.dailyLeaseCost} ج.م.
+              </span>
             )}
           </div>
-          
+
+        </div>
+
+        {/* Secondary scheduling detail and export action */}
+        <div className='flex shrink-0 flex-col items-stretch gap-2 sm:flex-row sm:items-center lg:flex-col lg:items-end'>
           {record.nextVisitDate && (
-            <div className='text-xs text-text flex items-center gap-1 mt-0.5'>
-              <CalendarIcon className="w-3.5 h-3.5" />
+            <div className='inline-flex items-center justify-end gap-1 text-xs font-semibold text-text'>
+              <CalendarIcon className="h-3.5 w-3.5" />
               <span>الزيارة القادمة: <bdi>{record.nextVisitDate}</bdi></span>
             </div>
           )}
-        </div>
-        
-        {/* Left side (end of RTL flow): Staff Badge + Visit Export */}
-        <div className='shrink-0 flex flex-wrap items-center gap-2'>
-          {record.baristaName && (
-            <span className='text-xs bg-cream px-2.5 py-1.5 border border-hairline rounded text-text flex items-center gap-1.5'>
-              <UserIcon className="w-4 h-4 text-latte" />
-              <span className='font-bold'>{record.baristaName}</span>
-            </span>
-          )}
           {onExport && (
             <PrintDropdown
-              label='Visit Report'
+              label={t.admin.recordDetails.visitReport}
               onPrint={(mode, format) => onExport(record, mode, format)}
-              className='scale-90 ltr:origin-right rtl:origin-left'
+              className='w-full sm:w-auto [&>button]:w-full [&>button]:justify-center [&>button]:border [&>button]:border-primary/30 [&>button]:bg-transparent [&>button]:text-primary [&>button]:shadow-none [&>button]:hover:bg-primary/10 [&>button]:py-1.5 [&>button]:px-3 [&>button]:text-xs'
             />
           )}
         </div>
       </div>
 
       {/* Body: Lists and Notes */}
-      <div className='mt-5 text-sm space-y-4'>
+      <div className='mt-4 space-y-4 border-t border-hairline/70 pt-4 text-sm sm:mt-5'>
         {record.machines && record.machines.length > 0 && (
           <div>
             <div className='font-semibold text-text flex items-center gap-1.5 mb-1.5'>
               <WrenchScrewdriverIcon className="w-4 h-4 text-latte" />
-              الماكينات
+              {t.review.machines}
             </div>
             <div className='space-y-1 text-text'>
               {record.machines.map((m) => (
@@ -375,7 +482,7 @@ const MaintenanceRecordView: React.FC<{
           <div>
             <div className='font-semibold text-text flex items-center gap-1.5 mb-2'>
               <ExclamationCircleIcon className="w-4 h-4 text-amber-500" />
-              المشاكل
+              {t.review.problems}
             </div>
             <div className='flex flex-wrap gap-1.5'>
               {record.problems.map((p, i) => (
@@ -389,12 +496,12 @@ const MaintenanceRecordView: React.FC<{
             </div>
           </div>
         )}
-        
+
         {record.partsWereReplaced && record.partsReplaced && record.partsReplaced.length > 0 && (
           <div>
             <div className='font-semibold text-ember-700 dark:text-ember-300 flex items-center gap-1.5 mb-1.5'>
               <CubeIcon className="w-4 h-4" />
-              قطع الغيار المستبدلة
+              {t.review.partsReplaced}
             </div>
             <div className='space-y-1 text-text-secondary'>
               {record.partsReplaced.map((p, i) => (
@@ -418,7 +525,7 @@ const MaintenanceRecordView: React.FC<{
           <div>
             <div className='font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1.5 mb-1.5'>
               <ClipboardDocumentListIcon className="w-4 h-4" />
-              الخدمات المقدمة
+              {t.review.services}
             </div>
             <div className='space-y-1 text-text-secondary'>
               {record.servicesPerformed.map((s, i) => (
@@ -437,7 +544,7 @@ const MaintenanceRecordView: React.FC<{
             </div>
           </div>
         )}
-        
+
         {record.notes && (
           <div className='mt-3 bg-white/50 dark:bg-black/20 p-3 rounded-lg border border-hairline'>
             <p className='italic text-text-secondary break-words leading-relaxed'>
@@ -465,14 +572,14 @@ const MaintenanceRecordView: React.FC<{
         <div className='mt-5 pe-3 border-e-2 border-hairline pt-2'>
           <p className='text-xs font-bold text-latte mb-3 flex items-center gap-1.5'>
             <ArrowUturnLeftIcon className="w-4 h-4" />
-            زيارات المتابعة
+            {t.admin.recordDetails.followUpVisits}
           </p>
           {record.followUpVisits.map((fu) => (
             <MaintenanceRecordView key={fu.id} record={fu} onExport={onExport} />
           ))}
         </div>
       )}
-    </div>
+    </article>
   );
 };
 
@@ -1180,11 +1287,63 @@ const PrintDropdown: React.FC<{
   className?: string;
   disabled?: boolean;
 }> = ({ label, onPrint, className, disabled }) => {
-  const { open: isOpen, setOpen: setIsOpen, triggerRef, contentRef, style, toggle } = useFloatingMenu();
+  const menuId = useId();
+  const t = useT();
+  const menuItemsRef = useRef<Array<HTMLButtonElement | null>>([]);
+  const focusRafRef = useRef<number | null>(null);
+  const wasOpenRef = useRef(false);
+  const { open: isOpen, setOpen: setIsOpen, triggerRef, contentRef, style, toggle } = useFloatingMenu({
+    menuWidth: 288,
+    edgeMargin: 8,
+  });
+
+  useEffect(() => {
+    if (focusRafRef.current !== null) {
+      cancelAnimationFrame(focusRafRef.current);
+      focusRafRef.current = null;
+    }
+
+    if (isOpen) {
+      focusRafRef.current = requestAnimationFrame(() => {
+        focusRafRef.current = null;
+        menuItemsRef.current[0]?.focus();
+      });
+    } else if (wasOpenRef.current) {
+      triggerRef.current?.focus();
+    }
+    wasOpenRef.current = isOpen;
+
+    return () => {
+      if (focusRafRef.current !== null) {
+        cancelAnimationFrame(focusRafRef.current);
+        focusRafRef.current = null;
+      }
+    };
+  }, [isOpen, triggerRef]);
 
   const handleSelect = (mode: "internal" | "client" | "cost", format: "pdf" | "word") => {
     setIsOpen(false);
     onPrint(mode, format);
+  };
+
+  const handleMenuKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const items = menuItemsRef.current.filter((item): item is HTMLButtonElement => Boolean(item));
+    if (items.length === 0) return;
+
+    const currentIndex = items.indexOf(document.activeElement as HTMLButtonElement);
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      items[(currentIndex + 1) % items.length]?.focus();
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      items[(currentIndex - 1 + items.length) % items.length]?.focus();
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      items[0]?.focus();
+    } else if (event.key === "End") {
+      event.preventDefault();
+      items[items.length - 1]?.focus();
+    }
   };
 
   return (
@@ -1197,6 +1356,9 @@ const PrintDropdown: React.FC<{
           toggle();
         }}
         disabled={disabled}
+        aria-haspopup='menu'
+        aria-expanded={isOpen}
+        aria-controls={isOpen ? menuId : undefined}
         className='flex items-center gap-2 bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-hover transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed'
       >
         <PrinterIcon className='w-5 h-5' />
@@ -1207,38 +1369,63 @@ const PrintDropdown: React.FC<{
       {isOpen && createPortal(
         <div
           ref={contentRef}
-          className='fixed w-72 rounded-md shadow-lg bg-cream border border-hairline focus:outline-none z-[9999] overflow-hidden'
+          className='fixed z-[9999] max-h-[calc(100vh-1rem)] w-72 max-w-[calc(100vw-1rem)] overflow-y-auto overscroll-contain rounded-2xl border border-hairline bg-cream shadow-2xl focus:outline-none'
           style={style}
         >
-          <div className='py-1' role='menu' aria-orientation='vertical'>
+          <div className='border-b border-hairline bg-cream-2/60 px-4 py-3'>
+            <div className='flex items-center gap-2 text-sm font-bold text-text'>
+              <PrinterIcon className='h-4 w-4 shrink-0 text-primary' aria-hidden='true' />
+              <span>{label}</span>
+            </div>
+            <p className='mt-1 text-xs text-latte'>{t.admin.recordDetails.chooseReportFormat}</p>
+          </div>
+          <div
+            id={menuId}
+            role='menu'
+            aria-orientation='vertical'
+            aria-label={`${label} options`}
+            onKeyDown={handleMenuKeyDown}
+          >
             {(
               [
-                { value: "internal", name: "Internal Report", desc: "Includes all costs & financial data" },
-                { value: "client", name: "Client Report", desc: "Hides all cost information" },
-                { value: "cost", name: "Cost Report", desc: "Full costs without payer split" },
+                { value: "internal", name: t.admin.recordDetails.internalReport, desc: t.admin.recordDetails.internalReportDescription },
+                { value: "client", name: t.admin.recordDetails.clientReport, desc: t.admin.recordDetails.clientReportDescription },
+                { value: "cost", name: t.admin.recordDetails.costReport, desc: t.admin.recordDetails.costReportDescription },
               ] as const
             ).map((md, idx) => (
-              <div key={md.value} className={`px-4 py-3 ${idx > 0 ? "border-t border-hairline" : ""}`}>
-                <div className='flex items-center justify-between gap-2 mb-1.5'>
-                  <span className='text-sm text-text font-bold'>{md.name}</span>
-                  <div className='flex gap-1.5 shrink-0'>
+              <div key={md.value} className={`px-3 py-3.5 sm:px-4 ${idx > 0 ? "border-t border-hairline" : ""}`}>
+                <div className='grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-3'>
+                  <div className='min-w-0'>
+                    <span className='block truncate text-sm font-bold text-text'>{md.name}</span>
+                    <p className='mt-1 break-words text-xs leading-relaxed text-latte'>{md.desc}</p>
+                  </div>
+                  <div className='flex shrink-0 gap-1.5'>
                     <button
                       type='button'
+                      role='menuitem'
+                      aria-label={`${md.name} PDF`}
+                      ref={(element) => {
+                        menuItemsRef.current[idx * 2] = element;
+                      }}
                       onClick={() => handleSelect(md.value, "pdf")}
-                      className='px-2.5 py-1 text-xs font-bold rounded border border-hairline bg-white dark:bg-espresso-light text-text hover:border-primary/50 hover:text-primary transition-colors'
+                      className='min-h-9 rounded-lg border border-hairline bg-white px-2.5 py-1 text-xs font-bold text-text transition-colors hover:border-primary/50 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:bg-espresso-light'
                     >
                       PDF
                     </button>
                     <button
                       type='button'
+                      role='menuitem'
+                      aria-label={`${md.name} Word`}
+                      ref={(element) => {
+                        menuItemsRef.current[idx * 2 + 1] = element;
+                      }}
                       onClick={() => handleSelect(md.value, "word")}
-                      className='px-2.5 py-1 text-xs font-bold rounded border border-hairline bg-white dark:bg-espresso-light text-text hover:border-primary/50 hover:text-primary transition-colors'
+                      className='min-h-9 rounded-lg border border-hairline bg-white px-2.5 py-1 text-xs font-bold text-text transition-colors hover:border-primary/50 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:bg-espresso-light'
                     >
                       Word
                     </button>
                   </div>
                 </div>
-                <p className='text-xs text-latte'>{md.desc}</p>
               </div>
             ))}
           </div>
@@ -1530,17 +1717,11 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
     setPendingParsedData(null);
   };
 
-  const filterRecords = (records: MaintenanceRecord[]) => {
-    if (!filterStartDate && !filterEndDate) return records;
-
-    return records.filter((r) => {
-      const rDate = new Date(r.maintenanceDate);
-      let match = true;
-      if (filterStartDate && rDate < new Date(filterStartDate)) match = false;
-      if (filterEndDate && rDate > new Date(filterEndDate)) match = false;
-      return match;
+  const filterRecords = (records: MaintenanceRecord[]) =>
+    filterMaintenanceByDateRange(records || [], {
+      startDate: filterStartDate || undefined,
+      endDate: filterEndDate || undefined,
     });
-  };
 
   // Derived filtered maintenance history for main office
   const filteredMainHistory = useMemo(
@@ -1548,179 +1729,248 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
     [submission.maintenanceHistory, filterStartDate, filterEndDate],
   );
 
+  const companyMaintenanceSummary = useMemo(
+    () => getMaintenanceSummary([
+      ...filteredMainHistory,
+      ...((submission.branches || []).flatMap((branch) => filterRecords(branch.maintenanceHistory || []))),
+    ]),
+    [filteredMainHistory, submission.branches, filterStartDate, filterEndDate],
+  );
+
   return (
     <div className='w-full max-w-5xl mx-auto pb-10 print:max-w-none print:pb-0 print:w-full'>
       {/* === SCREEN VIEW === */}
       <div className='print:hidden'>
-        <div className='flex flex-wrap items-center justify-between gap-3 mb-6'>
+        <div className='mb-5 flex min-h-[44px] items-center justify-between gap-3'>
+          <span className='text-xs font-semibold uppercase tracking-[0.18em] text-latte'>
+            {t.admin.recordDetails.companyRecord}
+          </span>
           <button
             onClick={onBack}
-            className='flex items-center gap-2 text-latte hover:text-primary transition-colors min-h-[44px] py-1'
+            className='group inline-flex min-h-[44px] items-center gap-2 rounded-lg px-2 text-sm font-semibold text-latte transition-colors hover:bg-cream-2 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary'
           >
-            <ArrowLeftIcon className='w-5 h-5' /> Back to History
+            <ArrowLeftIcon className='h-5 w-5 transition-transform group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5' />
+            Back to History
           </button>
-          <div className='flex flex-wrap items-center gap-2'>
-            <input
-              type='file'
-              accept='.pdf'
-              ref={fileInputRef}
-              onChange={handleUploadFilledPDF}
-              className='hidden'
-              disabled={isParsingPDF}
-            />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isParsingPDF || !onUpdate}
-              className='flex items-center gap-2 bg-cream-2 text-text font-bold py-2 px-4 rounded-lg hover:bg-cream-3 transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed'
-            >
-              <DocumentArrowUpIcon className='w-5 h-5' />
-              {isParsingPDF ? "جاري الاستيراد..." : "رفع PDF مكتمل"}
-            </button>
-            <button
-              onClick={() => handleGenerateMissingDataPDF("company")}
-              disabled={isGeneratingPDF}
-              className='flex items-center gap-2 bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-hover transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed'
-            >
-              <DocumentArrowDownIcon className='w-5 h-5' />
-              استكمال بيانات ناقصة (PDF)
-            </button>
-            <button
-              onClick={() => handleGenerateMissingDataWord("company")}
-              disabled={isGeneratingPDF}
-              className='flex items-center gap-2 bg-primary/10 text-primary hover:bg-primary/20 font-bold py-2 px-4 rounded-lg transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed'
-            >
-              <DocumentArrowDownIcon className='w-5 h-5' />
-              استكمال بيانات ناقصة (Word)
-            </button>
-            <PrintDropdown
-              label='Export Full Report'
-              onPrint={handlePrintFull}
-              disabled={isGeneratingPDF}
-            />
-          </div>
         </div>
 
-        {/* Local Date Range Filter */}
-        <div className='bg-cream p-4 rounded-xl shadow-sm border border-hairline mb-6 flex flex-col sm:flex-row items-center justify-between gap-4'>
-          <div className='flex items-center gap-2 text-text font-semibold text-sm'>
-            <CalendarIcon className='w-5 h-5 text-text' />
-            <span>Filter History by Date:</span>
+        <section
+          aria-labelledby='record-actions-heading'
+          data-testid='record-actions'
+          className='mb-4 rounded-2xl border border-hairline bg-cream-2/35 p-3 shadow-sm sm:p-4'
+        >
+          <div className='mb-3 flex items-center justify-between gap-3'>
+            <div>
+              <h2 id='record-actions-heading' className='text-sm font-bold text-text'>{t.admin.recordDetails.recordActions}</h2>
+              <p className='mt-0.5 text-xs text-latte'>{t.admin.recordDetails.recordActionsHint}</p>
+            </div>
+            <span className='hidden rounded-full border border-hairline bg-cream px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-latte sm:inline-flex'>
+              {t.admin.recordDetails.tools}
+            </span>
           </div>
-          <div className='flex items-center gap-2'>
-            <input
-              type='date'
-              value={filterStartDate}
-              onChange={(e) => setFilterStartDate(e.target.value)}
-              className='px-3 py-1.5 rounded-lg border-hairline bg-cream text-text text-sm focus:ring-primary focus:border-primary'
-            />
-            <span className='text-latte'>-</span>
-            <input
-              type='date'
-              value={filterEndDate}
-              onChange={(e) => setFilterEndDate(e.target.value)}
-              className='px-3 py-1.5 rounded-lg border-hairline bg-cream text-text text-sm focus:ring-primary focus:border-primary'
-            />
-            {(filterStartDate || filterEndDate) && (
+
+          <input
+            type='file'
+            accept='.pdf'
+            ref={fileInputRef}
+            onChange={handleUploadFilledPDF}
+            className='hidden'
+            disabled={isParsingPDF}
+          />
+          <span id='missing-data-actions-help' className='sr-only'>
+            {t.admin.recordDetails.missingDataHelp}
+          </span>
+          <div className='grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4'>              <button
+        onClick={() => fileInputRef.current?.click()}
+              disabled={isParsingPDF || !onUpdate}
+              className='inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-hairline bg-cream px-3 py-2.5 text-sm font-bold text-text transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-cream-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50'
+            >
+              <DocumentArrowUpIcon className='h-5 w-5 shrink-0' />
+              <span>{isParsingPDF ? "جاري الاستيراد..." : "رفع PDF مكتمل"}</span>
+            </button>
+            <div className='contents'>
               <button
-                onClick={() => {
-                  setFilterStartDate("");
-                  setFilterEndDate("");
-                }}
-                className='ms-2 p-1.5 text-latte hover:text-primary hover:bg-primary/10 rounded-full transition-colors'
-                title='Clear Dates'
+                onClick={() => handleGenerateMissingDataPDF("company")}
+                disabled={isGeneratingPDF}
+                aria-describedby='missing-data-actions-help'
+                className='inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-3 py-2.5 text-sm font-bold text-primary transition-all hover:-translate-y-0.5 hover:bg-primary/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50'
               >
-                <XMarkIcon className='w-5 h-5' />
+                <DocumentArrowDownIcon className='h-5 w-5 shrink-0' />
+                <span>استكمال بيانات ناقصة (PDF)</span>
               </button>
-            )}
+              <button
+                onClick={() => handleGenerateMissingDataWord("company")}
+                disabled={isGeneratingPDF}
+                aria-describedby='missing-data-actions-help'
+                className='inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-hairline bg-cream px-3 py-2.5 text-sm font-bold text-text transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-cream-2 focus:outline-none focus-visible:ring-2 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50'
+              >
+                <DocumentArrowDownIcon className='h-5 w-5 shrink-0' />
+                <span>استكمال بيانات ناقصة (Word)</span>
+              </button>
+            </div>
+            <PrintDropdown
+              label={t.admin.recordDetails.exportFullReport}
+              onPrint={handlePrintFull}
+              disabled={isGeneratingPDF}
+              className='w-full [&>button]:min-h-[44px] [&>button]:w-full [&>button]:justify-center [&>button]:rounded-xl'
+            />
           </div>
-        </div>
+        </section>
+
+        {/* Local Date Range Filter */}
+        <section
+          aria-labelledby='history-filter-heading'
+          data-testid='history-filter'
+          className='mb-6 rounded-2xl border border-hairline bg-cream-2/20 p-4 shadow-sm sm:p-5'
+        >
+          <div className='mb-4 flex items-start gap-3'>
+            <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary'>
+              <CalendarIcon className='h-5 w-5' aria-hidden='true' />
+            </div>
+            <div>
+              <h2 id='history-filter-heading' className='text-sm font-bold text-text'>{t.admin.recordDetails.filterHistory}</h2>
+              <p className='mt-0.5 text-xs text-latte'>{t.admin.recordDetails.filterHistoryHint}</p>
+            </div>
+          </div>
+
+          <div className='grid grid-cols-1 items-end gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto]'>
+            <label className='min-w-0'>
+              <span className='mb-1.5 block text-xs font-semibold text-latte'>{t.admin.recordDetails.from}</span>
+              <input
+                type='date'
+                aria-label={t.admin.recordDetails.filterStartDate}
+                value={filterStartDate}
+                onChange={(e) => setFilterStartDate(e.target.value)}
+                className='h-11 w-full min-w-0 rounded-xl border border-hairline bg-cream px-3 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20'
+              />
+            </label>
+            <span className='hidden pb-3 text-center text-sm font-bold text-latte sm:col-span-1 sm:block' aria-hidden='true'>
+              {t.admin.recordDetails.to}
+            </span>
+            <label className='min-w-0'>
+              <span className='mb-1.5 block text-xs font-semibold text-latte'>{t.admin.recordDetails.to}</span>
+              <input
+                type='date'
+                aria-label={t.admin.recordDetails.filterEndDate}
+                value={filterEndDate}
+                onChange={(e) => setFilterEndDate(e.target.value)}
+                className='h-11 w-full min-w-0 rounded-xl border border-hairline bg-cream px-3 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20'
+              />
+            </label>
+            <button
+              type='button'
+              onClick={() => {
+                setFilterStartDate("");
+                setFilterEndDate("");
+              }}
+              disabled={!filterStartDate && !filterEndDate}
+              className='inline-flex min-h-[44px] items-center justify-center gap-1.5 justify-self-end rounded-xl px-3 text-sm font-semibold text-latte transition-colors hover:bg-cream-2 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-40 sm:col-span-1'
+              title={t.admin.recordDetails.clearDates}
+            >
+              <XMarkIcon className='h-4 w-4' aria-hidden='true' />
+              <span>{t.admin.recordDetails.clear}</span>
+            </button>
+          </div>
+        </section>
 
         <div className='bg-cream rounded-xl shadow-lg overflow-hidden border border-hairline'>
           {/* Screen View Content */}
-          <div className='p-6 sm:p-8 bg-cream-2/20 border-b border-hairline'>
-            <div className='flex flex-col sm:flex-row justify-between ltr:items-start rtl:items-end gap-4'>
-              <div className='flex items-center gap-4'>
-                <div className='h-16 w-16 bg-cream-2 rounded-lg border border-hairline flex items-center justify-center p-2 shadow-sm shrink-0'>
-                  <img
-                    src='/logo.svg'
-                    alt='Logo'
-                    className='max-h-full max-w-full object-contain'
-                  />
-                </div>
-                <div>
-                  <h1 className='text-2xl sm:text-3xl font-bold text-text mb-1 break-words'>
-                    {submission.companyName}
-                  </h1>
-                  <div className='flex flex-wrap gap-x-4 gap-y-1 text-sm text-latte'>
-                    {submission.created_at && (
+          <div className='border-b border-hairline bg-cream-2/20 p-4 sm:p-6'>
+            <div className='flex flex-col gap-5'>
+              <div className='flex items-start justify-between gap-4'>
+                <div className='flex min-w-0 items-center gap-3'>
+                  <div className='flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-hairline bg-cream-2 p-2 shadow-sm sm:h-16 sm:w-16'>
+                    <img
+                      src='/logo.svg'
+                      alt={t.admin.recordDetails.logoAlt}
+                      className='max-h-full max-w-full object-contain'
+                    />
+                  </div>
+                  <div className='min-w-0'>
+                    <h1 className='break-words text-2xl font-bold tracking-tight text-text sm:text-3xl'>
+                      {submission.companyName}
+                    </h1>
+                    <div className='mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-latte'>
                       <span>
-                        Submitted:{" "}
-                        {new Date(submission.created_at).toLocaleDateString()}
+                        {submission.hasBranches
+                          ? `${submission.branches.length} branches`
+                          : 'Single location'}
                       </span>
-                    )}
-                    <span>•</span>
-                    <span>
-                      {submission.hasBranches
-                        ? `${submission.branches.length} Branches`
-                        : "Single Location"}
-                    </span>
+                      {submission.created_at && (
+                        <>
+                          <span aria-hidden='true'>•</span>
+                          <span>Submitted: {new Date(submission.created_at).toLocaleDateString()}</span>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
+                <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold ${submission.pendingSync ? 'border-amber-500/30 bg-amber-500/10 text-amber-500' : 'border-leaf-500/30 bg-leaf-500/10 text-leaf-600 dark:text-leaf-400'}`}>
+                  <span className='h-2 w-2 rounded-full bg-current' aria-hidden='true' />
+                  {submission.pendingSync ? 'Pending sync' : 'Synced'}
+                </span>
               </div>
-              <div className='bg-cream p-3 rounded-lg border border-hairline shadow-sm self-start'>
-                <div className='text-xs text-latte uppercase font-semibold'>
-                  Status
-                </div>
-                <div className='font-bold text-text'>
-                  {submission.pendingSync ? "Offline (Pending Sync)" : "Synced"}
-                </div>
-              </div>
-            </div>
 
-            <div className='mt-6 grid grid-cols-1 md:grid-cols-2 gap-6'>
-              <div>
-                <h3 className='text-sm font-bold uppercase text-latte mb-2'>
-                  Company Details
-                </h3>
-                <div className='space-y-1'>
-                  <InfoRow
-                    icon={EnvelopeIcon}
-                    label='Email'
-                    value={submission.email}
-                  />
-                  <InfoRow
-                    icon={IdentificationIcon}
-                    label='Tax Number'
-                    value={submission.taxNumber}
-                  />
-                  <InfoRow
-                    icon={MapPinIcon}
-                    label='Location'
-                    value={submission.location}
-                  />
-                  <InfoRow
-                    icon={ScaleIcon}
-                    label='Coffee Consumption'
-                    value={submission.coffeeConsumptionKg ? `${submission.coffeeConsumptionKg} kg/month` : undefined}
-                  />
+              <div className='grid grid-cols-2 gap-2 sm:grid-cols-4'>
+                <SummaryMetric
+                  label='Branches'
+                  value={submission.hasBranches ? submission.branches.length : 1}
+                  icon={BuildingStorefrontIcon}
+                  testId='summary-branches'
+                />
+                <SummaryMetric
+                  label={t.admin.recordDetails.maintenanceVisits}
+                  value={companyMaintenanceSummary.visitCount}
+                  icon={ClipboardDocumentCheckIcon}
+                  testId='summary-visits'
+                />
+                <SummaryMetric
+                  label={t.admin.recordDetails.lastVisit}
+                  value={companyMaintenanceSummary.latestVisit || 'No visits'}
+                  icon={CalendarIcon}
+                  testId='summary-last-visit'
+                />
+                <SummaryMetric
+                  label={t.admin.recordDetails.openIssues}
+                  value={companyMaintenanceSummary.openIssues}
+                  icon={ExclamationCircleIcon}
+                  tone={companyMaintenanceSummary.openIssues > 0 ? 'warning' : 'default'}
+                  testId='summary-open-issues'
+                />
+              </div>
+
+              <div className='grid gap-5 md:grid-cols-[1.1fr_0.9fr]'>
+                <section aria-labelledby='company-details-heading'>
+                  <h3 id='company-details-heading' className='mb-3 text-sm font-bold text-text'>{t.admin.recordDetails.companyInformation}</h3>
+                  <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
+                    <InfoTile label='Location' value={submission.location} icon={MapPinIcon} />
+                    <InfoTile label='Email' value={submission.email} icon={EnvelopeIcon} />
+                    <InfoTile label={t.admin.recordDetails.taxNumber} value={submission.taxNumber} icon={IdentificationIcon} />
+                    <InfoTile
+                      label={t.admin.recordDetails.coffeeConsumption}
+                      value={submission.coffeeConsumptionKg ? `${submission.coffeeConsumptionKg} kg/month` : undefined}
+                      icon={ScaleIcon}
+                    />
+                  </div>
                   {submission.hasBranches === false && (
-                    <div className="mt-2">
-                      <div className="flex items-center gap-2 text-latte text-sm font-bold uppercase mb-1">
-                        <WrenchScrewdriverIcon className="w-4 h-4" />
+                    <div className='mt-2 rounded-xl border border-hairline bg-cream-2/40 p-3'>
+                      <div className='mb-2 flex items-center gap-2 text-xs font-semibold text-latte'>
+                        <WrenchScrewdriverIcon className='h-4 w-4 text-primary' aria-hidden='true' />
                         <span>Machines</span>
                       </div>
                       <MachineList entity={submission} />
                     </div>
                   )}
-                </div>
+                </section>
+                <section aria-labelledby='main-contacts-heading'>
+                  <h3 id='main-contacts-heading' className='mb-3 text-sm font-bold text-text'>{t.admin.recordDetails.mainContacts}</h3>
+                  <ContactList
+                    contacts={submission.contacts}
+                    emptyTitle={t.admin.recordDetails.noContactsListed}
+                    emptyMessage={t.admin.recordDetails.noContactsHint}
+                  />
+                </section>
               </div>
-              <div>
-                <h3 className='text-sm font-bold uppercase text-latte mb-2'>
-                  Main Contacts
-                </h3>
-                <ContactList contacts={submission.contacts} />
-              </div>
-            </div>
 
             {/* Main Office Maintenance */}
             {filteredMainHistory.length > 0 && (
@@ -1744,16 +1994,26 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                     No maintenance records match the selected date range.
                   </p>
                 </div>
-              )}
-          </div>
+              )}              </div>
+            </div>
 
           {/* Branches List Screen View */}
           {submission.hasBranches && (
             <div className='p-6 sm:p-8 bg-paper'>
-              <h2 className='text-xl font-bold text-text mb-4 flex items-center gap-2 border-b border-hairline pb-2'>
-                <BuildingStorefrontIcon className='w-6 h-6 text-text' />
-                Branches & Maintenance
-              </h2>
+              <div className='mb-5 flex flex-col gap-2 border-b border-hairline pb-4 sm:flex-row sm:items-end sm:justify-between'>
+                <div>
+                  <p className='text-[11px] font-bold uppercase tracking-[0.18em] text-primary'>
+                    {t.admin.recordDetails.branchWorkspace}
+                  </p>
+                  <h2 className='mt-1 flex items-center gap-2 text-xl font-bold text-text sm:text-2xl'>
+                    <BuildingStorefrontIcon className='h-6 w-6 shrink-0 text-primary' aria-hidden='true' />
+                    {t.admin.recordDetails.branchesAndMaintenance}
+                  </h2>
+                </div>
+                <p className='text-xs text-latte'>
+                  {submission.branches.length} {submission.branches.length === 1 ? t.admin.recordDetails.branch : t.admin.recordDetails.branches}
+                </p>
+              </div>
 
               <div className='space-y-4'>
                 {submission.branches.map((branch, index) => {
@@ -1762,7 +2022,9 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                     branch.maintenanceHistory,
                   );
                   // Recalculate stats based on filtered view so the "Total Visits" reflects the filter
-                  const stats = getBranchStats(filteredBranchHistory);
+                  const reportBranchHistory = getReportRecords(filteredBranchHistory);
+                  const stats = getBranchStats(reportBranchHistory);
+                  const branchSummary = getMaintenanceSummary(reportBranchHistory);
 
                   return (
                     <div
@@ -1774,60 +2036,43 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                     >
                       <CollapsibleCard
                         titleContent={
-                          <div className='flex flex-col sm:flex-row sm:items-baseline gap-2 w-full pe-4'>
-                            <div className='flex flex-col sm:flex-row sm:items-baseline gap-2'>
-                              <span className='font-bold text-lg'>
+                          <div className='flex min-w-0 flex-1 flex-col gap-2 pe-4'>
+                            <div className='flex min-w-0 flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3'>
+                              <span
+                                data-testid={`branch-card-title-${branch.id}`}
+                                className='min-w-0 break-words whitespace-normal text-lg font-bold leading-snug'
+                              >
                                 {branch.branchName || `Branch ${index + 1}`}
                               </span>
+                              <span className='flex max-w-full flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-latte sm:justify-end'>
+                                <span>{branch.location}</span>
+                                <span aria-hidden='true'>•</span>
+                                <span>{branchSummary.visitCount === 0 ? t.admin.recordDetails.noMaintenanceVisits : `${branchSummary.visitCount} ${branchSummary.visitCount === 1 ? t.admin.recordDetails.maintenanceVisit : t.admin.recordDetails.maintenanceVisitsPlural}`}</span>
+                                {branchSummary.latestVisit && (
+                                  <>
+                                    <span aria-hidden='true'>•</span>
+                                    <span>{t.admin.recordDetails.lastVisitPrefix} {branchSummary.latestVisit}</span>
+                                  </>
+                                )}
+                                {branchSummary.openIssues > 0 && (
+                                  <span className='text-amber-500'>
+                                    • {branchSummary.openIssues} {branchSummary.openIssues === 1 ? t.admin.recordDetails.openIssue : t.admin.recordDetails.openIssuesPlural}
+                                  </span>
+                                )}
+                              </span>
                             </div>
-                            <div className='flex-grow'></div>
 
-                            {/* Desktop Dropdown for Branch */}
-                            <div className='hidden sm:flex items-center gap-2'>
-                              <button
-                                onClick={() => fileInputRef.current?.click()}
-                                disabled={isParsingPDF || !onUpdate}
-                                className='flex items-center gap-1 bg-cream-2 text-text hover:bg-cream-3 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm border border-hairline'
-                              >
-                                <DocumentArrowUpIcon className='w-4 h-4' />
-                                {isParsingPDF ? "جاري الاستيراد..." : "رفع PDF مكتمل"}
-                              </button>
-                              <button
-                                onClick={() => handleGenerateMissingDataPDF("branch", branch.id)}
-                                disabled={isGeneratingPDF}
-                                className='flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed'
-                              >
-                                <DocumentArrowDownIcon className='w-4 h-4' />
-                                استكمال (PDF)
-                              </button>
-                              <button
-                                onClick={() => handleGenerateMissingDataWord("branch", branch.id)}
-                                disabled={isGeneratingPDF}
-                                className='flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed'
-                              >
-                                <DocumentArrowDownIcon className='w-4 h-4' />
-                                استكمال (Word)
-                              </button>
-                              <PrintDropdown
-                                label='Print Branch'
-                                onPrint={(mode, format) =>
-                                  handlePrintBranch(branch, mode, format)
-                                }
-                                className='scale-90 ltr:origin-right rtl:origin-left'
-                                disabled={isGeneratingPDF}
-                              />
-                            </div>
                           </div>
                         }
-                        initiallyOpen={false}
-                      >
-                        <div className='space-y-6'>
-                          {/* Mobile only buttons */}
-                          <div className='sm:hidden mb-4 flex flex-col gap-2'>
+                        headerActions={
+                          <div
+                            data-testid={`branch-card-actions-${branch.id}`}
+                            className='hidden min-w-0 flex-wrap items-center justify-end gap-2 sm:flex'
+                          >
                             <button
                               onClick={() => fileInputRef.current?.click()}
                               disabled={isParsingPDF || !onUpdate}
-                              className='flex items-center justify-center gap-2 bg-cream-2 text-text hover:bg-cream-3 font-bold py-2 px-4 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm border border-hairline w-full'
+                              className='flex items-center gap-1 bg-cream-2 text-text hover:bg-cream-3 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm border border-hairline'
                             >
                               <DocumentArrowUpIcon className='w-4 h-4' />
                               {isParsingPDF ? "جاري الاستيراد..." : "رفع PDF مكتمل"}
@@ -1835,7 +2080,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                             <button
                               onClick={() => handleGenerateMissingDataPDF("branch", branch.id)}
                               disabled={isGeneratingPDF}
-                              className='flex items-center justify-center gap-2 bg-primary/10 text-primary hover:bg-primary/20 font-bold py-2 px-4 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed w-full'
+                              className='flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed'
                             >
                               <DocumentArrowDownIcon className='w-4 h-4' />
                               استكمال (PDF)
@@ -1843,113 +2088,135 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                             <button
                               onClick={() => handleGenerateMissingDataWord("branch", branch.id)}
                               disabled={isGeneratingPDF}
-                              className='flex items-center justify-center gap-2 bg-primary/10 text-primary hover:bg-primary/20 font-bold py-2 px-4 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed w-full'
+                              className='flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed'
                             >
                               <DocumentArrowDownIcon className='w-4 h-4' />
                               استكمال (Word)
                             </button>
                             <PrintDropdown
-                              label='Print Branch Report'
+                              label={t.admin.recordDetails.printBranch}
                               onPrint={(mode, format) =>
                                 handlePrintBranch(branch, mode, format)
                               }
-                              className='w-full'
+                              className='scale-90 ltr:origin-right rtl:origin-left'
                               disabled={isGeneratingPDF}
                             />
                           </div>
-
-                          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                            <div>
-                              <h4 className='text-xs font-bold uppercase text-latte mb-2'>
-                                Branch Info
-                              </h4>
-                              <InfoRow
-                                icon={MapPinIcon}
-                                label='Location'
-                                value={branch.location}
+                        }
+                        initiallyOpen={false}
+                      >
+                        <div className='space-y-6'>
+                          {/* Mobile only buttons */}
+                          <div className='mb-4 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:hidden'>
+                            <button
+                              onClick={() => fileInputRef.current?.click()}
+                              disabled={isParsingPDF || !onUpdate}
+                              className='flex min-w-0 items-center justify-center gap-2 rounded-lg border border-hairline bg-cream-2 px-3 py-2 text-center text-xs font-bold text-text transition-colors hover:bg-cream-3 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm'
+                            >
+                              <DocumentArrowUpIcon className='w-4 h-4' />
+                              {isParsingPDF ? "جاري الاستيراد..." : "رفع PDF مكتمل"}
+                            </button>
+                            <button
+                              onClick={() => handleGenerateMissingDataPDF("branch", branch.id)}
+                              disabled={isGeneratingPDF}
+                              className='flex min-w-0 items-center justify-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-center text-xs font-bold text-primary transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm'
+                            >
+                              <DocumentArrowDownIcon className='w-4 h-4' />
+                              استكمال (PDF)
+                            </button>
+                            <button
+                              onClick={() => handleGenerateMissingDataWord("branch", branch.id)}
+                              disabled={isGeneratingPDF}
+                              className='flex min-w-0 items-center justify-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-center text-xs font-bold text-primary transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm'
+                            >
+                              <DocumentArrowDownIcon className='w-4 h-4' />
+                              استكمال (Word)
+                            </button>
+                            <div className='min-w-0 min-[360px]:col-span-2'>
+                              <PrintDropdown
+                                label={t.admin.recordDetails.printBranchReport}
+                                onPrint={(mode, format) =>
+                                  handlePrintBranch(branch, mode, format)
+                                }
+                                className='w-full [&>button]:w-full [&>button]:justify-center'
+                                disabled={isGeneratingPDF}
                               />
-                              <InfoRow
-                                icon={EnvelopeIcon}
-                                label='Email'
-                                value={branch.email}
-                              />
-                              <InfoRow
-                                icon={IdentificationIcon}
-                                label='Tax ID'
-                                value={branch.taxNumber}
-                              />
-                              <InfoRow
-                                icon={WrenchScrewdriverIcon}
-                                label='Machines'
-                                value={getMachineOwnershipStatus(branch)}
-                              />
-                              <InfoRow
-                                icon={ScaleIcon}
-                                label='Coffee Consumption'
-                                value={branch.coffeeConsumptionKg ? `${branch.coffeeConsumptionKg} kg/month` : undefined}
-                              />
-                            </div>
-                            <div>
-                              <h4 className='text-xs font-bold uppercase text-latte mb-2'>
-                                Contacts
-                              </h4>
-                              <ContactList contacts={branch.contacts} />
                             </div>
                           </div>
 
-                          {/* Branch Stats Summary */}
-                          <div className='bg-cream rounded-lg p-3 border border-hairline flex flex-wrap gap-4 text-sm'>
-                            <div className='flex items-center gap-2'>
-                              <ClipboardDocumentCheckIcon className='w-4 h-4 text-latte' />
-                              <span className='text-latte font-medium'>
-                                Total Visits:
-                              </span>
-                              <span className='font-bold text-text'>
-                                {stats.visitCount}
-                              </span>
-                            </div>
+                          <div className='grid grid-cols-1 gap-5 lg:grid-cols-[1.08fr_0.92fr]'>
+                            <section aria-labelledby={`branch-info-${branch.id}`}>
+                              <div className='mb-3 flex items-center justify-between gap-3'>
+                                <h4 id={`branch-info-${branch.id}`} className='flex items-center gap-2 text-sm font-bold text-text'>
+                                  <MapPinIcon className='h-4 w-4 text-primary' aria-hidden='true' />
+                                  {t.admin.recordDetails.branchInformation}
+                                </h4>
+                                <span className='text-[11px] font-semibold uppercase tracking-wider text-latte'>
+                                  {branch.location || t.admin.recordDetails.notSpecified}
+                                </span>
+                              </div>
+                              <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
+                                <InfoTile label={t.admin.recordDetails.location} value={branch.location || t.admin.recordDetails.notSpecified} icon={MapPinIcon} />
+                                <InfoTile label={t.admin.recordDetails.email} value={branch.email || t.admin.recordDetails.notSpecified} icon={EnvelopeIcon} />
+                                <InfoTile label={t.admin.recordDetails.taxNumber} value={branch.taxNumber || t.admin.recordDetails.notSpecified} icon={IdentificationIcon} />
+                                <InfoTile label={t.admin.recordDetails.machines} value={getMachineOwnershipStatus(branch)} icon={WrenchScrewdriverIcon} />
+                                {branch.coffeeConsumptionKg ? (
+                                  <InfoTile label={t.admin.recordDetails.coffeeConsumption} value={`${branch.coffeeConsumptionKg} kg/month`} icon={ScaleIcon} />
+                                ) : null}
+                              </div>
+                              {(branch.usesOurMachines || branch.hasMultipleMachines) && (
+                                <div className='mt-2 rounded-xl border border-hairline bg-cream-2/40 p-3'>
+                                  <div className='mb-2 flex items-center gap-2 text-xs font-semibold text-latte'>
+                                    <WrenchScrewdriverIcon className='h-4 w-4 text-primary' aria-hidden='true' />
+                                    <span>{t.admin.recordDetails.machineDetails}</span>
+                                  </div>
+                                  <MachineList entity={branch} hideCosts={false} />
+                                </div>
+                              )}
+                            </section>
 
-                            {/* Machine Status */}
-                            {(branch.usesOurMachines || branch.hasMultipleMachines) && (
-                              <div className='w-full'>
-                                <div className='flex items-center gap-2 mb-2'>
-                                  <WrenchScrewdriverIcon className='w-4 h-4 text-latte' />
-                                  <span className='text-latte font-medium'>
-                                    Machines:
-                                  </span>
-                                </div>
-                                <MachineList entity={branch} hideCosts={false} />
+                            <section aria-labelledby={`branch-contacts-${branch.id}`}>
+                              <div className='mb-3 flex items-center justify-between gap-3'>
+                                <h4 id={`branch-contacts-${branch.id}`} className='flex items-center gap-2 text-sm font-bold text-text'>
+                                  <UserGroupIcon className='h-4 w-4 text-primary' aria-hidden='true' />
+                                  {t.admin.recordDetails.branchContacts}
+                                </h4>
+                                <span className='rounded-full bg-cream-2 px-2 py-0.5 text-[11px] font-bold text-latte'>
+                                  {branch.contacts.length}
+                                </span>
                               </div>
-                            )}
-                            {Object.keys(stats.partsMap).length > 0 && (
-                              <div className='flex ltr:items-start rtl:items-end gap-2 w-full pt-2 border-t border-hairline'>
-                                <CubeIcon className='w-4 h-4 text-latte mt-0.5' />
-                                <div className='flex flex-wrap gap-x-3 gap-y-1'>
-                                  <span className='text-latte font-medium'>
-                                    Parts Summary:
-                                  </span>
-                                  {Object.entries(stats.partsMap).map(
-                                    ([name, count]) => (
-                                      <span
-                                        key={name}
-                                        className='inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-cream-2 border border-hairline text-text'
-                                      >
-                                        <span className='font-bold me-1'>
-                                          {count}x
-                                        </span>{" "}
-                                        {name}
-                                      </span>
-                                    ),
-                                  )}
-                                </div>
-                              </div>
-                            )}
+                              <ContactList
+                                contacts={branch.contacts}
+                                emptyTitle={t.admin.recordDetails.noContactsListed}
+                                emptyMessage={t.admin.recordDetails.noContactsHint}
+                              />
+                            </section>
                           </div>
+
+                          <div className='grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4'>
+                            <SummaryMetric label={t.admin.recordDetails.maintenanceVisits} value={stats.visitCount} icon={ClipboardDocumentCheckIcon} testId={`branch-${branch.id}-visits`} />
+                            <SummaryMetric label={t.admin.recordDetails.lastVisit} value={branchSummary.latestVisit || t.admin.recordDetails.noVisits} icon={CalendarIcon} testId={`branch-${branch.id}-last-visit`} />
+                            <SummaryMetric label={t.admin.recordDetails.openIssues} value={branchSummary.openIssues} icon={ExclamationCircleIcon} tone={branchSummary.openIssues > 0 ? 'warning' : 'default'} testId={`branch-${branch.id}-open-issues`} />
+                            <SummaryMetric label={t.admin.recordDetails.replacedParts} value={Object.values(stats.partsMap).reduce((total, count) => total + count, 0)} icon={CubeIcon} testId={`branch-${branch.id}-parts`} />
+                          </div>
+
+                          {Object.keys(stats.partsMap).length > 0 && (
+                            <div className='flex min-w-0 flex-wrap items-center gap-2 rounded-xl border border-hairline bg-cream-2/40 p-3 text-sm'>
+                              <CubeIcon className='h-4 w-4 shrink-0 text-primary' aria-hidden='true' />
+                              <span className='font-semibold text-latte'>{t.admin.recordDetails.partsSummary}</span>
+                              {Object.entries(stats.partsMap).map(([name, count]) => (
+                                <span key={name} className='inline-flex max-w-full items-center rounded-full border border-hairline bg-cream px-2 py-1 text-xs text-text'>
+                                  <span className='me-1 font-bold'>{count}x</span>{name}
+                                </span>
+                              ))}
+                            </div>
+                          )}
 
                           {branch.baristas && branch.baristas.length > 0 && (
-                            <div>
-                              <h4 className='text-xs font-bold uppercase text-latte mb-2 flex items-center gap-1'>
-                                <UserGroupIcon className='w-4 h-4' /> Baristas
+                            <section aria-labelledby={`branch-staff-${branch.id}`}>
+                              <h4 id={`branch-staff-${branch.id}`} className='mb-2 flex items-center gap-2 text-sm font-bold text-text'>
+                                <UserIcon className='h-4 w-4 text-primary' aria-hidden='true' />
+                                {t.admin.recordDetails.assignedStaff}
                               </h4>
                               <div className='flex flex-wrap gap-2'>
                                 {branch.baristas.map((b) => (
@@ -1961,14 +2228,22 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                                   </span>
                                 ))}
                               </div>
-                            </div>
+                            </section>
                           )}
 
-                          <div>
-                            <h4 className='text-sm font-bold text-text flex items-center gap-2 border-t pt-3 border-hairline sticky top-0 sm:static bg-cream dark:bg-espresso z-10 -mx-4 px-4 py-3'>
-                              <WrenchScrewdriverIcon className='w-4 h-4' />{" "}
-                              Maintenance History
-                            </h4>
+                          <section aria-labelledby={`branch-maintenance-${branch.id}`}>
+                            <div className='mb-3 flex flex-col gap-2 border-t border-hairline pt-5 sm:flex-row sm:items-end sm:justify-between'>
+                              <div>
+                                <h4 id={`branch-maintenance-${branch.id}`} className='flex items-center gap-2 text-base font-bold text-text'>
+                                  <WrenchScrewdriverIcon className='h-5 w-5 text-primary' aria-hidden='true' />
+                                  {t.admin.recordDetails.maintenanceAndLogisticsHistory}
+                                </h4>
+                                <p className='mt-1 text-xs text-latte'>{t.admin.recordDetails.maintenanceHistoryHint}</p>
+                              </div>
+                              <span className='self-start rounded-full bg-cream-2 px-2.5 py-1 text-xs font-bold text-latte sm:self-auto'>
+                                {filteredBranchHistory.length} {filteredBranchHistory.length === 1 ? t.admin.recordDetails.visit : t.admin.recordDetails.visits}
+                              </span>
+                            </div>
                             {filteredBranchHistory.length > 0 ? (
                               filteredBranchHistory.map((r) => (
                                 <MaintenanceRecordView
@@ -1978,11 +2253,13 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                                 />
                               ))
                             ) : (
-                              <p className='text-sm text-latte italic'>
-                                No maintenance records match filter.
-                              </p>
+                              <div className='rounded-xl border border-dashed border-hairline bg-cream-2/30 px-3 py-7 text-center sm:px-4 sm:py-8'>
+                                <ClipboardDocumentCheckIcon className='mx-auto mb-2 h-8 w-8 text-latte/70' aria-hidden='true' />
+                                <p className='text-sm font-semibold text-text'>{t.admin.recordDetails.noRecordsTitle}</p>
+                                <p className='mt-1 text-xs text-latte'>{t.admin.recordDetails.noRecordsMatchFilter}</p>
+                              </div>
                             )}
-                          </div>
+                          </section>
                         </div>
                       </CollapsibleCard>
                     </div>

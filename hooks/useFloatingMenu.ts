@@ -65,8 +65,6 @@ export function useFloatingMenu(opts: FloatingMenuOptions = {}): FloatingMenuRes
   const triggerRef = useRef<HTMLElement | null>(null);
   const contentRef = useRef<HTMLElement | null>(null);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
-  const lastWidthRef = useRef<number>(window.innerWidth);
-
   const compute = useCallback(() => {
     if (!triggerRef.current) {
       setPos(null);
@@ -74,13 +72,20 @@ export function useFloatingMenu(opts: FloatingMenuOptions = {}): FloatingMenuRes
     }
     const r = triggerRef.current.getBoundingClientRect();
     const MENU_H = contentRef.current?.offsetHeight ?? 220;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
+    const viewport = window.visualViewport;
+    const vw = viewport?.width ?? window.innerWidth;
+    const vh = viewport?.height ?? window.innerHeight;
+    const availableWidth = Math.max(0, vw - edgeMargin * 2);
+    const measuredWidth = contentRef.current?.getBoundingClientRect().width ?? 0;
+    const actualMenuWidth = measuredWidth > 0
+      ? Math.min(measuredWidth, availableWidth)
+      : Math.min(menuWidth, availableWidth);
 
-    // Horizontal: right-align to trigger, flip/clamp to viewport.
-    let left = r.right - menuWidth;
-    if (left < edgeMargin) left = edgeMargin;
-    if (left + menuWidth > vw - edgeMargin) left = vw - edgeMargin - menuWidth;
+    // Horizontal: right-align to the trigger, then clamp the *actual* menu
+    // width so a narrow viewport can never produce a negative left position.
+    const maxLeft = Math.max(edgeMargin, vw - edgeMargin - actualMenuWidth);
+    let left = r.right - actualMenuWidth;
+    left = Math.max(edgeMargin, Math.min(left, maxLeft));
 
     // Vertical: prefer below; flip above if below clips; else pin in-bounds.
     let top = r.bottom + gap;
@@ -107,10 +112,9 @@ export function useFloatingMenu(opts: FloatingMenuOptions = {}): FloatingMenuRes
     const raf = requestAnimationFrame(compute); // recompute after paint with real height
     const handleScroll = compute;
     const handleResize = () => {
-      // Ignore height-only resize events (e.g. mobile on-screen keyboard)
-      // to prevent re-renders that steal focus from inputs.
-      if (window.innerWidth === lastWidthRef.current) return;
-      lastWidthRef.current = window.innerWidth;
+      // Recompute for width *and* height changes. Mobile browser chrome and the
+      // on-screen keyboard can change the visual viewport without changing
+      // window.innerWidth, which otherwise leaves a menu pinned off-screen.
       compute();
     };
     const resizeObserver = typeof ResizeObserver !== 'undefined' && contentRef.current
@@ -120,11 +124,13 @@ export function useFloatingMenu(opts: FloatingMenuOptions = {}): FloatingMenuRes
 
     window.addEventListener('scroll', handleScroll, true);
     window.addEventListener('resize', handleResize);
+    window.visualViewport?.addEventListener('resize', handleResize);
     return () => {
       cancelAnimationFrame(raf);
       resizeObserver?.disconnect();
       window.removeEventListener('scroll', handleScroll, true);
       window.removeEventListener('resize', handleResize);
+      window.visualViewport?.removeEventListener('resize', handleResize);
     };
   }, [open, compute]);
 
