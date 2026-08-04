@@ -235,8 +235,15 @@ describe('SubmissionDetails company summary', () => {
     expect(screen.getByRole('region', { name: 'Branch contacts' })).toHaveTextContent('No contacts listed');
     expect(screen.getByTestId('branch-10-visits')).toHaveTextContent('1');
     expect(screen.getByTestId('branch-10-open-issues')).toHaveTextContent('1');
-    expect(screen.getByRole('region', { name: 'Maintenance & logistics history' })).toHaveTextContent('Review work performed');
-    expect(screen.getByTestId('branch-10-open-issues')).toHaveTextContent('1');
+    const maintenance = screen.getByRole('region', { name: 'Maintenance & logistics history' });
+    expect(maintenance).toHaveTextContent('Review work performed');
+    expect(within(maintenance).getByText('No work details recorded')).toBeInTheDocument();
+    expect(within(maintenance).queryByText('دورة غسيل الجروب')).not.toBeInTheDocument();
+    const detailsButton = within(maintenance).getByRole('button', { name: /View details 2026-07-22/ });
+    fireEvent.click(detailsButton);
+    expect(detailsButton).toHaveAttribute('aria-controls', 'maintenance-details-101');
+    expect(within(maintenance).getByText('open issue')).toBeInTheDocument();
+    expect(detailsButton).toHaveAttribute('aria-label', 'Hide details 2026-07-22 — Tech One');
     expect(screen.getAllByRole('button', { name: /Visit Report/ }).some((button) => button.parentElement?.className.includes('[&>button]:border'))).toBe(true);
   });
 

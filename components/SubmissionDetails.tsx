@@ -382,6 +382,7 @@ const MaintenanceRecordView: React.FC<{
   onExport?: (record: MaintenanceRecord, mode: "internal" | "client" | "cost", format: "pdf" | "word") => void;
 }> = ({ record, onExport }) => {
   const t = useT();
+  const [isExpanded, setIsExpanded] = useState(false);
   const hasOpenIssue = Boolean(record.hadProblem && !record.problemSolved);
   const accentClass = record.isLogisticsVisit
     ? 'border-amber-500/70 bg-amber-500/[0.04]'
@@ -389,9 +390,28 @@ const MaintenanceRecordView: React.FC<{
       ? 'border-ember-500/70 bg-ember-500/[0.035]'
       : 'border-primary/60 bg-cream-2/60';
 
+  const detailCount =
+    (record.machines?.length || 0) +
+    (record.problems?.length || 0) +
+    (record.servicesPerformed?.length || 0) +
+    (record.partsReplaced?.length || 0) +
+    (record.photos?.length || 0) +
+    (record.followUpVisits?.length || 0) +
+    (record.supervisors?.length || 0) +
+    (record.notes ? 1 : 0) +
+    (record.recommendations ? 1 : 0);
+  const summaryItems = [
+    record.problems?.length ? { key: 'issues', text: `${record.problems.length} ${record.problems.length === 1 ? t.admin.recordDetails.issue : t.admin.recordDetails.issues}` } : null,
+    record.servicesPerformed?.length ? { key: 'services', text: `${record.servicesPerformed.length} ${record.servicesPerformed.length === 1 ? t.admin.recordDetails.service : t.admin.recordDetails.services}` } : null,
+    record.partsReplaced?.length ? { key: 'parts', text: `${record.partsReplaced.length} ${record.partsReplaced.length === 1 ? t.admin.recordDetails.part : t.admin.recordDetails.parts}` } : null,
+    record.photos?.length ? { key: 'photos', text: `${record.photos.length} ${record.photos.length === 1 ? t.admin.recordDetails.photo : t.admin.recordDetails.photos}` } : null,
+  ].filter(Boolean) as Array<{ key: string; text: string }>;
+  const detailsId = `maintenance-details-${record.id}`;
+  const recordAccessibleName = `${isExpanded ? t.admin.recordDetails.hideDetails : t.admin.recordDetails.viewDetails} ${record.maintenanceDate}${record.baristaName ? ` — ${record.baristaName}` : ''}`;
+
   return (
-    <article className={`relative mb-4 rounded-xl border-s-4 p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5 ${accentClass}`}>
-      {/* Header Row */}
+    <article className={`relative mb-3 rounded-xl border-s-4 p-3 shadow-sm transition-shadow hover:shadow-md sm:mb-4 sm:p-5 ${accentClass}`}>
+      {/* Compact scan header */}
       <div className='flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between'>
         {/* Visit identity and status */}
         <div className='min-w-0 flex-1'>
@@ -444,7 +464,7 @@ const MaintenanceRecordView: React.FC<{
           {record.nextVisitDate && (
             <div className='inline-flex items-center justify-end gap-1 text-xs font-semibold text-text'>
               <CalendarIcon className="h-3.5 w-3.5" />
-              <span>الزيارة القادمة: <bdi>{record.nextVisitDate}</bdi></span>
+              <span>{t.admin.recordDetails.nextVisit}: <bdi>{record.nextVisitDate}</bdi></span>
             </div>
           )}
           {onExport && (
@@ -457,8 +477,37 @@ const MaintenanceRecordView: React.FC<{
         </div>
       </div>
 
-      {/* Body: Lists and Notes */}
-      <div className='mt-4 space-y-4 border-t border-hairline/70 pt-4 text-sm sm:mt-5'>
+      <div className='mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-latte'>
+        {summaryItems.length > 0 ? (
+          summaryItems.map((item) => <span key={item.key} className='rounded-full bg-cream-2 px-2 py-1'>{item.text}</span>)
+        ) : (
+          <span>{t.admin.recordDetails.noWorkDetails}</span>
+        )}
+        {record.followUpVisits?.length ? (
+          <span className='rounded-full bg-primary/10 px-2 py-1 text-primary'>
+            {record.followUpVisits.length} {record.followUpVisits.length === 1 ? t.admin.recordDetails.followUp : t.admin.recordDetails.followUps}
+          </span>
+        ) : null}
+      </div>
+
+      <div className='mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-hairline/70 pt-3'>
+        <button
+          type='button'
+          aria-expanded={isExpanded}
+          aria-controls={isExpanded ? detailsId : undefined}
+          aria-label={recordAccessibleName}
+          onClick={() => setIsExpanded((open) => !open)}
+          className='inline-flex min-h-9 min-w-0 items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-bold text-latte transition-colors hover:bg-cream-2 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary'
+        >
+          <ChevronDownIcon className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} aria-hidden='true' />
+          <span>{isExpanded ? t.admin.recordDetails.hideDetails : t.admin.recordDetails.viewDetails}</span>
+          {detailCount > 0 && <span className='text-[11px] font-normal'>({detailCount})</span>}
+        </button>
+        {record.nextVisitDate ? <span className='text-[11px] text-latte'>{`${t.admin.recordDetails.nextVisit}: ${record.nextVisitDate}`}</span> : <span aria-hidden='true' />}
+      </div>
+
+      {/* Expandable body: Lists and Notes */}
+      {isExpanded && <div id={detailsId} className='mt-4 space-y-4 border-t border-hairline/70 pt-4 text-sm sm:mt-5'>
         {record.machines && record.machines.length > 0 && (
           <div>
             <div className='font-semibold text-text flex items-center gap-1.5 mb-1.5'>
@@ -511,7 +560,7 @@ const MaintenanceRecordView: React.FC<{
                     <div dir="ltr" className="text-end">{p.count}x {p.name}</div>
                     {p.paidByClient && (
                       <span className="text-xs text-ember-600 dark:text-ember-400 bg-ember-50 dark:bg-ember-900/30 px-1.5 py-0.5 rounded border border-ember-100 dark:border-ember-800/50 whitespace-nowrap">
-                        (على حساب العميل)
+                        ({t.selectors.paidByClient})
                       </span>
                     )}
                   </div>
@@ -535,7 +584,7 @@ const MaintenanceRecordView: React.FC<{
                     <div dir="ltr" className="text-end">{s.count}x {s.name}</div>
                     {s.paidByClient && (
                       <span className="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded border border-blue-100 dark:border-blue-800/50 whitespace-nowrap">
-                        (على حساب العميل)
+                        ({t.selectors.paidByClient})
                       </span>
                     )}
                   </div>
@@ -552,23 +601,23 @@ const MaintenanceRecordView: React.FC<{
             </p>
           </div>
         )}
-      </div>
+      </div>}
 
       {/* Photos Section */}
-      {record.photos && record.photos.length > 0 && (
+      {isExpanded && record.photos && record.photos.length > 0 && (
         <div className="mt-5 p-3 bg-white/50 dark:bg-black/20 border border-hairline rounded-lg">
           <h4 className="text-sm font-semibold mb-3 text-text-secondary flex items-center gap-1.5">
             <CameraIcon className="w-4 h-4 text-latte" />
-            الصور
+            {t.review.photos}
           </h4>
-          {renderPhotoGroup(record.photos, "before", "Before")}
-          {renderPhotoGroup(record.photos, "after", "After")}
-          {renderPhotoGroup(record.photos, "legacy", "Legacy")}
+          {renderPhotoGroup(record.photos, "before", t.ui.maintenanceEditor.before)}
+          {renderPhotoGroup(record.photos, "after", t.ui.maintenanceEditor.after)}
+          {renderPhotoGroup(record.photos, "legacy", t.ui.maintenanceEditor.legacy)}
         </div>
       )}
 
       {/* Recursively show follow-ups */}
-      {record.followUpVisits && record.followUpVisits.length > 0 && (
+      {isExpanded && record.followUpVisits && record.followUpVisits.length > 0 && (
         <div className='mt-5 pe-3 border-e-2 border-hairline pt-2'>
           <p className='text-xs font-bold text-latte mb-3 flex items-center gap-1.5'>
             <ArrowUturnLeftIcon className="w-4 h-4" />
