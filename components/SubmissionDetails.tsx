@@ -25,7 +25,7 @@ import {
   generateClientVisitReport,
   generateCostVisitReport,
 } from "../utils/internalReportPdf";
-import { useLogisticsOperations } from "../hooks/useLogisticsOperations";
+import { useLogisticsOperations, filterLogisticsOperationsForBranch } from "../hooks/useLogisticsOperations";
 import DateRangeExportModal from "./DateRangeExportModal";
 import { DateRange, filterMaintenanceByDateRange, getReportRecords } from "../utils/dateRangeFilter";
 import { getVisitZoneLabel } from "../utils/visitZones";
@@ -1617,8 +1617,11 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
           );
         } else if (branch) {
           const filteredBranch = filteredSub.branches.find((b) => b.id === branch.id) || branch;
+          // Branch-scope logistics operations so visits from other branches
+          // never leak into this branch's report.
+          const branchLogisticsOps = filterLogisticsOperationsForBranch(logisticsOps, filteredBranch.maintenanceHistory || []);
           const doc = await word.generateBranchWordReport(filteredSub.companyName, filteredBranch, {
-            logisticsOperations: logisticsOps,
+            logisticsOperations: branchLogisticsOps,
             dateRange: range.preset !== "allTime" ? range : undefined,
             clientMode: mode === "client",
             costMode: mode === "cost",
@@ -1656,11 +1659,14 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
       } else if (branch) {
         // Look up the filtered branch from the cloned submission (CR #1 fix)
         const filteredBranch = filteredSub.branches.find(b => b.id === branch.id) || branch;
+        // Branch-scope logistics operations so visits from other branches
+        // never leak into this branch's report.
+        const branchLogisticsOps = filterLogisticsOperationsForBranch(logisticsOps, filteredBranch.maintenanceHistory || []);
         if (mode === "internal") {
           const doc = await generateInternalBranchReport(
             filteredSub.companyName,
             filteredBranch,
-            { logisticsOperations: logisticsOps, dateRange: range.preset !== "allTime" ? range : undefined },
+            { logisticsOperations: branchLogisticsOps, dateRange: range.preset !== "allTime" ? range : undefined },
           );
           const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${filteredBranch.branchName?.replace(/\s+/g, "_")}_Internal_Report_${new Date().toISOString().split("T")[0]}.pdf`;
           doc.save(fileName);
@@ -1668,7 +1674,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
           const doc = await generateClientBranchReport(
             filteredSub.companyName,
             filteredBranch,
-            { logisticsOperations: logisticsOps, dateRange: range.preset !== "allTime" ? range : undefined },
+            { logisticsOperations: branchLogisticsOps, dateRange: range.preset !== "allTime" ? range : undefined },
           );
           const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${filteredBranch.branchName?.replace(/\s+/g, "_")}_Client_Report_${new Date().toISOString().split("T")[0]}.pdf`;
           doc.save(fileName);
@@ -1676,7 +1682,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
           const doc = await generateCostBranchReport(
             filteredSub.companyName,
             filteredBranch,
-            { logisticsOperations: logisticsOps, dateRange: range.preset !== "allTime" ? range : undefined },
+            { logisticsOperations: branchLogisticsOps, dateRange: range.preset !== "allTime" ? range : undefined },
           );
           const fileName = `${submission.companyName.replace(/\s+/g, "_")}_${filteredBranch.branchName?.replace(/\s+/g, "_")}_Cost_Report_${new Date().toISOString().split("T")[0]}.pdf`;
           doc.save(fileName);

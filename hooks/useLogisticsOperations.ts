@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
-import { LogisticsOperation, CompanyMachine, MachineNameEntry, ServiceRecord, PartRecord } from '../types';
+import { LogisticsOperation, CompanyMachine, MachineNameEntry, ServiceRecord, PartRecord, MaintenanceRecord } from '../types';
 import { logger } from '../utils/logger';
 import { composeMaintenanceWork } from '../utils/logisticsLabels';
 
@@ -453,6 +453,40 @@ export function findDuplicateNameGroups(names: MachineNameEntry[]): MachineNameE
     byKey.set(key, list);
   });
   return Array.from(byKey.values()).filter((g) => g.length > 1);
+}
+
+/**
+ * Collect every maintenance record id in a branch's history, including nested
+ * follow-up visits, as strings (record ids may be numbers or strings).
+ */
+export function collectMaintenanceRecordIds(records: MaintenanceRecord[]): Set<string> {
+  const ids = new Set<string>();
+  const walk = (recs: MaintenanceRecord[]) => {
+    recs.forEach((r) => {
+      if (r.id !== undefined && r.id !== null) ids.add(String(r.id));
+      if (r.followUpVisits?.length) walk(r.followUpVisits);
+    });
+  };
+  walk(records);
+  return ids;
+}
+
+/**
+ * Filter logistics operations to those opened from a maintenance record that
+ * lives inside the given branch's history (matched via opened_by_record_id).
+ * Operations without an opened_by_record_id cannot be attributed to any branch
+ * and are excluded from branch-scoped lists — they still appear in company
+ * reports.
+ */
+export function filterLogisticsOperationsForBranch(
+  operations: LogisticsOperation[],
+  branchHistory: MaintenanceRecord[],
+): LogisticsOperation[] {
+  const recordIds = collectMaintenanceRecordIds(branchHistory);
+  if (recordIds.size === 0) return [];
+  return operations.filter(
+    (op) => op.opened_by_record_id != null && recordIds.has(String(op.opened_by_record_id)),
+  );
 }
 
 /**

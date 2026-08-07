@@ -23,6 +23,7 @@ import ReportIcon from "./ReportIcon";
 import type { PdfIconName } from "../utils/pdfTheme";
 import { partsList, servicesList } from "../constants";
 import { getReportRecords } from "../utils/dateRangeFilter";
+import { filterLogisticsOperationsForBranch } from "../hooks/useLogisticsOperations";
 import { NO_DATA_LABEL } from "../utils/pdfCompactLayout";
 
 // ── Helpers ──
@@ -206,6 +207,14 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
   const reportBranch = useMemo<Branch>(
     () => ({ ...branch, maintenanceHistory: getReportRecords(branch.maintenanceHistory) }),
     [branch],
+  );
+  // Only this branch's own logistics visits belong in its report — operations
+  // link to their originating maintenance record via opened_by_record_id.
+  // Filter against the RAW branch history (logistics visits are stripped from
+  // reportBranch above), so a visit's op matches its home branch only.
+  const branchLogistics = useMemo(
+    () => filterLogisticsOperationsForBranch(logisticsOperations ?? [], branch.maintenanceHistory ?? []),
+    [logisticsOperations, branch],
   );
   const costs = useMemo(
     () => aggregateBranchCosts(reportBranch, partsList, servicesList),
@@ -392,7 +401,7 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
       )}
 
       {/* Logistics Operations */}
-      <LogisticsReportSection operations={logisticsOperations ?? []} />
+      <LogisticsReportSection operations={branchLogistics} />
 
       {/* Maintenance history — keeps every record row (D-08); section vanishes when empty (D-04) */}
       {reportBranch.maintenanceHistory.length > 0 && (
@@ -673,10 +682,10 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, log
       <LogisticsReportSection operations={logisticsOperations ?? []} />
 
       {/* Branch details */}
-      {reportData.hasBranches && reportData.branches.map((branch) => (
+      {reportData.hasBranches && data.branches.map((branch) => (
         <React.Fragment key={branch.id}>
           <div className='break-before-page' />
-          <BranchInternalReport companyName={reportData.companyName} branch={branch} />
+          <BranchInternalReport companyName={reportData.companyName} branch={branch} logisticsOperations={logisticsOperations} />
         </React.Fragment>
       ))}
 

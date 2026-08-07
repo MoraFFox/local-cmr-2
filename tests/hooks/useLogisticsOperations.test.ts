@@ -5,7 +5,10 @@ import {
   calculateBillableDays,
   normalizeMachineName,
   findDuplicateNameGroups,
+  collectMaintenanceRecordIds,
+  filterLogisticsOperationsForBranch,
 } from '../../hooks/useLogisticsOperations';
+import type { MaintenanceRecord, LogisticsOperation } from '../../types';
 
 describe('calculateRentalDuration', () => {
   it('returns correct days for a 9-day span (June 11 → June 20)', () => {
@@ -136,5 +139,60 @@ describe('findDuplicateNameGroups', () => {
 
   it('handles an empty list', () => {
     expect(findDuplicateNameGroups([])).toHaveLength(0);
+  });
+});
+
+describe('collectMaintenanceRecordIds', () => {
+  it('collects top-level and nested follow-up record ids', () => {
+    const ids = collectMaintenanceRecordIds([
+      { id: 1 },
+      { id: 2, followUpVisits: [{ id: 3 }, { id: 'rec-4' }] },
+    ] as unknown as MaintenanceRecord[]);
+    expect(ids).toEqual(new Set(['1', '2', '3', 'rec-4']));
+  });
+
+  it('returns an empty set when there are no records', () => {
+    expect(collectMaintenanceRecordIds([]).size).toBe(0);
+  });
+});
+
+describe('filterLogisticsOperationsForBranch', () => {
+  const op = (id: number, openedByRecordId?: number) => ({
+    id,
+    opened_by_record_id: openedByRecordId,
+  });
+
+  it('keeps only operations opened from records that live in this branch', () => {
+    const branchHistory = [
+      { id: 100, followUpVisits: [{ id: 101 }] },
+    ] as unknown as MaintenanceRecord[];
+    const ops = [
+      op(1, 100), // this branch
+      op(2, 101), // this branch (nested follow-up)
+      op(3, 999), // another branch
+      op(4), // unattributed (no opened_by_record_id)
+    ] as unknown as LogisticsOperation[];
+    const result = filterLogisticsOperationsForBranch(ops, branchHistory);
+    expect(result.map((o) => o.id)).toEqual([1, 2]);
+  });
+
+  it('matches when record ids and opened_by_record_id use different types', () => {
+    const branchHistory = [{ id: '7' }] as unknown as MaintenanceRecord[];
+    const ops = [
+      { id: 1, opened_by_record_id: 7 },
+      { id: 2, opened_by_record_id: 999 },
+    ] as unknown as LogisticsOperation[];
+    const result = filterLogisticsOperationsForBranch(ops, branchHistory);
+    expect(result.map((o) => o.id)).toEqual([1]);
+  });
+
+  it('returns an empty list when the branch has no history', () => {
+    const ops = [{ id: 1, opened_by_record_id: 100 }] as unknown as LogisticsOperation[];
+    expect(filterLogisticsOperationsForBranch(ops, [])).toEqual([]);
+  });
+
+  it('returns an empty list when no operations are provided', () => {
+    const branchHistory = [{ id: 100 }] as unknown as MaintenanceRecord[];
+    expect(filterLogisticsOperationsForBranch([], branchHistory)).toEqual([]);
   });
 });
