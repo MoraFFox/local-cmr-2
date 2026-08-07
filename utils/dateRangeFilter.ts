@@ -20,6 +20,18 @@ export const ARABIC_PRESET_LABELS: Record<string, string> = {
   custom: "فترة مخصصة",
 };
 
+// ── English Labels ──
+
+export const ENGLISH_PRESET_LABELS: Record<string, string> = {
+  allTime: "All Time",
+  today: "Today",
+  thisWeek: "This Week",
+  thisMonth: "This Month",
+  thisQuarter: "This Quarter",
+  thisYear: "This Year",
+  custom: "Custom Range",
+};
+
 // ── Presets ──
 
 function todayISO(): string {

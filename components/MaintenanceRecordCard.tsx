@@ -39,6 +39,7 @@ import { generateUniqueId } from "../utils/idGenerator";
 import { useVisitZones } from "../utils/visitZones";
 import { useMergedCatalog } from "../hooks/useCustomCatalog";
 import MachineLogisticsSection from "./MachineLogisticsSection";
+import { useT } from "../utils/i18n";
 
 
 interface MaintenanceRecordCardProps {
@@ -151,6 +152,7 @@ export const getNewMaintenanceRecord = (
 const MaintenanceSummary: React.FC<{ record: MaintenanceRecord }> = ({
   record,
 }) => {
+  const t = useT();
   const problemCount = record.problems?.length || 0;
   const serviceCount = record.servicesPerformed?.length || 0;
   const partsCount = record.partsReplaced?.length || 0;
@@ -161,7 +163,7 @@ const MaintenanceSummary: React.FC<{ record: MaintenanceRecord }> = ({
     <div className="flex flex-wrap items-center gap-3 text-sm">
       <div className="flex items-center gap-1.5 text-primary dark:text-latte">
         <CalendarIcon className="w-4 h-4" />
-        <span>{record.maintenanceDate || "لا يوجد تاريخ"}</span>
+        <span>{record.maintenanceDate || t.ui.maintenanceEditor.noDate}</span>
       </div>
 
       {record.baristaName && (
@@ -179,42 +181,42 @@ const MaintenanceSummary: React.FC<{ record: MaintenanceRecord }> = ({
         {problemCount > 0 && (
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-ember-50 text-ember-700 dark:bg-ember-500/10 dark:text-ember-300">
             <ExclamationCircleIcon className="w-3 h-3 me-1" />
-            {problemCount} مشاكل
+            {t.ui.maintenanceEditor.problemsCount.replace('{{count}}', String(problemCount))}
           </span>
         )}
 
         {serviceCount > 0 && (
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
             <WrenchIcon className="w-3 h-3 me-1" />
-            {serviceCount} خدمات
+            {t.ui.maintenanceEditor.servicesCount.replace('{{count}}', String(serviceCount))}
           </span>
         )}
 
         {partsCount > 0 && (
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
             <CurrencyDollarIcon className="w-3 h-3 me-1" />
-            {partsCount} قطع
+            {t.ui.maintenanceEditor.partsCount.replace('{{count}}', String(partsCount))}
           </span>
         )}
 
         {hasFollowUps && (
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
             <ClipboardDocumentListIcon className="w-3 h-3 me-1" />
-            {record.followUpVisits?.length} متابعات
+            {t.ui.maintenanceEditor.followUpsCount.replace('{{count}}', String(record.followUpVisits?.length))}
           </span>
         )}
 
         {record.isLogisticsVisit && (
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-300/60 dark:border-amber-500/40">
             <TruckIcon className="w-3 h-3 me-1" />
-            زيارة لوجستية
+            {t.ui.maintenanceEditor.logisticsVisit}
           </span>
         )}
 
         {record.problemSolved && (
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-leaf-50 text-leaf-700 dark:bg-leaf-500/10 dark:text-leaf-300">
             <CheckCircleIcon className="w-3 h-3 me-1" />
-            تم الحل
+            {t.ui.maintenanceEditor.solved}
           </span>
         )}
       </div>
@@ -223,6 +225,7 @@ const MaintenanceSummary: React.FC<{ record: MaintenanceRecord }> = ({
 };
 
 const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
+  const t = useT();
   const {
     record,
     onChange,
@@ -484,7 +487,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
         <div className="bg-white dark:bg-espresso rounded-xl p-4 space-y-4 border border-hairline dark:border-hairline">
           <h4 className="text-sm font-semibold text-primary dark:text-cream flex items-center gap-2">
             <CalendarIcon className="w-4 h-4 text-primary" />
-            المعلومات الأساسية
+            {t.ui.maintenanceEditor.basicInfo}
           </h4>
 
           {/* Logistics visit toggle */}
@@ -493,9 +496,9 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               <TruckIcon className={`w-5 h-5 shrink-0 ${record.isLogisticsVisit ? 'text-amber-500' : 'text-latte'}`} />
               <div className="min-w-0">
                 <div className={`text-sm font-semibold ${record.isLogisticsVisit ? 'text-amber-700 dark:text-amber-300' : 'text-primary dark:text-cream'}`}>
-                  زيارة لوجستية
+                  {t.ui.maintenanceEditor.logisticsVisit}
                 </div>
-                <div className="text-xs text-latte truncate">فقط لحركة الماكينات — لا تظهر في التقارير</div>
+                <div className="text-xs text-latte truncate">{t.ui.maintenanceEditor.logisticsVisitHint}</div>
               </div>
             </div>
             <button
@@ -511,7 +514,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <TextInput
-              label="التاريخ"
+              label={t.ui.maintenanceEditor.date}
               type="date"
               name="maintenanceDate"
               value={record.maintenanceDate}
@@ -519,7 +522,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
             />
             {!record.isLogisticsVisit && (
               <TextInput
-                label="الزيارة القادمة"
+                label={t.ui.maintenanceEditor.nextVisit}
                 type="date"
                 name="nextVisitDate"
                 value={record.nextVisitDate || ""}
@@ -530,7 +533,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
             {/* Staff Selector */}
             <div className="flex flex-col">
               <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
-                فني الصيانة
+                {t.ui.maintenanceEditor.technician}
               </label>
               <div className="flex gap-2 relative">
                 {baristas.length > 0 ? (
@@ -540,7 +543,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                     onChange={handleFieldChange}
                     className={selectClasses}
                   >
-                    <option value="">اختر الفني</option>
+                    <option value="">{t.ui.maintenanceEditor.selectTechnician}</option>
                     {baristas.map((b) => (
                       <option key={b.id} value={b.name}>
                         {b.name}
@@ -555,7 +558,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                       value={record.baristaName}
                       onChange={handleFieldChange}
                       className={`w-full ${selectClasses} ${typoSuggestion ? "ring-2 ring-amber-400 border-amber-400" : ""}`}
-                      placeholder="اسم الفني"
+                      placeholder={t.ui.maintenanceEditor.technicianNamePlaceholder}
                     />
                     {typoSuggestion && createPortal(
                       <button
@@ -567,11 +570,11 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                       >
                         <ExclamationCircleIcon className="w-5 h-5 text-amber-600" />
                         <span className="text-xs text-amber-800 dark:text-amber-100">
-                          هل تقصد:{" "}
+                          {t.ui.maintenanceEditor.didYouMean}{" "}
                           <span className="font-bold underline">
                             {typoSuggestion}
                           </span>
-                          ؟
+                          {t.ui.maintenanceEditor.questionMark}
                         </span>
                       </button>,
                       document.body
@@ -583,8 +586,8 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                     type="button"
                     onClick={handleQuickAddBarista}
                     className="btn-primary px-3 shrink-0 rounded-lg"
-                    title="إضافة فني جديد"
-                    aria-label="إضافة فني جديد"
+                    title={t.ui.maintenanceEditor.addTechnician}
+                    aria-label={t.ui.maintenanceEditor.addTechnician}
                   >
                     <UserPlusIcon className="w-5 h-5" />
                   </button>
@@ -596,7 +599,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
             {!record.isLogisticsVisit && (
             <div className="flex flex-col">
               <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
-                باريستا العميل
+                {t.ui.maintenanceEditor.clientBarista}
               </label>
               <div className="flex gap-2 relative">
                 {clientBaristas.length > 0 ? (
@@ -606,7 +609,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                     onChange={handleFieldChange}
                     className={selectClasses}
                   >
-                    <option value="">اختر باريستا العميل</option>
+                    <option value="">{t.ui.maintenanceEditor.selectClientBarista}</option>
                     {clientBaristas.map((b) => (
                       <option key={b.id} value={b.name}>
                         {b.name}
@@ -619,7 +622,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                     value={record.clientBaristaName || ""}
                     onChange={handleFieldChange}
                     className={selectClasses}
-                    placeholder="اسم باريستا العميل"
+                    placeholder={t.ui.maintenanceEditor.clientBaristaNamePlaceholder}
                   />
                 )}
                 {onAddClientBarista && (
@@ -627,8 +630,8 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                     type="button"
                     onClick={() => setQuickAddModal({ type: 'clientBarista', name: '' })}
                     className="px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors flex items-center justify-center shadow-sm active:scale-95 shrink-0"
-                    title="إضافة باريستا عميل جديد"
-                    aria-label="إضافة باريستا عميل جديد"
+                    title={t.ui.maintenanceEditor.addClientBarista}
+                    aria-label={t.ui.maintenanceEditor.addClientBarista}
                   >
                     <UserPlusIcon className="w-5 h-5" />
                   </button>
@@ -643,7 +646,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               value={record.visitRating || 0}
               onChange={handleRatingChange}
               size="sm"
-              label="تقييم الأداء"
+              label={t.ui.maintenanceEditor.performanceRating}
               showNA
               showNumeric
             />
@@ -652,7 +655,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
 
           {!record.isLogisticsVisit && (
           <RadioGroup
-            label="منطقة الزيارة (رسوم الانتقال)"
+            label={t.ui.maintenanceEditor.visitZoneWithFees}
             name={`visitZone-${record.id}`}
             value={record.visitZone}
             onChange={(val) =>
@@ -675,7 +678,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
           <div className="flex items-center justify-between">
             <h4 className="text-sm font-semibold text-primary dark:text-cream flex items-center gap-2">
               <WrenchIcon className="w-4 h-4 text-ember-500" />
-              المشكلة والخدمات
+              {t.ui.maintenanceEditor.problemAndServices}
             </h4>
             <div className="flex items-center gap-x-3">
               <input
@@ -690,14 +693,14 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                 htmlFor={`hadProblem-${record.id}`}
                 className="font-medium text-primary dark:text-cream"
               >
-                هل كانت هناك مشكلة؟
+                {t.ui.maintenanceEditor.wasThereAProblem}
               </label>
             </div>
           </div>
 
           {record.hadProblem && (
             <div className="space-y-4">
-              <CollapsibleSection title="المشاكل المكتشفة">
+              <CollapsibleSection title={t.ui.maintenanceEditor.detectedProblems}>
                 <CheckboxGroup
                   categories={problemCategoriesWithCustoms}
                   selectedValues={record.problems || []}
@@ -712,7 +715,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                 />
               </CollapsibleSection>
 
-              <CollapsibleSection title="الخدمات المُقدمة">
+              <CollapsibleSection title={t.ui.maintenanceEditor.servicesProvided}>
                 <ServiceSelector
                   options={mergedServicesList}
                   selectedValues={record.servicesPerformed || []}
@@ -740,13 +743,13 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                   htmlFor={`partsWereReplaced-${record.id}`}
                   className="font-medium text-primary dark:text-cream"
                 >
-                  هل تم تغيير قطع غيار؟
+                  {t.ui.maintenanceEditor.werePartsReplaced}
                 </label>
               </div>
 
               {record.partsWereReplaced && (
                 <div className="ltr:pe-6 rtl:ps-6 ltr:ps-2 rtl:pe-2 space-y-4">
-                  <CollapsibleSection title="القطع المستبدلة">
+                  <CollapsibleSection title={t.ui.maintenanceEditor.replacedParts}>
                     <PartsSelector
                       options={mergedPartsList}
                       selectedValues={record.partsReplaced || []}
@@ -776,7 +779,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                   htmlFor={`problemSolved-${record.id}`}
                   className="font-medium text-primary dark:text-cream"
                 >
-                  هل تم حل المشكلة؟
+                  {t.ui.maintenanceEditor.wasProblemSolved}
                 </label>
               </div>
 
@@ -786,10 +789,10 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-semibold text-primary dark:text-cream flex items-center gap-2">
                       <ClipboardDocumentListIcon className="w-4 h-4 text-primary" />
-                      زيارات المتابعة
+                      {t.ui.maintenanceEditor.followUpVisits}
                     </h4>
                     <span className="text-sm text-latte">
-                      {(record.followUpVisits || []).length} زيارة
+                      {t.ui.maintenanceEditor.visitCount.replace('{{count}}', String((record.followUpVisits || []).length))}
                     </span>
                   </div>
                   <div className="space-y-3">
@@ -819,7 +822,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                     className="mt-3 flex items-center gap-1.5 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-500 transition-colors transform active:scale-95"
                   >
                     <PlusCircleIcon className="w-5 h-5" />
-                    إضافة زيارة متابعة
+                    {t.ui.maintenanceEditor.addFollowUpVisit}
                   </button>
                 </div>
               )}
@@ -833,19 +836,19 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-hairline dark:border-hairline">
           <RadioGroup
             name={`type-${record.id}`}
-            label="النوع"
+            label={t.ui.maintenanceEditor.type}
             value={record.type}
             onChange={(val) =>
               handleFieldChange({ target: { name: "type", value: val } } as any)
             }
             options={[
-              { label: "طلب صيانة", value: "requested" },
-              { label: "صيانة دورية", value: "scheduled" },
+              { label: t.ui.maintenanceEditor.requested, value: "requested" },
+              { label: t.ui.maintenanceEditor.scheduled, value: "scheduled" },
             ]}
           />
           <RadioGroup
             name={`paidBy-${record.id}`}
-            label="الدفع بواسطة"
+            label={t.ui.maintenanceEditor.paidBy}
             value={record.paidBy}
             onChange={(val) =>
               handleFieldChange({
@@ -853,12 +856,12 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               } as any)
             }
             options={[
-              { label: "ميدوز", value: "company" },
-              { label: "الشركة", value: "client" },
+              { label: t.ui.maintenanceEditor.midosLabel, value: "company" },
+              { label: t.ui.maintenanceEditor.companyLabel, value: "client" },
             ]}
           />
           <TextInput
-            label="تكلفة الإيجار اليومي (ج.م)"
+            label={t.ui.maintenanceEditor.dailyLeaseCost}
             type="number"
             name="dailyLeaseCost"
             value={record.dailyLeaseCost || ""}
@@ -871,13 +874,13 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
         {/* Machines Section */}
         {!record.isLogisticsVisit && (
         <div className="pt-4 border-t border-hairline dark:border-hairline">
-          <CollapsibleSection title="الماكينات التي تمت صيانتها">
+          <CollapsibleSection title={t.ui.maintenanceEditor.maintainedMachines}>
             <div className="space-y-3">
               {(record.machines || []).map((machine, index) => (
                 <div key={machine.id} className="flex ltr:items-start rtl:items-end gap-2">
                   <div className="grid grid-cols-4 gap-2 w-full">
                     <TextInput
-                      placeholder="اسم/رقم الماكينة"
+                      placeholder={t.ui.maintenanceEditor.machineNamePlaceholder}
                       value={machine.name}
                       onChange={(e) =>
                         handleMachineChange(index, "name", e.target.value)
@@ -887,7 +890,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                     <TextInput
                       type="number"
                       min="1"
-                      placeholder="الكمية"
+                      placeholder={t.ui.maintenanceEditor.quantity}
                       value={machine.count}
                       onChange={(e) =>
                         handleMachineChange(
@@ -902,7 +905,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                   <button
                     onClick={() => handleRemoveMachine(index)}
                     className="mt-3 p-2 text-latte hover:text-ember-500 dark:hover:text-ember-300 rounded-full hover:bg-ember-500/20 dark:hover:bg-ember-500/20 transition-colors transform active:scale-95"
-                    aria-label="إزالة الماكينة"
+                    aria-label={t.ui.maintenanceEditor.removeMachine}
                   >
                     <TrashIcon className="w-5 h-5" />
                   </button>
@@ -913,7 +916,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                 className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-primary dark:text-primary hover:text-primary dark:hover:text-leaf-500 transition-colors transform active:scale-95"
               >
                 <PlusCircleIcon className="w-5 h-5" />
-                إضافة ماكينة
+                {t.ui.maintenanceEditor.addMachine}
               </button>
             </div>
           </CollapsibleSection>
@@ -923,7 +926,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
         {/* Supervisors Section */}
         {!record.isLogisticsVisit && (
         <div className="pt-4 border-t border-hairline dark:border-hairline">
-          <CollapsibleSection title="بيانات المشرف">
+          <CollapsibleSection title={t.ui.maintenanceEditor.supervisorDetails}>
             <div className="space-y-4">
               {(record.supervisors || []).map((supervisor, index) => (
                 <div
@@ -932,14 +935,14 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                 >
                   <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <TextInput
-                      label="اسم المشرف"
+                      label={t.ui.maintenanceEditor.supervisorNameLabel}
                       value={supervisor.name}
                       onChange={(e) =>
                         handleSupervisorChange(index, "name", e.target.value)
                       }
                     />
                     <TextInput
-                      label="رقم هاتف المشرف"
+                      label={t.ui.maintenanceEditor.supervisorPhoneLabel}
                       value={supervisor.phone}
                       onChange={(e) =>
                         handleSupervisorChange(index, "phone", e.target.value)
@@ -949,7 +952,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                   <button
                     onClick={() => handleRemoveSupervisor(index)}
                     className="p-1.5 mt-2 shrink-0 text-latte hover:text-ember-500 dark:hover:text-ember-300 rounded-full hover:bg-ember-500/20 dark:hover:bg-ember-500/20 transition-colors transform active:scale-95"
-                    aria-label="إزالة المشرف"
+                    aria-label={t.ui.maintenanceEditor.removeSupervisor}
                   >
                     <TrashIcon className="w-5 h-5" />
                   </button>
@@ -960,7 +963,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
                 className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-primary dark:text-primary hover:text-primary dark:hover:text-leaf-500 transition-colors transform active:scale-95"
               >
                 <PlusCircleIcon className="w-5 h-5" />
-                إضافة مشرف
+                {t.ui.maintenanceEditor.addSupervisor}
               </button>
             </div>
           </CollapsibleSection>
@@ -969,7 +972,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
 
         {/* Machine Logistics Section — always visible */}
         <div className="pt-4 border-t border-hairline dark:border-hairline">
-          <CollapsibleSection title="لوجستيات الماكينات">
+          <CollapsibleSection title={t.ui.maintenanceEditor.machineLogistics}>
             <MachineLogisticsSection
               customerId={customerId}
               recordId={typeof record.id === 'number' ? record.id : undefined as any}
@@ -982,7 +985,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
         {!record.isLogisticsVisit && (
         <div className="pt-4 border-t border-hairline dark:border-hairline">
           <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">
-            ملاحظات (اختياري)
+            {t.ui.maintenanceEditor.notesOptional}
           </label>
           <textarea
             name="notes"
@@ -999,15 +1002,15 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
       <SafeModal
         isOpen={quickAddModal !== null}
         onClose={() => setQuickAddModal(null)}
-        title={quickAddModal?.type === 'barista' ? 'إضافة فني جديد' : 'إضافة باريستا عميل'}
+        title={quickAddModal?.type === 'barista' ? t.ui.maintenanceEditor.addTechnician : t.ui.maintenanceEditor.addClientBarista}
       >
         <div className="space-y-4">
           <TextInput
-            label="الاسم"
+            label={t.ui.maintenanceEditor.name}
             name="quickAddName"
             value={quickAddModal?.name || ''}
             onChange={(e) => setQuickAddModal(prev => prev ? { ...prev, name: e.target.value } : null)}
-            placeholder={quickAddModal?.type === 'barista' ? 'اسم الفني' : 'اسم باريستا العميل'}
+            placeholder={quickAddModal?.type === 'barista' ? t.ui.maintenanceEditor.technicianNamePlaceholder : t.ui.maintenanceEditor.clientBaristaNamePlaceholder}
             autoFocus
           />
           <div className="flex ltr:justify-end rtl:justify-start gap-3">
@@ -1016,7 +1019,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               onClick={() => setQuickAddModal(null)}
               className="px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"
             >
-              إلغاء
+              {t.ui.maintenanceEditor.cancel}
             </button>
             <button
               type="button"
@@ -1024,7 +1027,7 @@ const MaintenanceRecordCard: React.FC<MaintenanceRecordCardProps> = (props) => {
               disabled={!quickAddModal?.name.trim()}
               className="btn-primary px-4 py-2 text-sm font-medium rounded-lg disabled:opacity-50"
             >
-              إضافة
+              {t.ui.maintenanceEditor.add}
             </button>
           </div>
         </div>

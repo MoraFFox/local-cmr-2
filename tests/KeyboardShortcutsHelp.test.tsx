@@ -151,7 +151,7 @@ describe('KeyboardShortcutsHelp', () => {
 
     fireEvent.click(screen.getByRole('button', { name: helpLabel }));
 
-    const closeButton = screen.getByRole('button', { name: /close modal/i });
+    const closeButton = screen.getByRole('button', { name: ar.common.close });
     expect(document.activeElement).toBe(closeButton);
   });
 });

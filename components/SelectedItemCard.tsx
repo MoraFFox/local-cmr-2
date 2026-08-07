@@ -1,6 +1,7 @@
 import React from 'react';
 import { MinusIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import PayerSegmentedControl from './PayerSegmentedControl';
+import { useT } from '../utils/i18n';
 
 interface SelectedItemCardProps {
   name: string;
@@ -28,6 +29,7 @@ const SelectedItemCard: React.FC<SelectedItemCardProps> = ({
   viewMode = 'grid',
   autoFocus = false,
 }) => {
+  const t = useT();
   const borderColorClass = paidByClient
     ? 'border-amber-500/30 bg-amber-500/5'
     : 'border-primary/30 bg-primary/5';
@@ -73,7 +75,7 @@ const SelectedItemCard: React.FC<SelectedItemCardProps> = ({
             value={name}
             onChange={handleNameChange}
             className="w-full bg-cream text-text px-3 py-1.5 rounded-lg border border-hairline focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none transition-all placeholder-latte"
-            placeholder="Item name..."
+            placeholder={t.selectors.itemNamePlaceholder}
             autoFocus={autoFocus}
           />
         ) : (

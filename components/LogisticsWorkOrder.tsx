@@ -3,12 +3,17 @@ import { PrinterIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 import type { LogisticsOperation } from '../types';
 import {
   LOGISTICS_TYPE_LABELS_AR,
+  LOGISTICS_TYPE_LABELS_EN,
   LOGISTICS_STATUS_LABELS,
   formatMachineDescriptionAr,
+  formatMachineDescription,
   getMaintenanceWorkSections,
   MAINTENANCE_SECTION_LABELS_AR,
+  MAINTENANCE_SECTION_LABELS_EN,
 } from '../utils/logisticsLabels';
 import { calculateDailyRentalPrice } from '../hooks/useLogisticsOperations';
+import { useLanguage } from '../utils/LanguageContext';
+import { useT } from '../utils/i18n';
 
 interface LogisticsWorkOrderProps {
   /** The single operation being printed. */
@@ -19,9 +24,6 @@ interface LogisticsWorkOrderProps {
   companyName?: string;
   onBack: () => void;
 }
-
-const fmtCurrency = (value?: number | null): string =>
-  value != null && !isNaN(Number(value)) ? `${Number(value).toLocaleString()} ج.م` : '—';
 
 /** Label + dotted underline field (fill-in style, like PrintableWorkOrder). */
 const LinedField: React.FC<{ label: string; value?: React.ReactNode }> = ({ label, value }) => (
@@ -43,18 +45,19 @@ const OpNumberBadge: React.FC<{ number: number }> = ({ number }) => (
 );
 
 /** Structured work-done sections (issues/services/parts) with bullets. */
-const WorkSections: React.FC<{ operation: LogisticsOperation }> = ({ operation }) => {
+const WorkSections: React.FC<{ operation: LogisticsOperation; t: any; isAr: boolean }> = ({ operation, t, isAr }) => {
   const sections = getMaintenanceWorkSections(
     operation.maintenance_issues,
     operation.maintenance_services,
     operation.maintenance_parts,
   );
+  const sectionLabels = isAr ? MAINTENANCE_SECTION_LABELS_AR : MAINTENANCE_SECTION_LABELS_EN;
 
   if (sections.length === 0) {
     return operation.work_done ? (
-      <p className="text-sm text-latte whitespace-pre-wrap">الأعمال: {operation.work_done}</p>
+      <p className="text-sm text-latte whitespace-pre-wrap">{t.ui.logistics.workColon} {operation.work_done}</p>
     ) : (
-      <p className="text-sm text-latte">لا توجد بيانات أعمال مسجلة.</p>
+      <p className="text-sm text-latte">{t.ui.logistics.noWorkData}</p>
     );
   }
 
@@ -62,7 +65,7 @@ const WorkSections: React.FC<{ operation: LogisticsOperation }> = ({ operation }
     <div className="space-y-3">
       {sections.map((s) => (
         <div key={s.key} className="break-inside-avoid">
-          <p className="text-[13px] font-bold text-primary mb-1">{MAINTENANCE_SECTION_LABELS_AR[s.key]}:</p>
+          <p className="text-[13px] font-bold text-primary mb-1">{sectionLabels[s.key]}:</p>
           <ul className="space-y-0.5">
             {s.items.map((item, i) => (
               <li key={i} className="flex items-start gap-1.5 text-sm text-latte">
@@ -83,12 +86,19 @@ const LogisticsWorkOrder: React.FC<LogisticsWorkOrderProps> = ({
   companyName,
   onBack,
 }) => {
-  const typeLabel = LOGISTICS_TYPE_LABELS_AR[op.operation_type] || op.operation_type;
+  const { language } = useLanguage();
+  const t = useT();
+  const isAr = language === 'ar';
+  const fmtCurrency = (value?: number | null): string =>
+    value != null && !isNaN(Number(value)) ? `${Number(value).toLocaleString()} ${t.ui.logistics.egp}` : '—';
+  const typeLabel = isAr
+    ? (LOGISTICS_TYPE_LABELS_AR[op.operation_type] || op.operation_type)
+    : (LOGISTICS_TYPE_LABELS_EN[op.operation_type] || op.operation_type);
   const statusLabel = LOGISTICS_STATUS_LABELS[op.status]?.label || op.status;
-  const clientMachine = formatMachineDescriptionAr(op.machine_category, op.machine_type, op.machine_name) || '—';
+  const clientMachine = (isAr ? formatMachineDescriptionAr : formatMachineDescription)(op.machine_category, op.machine_type, op.machine_name) || '—';
   const givenMachine =
     op.given_machine_category || op.given_machine_type || op.given_machine_name
-      ? formatMachineDescriptionAr(op.given_machine_category, op.given_machine_type, op.given_machine_name)
+      ? (isAr ? formatMachineDescriptionAr : formatMachineDescription)(op.given_machine_category, op.given_machine_type, op.given_machine_name)
       : null;
   const dailyRental =
     op.monthly_rental_price != null ? calculateDailyRentalPrice(op.monthly_rental_price) : null;
@@ -102,14 +112,14 @@ const LogisticsWorkOrder: React.FC<LogisticsWorkOrderProps> = ({
           className="flex items-center gap-2 bg-hover text-white font-bold py-3 px-5 rounded-full hover:bg-copper-700 transition-colors shadow-lg transform active:scale-95"
         >
           <PrinterIcon className="w-6 h-6" />
-          <span>طباعة</span>
+          <span>{t.ui.logistics.printWorkOrder}</span>
         </button>
         <button
           onClick={onBack}
           className="flex items-center gap-2 bg-espresso-light text-white font-bold py-3 px-5 rounded-full hover:bg-espresso-light/50 transition-colors shadow-lg transform active:scale-95"
         >
           <ArrowUturnLeftIcon className="w-6 h-6" />
-          <span>رجوع</span>
+          <span>{t.ui.logistics.back}</span>
         </button>
       </div>
 
@@ -117,8 +127,8 @@ const LogisticsWorkOrder: React.FC<LogisticsWorkOrderProps> = ({
         {/* Header */}
         <header className="flex justify-between items-center pb-3 border-b-2 border-hairline">
           <div>
-            <h1 className="text-2xl font-bold text-primary">أمر عمل لوجستي</h1>
-            <p className="text-xs text-latte">وثيقة داخلية — تستخدم في الموقع</p>
+            <h1 className="text-2xl font-bold text-primary">{t.ui.logistics.workOrderTitle}</h1>
+            <p className="text-xs text-latte">{t.ui.logistics.workOrderDocHint}</p>
           </div>
           <div className="flex flex-col ltr:items-end rtl:items-start">
             <img src="/logo.svg" alt="Mido for distribution" className="h-12 w-auto object-contain mb-1" />
@@ -141,20 +151,20 @@ const LogisticsWorkOrder: React.FC<LogisticsWorkOrderProps> = ({
               {statusLabel}
             </span>
           </div>
-          <LinedField label="تاريخ الفتح" value={op.open_date || '—'} />
-          <LinedField label="تاريخ الإغلاق" value={op.close_date || '—'} />
+          <LinedField label={t.ui.logistics.openDate} value={op.open_date || '—'} />
+          <LinedField label={t.ui.logistics.closeDate} value={op.close_date || '—'} />
         </section>
 
         {/* Machines */}
         <section className="mt-4 p-2 border border-hairline rounded-md break-inside-avoid">
           <h3 className="text-sm font-bold uppercase tracking-wider text-primary bg-cream-2 -m-2 mb-2 p-2 rounded-t-md border-b-2 border-hairline">
-            الماكينات
+            {t.ui.logistics.machines}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 px-1">
-            <LinedField label="ماكينة العميل" value={clientMachine} />
-            <LinedField label="الماكينة المقدمة" value={givenMachine || '—'} />
+            <LinedField label={t.ui.logistics.clientMachine} value={clientMachine} />
+            <LinedField label={t.ui.logistics.providedMachine} value={givenMachine || '—'} />
             {op.company_machines && (
-              <LinedField label="البديلة (المخزن)" value={op.company_machines.name} />
+              <LinedField label={t.ui.logistics.warehouseReplacement} value={op.company_machines.name} />
             )}
           </div>
         </section>
@@ -162,29 +172,29 @@ const LogisticsWorkOrder: React.FC<LogisticsWorkOrderProps> = ({
         {/* Costs */}
         <section className="mt-4 p-2 border border-hairline rounded-md break-inside-avoid">
           <h3 className="text-sm font-bold uppercase tracking-wider text-primary bg-cream-2 -m-2 mb-2 p-2 rounded-t-md border-b-2 border-hairline">
-            التكاليف
+            {t.ui.logistics.costs}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-2 px-1">
             {op.monthly_rental_price != null && (
-              <LinedField label="الإيجار الشهري" value={fmtCurrency(op.monthly_rental_price)} />
+              <LinedField label={t.ui.logistics.monthlyRent} value={fmtCurrency(op.monthly_rental_price)} />
             )}
             {dailyRental != null && (
-              <LinedField label="الإيجار اليومي" value={fmtCurrency(dailyRental)} />
+              <LinedField label={t.ui.logistics.dailyRent} value={fmtCurrency(dailyRental)} />
             )}
             {op.total_rental_cost != null && (
-              <LinedField label="إجمالي الإيجار" value={fmtCurrency(op.total_rental_cost)} />
+              <LinedField label={t.ui.logistics.totalRent} value={fmtCurrency(op.total_rental_cost)} />
             )}
             {op.pickup_cost != null && op.pickup_cost > 0 && (
-              <LinedField label="تكلفة الاستلام" value={fmtCurrency(op.pickup_cost)} />
+              <LinedField label={t.ui.logistics.pickupCost} value={fmtCurrency(op.pickup_cost)} />
             )}
             {op.return_cost != null && op.return_cost > 0 && (
-              <LinedField label="تكلفة الإرجاع" value={fmtCurrency(op.return_cost)} />
+              <LinedField label={t.ui.logistics.returnCost} value={fmtCurrency(op.return_cost)} />
             )}
             {op.maintenance_cost != null && (
-              <LinedField label="تكلفة الصيانة" value={fmtCurrency(op.maintenance_cost)} />
+              <LinedField label={t.ui.logistics.maintenanceCost} value={fmtCurrency(op.maintenance_cost)} />
             )}
             {op.total_logistics_cost != null && (
-              <LinedField label="إجمالي العملية" value={fmtCurrency(op.total_logistics_cost)} />
+              <LinedField label={t.ui.logistics.totalOperation} value={fmtCurrency(op.total_logistics_cost)} />
             )}
           </div>
         </section>
@@ -192,10 +202,10 @@ const LogisticsWorkOrder: React.FC<LogisticsWorkOrderProps> = ({
         {/* Work performed — structured sections */}
         <section className="mt-4 p-2 border border-hairline rounded-md break-inside-avoid">
           <h3 className="text-sm font-bold uppercase tracking-wider text-primary bg-cream-2 -m-2 mb-2 p-2 rounded-t-md border-b-2 border-hairline">
-            الأعمال المنفذة
+            {t.ui.logistics.workPerformed}
           </h3>
           <div className="px-1">
-            <WorkSections operation={op} />
+            <WorkSections operation={op} t={t} isAr={isAr} />
           </div>
         </section>
 
@@ -203,7 +213,7 @@ const LogisticsWorkOrder: React.FC<LogisticsWorkOrderProps> = ({
         {op.internal_notes && (
           <section className="mt-4 p-2 border border-hairline rounded-md break-inside-avoid">
             <h3 className="text-sm font-bold uppercase tracking-wider text-primary bg-cream-2 -m-2 mb-2 p-2 rounded-t-md border-b-2 border-hairline">
-              ملاحظات داخلية
+              {t.ui.logistics.internalNotesTitle}
             </h3>
             <p className="text-sm text-latte px-1 whitespace-pre-wrap">{op.internal_notes}</p>
           </section>
@@ -212,18 +222,18 @@ const LogisticsWorkOrder: React.FC<LogisticsWorkOrderProps> = ({
         {/* Signatures */}
         <section className="mt-10 grid grid-cols-2 gap-8">
           <div>
-            <p className="text-xs text-latte mb-2">توقيع الفني</p>
+            <p className="text-xs text-latte mb-2">{t.ui.logistics.technicianSignature}</p>
             <div className="border-b border-dotted border-hairline h-8" />
           </div>
           <div>
-            <p className="text-xs text-latte mb-2">توقيع العميل</p>
+            <p className="text-xs text-latte mb-2">{t.ui.logistics.clientSignature}</p>
             <div className="border-b border-dotted border-hairline h-8" />
           </div>
         </section>
 
         {/* Footer */}
         <footer className="mt-8 pt-6 border-t-2 border-hairline text-center">
-          <p className="text-xs text-latte">نهاية أمر العمل</p>
+          <p className="text-xs text-latte">{t.ui.logistics.endOfWorkOrder}</p>
         </footer>
       </div>
 

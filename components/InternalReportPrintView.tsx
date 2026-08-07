@@ -25,11 +25,13 @@ import { partsList, servicesList } from "../constants";
 import { getReportRecords } from "../utils/dateRangeFilter";
 import { filterLogisticsOperationsForBranch } from "../hooks/useLogisticsOperations";
 import { NO_DATA_LABEL } from "../utils/pdfCompactLayout";
+import { useT } from "../utils/i18n";
+import type { Translations } from "../utils/i18n";
 
 // ── Helpers ──
 
-const getPaidByLabel = (val: string) =>
-  val === "company" ? "By Midos" : "By Client";
+const getPaidByLabel = (val: string, t: Translations) =>
+  val === "company" ? t.ui.print.byMidos : t.ui.print.byClient;
 
 const formatDate = (date = new Date()) =>
   date.toLocaleDateString("en-GB", {
@@ -89,6 +91,7 @@ const computeRecordCostSummary = (record: MaintenanceRecord) => {
 // ── Maintenance record card for print ──
 
 const PrintRecordCard: React.FC<{ record: MaintenanceRecord }> = ({ record }) => {
+  const t = useT();
   const recCosts = computeRecordCostSummary(record);
 
   return (
@@ -108,22 +111,22 @@ const PrintRecordCard: React.FC<{ record: MaintenanceRecord }> = ({ record }) =>
       <div className='p-4 text-xs space-y-2'>
         <div className='grid grid-cols-3 gap-2 mb-2'>
           <div>
-            <span className='text-latte font-semibold block'>Technician</span>
+            <span className='text-latte font-semibold block'>{t.ui.print.technician}</span>
             <span className='text-text font-medium'>{record.baristaName || NO_DATA_LABEL}</span>
           </div>
           <div>
-            <span className='text-latte font-semibold block'>Paid By</span>
-            <span className='text-text font-medium'>{getPaidByLabel(record.paidBy)}</span>
+            <span className='text-latte font-semibold block'>{t.ui.print.paidBy}</span>
+            <span className='text-text font-medium'>{getPaidByLabel(record.paidBy, t)}</span>
           </div>
           <div>
-            <span className='text-latte font-semibold block'>Resolved</span>
-            <span className='text-text font-medium'>{record.problemSolved ? "Yes" : "No"}</span>
+            <span className='text-latte font-semibold block'>{t.ui.print.resolved}</span>
+            <span className='text-text font-medium'>{record.problemSolved ? t.common.yes : t.common.no}</span>
           </div>
         </div>
 
         {record.machines && record.machines.length > 0 && (
           <div className='flex gap-1 flex-wrap'>
-            <span className='font-semibold text-text'>Machines:</span>
+            <span className='font-semibold text-text'>{t.ui.print.machines}</span>
             {record.machines.map((m, i) => (
               <span key={i} className='bg-cream-2 border border-hairline px-1.5 py-0.5 rounded text-text'>
                 {m.count}x {m.name}
@@ -134,7 +137,7 @@ const PrintRecordCard: React.FC<{ record: MaintenanceRecord }> = ({ record }) =>
 
         {record.problems && record.problems.length > 0 && (
           <div className='flex gap-1 flex-wrap'>
-            <span className='font-semibold text-ember-700'>Issues:</span>
+            <span className='font-semibold text-ember-700'>{t.ui.print.issues}</span>
             {record.problems.map((p, i) => (
               <span key={i} className='bg-ember-50 text-ember-700 border border-ember-100 px-1.5 py-0.5 rounded text-[10px]'>
                 {p}
@@ -145,7 +148,7 @@ const PrintRecordCard: React.FC<{ record: MaintenanceRecord }> = ({ record }) =>
 
         {record.partsReplaced && record.partsReplaced.length > 0 && (
           <div>
-            <span className='font-semibold text-text block mb-1'>Replaced Parts</span>
+            <span className='font-semibold text-text block mb-1'>{t.ui.print.replacedParts}</span>
             <div className='grid grid-cols-2 sm:grid-cols-3 gap-2'>
               {record.partsReplaced.map((p, i) => (
                 <div key={i} className='bg-cream-2 border border-hairline rounded p-2 flex justify-between items-center'>
@@ -155,7 +158,7 @@ const PrintRecordCard: React.FC<{ record: MaintenanceRecord }> = ({ record }) =>
                   </div>
                   {p.paidByClient && (
                     <span className='text-[9px] bg-blue-50 text-blue-700 border border-blue-100 px-1 rounded'>
-                      Client
+                      {t.ui.print.clientBadge}
                     </span>
                   )}
                 </div>
@@ -166,7 +169,7 @@ const PrintRecordCard: React.FC<{ record: MaintenanceRecord }> = ({ record }) =>
 
         {record.servicesPerformed && record.servicesPerformed.length > 0 && (
           <div>
-            <span className='font-semibold text-text block mb-1'>Services Performed</span>
+            <span className='font-semibold text-text block mb-1'>{t.ui.print.servicesPerformed}</span>
             <div className='grid grid-cols-2 sm:grid-cols-3 gap-2'>
               {record.servicesPerformed.map((s, i) => (
                 <div key={i} className='bg-cream-2 border border-hairline rounded p-2 flex justify-between items-center'>
@@ -176,7 +179,7 @@ const PrintRecordCard: React.FC<{ record: MaintenanceRecord }> = ({ record }) =>
                   </div>
                   {s.paidByClient && (
                     <span className='text-[9px] bg-blue-50 text-blue-700 border border-blue-100 px-1 rounded'>
-                      Client
+                      {t.ui.print.clientBadge}
                     </span>
                   )}
                 </div>
@@ -204,6 +207,7 @@ interface BranchInternalReportProps {
 }
 
 const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName, branch, logisticsOperations }) => {
+  const t = useT();
   const reportBranch = useMemo<Branch>(
     () => ({ ...branch, maintenanceHistory: getReportRecords(branch.maintenanceHistory) }),
     [branch],
@@ -242,12 +246,12 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
           <img src='/logo.svg' alt='Logo' className='h-16 w-auto object-contain' />
           <div>
             <h1 className='text-2xl font-bold text-text leading-tight'>{companyName}</h1>
-            <h2 className='text-lg font-medium text-latte mt-1'>{branch.branchName || "Branch Report"}</h2>
+            <h2 className='text-lg font-medium text-latte mt-1'>{branch.branchName || t.ui.print.branchReport}</h2>
           </div>
         </div>
         <div className='text-end'>
           <div className='inline-block bg-primary text-white text-xs font-bold uppercase px-3 py-1.5 rounded mb-2'>
-            Internal Report
+            {t.ui.print.internalReport}
           </div>
           <p className='text-xs text-latte'>{formatDate()}</p>
           <p className='text-xs text-latte'>{branch.location}</p>
@@ -256,10 +260,10 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
 
       {/* KPI Cards */}
       <div className='grid grid-cols-4 gap-3 mb-6'>
-        <FinancialCard label='Total Visits' icon='chart' value={kpis.totalVisits} accent='blue' />
-        <FinancialCard label='Resolution Rate' icon='check' value={`${kpis.resolutionRate}%`} accent='green' />
-        <FinancialCard label='Spare Parts' icon='package' value={kpis.totalPartsUsed} accent='amber' />
-        <FinancialCard label='Net Cost' icon='money' value={formatCurrencyEn(costs.grandTotalCompanyCost)} accent='crimson' />
+        <FinancialCard label={t.ui.print.totalVisits} icon='chart' value={kpis.totalVisits} accent='blue' />
+        <FinancialCard label={t.ui.print.resolutionRate} icon='check' value={`${kpis.resolutionRate}%`} accent='green' />
+        <FinancialCard label={t.ui.print.spareParts} icon='package' value={kpis.totalPartsUsed} accent='amber' />
+        <FinancialCard label={t.ui.print.netCost} icon='money' value={formatCurrencyEn(costs.grandTotalCompanyCost)} accent='crimson' />
       </div>
 
       {/* Financial Summary — omitted entirely when every figure is zero (D-11) */}
@@ -267,22 +271,22 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
         costs.totalClientPartsCost + costs.totalClientServicesCost +
         costs.totalLeaseRevenue + costs.grandTotalCompanyCost > 0 && (
         <>
-          <SectionTitle icon='money'>Financial Summary</SectionTitle>
+          <SectionTitle icon='money'>{t.ui.print.financialSummary}</SectionTitle>
           <div className='bg-cream border border-hairline rounded-lg p-4 mb-6'>
             <div className='grid grid-cols-3 gap-4 mb-4'>
-              <FinancialCard label='Visit Fees' icon='location' value={formatCurrencyEn(costs.totalVisitFees)} accent='amber' />
-              <FinancialCard label='Parts (Company)' icon='package' value={formatCurrencyEn(costs.totalPartsCost)} accent='crimson' />
-              <FinancialCard label='Services (Company)' icon='wrench' value={formatCurrencyEn(costs.totalServicesCost)} accent='crimson' />
+              <FinancialCard label={t.ui.print.visitFees} icon='location' value={formatCurrencyEn(costs.totalVisitFees)} accent='amber' />
+              <FinancialCard label={t.ui.print.partsCompany} icon='package' value={formatCurrencyEn(costs.totalPartsCost)} accent='crimson' />
+              <FinancialCard label={t.ui.print.servicesCompany} icon='wrench' value={formatCurrencyEn(costs.totalServicesCost)} accent='crimson' />
             </div>
             {(costs.totalClientPartsCost > 0 || costs.totalClientServicesCost > 0) && (
               <div className='grid grid-cols-2 gap-4 mb-4 pt-4 border-t border-hairline'>
-                <FinancialCard label='Parts (Client)' icon='package' value={formatCurrencyEn(costs.totalClientPartsCost)} accent='blue' />
-                <FinancialCard label='Services (Client)' icon='wrench' value={formatCurrencyEn(costs.totalClientServicesCost)} accent='blue' />
+                <FinancialCard label={t.ui.print.partsClient} icon='package' value={formatCurrencyEn(costs.totalClientPartsCost)} accent='blue' />
+                <FinancialCard label={t.ui.print.servicesClient} icon='wrench' value={formatCurrencyEn(costs.totalClientServicesCost)} accent='blue' />
               </div>
             )}
             <div className='grid grid-cols-2 gap-4 pt-4 border-t-2 border-primary mt-4'>
-              <FinancialCard label='Rental Revenue' icon='coffee' value={formatCurrencyEn(costs.totalLeaseRevenue)} accent='green' />
-              <FinancialCard label='Company Net Cost' icon='money' value={formatCurrencyEn(costs.grandTotalCompanyCost)} accent='crimson' />
+              <FinancialCard label={t.ui.print.rentalRevenue} icon='coffee' value={formatCurrencyEn(costs.totalLeaseRevenue)} accent='green' />
+              <FinancialCard label={t.ui.print.companyNetCost} icon='money' value={formatCurrencyEn(costs.grandTotalCompanyCost)} accent='crimson' />
             </div>
           </div>
         </>
@@ -291,14 +295,14 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
       {/* Parts & Services breakdowns */}
       {parts.length > 0 && (
         <>
-          <SectionTitle icon='package'>Parts — Company Paid</SectionTitle>
+          <SectionTitle icon='package'>{t.ui.print.partsCompanyPaid}</SectionTitle>
           <table className='w-full text-xs border border-hairline mb-4'>
             <thead className='bg-primary text-white'>
               <tr>
-                <th className='text-start px-3 py-2'>Item</th>
-                <th className='text-end px-3 py-2 w-24'>Qty</th>
-                <th className='text-end px-3 py-2 w-28'>Unit Price</th>
-                <th className='text-end px-3 py-2 w-28'>Total</th>
+                <th className='text-start px-3 py-2'>{t.ui.print.item}</th>
+                <th className='text-end px-3 py-2 w-24'>{t.ui.print.qty}</th>
+                <th className='text-end px-3 py-2 w-28'>{t.ui.print.unitPrice}</th>
+                <th className='text-end px-3 py-2 w-28'>{t.ui.print.total}</th>
               </tr>
             </thead>
             <tbody>
@@ -317,14 +321,14 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
 
       {services.length > 0 && (
         <>
-          <SectionTitle icon='wrench'>Services — Company Paid</SectionTitle>
+          <SectionTitle icon='wrench'>{t.ui.print.servicesCompanyPaid}</SectionTitle>
           <table className='w-full text-xs border border-hairline mb-4'>
             <thead className='bg-primary text-white'>
               <tr>
-                <th className='text-start px-3 py-2'>Service</th>
-                <th className='text-end px-3 py-2 w-24'>Qty</th>
-                <th className='text-end px-3 py-2 w-28'>Unit Price</th>
-                <th className='text-end px-3 py-2 w-28'>Total</th>
+                <th className='text-start px-3 py-2'>{t.ui.print.service}</th>
+                <th className='text-end px-3 py-2 w-24'>{t.ui.print.qty}</th>
+                <th className='text-end px-3 py-2 w-28'>{t.ui.print.unitPrice}</th>
+                <th className='text-end px-3 py-2 w-28'>{t.ui.print.total}</th>
               </tr>
             </thead>
             <tbody>
@@ -344,12 +348,12 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
       {/* Visit zones — zero-visit zone cards are dropped (D-07); section vanishes when none survive (D-04) */}
       {visitedZones.length > 0 && (
         <>
-          <SectionTitle icon='location'>Visit Zone Fees</SectionTitle>
+          <SectionTitle icon='location'>{t.ui.print.visitZoneFees}</SectionTitle>
           <div className='grid grid-cols-3 gap-3 mb-6'>
             {visitedZones.map((z) => (
               <div key={z.zone} className='bg-white border border-hairline rounded-lg p-3 text-center'>
                 <div className='text-xs text-latte uppercase font-semibold'>{z.label}</div>
-                <div className='text-sm font-bold text-text mt-1'>{z.visits} visits</div>
+                <div className='text-sm font-bold text-text mt-1'>{t.ui.print.visitsCount.replace('{{count}}', String(z.visits))}</div>
                 <div className='text-xs text-latte'>{formatCurrencyEn(z.total)}</div>
               </div>
             ))}
@@ -360,15 +364,15 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
       {/* Technicians — section vanishes when no technician rows survive (D-07) */}
       {meaningfulTechs.length > 0 && (
         <>
-          <SectionTitle icon='user'>Technician Performance</SectionTitle>
+          <SectionTitle icon='user'>{t.ui.print.technicianPerformance}</SectionTitle>
           <table className='w-full text-xs border border-hairline mb-6'>
             <thead className='bg-cream text-latte uppercase'>
               <tr>
-                <th className='text-start px-3 py-2'>Technician</th>
-                <th className='text-end px-3 py-2'>Visits</th>
-                <th className='text-end px-3 py-2'>Rating</th>
-                <th className='text-end px-3 py-2'>Parts Used</th>
-                <th className='text-end px-3 py-2'>Resolved</th>
+                <th className='text-start px-3 py-2'>{t.ui.print.technician}</th>
+                <th className='text-end px-3 py-2'>{t.ui.print.visits}</th>
+                <th className='text-end px-3 py-2'>{t.ui.print.rating}</th>
+                <th className='text-end px-3 py-2'>{t.ui.print.partsUsed}</th>
+                <th className='text-end px-3 py-2'>{t.ui.print.resolved}</th>
               </tr>
             </thead>
             <tbody>
@@ -389,7 +393,7 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
       {/* Top problems */}
       {problems.length > 0 && (
         <>
-          <SectionTitle icon='alert'>Common Problems</SectionTitle>
+          <SectionTitle icon='alert'>{t.ui.print.commonProblems}</SectionTitle>
           <div className='flex flex-wrap gap-2 mb-6'>
             {problems.slice(0, 10).map((p) => (
               <span key={p.name} className='bg-ember-50 text-ember-700 border border-ember-100 px-2 py-1 rounded text-xs font-medium'>
@@ -406,7 +410,7 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
       {/* Maintenance history — keeps every record row (D-08); section vanishes when empty (D-04) */}
       {reportBranch.maintenanceHistory.length > 0 && (
         <>
-          <SectionTitle icon='doc'>Maintenance Log</SectionTitle>
+          <SectionTitle icon='doc'>{t.ui.print.maintenanceLog}</SectionTitle>
           {reportBranch.maintenanceHistory.map((record) => (
             <PrintRecordCard key={record.id} record={record} />
           ))}
@@ -415,7 +419,7 @@ const BranchInternalReport: React.FC<BranchInternalReportProps> = ({ companyName
 
       {/* Footer */}
       <div className='mt-12 pt-4 border-t border-hairline text-center text-[10px] text-latte'>
-        <p>Confidential — For internal use only • Mido's for Distribution</p>
+        <p>{t.ui.print.confidential}</p>
       </div>
     </div>
   );
@@ -429,6 +433,7 @@ interface CompanyInternalReportProps {
 }
 
 const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, logisticsOperations }) => {
+  const t = useT();
   const reportData = useMemo<FormData>(
     () => ({
       ...data,
@@ -472,12 +477,12 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, log
           <img src='/logo.svg' alt='Logo' className='h-20 w-auto object-contain' />
           <div>
             <h1 className='text-3xl font-bold text-text leading-tight'>{data.companyName}</h1>
-            <p className='text-sm text-latte mt-1'>Comprehensive Internal Maintenance Report</p>
+            <p className='text-sm text-latte mt-1'>{t.ui.print.reportSubtitle}</p>
           </div>
         </div>
         <div className='text-end'>
           <div className='inline-block bg-primary text-white text-xs font-bold uppercase px-3 py-1.5 rounded mb-2'>
-            Internal Report
+            {t.ui.print.internalReport}
           </div>
           <p className='text-xs text-latte'>{formatDate()}</p>
         </div>
@@ -485,10 +490,10 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, log
 
       {/* KPI Cards */}
       <div className='grid grid-cols-4 gap-3 mb-6'>
-        <FinancialCard label='Total Visits' icon='chart' value={kpis.totalVisits} accent='blue' />
-        <FinancialCard label='Resolution Rate' icon='check' value={`${kpis.resolutionRate}%`} accent='green' />
-        <FinancialCard label='Spare Parts' icon='package' value={kpis.totalPartsUsed} accent='amber' />
-        <FinancialCard label='Net Cost' icon='money' value={formatCurrencyEn(costs.grandTotalCompanyCost)} accent='crimson' />
+        <FinancialCard label={t.ui.print.totalVisits} icon='chart' value={kpis.totalVisits} accent='blue' />
+        <FinancialCard label={t.ui.print.resolutionRate} icon='check' value={`${kpis.resolutionRate}%`} accent='green' />
+        <FinancialCard label={t.ui.print.spareParts} icon='package' value={kpis.totalPartsUsed} accent='amber' />
+        <FinancialCard label={t.ui.print.netCost} icon='money' value={formatCurrencyEn(costs.grandTotalCompanyCost)} accent='crimson' />
       </div>
 
       {/* Financial Summary — omitted entirely when every figure is zero (D-11) */}
@@ -496,22 +501,22 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, log
         costs.totalClientPartsCost + costs.totalClientServicesCost +
         costs.totalLeaseRevenue + costs.grandTotalCompanyCost > 0 && (
         <>
-          <SectionTitle icon='money'>Financial Summary</SectionTitle>
+          <SectionTitle icon='money'>{t.ui.print.financialSummary}</SectionTitle>
           <div className='bg-cream border border-hairline rounded-lg p-4 mb-6'>
             <div className='grid grid-cols-3 gap-4 mb-4'>
-              <FinancialCard label='Visit Fees' icon='location' value={formatCurrencyEn(costs.totalVisitFees)} accent='amber' />
-              <FinancialCard label='Parts (Company)' icon='package' value={formatCurrencyEn(costs.totalPartsCost)} accent='crimson' />
-              <FinancialCard label='Services (Company)' icon='wrench' value={formatCurrencyEn(costs.totalServicesCost)} accent='crimson' />
+              <FinancialCard label={t.ui.print.visitFees} icon='location' value={formatCurrencyEn(costs.totalVisitFees)} accent='amber' />
+              <FinancialCard label={t.ui.print.partsCompany} icon='package' value={formatCurrencyEn(costs.totalPartsCost)} accent='crimson' />
+              <FinancialCard label={t.ui.print.servicesCompany} icon='wrench' value={formatCurrencyEn(costs.totalServicesCost)} accent='crimson' />
             </div>
             {(costs.totalClientPartsCost > 0 || costs.totalClientServicesCost > 0) && (
               <div className='grid grid-cols-2 gap-4 mb-4 pt-4 border-t border-hairline'>
-                <FinancialCard label='Parts (Client)' icon='package' value={formatCurrencyEn(costs.totalClientPartsCost)} accent='blue' />
-                <FinancialCard label='Services (Client)' icon='wrench' value={formatCurrencyEn(costs.totalClientServicesCost)} accent='blue' />
+                <FinancialCard label={t.ui.print.partsClient} icon='package' value={formatCurrencyEn(costs.totalClientPartsCost)} accent='blue' />
+                <FinancialCard label={t.ui.print.servicesClient} icon='wrench' value={formatCurrencyEn(costs.totalClientServicesCost)} accent='blue' />
               </div>
             )}
             <div className='grid grid-cols-2 gap-4 pt-4 border-t-2 border-primary mt-4'>
-              <FinancialCard label='Rental Revenue' icon='coffee' value={formatCurrencyEn(costs.totalLeaseRevenue)} accent='green' />
-              <FinancialCard label='Company Net Cost' icon='money' value={formatCurrencyEn(costs.grandTotalCompanyCost)} accent='crimson' />
+              <FinancialCard label={t.ui.print.rentalRevenue} icon='coffee' value={formatCurrencyEn(costs.totalLeaseRevenue)} accent='green' />
+              <FinancialCard label={t.ui.print.companyNetCost} icon='money' value={formatCurrencyEn(costs.grandTotalCompanyCost)} accent='crimson' />
             </div>
           </div>
         </>
@@ -520,14 +525,14 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, log
       {/* Parts & Services breakdowns */}
       {companyParts.length > 0 && (
         <>
-          <SectionTitle icon='package'>Parts — Company Paid</SectionTitle>
+          <SectionTitle icon='package'>{t.ui.print.partsCompanyPaid}</SectionTitle>
           <table className='w-full text-xs border border-hairline mb-4'>
             <thead className='bg-primary text-white'>
               <tr>
-                <th className='text-start px-3 py-2'>Item</th>
-                <th className='text-end px-3 py-2 w-24'>Qty</th>
-                <th className='text-end px-3 py-2 w-28'>Unit Price</th>
-                <th className='text-end px-3 py-2 w-28'>Total</th>
+                <th className='text-start px-3 py-2'>{t.ui.print.item}</th>
+                <th className='text-end px-3 py-2 w-24'>{t.ui.print.qty}</th>
+                <th className='text-end px-3 py-2 w-28'>{t.ui.print.unitPrice}</th>
+                <th className='text-end px-3 py-2 w-28'>{t.ui.print.total}</th>
               </tr>
             </thead>
             <tbody>
@@ -546,14 +551,14 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, log
 
       {companyServices.length > 0 && (
         <>
-          <SectionTitle icon='wrench'>Services — Company Paid</SectionTitle>
+          <SectionTitle icon='wrench'>{t.ui.print.servicesCompanyPaid}</SectionTitle>
           <table className='w-full text-xs border border-hairline mb-4'>
             <thead className='bg-primary text-white'>
               <tr>
-                <th className='text-start px-3 py-2'>Service</th>
-                <th className='text-end px-3 py-2 w-24'>Qty</th>
-                <th className='text-end px-3 py-2 w-28'>Unit Price</th>
-                <th className='text-end px-3 py-2 w-28'>Total</th>
+                <th className='text-start px-3 py-2'>{t.ui.print.service}</th>
+                <th className='text-end px-3 py-2 w-24'>{t.ui.print.qty}</th>
+                <th className='text-end px-3 py-2 w-28'>{t.ui.print.unitPrice}</th>
+                <th className='text-end px-3 py-2 w-28'>{t.ui.print.total}</th>
               </tr>
             </thead>
             <tbody>
@@ -573,17 +578,17 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, log
       {/* Branch cost comparison */}
       {data.hasBranches && branchSummaries.length > 0 && (
         <>
-          <SectionTitle icon='chart'>Branch Comparison</SectionTitle>
+          <SectionTitle icon='chart'>{t.ui.print.branchComparison}</SectionTitle>
           <table className='w-full text-xs border border-hairline mb-6'>
             <thead className='bg-primary text-white'>
               <tr>
-                <th className='text-start px-3 py-2'>Branch</th>
-                <th className='text-end px-3 py-2'>Visits</th>
-                <th className='text-end px-3 py-2'>Visit Fees</th>
-                <th className='text-end px-3 py-2'>Parts</th>
-                <th className='text-end px-3 py-2'>Services</th>
-                <th className='text-end px-3 py-2'>Net Cost</th>
-                <th className='text-end px-3 py-2'>Logistics</th>
+                <th className='text-start px-3 py-2'>{t.ui.print.branch}</th>
+                <th className='text-end px-3 py-2'>{t.ui.print.visits}</th>
+                <th className='text-end px-3 py-2'>{t.ui.print.visitFees}</th>
+                <th className='text-end px-3 py-2'>{t.ui.print.partsUsed}</th>
+                <th className='text-end px-3 py-2'>{t.ui.print.servicesPerformed}</th>
+                <th className='text-end px-3 py-2'>{t.ui.print.netCost}</th>
+                <th className='text-end px-3 py-2'>{t.ui.print.logistics}</th>
               </tr>
             </thead>
             <tbody>
@@ -601,7 +606,7 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, log
             </tbody>
             <tfoot>
               <tr className='bg-cream border-t-2 border-primary font-bold'>
-                <td className='px-3 py-2 text-text'>Total</td>
+                <td className='px-3 py-2 text-text'>{t.ui.print.total}</td>
                 <td className='px-3 py-2 text-end'>{kpis.totalVisits}</td>
                 <td className='px-3 py-2 text-end'>{formatCurrencyEn(costs.totalVisitFees)}</td>
                 <td className='px-3 py-2 text-end'>{formatCurrencyEn(costs.totalPartsCost)}</td>
@@ -622,12 +627,12 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, log
       {/* Visit zones — zero-visit zone cards are dropped (D-07); section vanishes when none survive (D-04) */}
       {visitedZones.length > 0 && (
         <>
-          <SectionTitle icon='location'>Visit Zone Fees</SectionTitle>
+          <SectionTitle icon='location'>{t.ui.print.visitZoneFees}</SectionTitle>
           <div className='grid grid-cols-3 gap-3 mb-6'>
             {visitedZones.map((z) => (
               <div key={z.zone} className='bg-white border border-hairline rounded-lg p-3 text-center'>
                 <div className='text-xs text-latte uppercase font-semibold'>{z.label}</div>
-                <div className='text-sm font-bold text-text mt-1'>{z.visits} visits</div>
+                <div className='text-sm font-bold text-text mt-1'>{t.ui.print.visitsCount.replace('{{count}}', String(z.visits))}</div>
                 <div className='text-xs text-latte'>{formatCurrencyEn(z.total)}</div>
               </div>
             ))}
@@ -638,15 +643,15 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, log
       {/* Technicians — section vanishes when no technician rows survive (D-07) */}
       {meaningfulTechs.length > 0 && (
         <>
-          <SectionTitle icon='user'>Technician Performance</SectionTitle>
+          <SectionTitle icon='user'>{t.ui.print.technicianPerformance}</SectionTitle>
           <table className='w-full text-xs border border-hairline mb-6'>
             <thead className='bg-cream text-latte uppercase'>
               <tr>
-                <th className='text-start px-3 py-2'>Technician</th>
-                <th className='text-end px-3 py-2'>Visits</th>
-                <th className='text-end px-3 py-2'>Rating</th>
-                <th className='text-end px-3 py-2'>Parts Used</th>
-                <th className='text-end px-3 py-2'>Resolved</th>
+                <th className='text-start px-3 py-2'>{t.ui.print.technician}</th>
+                <th className='text-end px-3 py-2'>{t.ui.print.visits}</th>
+                <th className='text-end px-3 py-2'>{t.ui.print.rating}</th>
+                <th className='text-end px-3 py-2'>{t.ui.print.partsUsed}</th>
+                <th className='text-end px-3 py-2'>{t.ui.print.resolved}</th>
               </tr>
             </thead>
             <tbody>
@@ -667,7 +672,7 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, log
       {/* Top problems */}
       {problems.length > 0 && (
         <>
-          <SectionTitle icon='alert'>Common Problems</SectionTitle>
+          <SectionTitle icon='alert'>{t.ui.print.commonProblems}</SectionTitle>
           <div className='flex flex-wrap gap-2 mb-6'>
             {problems.slice(0, 10).map((p) => (
               <span key={p.name} className='bg-ember-50 text-ember-700 border border-ember-100 px-2 py-1 rounded text-xs font-medium'>
@@ -691,7 +696,7 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, log
 
       {!reportData.hasBranches && reportData.maintenanceHistory.length > 0 && (
         <>
-          <SectionTitle icon='doc'>Maintenance Log</SectionTitle>
+          <SectionTitle icon='doc'>{t.ui.print.maintenanceLog}</SectionTitle>
           {reportData.maintenanceHistory.map((record) => (
             <PrintRecordCard key={record.id} record={record} />
           ))}
@@ -700,7 +705,7 @@ const CompanyInternalReport: React.FC<CompanyInternalReportProps> = ({ data, log
 
       {/* Footer */}
       <div className='mt-12 pt-4 border-t border-hairline text-center text-[10px] text-latte'>
-        <p>Confidential — For internal use only • Mido's for Distribution</p>
+        <p>{t.ui.print.confidential}</p>
       </div>
     </div>
   );

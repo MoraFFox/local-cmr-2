@@ -6,10 +6,8 @@ import {
   saveWordTemplate,
   clearWordTemplate,
 } from "../utils/wordExportTemplate";
+import { useT } from "../utils/i18n";
 
-// Internal/cost reports have no default footer; only client reports get a
-// "Service Report" label. This is the preview shown when no custom footer is set.
-const DEFAULT_FOOTER_PREVIEW = "لا يوجد تذييل افتراضي";
 const LOGO_MAX_DIM = 400;
 
 /**
@@ -43,6 +41,8 @@ const downscaleLogo = (dataUrl: string): Promise<string> =>
   });
 
 const WordExportTemplateSettings: React.FC = () => {
+  const t = useT();
+  const DEFAULT_FOOTER_PREVIEW = t.ui.wordTemplate.noDefaultFooter;
   const [template, setTemplate] = useState<WordTemplateConfig>(() => loadWordTemplate());
   const [logoPreview, setLogoPreview] = useState<string | null>(template.logoDataUrl ?? null);
   const [logoError, setLogoError] = useState<string | null>(null);
@@ -61,7 +61,7 @@ const WordExportTemplateSettings: React.FC = () => {
     e.target.value = "";
     if (!file) return;
     if (!/^image\/(png|jpe?g)$/.test(file.type)) {
-      setLogoError("يرجى اختيار صورة بصيغة PNG أو JPG.");
+      setLogoError(t.ui.wordTemplate.logoFormatError);
       return;
     }
     setLogoError(null);
@@ -72,7 +72,7 @@ const WordExportTemplateSettings: React.FC = () => {
         .then((dataUrl) => {
           setLogoPreview(dataUrl);
           if (!update({ logoDataUrl: dataUrl })) {
-            setLogoError("تعذر حفظ الشعار — مساحة التخزين ممتلئة. جرّب صورة أصغر.");
+            setLogoError(t.ui.wordTemplate.logoStorageError);
           }
         })
         .catch(() => {
@@ -81,7 +81,7 @@ const WordExportTemplateSettings: React.FC = () => {
           update({ logoDataUrl: original });
         });
     };
-    reader.onerror = () => setLogoError("تعذر قراءة ملف الصورة. حاول مرة أخرى.");
+    reader.onerror = () => setLogoError(t.ui.wordTemplate.logoReadError);
     reader.readAsDataURL(file);
   };
 
@@ -105,20 +105,20 @@ const WordExportTemplateSettings: React.FC = () => {
     <div className="space-y-6">
       {/* Logo */}
       <div className="bg-cream rounded-xl shadow-sm border border-hairline p-5">
-        <h3 className="font-bold text-text text-sm mb-1">شعار الشركة</h3>
-        <p className="text-xs text-latte mb-3">يُعرض الشعار أعلى التقارير المصدرة. التنسيقات المدعومة: PNG / JPG</p>
+        <h3 className="font-bold text-text text-sm mb-1">{t.ui.wordTemplate.companyLogo}</h3>
+        <p className="text-xs text-latte mb-3">{t.ui.wordTemplate.companyLogoHint}</p>
         {logoPreview ? (
           <div className="flex items-center gap-4">
             <img
               src={logoPreview}
-              alt="شعار الشركة"
+              alt={t.ui.wordTemplate.companyLogo}
               className="h-16 w-auto object-contain border border-hairline rounded-lg bg-white p-2"
             />
             <button
               onClick={removeLogo}
               className="flex items-center gap-1 bg-cream-2 text-text hover:bg-cream-3 font-bold py-1.5 px-3 rounded-lg transition-colors text-sm border border-hairline"
             >
-              إزالة الشعار
+              {t.ui.wordTemplate.removeLogo}
             </button>
           </div>
         ) : (
@@ -126,7 +126,7 @@ const WordExportTemplateSettings: React.FC = () => {
             onClick={() => fileInputRef.current?.click()}
             className="flex items-center gap-2 bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-hover transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
           >
-            اختيار شعار
+            {t.ui.wordTemplate.chooseLogo}
           </button>
         )}
         <input
@@ -141,24 +141,24 @@ const WordExportTemplateSettings: React.FC = () => {
 
       {/* Custom footer */}
       <div className="bg-cream rounded-xl shadow-sm border border-hairline p-5">
-        <h3 className="font-bold text-text text-sm mb-1">نص التذييل المخصص</h3>
-        <p className="text-xs text-latte mb-3">يظهر في نهاية التقارير. اتركه فارغاً: لا تذييل في التقارير الداخلية وتقارير التكلفة، وتذييل تقرير الخدمة في تقارير العملاء.</p>
+        <h3 className="font-bold text-text text-sm mb-1">{t.ui.wordTemplate.customFooter}</h3>
+        <p className="text-xs text-latte mb-3">{t.ui.wordTemplate.customFooterHint}</p>
         <input
           type="text"
           value={footerText}
           onChange={(e) => update({ footerText: e.target.value })}
-          placeholder="مثال: شكراً لتعاملكم معنا"
+          placeholder={t.ui.wordTemplate.footerPlaceholder}
           className="w-full bg-white border border-hairline rounded-lg px-3 py-2 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary"
         />
         <p className="text-xs text-latte mt-2">
-          معاينة: {footerText.trim() ? footerText : DEFAULT_FOOTER_PREVIEW}
+          {t.ui.wordTemplate.previewColon} {footerText.trim() ? footerText : DEFAULT_FOOTER_PREVIEW}
         </p>
       </div>
 
       {/* Label language */}
       <div className="bg-cream rounded-xl shadow-sm border border-hairline p-5">
-        <h3 className="font-bold text-text text-sm mb-1">لغة عناوين التقرير</h3>
-        <p className="text-xs text-latte mb-3">عناوين الأقسام والجداول في تقارير Word.</p>
+        <h3 className="font-bold text-text text-sm mb-1">{t.ui.wordTemplate.reportLabelLang}</h3>
+        <p className="text-xs text-latte mb-3">{t.ui.wordTemplate.reportLabelLangHint}</p>
         <div className="flex gap-2">
           <button
             onClick={() => update({ labelLang: "en" })}
@@ -174,7 +174,7 @@ const WordExportTemplateSettings: React.FC = () => {
               labelLang === "ar" ? "bg-primary text-white" : "bg-cream-2 text-text hover:bg-cream-3 border border-hairline"
             }`}
           >
-            العربية
+            {t.ui.wordTemplate.arabic}
           </button>
         </div>
       </div>
@@ -185,7 +185,7 @@ const WordExportTemplateSettings: React.FC = () => {
           onClick={resetAll}
           className="flex items-center gap-1 bg-cream-2 text-text hover:bg-cream-3 font-bold py-2 px-4 rounded-lg transition-colors text-sm border border-hairline"
         >
-          استعادة الإعدادات الافتراضية
+          {t.ui.wordTemplate.resetDefaults}
         </button>
       </div>
     </div>

@@ -22,14 +22,14 @@ export const Step5_MaintenanceHistory: React.FC<WizardStepProps> = ({
   const t = useT();
 
   return (
-  <Card title="سجل الصيانة (المكتب الرئيسي)">
+  <Card title={t.ui.wizard.maintenanceHistoryTitle}>
     <div className="flex justify-between items-center mb-6">
       <div className="flex items-center gap-2">
-        <h3 className="text-xl font-bold text-primary tracking-tight">سجلات الصيانة</h3>
+        <h3 className="text-xl font-bold text-primary tracking-tight">{t.ui.wizard.maintenanceRecordsTitle}</h3>
         <HelpTooltip text={t.tooltips.maintenanceHistory} />
       </div>
       <Button onClick={() => actions.addListItem("maintenanceHistory")}>
-        <PlusCircleIcon className="w-5 h-5" /> إضافة سجل
+        <PlusCircleIcon className="w-5 h-5" /> {t.ui.wizard.addRecord}
       </Button>
     </div>
     <div className="space-y-4">
@@ -56,10 +56,10 @@ export const Step5_MaintenanceHistory: React.FC<WizardStepProps> = ({
         ))
       ) : (
         <EmptyState variant="inline" icon={<WrenchScrewdriverIcon />}
-          title="لا يوجد سجل صيانة" message="أضف سجلات الصيانة للمكتب الرئيسي."
+          title={t.ui.wizard.noRecordsTitle} message={t.ui.wizard.noRecordsMainMsg}
         >
           <Button variant="secondary" onClick={() => actions.addListItem("maintenanceHistory")}>
-            <PlusCircleIcon className="w-4 h-4" /> إضافة سجل
+            <PlusCircleIcon className="w-4 h-4" /> {t.ui.wizard.addRecord}
           </Button>
         </EmptyState>
       )}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { UserIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { useT } from '../../../utils/i18n';
 
 interface TechnicianLayoutProps {
   children: React.ReactNode;
@@ -20,6 +21,7 @@ const TechnicianLayout: React.FC<TechnicianLayoutProps> = ({
   step,
   totalSteps,
 }) => {
+  const t = useT();
   return (
     <div className="min-h-screen bg-espresso text-cream font-sans selection:bg-primary/30">
       {/* Background Grid Pattern (Subtle) */}
@@ -30,7 +32,7 @@ const TechnicianLayout: React.FC<TechnicianLayoutProps> = ({
         <div className="max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
             <div className="flex items-center gap-3">
                 {onBack ? (
-                    <button onClick={onBack} className="p-3 -ms-2 text-latte hover:text-cream transition-colors rounded-full active:bg-espresso-light min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="رجوع">
+                    <button onClick={onBack} className="p-3 -ms-2 text-latte hover:text-cream transition-colors rounded-full active:bg-espresso-light min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label={t.common.back}>
                         <ArrowLeftIcon className="w-5 h-5" />
                     </button>
                 ) : (
@@ -44,8 +46,8 @@ const TechnicianLayout: React.FC<TechnicianLayoutProps> = ({
                        <h1 className="text-sm font-bold tracking-wide uppercase text-cream">{title}</h1>
                    ) : (
                        <div className="flex flex-col">
-                           <span className="text-[10px] uppercase tracking-wider text-latte font-semibold">فني</span>
-                           <span className="text-sm font-bold text-cream">{technicianName || 'غير معروف'}</span>
+                           <span className="text-[10px] uppercase tracking-wider text-latte font-semibold">{t.ui.misc.technicianRole}</span>
+                           <span className="text-sm font-bold text-cream">{technicianName || t.ui.misc.unknownTechnician}</span>
                        </div>
                    )}
                 </div>
@@ -55,7 +57,7 @@ const TechnicianLayout: React.FC<TechnicianLayoutProps> = ({
                 onClick={onLogout}
                 className="text-xs font-medium text-ember-500 hover:text-ember-400 px-3 py-1.5 rounded-full hover:bg-ember-500/10 transition-colors"
             >
-                تسجيل الخروج
+                {t.ui.misc.logout}
             </button>
         </div>
 

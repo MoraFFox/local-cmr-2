@@ -4,6 +4,7 @@ import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import { RequiredFieldBadge } from '@/packages/form-progress';
 import { HelpTooltip } from './form-ui/HelpTooltip';
 import { useFloatingMenu } from '../hooks/useFloatingMenu';
+import { useT } from '../utils/i18n';
 
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: React.ReactNode;
@@ -15,6 +16,7 @@ interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, error, required, suggestions, helpText, ...props }) => {
+  const t = useT();
   const inputId = props.id || name;
   const [menuWidth, setMenuWidth] = useState(224);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -126,7 +128,7 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, err
         {isCombobox && (
           <button
             type="button"
-            aria-label="عرض الاقتراحات"
+            aria-label={t.ui.misc.showSuggestions}
             tabIndex={-1}
             className="absolute inset-y-0 start-0 ps-3.5 flex items-center cursor-pointer text-latte group-focus-within:text-primary transition-colors"
             onMouseDown={(e) => {
@@ -146,7 +148,7 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, err
             id={`${inputId}-suggestions`}
             ref={menu.contentRef as React.RefObject<HTMLUListElement>}
             role="listbox"
-            aria-label={label ? String(label) : 'الاقتراحات'}
+            aria-label={label ? String(label) : t.ui.misc.suggestions}
             style={{ ...menu.style, width: menuWidth }}
             className="fixed z-[9999] bg-paper border border-hairline rounded-lg shadow-xl max-h-60 overflow-auto animate-scale-in"
           >
@@ -167,7 +169,7 @@ const TextInput: React.FC<TextInputProps> = ({ label, name, className, icon, err
               ))
             ) : (
               <li className="px-4 py-2 text-sm text-latte italic text-center">
-                اكتب لإضافة قيمة جديدة...
+                {t.ui.misc.typeToAddNewValue}
               </li>
             )}
           </ul>,

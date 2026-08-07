@@ -8,7 +8,7 @@ import type { FormData } from '../types';
 
 // Mocks
 vi.mock('../utils/googleSheetsSync', () => ({
-  syncAllCompaniesToSheets: vi.fn(),
+  syncAllCompaniesToSheetsNow: vi.fn(),
 }));
 vi.mock('../utils/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
@@ -21,9 +21,9 @@ vi.mock('../components/KeyboardShortcutsHelp', () => ({
   ),
 }));
 
-import { syncAllCompaniesToSheets } from '../utils/googleSheetsSync';
+import { syncAllCompaniesToSheetsNow } from '../utils/googleSheetsSync';
 
-const mockSync = vi.mocked(syncAllCompaniesToSheets);
+const mockSync = vi.mocked(syncAllCompaniesToSheetsNow);
 
 function makeDraft(id: string, companyName: string): {
   id: string;

@@ -24,7 +24,7 @@ import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import SafeModal from "../../components/form-ui/SafeModal";
 import { SidebarTooltip } from "../../components/ui/SidebarTooltip";
 import { logger } from "../../utils/logger";
-import { syncAllCompaniesToSheets } from "../../utils/googleSheetsSync";
+import { syncAllCompaniesToSheetsNow } from "../../utils/googleSheetsSync";
 import { useToast } from "../../components/ToastContext";
 import { useLanguage } from "../../utils/LanguageContext";
 
@@ -131,7 +131,7 @@ const SidebarContent = React.memo<SidebarContentProps>(({
   const handleSheetsSync = async () => {
     setIsSheetsSyncing(true);
     try {
-      const result = await syncAllCompaniesToSheets();
+      const result = await syncAllCompaniesToSheetsNow();
       if (result.success) {
         showToast(s.syncSuccess, "success");
       } else {

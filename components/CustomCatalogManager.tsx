@@ -2,12 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { PlusIcon, PencilIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useCustomCatalog, CustomCatalogItem } from '../hooks/useCustomCatalog';
 import AddCustomCatalogItemDialog from './AddCustomCatalogItemDialog';
-
-const typeLabels: Record<CustomCatalogItem['type'], string> = {
-  part: 'قطع الغيار',
-  service: 'الخدمات',
-  problem: 'المشاكل',
-};
+import { useT } from '../utils/i18n';
 
 const typeBadgeClasses: Record<CustomCatalogItem['type'], string> = {
   part: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
@@ -16,6 +11,12 @@ const typeBadgeClasses: Record<CustomCatalogItem['type'], string> = {
 };
 
 const CustomCatalogManager: React.FC = () => {
+  const t = useT();
+  const typeLabels: Record<CustomCatalogItem['type'], string> = {
+    part: t.ui.customCatalog.typePart,
+    service: t.ui.customCatalog.typeService,
+    problem: t.ui.customCatalog.typeProblem,
+  };
   const {
     customParts,
     customServices,
@@ -88,7 +89,7 @@ const CustomCatalogManager: React.FC = () => {
   if (isLoading) {
     return (
       <div className="p-6 text-center text-latte animate-pulse">
-        جاري تحميل العناصر المخصصة...
+        {t.common.loading}
       </div>
     );
   }
@@ -104,13 +105,13 @@ const CustomCatalogManager: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h2 className="text-xl font-bold text-primary dark:text-white">إدارة الكتالوج المخصص</h2>
+        <h2 className="text-xl font-bold text-primary dark:text-white">{t.ui.customCatalog.title}</h2>
         <button
           onClick={handleAdd}
           className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors"
         >
           <PlusIcon className="w-4 h-4" />
-          إضافة عنصر
+          {t.ui.customCatalog.addItem}
         </button>
       </div>
 
@@ -133,7 +134,7 @@ const CustomCatalogManager: React.FC = () => {
       <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline overflow-hidden">
         {filteredItems.length === 0 ? (
           <div className="p-8 text-center text-latte">
-            لا توجد عناصر مخصصة من نوع {typeLabels[activeType]} بعد.
+            {t.ui.customCatalog.noItemsOfType.replace('{{type}}', typeLabels[activeType])}
           </div>
         ) : (
           <div className="divide-y divide-hairline">
@@ -155,21 +156,21 @@ const CustomCatalogManager: React.FC = () => {
                   </div>
                   <p className="mt-2 font-medium text-text truncate">{item.label}</p>
                   {item.cost !== undefined && item.cost !== null && (
-                    <p className="text-sm text-latte">{item.cost.toLocaleString()} جم</p>
+                    <p className="text-sm text-latte">{item.cost.toLocaleString()} {t.ui.customCatalog.egp}</p>
                   )}
                 </div>
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => handleEdit(item)}
                     className="p-2 text-latte hover:text-primary hover:bg-cream-2 rounded-lg transition-colors"
-                    aria-label="تعديل"
+                    aria-label={t.common.edit}
                   >
                     <PencilIcon className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setDeleteId(item.id)}
                     className="p-2 text-latte hover:text-ember-500 hover:bg-ember-50 rounded-lg transition-colors"
-                    aria-label="حذف"
+                    aria-label={t.ui.customCatalog.delete}
                   >
                     <TrashIcon className="w-4 h-4" />
                   </button>
@@ -209,7 +210,7 @@ const CustomCatalogManager: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
           <div className="bg-cream dark:bg-espresso rounded-2xl shadow-2xl border border-hairline p-6 w-full max-w-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-primary dark:text-white">تأكيد الحذف</h3>
+              <h3 className="text-lg font-bold text-primary dark:text-white">{t.ui.customCatalog.deleteConfirmTitle}</h3>
               <button
                 onClick={() => setDeleteId(null)}
                 className="p-1 rounded-full text-latte hover:text-text hover:bg-cream-2"
@@ -218,20 +219,20 @@ const CustomCatalogManager: React.FC = () => {
               </button>
             </div>
             <p className="text-sm text-text mb-6">
-              هل أنت متأكد من حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.
+              {t.ui.customCatalog.deleteConfirmMessage}
             </p>
             <div className="flex items-center justify-end gap-2">
               <button
                 onClick={() => setDeleteId(null)}
                 className="px-4 py-2 text-sm font-medium text-latte hover:text-text rounded-lg transition-colors"
               >
-                إلغاء
+                {t.common.cancel}
               </button>
               <button
                 onClick={handleDelete}
                 className="px-4 py-2 text-sm font-medium text-white bg-ember-500 hover:bg-ember-600 rounded-lg transition-colors"
               >
-                حذف
+                {t.ui.customCatalog.delete}
               </button>
             </div>
           </div>

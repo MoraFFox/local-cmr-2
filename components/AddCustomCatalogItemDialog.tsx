@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { CatalogItemType, CustomCatalogItem } from '../hooks/useCustomCatalog';
+import { useT } from '../utils/i18n';
 
 interface AddCustomCatalogItemDialogProps {
   isOpen: boolean;
@@ -13,18 +14,12 @@ interface AddCustomCatalogItemDialogProps {
   lockType?: boolean;
 }
 
-const typeLabels: Record<CatalogItemType, string> = {
-  part: 'قطعة غيار',
-  service: 'خدمة',
-  problem: 'مشكلة',
-};
-
 function getErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message;
   if (typeof err === 'object' && err !== null && 'message' in err) {
     return String((err as { message: unknown }).message);
   }
-  return 'حدث خطأ أثناء الحفظ';
+  return '';
 }
 
 const AddCustomCatalogItemDialog: React.FC<AddCustomCatalogItemDialogProps> = ({
@@ -36,6 +31,12 @@ const AddCustomCatalogItemDialog: React.FC<AddCustomCatalogItemDialogProps> = ({
   existingCategories = [],
   lockType = false,
 }) => {
+  const t = useT();
+  const typeLabels: Record<CatalogItemType, string> = {
+    part: t.ui.customCatalog.typePart,
+    service: t.ui.customCatalog.typeService,
+    problem: t.ui.customCatalog.typeProblem,
+  };
   const [type, setType] = useState<CatalogItemType>(initialValues?.type ?? 'service');
   const [label, setLabel] = useState(initialValues?.label ?? '');
   const [value, setValue] = useState(initialValues?.value ?? '');
@@ -74,22 +75,22 @@ const AddCustomCatalogItemDialog: React.FC<AddCustomCatalogItemDialogProps> = ({
   const validate = (): boolean => {
     const nextErrors: Record<string, string> = {};
     if (!label.trim()) {
-      nextErrors.label = 'الاسم مطلوب';
+      nextErrors.label = t.ui.customCatalog.nameRequired;
     }
     if (needsCost) {
       const costNum = parseFloat(cost);
       if (Number.isNaN(costNum) || costNum < 0) {
-        nextErrors.cost = 'التكلفة مطلوبة ويجب أن تكون رقمًا غير سالب';
+        nextErrors.cost = t.ui.customCatalog.costRequired;
       }
     }
     if (type === 'service' && !finalCategory) {
-      nextErrors.category = 'التصنيف مطلوب';
+      nextErrors.category = t.ui.customCatalog.categoryRequired;
     }
     if (type === 'problem' && !finalCategory) {
-      nextErrors.category = 'التصنيف مطلوب';
+      nextErrors.category = t.ui.customCatalog.categoryRequired;
     }
     if (isNewCategory && !newCategory.trim()) {
-      nextErrors.newCategory = 'أدخل اسم التصنيف الجديد';
+      nextErrors.newCategory = t.ui.customCatalog.newCategoryRequired;
     }
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -116,8 +117,8 @@ const AddCustomCatalogItemDialog: React.FC<AddCustomCatalogItemDialogProps> = ({
       await onSubmit(item);
       onClose();
     } catch (err) {
-      const message = getErrorMessage(err);
-      setSubmitError(`تعذر الحفظ: ${message}. تأكد من تطبيق migration أو من صلاحيات المستخدم.`);
+      const message = getErrorMessage(err) || t.ui.customCatalog.saveError;
+      setSubmitError(t.ui.customCatalog.saveFailedWithMessage.replace('{{message}}', message));
     } finally {
       setIsSubmitting(false);
     }
@@ -139,13 +140,13 @@ const AddCustomCatalogItemDialog: React.FC<AddCustomCatalogItemDialogProps> = ({
       <div className="w-full max-w-md bg-cream dark:bg-espresso rounded-2xl shadow-2xl border border-hairline dark:border-hairline overflow-hidden">
         <div className="flex items-center justify-between p-4 border-b border-hairline dark:border-hairline">
           <h2 id="custom-item-dialog-title" className="text-lg font-bold text-primary dark:text-white">
-            {mode === 'edit' ? 'تعديل عنصر' : 'إضافة عنصر مخصص'}
+            {mode === 'edit' ? t.ui.customCatalog.editItemTitle : t.ui.customCatalog.addItemTitle}
           </h2>
           <button
             type="button"
             onClick={handleClose}
             className="p-1 rounded-full text-latte hover:text-text hover:bg-cream-2 transition-colors"
-            aria-label="إغلاق"
+            aria-label={t.common.close}
           >
             <XMarkIcon className="w-5 h-5" />
           </button>
@@ -155,7 +156,7 @@ const AddCustomCatalogItemDialog: React.FC<AddCustomCatalogItemDialogProps> = ({
           {/* Type selector — hidden when the type is locked to a phase */}
           {!lockType && (
             <div>
-              <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">النوع</label>
+              <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">{t.ui.customCatalog.typeLabel}</label>
               <div className="grid grid-cols-3 gap-2">
                 {(['service', 'part', 'problem'] as CatalogItemType[]).map((t) => (
                   <button
@@ -178,7 +179,7 @@ const AddCustomCatalogItemDialog: React.FC<AddCustomCatalogItemDialogProps> = ({
           {/* Name */}
           <div>
             <label htmlFor="custom-item-label" className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-              الاسم <span className="text-ember-500">*</span>
+              {t.ui.customCatalog.nameLabel} <span className="text-ember-500">*</span>
             </label>
             <input
               id="custom-item-label"
@@ -191,7 +192,7 @@ const AddCustomCatalogItemDialog: React.FC<AddCustomCatalogItemDialogProps> = ({
                 }
               }}
               className="w-full px-3 py-2 bg-cream dark:bg-espresso-light text-text rounded-lg border border-hairline focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none"
-              placeholder="مثال: تغيير جوانات"
+              placeholder={t.ui.customCatalog.namePlaceholder}
             />
             {errors.label && <p className="mt-1 text-xs text-ember-700">{errors.label}</p>}
           </div>
@@ -200,7 +201,7 @@ const AddCustomCatalogItemDialog: React.FC<AddCustomCatalogItemDialogProps> = ({
           {needsCost && (
             <div>
               <label htmlFor="custom-item-cost" className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-                التكلفة <span className="text-ember-500">*</span>
+                {t.ui.customCatalog.costLabel} <span className="text-ember-500">*</span>
               </label>
               <input
                 id="custom-item-cost"
@@ -220,7 +221,7 @@ const AddCustomCatalogItemDialog: React.FC<AddCustomCatalogItemDialogProps> = ({
           {(type === 'service' || type === 'problem') && (
             <div>
               <label htmlFor="custom-item-category" className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-                التصنيف <span className="text-ember-500">*</span>
+                {t.ui.customCatalog.categoryLabel} <span className="text-ember-500">*</span>
               </label>
               <select
                 id="custom-item-category"
@@ -228,13 +229,13 @@ const AddCustomCatalogItemDialog: React.FC<AddCustomCatalogItemDialogProps> = ({
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full px-3 py-2 bg-cream dark:bg-espresso-light text-text rounded-lg border border-hairline focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none mb-2"
               >
-                <option value="">اختر تصنيف...</option>
+                <option value="">{t.ui.customCatalog.chooseCategory}</option>
                 {existingCategories.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
                   </option>
                 ))}
-                <option value="__new__">+ تصنيف جديد</option>
+                <option value="__new__">{t.ui.customCatalog.newCategoryOption}</option>
               </select>
               {isNewCategory && (
                 <input
@@ -242,7 +243,7 @@ const AddCustomCatalogItemDialog: React.FC<AddCustomCatalogItemDialogProps> = ({
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value)}
                   className="w-full px-3 py-2 bg-cream dark:bg-espresso-light text-text rounded-lg border border-hairline focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none"
-                  placeholder="اسم التصنيف الجديد"
+                  placeholder={t.ui.customCatalog.newCategoryPlaceholder}
                 />
               )}
               {(errors.category || errors.newCategory) && (
@@ -262,7 +263,7 @@ const AddCustomCatalogItemDialog: React.FC<AddCustomCatalogItemDialogProps> = ({
                 className="w-4 h-4 text-primary rounded focus:ring-primary"
               />
               <label htmlFor="custom-item-frequent" className="text-sm text-primary dark:text-latte/70">
-                قطعة تُستبدل بكثرة
+                {t.ui.customCatalog.frequentlyReplaced}
               </label>
             </div>
           )}
@@ -271,7 +272,7 @@ const AddCustomCatalogItemDialog: React.FC<AddCustomCatalogItemDialogProps> = ({
           {type === 'service' && (
             <div>
               <label htmlFor="custom-item-description" className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-                الوصف (اختياري)
+                {t.ui.customCatalog.descriptionLabel}
               </label>
               <input
                 id="custom-item-description"
@@ -279,7 +280,7 @@ const AddCustomCatalogItemDialog: React.FC<AddCustomCatalogItemDialogProps> = ({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full px-3 py-2 bg-cream dark:bg-espresso-light text-text rounded-lg border border-hairline focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none"
-                placeholder="وصف قصير..."
+                placeholder={t.ui.customCatalog.descriptionPlaceholder}
               />
             </div>
           )}
@@ -297,7 +298,7 @@ const AddCustomCatalogItemDialog: React.FC<AddCustomCatalogItemDialogProps> = ({
               onClick={handleClose}
               className="px-4 py-2 text-sm font-medium text-latte hover:text-text rounded-lg transition-colors"
             >
-              إلغاء
+              {t.common.cancel}
             </button>
             <button
               type="submit"
@@ -307,7 +308,7 @@ const AddCustomCatalogItemDialog: React.FC<AddCustomCatalogItemDialogProps> = ({
               {isSubmitting && (
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               )}
-              {mode === 'edit' ? 'حفظ التعديل' : 'إضافة'}
+              {mode === 'edit' ? t.ui.customCatalog.saveEdit : t.common.add}
             </button>
           </div>
         </form>

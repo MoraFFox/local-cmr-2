@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from "react";
-import { ar } from "../../utils/arabicTranslations";
+import { useT } from "../../utils/i18n";
 import {
   compressImage,
   getImagePreview,
@@ -38,6 +38,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
   const [processedCount, setProcessedCount] = useState(0);
   const cancelledRef = useRef(false);
   const { showToast } = useToast();
+  const t = useT();
 
   const updateProgress = useCallback((id: string, value: number) => {
     setProcessingProgress((prev) => ({ ...prev, [id]: value }));
@@ -58,7 +59,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
     setProcessingProgress({});
     setPendingCount(0);
     setProcessedCount(0);
-    showToast("تم إلغاء معالجة الصور", "info");
+    showToast(t.ui.portal.cancelledPhotosToast, "info");
   }, [showToast]);
 
   const handleFileSelect = useCallback(
@@ -75,7 +76,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
 
       if (remainingSlots <= 0) {
         showToast(
-          `يمكنك إضافة ${maxPerType} صور ${type === "before" ? "قبل" : "بعد"} فقط`,
+          t.ui.portal[type === "before" ? "maxBeforePhotosWarning" : "maxAfterPhotosWarning"].replace("{{count}}", String(maxPerType)),
           "warning"
         );
         return;
@@ -98,7 +99,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
         // Validate file
         const validation = validateImageFile(file, 10);
         if (!validation.valid) {
-          showToast(validation.error || 'ملف غير صالح', "error");
+          showToast(validation.error || t.ui.portal.invalidFileToast, "error");
           continue;
         }
 
@@ -212,7 +213,8 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
               >
                 <img
                   src={photo.preview}
-                  alt={`${type} photo`}
+                  alt={type === "before" ? t.ui.portal.beforePhotoAlt : t.ui.portal.afterPhotoAlt}
+                  loading="lazy"
                   className="w-full h-full object-cover"
                 />
 
@@ -240,7 +242,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
           <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-hairline dark:border-hairline rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-all">
             <CameraIcon className="w-5 h-5 text-latte" />
             <span className="text-sm text-primary dark:text-cream">
-              {ar.step3.addPhoto}
+              {t.step3.addPhoto}
             </span>
             <input
               type="file"
@@ -262,11 +264,11 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
       {/* Header */}
       <div className="flex items-center gap-2 text-primary dark:text-cream">
         <PhotoIcon className="w-5 h-5" />
-        <span className="font-medium">{ar.step3.photosLabel}</span>
+        <span className="font-medium">{t.step3.photosLabel}</span>
       </div>
 
       <p className="text-sm text-latte dark:text-cream/70">
-        {ar.step3.photosHint}
+        {t.step3.photosHint}
       </p>
 
       {/* Multi-photo progress panel */}
@@ -274,7 +276,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
         <div className="p-4 bg-cream-2 dark:bg-espresso-light/50 rounded-lg border border-primary/30 dark:border-primary/30 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-primary dark:text-cream">
-              جاري معالجة الصور… ({processedCount} / {pendingCount})
+              {t.ui.portal.photosProcessing.replace("{{processed}}", String(processedCount)).replace("{{total}}", String(pendingCount))}
             </span>
             <button
               type="button"
@@ -282,7 +284,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
               className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-ember-600 bg-white dark:bg-espresso-light border border-hairline rounded-lg hover:bg-ember-50 dark:hover:bg-ember-500/10 transition-colors"
             >
               <XCircleIcon className="w-4 h-4" />
-              إلغاء
+              {t.ui.portal.cancelProcessing}
             </button>
           </div>
 
@@ -291,7 +293,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
               const progress = processingProgress[id] ?? 0;
               return (                  <div key={id} className="space-y-1">
                   <div className="flex items-center justify-between text-xs text-latte">
-                    <span>جاري معالجة الصورة</span>
+                    <span>{t.ui.portal.processingImage}</span>
                     <span>{Math.round(progress)}%</span>
                   </div>
                   <div className="h-2 bg-hairline rounded-full overflow-hidden">
@@ -309,8 +311,8 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
 
       {/* Photo Sections */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {renderPhotoSection("before", ar.step3.beforeLabel)}
-        {renderPhotoSection("after", ar.step3.afterLabel)}
+        {renderPhotoSection("before", t.step3.beforeLabel)}
+        {renderPhotoSection("after", t.step3.afterLabel)}
       </div>
 
     </div>

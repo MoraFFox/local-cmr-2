@@ -347,7 +347,7 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
                     {beforePhotos.map((photo) => (
                         <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden border border-hairline group">
                             <img src={photo.preview} alt={t.portal.beforeMaintenance} className="w-full h-full object-cover" loading="lazy" />
-                            <button onClick={() => handleRemovePhoto(photo.id)} className="absolute top-1 end-1 p-2 bg-ember-500 rounded-full text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="حذف الصورة">
+                            <button onClick={() => handleRemovePhoto(photo.id)} className="absolute top-1 end-1 p-2 bg-ember-500 rounded-full text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label={t.ui.misc.deletePhoto}>
                                 <TrashIcon className="w-4 h-4" />
                             </button>
                         </div>
@@ -375,7 +375,7 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
                     {afterPhotos.map((photo) => (
                         <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden border border-hairline group">
                             <img src={photo.preview} alt={t.portal.afterMaintenance} className="w-full h-full object-cover" loading="lazy" />
-                            <button onClick={() => handleRemovePhoto(photo.id)} className="absolute top-1 end-1 p-2 bg-ember-500 rounded-full text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="حذف الصورة">
+                            <button onClick={() => handleRemovePhoto(photo.id)} className="absolute top-1 end-1 p-2 bg-ember-500 rounded-full text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label={t.ui.misc.deletePhoto}>
                                 <TrashIcon className="w-4 h-4" />
                             </button>
                         </div>
@@ -422,7 +422,7 @@ const Step2WorkLog: React.FC<Step2WorkLogProps> = ({
 
       {/* 8. Machine Logistics — the only work recorded for logistics visits */}
       {customerId != null && maintenanceDate && (
-        <TechCard title="لوجستيات الماكينات" icon={<TruckIcon />} variant={data.visitType === 'logistics' ? 'warning' : 'active'}>
+        <TechCard title={t.ui.misc.machineLogisticsTitle} icon={<TruckIcon />} variant={data.visitType === 'logistics' ? 'warning' : 'active'}>
           <MachineLogisticsSection
             customerId={customerId}
             recordId={recordId}

@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from "./testUtils";
 import BulkExportModal from "../components/BulkExportModal";
 import { BatchExportItem } from "../utils/internalReportPdf";
 import { MaintenanceRecord } from "../types";
+import { ar } from "../utils/arabicTranslations";
 
 const makeRecord = (id: string, overrides: Partial<MaintenanceRecord> = {}): MaintenanceRecord =>
   ({
@@ -177,7 +178,7 @@ describe("BulkExportModal", () => {
         onExportCSV={mockOnExportCSV}
       />,
     );
-    fireEvent.click(screen.getByLabelText("Close"));
+    fireEvent.click(screen.getByLabelText(ar.common.close));
     expect(mockOnClose).toHaveBeenCalledOnce();
   });
 });

@@ -47,6 +47,7 @@ import { generateMockWizardData } from "./utils/mockData";
 
 import { useTheme } from "./hooks/useTheme";
 import { useLanguage } from "./utils/LanguageContext";
+import { wizardStepName } from "./utils/i18n";
 import { useNetworkStatus } from "./hooks/useNetworkStatus";
 import { useDrafts } from "./hooks/useDrafts";
 import { useTechnicians } from "./hooks/useTechnicians";
@@ -709,13 +710,13 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
   // ── Mobile title ──
   const mobileTitle =
     view === "form"
-      ? steps.find((s) => s.id === currentStep)?.name || t.admin.titles.form
+      ? (steps.some((s) => s.id === currentStep) ? wizardStepName(t, currentStep) : t.admin.titles.form)
       : t.admin.titles[VIEW_TITLE_MAP[view]] || t.admin.titles.history;
 
   // ── Dynamic page title (accessibility: audit issues #27-45) ──
   React.useEffect(() => {
     if (view === "form") {
-      const stepName = steps.find((s) => s.id === currentStep)?.name;
+      const stepName = steps.some((s) => s.id === currentStep) ? wizardStepName(t, currentStep) : null;
       document.title = stepName ? `${stepName} — ${t.admin.appName}` : `${t.admin.titles.form} — ${t.admin.appName}`;
     } else {
       const titleKey = VIEW_TITLE_MAP[view];
@@ -1013,7 +1014,7 @@ const App: React.FC<AppProps> = ({ onAdminLogout }) => {
             </button>
             <button
               onClick={dismissResumeFab}
-              aria-label="إغلاق"
+              aria-label="تجاهل المسودة"
               className="self-stretch px-3 border-s border-white/20 hover:bg-white/10 transition-colors rounded-e-full"
             >
               <XMarkIcon className="w-4 h-4" />

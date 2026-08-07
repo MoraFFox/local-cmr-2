@@ -22,6 +22,7 @@ import {
 import { FormData } from '../types';
 import Button from './ui/Button';
 import { SafeModal } from './form-ui/SafeModal';
+import { useT } from '../utils/i18n';
 
 interface ImportExportDialogProps {
     isOpen: boolean;
@@ -36,6 +37,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
     companies,
     onImportCompany
 }) => {
+    const t = useT();
     const [activeTab, setActiveTab] = useState<'export' | 'import'>('export');
     const [importStatus, setImportStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [importMessage, setImportMessage] = useState('');
@@ -169,7 +171,7 @@ const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
                     <button
                         onClick={handleClose}
                         className="p-2 text-latte hover:text-primary rounded-full hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                        aria-label="Close modal"
+                        aria-label={t.common.close}
                     >
                         <XMarkIcon className="w-5 h-5" />
                     </button>

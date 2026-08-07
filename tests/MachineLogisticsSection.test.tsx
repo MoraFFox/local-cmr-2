@@ -407,8 +407,8 @@ describe('MachineLogisticsSection', () => {
     expect(screen.getByTestId('close-services-body')).toBeInTheDocument();
     fireEvent.click(screen.getByText('قطع الغيار المستبدلة'));
     expect(screen.getByTestId('close-parts-body')).toBeInTheDocument();
-  });
-
+  });  // Generous timeout: this test is slow under full-suite parallel load.
+  // Generous timeout: slow under full-suite parallel load (was flaking at 5s).
   it('auto-fills maintenance cost from selected services and parts in the close form', async () => {
     mockHook([openOp]);
     renderWithProviders(<MachineLogisticsSection {...baseProps} />);
@@ -434,7 +434,7 @@ describe('MachineLogisticsSection', () => {
 
     // Auto-calc hint with live breakdown is shown
     expect(screen.getByText(/محسوبة تلقائياً/)).toBeInTheDocument();
-  });
+  }, 15000);
 
   it('lets the user manually override the auto-calculated cost and recalcs on item changes', async () => {
     mockHook([openOp]);

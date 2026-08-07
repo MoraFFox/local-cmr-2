@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronUpIcon } from '@heroicons/react/24/solid';
+import { useT } from '../utils/i18n';
 
 interface CollapsibleCardProps {
     titleContent: React.ReactNode;
@@ -15,7 +16,9 @@ interface CollapsibleCardProps {
     headerActions?: React.ReactNode;
 }
 
-const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ titleContent, children, initiallyOpen = false, onRemove, removeLabel = 'حذف', wizardKey, className = '', headerActions }) => {
+const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ titleContent, children, initiallyOpen = false, onRemove, removeLabel, wizardKey, className = '', headerActions }) => {
+    const t = useT();
+    const resolvedRemoveLabel = removeLabel ?? t.ui.misc.deleteCard;
     const [isOpen, setIsOpen] = useState(initiallyOpen);
     const [hasBeenOpened, setHasBeenOpened] = useState(initiallyOpen);
 
@@ -107,9 +110,9 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ titleContent, childre
                                 onClick={(e) => { e.stopPropagation(); onRemove(); }}
                                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); onRemove(); } }}
                                 className="text-xs font-semibold text-latte hover:text-ember-600 transition-colors cursor-pointer"
-                                aria-label={removeLabel}
+                                aria-label={resolvedRemoveLabel}
                             >
-                                حذف
+                                {resolvedRemoveLabel}
                             </span>
                         )}
                         <div

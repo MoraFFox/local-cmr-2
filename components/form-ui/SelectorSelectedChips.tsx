@@ -22,6 +22,7 @@
 
 import React from 'react';
 import { MinusIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useT } from '../../utils/i18n';
 
 interface SelectedChipItem {
   name: string;
@@ -53,13 +54,16 @@ export const SelectorSelectedChips: React.FC<SelectorSelectedChipsProps> = ({
   onQuantityChange,
   onPayerChange,
   onNameChange,
-  midosLabel = "By Midos",
-  clientLabel = 'By Client',
+  midosLabel,
+  clientLabel,
 }) => {
+  const t = useT();
+  const resolvedMidos = midosLabel ?? t.payerFirstUI.midosPays;
+  const resolvedClient = clientLabel ?? t.payerFirstUI.clientPays;
   if (items.length === 0) {
     return (
       <div className="text-center py-4 text-latte text-sm italic">
-        No items selected yet.
+        {t.payerFirstUI.noSelectedItems}
       </div>
     );
   }
@@ -84,7 +88,7 @@ export const SelectorSelectedChips: React.FC<SelectorSelectedChipsProps> = ({
                 value={item.name}
                 onChange={(e) => onNameChange(index, e.target.value)}
                 className="text-xs font-semibold bg-transparent border-b border-hairline focus:border-primary outline-none px-1 max-w-[140px] text-text placeholder-latte"
-                placeholder="Name..."
+                placeholder={t.selectors.namePlaceholder}
                 aria-label={`Custom item name (row ${index + 1})`}
                 autoFocus={item.isCustom && item.name === ''}
               />
@@ -93,10 +97,10 @@ export const SelectorSelectedChips: React.FC<SelectorSelectedChipsProps> = ({
                 type="button"
                 onClick={() => onPayerChange(item.name, !paidByClient)}
                 className="text-xs font-semibold text-text hover:text-primary dark:hover:text-copper-300 transition-colors max-w-[160px] truncate"
-                title={`${item.name} — click to change payer (currently ${paidByClient ? clientLabel : midosLabel})`}
-                aria-label={`${item.name}, paid by ${paidByClient ? clientLabel : midosLabel}, click to toggle payer`}
+                title={`${item.name} — click to change payer (currently ${paidByClient ? resolvedClient : resolvedMidos})`}
+                aria-label={`${item.name}, paid by ${paidByClient ? resolvedClient : resolvedMidos}, click to toggle payer`}
               >
-                {item.name || 'Untitled'}
+                {item.name || t.admin.sidebar.untitledCompany}
               </button>
             )}
 
@@ -132,7 +136,7 @@ export const SelectorSelectedChips: React.FC<SelectorSelectedChipsProps> = ({
                   : 'bg-primary/20 text-primary dark:text-copper-300'
               }`}
             >
-              {paidByClient ? clientLabel : midosLabel}
+              {paidByClient ? resolvedClient : resolvedMidos}
             </span>
 
             {/* Remove button */}

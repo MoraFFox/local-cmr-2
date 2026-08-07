@@ -8,6 +8,7 @@ import { useFormValidation, ValidationPatterns } from './forms/hooks/useFormVali
 import { AutoSaveIndicator } from './form-ui/AutoSaveIndicator';
 import { ValidationSummary } from './form-ui/ValidationSummary';
 import { SafeModal } from './form-ui/SafeModal';
+import { useT } from '../utils/i18n';
 
 interface CompanyEditModalProps {
     isOpen: boolean;
@@ -35,6 +36,7 @@ const EMPTY_FIELDS: CompanyEditableFields = {
 };
 
 const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, company, onSave }) => {
+    const t = useT();
     const [formData, setFormData] = useState<CompanyEditableFields>(EMPTY_FIELDS);
     const [isSaving, setIsSaving] = useState(false);
     // Track whether the user has edited anything since opening (for unsaved-changes protection)
@@ -144,8 +146,8 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
             type="form"
             size="md"
             hasUnsavedChanges={isDirty}
-            unsavedMessage="لديك تغييرات غير محفوظة. سيتم فقدانها إذا أغلقت النافذة. هل تريد المتابعة؟"
-            ariaLabel="تعديل الشركة"
+            unsavedMessage={t.ui.companyEdit.unsavedWarning}
+            ariaLabel={t.ui.companyEdit.title}
             rawContent
             renderHeader={(handleClose) => (
                 <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-hairline dark:border-hairline bg-cream-2/50 dark:bg-espresso-light/30 flex-shrink-0">
@@ -155,10 +157,10 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                         </div>
                         <div>
                             <h2 className="text-lg font-bold text-primary dark:text-white">
-                                تعديل الشركة
+                                {t.ui.companyEdit.title}
                             </h2>
                             <p className="text-sm text-latte dark:text-cream/60">
-                                {company.companyName || 'شركة غير مسماة'}
+                                {company.companyName || t.ui.records.unnamedCompany}
                             </p>
                         </div>
                     </div>
@@ -167,7 +169,7 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                     <button
                         onClick={handleClose}
                         className="p-2 sm:p-2 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center text-latte hover:text-primary rounded-full hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
-                        aria-label="إغلاق النافذة"
+                        aria-label={t.ui.companyEdit.closeDialog}
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -184,7 +186,7 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                         className="w-full sm:w-auto px-4 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 text-latte hover:text-primary font-medium rounded-lg hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
                         disabled={isSaving}
                     >
-                        إلغاء
+                        {t.ui.companyEdit.cancel}
                     </button>
                     <button
                         onClick={handleSave}
@@ -197,10 +199,10 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                 </svg>
-                                جارٍ الحفظ...
+                                {t.ui.companyEdit.saving}
                             </>
                         ) : (
-                            'حفظ التغييرات'
+                            t.ui.companyEdit.saveChanges
                         )}
                     </button>
                 </div>
@@ -237,12 +239,12 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                     {/* Company Name */}
                     <div>
                         <TextInput
-                            label="اسم الشركة"
+                            label={t.ui.companyEdit.companyName}
                             name="companyName"
                             value={formData.companyName || ''}
                             onChange={handleChange}
                             onBlur={() => validation.touchField('companyName')}
-                            placeholder="أدخل اسم الشركة"
+                            placeholder={t.ui.companyEdit.companyNamePlaceholder}
                             icon={<BuildingOfficeIcon className="w-5 h-5" />}
                             error={validation.errors.companyName}
                             required
@@ -252,7 +254,7 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                     {/* Email & Tax Number */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <TextInput
-                            label="البريد الإلكتروني"
+                            label={t.ui.companyEdit.email}
                             name="email"
                             type="email"
                             value={formData.email || ''}
@@ -263,12 +265,12 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                             error={validation.errors.email}
                         />
                         <TextInput
-                            label="الرقم الضريبي"
+                            label={t.ui.companyEdit.taxNumber}
                             name="taxNumber"
                             value={formData.taxNumber || ''}
                             onChange={handleChange}
                             onBlur={() => validation.touchField('taxNumber')}
-                            placeholder="الرقم الضريبي"
+                            placeholder={t.ui.companyEdit.taxNumberPlaceholder}
                             icon={<IdentificationIcon className="w-5 h-5" />}
                             error={validation.errors.taxNumber}
                         />
@@ -276,11 +278,11 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
 
                     {/* Location */}
                     <TextInput
-                        label="الموقع"
+                        label={t.ui.companyEdit.location}
                         name="location"
                         value={formData.location || ''}
                         onChange={handleChange}
-                        placeholder="عنوان الشركة أو الموقع"
+                        placeholder={t.ui.companyEdit.locationPlaceholder}
                         icon={<MapPinIcon className="w-5 h-5" />}
                     />
                 </div>
@@ -293,7 +295,7 @@ const CompanyEditModal: React.FC<CompanyEditModalProps> = ({ isOpen, onClose, co
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                             </svg>
-                            لديك تغييرات غير محفوظة
+                            {t.ui.companyEdit.hasUnsavedChanges}
                         </p>
                     </div>
                 )}

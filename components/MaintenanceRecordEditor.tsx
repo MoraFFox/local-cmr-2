@@ -53,16 +53,23 @@ const STEP_TO_SECTION: Record<number, string> = { 1: 'basic', 2: 'problems', 3: 
 const SECTION_TO_STEP: Record<string, number> = { basic: 1, problems: 2, services: 3, parts: 4, payment: 5, supervisor: 6, logistics: 7, notes: 8, photos: 9 };
 
 const STEPPER_STEPS: StepperStep[] = [
-  { id: 1, name: 'المعلومات الأساسية' },
-  { id: 2, name: 'المشاكل' },
-  { id: 3, name: 'الخدمات المنفذة' },
-  { id: 4, name: 'القطع المستبدلة' },
-  { id: 5, name: 'الدفع' },
-  { id: 6, name: 'بيانات المشرف' },
-  { id: 7, name: 'لوجستيات الماكينات' },
-  { id: 8, name: 'ملاحظات وتوصيات' },
-  { id: 9, name: 'صور قبل وبعد' },
+  { id: 1, name: 'basic' },
+  { id: 2, name: 'problems' },
+  { id: 3, name: 'services' },
+  { id: 4, name: 'parts' },
+  { id: 5, name: 'payment' },
+  { id: 6, name: 'supervisor' },
+  { id: 7, name: 'logistics' },
+  { id: 8, name: 'notes' },
+  { id: 9, name: 'photos' },
 ];
+
+/** Localize the stepper steps for the current language. */
+const localizedSteps = (t: ReturnType<typeof useT>): StepperStep[] =>
+  STEPPER_STEPS.map((s) => ({
+    ...s,
+    name: t.ui.maintenanceEditor.stepNames[s.name as keyof typeof t.ui.maintenanceEditor.stepNames],
+  }));
 
 const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
   record, onSave, onCancel, partsList, servicesList,
@@ -86,8 +93,11 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
 
   // When logistics mode is on, only Basic Info + Machine Logistics steps are shown.
   const visibleSteps = useMemo<StepperStep[]>(
-    () => (isLogisticsVisit ? STEPPER_STEPS.filter((s) => s.id === 1 || s.id === 7) : STEPPER_STEPS),
-    [isLogisticsVisit],
+    () => {
+      const localized = localizedSteps(t);
+      return isLogisticsVisit ? localized.filter((s) => s.id === 1 || s.id === 7) : localized;
+    },
+    [isLogisticsVisit, t],
   );
 
   const { highlightedSection, jumpToSection, jumpToFirstError } = useSectionJump({
@@ -124,12 +134,12 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
     if (!isLogisticsVisit) {
       rules.baristaName = { required: true, minLength: 2 };
       rules.supervisors = { custom: (value: any) => {
-        if (!Array.isArray(value) || value.length === 0) return 'مطلوب مشرف واحد على الأقل';
-        return value.some((s: any) => !s.name?.trim()) ? 'جميع أسماء المشرفين مطلوبة' : null;
+        if (!Array.isArray(value) || value.length === 0) return t.ui.maintenanceEditor.supervisorRequired;
+        return value.some((s: any) => !s.name?.trim()) ? t.ui.maintenanceEditor.allSupervisorNamesRequired : null;
       }};
     }
     return rules;
-  }, [isLogisticsVisit]);
+  }, [isLogisticsVisit, t]);
   const validation = useFormValidation(editedRecord, validationRules, { mode: 'onBlur', showSummary: true, validateOnMount: false });
 
   // Re-sync when record prop changes
@@ -155,7 +165,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
     const saved = autoSave.restore();
     if (saved && JSON.stringify(saved) !== JSON.stringify(record)) {
       setEditedRecord({ ...record, ...saved });
-      showToast('تم استعادة آخر نسخة محفوظة تلقائيًا', 'info');
+      showToast(t.ui.maintenanceEditor.autosaveRestored, 'info');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [record.id]);
@@ -242,12 +252,12 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
   const handlePhotoUpload = async (files: FileList | null, type: 'before' | 'after') => {
     if (!files || files.length === 0) return;
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { showToast('يجب تسجيل الدخول لرفع الصور', 'error'); return; }
+    if (!session) { showToast(t.ui.maintenanceEditor.loginToUpload, 'error'); return; }
     setUploadingPhotos(true);
     for (const file of Array.from(files)) {
       try {
         const v = validateImageFile(file);
-        if (!v.valid) { showToast(v.error || 'صورة غير صالحة', 'error'); continue; }
+        if (!v.valid) { showToast(v.error || t.ui.maintenanceEditor.invalidImage, 'error'); continue; }
         const compressed = await compressImage(file);
         const ts = Date.now();
         const rnd = Math.random().toString(36).substring(2, 8);
@@ -257,8 +267,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         if (error) throw error;
         const { data: { publicUrl } } = supabase.storage.from('maintenance-photos').getPublicUrl(data.path);
         setEditedRecord(prev => ({ ...prev, photos: [...(prev.photos || []), { url: publicUrl, type }] }));
-        showToast('تم رفع الصورة بنجاح', 'success');
-      } catch (err) { logger.error('Upload error', err, 'upload'); showToast('تعذر رفع الصورة', 'error'); }
+        showToast(t.ui.maintenanceEditor.photoUploaded, 'success');
+      } catch (err) { logger.error('Upload error', err, 'upload'); showToast(t.ui.maintenanceEditor.photoUploadFailed, 'error'); }
     }
     setUploadingPhotos(false);
   };
@@ -270,9 +280,9 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         const parts = photo.url.split('/maintenance-photos/');
         if (parts.length > 1) {
           const { error } = await supabase.storage.from('maintenance-photos').remove([parts[1]]);
-          if (error) showToast('تمت إزالة الصورة من السجل، لكن تعذر حذفها من التخزين', 'warning');
+          if (error) showToast(t.ui.maintenanceEditor.photoRemovedStorageFailed, 'warning');
         }
-      } catch { showToast('تمت إزالة الصورة من السجل، لكن تعذر حذفها من التخزين', 'warning'); }
+      } catch { showToast(t.ui.maintenanceEditor.photoRemovedStorageFailed, 'warning'); }
     }
   };
 
@@ -283,9 +293,9 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         // The edit is now persisted upstream — drop the autosave so a stale
         // draft is not restored the next time this record is opened.
         autoSave.clearSaved();
-        showToast('تم حفظ السجل بنجاح', 'success');
+        showToast(t.ui.maintenanceEditor.recordSaved, 'success');
       },
-      (errors) => { showToast('يرجى تصحيح الأخطاء قبل الحفظ', 'error'); jumpToFirstError(errors); }
+      (errors) => { showToast(t.ui.maintenanceEditor.fixErrorsBeforeSave, 'error'); jumpToFirstError(errors); }
     )();
   };
 
@@ -361,7 +371,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         <div id="step-content-1" className={sectionClass(1)}>
           <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
             <DocumentTextIcon className="w-5 h-5 text-primary" />
-            <h3 className="font-semibold text-primary dark:text-white">المعلومات الأساسية</h3>
+            <h3 className="font-semibold text-primary dark:text-white">{t.ui.maintenanceEditor.basicInfo}</h3>
           </div>
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -396,7 +406,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       {baristas.map(b => <option key={b.id} value={b.name}>{b.name}</option>)}
                     </select>
                   ) : (
-                    <input type="text" name="baristaName" value={editedRecord.baristaName} onChange={handleFieldChange} placeholder="أدخل اسم فرد صيانة (Midoe's)" className={`w-full ps-10 pe-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${errors.baristaName ? 'border-ember-500' : 'border-hairline dark:border-hairline'}`} />
+                    <input type="text" name="baristaName" value={editedRecord.baristaName} onChange={handleFieldChange} placeholder={t.ui.maintenanceEditor.technicianPlaceholder} className={`w-full ps-10 pe-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border ${errors.baristaName ? 'border-ember-500' : 'border-hairline dark:border-hairline'}`} />
                   )}
                 </div>
                 {errors.baristaName && <p className="mt-1 text-sm text-ember-700">{errors.baristaName}</p>}
@@ -411,7 +421,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       {clientBaristas.map(b => <option key={b.id} value={b.name}>{b.name}</option>)}
                     </select>
                   ) : (
-                    <input type="text" name="clientBaristaName" value={editedRecord.clientBaristaName || ''} onChange={handleFieldChange} placeholder="أدخل اسم باريستا العميل" className="w-full ps-10 pe-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline" />
+                    <input type="text" name="clientBaristaName" value={editedRecord.clientBaristaName || ''} onChange={handleFieldChange} placeholder={t.ui.maintenanceEditor.clientBaristaNamePlaceholder} className="w-full ps-10 pe-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline" />
                   )}
                 </div>
               </div>
@@ -430,7 +440,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                       onClick={() => setIsZoneManagerOpen(true)}
                       className="text-xs text-primary hover:text-hover underline"
                     >
-                      إدارة المناطق
+                      {t.ui.maintenanceEditor.manageZones}
                     </button>
                   </label>
                   <div className="relative">
@@ -438,7 +448,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                     <select name="visitZone" value={editedRecord.visitZone || ''} onChange={handleFieldChange} className="w-full ps-10 pe-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline">
                       <option value="">{t.ui.maintenanceEditor.selectZone}</option>
                       {zones.map((z) => (
-                        <option key={z.key} value={z.key}>{z.label} ({z.fee.toLocaleString()} جم)</option>
+                        <option key={z.key} value={z.key}>{z.label} ({z.fee.toLocaleString()} {t.ui.maintenanceEditor.zoneFeeSuffix})</option>
                       ))}
                     </select>
                   </div>
@@ -458,8 +468,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         <div id="step-content-2" className={sectionClass(2)}>
           <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
             <ExclamationCircleIcon className="w-5 h-5 text-ember-500" />
-            <h3 className="font-semibold text-primary dark:text-white">المشاكل</h3>
-            {editedRecord.problems?.length > 0 && <span className="px-2 py-0.5 bg-ember-50 dark:bg-ember-500/10 text-ember-700 dark:text-ember-300 text-xs rounded-full">{editedRecord.problems.length} مشاكل</span>}
+            <h3 className="font-semibold text-primary dark:text-white">{t.ui.maintenanceEditor.stepNames.problems}</h3>
+            {editedRecord.problems?.length > 0 && <span className="px-2 py-0.5 bg-ember-50 dark:bg-ember-500/10 text-ember-700 dark:text-ember-300 text-xs rounded-full">{t.ui.maintenanceEditor.problemsCount.replace('{{count}}', String(editedRecord.problems.length))}</span>}
           </div>
           <div className="p-6 space-y-6">
             <div className="flex items-center gap-3">
@@ -479,7 +489,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             )}
           </div>
           <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
-            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
+            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />{t.ui.maintenanceEditor.back}</button>
             <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{STEPPER_STEPS[2].name}<ChevronLeftIcon className="w-4 h-4" /></button>
           </div>
         </div>
@@ -490,14 +500,14 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         <div id="step-content-3" className={sectionClass(3)}>
           <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
             <WrenchIcon className="w-5 h-5 text-blue-500" />
-            <h3 className="font-semibold text-primary dark:text-white">الخدمات المنفذة</h3>
+            <h3 className="font-semibold text-primary dark:text-white">{t.ui.maintenanceEditor.stepNames.services}</h3>
             {editedRecord.servicesPerformed.length > 0 && <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs rounded-full">{editedRecord.servicesPerformed.length}</span>}
           </div>
           <div className="p-6">
             <ServiceSelector options={mergedServicesList} selectedValues={editedRecord.servicesPerformed} onChange={handleServicesChange} suggestedValues={suggestedServices} onAddCustom={(item) => addItem({ ...item, type: 'service' })} existingCategories={Array.from(new Set(mergedServicesList.map((s) => s.category)))} />
           </div>
           <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
-            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
+            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />{t.ui.maintenanceEditor.back}</button>
             <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{STEPPER_STEPS[3].name}<ChevronLeftIcon className="w-4 h-4" /></button>
           </div>
         </div>
@@ -508,7 +518,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         <div id="step-content-4" className={sectionClass(4)}>
           <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
             <BeakerIcon className="w-5 h-5 text-purple-500" />
-            <h3 className="font-semibold text-primary dark:text-white">القطع المستبدلة</h3>
+            <h3 className="font-semibold text-primary dark:text-white">{t.ui.maintenanceEditor.stepNames.parts}</h3>
             {editedRecord.partsReplaced.length > 0 && <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs rounded-full">{editedRecord.partsReplaced.length}</span>}
           </div>
           <div className="p-6 space-y-4">
@@ -519,7 +529,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             {editedRecord.partsWereReplaced && <PartsSelector options={mergedPartsList} selectedValues={editedRecord.partsReplaced} onChange={handlePartsChange} suggestedValues={suggestedParts} onAddCustom={(item) => addItem({ ...item, type: 'part' })} existingCategories={[]} />}
           </div>
           <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
-            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
+            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />{t.ui.maintenanceEditor.back}</button>
             <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{STEPPER_STEPS[4].name}<ChevronLeftIcon className="w-4 h-4" /></button>
           </div>
         </div>
@@ -530,11 +540,11 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         <div id="step-content-5" className={sectionClass(5)}>
           <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
             <CurrencyDollarIcon className="w-5 h-5 text-amber-500" />
-            <h3 className="font-semibold text-primary dark:text-white">نوع الزيارة والدفع</h3>
+            <h3 className="font-semibold text-primary dark:text-white">{t.ui.maintenanceEditor.typeAndPayment}</h3>
           </div>
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <RadioGroup label="نوع الزيارة" name="type" options={[{ label: t.ui.maintenanceEditor.requested, value: 'requested' }, { label: t.ui.maintenanceEditor.scheduled, value: 'scheduled' }]} value={editedRecord.type} onChange={(val) => handleRadioChange('type', val)} />
+              <RadioGroup label={t.ui.maintenanceEditor.visitType} name="type" options={[{ label: t.ui.maintenanceEditor.requested, value: 'requested' }, { label: t.ui.maintenanceEditor.scheduled, value: 'scheduled' }]} value={editedRecord.type} onChange={(val) => handleRadioChange('type', val)} />
               <div>
                 <label className="text-sm font-medium text-primary dark:text-latte/70 block mb-3">{t.ui.maintenanceEditor.paidBy}</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -553,7 +563,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             </div>
           </div>
           <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
-            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
+            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />{t.ui.maintenanceEditor.back}</button>
             <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{STEPPER_STEPS[5].name}<ChevronLeftIcon className="w-4 h-4" /></button>
           </div>
         </div>
@@ -564,9 +574,9 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         <div id="step-content-6" className={sectionClass(6)} data-field="supervisors">
           <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
             <ClipboardDocumentListIcon className="w-5 h-5 text-leaf-500" />
-            <h3 className="font-semibold text-primary dark:text-white">بيانات المشرف</h3>
+            <h3 className="font-semibold text-primary dark:text-white">{t.ui.maintenanceEditor.stepNames.supervisor}</h3>
             {(!editedRecord.supervisors || editedRecord.supervisors.length === 0) ? (
-              <span className="px-2 py-0.5 bg-ember-50 dark:bg-ember-500/10 text-ember-700 dark:text-ember-300 text-xs rounded-full">مطلوب</span>
+              <span className="px-2 py-0.5 bg-ember-50 dark:bg-ember-500/10 text-ember-700 dark:text-ember-300 text-xs rounded-full">{t.ui.maintenanceEditor.required}</span>
             ) : (
               <span className="px-2 py-0.5 bg-leaf-50 dark:bg-leaf-500/10 text-leaf-700 dark:text-leaf-300 text-xs rounded-full">{editedRecord.supervisors.length}</span>
             )}
@@ -581,11 +591,11 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor={`supervisor-${supervisor.id}-name`} className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.supervisorName}</label>
-                    <input id={`supervisor-${supervisor.id}-name`} name={`supervisor-${index}-name`} type="text" value={supervisor.name} onChange={(e) => updateSupervisor(index, 'name', e.target.value)} className="w-full px-3 py-2 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg border border-hairline dark:border-hairline focus:outline-none focus:ring-2 focus:ring-primary" placeholder="اسم المشرف" />
+                    <input id={`supervisor-${supervisor.id}-name`} name={`supervisor-${index}-name`} type="text" value={supervisor.name} onChange={(e) => updateSupervisor(index, 'name', e.target.value)} className="w-full px-3 py-2 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg border border-hairline dark:border-hairline focus:outline-none focus:ring-2 focus:ring-primary" placeholder={t.ui.maintenanceEditor.supervisorNamePlaceholder} />
                   </div>
                   <div>
                     <label htmlFor={`supervisor-${supervisor.id}-phone`} className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.phone}</label>
-                    <input id={`supervisor-${supervisor.id}-phone`} name={`supervisor-${index}-phone`} type="tel" value={supervisor.phone} onChange={(e) => updateSupervisor(index, 'phone', formatEgyptianPhone(e.target.value))} className="w-full px-3 py-2 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg border border-hairline dark:border-hairline focus:outline-none focus:ring-2 focus:ring-primary" placeholder="رقم الهاتف" dir="ltr" />
+                    <input id={`supervisor-${supervisor.id}-phone`} name={`supervisor-${index}-phone`} type="tel" value={supervisor.phone} onChange={(e) => updateSupervisor(index, 'phone', formatEgyptianPhone(e.target.value))} className="w-full px-3 py-2 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg border border-hairline dark:border-hairline focus:outline-none focus:ring-2 focus:ring-primary" placeholder={t.ui.maintenanceEditor.phonePlaceholder} dir="ltr" />
                   </div>
                 </div>
               </div>
@@ -593,7 +603,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             <button type="button" onClick={addSupervisor} className="flex items-center gap-2 px-4 py-2 text-primary dark:text-primary-400 font-medium hover:bg-cream-2 dark:hover:bg-primary/10 rounded-lg border border-primary/30 dark:border-copper-700 transition-colors"><PlusCircleIcon className="w-5 h-5" /> {t.ui.maintenanceEditor.addSupervisor}</button>
           </div>
           <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
-            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
+            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />{t.ui.maintenanceEditor.back}</button>
             <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{STEPPER_STEPS[6].name}<ChevronLeftIcon className="w-4 h-4" /></button>
           </div>
         </div>
@@ -604,7 +614,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         <div id="step-content-7" className={sectionClass(7)}>
           <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
             <TruckIcon className="w-5 h-5 text-amber-500" />
-            <h3 className="font-semibold text-primary dark:text-white">لوجستيات الماكينات</h3>
+            <h3 className="font-semibold text-primary dark:text-white">{t.ui.maintenanceEditor.stepNames.logistics}</h3>
           </div>
           <div className="p-6">
             <MachineLogisticsSection
@@ -614,11 +624,11 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             />
           </div>
           <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
-            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
+            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />{t.ui.maintenanceEditor.back}</button>
             {visibleSteps[2] ? (
               <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{visibleSteps[2].name}<ChevronLeftIcon className="w-4 h-4" /></button>
             ) : (
-              <span className="text-xs text-latte">الخطوة الأخيرة</span>
+              <span className="text-xs text-latte">{t.ui.maintenanceEditor.lastStep}</span>
             )}
           </div>
         </div>
@@ -629,20 +639,20 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         <div id="step-content-8" className={sectionClass(8)}>
           <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
             <DocumentTextIcon className="w-5 h-5 text-latte" />
-            <h3 className="font-semibold text-primary dark:text-white">ملاحظات وتوصيات</h3>
+            <h3 className="font-semibold text-primary dark:text-white">{t.ui.maintenanceEditor.stepNames.notes}</h3>
           </div>
           <div className="p-6 space-y-4">
             <div>
               <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.notes}</label>
-              <textarea name="notes" value={editedRecord.notes || ''} onChange={handleFieldChange} rows={4} placeholder="أضف أي ملاحظات إضافية..." className="w-full px-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline resize-none" />
+              <textarea name="notes" value={editedRecord.notes || ''} onChange={handleFieldChange} rows={4} placeholder={t.ui.maintenanceEditor.notesPlaceholder} className="w-full px-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline resize-none" />
             </div>
             <div>
               <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-2">{t.ui.maintenanceEditor.recommendations}</label>
-              <textarea name="recommendations" value={editedRecord.recommendations || ''} onChange={handleFieldChange} rows={3} placeholder="أضف توصيات للزيارات القادمة..." className="w-full px-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline resize-none" />
+              <textarea name="recommendations" value={editedRecord.recommendations || ''} onChange={handleFieldChange} rows={3} placeholder={t.ui.maintenanceEditor.recommendationsPlaceholder} className="w-full px-4 py-3 bg-cream dark:bg-espresso-light text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline resize-none" />
             </div>
           </div>
           <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
-            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
+            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />{t.ui.maintenanceEditor.back}</button>
             <button type="button" onClick={goToNextStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-700 rounded-lg transition-colors">{STEPPER_STEPS[8].name}<ChevronLeftIcon className="w-4 h-4" /></button>
           </div>
         </div>
@@ -653,7 +663,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         <div id="step-content-9" className={sectionClass(9)}>
           <div className="flex items-center gap-3 p-4 border-b border-hairline dark:border-hairline">
             <CameraIcon className="w-5 h-5 text-primary" />
-            <h3 className="font-semibold text-primary dark:text-white">صور قبل وبعد</h3>
+            <h3 className="font-semibold text-primary dark:text-white">{t.ui.maintenanceEditor.stepNames.photos}</h3>
             {editedRecord.photos && editedRecord.photos.length > 0 && <span className="px-2 py-0.5 bg-primary/10 dark:bg-primary/10 text-primary dark:text-primary-400 text-xs rounded-full">{editedRecord.photos.length}</span>}
           </div>
           <div className="p-6 space-y-6">
@@ -676,7 +686,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 {editedRecord.photos?.filter(p => p.type === 'before').map((photo, i) => (
                   <div key={`before-${i}`} className="relative group aspect-square">
                     <img src={photo.url} alt={`${t.ui.maintenanceEditor.before} ${i + 1}`} className="w-full h-full object-cover rounded-lg border border-hairline dark:border-hairline" loading="lazy" />
-                    <button onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: 'before' })} className="absolute top-2 end-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" title="إزالة الصورة" aria-label="إزالة الصورة"><XMarkIcon className="w-4 h-4" /></button>
+                    <button onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: 'before' })} className="absolute top-2 end-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" title={t.ui.maintenanceEditor.removeImage} aria-label={t.ui.maintenanceEditor.removeImage}><XMarkIcon className="w-4 h-4" /></button>
                     <div className="absolute bottom-2 start-2 px-2 py-1 bg-black/50 text-white text-xs rounded">{t.ui.maintenanceEditor.before}</div>
                   </div>
                 ))}
@@ -698,7 +708,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                 {editedRecord.photos?.filter(p => p.type === 'after').map((photo, i) => (
                   <div key={`after-${i}`} className="relative group aspect-square">
                     <img src={photo.url} alt={`${t.ui.maintenanceEditor.after} ${i + 1}`} className="w-full h-full object-cover rounded-lg border border-hairline dark:border-hairline" loading="lazy" />
-                    <button onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: 'after' })} className="absolute top-2 end-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" title="إزالة الصورة" aria-label="إزالة الصورة"><XMarkIcon className="w-4 h-4" /></button>
+                    <button onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: 'after' })} className="absolute top-2 end-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" title={t.ui.maintenanceEditor.removeImage} aria-label={t.ui.maintenanceEditor.removeImage}><XMarkIcon className="w-4 h-4" /></button>
                     <div className="absolute bottom-2 start-2 px-2 py-1 bg-leaf-500/80 text-white text-xs rounded">{t.ui.maintenanceEditor.after}</div>
                   </div>
                 ))}
@@ -715,7 +725,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
                   {editedRecord.photos.filter(p => p.type === 'legacy').map((photo, i) => (
                     <div key={`legacy-${i}`} className="relative group aspect-square">
                       <img src={photo.url} alt={`${t.ui.maintenanceEditor.legacyPhotos} ${i + 1}`} className="w-full h-full object-cover rounded-lg border border-hairline dark:border-hairline" loading="lazy" />
-                      <button onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: 'legacy' })} className="absolute top-2 end-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" title="إزالة الصورة" aria-label="إزالة الصورة"><XMarkIcon className="w-4 h-4" /></button>
+                      <button onClick={() => setConfirmPhotoDelete({ isOpen: true, url: photo.url, category: 'legacy' })} className="absolute top-2 end-2 bg-ember-500 hover:bg-ember-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" title={t.ui.maintenanceEditor.removeImage} aria-label={t.ui.maintenanceEditor.removeImage}><XMarkIcon className="w-4 h-4" /></button>
                       <div className="absolute bottom-2 start-2 px-2 py-1 bg-espresso/80 text-white text-xs rounded">{t.ui.maintenanceEditor.legacy}</div>
                     </div>
                   ))}
@@ -724,8 +734,8 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
             )}
           </div>
           <div className="flex justify-between items-center p-4 border-t border-hairline dark:border-hairline">
-            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />السابق</button>
-              <span className="text-xs text-latte">الخطوة الأخيرة</span>
+            <button type="button" onClick={goToPrevStep} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors"><ChevronRightIcon className="w-4 h-4" />{t.ui.maintenanceEditor.back}</button>
+              <span className="text-xs text-latte">{t.ui.maintenanceEditor.lastStep}</span>
           </div>
         </div>
       )}
@@ -747,7 +757,7 @@ const MaintenanceRecordEditor: React.FC<MaintenanceRecordEditorProps> = ({
         </div>
       </div>
 
-      <ConfirmDialog isOpen={!!confirmPhotoDelete?.isOpen} onClose={() => setConfirmPhotoDelete(null)} onConfirm={() => { if (confirmPhotoDelete) { handlePhotoRemove({ url: confirmPhotoDelete.url, type: confirmPhotoDelete.category as any }); } setConfirmPhotoDelete(null); }} title="إزالة الصورة" aria-label="إزالة الصورة" message="هل أنت متأكد من رغبتك في إزالة هذه الصورة؟ لا يمكن التراجع عن هذا الإجراء." confirmLabel="نعم، إزالة" />
+      <ConfirmDialog isOpen={!!confirmPhotoDelete?.isOpen} onClose={() => setConfirmPhotoDelete(null)} onConfirm={() => { if (confirmPhotoDelete) { handlePhotoRemove({ url: confirmPhotoDelete.url, type: confirmPhotoDelete.category as any }); } setConfirmPhotoDelete(null); }} title={t.ui.maintenanceEditor.removeImage} message={t.ui.maintenanceEditor.removeImageConfirm} confirmLabel={t.ui.maintenanceEditor.removeImageConfirmLabel} />
 
       <VisitZoneManager isOpen={isZoneManagerOpen} onClose={() => setIsZoneManagerOpen(false)} />
     </div>

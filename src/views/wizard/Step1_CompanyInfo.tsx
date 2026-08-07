@@ -36,62 +36,62 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
   const t = useT();
 
   return (
-  <Card title="معلومات الشركة">
+  <Card title={t.ui.wizard.companyInfoTitle}>
     <div className="space-y-6">
       <TextInput
-        label="اسم الشركة"
+        label={t.ui.wizard.companyNameLabel}
         name="companyName"
         data-field="company.companyName"
         value={formData.companyName}
         onChange={actions.handleChange}
-        placeholder="مثال: شركة كافيه ميدوز"
+        placeholder={t.ui.wizard.companyNamePlaceholder}
         icon={<BuildingOfficeIcon />}
       />
       <TextInput
-        label="البريد الإلكتروني"
+        label={t.ui.wizard.emailLabel}
         name="email"
         data-field="company.email"
         type="email"
         value={formData.email}
         onChange={actions.handleChange}
-        placeholder="مثال: manager@midoes.com"
+        placeholder={t.ui.wizard.emailPlaceholder}
         icon={<EnvelopeIcon />}
       />
       <TextInput
-        label="الرقم الضريبي"
+        label={t.ui.wizard.taxNumberLabel}
         name="taxNumber"
         data-field="company.taxNumber"
         value={formData.taxNumber}
         onChange={actions.handleChange}
-        placeholder="مثال: 12-3456789"
+        placeholder={t.ui.wizard.taxNumberPlaceholder}
         icon={<DocumentTextIcon />}
       />
       <TextInput
-        label="الموقع"
+        label={t.ui.wizard.location}
         name="location"
         data-field="company.location"
         value={formData.location}
         onChange={actions.handleChange}
-        placeholder="مثال: شارع التحرير، القاهرة"
+        placeholder={t.ui.wizard.locationPlaceholder}
         icon={<MapPinIcon />}
       />
       <TextInput
-        label="استهلاك القهوة بالكيلو (كجم/شهر)"
+        label={t.ui.wizard.coffeeConsumptionLabel}
         name="coffeeConsumptionKg"
         data-field="company.coffeeConsumptionKg"
         type="number"
         value={formData.coffeeConsumptionKg || ""}
         onChange={actions.handleChange}
-        placeholder="مثال: 50"
+        placeholder={t.ui.wizard.coffeeConsumptionPlaceholder}
         icon={<ScaleIcon />}
         helpText={t.tooltips.coffeeConsumption}
       />
       <div className="pt-8 mt-8 border-t border-hairline">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-primary tracking-tight">جهات الاتصال</h3>
+          <h3 className="text-xl font-bold text-primary tracking-tight">{t.ui.wizard.contactsTitle}</h3>
           <Button onClick={() => actions.addContact("main")}>
             <PlusCircleIcon className="w-5 h-5" />
-            <span>إضافة جهة اتصال</span>
+            <span>{t.ui.wizard.addContact}</span>
           </Button>
         </div>
         <ContactsSection
@@ -104,13 +104,13 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
       </div>
       <div data-field="company.hasBranches">
         <RadioGroup
-          label="هل لدى الشركة عدة فروع؟"
+          label={t.ui.wizard.hasBranchesLabel}
           name="hasBranches"
           value={formData.hasBranches}
           onChange={(val) => actions.handleRadioChange("hasBranches", val)}
             options={[
-            { label: "نعم", value: true },
-            { label: "لا", value: false },
+            { label: t.common.yes, value: true },
+            { label: t.common.no, value: false },
           ]}
           inline
         />
@@ -119,7 +119,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
         <div className="pt-6 mt-6 border-t border-hairline space-y-6">
           {/* NEW: mixed machine fleet toggle — asked BEFORE the single-machine status */}
           <RadioGroup
-            label="هل لدى العميل أكثر من ماكينة؟"
+            label={t.ui.wizard.hasMultipleMachinesLabel}
             name="hasMultipleMachines"
             value={formData.hasMultipleMachines}
             onChange={(val) => actions.handleRadioChange("hasMultipleMachines", val)}
@@ -132,13 +132,13 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
           {/* Single machine flow (including legacy records without hasMultipleMachines) */}
           {formData.hasMultipleMachines !== true && (
             <RadioGroup
-              label="حالة الماكينة"
+              label={t.ui.wizard.machineStatusLabel}
               name="usesOurMachines"
               value={formData.usesOurMachines}
               onChange={(val) => actions.handleRadioChange("usesOurMachines", val)}
               options={[
-                { label: "مكينتنا", value: true },
-                { label: "مكينة العميل", value: false },
+                { label: t.ui.wizard.ourMachine, value: true },
+                { label: t.ui.wizard.clientMachine, value: false },
               ]}
               inline
             />
@@ -147,9 +147,9 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
           {(formData.hasMultipleMachines === true || formData.usesOurMachines === true) && (
             <div className="mt-4 space-y-4">
               <div className="flex justify-between items-center mb-4">
-                <h4 className="text-lg font-bold text-primary tracking-tight">الماكينات</h4>
+                <h4 className="text-lg font-bold text-primary tracking-tight">{t.ui.wizard.machinesTitle}</h4>
                 <Button onClick={() => actions.addListItem("machines")} variant="secondary">
-                  <PlusCircleIcon className="w-4 h-4" /> إضافة ماكينة
+                  <PlusCircleIcon className="w-4 h-4" /> {t.ui.wizard.addMachine}
                 </Button>
               </div>
 
@@ -159,13 +159,13 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
                     key={machine.id}
                     initiallyOpen={machine.id === newlyAddedId}
                     onRemove={() => actions.removeListItem("machines", idx)}
-                    titleContent={<span className="font-semibold">{machine.machineName || "ماكينة جديدة"}</span>}
+                    titleContent={<span className="font-semibold">{machine.machineName || t.ui.wizard.newMachine}</span>}
                   >
                     <div className="space-y-4">
                       {/* NEW: per-machine ownership status — only in mixed mode */}
                       {formData.hasMultipleMachines === true && (
                         <RadioGroup
-                          label="حالة الماكينة"
+                          label={t.ui.wizard.machineStatusLabel}
                           name={`machineOwner-${machine.id}`}
                           value={machine.machineOwner === "client" ? "client" : "ours"}
                           onChange={(v) =>
@@ -176,19 +176,19 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
                             )
                           }
                           options={[
-                            { label: "مكينة العميل", value: "client" },
-                            { label: "مكينة ميدوز", value: "ours" },
+                            { label: t.ui.wizard.clientMachine, value: "client" },
+                            { label: t.ui.wizard.midosMachine, value: "ours" },
                           ]}
                           inline
                         />
                       )}
                       <TextInput
-                        label="اسم الماكينة (اختياري)"
+                        label={t.ui.wizard.machineNameLabel}
                         name="machineName"
                         data-field={`company.machines.${idx}.machineName`}
                         value={machine.machineName || ""}
                         onChange={(e) => actions.handleListItemChange(e, "machines", idx)}
-                        placeholder="مثال: La Marzocco"
+                        placeholder={t.ui.wizard.machineNamePlaceholder}
                         suggestions={allKnownMachineNames}
                         helpText={t.tooltips.machineName}
                       />
@@ -206,27 +206,27 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
                         helpText={t.tooltips.machineType}
                       />
                       <TextInput
-                        label="نظام تشغيل الماكينة (اختياري)"
+                        label={t.ui.wizard.machineOptionLabel}
                         name="machineOption"
                         data-field={`company.machines.${idx}.machineOption`}
                         value={machine.machineOption || ""}
                         onChange={(e) => actions.handleListItemChange(e, "machines", idx)}
-                        placeholder="مثال: Manual, Automatic..."
+                        placeholder={t.ui.wizard.machineOptionPlaceholder}
                         suggestions={allKnownMachineOptions}
                         helpText={t.tooltips.machineOption}
                       />
                       {/* Rent options only appear for Mido's machines (single mode, or mixed-mode machineOwner === ours) */}
                       {(formData.hasMultipleMachines !== true || machine.machineOwner !== "client") && (
                         <div>
-                          <label className="block text-sm font-medium text-primary mb-2">كيف تم الحصول على الماكينة؟</label>
+                          <label className="block text-sm font-medium text-primary mb-2">{t.ui.wizard.machineAcquisitionLabel}</label>
                           <PortalSelect
                             name="machineOwnershipType"
                             dataField={`company.machines.${idx}.machineOwnershipType`}
-                            ariaLabel="كيف تم الحصول على الماكينة؟"
+                            ariaLabel={t.ui.wizard.machineAcquisitionLabel}
                             value={machine.machineOwnershipType || "leased"}
                             options={[
-                              { value: "leased", label: "إيجار" },
-                              { value: "consumption", label: "مقابل الاستهلاك" },
+                              { value: "leased", label: t.ui.wizard.lease },
+                              { value: "consumption", label: t.ui.wizard.consumption },
                             ]}
                             onChange={(v) =>
                               actions.handleListItemChange(
@@ -241,7 +241,7 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
                       {(formData.hasMultipleMachines !== true || machine.machineOwner !== "client") &&
                         (machine.machineOwnershipType === "leased" || machine.machineOwnershipType === "consumption") && (
                         <TextInput
-                          label={machine.machineOwnershipType === "leased" ? "قيمة الإيجار اليومي (ج.م)" : "القيمة اليومية (ج.م)"}
+                          label={machine.machineOwnershipType === "leased" ? t.ui.wizard.dailyLeaseCostLabel : t.ui.wizard.dailyValueLabel}
                           name="dailyLeaseCost"
                           data-field={`company.machines.${idx}.dailyLeaseCost`}
                           type="number"
@@ -259,11 +259,11 @@ export const Step1_CompanyInfo: React.FC<WizardStepProps> = ({
                 <EmptyState
                   variant="inline"
                   icon={<WrenchScrewdriverIcon />}
-                  title="لا توجد ماكينات"
-                  message="أضف الماكينات الموجودة في المكتب الرئيسي."
+                  title={t.ui.wizard.noMachinesTitle}
+                  message={t.ui.wizard.noMachinesMainMsg}
                 >
                   <Button variant="secondary" onClick={() => actions.addListItem("machines")}>
-                    <PlusCircleIcon className="w-4 h-4" /> إضافة ماكينة
+                    <PlusCircleIcon className="w-4 h-4" /> {t.ui.wizard.addMachine}
                   </Button>
                 </EmptyState>
               )}

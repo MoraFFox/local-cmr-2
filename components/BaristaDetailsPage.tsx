@@ -25,6 +25,8 @@ import {
   aggregateBaristaData,
   AggregatedBarista,
 } from "../utils/baristaAnalytics";
+import { useT } from "../utils/i18n";
+import { useLanguage } from "../utils/LanguageContext";
 
 interface BaristaDetailsPageProps {
   baristaName: string;
@@ -37,6 +39,8 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
   submissions,
   onBack,
 }) => {
+  const t = useT();
+  const { language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
   const [filterClient, setFilterClient] = useState<string>("all");
@@ -48,7 +52,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
     useState<MaintenanceRecord | null>(null);
 
   const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("ar-EG", {
+    new Intl.NumberFormat(language === "ar" ? "ar-EG" : "en-US", {
       style: "currency",
       currency: "EGP",
       minimumFractionDigits: 0,
@@ -101,13 +105,13 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
       <div className='text-center py-20'>
         <UserIcon className='w-16 h-16 text-latte/70 mx-auto mb-4' />
         <h2 className='text-2xl font-bold text-primary dark:text-white'>
-          Barista Not Found
+          {t.admin.baristaDetails.notFoundTitle}
         </h2>
         <button
           onClick={onBack}
           className='mt-4 text-primary font-bold hover:underline'
         >
-          Go Back
+          {t.admin.baristaDetails.goBack}
         </button>
       </div>
     );
@@ -125,10 +129,10 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
         </button>
         <div>
           <h1 className='text-2xl font-bold text-primary dark:text-white'>
-            Staff Details
+            {t.admin.baristaDetails.staffDetails}
           </h1>
           <p className='text-sm text-latte'>
-            Comprehensive performance and work history for {baristaName}
+            {t.admin.baristaDetails.subtitle.replace('{{name}}', baristaName)}
           </p>
         </div>
       </div>
@@ -148,7 +152,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
               </h2>
               {baristaProfile.isAutoDetected && (
                 <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 uppercase gap-1'>
-                  <SparklesIcon className='w-3 h-3' /> Auto-Detected
+                  <SparklesIcon className='w-3 h-3' /> {t.admin.baristaDetails.autoDetected}
                 </span>
               )}
             </div>
@@ -167,7 +171,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                   ))}
                 </div>
                 <span className='text-latte text-sm font-medium'>
-                  Rating
+                  {t.admin.baristaDetails.rating}
                 </span>
               </div>
               <div className='h-6 w-px bg-cream-2 dark:bg-espresso-light hidden sm:block'></div>
@@ -175,14 +179,14 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                 <span className='text-xl font-bold text-primary dark:text-white'>
                   {baristaProfile.visitCount}
                 </span>
-                <span className='text-latte text-sm'>Total Visits</span>
+                <span className='text-latte text-sm'>{t.admin.baristaDetails.totalVisits}</span>
               </div>
             </div>
 
             <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 border-t border-hairline'>
               <div>
                 <p className='text-[10px] font-bold text-latte uppercase tracking-widest'>
-                  Main Office / Last Client
+                  {t.admin.baristaDetails.mainOfficeLastClient}
                 </p>
                 <p className='font-semibold text-primary dark:text-latte/70 truncate'>
                   {baristaProfile.companyName}
@@ -190,7 +194,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
               </div>
               <div>
                 <p className='text-[10px] font-bold text-latte uppercase tracking-widest'>
-                  Company Paid (Accumulated)
+                  {t.admin.baristaDetails.companyPaidAccumulated}
                 </p>
                 <p className='font-mono font-bold text-amber-600 dark:text-amber-400'>
                   {formatCurrency(baristaProfile.companyCost)}
@@ -198,7 +202,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
               </div>
               <div>
                 <p className='text-[10px] font-bold text-latte uppercase tracking-widest'>
-                  Client Paid (Accumulated)
+                  {t.admin.baristaDetails.clientPaidAccumulated}
                 </p>
                 <p className='font-mono font-bold text-primary dark:text-primary-400'>
                   {formatCurrency(baristaProfile.clientCost)}
@@ -214,7 +218,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
         <div className='p-6 border-b border-hairline flex flex-col lg:flex-row lg:items-center justify-between gap-4'>
           <h3 className='text-lg font-bold text-primary dark:text-white flex items-center gap-2'>
             <WrenchScrewdriverIcon className='w-5 h-5 text-primary' />
-            Detailed Visit History
+            {t.admin.baristaDetails.detailedVisitHistory}
           </h3>
 
           {/* Filters Toolbar */}
@@ -223,7 +227,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
               <MagnifyingGlassIcon className='absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-latte' />
               <input
                 type='text'
-                placeholder='Search machines, notes...'
+                placeholder={t.admin.baristaDetails.searchPlaceholder}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className='w-full sm:w-auto ps-9 pe-3 py-2.5 text-base rounded-full border-hairline bg-slate-50 dark:bg-slate-900 text-primary dark:text-white focus:ring-primary focus:border-primary'
@@ -234,7 +238,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
               onChange={(e) => setFilterClient(e.target.value)}
               className='w-full sm:w-auto text-base rounded-full border-hairline bg-slate-50 dark:bg-slate-900 text-primary dark:text-latte/70 py-2.5 ps-3 pe-8 focus:ring-primary'
             >
-              <option value='all'>All Clients</option>
+              <option value='all'>{t.admin.baristaDetails.allClients}</option>
               {clientsList.map((c) => (
                 <option key={c} value={c}>
                   {c}
@@ -246,9 +250,9 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
               onChange={(e) => setFilterType(e.target.value)}
               className='w-full sm:w-auto text-base rounded-full border-hairline bg-slate-50 dark:bg-slate-900 text-primary dark:text-latte/70 py-2.5 ps-3 pe-8 focus:ring-primary'
             >
-              <option value='all'>All Types</option>
-              <option value='scheduled'>Scheduled</option>
-              <option value='requested'>Requested / Emergency</option>
+              <option value='all'>{t.admin.baristaDetails.allTypes}</option>
+              <option value='scheduled'>{t.admin.baristaDetails.scheduled}</option>
+              <option value='requested'>{t.admin.baristaDetails.requestedEmergency}</option>
             </select>
           </div>
         </div>
@@ -257,13 +261,13 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
           <table className='w-full text-start border-collapse'>
             <thead>
               <tr className='bg-cream/50 dark:bg-espresso/50 text-latte text-[11px] font-bold uppercase tracking-wider'>
-                <th className='px-6 py-4'>Date</th>
-                <th className='px-6 py-4'>Client / Branch</th>
-                <th className='px-6 py-4'>Machine / Asset</th>
-                <th className='px-6 py-4'>Type</th>
-                <th className='px-6 py-4 text-center'>Rating</th>
-                <th className='px-6 py-4'>Status / Follow-up</th>
-                <th className='px-6 py-4 text-end'>View</th>
+                <th className='px-6 py-4'>{t.admin.baristaDetails.colDate}</th>
+                <th className='px-6 py-4'>{t.admin.baristaDetails.colClientBranch}</th>
+                <th className='px-6 py-4'>{t.admin.baristaDetails.colMachineAsset}</th>
+                <th className='px-6 py-4'>{t.admin.baristaDetails.colType}</th>
+                <th className='px-6 py-4 text-center'>{t.admin.baristaDetails.colRating}</th>
+                <th className='px-6 py-4'>{t.admin.baristaDetails.colStatusFollowup}</th>
+                <th className='px-6 py-4 text-end'>{t.admin.baristaDetails.colView}</th>
               </tr>
             </thead>
             <tbody className='divide-y divide-hairline'>
@@ -311,7 +315,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                       <span
                         className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase  ${rec.type === "requested" ? "bg-ember-50 text-ember-700 dark:bg-ember-500/20 dark:text-ember-300" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"}`}
                       >
-                        {rec.type === "requested" ? "Emergency" : "Preventive"}
+                        {rec.type === "requested" ? t.admin.baristaDetails.emergency : t.admin.baristaDetails.preventive}
                       </span>
                     </td>
                     <td className='px-6 py-4 text-center'>
@@ -336,13 +340,13 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                           ) : (
                             <ExclamationTriangleIcon className='w-4 h-4' />
                           )}
-                          {rec.problemSolved ? "Resolved" : "Needs Work"}
+                          {rec.problemSolved ? t.admin.baristaDetails.resolved : t.admin.baristaDetails.needsWork}
                         </div>
                         {rec.followUpVisits &&
                           rec.followUpVisits.length > 0 && (
                             <div className='text-[10px] bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-md border border-amber-200/50 w-fit flex items-center gap-1'>
                               <ClipboardDocumentCheckIcon className='w-3 h-3' />
-                              Follow-up Required
+                              {t.admin.baristaDetails.followUpRequired}
                             </div>
                           )}
                       </div>
@@ -351,7 +355,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                       <button
                         onClick={() => setSelectedRecord(rec)}
                         className='text-latte group-hover:text-primary transition-colors p-2 rounded-full hover:bg-cream-2 dark:hover:bg-primary/10'
-                        title='View Details'
+                        title={t.admin.baristaDetails.viewDetailsTitle}
                       >
                         <MagnifyingGlassIcon className='w-5 h-5' />
                       </button>
@@ -362,7 +366,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                 <tr>
                   <td colSpan={7} className='px-6 py-12 text-center'>
                     <div className='text-latte/70 mb-2 whitespace-pre-wrap'>
-                      No records match your filters.
+                      {t.admin.baristaDetails.noRecordsMatch}
                     </div>
                   </td>
                 </tr>
@@ -373,20 +377,20 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
 
         {/* Footer Section */}
         <div className='p-4 bg-cream dark:bg-espresso/50 flex items-center justify-between text-xs text-latte border-t border-hairline'>
-          <div>Showing {filteredRecords.length} maintenance visits</div>
+          <div>{t.admin.baristaDetails.showingCount.replace('{{count}}', String(filteredRecords.length))}</div>
           <div className='flex items-center gap-2'>
             <button
               className='px-3 py-1 bg-cream dark:bg-espresso-light border border-hairline rounded-md disabled:opacity-50'
               disabled
             >
-              Previous
+              {t.admin.baristaDetails.previous}
             </button>
             <span className='font-bold text-primary dark:text-white'>1</span>
             <button
               className='px-3 py-1 bg-cream dark:bg-espresso-light border border-hairline rounded-md disabled:opacity-50'
               disabled
             >
-              Next
+              {t.admin.baristaDetails.next}
             </button>
           </div>
         </div>
@@ -394,19 +398,19 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
 
       {/* Record Detail Modal */}
       {selectedRecord && (
-        <div className='fixed inset-0 z-[100] flex items-center justify-center p-4 bg-espresso/60 backdrop-blur-sm animate-in fade-in duration-300'>
+        <div className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-espresso/60 backdrop-blur-sm animate-in fade-in duration-300'>
           <div className='bg-cream dark:bg-espresso-light rounded-2xl shadow-sm border border-hairline w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col xl:scale-100 scale-95 transition-transform'>
             {/* Modal Header */}
             <div className='px-6 py-4 border-b border-hairline flex items-center justify-between bg-cream/50 dark:bg-espresso/50'>
               <div>
                 <h4 className='font-bold text-primary dark:text-white'>
-                  Visit Details
+                  {t.admin.baristaDetails.visitDetails}
                 </h4>
                 <p className='text-xs text-latte'>
                   {selectedRecord.maintenanceDate} •{" "}
                   {selectedRecord.type === "requested"
-                    ? "Emergency"
-                    : "Preventive"}
+                    ? t.admin.baristaDetails.emergency
+                    : t.admin.baristaDetails.preventive}
                 </p>
               </div>
               <button
@@ -424,7 +428,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                 selectedRecord.machines.length > 0 && (
                   <section>
                     <h5 className='text-[10px] font-bold text-latte uppercase tracking-widest mb-3'>
-                      Machines Maintained
+                      {t.admin.baristaDetails.machinesMaintained}
                     </h5>
                     <div className='flex flex-wrap gap-2'>
                       {selectedRecord.machines.map((m, i) => (
@@ -451,7 +455,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                   selectedRecord.servicesPerformed.length > 0 && (
                     <section>
                       <h5 className='text-[10px] font-bold text-latte uppercase tracking-widest mb-3'>
-                        Services Performed
+                        {t.admin.baristaDetails.servicesPerformed}
                       </h5>
                       <ul className='space-y-2'>
                         {selectedRecord.servicesPerformed.map((s, i) => (
@@ -476,7 +480,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                   selectedRecord.partsReplaced.length > 0 && (
                     <section>
                       <h5 className='text-[10px] font-bold text-latte uppercase tracking-widest mb-3'>
-                        Parts Replaced
+                        {t.admin.baristaDetails.partsReplaced}
                       </h5>
                       <ul className='space-y-2'>
                         {selectedRecord.partsReplaced.map((p, i) => (
@@ -500,14 +504,14 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
               {/* Problems & Notes */}
               <section className='space-y-4'>
                 <h5 className='text-[10px] font-bold text-latte uppercase tracking-widest border-b border-hairline pb-2'>
-                  Observations & Results
+                  {t.admin.baristaDetails.observationsResults}
                 </h5>
 
                 {selectedRecord.problems &&
                   selectedRecord.problems.length > 0 && (
                     <div>
                       <p className='text-xs font-bold text-latte mb-2'>
-                        Identified Issues:
+                        {t.admin.baristaDetails.identifiedIssues}
                       </p>
                       <div className='flex flex-wrap gap-1.5'>
                         {selectedRecord.problems.map((p, i) => (
@@ -525,7 +529,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                 {selectedRecord.notes && (
                   <div>
                     <p className='text-xs font-bold text-latte mb-2'>
-                      Maintenance Notes:
+                      {t.admin.baristaDetails.maintenanceNotes}
                     </p>
                     <div className='text-sm text-primary dark:text-latte/70 bg-cream-2 dark:bg-espresso p-4 rounded-xl italic'>
                       "{selectedRecord.notes}"
@@ -536,7 +540,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                 {selectedRecord.recommendations && (
                   <div>
                     <p className='text-xs font-bold text-latte mb-2'>
-                      Technician's Recommendations:
+                      {t.admin.baristaDetails.techRecommendations}
                     </p>
                     <div className='text-sm text-blue-800 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 p-4 rounded-xl border border-blue-100 dark:border-blue-800/50'>
                       {selectedRecord.recommendations}
@@ -548,24 +552,24 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
               <div className='grid grid-cols-2 gap-4 pt-4'>
                 <div className='p-3 bg-cream dark:bg-espresso/50 rounded-xl border border-hairline'>
                   <p className='text-[10px] font-bold text-latte uppercase mb-1'>
-                    Status
+                    {t.admin.baristaDetails.status}
                   </p>
                   <p
                     className={`text-sm font-bold ${selectedRecord.problemSolved ? "text-leaf-600" : "text-amber-600"}`}
                   >
                     {selectedRecord.problemSolved
-                      ? "Successfully Resolved"
-                      : "Partially Resolved / Pending"}
+                      ? t.admin.baristaDetails.successfullyResolved
+                      : t.admin.baristaDetails.partiallyResolved}
                   </p>
                 </div>
                 <div className='p-3 bg-cream dark:bg-espresso/50 rounded-xl border border-hairline'>
                   <p className='text-[10px] font-bold text-latte uppercase mb-1'>
-                    Visit Rating
+                    {t.admin.baristaDetails.visitRating}
                   </p>
                   <p className='text-sm font-bold text-primary dark:text-white'>
                     {selectedRecord.visitRating
                       ? `${selectedRecord.visitRating} / 5`
-                      : "Not Rated"}
+                      : t.admin.baristaDetails.notRated}
                   </p>
                 </div>
               </div>
@@ -577,7 +581,7 @@ const BaristaDetailsPage: React.FC<BaristaDetailsPageProps> = ({
                 onClick={() => setSelectedRecord(null)}
                 className='btn-primary px-6 py-2 font-bold rounded-xl transition-all px-8'
               >
-                Close Details
+                {t.admin.baristaDetails.closeDetails}
               </button>
             </div>
           </div>

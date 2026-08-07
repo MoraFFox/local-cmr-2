@@ -21,6 +21,7 @@
 
 import React, { useState } from 'react';
 import { PlusIcon, MinusIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { useT } from '../../utils/i18n';
 
 interface SelectorAvailableItemProps {
   /** Display label for the option */
@@ -49,6 +50,7 @@ export const SelectorAvailableItem: React.FC<SelectorAvailableItemProps> = ({
   isSuggested = false,
   onAdd,
 }) => {
+  const t = useT();
   const [quantity, setQuantity] = useState(initialQuantity);
 
   const decrement = () => setQuantity(q => Math.max(1, q - 1));
@@ -83,10 +85,10 @@ export const SelectorAvailableItem: React.FC<SelectorAvailableItemProps> = ({
           {isSuggested && (
             <span
               className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/15 text-primary dark:text-copper-300 border border-primary/30 whitespace-nowrap"
-              title="Suggested based on the problems you reported"
+              title={t.selectors.suggestedTooltip}
             >
               <SparklesIcon className="w-3 h-3" />
-              Suggested
+              {t.selectors.suggested}
             </span>
           )}
         </div>
@@ -134,7 +136,7 @@ export const SelectorAvailableItem: React.FC<SelectorAvailableItemProps> = ({
           aria-label={`Add ${quantity} ${label}`}
         >
           <PlusIcon className="w-4 h-4" />
-          Add
+          {t.common.add}
         </button>
       </div>
     </div>

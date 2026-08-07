@@ -19,7 +19,7 @@ export const Step3_Warehouse: React.FC<WizardStepProps> = ({
   const t = useT();
 
   return (
-  <Card title="معلومات المخزن">
+  <Card title={t.ui.wizard.warehouseTitle}>
     <div className="space-y-6">
       <TextInput
         label={t.ui.wizard.location}
@@ -32,10 +32,10 @@ export const Step3_Warehouse: React.FC<WizardStepProps> = ({
       />
       <div className="pt-8 mt-8 border-t dark:border-hairline">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-primary tracking-tight">جهات اتصال المخزن</h3>
+          <h3 className="text-xl font-bold text-primary tracking-tight">{t.ui.wizard.warehouseContactsTitle}</h3>
           <Button onClick={() => actions.addContact("warehouse")}>
             <PlusCircleIcon className="w-5 h-5" />
-            <span>إضافة جهة اتصال</span>
+            <span>{t.ui.wizard.addContact}</span>
           </Button>
         </div>
         <ContactsSection

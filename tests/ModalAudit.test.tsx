@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from './testUtils';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import SafeModal from '../components/form-ui/SafeModal';
 import BottomSheet from '../components/BottomSheet';
@@ -16,7 +16,7 @@ describe('SafeModal unsaved-changes protection', () => {
       </SafeModal>
     );
 
-    const closeButton = screen.getByLabelText('Close modal');
+    const closeButton = screen.getByLabelText(ar.common.close);
     fireEvent.click(closeButton);
 
     expect(onClose).not.toHaveBeenCalled();

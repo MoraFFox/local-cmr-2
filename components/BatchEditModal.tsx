@@ -5,6 +5,7 @@ import { ConfirmDialog } from './ui/ConfirmDialog';
 import { SafeModal } from './form-ui/SafeModal';
 import { useUndoQueue } from './UndoQueueContext';
 import { useToast } from './ToastContext';
+import { useT } from '../utils/i18n';
 
 import { 
     CheckCircleIcon, 
@@ -48,6 +49,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
     // against accidental dismissal (audit issue #16).
     const hasUnsavedChanges = selectedIds.size > 0 || operation !== null;
 
+    const t = useT();
     const { queueDelete } = useUndoQueue();
     const { showToast } = useToast();
 
@@ -202,7 +204,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                     <button
                         onClick={handleClose}
                         className="p-2 text-latte hover:text-primary rounded-full hover:bg-cream-2 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                        aria-label="Close modal"
+                        aria-label={t.common.close}
                     >
                         <XMarkIcon className="w-5 h-5" />
                     </button>
@@ -265,8 +267,19 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                         {records.map((record) => (
                             <div
                                 key={record.id}
+                                role="button"
+                                tabIndex={0}
                                 onClick={() => toggleSelection(record.id)}
-                                className={`flex items-center gap-3 p-4 border-b border-hairline/50 cursor-pointer transition-colors ${
+                                onKeyDown={(e) => {
+                                  // Only toggle when the row itself is focused —
+                                  // never when an inner interactive element fires.
+                                  if (e.target !== e.currentTarget) return;
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    toggleSelection(record.id);
+                                  }
+                                }}
+                                className={`flex items-center gap-3 p-4 border-b border-hairline/50 cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
                                     selectedIds.has(record.id)
                                         ? 'bg-primary/10'
                                         : 'hover:bg-cream-2'
@@ -286,7 +299,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                             {record.maintenanceDate || 'No Date'}
                                         </span>
                                         {record.problemSolved && (
-                                            <span className="text-xs px-2 py-0.5 bg-leaf-500/20 text-leaf-600 rounded-full">تم الحل</span>
+                                            <span className="text-xs px-2 py-0.5 bg-leaf-500/20 text-leaf-600 rounded-full">{t.ui.maintenanceEditor.solved}</span>
                                         )}
                                     </div>
                                     {record.baristaName && (
@@ -402,8 +415,8 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                                         onChange={(e) => setOperation({ ...operation, value: e.target.value === 'true' })}
                                         className="w-full px-3 py-2 bg-cream text-primary border border-hairline rounded-lg focus:border-primary focus:ring-1 focus:ring-primary"
                                     >
-                                        <option value="true">تم الحل</option>
-                                        <option value="false">Not Solved</option>
+                                        <option value="true">{t.ui.maintenanceEditor.solved}</option>
+                                        <option value="false">{t.ui.misc.notSolved}</option>
                                     </select>
                                 )}
                             </div>
@@ -432,7 +445,7 @@ const BatchEditModal: React.FC<BatchEditModalProps> = ({
                 confirm is separate and guards the close action. */}
             <ConfirmDialog
                 isOpen={confirmState?.open ?? false}
-                title="تأكيد العملية"
+                title={t.ui.misc.confirmOperation}
                 message={confirmState?.message ?? ''}
                 variant="danger"
                 onConfirm={() => confirmState?.onConfirm()}

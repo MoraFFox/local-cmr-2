@@ -15,6 +15,8 @@ import Avatar from "./Avatar";
 import { StarIcon } from "@heroicons/react/24/solid";
 import CostBreakdownModal from "./CostBreakdownModal";
 import { getVisitZoneFee, getVisitZoneLabel } from "../utils/visitZones";
+import { useT } from "../utils/i18n";
+import type { Translations } from "../utils/arabicTranslations";
 
 interface ReviewStepProps {
   formData: FormData;
@@ -86,14 +88,20 @@ export const getMachineOwnershipStatus = (
     dailyLeaseCost?: number;
   },
   hideCosts = false,
+  t?: Translations,
 ) => {
+  const l10n = t?.ui.records;
   // Mixed machine fleet: each machine carries its own owner status.
   if (entity.hasMultipleMachines === true) {
     const machines = entity.machines || [];
-    if (machines.length === 0) return "ماكينات مختلطة";
+    if (machines.length === 0) {
+      return l10n?.mixedMachines ?? "ماكينات مختلطة";
+    }
     const ours = machines.filter((m) => m.machineOwner !== "client").length;
     const client = machines.filter((m) => m.machineOwner === "client").length;
-    return `ماكينات مختلطة (ميدوز: ${ours}، العميل: ${client})`;
+    return (l10n?.mixedMachinesWithCounts ?? "ماكينات مختلطة (ميدوز: {{ours}}، العميل: {{client}})")
+      .replace("{{ours}}", String(ours))
+      .replace("{{client}}", String(client));
   }
   if (
     entity.usesOurMachines === null ||
@@ -102,14 +110,14 @@ export const getMachineOwnershipStatus = (
     return "Not specified";
   }
   if (entity.usesOurMachines === false) {
-    return "مكينة العميل";
+    return l10n?.clientMachine ?? "مكينة العميل";
   }
   if (entity.usesOurMachines === true) {
     if (entity.machineOwnershipType) {
       const type =
         entity.machineOwnershipType.charAt(0).toUpperCase() +
         entity.machineOwnershipType.slice(1);
-      let status = `مكينتنا (${type})`;
+      let status = (l10n?.ourMachineWithType ?? "مكينتنا ({{type}})").replace("{{type}}", type);
       if (
         !hideCosts &&
         (entity.machineOwnershipType === "leased" ||
@@ -120,7 +128,7 @@ export const getMachineOwnershipStatus = (
       }
       return status;
     }
-    return "مكينتنا (نوع الاستحواذ غير محدد)";
+    return l10n?.ourMachineUnknownType ?? "مكينتنا (نوع الاستحواذ غير محدد)";
   }
   return "Not specified";
 };
@@ -131,6 +139,7 @@ const MaintenanceRecordReview: React.FC<{
   servicesList: Service[];
   isFollowUp?: boolean;
 }> = ({ record, partsList, servicesList, isFollowUp = false }) => {
+  const t = useT();
   if (!record) return null;
 
   const getPartCost = (part: PartRecord): number => {
@@ -215,8 +224,8 @@ const MaintenanceRecordReview: React.FC<{
         )}
       </div>
       <dl className="mt-2 text-xs divide-y divide-hairline">
-        <Detail label="الموظفون" value={record.baristaName} />
-        <Detail label="النوع" value={record.type} />
+        <Detail label={t.ui.details.staff} value={record.baristaName} />
+        <Detail label={t.ui.details.type} value={record.type} />
         <Detail
           label="Daily Lease Cost"
           value={
@@ -232,7 +241,7 @@ const MaintenanceRecordReview: React.FC<{
         {record.hadProblem && (
           <>
             <Detail
-              label="تم حل المشكلة"
+              label={t.ui.details.problemSolved}
               value={record.problemSolved ? "نعم" : "لا"}
             />
             <Detail
@@ -256,7 +265,7 @@ const MaintenanceRecordReview: React.FC<{
         <Detail label="Recommendations" value={record.recommendations} />
         <Detail label="Notes" value={record.notes} />
         <Detail
-          label="الدفع بواسطة"
+          label={t.ui.details.paidBy}
           value={record.paidBy === "company" ? "By Midos" : "By Client"}
         />
 
@@ -403,6 +412,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
   embedded = false,
   cardTitle = "Review Your Submission",
 }) => {
+  const t = useT();
   const [isCostModalOpen, setIsCostModalOpen] = useState(false);
 
   const getPartCost = (part: PartRecord): number => {
@@ -476,10 +486,10 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           Company Details
         </h3>
         <dl className="divide-y divide-hairline">
-          <Detail label="اسم الشركة" value={formData.companyName} />
+          <Detail label={t.ui.details.companyName} value={formData.companyName} />
           <Detail label="Email" value={formData.email} />
-          <Detail label="الرقم الضريبي" value={formData.taxNumber} />
-          <Detail label="الموقع" value={formData.location} />
+          <Detail label={t.ui.details.taxNumber} value={formData.taxNumber} />
+          <Detail label={t.ui.details.location} value={formData.location} />
           <ContactReview contacts={formData.contacts} />
           <Detail
             label="Has Branches"
@@ -488,7 +498,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           {formData.hasBranches === false && (
             <Detail
               label="Using Our Machines"
-              value={getMachineOwnershipStatus(formData)}
+              value={getMachineOwnershipStatus(formData, false, t)}
             />
           )}
         </dl>
@@ -518,12 +528,12 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                     value={branch.branchName || "N/A"}
                   />
                   <Detail label="Email" value={branch.email} />
-                  <Detail label="الرقم الضريبي" value={branch.taxNumber} />
-                  <Detail label="الموقع" value={branch.location} />
+                  <Detail label={t.ui.details.taxNumber} value={branch.taxNumber} />
+                  <Detail label={t.ui.details.location} value={branch.location} />
                   <ContactReview contacts={branch.contacts} />
                   <Detail
                     label="Using Our Machines"
-                    value={getMachineOwnershipStatus(branch)}
+                    value={getMachineOwnershipStatus(branch, false, t)}
                   />
                 </dl>
                 {branch.baristas && branch.baristas.length > 0 && (
@@ -577,7 +587,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
         </h3>
         <dl className="divide-y divide-hairline">
           <Detail
-            label="الموقع"
+            label={t.ui.details.location}
             value={formData.warehouse.location || "Not specified"}
           />
           <ContactReview contacts={formData.warehouse.contacts} />

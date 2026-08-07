@@ -5,7 +5,7 @@ import TechCard from './ui/TechCard';
 import SelectDrawer from './ui/SelectDrawer';
 import TechButton from './ui/TechButton';
 import TechInput from './ui/TechInput';
-import { ar } from '../../utils/arabicTranslations';
+import { useT } from '../../utils/i18n';
 import { useVisitZones } from '../../utils/visitZones';
 
 export interface Step1ContextData {
@@ -32,6 +32,7 @@ const Step1_Context: React.FC<Step1ContextProps> = ({
   loadingCompanies,
   sortedZones,
 }) => {
+  const t = useT();
   const { zones: allZones } = useVisitZones();
   const zones = sortedZones || allZones.map(z => ({ value: z.key, label: z.label }));
   const selectedCompany = companies.find(c => c.id === data.companyId);
@@ -45,15 +46,15 @@ const Step1_Context: React.FC<Step1ContextProps> = ({
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       
       {/* Sector Selection (Company & Branch) */}
-      <TechCard title={ar.tactical.missionSector} icon={<BuildingOfficeIcon />} variant="active">
+      <TechCard title={t.tactical.missionSector} icon={<BuildingOfficeIcon />} variant="active">
         <div className="space-y-4">
              <SelectDrawer 
-                label={ar.step1.companyLabel}
+                label={t.step1.companyLabel}
                 value={data.companyId}
                 options={companies.map(c => ({ value: c.id, label: c.companyName }))}
                 onChange={(val) => onChange({ ...data, companyId: String(val), branchId: null })}
                 searchable
-                placeholder={loadingCompanies ? ar.common.loading : ar.step1.companyPlaceholder}
+                placeholder={loadingCompanies ? t.common.loading : t.step1.companyPlaceholder}
                 disabled={loadingCompanies}
                 icon={<BuildingOfficeIcon className="w-5 h-5" />}
              />
@@ -61,11 +62,11 @@ const Step1_Context: React.FC<Step1ContextProps> = ({
              {data.companyId && (
                 <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                     <SelectDrawer
-                        label={ar.step1.branchLabel}
+                        label={t.step1.branchLabel}
                         value={data.branchId}
                         options={branches.map((b: any) => ({ value: b.id || b.branchId, label: b.branchName || b.name }))}
                         onChange={(val) => onChange({ ...data, branchId: String(val) })}
-                        placeholder={ar.step1.branchPlaceholder}
+                        placeholder={t.step1.branchPlaceholder}
                         icon={<MapPinIcon className="w-5 h-5" />}
                     />
                 </div>
@@ -74,7 +75,7 @@ const Step1_Context: React.FC<Step1ContextProps> = ({
       </TechCard>
 
       {/* Zone Deployment */}
-      <TechCard title={ar.tactical.deploymentZone} icon={<MapPinIcon />}>
+      <TechCard title={t.tactical.deploymentZone} icon={<MapPinIcon />}>
         <div className="grid grid-cols-1 gap-3">
           {zones.map((zone) => (
              <TechButton
@@ -91,7 +92,7 @@ const Step1_Context: React.FC<Step1ContextProps> = ({
       </TechCard>
 
       {/* Operation Timestamp */}
-      <TechCard title={ar.tactical.operationDate} icon={<CalendarIcon />}>
+      <TechCard title={t.tactical.operationDate} icon={<CalendarIcon />}>
           <TechInput 
              type="date"
              value={data.date || new Date().toISOString().split('T')[0]}
@@ -100,11 +101,11 @@ const Step1_Context: React.FC<Step1ContextProps> = ({
       </TechCard>
 
        {/* On-Site Contact (Optional) */}
-       <TechCard title={ar.tactical.onSiteContact} icon={<UserIcon />}>
+       <TechCard title={t.tactical.onSiteContact} icon={<UserIcon />}>
           <div className="space-y-4">
               <TechInput
-                  label={ar.step1.clientBaristaLabel}
-                  placeholder={ar.step1.clientBaristaPlaceholder}
+                  label={t.step1.clientBaristaLabel}
+                  placeholder={t.step1.clientBaristaPlaceholder}
                   value={data.clientBaristaName}
                   onChange={(e) => onChange({ ...data, clientBaristaName: e.target.value })}
                   autoScroll
@@ -116,7 +117,7 @@ const Step1_Context: React.FC<Step1ContextProps> = ({
                   size="lg"
                   showNA
                   showNumeric
-                  label={ar.step1.ratingLabel}
+                  label={t.step1.ratingLabel}
                   className="bg-cream-2 p-4 rounded-xl border border-hairline"
                 />
           </div>

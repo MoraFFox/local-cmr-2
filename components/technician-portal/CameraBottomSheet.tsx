@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { ar } from '../../utils/arabicTranslations';
+import { useLanguage } from '../../utils/LanguageContext';
 import { CameraIcon, PhotoIcon, XMarkIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { ConfirmationDialog } from '../form-ui/SafeModal';
 import { Photo } from './PhotoUpload';
@@ -27,6 +27,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
   maxPhotos = 4,
   hasUnsavedChanges = false,
 }) => {
+  const { t, dir } = useLanguage();
   const beforeCount = photos.filter((p) => p.type === 'before').length;
   const afterCount = photos.filter((p) => p.type === 'after').length;
   const maxPerType = Math.floor(maxPhotos / 2);
@@ -133,11 +134,11 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
       />
 
       {/* Bottom Sheet */}
-      <div className="fixed ltr:inset-x-0 rtl:inset-x-0 bottom-0 z-50 animate-slide-up" dir="rtl">
+      <div className="fixed ltr:inset-x-0 rtl:inset-x-0 bottom-0 z-50 animate-slide-up" dir={dir}>
         {showCloseConfirm && (
           <div className="absolute inset-0 z-20 bg-cream dark:bg-espresso-light rounded-t-2xl p-5">
             <ConfirmationDialog
-              message={ar.common.unsavedChangesMessage}
+              message={t.common.unsavedChangesMessage}
               onConfirm={() => {
                 setShowCloseConfirm(false);
                 onClose();
@@ -155,7 +156,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
           {/* Header */}
           <div className="flex items-center justify-between px-5 pb-4">
             <h3 className="text-lg font-semibold text-primary dark:text-cream">
-              {ar.portal.capturePhoto}
+              {t.portal.capturePhoto}
             </h3>
             <button
               onClick={requestClose}
@@ -175,10 +176,10 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
                   <TrashIcon className="w-6 h-6 text-ember-700 dark:text-ember-300" />
                 </div>
                 <h4 className="text-lg font-semibold text-primary dark:text-cream mb-1">
-                  {ar.portal.resetPhotos}?
+                  {t.portal.resetPhotos}?
                 </h4>
                 <p className="text-sm text-latte dark:text-cream/70">
-                  {ar.common.remove} {photoType === 'before' ? ar.portal.beforeMaintenance : ar.portal.afterMaintenance}
+                  {t.common.remove} {photoType === 'before' ? t.portal.beforeMaintenance : t.portal.afterMaintenance}
                 </p>
               </div>
 
@@ -187,13 +188,13 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
                   onClick={() => setConfirmView(false)}
                   className="py-3 px-4 rounded-xl border border-hairline text-primary dark:text-cream font-semibold text-sm hover:bg-cream-2 dark:hover:bg-chrome-light/50 transition-colors"
                 >
-                  {ar.common.cancel}
+                  {t.common.cancel}
                 </button>
                 <button
                   onClick={confirmClear}
                   className="py-3 px-4 rounded-xl bg-ember-500 hover:bg-ember-700 text-white font-semibold text-sm transition-colors shadow-sm"
                 >
-                  {ar.common.remove}
+                  {t.common.remove}
                 </button>
               </div>
             </div>
@@ -202,7 +203,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
               {/* Photo Type Selector */}
               <div className="px-5 pb-5">
                 <label className="block text-sm font-medium text-primary dark:text-cream mb-3">
-                  {ar.portal.photoType}
+                  {t.portal.photoType}
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
@@ -215,7 +216,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
                         : 'border-hairline text-primary dark:text-cream'
                     } ${!canAddBefore ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    {ar.portal.beforeMaintenance}
+                    {t.portal.beforeMaintenance}
                     <span className="block text-xs font-normal mt-0.5 opacity-70">
                       {beforeCount}/{maxPerType}
                     </span>
@@ -230,7 +231,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
                         : 'border-hairline text-primary dark:text-cream'
                     } ${!canAddAfter ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    {ar.portal.afterMaintenance}
+                    {t.portal.afterMaintenance}
                     <span className="block text-xs font-normal mt-0.5 opacity-70">
                       {afterCount}/{maxPerType}
                     </span>
@@ -246,7 +247,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
                       className="flex items-center gap-2 text-ember-500 hover:text-ember-700 hover:bg-ember-500/10 dark:hover:bg-ember-500/20 py-2 px-4 rounded-lg transition-colors text-sm font-medium"
                     >
                       <TrashIcon className="w-4 h-4" />
-                      {ar.portal.resetPhotos}
+                      {t.portal.resetPhotos}
                     </button>
                   </div>
                 )}
@@ -265,7 +266,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
                   ) : (
                     <CameraIcon className="w-6 h-6" />
                   )}
-                  {isProcessing ? ar.common.loading : ar.portal.capturePhoto}
+                  {isProcessing ? t.common.loading : t.portal.capturePhoto}
                 </button>
 
                 <button
@@ -275,7 +276,7 @@ const CameraBottomSheet: React.FC<CameraBottomSheetProps> = ({
                   className="w-full flex items-center justify-center gap-3 py-4 px-4 min-h-[56px] bg-cream dark:bg-espresso-light hover:bg-cream-2 dark:hover:bg-chrome-light/50 disabled:opacity-50 disabled:cursor-not-allowed text-primary dark:text-cream rounded-xl font-semibold text-base transition-all active:scale-[0.98]"
                 >
                   <PhotoIcon className="w-6 h-6" />
-                  {ar.portal.chooseFromGallery}
+                  {t.portal.chooseFromGallery}
                 </button>
               </div>
             </>

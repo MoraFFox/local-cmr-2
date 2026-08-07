@@ -12,6 +12,7 @@
 import React, { useState, useEffect, useId } from "react";
 import { HelpTooltip } from "../../../components/form-ui/HelpTooltip";
 import PortalSelect from "../../../components/form-ui/PortalSelect";
+import { useT } from "../../../utils/i18n";
 
 interface MachineTypeFieldProps {
   value?: string;
@@ -35,6 +36,7 @@ const MachineTypeField: React.FC<MachineTypeFieldProps> = ({
   dataField,
   helpText,
 }) => {
+  const t = useT();
   const options = React.useMemo(() => {
     const seen = new Set(FIXED_MACHINE_TYPES);
     const saved = knownTypes.filter(
@@ -64,7 +66,7 @@ const MachineTypeField: React.FC<MachineTypeFieldProps> = ({
     <div>
       <div className="flex items-center gap-1.5 mb-1.5">
         <label htmlFor={inputId} className="text-xs sm:text-sm font-medium text-primary">
-          نوع الماكينة (اختياري)
+          {t.ui.wizard.machineTypeLabel}
         </label>
         {helpText && <HelpTooltip text={helpText} variant="inline" size="sm" />}
       </div>
@@ -72,13 +74,13 @@ const MachineTypeField: React.FC<MachineTypeFieldProps> = ({
         id={inputId}
         name={name}
         dataField={dataField}
-        ariaLabel="نوع الماكينة (اختياري)"
-        placeholder="اختر النوع..."
+        ariaLabel={t.ui.wizard.machineTypeLabel}
+        placeholder={t.ui.wizard.chooseTypePlaceholder}
         value={selectValue}
         options={[
-          { value: "", label: "اختر النوع..." },
+          { value: "", label: t.ui.wizard.chooseTypePlaceholder },
           ...options.map((t) => ({ value: t, label: t })),
-          { value: OTHER_TYPE, label: "أخرى (اكتب نوع جديد)" },
+          { value: OTHER_TYPE, label: t.ui.wizard.otherTypeLabel },
         ]}
         onChange={(v) => {
           if (v === OTHER_TYPE) {
@@ -96,7 +98,7 @@ const MachineTypeField: React.FC<MachineTypeFieldProps> = ({
           name={name}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="اكتب نوع الماكينة الجديد..."
+          placeholder={t.ui.wizard.typeNewMachinePlaceholder}
           className="mt-2 w-full ps-3 pe-4 py-3 bg-cream dark:bg-espresso-light text-base text-primary dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary border border-hairline dark:border-hairline"
         />
       )}

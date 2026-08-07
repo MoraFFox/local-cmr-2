@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
+import { useT } from '../utils/i18n';
 
 export interface Toast {
   id: string;
@@ -18,6 +19,7 @@ interface ToastContextType {
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const t = useT();
   const [toasts, setToasts] = useState<Toast[]>([]);
   const timeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
@@ -66,7 +68,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {children}
       {/* Toast Container */}
       <div
-        className="fixed top-4 start-4 z-50 flex flex-col gap-2"
+        className="fixed top-4 start-4 z-[10000] flex flex-col gap-2"
         aria-live="polite"
         aria-atomic="true"
       >
@@ -120,7 +122,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               <button
                 onClick={() => removeToast(toast.id)}
                 className="flex-shrink-0 p-1 rounded hover:bg-ink/10 transition-colors text-latte hover:text-primary"
-                aria-label="إغلاق"
+                aria-label={t.ui.dateRange.close}
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />

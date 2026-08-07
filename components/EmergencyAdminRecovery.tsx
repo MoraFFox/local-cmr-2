@@ -220,7 +220,7 @@ const EmergencyAdminRecovery: React.FC<EmergencyAdminRecoveryProps> = ({
                   type="text"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  placeholder="اسم المدير"
+                  placeholder={t.name}
                   className="w-full pe-14 ps-4 py-3 rounded-lg bg-cream dark:bg-espresso-light border border-hairline dark:border-hairline text-primary dark:text-white focus:outline-none focus:border-ember-500 focus:ring-2 focus:ring-ember-500/20"
                   dir={lang === "ar" ? "rtl" : "ltr"}
                 />

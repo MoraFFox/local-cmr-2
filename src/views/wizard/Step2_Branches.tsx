@@ -27,14 +27,14 @@ export const Step2_Branches: React.FC<WizardStepProps> = ({
   if (formData.hasBranches !== true) return null;
 
   return (
-    <Card title="تفاصيل الفرع">
+    <Card title={t.ui.wizard.branchDetailsTitle}>
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-2">
-          <h3 className="text-xl font-bold text-primary tracking-tight">الفروع</h3>
+          <h3 className="text-xl font-bold text-primary tracking-tight">{t.ui.wizard.branchesTitle}</h3>
           <HelpTooltip text={t.tooltips.branchDetails} />
         </div>
         <Button onClick={() => actions.addListItem("branches")}>
-          <PlusCircleIcon className="w-5 h-5" /> إضافة فرع
+          <PlusCircleIcon className="w-5 h-5" /> {t.ui.wizard.addBranch}
         </Button>
       </div>
       <div className="space-y-4">
@@ -57,10 +57,10 @@ export const Step2_Branches: React.FC<WizardStepProps> = ({
           ))
         ) : (
           <EmptyState variant="inline" icon={<BuildingOffice2Icon />}
-            title="لم تتم إضافة فروع" message="اضغط الزر لإضافة أول فرع."
+            title={t.ui.wizard.noBranchesTitle} message={t.ui.wizard.noBranchesMsg}
           >
             <Button variant="secondary" onClick={() => actions.addListItem("branches")}>
-              <PlusCircleIcon className="w-4 h-4" /> إضافة فرع
+              <PlusCircleIcon className="w-4 h-4" /> {t.ui.wizard.addBranch}
             </Button>
           </EmptyState>
         )}

@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { MaintenanceRecord } from '../types';import {
+import { MaintenanceRecord } from '../types';
+import type { Translations } from '../utils/i18n';
+import { useT } from '../utils/i18n';
+import {
   PencilIcon, 
   CheckCircleIcon,
   CalendarIcon,
@@ -57,12 +60,12 @@ const createDateFormatter = () => {
 const formatDate = createDateFormatter();
 
 // Hoisted so both the desktop table row and the mobile card reuse them.
-const getStatusBadge = (rec: MaintenanceRecord) => {
+const getStatusBadge = (rec: MaintenanceRecord, t: Translations) => {
   if (rec.isLogisticsVisit) {
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-300/60 dark:border-amber-500/40">
         <TruckIcon className="w-3 h-3" />
-        Logistics
+        {t.ui.records.logisticsBadge}
       </span>
     );
   }
@@ -70,21 +73,21 @@ const getStatusBadge = (rec: MaintenanceRecord) => {
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-leaf-50 text-leaf-700 dark:bg-leaf-500/10 dark:text-leaf-300">
         <CheckCircleIcon className="w-3 h-3" />
-        Solved
+        {t.ui.records.solvedBadge}
       </span>
     );
   } else if (rec.hadProblem) {
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-ember-50 text-ember-700 dark:bg-ember-500/10 dark:text-ember-300">
         <ExclamationCircleIcon className="w-3 h-3" />
-        Problem
+        {t.ui.records.problemBadge}
       </span>
     );
   }
   return (
     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream text-primary dark:bg-espresso-light dark:text-latte/70">
       <WrenchIcon className="w-3 h-3" />
-      Routine
+      {t.ui.records.routineBadge}
     </span>
   );
 };
@@ -122,6 +125,7 @@ const SortableHeader: React.FC<{
 interface MaintenanceRecordRowProps {
   record: MaintenanceRecord;
   actualIndex: number;
+  t: Translations;
   onEdit: (record: MaintenanceRecord, index: number) => void;
   onQuickUpdate: (recordId: MaintenanceRecord['id'], updates: Partial<MaintenanceRecord>) => void;
   onDelete?: (recordId: MaintenanceRecord['id'], recordIndex: number) => void;
@@ -130,6 +134,7 @@ interface MaintenanceRecordRowProps {
 const MaintenanceRecordRow = React.memo(({
   record,
   actualIndex,
+  t,
   onEdit,
   onQuickUpdate,
   onDelete
@@ -162,7 +167,7 @@ const MaintenanceRecordRow = React.memo(({
       </td>
 
       <td className="px-6 py-4 whitespace-nowrap">
-        {getStatusBadge(record)}
+        {getStatusBadge(record, t)}
       </td>
 
       <td className="px-6 py-4 whitespace-nowrap">
@@ -172,9 +177,9 @@ const MaintenanceRecordRow = React.memo(({
       <td className="px-6 py-4">
         <div className="text-sm text-primary dark:text-latte">
           {record.servicesPerformed.length > 0 ? (
-            <span>{record.servicesPerformed.length} service(s)</span>
+            <span>{t.ui.records.servicesCount.replace('{{count}}', String(record.servicesPerformed.length))}</span>
           ) : (
-            <span className="text-latte">No services</span>
+            <span className="text-latte">{t.ui.records.noServices}</span>
           )}
         </div>
       </td>
@@ -195,7 +200,7 @@ const MaintenanceRecordRow = React.memo(({
           <button
             onClick={() => onEdit(record, actualIndex)}
             className="p-2 text-latte hover:text-primary dark:hover:text-primary-400 hover:bg-cream-2 dark:hover:bg-primary/10 rounded-lg transition-colors"
-            title="تعديل السجل"
+            title={t.ui.records.editRecord}
           >
             <PencilIcon className="w-5 h-5" />
           </button>
@@ -212,6 +217,7 @@ MaintenanceRecordRow.displayName = 'MaintenanceRecordRow';
 const MaintenanceRecordCardMobile: React.FC<MaintenanceRecordRowProps> = ({
   record,
   actualIndex,
+  t,
   onEdit,
   onQuickUpdate,
   onDelete
@@ -227,7 +233,7 @@ const MaintenanceRecordCardMobile: React.FC<MaintenanceRecordRowProps> = ({
           {formatDate(record.maintenanceDate)}
         </span>
       </div>
-      {getStatusBadge(record)}
+      {getStatusBadge(record, t)}
     </div>
 
     {/* Middle: technician → client */}
@@ -251,13 +257,13 @@ const MaintenanceRecordCardMobile: React.FC<MaintenanceRecordRowProps> = ({
           {renderStars(record.visitRating)}
           <span className="text-xs text-latte dark:text-latte">
             {record.servicesPerformed.length > 0
-              ? `${record.servicesPerformed.length} service(s)`
-              : 'No services'}
+              ? t.ui.records.servicesCount.replace('{{count}}', String(record.servicesPerformed.length))
+              : t.ui.records.noServices}
           </span>
         </div>
         {record.lastModified && (
           <span className="text-[10px] text-latte/70 dark:text-latte/70">
-            Edited {formatDate(record.lastModified)}
+            {t.ui.records.editedPrefix.replace('{{date}}', formatDate(record.lastModified))}
           </span>
         )}
       </div>
@@ -270,8 +276,8 @@ const MaintenanceRecordCardMobile: React.FC<MaintenanceRecordRowProps> = ({
         <button
           onClick={() => onEdit(record, actualIndex)}
           className="p-2 text-latte hover:text-primary dark:hover:text-primary-400 hover:bg-cream-2 dark:hover:bg-primary/10 rounded-lg transition-colors"
-          title="تعديل السجل"
-          aria-label="Edit record"
+          title={t.ui.records.editRecord}
+          aria-label={t.ui.records.editRecord}
         >
           <PencilIcon className="w-5 h-5" />
         </button>
@@ -288,6 +294,7 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
   onQuickUpdate,
   onDelete
 }) => {
+  const t = useT();
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState<SortField>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -352,7 +359,7 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
             {branchName}
           </h3>
           <span className="text-xs text-latte dark:text-latte">
-            Click a column header to sort • {records.length} record{records.length !== 1 ? 's' : ''}
+            {t.ui.records.sortHint} • {t.ui.records.recordCount.replace('{{count}}', String(records.length))}
           </span>
         </div>
       </div>
@@ -363,8 +370,8 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
         {paginatedRecords.length === 0 ? (
           <EmptyState
             icon={<WrenchScrewdriverIcon className="w-8 h-8" />}
-            title="لا يوجد سجل صيانة"
-            message="لم يتم العثور على سجلات صيانة."
+            title={t.ui.records.noRecordsTitle}
+            message={t.ui.records.noRecordsMsg}
           />
         ) : (
           paginatedRecords.map((record) => {
@@ -374,6 +381,7 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
                 key={record.id}
                 record={record}
                 actualIndex={actualIndex}
+                t={t}
                 onEdit={onEdit}
                 onQuickUpdate={onQuickUpdate}
                 onDelete={onDelete}
@@ -388,17 +396,17 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
         <table className="w-full">
           <thead className="bg-cream dark:bg-espresso/50">
             <tr>
-              <SortableHeader field="date" label="Date" {...{ sortBy, sortOrder, sortArrow, handleSort }} />
-              <SortableHeader field="baristaName" label="Technician" {...{ sortBy, sortOrder, sortArrow, handleSort }} />
+              <SortableHeader field="date" label={t.ui.records.colDate} {...{ sortBy, sortOrder, sortArrow, handleSort }} />
+              <SortableHeader field="baristaName" label={t.ui.records.colTechnician} {...{ sortBy, sortOrder, sortArrow, handleSort }} />
               <th className="px-6 py-3 text-start text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
-                Client
+                {t.ui.records.colClient}
               </th>
-              <SortableHeader field="status" label="Status" {...{ sortBy, sortOrder, sortArrow, handleSort }} />
-              <SortableHeader field="rating" label="Rating" {...{ sortBy, sortOrder, sortArrow, handleSort }} />
-              <SortableHeader field="serviceCount" label="Services" {...{ sortBy, sortOrder, sortArrow, handleSort }} />
-              <SortableHeader field="lastModified" label="Modified" {...{ sortBy, sortOrder, sortArrow, handleSort }} />
+              <SortableHeader field="status" label={t.ui.records.colStatus} {...{ sortBy, sortOrder, sortArrow, handleSort }} />
+              <SortableHeader field="rating" label={t.ui.records.colRating} {...{ sortBy, sortOrder, sortArrow, handleSort }} />
+              <SortableHeader field="serviceCount" label={t.ui.records.colServices} {...{ sortBy, sortOrder, sortArrow, handleSort }} />
+              <SortableHeader field="lastModified" label={t.ui.records.colModified} {...{ sortBy, sortOrder, sortArrow, handleSort }} />
               <th className="px-6 py-3 text-end text-xs font-medium text-latte dark:text-latte uppercase tracking-wider">
-                Actions
+                {t.ui.records.colActions}
               </th>
             </tr>
           </thead>
@@ -408,8 +416,8 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
                 <td colSpan={8} className="py-8">
                   <EmptyState 
                     icon={<WrenchScrewdriverIcon className="w-8 h-8" />} 
-                    title="لا يوجد سجل صيانة" 
-                    message="لم يتم العثور على سجلات صيانة." 
+                    title={t.ui.records.noRecordsTitle} 
+                    message={t.ui.records.noRecordsMsg} 
                   />
                 </td>
               </tr>
@@ -422,6 +430,7 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
                     key={record.id}
                     record={record}
                     actualIndex={actualIndex}
+                    t={t}
                     onEdit={onEdit}
                     onQuickUpdate={onQuickUpdate}
                     onDelete={onDelete}
@@ -437,7 +446,10 @@ const MaintenanceRecordList: React.FC<MaintenanceRecordListProps> = ({
         <div className="px-6 py-4 border-t border-hairline dark:border-hairline bg-cream dark:bg-espresso/50">
           <div className="flex items-center justify-between">
             <div className="text-sm text-latte dark:text-latte">
-              Showing {startIndex + 1} to {Math.min(startIndex + ITEMS_PER_PAGE, sortedRecords.length)} of {sortedRecords.length} records
+              {t.ui.records.showingRange
+                .replace('{{from}}', String(startIndex + 1))
+                .replace('{{to}}', String(Math.min(startIndex + ITEMS_PER_PAGE, sortedRecords.length)))
+                .replace('{{total}}', String(sortedRecords.length))}
             </div>
             
             <div className="flex items-center gap-2">

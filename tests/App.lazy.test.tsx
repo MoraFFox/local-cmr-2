@@ -391,7 +391,7 @@ describe('App — Lazy Loading & Suspense', () => {
       mockSavedDrafts([savedDraft]);
       renderApp('/');
       await screen.findByRole('button', { name: /استئناف المسودة/ });
-      fireEvent.click(screen.getByRole('button', { name: 'إغلاق' }));
+      fireEvent.click(screen.getByRole('button', { name: /تجاهل المسودة/ }));
       await waitFor(() => {
         expect(screen.queryByRole('button', { name: /استئناف المسودة/ })).not.toBeInTheDocument();
       });
@@ -402,7 +402,7 @@ describe('App — Lazy Loading & Suspense', () => {
       const first = renderApp('/');
       const fab = await screen.findByRole('button', { name: /استئناف المسودة/ });
       fireEvent.click(fab);
-      fireEvent.click(screen.getByRole('button', { name: 'إغلاق' }));
+      fireEvent.click(screen.getByRole('button', { name: /تجاهل المسودة/ }));
 
       // The dismissal must be persisted to localStorage, keyed by draft id.
       const stored = JSON.parse(localStorage.getItem('cmr-dismissed-drafts') || '[]') as string[];
@@ -434,7 +434,7 @@ describe('App — Lazy Loading & Suspense', () => {
       mockSavedDrafts([savedDraft]);
       renderApp('/');
       await screen.findByRole('button', { name: /استئناف المسودة/ });
-      fireEvent.click(screen.getByRole('button', { name: 'إغلاق' }));
+      fireEvent.click(screen.getByRole('button', { name: /تجاهل المسودة/ }));
 
       // Dismissed: FAB hidden, draft id persisted, undo toast fired.
       await waitFor(() => {

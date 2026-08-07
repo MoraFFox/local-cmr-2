@@ -11,7 +11,7 @@ import TechnicianLayout from "./ui/TechnicianLayout";
 import TechnicianFooter from "./TechnicianFooter";
 import FloatingCameraFAB from "./FloatingCameraFAB";
 import CameraBottomSheet from "./CameraBottomSheet";
-import { ar } from "../../utils/arabicTranslations";
+import { useT } from "../../utils/i18n";
 import { supabase } from "../../supabaseClient";
 import { logger } from "../../utils/logger";
 import { partsList, servicesList, problemCategories } from "../../constants";
@@ -43,17 +43,12 @@ interface CompanyRow {
   };
 }
 
-const steps = [
-  { id: 1, name: ar.steps.step1 },
-  { id: 2, name: ar.steps.step2 },
-  { id: 3, name: ar.steps.step3 },
-];
-
 const TechnicianPortal: React.FC<TechnicianPortalProps> = ({
   onBackToMain,
 }) => {
   const { technician, isAuthenticated, isLoading, authBootstrapError, retryAuthBootstrap, logout } = useTechnicianAuth();
   const { showToast } = useToast();
+  const t = useT();
 
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
 
@@ -112,7 +107,7 @@ const TechnicianPortal: React.FC<TechnicianPortalProps> = ({
       
       // Auto-advance to review step
       setCurrentStep(3);
-      showToast("تم ملء بيانات التقرير التجريبية", "success");
+      showToast(t.ui.portal.mockTechnicianToast, "success");
     };
     window.addEventListener('MOCK_TECHNICIAN_DATA', handleMockData);
     return () => window.removeEventListener('MOCK_TECHNICIAN_DATA', handleMockData);
@@ -302,33 +297,33 @@ const TechnicianPortal: React.FC<TechnicianPortalProps> = ({
   const getValidationError = useCallback((): string | null => {
     switch (currentStep) {
       case 1:
-        if (!step1Data.companyId) return ar.errors.selectCompany;
-        if (!step1Data.branchId) return ar.errors.selectBranch;
-        if (!step1Data.visitZone) return ar.errors.selectZone;
+        if (!step1Data.companyId) return t.errors.selectCompany;
+        if (!step1Data.branchId) return t.errors.selectBranch;
+        if (!step1Data.visitZone) return t.errors.selectZone;
         return null;
       case 2: {
         if (step2Data.visitType === 'logistics') return null;
         if (step2Data.visitType === 'problem') {
           if (step2Data.problems.length === 0 && step2Data.servicesPerformed.length === 0) {
-            return ar.errors.selectProblems;
+            return t.errors.selectProblems;
           }
         } else {
           if (step2Data.servicesPerformed.length === 0) {
-            return ar.errors.selectServices;
+            return t.errors.selectServices;
           }
         }
-        if (!step2Data.photos.some(p => p.type === 'before')) return ar.errors.requireBeforePhoto;
-        if (!step2Data.photos.some(p => p.type === 'after')) return ar.errors.requireAfterPhoto;
-        if (!step2Data.clientSupervisorName?.trim()) return ar.errors.requireSupervisorName;
-        if (!step2Data.clientSupervisorPhone?.trim()) return ar.errors.requireSupervisorPhone;
+        if (!step2Data.photos.some(p => p.type === 'before')) return t.errors.requireBeforePhoto;
+        if (!step2Data.photos.some(p => p.type === 'after')) return t.errors.requireAfterPhoto;
+        if (!step2Data.clientSupervisorName?.trim()) return t.errors.requireSupervisorName;
+        if (!step2Data.clientSupervisorPhone?.trim()) return t.errors.requireSupervisorPhone;
         return null;
       }
       case 3: {
         if (step2Data.visitType === 'logistics') return null;
-        if (!step2Data.photos.some(p => p.type === 'before')) return ar.errors.requireBeforePhoto;
-        if (!step2Data.photos.some(p => p.type === 'after')) return ar.errors.requireAfterPhoto;
-        if (!step2Data.clientSupervisorName?.trim()) return ar.errors.requireSupervisorName;
-        if (!step2Data.clientSupervisorPhone?.trim()) return ar.errors.requireSupervisorPhone;
+        if (!step2Data.photos.some(p => p.type === 'before')) return t.errors.requireBeforePhoto;
+        if (!step2Data.photos.some(p => p.type === 'after')) return t.errors.requireAfterPhoto;
+        if (!step2Data.clientSupervisorName?.trim()) return t.errors.requireSupervisorName;
+        if (!step2Data.clientSupervisorPhone?.trim()) return t.errors.requireSupervisorPhone;
         return null;
       }
       default:
@@ -360,10 +355,10 @@ const TechnicianPortal: React.FC<TechnicianPortalProps> = ({
     const afterPhotos = step2Data.photos.filter(p => p.type === 'after');
 
     const errors: string[] = [];
-    if (!isLogisticsVisit && beforePhotos.length === 0) errors.push('صورة قبل الصيانة مطلوبة');
-    if (!isLogisticsVisit && afterPhotos.length === 0) errors.push('صورة بعد الصيانة مطلوبة');
-    if (!isLogisticsVisit && !step2Data.clientSupervisorName?.trim()) errors.push('اسم مشرف العميل مطلوب');
-    if (!isLogisticsVisit && !step2Data.clientSupervisorPhone?.trim()) errors.push('رقم هاتف المشرف مطلوب');
+    if (!isLogisticsVisit && beforePhotos.length === 0) errors.push(t.ui.portal.beforePhotoRequired);
+    if (!isLogisticsVisit && afterPhotos.length === 0) errors.push(t.ui.portal.afterPhotoRequired);
+    if (!isLogisticsVisit && !step2Data.clientSupervisorName?.trim()) errors.push(t.ui.portal.supervisorNameRequired);
+    if (!isLogisticsVisit && !step2Data.clientSupervisorPhone?.trim()) errors.push(t.ui.portal.supervisorPhoneRequired);
 
     if (errors.length > 0) {
       showToast(errors.join('\n'), 'error');
@@ -518,7 +513,7 @@ const TechnicianPortal: React.FC<TechnicianPortalProps> = ({
       const errMsg = error?.message || error?.statusText || String(error);
       logger.error("Error submitting maintenance record", error, "submission");
       logger.error("Error submitting maintenance record", error, "submission");
-      showToast(`حدث خطأ أثناء إرسال التقرير: ${errMsg}`, 'error');
+      showToast(t.ui.portal.reportSubmitError.replace('{{msg}}', errMsg), 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -530,9 +525,9 @@ const TechnicianPortal: React.FC<TechnicianPortalProps> = ({
 
   // Define step Title dynamically
   const stepTitles = {
-    1: ar.tactical.missionIntel,
-    2: ar.tactical.fieldOps,
-    3: ar.tactical.debrief,
+    1: t.tactical.missionIntel,
+    2: t.tactical.fieldOps,
+    3: t.tactical.debrief,
   };
 
   return (

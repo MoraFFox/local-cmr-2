@@ -1,7 +1,8 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen } from './testUtils';
 import Button from '../components/ui/Button';
+import { ar } from '../utils/arabicTranslations';
 
 describe('Button component', () => {
   it('renders children correctly', () => {
@@ -21,7 +22,7 @@ describe('Button component', () => {
 
   it('shows loading state and disables button', () => {
     render(<Button isLoading>Submit</Button>);
-    expect(screen.getByText('جارٍ التحميل...')).toBeInTheDocument();
+    expect(screen.getByText(ar.common.loading)).toBeInTheDocument();
     expect(screen.getByRole('button')).toBeDisabled();
   });
 

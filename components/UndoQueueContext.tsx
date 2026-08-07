@@ -9,6 +9,7 @@
 import React, { createContext, useContext, useCallback, useRef, useState } from 'react';
 import { useToast } from './ToastContext';
 import { announce } from '../utils/ariaAnnouncer';
+import { useT } from '../utils/i18n';
 
 interface UndoQueueContextValue {
   /** Queue a delete operation. Returns the queue item id. */
@@ -18,6 +19,7 @@ interface UndoQueueContextValue {
 const UndoQueueContext = createContext<UndoQueueContextValue | undefined>(undefined);
 
 export const UndoQueueProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const t = useT();
   const { showToast, removeToast } = useToast();
   const [pending, setPending] = useState<Record<string, { timeoutId: ReturnType<typeof setTimeout>; toastId: string }>>({});
   const pendingRef = useRef<Record<string, { timeoutId: ReturnType<typeof setTimeout>; toastId: string }>>({});
@@ -38,7 +40,7 @@ export const UndoQueueProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       try {
         clearTimeout(item.timeoutId);
         onUndo?.();
-        announce('تم التراجع عن الحذف');
+        announce(t.ui.misc.undoAnnouncement);
       } finally {
         removeToast(item.toastId);
         setPending(prev => {
@@ -65,16 +67,16 @@ export const UndoQueueProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const toastLabel = label.replace(/[.!?]\s*$/, '').trim();
 
     const toastId = showToast(
-      `${toastLabel}. Undo within ${timeout / 1000}s.`,
+      t.ui.misc.undoWithinSeconds.replace('{{label}}', toastLabel).replace('{{seconds}}', String(timeout / 1000)),
       'warning',
       0,
       <button
         type="button"
         onClick={undo}
         className="px-2.5 py-1 bg-white text-amber-600 text-xs font-bold rounded-md hover:bg-amber-100 transition-colors"
-        aria-label="Undo"
+        aria-label={t.ui.misc.undo}
       >
-        تراجع
+        {t.ui.misc.undo}
       </button>
     );
 

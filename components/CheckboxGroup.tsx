@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { ar } from '../utils/arabicTranslations';
+import { useT } from '../utils/i18n';
 import { PlusCircleIcon, TrashIcon, MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, ClockIcon, BookmarkIcon } from '@heroicons/react/24/outline';
 import TechInput from './technician-portal/ui/TechInput'; // Reuse our new input
 import { useSearchRefocus } from '../hooks/useSearchRefocus';
@@ -65,6 +65,7 @@ function addToCustomHistory(problems: string[]): void {
 
 const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValues = [], onChange, predefinedProblems, onAddCustom, existingCategories = [] }) => {
   const { showToast } = useToast();
+  const t = useT();
 
   const [customProblems, setCustomProblems] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -105,7 +106,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
     useEffect(() => {
       const count = (selectedValues || []).length;
       if (count > 0) {
-        announce(`تم تحديد ${count} ${count === 1 ? 'مشكلة' : 'مشاكل'}`);
+        announce(t.selectors.selectedProblems.replace('{{count}}', String(count)));
       }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [(selectedValues || []).length]);
@@ -367,7 +368,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
             {/* Search */}
             <div className="relative" ref={searchInputRef}>
                 <TechInput 
-                    placeholder={ar.selectors.searchProblems}
+                    placeholder={t.selectors.searchProblems}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     icon={<MagnifyingGlassIcon className="w-5 h-5 text-latte" />}
@@ -378,7 +379,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
             {!searchTerm && (
                 <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
                     <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-3">
-                        Common
+                        {t.selectors.common}
                     </h3>
                     <div className="flex flex-wrap gap-2">
                         {commonOptions.map(option => {
@@ -428,7 +429,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="text-xs text-latte hidden sm:inline">
-                                            {searchTerm ? `${category.options.length} results` : `${category.options.length} options`}
+                                            {searchTerm ? t.selectors.resultsCount.replace('{{count}}', String(category.options.length)) : t.selectors.optionsCount.replace('{{count}}', String(category.options.length))}
                                         </span>
                                         {!searchTerm && (
                                             isExpanded ? <ChevronUpIcon className="w-4 h-4 text-latte" /> : <ChevronDownIcon className="w-4 h-4 text-latte" />
@@ -446,7 +447,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                                                 className="text-xs font-medium text-primary hover:underline disabled:opacity-50"
                                                 disabled={allSelected}
                                             >
-                                                Select All
+                                                {t.selectors.selectAll}
                                             </button>
                                             {selectedInCategory > 0 && (
                                                 <button
@@ -454,7 +455,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                                                     onClick={() => deselectAllInCategory(category)}
                                                     className="text-xs font-medium text-latte hover:text-ember-500 hover:underline"
                                                 >
-                                                    Clear
+                                                    {t.selectors.clear}
                                                 </button>
                                             )}
                                         </div>
@@ -501,7 +502,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                 </div>
             ) : (
                  <div className="text-center py-12 bg-cream-2 rounded-xl border border-dashed border-hairline">
-                    <p className="text-latte">{ar.selectors.noProblemsMatch} &quot;{searchTerm}&quot;.</p>
+                    <p className="text-latte">{t.selectors.noProblemsMatch} &quot;{searchTerm}&quot;.</p>
                 </div>
             )}
 
@@ -510,7 +511,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                 <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
                     <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-3 flex items-center gap-2">
                         <ClockIcon className="w-4 h-4" />
-                        {ar.selectors.useAgain}
+                        {t.selectors.useAgain}
                     </h3>
                     <div className="flex flex-wrap gap-2">
                         {recentCustomProblems.map(problem => (
@@ -530,7 +531,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
             {/* Custom Problems */}
             <div className="bg-cream-2 border border-hairline rounded-xl p-4">
                 <h4 className="text-sm font-bold text-text uppercase tracking-wider mb-4">
-                    {ar.selectors.customProblems}
+                    {t.selectors.customProblems}
                 </h4>
 
                 <div className="space-y-3">
@@ -551,7 +552,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                                         onFocus={() => handleCustomInputFocus(index)}
                                         onKeyDown={(e) => handleCustomInputKeyDown(index, e, allSuggestions.length)}
                                         className="block w-full px-4 py-3 bg-cream text-text rounded-lg border border-hairline focus:border-primary focus:ring-1 focus:ring-primary/50 placeholder-latte outline-none transition-all"
-                                        placeholder={ar.selectors.problemPlaceholder}
+                                        placeholder={t.selectors.problemPlaceholder}
                                         role="combobox"
                                         aria-expanded={hasSuggestions && hasAnySuggestions}
                                         aria-controls={hasSuggestions && hasAnySuggestions ? suggestionListId.current : undefined}
@@ -570,12 +571,12 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                                             className="absolute z-50 w-full mt-1 bg-paper border border-hairline rounded-lg shadow-lg max-h-60 overflow-auto"
                                         >
                                             {/* Similar predefined problems */}
-                                            {suggestions.similar.length > 0 && (
+                                            {suggestions.similt.length > 0 && (
                                                 <>
                                                     <div className="px-3 py-2 text-[10px] font-bold text-latte uppercase tracking-wider bg-cream-2/50 border-b border-hairline">
-                                                        {ar.selectors.similarPredefinedProblems}
+                                                        {t.selectors.similarPredefinedProblems}
                                                     </div>
-                                                    {suggestions.similar.map((s, sIdx) => (
+                                                    {suggestions.similt.map((s, sIdx) => (
                                                         <button
                                                             key={`similar-${s}`}
                                                             id={`${suggestionListId.current}-option-${sIdx}`}
@@ -601,10 +602,10 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                                             {suggestions.previous.length > 0 && (
                                                 <>
                                                     <div className="px-3 py-2 text-[10px] font-bold text-latte uppercase tracking-wider bg-cream-2/50 border-b border-hairline">
-                                                        {ar.selectors.previousCustomProblems}
+                                                        {t.selectors.previousCustomProblems}
                                                     </div>
                                                     {suggestions.previous.map((s, sIdx) => {
-                                                        const globalIdx = suggestions.similar.length + sIdx;
+                                                        const globalIdx = suggestions.similt.length + sIdx;
                                                         return (
                                                             <button
                                                                 key={`prev-${s}`}
@@ -644,7 +645,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                                         }
                                     }}
                                     disabled={!problem.trim()}
-                                    title="حفظ في الكتالوج"
+                                    title={t.selectors.saveToCatalog}
                                     className="p-3 text-latte hover:text-primary hover:bg-primary/10 rounded-lg transition-colors flex-shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
                                 >
                                     <BookmarkIcon className="w-5 h-5" />
@@ -658,7 +659,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                         className="w-full py-3 border-2 border-dashed border-hairline rounded-lg text-latte hover:text-text hover:border-primary hover:bg-cream transition-all flex items-center justify-center gap-2 font-medium"
                     >
                         <PlusCircleIcon className="w-5 h-5"/>
-                        {ar.selectors.addCustomProblem}
+                        {t.selectors.addCustomProblem}
                     </button>
                     <AddCustomCatalogItemDialog
                         isOpen={isAddCustomDialogOpen}
@@ -666,7 +667,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({ categories, selectedValue
                         onSubmit={async (item) => {
                           if (!onAddCustom) return;
                           const saved = await onAddCustom(item);
-                          showToast('تم حفظ المشكلة في الكتالوج', 'success');
+                          showToast(t.selectors.problemSavedToast, 'success');
                           const value = saved?.value ?? item.value;
                           const current = selectedValuesRef.current || [];
                           if (value && !current.includes(value)) {

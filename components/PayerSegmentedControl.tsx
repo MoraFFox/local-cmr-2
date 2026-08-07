@@ -1,5 +1,5 @@
 import React from 'react';
-import { ar } from '../utils/arabicTranslations';
+import { useT } from '../utils/i18n';
 import { HelpTooltip } from './form-ui/HelpTooltip';
 
 interface PayerSegmentedControlProps {
@@ -18,6 +18,7 @@ const PayerSegmentedControl: React.FC<PayerSegmentedControlProps> = ({
   disabled = false,
   helpText,
 }) => {
+  const t = useT();
   const sizeClasses = {
     sm: 'text-xs py-1 px-3',
     md: 'text-sm py-2 px-4',
@@ -56,7 +57,7 @@ const PayerSegmentedControl: React.FC<PayerSegmentedControlProps> = ({
             : 'bg-transparent text-latte hover:text-text'
         }`}
       >
-        {ar.payerFirstUI.midosPays}
+        {t.payerFirstUI.midosPays}
       </button>
       <button
         type="button"
@@ -70,7 +71,7 @@ const PayerSegmentedControl: React.FC<PayerSegmentedControlProps> = ({
             : 'bg-transparent text-latte hover:text-text'
         }`}
       >
-        {ar.payerFirstUI.clientPays}
+        {t.payerFirstUI.clientPays}
       </button>
       </div>
     </div>

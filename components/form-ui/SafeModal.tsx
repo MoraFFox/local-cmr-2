@@ -25,7 +25,7 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { createPortal } from 'react-dom';
-import { ar } from '../../utils/arabicTranslations';
+import { useT } from '../../utils/i18n';
 
 interface SafeModalProps {
   /** Whether modal is open */
@@ -144,13 +144,13 @@ export const SafeModal: React.FC<SafeModalProps> = ({
   children,
   type = 'form',
   hasUnsavedChanges = false,
-  unsavedMessage = ar.common.unsavedChangesMessage,
+  unsavedMessage,
   size = 'md',
   showCloseButton = true,
   closeOnBackdropClick,
   className = '',
   ariaLabel,
-  closeLabel = 'Close modal',
+  closeLabel,
   renderHeader,
   renderFooter,
   bodyClassName = '',
@@ -159,6 +159,10 @@ export const SafeModal: React.FC<SafeModalProps> = ({
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  const t = useT();
+  // Reactive fallbacks for props whose old defaults were hardcoded English.
+  const resolvedUnsavedMessage = unsavedMessage ?? t.common.unsavedChangesMessage;
+  const resolvedCloseLabel = closeLabel ?? t.common.close;
 
   // Override backdrop click behavior based on type
   const shouldCloseOnBackdrop = closeOnBackdropClick !== undefined
@@ -276,7 +280,7 @@ export const SafeModal: React.FC<SafeModalProps> = ({
                 type="button"
                 onClick={handleClose}
                 className="p-2 text-latte hover:text-primary rounded-lg hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                aria-label={closeLabel}
+                aria-label={resolvedCloseLabel}
               >
                 <XMarkIcon className="w-5 h-5" />
               </button>
@@ -289,7 +293,7 @@ export const SafeModal: React.FC<SafeModalProps> = ({
           showConfirm ? (
             <div className="flex-1 px-6 py-4">
               <ConfirmationDialog
-                message={unsavedMessage}
+                message={resolvedUnsavedMessage}
                 onConfirm={handleConfirmClose}
                 onCancel={handleCancelConfirm}
               />
@@ -303,7 +307,7 @@ export const SafeModal: React.FC<SafeModalProps> = ({
           <div className={`flex-1 overflow-y-auto px-6 py-4 ${bodyClassName}`}>
             {showConfirm ? (
               <ConfirmationDialog
-                message={unsavedMessage}
+                message={resolvedUnsavedMessage}
                 onConfirm={handleConfirmClose}
                 onCancel={handleCancelConfirm}
               />
@@ -331,7 +335,7 @@ export const SafeModal: React.FC<SafeModalProps> = ({
                   clipRule="evenodd"
                 />
               </svg>
-              {ar.common.unsavedChangesWarning}
+              {t.common.unsavedChangesWarning}
             </p>
           </div>
         )}
@@ -358,6 +362,7 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   onConfirm,
   onCancel
 }) => {
+  const t = useT();
   return (
     <div className="space-y-4 py-4">
       <div className="flex ltr:items-start rtl:items-end gap-3">
@@ -372,7 +377,7 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
         </div>
 
         <div className="flex-1">
-          <h3 className="font-bold text-primary mb-1">{ar.common.discardUnsavedChanges}</h3>
+          <h3 className="font-bold text-primary mb-1">{t.common.discardUnsavedChanges}</h3>
           <p className="text-sm text-latte">{message}</p>
         </div>
       </div>
@@ -383,14 +388,14 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
           onClick={onCancel}
           className="px-4 py-2 text-sm font-medium text-primary border border-hairline rounded-lg hover:bg-cream-2 transition-colors min-h-[44px]"
         >
-          {ar.common.keepEditing}
+          {t.common.keepEditing}
         </button>
         <button
           type="button"
           onClick={onConfirm}
           className="px-4 py-2 text-sm font-medium bg-ember-500 text-white rounded-lg hover:bg-ember-600 transition-colors min-h-[44px]"
         >
-          {ar.common.discardChanges}
+          {t.common.discardChanges}
         </button>
       </div>
     </div>

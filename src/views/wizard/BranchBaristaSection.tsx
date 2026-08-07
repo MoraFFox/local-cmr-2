@@ -46,9 +46,9 @@ export const BranchBaristaSection: React.FC<BranchBaristaSectionProps> = ({
   return (
   <div className="mt-6 pt-6 border-t border-hairline">
     <div className="flex justify-between items-center mb-4">
-      <h4 className="text-lg font-bold text-primary tracking-tight">أفراد صيانة Midoe's</h4>
+      <h4 className="text-lg font-bold text-primary tracking-tight">{t.ui.wizard.baristasSubtitle}</h4>
       <Button onClick={() => onAddNested(index, "baristas")}>
-        <PlusCircleIcon className="w-4 h-4" /> إضافة فرد صيانة (Midoe's)
+        <PlusCircleIcon className="w-4 h-4" /> {t.ui.wizard.addBarista}
       </Button>
     </div>
     <div className="space-y-3">
@@ -59,12 +59,12 @@ export const BranchBaristaSection: React.FC<BranchBaristaSectionProps> = ({
             initiallyOpen={barista.id === newlyAddedId}
             onRemove={() => onRemoveNested("baristas", baristaIndex)}
             wizardKey={`branch.${index}.baristas.${baristaIndex}`}
-            titleContent={<span className="font-semibold">{barista.name || "فرد صيانة جديد"}</span>}
+            titleContent={<span className="font-semibold">{barista.name || t.ui.wizard.newBarista}</span>}
           >
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
                 <TextInput
-                  label="الاسم"
+                  label={t.ui.wizard.nameLabel}
                   name="name"
                   data-field={`branch.${index}.baristas.${baristaIndex}.name`}
                   value={barista.name}
@@ -72,7 +72,7 @@ export const BranchBaristaSection: React.FC<BranchBaristaSectionProps> = ({
                   icon={<UserIcon />}
                 />
                 <TextInput
-                  label="رقم الهاتف"
+                  label={t.ui.wizard.phoneLabel}
                   name="phone"
                   data-field={`branch.${index}.baristas.${baristaIndex}.phone`}
                   value={barista.phone}
@@ -91,7 +91,7 @@ export const BranchBaristaSection: React.FC<BranchBaristaSectionProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-primary mb-2">ملاحظات</label>
+                <label className="block text-sm font-medium text-primary mb-2">{t.ui.wizard.notesLabel}</label>
                 <textarea
                   name="notes"
                   value={barista.notes || ""}
@@ -106,8 +106,8 @@ export const BranchBaristaSection: React.FC<BranchBaristaSectionProps> = ({
       ) : (
         <EmptyState
           icon={<UserGroupIcon className="w-8 h-8" />}
-          title="لا يوجد فريق صيانة"
-          message="أضف أفراد صيانة Midoe's الذين يعملون في هذا الفرع."
+          title={t.ui.wizard.noBaristasTitle}
+          message={t.ui.wizard.noBaristasBranchMsg}
         />
       )}
     </div>

@@ -23,6 +23,13 @@ import { useToast } from "../components/ToastContext";
 type Submission = FormData & { created_at: string };
 
 /**
+ * Upper bounds for data fetches. These are generous (the app serves a small
+ * customer base) but prevent an unbounded payload as the dataset grows.
+ */
+const MAX_COMPANIES = 2000;
+const MAX_PORTAL_SUBMISSIONS = 10000;
+
+/**
  * Parse a maintenance date to epoch-ms, returning 0 on invalid/empty input.
  * Used in sort comparators so a malformed date can't produce NaN (which makes
  * Array#sort non-deterministic and can crash rendering downstream).
@@ -48,12 +55,20 @@ export function useSubmissions(isOnline: boolean) {
         const { data: companies, error: companiesError } = await supabase
           .from("companies")
           .select("*")
-          .order("created_at", { ascending: false });
+          .order("created_at", { ascending: false })
+          .limit(MAX_COMPANIES);
 
         if (companiesError) {
           logger.error("Error fetching companies", companiesError, "data");
           showToast("خطأ في جلب بيانات الشركات", "error");
         } else {
+          if (companies && companies.length >= MAX_COMPANIES) {
+            logger.warn(
+              `Company fetch hit the ${MAX_COMPANIES}-row cap — results may be truncated`,
+              { count: companies.length },
+              "data",
+            );
+          }
           serverData =
             companies?.map((d) => {
               const fd = d.form_data;
@@ -106,13 +121,21 @@ export function useSubmissions(isOnline: boolean) {
         const { data: portalData, error: subsError } = await supabase
           .from("maintenance_submissions")
           .select("*")
-          .order("maintenance_date", { ascending: false });
+          .order("maintenance_date", { ascending: false })
+          .limit(MAX_PORTAL_SUBMISSIONS);
 
         if (subsError) {
           logger.error("Error fetching submissions", subsError, "data");
           showToast("خطأ في جلب بيانات الصيانة", "error");
         } else {
           portalSubmissions = portalData || [];
+          if (portalSubmissions.length >= MAX_PORTAL_SUBMISSIONS) {
+            logger.warn(
+              `Portal submission fetch hit the ${MAX_PORTAL_SUBMISSIONS}-row cap — results may be truncated`,
+              { count: portalSubmissions.length },
+              "data",
+            );
+          }
         }
       }
 

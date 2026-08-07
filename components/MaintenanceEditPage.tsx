@@ -18,6 +18,7 @@ import MaintenanceRecordEditor from './MaintenanceRecordEditor';
 import { getNewMaintenanceRecord } from './MaintenanceRecordCard';
 import { generateMockMaintenanceRecord } from '../utils/mockData';
 import { generateUniqueId } from '../utils/idGenerator';
+import { useT } from '../utils/i18n';
 
 interface MaintenanceEditPageProps {
   submission: FormData;
@@ -53,6 +54,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
   problemCategories,
   allPredefinedProblems
 }) => {
+  const t = useT();
   const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null);
   const [editingRecord, setEditingRecord] = useState<MaintenanceRecord | null>(null);
   const [editingRecordIndex, setEditingRecordIndex] = useState<number>(-1);
@@ -256,9 +258,9 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
     // Show a success message for new records
     if (isStagedNew) {
       const branchName = targetIsMainOffice
-        ? 'Main Office'
-        : (newSubmission.branches.find(b => b.id === stagingNewRecord!.branchId)?.branchName) || 'this branch';
-      setSuccessMessage(`New maintenance record saved successfully for ${branchName}!`);
+        ? t.ui.records.mainOffice
+        : (newSubmission.branches.find(b => b.id === stagingNewRecord!.branchId)?.branchName) || t.ui.records.unnamedBranch;
+      setSuccessMessage(t.ui.maintenanceEdit.recordSavedFor.replace('{{branch}}', branchName));
 
       setTimeout(() => {
         setSuccessMessage(null);
@@ -326,9 +328,9 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
 
     // Show success message
     const branchName = selectedBranch?.isMainOffice
-      ? 'Main Office'
-      : selectedBranch?.branchName || 'this branch';
-    setSuccessMessage(`Maintenance record deleted successfully from ${branchName}.`);
+      ? t.ui.records.mainOffice
+      : selectedBranch?.branchName || t.ui.records.unnamedBranch;
+    setSuccessMessage(t.ui.maintenanceEdit.recordDeletedFrom.replace('{{branch}}', branchName));
 
     // Auto-clear success message after 5 seconds
     setTimeout(() => {
@@ -385,7 +387,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors backdrop-blur-sm"
                 >
                   <ArrowLeftIcon className="w-5 h-5" />
-                  <span className="hidden sm:inline font-medium">رجوع</span>
+                  <span className="hidden sm:inline font-medium">{t.ui.maintenanceEdit.back}</span>
                 </button>
                 
                 <div className="hidden sm:block h-8 w-px bg-espresso-light" />
@@ -400,16 +402,16 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                     <span className="flex items-center gap-1">
                       <CalendarIcon className="w-4 h-4" />
                       {stagingNewRecord ? (
-                        'سجل جديد'
+                        t.ui.maintenanceEdit.newRecord
                       ) : (
-                        <>السجل {editingRecordIndex + 1} من {selectedBranch.maintenanceHistory.length}</>
+                        <>{t.ui.maintenanceEdit.recordXOfY.replace('{{current}}', String(editingRecordIndex + 1)).replace('{{total}}', String(selectedBranch.maintenanceHistory.length))}</>
                       )}
                     </span>
                     {stagingNewRecord && (
                       <>
                         <span className="text-latte">•</span>
                         <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded-full text-xs font-medium">
-                          جديد (غير محفوظ)
+                          {t.ui.maintenanceEdit.unsavedNew}
                         </span>
                       </>
                     )}
@@ -418,7 +420,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                         <span className="text-latte">•</span>
                         <span className="flex items-center gap-1 text-primary-400">
                           <ClockIcon className="w-4 h-4" />
-                          متوسط: {averageDaysBetweenMaintenance} يوم
+                          {t.ui.maintenanceEdit.averageDays.replace('{{days}}', String(averageDaysBetweenMaintenance))}
                         </span>
                       </>
                     )}
@@ -430,12 +432,12 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                 <button
                   onClick={() => handleNavigateRecord('prev')}
                   disabled={stagingNewRecord || editingRecordIndex === 0}
-                  title={stagingNewRecord || editingRecordIndex === 0 ? 'لا يوجد سجل سابق' : 'السجل السابق'}
-                  aria-label="السابق"
+                  title={stagingNewRecord || editingRecordIndex === 0 ? t.ui.maintenanceEdit.noPreviousRecord : t.ui.maintenanceEdit.previousRecord}
+                  aria-label={t.common.back}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white/10 disabled:text-white/50 text-white transition-colors backdrop-blur-sm"
                 >
                   <ChevronLeftIcon className="w-5 h-5" />
-                  <span className="hidden sm:inline">السابق</span>
+                  <span className="hidden sm:inline">{t.common.back}</span>
                 </button>
                 <div className="hidden sm:block px-4 py-2 bg-white/5 rounded-lg text-white font-medium min-w-[80px] text-center">
                   {stagingNewRecord ? 'NEW' : `${editingRecordIndex + 1} / ${selectedBranch.maintenanceHistory.length}`}
@@ -443,21 +445,21 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                 <button
                   onClick={() => handleNavigateRecord('next')}
                   disabled={stagingNewRecord || editingRecordIndex === selectedBranch.maintenanceHistory.length - 1}
-                  title={stagingNewRecord || editingRecordIndex === selectedBranch.maintenanceHistory.length - 1 ? 'لا يوجد سجل لاحق' : 'السجل التالي'}
-                  aria-label="التالي"
+                  title={stagingNewRecord || editingRecordIndex === selectedBranch.maintenanceHistory.length - 1 ? t.ui.maintenanceEdit.noNextRecord : t.ui.maintenanceEdit.nextRecord}
+                  aria-label={t.common.next}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white/10 disabled:text-white/50 text-white transition-colors backdrop-blur-sm"
                 >
-                  <span className="hidden sm:inline">التالي</span>
+                  <span className="hidden sm:inline">{t.common.next}</span>
                   <ChevronRightIcon className="w-5 h-5" />
                 </button>
                 
                 <div className="hidden sm:block h-8 w-px bg-espresso-light" />                <button
                   onClick={handleAddNewRecord}
                   className="btn-primary rounded-lg shadow-lg backdrop-blur-sm"
-                  title="إضافة سجل صيانة جديد لهذا الفرع"
+                  title={t.ui.maintenanceEdit.addRecordTitle}
                 >
                   <PlusIcon className="w-5 h-5" />
-                  <span className="hidden sm:inline font-medium">إضافة</span>
+                  <span className="hidden sm:inline font-medium">{t.common.add}</span>
                 </button>
 
                 {isDevEnvironment() && editingRecord && (
@@ -467,7 +469,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                     title="Fill the current record with random realistic data (dev only)"
                   >
                     <SwatchIcon className="w-5 h-5" />
-                    <span className="hidden sm:inline font-medium">بيانات</span>
+                    <span className="hidden sm:inline font-medium">{t.ui.maintenanceEdit.fillData}</span>
                   </button>
                 )}
               </div>
@@ -505,13 +507,13 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors backdrop-blur-sm"
             >
               <ArrowLeftIcon className="w-5 h-5" />
-              <span className="hidden sm:inline font-medium">Back</span>
+              <span className="hidden sm:inline font-medium">{t.common.back}</span>
             </button>
             
             <div className="h-8 w-px bg-espresso-light" />
             
             <div>                <h1 className="text-xl font-bold text-white">
-                تعديل سجلات الصيانة
+                {t.ui.maintenanceEdit.title}
               </h1>
               <p className="text-sm text-latte/70">
                 {localSubmission.companyName}
@@ -530,25 +532,25 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                 className="flex items-center gap-2 text-primary dark:text-primary-400 hover:text-primary dark:hover:text-primary-400 font-medium transition-colors"
               >
                 <ArrowLeftIcon className="w-4 h-4" />
-                اختيار فرع آخر
+                {t.ui.maintenanceEdit.chooseAnotherBranch}
               </button>
               <div className="flex items-center gap-4">
                 {averageDaysBetweenMaintenance && (
                   <div className="flex items-center gap-2 text-sm text-primary dark:text-latte">
                     <ClockIcon className="w-4 h-4 text-primary" />
-                    متوسط: {averageDaysBetweenMaintenance} يوم بين الزيارات
+                    {t.ui.maintenanceEdit.averageDaysBetweenVisits.replace('{{days}}', String(averageDaysBetweenMaintenance))}
                   </div>
                 )}
                 <span className="text-sm font-medium text-primary dark:text-latte/70 px-3 py-1 bg-cream dark:bg-espresso-light rounded-full">
-                  {selectedBranch.maintenanceHistory.length} سجل
+                  {t.ui.maintenanceEdit.recordsCount.replace('{{count}}', String(selectedBranch.maintenanceHistory.length))}
                 </span>
                 <button
                   onClick={handleAddNewRecord}
                   className="btn-primary rounded-lg shadow-lg"
-                  title="إضافة سجل صيانة جديد لهذا الفرع"
+                  title={t.ui.maintenanceEdit.addRecordTitle}
                 >
                   <PlusIcon className="w-5 h-5" />
-                  <span className="hidden sm:inline font-medium">Add Record</span>
+                  <span className="hidden sm:inline font-medium">{t.ui.maintenanceEdit.addRecord}</span>
                 </button>
               </div>
             </div>
@@ -562,7 +564,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
             
             <MaintenanceRecordList
               records={selectedBranch.maintenanceHistory}
-              branchName={selectedBranch.branchName || 'Unnamed Branch'}
+              branchName={selectedBranch.branchName || t.ui.records.unnamedBranch}
               onEdit={handleEditRecord}
               onQuickUpdate={handleQuickUpdate}
               onDelete={handleDeleteRecord}
@@ -570,7 +572,7 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
           </div>
         ) : (
           <div className="space-y-6">                <h2 className="text-xl font-bold text-primary dark:text-white">
-              اختر فرعاً
+              {t.ui.maintenanceEdit.chooseBranch}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {branches.map((branch) => (
@@ -588,10 +590,10 @@ const MaintenanceEditPage: React.FC<MaintenanceEditPageProps> = ({
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-primary dark:text-white truncate">
-                      {branch.branchName || 'Unnamed Branch'}
+                      {branch.branchName || t.ui.records.unnamedBranch}
                     </h3>
                     <p className="text-sm text-latte dark:text-latte mt-1">
-                      {branch.maintenanceHistory.length} سجل صيانة
+                      {t.ui.maintenanceEdit.maintenanceRecordCount.replace('{{count}}', String(branch.maintenanceHistory.length))}
                     </p>
                     <p className="text-xs text-latte dark:text-latte mt-2 truncate">
                       {branch.location}

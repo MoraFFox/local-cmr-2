@@ -20,22 +20,27 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <ErrorBoundary>
-      <ToastProvider>
-        <UndoQueueProvider>
-          <BrowserRouter
-            future={{
-              v7_startTransition: true,
-              v7_relativeSplatPath: true,
-            }}
-          >
-            <LanguageProvider>
-            <AppRouter />
-          </LanguageProvider>
-          </BrowserRouter>
-          {import.meta.env.DEV && <DebugPanel />}
-        </UndoQueueProvider>
-      </ToastProvider>
-    </ErrorBoundary>
+    {/*
+      LanguageProvider must wrap ErrorBoundary/ToastProvider/UndoQueueProvider:
+      those providers read translations via useT() themselves, so they need the
+      language context to be mounted before (above) them.
+    */}
+    <LanguageProvider>
+      <ErrorBoundary>
+        <ToastProvider>
+          <UndoQueueProvider>
+            <BrowserRouter
+              future={{
+                v7_startTransition: true,
+                v7_relativeSplatPath: true,
+              }}
+            >
+              <AppRouter />
+              {import.meta.env.DEV && <DebugPanel />}
+            </BrowserRouter>
+          </UndoQueueProvider>
+        </ToastProvider>
+      </ErrorBoundary>
+    </LanguageProvider>
   </React.StrictMode>
 );

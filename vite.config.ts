@@ -16,25 +16,10 @@ export default defineConfig(({ mode }) => {
         VitePWA({
           registerType: 'autoUpdate',
           includeAssets: ['logo.png', 'logo.svg', 'manifest.webmanifest'],
-          manifest: {
-            name: 'ميدوز - نظام إدارة الصيانة',
-            short_name: 'ميدوز',
-            lang: 'ar',
-            dir: 'rtl',
-            description: 'نظام إدارة صيانة القهوة لميدوز',
-            start_url: '/',
-            scope: '/',
-            display: 'standalone',
-	            background_color: '#FAF6EF',
-	            theme_color: '#241B16',
-            orientation: 'portrait-primary',
-            icons: [
-              // ponytail:logo.png is 1392x768, not 192/512 maskable. Add sized
-              // square raster icons when provided; until then `purpose: any` works.
-              { src: '/logo.png', sizes: '1392x768', type: 'image/png', purpose: 'any' },
-              { src: '/logo.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
-            ],
-          },
+          // Single source of truth: public/manifest.webmanifest is served
+          // directly (dev + prod). Disable plugin manifest generation so the
+          // two can never drift.
+          manifest: false,
           workbox: {
             globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
             runtimeCaching: [

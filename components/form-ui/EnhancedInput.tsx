@@ -26,6 +26,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { RequiredFieldBadge } from '@/packages/form-progress';
+import { useT } from '../../utils/i18n';
 
 interface EnhancedInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   /** Field name for error tracking */
@@ -129,6 +130,7 @@ export const EnhancedInput: React.FC<EnhancedInputProps> = ({
   type = 'text',
   ...rest
 }) => {
+  const t = useT();
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -263,7 +265,7 @@ export const EnhancedInput: React.FC<EnhancedInputProps> = ({
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="p-1 text-latte hover:text-primary transition-colors"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-label={showPassword ? t.ui.misc.hidePassword : t.ui.misc.showPassword}
             >
               {showPassword ? (
                 <EyeSlashIcon className={styles.icon} />

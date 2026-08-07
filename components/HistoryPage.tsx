@@ -11,6 +11,7 @@ import Button from './ui/Button';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import DateRangeExportModal from './DateRangeExportModal';
 import { DateRange } from '../utils/dateRangeFilter';
+import { useT } from '../utils/i18n';
 
 interface HistoryPageProps {
     submissions: (FormData & { created_at: string })[];
@@ -28,6 +29,7 @@ interface HistoryPageProps {
 }
 
 const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete, onAddNew, onPrint, onViewDetails, onUpdateCompany, onEditMaintenance, onRequestMissingData, getTechnicianDisplayName, isLoading }) => {
+    const t = useT();
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [startDate, setStartDate] = useState('');
@@ -43,7 +45,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
     const handleDelete = (id: number) => {
         setConfirmState({
             open: true,
-            message: "هل أنت متأكد من حذف هذه الشركة وسجلات صيانتها؟",
+            message: t.ui.history.confirmDeleteCompanyMsg,
             onConfirm: () => {
                 onDelete(id);
                 setConfirmState(null);
@@ -210,20 +212,20 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
         <div className="w-full max-w-6xl mx-auto">
              <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                  <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-text">سجل الإرسالات</h1>
-                    <p className="text-latte mt-1 sm:mt-2">عرض أو تعديل أو حذف الإرسالات السابقة.</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-text">{t.ui.history.title}</h1>
+                    <p className="text-latte mt-1 sm:mt-2">{t.ui.history.subtitle}</p>
                  </div>
                  <div className="flex items-center gap-x-2 sm:gap-x-3">
                     <Button variant="secondary" onClick={() => setShowDateRangeModal(true)}>
                         <PrinterIcon className="w-5 h-5" />
-                        طباعة
+                        {t.ui.history.print}
                     </Button>
                      <Button variant="secondary" onClick={handleDownloadAll} disabled={submissions.length === 0}>
                         <ArrowDownTrayIcon className="w-5 h-5" />
-                        تنزيل
+                        {t.ui.history.download}
                     </Button>
                     <Button onClick={onAddNew}>
-                        إضافة شركة
+                        {t.ui.history.addCompany}
                     </Button>
                  </div>
             </header>
@@ -240,26 +242,26 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                     {startDate && (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-cream-2 text-primary">
                             <CalendarIcon className="w-3 h-3" />
-                            من {startDate}
+                            {t.ui.history.from} {startDate}
                         </span>
                     )}
                     {endDate && (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-cream-2 text-primary">
                             <CalendarIcon className="w-3 h-3" />
-                            إلى {endDate}
+                            {t.ui.history.to} {endDate}
                         </span>
                     )}
                     {showOnlyProblems && (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-ember-500/20 text-ember-700">
                             <ExclamationTriangleIcon className="w-3 h-3" />
-                            به مشاكل
+                            {t.ui.history.hasProblems}
                         </span>
                     )}
                     <button
                         onClick={clearFilters}
                         className="text-xs font-medium text-latte hover:text-primary underline transition-colors"
                     >
-                        مسح جميع الفلاتر
+                        {t.ui.history.clearAllFilters}
                     </button>
                 </div>
             )}
@@ -270,7 +272,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                     {/* Top Row: Search & Toggle */}
                     <div className="grid grid-cols-1 sm:grid-cols-[1fr_180px] gap-4 ltr:items-end rtl:items-start w-full">
                         <div className="w-full">
-                            <label htmlFor="submission-search" className="block text-xs font-bold uppercase text-latte mb-1">بحث نصي</label>
+                            <label htmlFor="submission-search" className="block text-xs font-bold uppercase text-latte mb-1">{t.ui.history.textSearch}</label>
                             <div className="relative rounded-md shadow-sm">
                                 <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
                                     <MagnifyingGlassIcon className="h-5 w-5 text-latte" aria-hidden="true" />
@@ -281,7 +283,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     className="input-base ps-10"
-                                    placeholder="شركة، فرع، باريستا..."
+                                    placeholder={t.ui.history.searchPlaceholder}
                                 />
                             </div>
                         </div>
@@ -293,7 +295,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                 className={`flex items-center gap-2 px-4 h-[50px] rounded-lg border text-sm font-semibold w-full justify-center transition-colors ${showFilters || activeFiltersCount > 0 ? 'bg-primary/10 border-primary text-primary' : 'bg-cream border-hairline text-latte hover:bg-surface-elevated'}`}
                             >
                                 <FunnelIcon className="w-5 h-5" />
-                                {showFilters ? 'إخفاء الفلاتر' : 'فلاتر متقدمة'}
+                                {showFilters ? t.ui.history.hideFilters : t.ui.history.advancedFilters}
                                 {activeFiltersCount > 0 && <span className="bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center ms-1">{activeFiltersCount}</span>}
                             </button>
                         </div>
@@ -304,7 +306,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                         <div className="flex flex-wrap ltr:items-end rtl:items-start gap-4 pt-4 mt-2 border-t border-hairline animate-fade-in w-full">
                             {/* Date Range */}
                             <div className="w-full sm:w-auto flex-1 sm:flex-none">
-                                <label className="block text-xs font-bold uppercase text-latte mb-1">من تاريخ</label>
+                                <label className="block text-xs font-bold uppercase text-latte mb-1">{t.ui.history.fromDate}</label>
                                 <input
                                     type="date"
                                     value={startDate}
@@ -313,7 +315,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                 />
                             </div>
                             <div className="w-full sm:w-auto flex-1 sm:flex-none">
-                                <label className="block text-xs font-bold uppercase text-latte mb-1">إلى تاريخ</label>
+                                <label className="block text-xs font-bold uppercase text-latte mb-1">{t.ui.history.toDate}</label>
                                 <input
                                     type="date"
                                     value={endDate}
@@ -332,7 +334,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                         className="hidden"
                                     />
                                     <ExclamationTriangleIcon className="w-5 h-5" />
-                                    <span className="text-sm font-medium">به مشاكل</span>
+                                    <span className="text-sm font-medium">{t.ui.history.hasProblems}</span>
                                 </label>
                             </div>
 
@@ -347,7 +349,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                         disabled={activeFiltersCount === 0 && !searchTerm}
                                         className="flex items-center justify-center gap-2 h-[50px] px-6 text-latte hover:text-primary transition-colors text-sm font-medium rounded-lg hover:bg-primary/10 disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed border border-transparent hover:border-primary/30"
                                     >
-                                        <XMarkIcon className="w-5 h-5" /> مسح الفلاتر
+                                        <XMarkIcon className="w-5 h-5" /> {t.ui.history.clearFilters}
                                     </button>
                                 </div>
                             )}
@@ -367,12 +369,12 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                     <EmptyState
                         variant="primary"
                         icon={<DocumentIcon />}
-                        title="لا توجد سجلات بعد"
-                        message="نظام إدارة الصيانة فارغ حالياً. قم بإضافة أول شركة أو فرع للبدء بتسجيل بيانات وتقارير الصيانة."
+                        title={t.ui.history.noRecordsTitle}
+                        message={t.ui.history.noRecordsMsg}
                     >
                         <Button onClick={onAddNew}>
                             <BuildingOfficeIcon className="w-5 h-5" />
-                            إضافة شركة جديدة
+                            {t.ui.history.addCompanyNew}
                         </Button>
                     </EmptyState>
                 </div>
@@ -381,12 +383,12 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                     <EmptyState
                         variant="search"
                         icon={<MagnifyingGlassIcon />}
-                        title="لم يتم العثور على نتائج"
-                        message="لا توجد شركات أو إرسالات تطابق الفلاتر وعمليات البحث الحالية. حاول تغيير كلمات البحث أو تواريخ الفلتر."
+                        title={t.ui.history.noResultsTitle}
+                        message={t.ui.history.noResultsMsg}
                     >
                         <Button variant="secondary" onClick={clearFilters}>
                             <XMarkIcon className="w-4 h-4" />
-                            مسح جميع الفلاتر
+                            {t.ui.history.clearAllFilters}
                         </Button>
                     </EmptyState>
                 </div>
@@ -401,24 +403,24 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                             <div className="flex flex-col sm:flex-row sm:ltr:items-start rtl:items-end sm:justify-between gap-3">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center flex-wrap gap-2">
-                                        <h3 className="font-bold text-lg text-text truncate">{sub.companyName || 'شركة بدون اسم'}</h3>
+                                        <h3 className="font-bold text-lg text-text truncate">{sub.companyName || t.ui.history.unnamedCompany}</h3>
                                         {sub.pendingSync && (
                                             <span className="inline-flex items-center rounded-md bg-amber-500/15 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-400 border border-amber-500/30">
                                                 <CloudIcon className="w-3.5 h-3.5 me-1" />
-                                                بانتظار المزامنة
+                                                {t.ui.history.pendingSync}
                                             </span>
                                         )}
                                     </div>
                                     <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-latte">
-                                        <span>أُرسلت: {new Date(sub.created_at).toLocaleDateString()}</span>
+                                        <span>{t.ui.history.submittedAt} {new Date(sub.created_at).toLocaleDateString()}</span>
                                         <span className="hidden sm:inline">•</span>
-                                        <span>{sub.hasBranches ? `${sub.branches.length} فروع` : 'لا فروع'}</span>
+                                        <span>{sub.hasBranches ? t.ui.history.branchesCount.replace('{{count}}', String(sub.branches.length)) : t.ui.history.noBranches}</span>
                                         <span className="hidden sm:inline">•</span>
-                                        <span>{getTotalVisits(sub)} زيارة</span>
+                                        <span>{t.ui.history.visitsCount.replace('{{count}}', String(getTotalVisits(sub)))}</span>
                                         {getLastMaintenanceDate(sub) && (
                                             <>
                                                 <span className="hidden sm:inline">•</span>
-                                                <span>آخر صيانة: {getLastMaintenanceDate(sub)}</span>
+                                                <span>{t.ui.history.lastMaintenance} {getLastMaintenanceDate(sub)}</span>
                                             </>
                                         )}
                                     </div>
@@ -428,15 +430,16 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                 <div className="hidden sm:flex items-center gap-1 self-center">
                                     <Button variant="secondary" onClick={() => onViewDetails(sub)} className="text-sm py-2 px-3">
                                         <EyeIcon className="h-4 w-4" />
-                                        عرض
+                                        {t.ui.history.view}
                                     </Button>
                                     {onRequestMissingData && (
                                         <Button variant="secondary" onClick={() => onRequestMissingData(sub)} className="text-sm py-2 px-3">
                                             <DocumentArrowDownIcon className="h-4 w-4" />
-                                            استكمال
+                                            {t.ui.history.complete}
                                         </Button>
                                     )}
                                     <RowEllipsisMenu
+                                        t={t}
                                         sub={sub}
                                         isOpen={openMenuId === sub.id}
                                         onOpenChange={(o) => setOpenMenuId(o ? sub.id! : null)}
@@ -453,22 +456,22 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
                                 <div className="flex sm:hidden items-center gap-2 self-stretch">
                                     <Button variant="secondary" onClick={() => onViewDetails(sub)} className="flex-1 justify-center">
                                         <EyeIcon className="h-4 w-4" />
-                                        عرض
+                                        {t.ui.history.view}
                                     </Button>
                                     <Button variant="secondary" onClick={() => onEdit(sub)} className="flex-1 justify-center">
                                         <PencilIcon className="h-4 w-4" />
-                                        تعديل
+                                        {t.ui.history.fullEdit}
                                     </Button>
                                     {onEditMaintenance && (
                                         <Button variant="secondary" onClick={() => onEditMaintenance(sub)} className="flex-1 justify-center">
                                             <WrenchScrewdriverIcon className="h-4 w-4" />
-                                            صيانة
+                                            {t.ui.history.maintenance}
                                         </Button>
                                     )}
                                     <button
                                         onClick={() => handleDelete(sub.id!)}
                                         className="p-2 rounded-lg border border-ember-500/30 text-ember-500 hover:bg-ember-500/10"
-                                        aria-label="حذف"
+                                        aria-label={t.ui.history.delete}
                                     >
                                         <TrashIcon className="h-5 w-5" />
                                     </button>
@@ -504,7 +507,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
             />
             <ConfirmDialog
                 isOpen={confirmState?.open ?? false}
-                title="تأكيد الحذف"
+                title={t.ui.history.confirmDeleteTitle}
                 message={confirmState?.message ?? ''}
                 variant="danger"
                 onConfirm={() => confirmState?.onConfirm()}
@@ -517,6 +520,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ submissions, onEdit, onDelete
 // Per-row ⋮ actions rendered through a portal so the dropdown can never be clipped
 // by the page scroll container (main.overflow-y-auto) or card ancestors.
 const RowEllipsisMenu: React.FC<{
+  t: ReturnType<typeof useT>;
   sub: FormData & { created_at: string; id?: number | null; pendingSync?: boolean };
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -526,7 +530,7 @@ const RowEllipsisMenu: React.FC<{
   onEditMaintenance?: (sub: FormData & { created_at: string }) => void;
   onRequestMissingData?: (sub: FormData & { created_at: string }) => void;
   onDelete: (id: number) => void;
-}> = ({ sub, isOpen, onOpenChange, onDownload, onQuickEdit, onEdit, onEditMaintenance, onRequestMissingData, onDelete }) => {
+}> = ({ t, sub, isOpen, onOpenChange, onDownload, onQuickEdit, onEdit, onEditMaintenance, onRequestMissingData, onDelete }) => {
   const { triggerRef, contentRef, style } = useFloatingMenu({
     controlledOpen: isOpen,
     menuWidth: 192, // w-48 = 12rem = 192px
@@ -538,7 +542,7 @@ const RowEllipsisMenu: React.FC<{
         ref={triggerRef as React.RefObject<HTMLButtonElement>}
         onClick={() => onOpenChange(!isOpen)}
         className="p-2 min-w-[44px] min-h-[44px] rounded-lg text-latte hover:text-text hover:bg-surface-elevated transition-colors"
-        aria-label="المزيد من الإجراءات"
+        aria-label={t.ui.history.moreActions}
         aria-expanded={isOpen}
       >
         <EllipsisVerticalIcon className="h-5 w-5" />
@@ -556,21 +560,21 @@ const RowEllipsisMenu: React.FC<{
             className="w-full flex items-center gap-2 px-4 py-2 text-sm text-text hover:bg-surface-elevated disabled:opacity-50"
           >
             <ArrowDownTrayIcon className="h-4 w-4" />
-            تنزيل JSON
+            {t.ui.history.downloadJson}
           </button>
           <button
             onClick={() => { onQuickEdit(sub); onOpenChange(false); }}
             className="w-full flex items-center gap-2 px-4 py-2 text-sm text-text hover:bg-surface-elevated"
           >
             <BuildingOfficeIcon className="h-4 w-4" />
-            تعديل سريع
+            {t.ui.history.quickEdit}
           </button>
           <button
             onClick={() => { onEdit(sub); onOpenChange(false); }}
             className="w-full flex items-center gap-2 px-4 py-2 text-sm text-text hover:bg-surface-elevated"
           >
             <PencilIcon className="h-4 w-4" />
-            تعديل كامل
+            {t.ui.history.fullEdit}
           </button>
           {onEditMaintenance && (
             <button
@@ -578,7 +582,7 @@ const RowEllipsisMenu: React.FC<{
               className="w-full flex items-center gap-2 px-4 py-2 text-sm text-text hover:bg-surface-elevated"
             >
               <WrenchScrewdriverIcon className="h-4 w-4" />
-              تعديل الصيانة
+              {t.ui.history.editMaintenance}
             </button>
           )}
           {onRequestMissingData && (
@@ -587,7 +591,7 @@ const RowEllipsisMenu: React.FC<{
               className="w-full flex items-center gap-2 px-4 py-2 text-sm text-text hover:bg-surface-elevated"
             >
               <DocumentArrowDownIcon className="h-4 w-4" />
-              استكمال بيانات
+              {t.ui.history.completeData}
             </button>
           )}
           <div className="border-t border-hairline my-1" />
@@ -596,7 +600,7 @@ const RowEllipsisMenu: React.FC<{
             className="w-full flex items-center gap-2 px-4 py-2 text-sm text-ember-500 hover:bg-ember-500/10"
           >
             <TrashIcon className="h-4 w-4" />
-            حذف
+            {t.ui.history.delete}
           </button>
         </div>,
         document.body

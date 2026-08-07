@@ -5,6 +5,7 @@ import { hasAdminRole, checkAdminFallback } from "../utils/authRoles";
 import { logger } from "../utils/logger";
 import AdminLogin from "./AdminLogin.tsx";
 import { TechnicianAuthProvider } from "./TechnicianAuthContext.tsx";
+import { useT } from "../utils/i18n";
 
 const App = lazy(() => import("../App.tsx"));
 const TechnicianPortal = lazy(() => import("./technician-portal/TechnicianPortal.tsx"));
@@ -12,16 +13,19 @@ const EmergencyAdminRecovery = lazy(() => import("./EmergencyAdminRecovery.tsx")
 const InviteSignup = lazy(() => import("./InviteSignup.tsx"));
 const ResetPassword = lazy(() => import("./ResetPassword.tsx"));
 
-const LoadingFallback = () => (
-  <div className="min-h-screen bg-paper  flex items-center justify-center p-4">
-    <div className="text-center">
-      <div className="mx-auto mb-4 h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      <p className="text-primary dark:text-cream font-medium">
-        جاري التحميل...
-      </p>
+const LoadingFallback = () => {
+  const t = useT();
+  return (
+    <div className="min-h-screen bg-paper  flex items-center justify-center p-4">
+      <div className="text-center">
+        <div className="mx-auto mb-4 h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <p className="text-primary dark:text-cream font-medium">
+          {t.common.loading}
+        </p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 type AdminAccessState = "checking" | "allowed" | "login";
 

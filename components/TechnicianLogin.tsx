@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useTechnicianAuth } from "./TechnicianAuthContext";
 import { supabase } from "../supabaseClient";
-import { ar } from "../utils/arabicTranslations";
+import { useT } from "../utils/i18n";
 import { authRateLimiter } from "../utils/rateLimiter";
 import { sanitizeString } from "../utils/sanitization";
 import { logger } from "../utils/logger";
@@ -36,6 +36,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const t = useT();
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -48,11 +49,11 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
 
     const normalizedEmail = email.trim().toLowerCase();
     if (!normalizedEmail) {
-      setError("يرجى إدخال بريدك الإلكتروني.");
+      setError(t.ui.login.enterEmailRequired);
       return;
     }
     if (!validateEmail(normalizedEmail)) {
-      setError("يرجى إدخال بريد إلكتروني صحيح.");
+      setError(t.ui.login.enterValidEmail);
       return;
     }
 
@@ -67,13 +68,13 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
 
       if (resetError) {
         logger.error("Password reset error", resetError, "auth");
-        setError("فشل إرسال رابط إعادة التعيين. يرجى المحاولة مرة أخرى.");
+        setError(t.ui.login.resetLinkFailed);
       } else {
         setIsSuccess(true);
       }
     } catch (submitError) {
       logger.error("Password reset exception", submitError, "auth");
-      setError("حدث خطأ. يرجى المحاولة مرة أخرى.");
+      setError(t.ui.login.genericError);
     } finally {
       setIsSubmitting(false);
     }
@@ -105,16 +106,16 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
               <CheckCircleIcon className="w-7 h-7 text-leaf-500" />
             </div>
             <h2 className="text-xl font-bold text-primary mb-2">
-              تحقق من بريدك الإلكتروني
+              {t.ui.login.checkYourEmail}
             </h2>
             <p className="text-sm text-latte mb-6">
-              لقد أرسلنا رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.
+              {t.ui.login.resetLinkSent}
             </p>
             <Button
               onClick={handleClose}
               className="w-full"
             >
-              العودة لتسجيل الدخول
+              {t.ui.login.backToLogin}
             </Button>
           </div>
         ) : (
@@ -125,12 +126,12 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                 <EnvelopeIcon className="w-7 h-7 text-primary" />
               </div>
               <h2 className="text-xl font-bold text-primary mb-2">
-                إعادة تعيين كلمة المرور
+                {t.ui.login.resetPasswordTitle}
               </h2>
             </div>
 
             <p className="text-sm text-latte text-center mb-4">
-              أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.
+              {t.ui.login.resetPasswordHint}
             </p>
 
             {error && (
@@ -142,7 +143,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-primary mb-2 text-end">
-                  البريد الإلكتروني
+                  {t.ui.details.email}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
@@ -166,7 +167,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                 isLoading={isSubmitting}
                 className="w-full"
               >
-                إرسال رابط إعادة التعيين
+                {t.ui.login.sendResetLink}
               </Button>
             </form>
           </>
@@ -201,6 +202,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const t = useT();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -210,8 +212,8 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
 
     if (!identifier || !password.trim()) {
       setError(contactType === "email"
-        ? "يرجى إدخال البريد الإلكتروني وكلمة المرور"
-        : "يرجى إدخال رقم الهاتف وكلمة المرور");
+        ? t.ui.login.emailPasswordRequired
+        : t.ui.login.phonePasswordRequired);
       return;
     }
 
@@ -220,7 +222,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
 
     const rateCheck = authRateLimiter.check(rateLimitKey);
     if (!rateCheck.allowed) {
-      setError(rateCheck.message || "لقد تجاوزت الحد الأقصى للمحاولات");
+      setError(rateCheck.message || t.ui.login.tooManyAttempts);
       return;
     }
 
@@ -230,7 +232,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
 
     const result = await login(sanitizedIdentifier, password);
     if (!result.success) {
-      setError(result.error || "حدث خطأ أثناء تسجيل الدخول");
+      setError(result.error || t.ui.login.loginError);
     } else {
       authRateLimiter.reset(rateLimitKey);
     }
@@ -246,7 +248,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
             className="mb-6 flex items-center gap-2 text-latte hover:text-primary transition-colors"
           >
             <ArrowLeftIcon className="w-5 h-5" />
-            <span>العودة للتطبيق الرئيسي</span>
+            <span>{t.ui.login.backToMainApp}</span>
           </button>
         )}
 
@@ -262,10 +264,10 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
               )}
             </div>
             <h1 className="text-2xl font-bold text-primary mb-2">
-              {ar.login.title}
+              {t.login.title}
             </h1>
             <p className="text-latte">
-              {ar.login.subtitle}
+              {t.login.subtitle}
             </p>
           </div>
 
@@ -283,7 +285,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
             {/* Contact Type Toggle */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-primary mb-2 text-center">
-                البريد الإلكتروني أو الهاتف
+                {t.ui.login.emailOrPhone}
               </label>
               <div className="flex rounded-lg bg-cream-2 p-1">
                 <button
@@ -296,7 +298,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                   }`}
                 >
                   <EnvelopeIcon className="w-4 h-4" />
-                  <span>البريد</span>
+                  <span>{t.ui.login.emailShort}</span>
                 </button>
                 <button
                   type="button"
@@ -308,7 +310,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                   }`}
                 >
                   <PhoneIcon className="w-4 h-4" />
-                  <span>الهاتف</span>
+                  <span>{t.ui.login.phoneShort}</span>
                 </button>
               </div>
             </div>
@@ -316,7 +318,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
             {/* Email/Phone Field */}
             <div>
               <label className="block text-sm font-medium text-primary mb-2">
-                {contactType === "email" ? "البريد الإلكتروني" : "رقم الهاتف"}
+                {contactType === "email" ? t.ui.details.email : t.ui.wizard.phoneLabel}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
@@ -349,7 +351,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
             {/* Password Field */}
             <div>
               <label className="block text-sm font-medium text-primary mb-2">
-                {ar.login.passwordLabel}
+                {t.login.passwordLabel}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
@@ -359,7 +361,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder={ar.login.passwordPlaceholder}
+                  placeholder={t.login.passwordPlaceholder}
                   className="block w-full pe-14 ps-4 py-3 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-end"
                   dir="rtl"
                 />
@@ -372,7 +374,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
               isLoading={isLoading}
               className="w-full py-3"
             >
-              {isLoading ? ar.login.loggingIn : ar.login.loginButton}
+              {isLoading ? t.login.loggingIn : t.login.loginButton}
             </Button>
 
             {/* Forgot Password Link */}
@@ -383,7 +385,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
                   onClick={() => setShowForgotPassword(true)}
                   className="text-sm text-primary hover:text-primary transition-colors min-h-[44px] px-2"
                 >
-                  نسيت كلمة المرور؟
+                  {t.ui.login.forgotPassword}
                 </button>
               </div>
             )}
@@ -392,7 +394,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
 
         {/* Footer */}
         <p className="text-center mt-6 text-sm text-latte">
-          بوابة خاصة بالفنيين لإدخال تقارير الصيانة
+          {t.ui.login.portalFooter}
         </p>
 
         {/* Invite-Only Message */}
@@ -400,7 +402,7 @@ const TechnicianLogin: React.FC<TechnicianLoginProps> = ({
           <div className="flex ltr:items-start rtl:items-end gap-2">
             <InformationCircleIcon className="w-5 h-5 text-latte flex-shrink-0 mt-0.5" />
             <div className="text-sm text-latte">
-              <p className="font-medium">إنشاء الحساب عبر رابط الدعوة فقط. تواصل مع المدير.</p>
+              <p className="font-medium">{t.ui.login.inviteOnly}</p>
             </div>
           </div>
         </div>

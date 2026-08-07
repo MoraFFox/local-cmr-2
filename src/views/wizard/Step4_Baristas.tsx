@@ -27,11 +27,11 @@ export const Step4_Baristas: React.FC<WizardStepProps> = ({
   const t = useT();
 
   return (
-  <Card title="فريق Midoe's (المكتب الرئيسي)">
+  <Card title={t.ui.wizard.baristasTeamTitle}>
     <div className="flex justify-between items-center mb-6">
-      <h3 className="text-xl font-bold text-primary tracking-tight">أفراد صيانة Midoe's</h3>
+      <h3 className="text-xl font-bold text-primary tracking-tight">{t.ui.wizard.baristasSubtitle}</h3>
       <Button onClick={() => actions.addListItem("baristas")}>
-        <PlusCircleIcon className="w-5 h-5" /> إضافة فرد صيانة (Midoe's)
+        <PlusCircleIcon className="w-5 h-5" /> {t.ui.wizard.addBarista}
       </Button>
     </div>
     <div className="space-y-4">
@@ -42,12 +42,12 @@ export const Step4_Baristas: React.FC<WizardStepProps> = ({
             initiallyOpen={barista.id === newlyAddedId}
             onRemove={() => actions.removeListItem("baristas", index)}
             wizardKey={`company.baristas.${index}`}
-            titleContent={<span className="font-semibold">{barista.name || "فرد صيانة جديد"}</span>}
+            titleContent={<span className="font-semibold">{barista.name || t.ui.wizard.newBarista}</span>}
           >
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <TextInput
-                  label="الاسم"
+                  label={t.ui.wizard.nameLabel}
                   name="name"
                   data-field={`company.baristas.${index}.name`}
                   value={barista.name}
@@ -55,7 +55,7 @@ export const Step4_Baristas: React.FC<WizardStepProps> = ({
                   icon={<UserIcon />}
                 />
                 <TextInput
-                  label="رقم الهاتف"
+                  label={t.ui.wizard.phoneLabel}
                   name="phone"
                   data-field={`company.baristas.${index}.phone`}
                   value={barista.phone}
@@ -74,7 +74,7 @@ export const Step4_Baristas: React.FC<WizardStepProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-primary mb-2">ملاحظات</label>
+                <label className="block text-sm font-medium text-primary mb-2">{t.ui.wizard.notesLabel}</label>
                 <textarea
                   name="notes"
                   value={barista.notes || ""}
@@ -90,11 +90,11 @@ export const Step4_Baristas: React.FC<WizardStepProps> = ({
         <EmptyState
           variant="inline"
           icon={<UserGroupIcon />}
-          title="لا يوجد فريق صيانة"
-          message="أضف أفراد صيانة Midoe's الذين يعملون في المكتب الرئيسي."
+          title={t.ui.wizard.noBaristasTitle}
+          message={t.ui.wizard.noBaristasMainMsg}
         >
           <Button variant="secondary" onClick={() => actions.addListItem("baristas")}>
-            <PlusCircleIcon className="w-4 h-4" /> إضافة فرد صيانة (Midoe's)
+            <PlusCircleIcon className="w-4 h-4" /> {t.ui.wizard.addBarista}
           </Button>
         </EmptyState>
       )}

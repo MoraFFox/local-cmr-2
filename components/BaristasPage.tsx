@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import { FormData } from "../types";
 import { useToast } from "./ToastContext";
 import { useT } from "../utils/i18n";
+import { useLanguage } from "../utils/LanguageContext";
 import { ConfirmDialog } from "./ui/ConfirmDialog";
 import {
   MagnifyingGlassIcon,
@@ -60,6 +61,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
 }) => {
   const { showToast } = useToast();
   const t = useT();
+  const { language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [showDebug, setShowDebug] = useState(false);
   const [includeLogOnly, setIncludeLogOnly] = useState(false);
@@ -83,15 +85,15 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
   const handleDelete = (e: React.MouseEvent, barista: AggregatedBarista) => {
     e.stopPropagation();
     if (!barista.sources || barista.sources.length === 0) {
-      showToast("لا يمكن حذف هذا الباريستا (لا يوجد مصدر).", "error");
+      showToast(t.admin.baristas.cannotDelete, "error");
       return;
     }
 
     const count = barista.sources.length;
     const confirmMsg =
       count > 1
-        ? `هذا الباريستا يظهر في ${count} أماكن. هل أنت متأكد من حذفه من كل المواقع؟`
-        : `هل أنت متأكد من حذف ${barista.name}؟`;
+        ? t.admin.baristas.deleteConfirmMulti.replace('{{count}}', String(count))
+        : t.admin.baristas.deleteConfirmSingle.replace('{{name}}', barista.name);
 
     setConfirmState({
       open: true,
@@ -111,7 +113,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
   };
 
   const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("ar-EG", {
+    new Intl.NumberFormat(language === "ar" ? "ar-EG" : "en-US", {
       style: "currency",
       currency: "EGP",
       minimumFractionDigits: 0,
@@ -155,10 +157,10 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div>
           <h1 className='text-2xl sm:text-3xl font-bold text-primary'>
-            أداء الباريستا
+            {t.admin.baristas.title}
           </h1>
           <p className='text-latte mt-1'>
-            تتبع تقييمات الموظفين والزيارات والمالية الخاصة بالصيانة.
+            {t.admin.baristas.subtitle}
           </p>
         </div>
 
@@ -166,23 +168,23 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
           <button
             onClick={() => setShowDebug(!showDebug)}
             className={`p-2 rounded-md transition-colors ${showDebug ? "bg-ember-50 text-ember-700" : "bg-cream text-latte"}`}
-            title='تبديل وضع التصحيح'
+            title={t.admin.baristas.toggleDebug}
           >
             <BugAntIcon className='w-5 h-5' />
           </button>
           <button
             onClick={() => setIncludeLogOnly(!includeLogOnly)}
             className={`px-3 py-2 rounded-md text-xs font-bold uppercase tracking-wide transition-colors ${includeLogOnly ? "bg-blue-100 text-blue-700" : "bg-cream text-latte"}`}
-            title='Include baristas detected only from maintenance logs'
+            title={t.admin.baristas.includeLogOnlyTitle}
           >
-            Include Log-Only
+            {t.admin.baristas.includeLogOnly}
           </button>
           <button
             onClick={() => setIncludeZeroVisits(!includeZeroVisits)}
             className={`px-3 py-2 rounded-md text-xs font-bold uppercase tracking-wide transition-colors ${includeZeroVisits ? "bg-cream-2 text-primary" : "bg-cream text-latte"}`}
-            title='Include client staff with zero visits'
+            title={t.admin.baristas.includeZeroVisitsTitle}
           >
-            Include 0 Visits
+            {t.admin.baristas.includeZeroVisits}
           </button>
           <div className='relative w-full sm:w-72'>
             <div className='pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3'>
@@ -193,7 +195,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className='block w-full rounded-lg border-hairline bg-cream py-2.5 ps-10 pe-3 text-primary placeholder:text-latte focus:border-primary focus:ring-primary sm:text-sm shadow-sm transition-colors'
-              placeholder='Search baristas...'
+              placeholder={t.admin.baristas.searchPlaceholder}
             />
           </div>
         </div>
@@ -202,17 +204,17 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
       {showDebug && (
         <div className='bg-espresso text-leaf-500 p-4 rounded-lg text-xs font-mono overflow-x-auto border border-leaf-500 shadow-lg mb-6'>
           <h3 className='text-white font-bold text-sm mb-2 border-b border-leaf-500 pb-1'>
-            Debug: Profile Aggregation Logic
+            {t.admin.baristas.debugTitle}
           </h3>
           <table className='w-full text-start'>
             <thead>
               <tr className='text-latte/70'>
                 <th className='p-1'>ID</th>
-                <th className='p-1'>Displayed Name</th>
-                <th className='p-1'>Norm. Name Key</th>
-                <th className='p-1'>Companies Merged</th>
-                <th className='p-1'>Raw Names Merged</th>
-                <th className='p-1 text-end'>Is Auto?</th>
+                <th className='p-1'>{t.admin.baristas.debugDisplayedName}</th>
+                <th className='p-1'>{t.admin.baristas.debugNormKey}</th>
+                <th className='p-1'>{t.admin.baristas.debugCompaniesMerged}</th>
+                <th className='p-1'>{t.admin.baristas.debugRawNamesMerged}</th>
+                <th className='p-1 text-end'>{t.admin.baristas.debugIsAuto}</th>
               </tr>
             </thead>
             <tbody>
@@ -233,7 +235,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                     {Array.from(b._rawNames || []).join(", ")}
                   </td>
                   <td className='p-1 text-end font-bold text-primary-400'>
-                    {b.isAutoDetected ? "YES" : "NO"}
+                    {b.isAutoDetected ? t.admin.baristas.debugYes : t.admin.baristas.debugNo}
                   </td>
                 </tr>
               ))}
@@ -250,7 +252,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
           </div>
           <div>
             <p className='text-xs font-bold uppercase text-latte'>
-              Total Staff
+              {t.admin.baristas.totalStaff}
             </p>
             <p className='text-2xl font-bold text-primary'>
               {filteredBaristas.length}
@@ -263,7 +265,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
           </div>
           <div>
             <p className='text-xs font-bold uppercase text-latte'>
-              Total Visits
+              {t.admin.baristas.totalVisits}
             </p>
             <p className='text-2xl font-bold text-primary'>
               {totalVisits}
@@ -276,13 +278,13 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
           </div>
           <div>
             <p className='text-xs font-bold uppercase text-latte'>
-              Total Company Paid
+              {t.admin.baristas.totalCompanyPaid}
             </p>
             <p
               className='text-xl font-bold text-primary truncate'
               title={formatCurrency(totalCompanyCost)}
             >
-              {new Intl.NumberFormat("en-US", {
+              {new Intl.NumberFormat(language === "ar" ? "ar-EG" : "en-US", {
                 notation: "compact",
                 compactDisplay: "short",
                 style: "currency",
@@ -299,16 +301,27 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
           {filteredBaristas.map((barista) => (
             <div
               key={`${barista.id}-${barista.name}`}
+              role="button"
+              tabIndex={0}
               onClick={() => onViewDetails(barista.name)}
-              className='bg-cream rounded-xl shadow-md border border-hairline overflow-hidden flex flex-col hover:shadow-lg hover:border-primary/50 cursor-pointer transition-all duration-300 relative group'
+              onKeyDown={(e) => {
+                // Only activate when the card itself is focused — never when an
+                // inner button (Edit/Delete) fires, which would double-trigger.
+                if (e.target !== e.currentTarget) return;
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onViewDetails(barista.name);
+                }
+              }}
+              className='bg-cream rounded-xl shadow-md border border-hairline overflow-hidden flex flex-col hover:shadow-lg hover:border-primary/50 cursor-pointer transition-all duration-300 relative group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50'
             >
               {/* Auto Detected Badge */}
               {barista.isAutoDetected && (
                 <div
                   className='absolute top-0 end-0 bg-blue-500 text-white text-[10px] uppercase font-bold px-2 py-1 rounded-bl-lg shadow-sm z-10 flex items-center gap-1'
-                  title='This barista was found in maintenance logs but is not in the team list.'
+                  title={t.admin.baristas.autoDetectedTitle}
                 >
-                  <SparklesIcon className='w-3 h-3' /> Auto-Detected
+                  <SparklesIcon className='w-3 h-3' /> {t.admin.baristas.autoDetected}
                 </div>
               )}
 
@@ -324,7 +337,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                       {barista.averageVisitRating > 0 ? (
                         <div
                           className='flex items-center gap-1.5'
-                          title='Average performance from maintenance visits'
+                          title={t.admin.baristas.avgPerfTitle}
                         >
                           <span className='font-bold text-primary dark:text-primary-400 text-sm'>
                             {barista.averageVisitRating.toFixed(1)}
@@ -345,22 +358,22 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                             )}
                           </div>
                           <span className='text-[10px] text-latte font-medium bg-cream dark:bg-espresso-light px-1.5 rounded'>
-                            Perf.
+                            {t.admin.baristas.perfBadge}
                           </span>
                         </div>
                       ) : (
                         <div
                           className='flex items-center gap-1.5'
-                          title='Initial Profile Rating'
+                          title={t.admin.baristas.initialProfileRatingTitle}
                         >
                           {barista.isAutoDetected ? (
                             <span className='text-[10px] text-latte italic'>
-                              No Rating Yet
+                              {t.admin.baristas.noRatingYet}
                             </span>
                           ) : (
                             <>
                               <span className='text-[10px] text-latte font-medium bg-cream dark:bg-espresso-light px-1.5 rounded'>
-                                Profile
+                                {t.admin.baristas.profileBadge}
                               </span>
                             </>
                           )}
@@ -373,8 +386,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                   <span
                     className={`text-xs px-2 py-1 rounded-full font-bold uppercase tracking-wider ${barista.visitCount > 0 ? "bg-cream-2 text-primary dark:bg-primary/20 dark:text-primary-400" : "bg-cream text-latte dark:bg-espresso-light dark:text-latte/70"}`}
                   >
-                    {barista.visitCount} Visit
-                    {barista.visitCount !== 1 ? "s" : ""}
+                    {barista.visitCount} {barista.visitCount === 1 ? t.admin.baristas.visitOne : t.admin.baristas.visitMany}
                   </span>
                   <span
                     className={`text-[9px] px-1.5 py-0.5 rounded border font-bold uppercase tracking-tighter ${
@@ -384,11 +396,11 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                     }`}
                     title={
                       barista.isAutoDetected
-                        ? "Detected from maintenance logs"
-                        : "Listed in client staff"
+                        ? t.admin.baristas.logOnlyBadgeTitle
+                        : t.admin.baristas.clientStaffBadgeTitle
                     }
                   >
-                    {barista.isAutoDetected ? "Log-Only" : "Client Staff"}
+                    {barista.isAutoDetected ? t.admin.baristas.logOnlyBadge : t.admin.baristas.clientStaffBadge}
                   </span>
                 </div>
               </div>
@@ -421,14 +433,14 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                     <button
                       onClick={(e) => startEdit(e, barista)}
                       className='p-1.5 text-latte hover:text-primary hover:bg-cream-2 dark:hover:bg-primary/20 rounded-lg transition-colors min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center'
-                      title='Edit Details'
+                      title={t.admin.baristas.editDetailsTitle}
                     >
                       <PencilIcon className='w-5 h-5' />
                     </button>
                     <button
                       onClick={(e) => handleDelete(e, barista)}
                       className='p-1.5 text-latte hover:text-ember-700 hover:bg-ember-50 dark:hover:bg-ember-500/20 rounded-lg transition-colors min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center'
-                      title='Delete Barista'
+                      title={t.admin.baristas.deleteBaristaTitle}
                     >
                       <TrashIcon className='w-5 h-5' />
                     </button>
@@ -439,7 +451,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                 <div className='bg-cream rounded-lg p-3 space-y-2 text-sm border border-hairline'>
                   <div className='flex justify-between items-center'>
                     <span className='text-latte text-xs uppercase font-bold'>
-                      Company Paid (Saved)
+                      {t.admin.baristas.companyPaidSaved}
                     </span>
                     <span
                       className={`font-mono font-bold ${barista.companyCost > 0 ? "text-amber-500" : "text-latte"}`}
@@ -450,7 +462,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                   <div className='w-full h-px bg-cream-2'></div>
                   <div className='flex justify-between items-center'>
                     <span className='text-latte text-xs uppercase font-bold'>
-                      Client Paid (Rev)
+                      {t.admin.baristas.clientPaidRev}
                     </span>
                     <span
                       className={`font-mono font-bold ${barista.clientCost > 0 ? "text-primary" : "text-latte"}`}
@@ -463,13 +475,13 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                 <div className='flex items-center justify-between mt-2 pt-2 border-t border-hairline'>
                   {barista.lastActive ? (
                     <span className='text-[10px] text-latte italic'>
-                      Last active: {barista.lastActive}
+                      {t.admin.baristas.lastActive.replace('{{date}}', barista.lastActive)}
                     </span>
                   ) : (
                     <span></span>
                   )}
                   <span className='text-primary text-xs font-bold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
-                    View Work History <ArrowRightIcon className='w-3 h-3' />
+                    {t.admin.baristas.viewWorkHistory} <ArrowRightIcon className='w-3 h-3' />
                   </span>
                 </div>
               </div>
@@ -481,13 +493,13 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
           <EmptyState
             variant={searchTerm ? "search" : "primary"}
             icon={<UserIcon />}
-            title="لا يوجد باريستا"
-            message={searchTerm ? "لم يتم العثور على باريستا يطابق بحثك." : "لم يتم إضافة باريستا حتى الآن."}
+            title={t.admin.baristas.noBaristas}
+            message={searchTerm ? t.admin.baristas.noSearchResults : t.admin.baristas.noBaristasYet}
           >
             {searchTerm && (
                 <Button variant="secondary" onClick={() => setSearchTerm('')}>
                     <XMarkIcon className="w-4 h-4" />
-                    مسح البحث
+                    {t.admin.baristas.clearSearch}
                 </Button>
             )}
           </EmptyState>
@@ -503,7 +515,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
           >
             <div className='flex justify-between items-center mb-4'>
               <h3 className='text-lg font-bold text-primary'>
-                تعديل التفاصيل
+                {t.admin.baristas.editTitle}
               </h3>
               <button
                 onClick={() => setEditingBarista(null)}
@@ -516,7 +528,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
             <div className='space-y-4'>
               <div>
                 <label className='block text-sm font-medium text-primary mb-1'>
-                  الاسم
+                  {t.admin.baristas.nameLabel}
                 </label>
                 <input
                   type='text'
@@ -529,7 +541,7 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
               </div>
               <div>
                 <label className='block text-sm font-medium text-primary mb-1'>
-                  رقم الهاتف
+                  {t.admin.baristas.phoneLabel}
                 </label>
               <input
                 type='tel'
@@ -554,13 +566,13 @@ const BaristasPage: React.FC<BaristasPageProps> = ({
                   onClick={() => setEditingBarista(null)}
                   className='flex-1 py-3 min-h-[44px] border border-hairline text-primary rounded-lg font-semibold hover:bg-cream-2 transition-colors'
                 >
-                  إلغاء
+                  {t.common.cancel}
                 </button>
                 <button
                   onClick={saveEdit}
                   className='btn-primary flex-1 py-3 min-h-[44px] rounded-lg font-bold transition-colors'
                 >
-                  حفظ التغييرات
+                  {t.admin.baristas.saveChanges}
                 </button>
               </div>
             </div>

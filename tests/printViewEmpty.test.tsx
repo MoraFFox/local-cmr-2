@@ -77,17 +77,18 @@ describe("InternalReportPrintView empty-state suppression (plan 03-03)", () => {
     render(<InternalReportPrintView data={baseForm()} branch={emptyBranch} />);
 
     // KPI cards stay at 0 (D-06) — the report still renders.
-    expect(screen.getByText("Total Visits")).toBeTruthy();
-    expect(screen.getByText("Net Cost")).toBeTruthy();
+    // (Print view is localized via the LanguageProvider; default language is Arabic.)
+    expect(screen.getByText("إجمالي الزيارات")).toBeTruthy();
+    expect(screen.getByText("صافي التكلفة")).toBeTruthy();
 
     // Empty sections vanish entirely (D-04/D-07/D-11): no headings…
-    expect(screen.queryByText("Financial Summary")).toBeNull();
-    expect(screen.queryByText("Visit Zone Fees")).toBeNull();
-    expect(screen.queryByText("Technician Performance")).toBeNull();
-    expect(screen.queryByText("Common Problems")).toBeNull();
-    expect(screen.queryByText("Maintenance Log")).toBeNull();
+    expect(screen.queryByText("الملخص المالي")).toBeNull();
+    expect(screen.queryByText("رسوم مناطق الزيارة")).toBeNull();
+    expect(screen.queryByText("أداء الفنيين")).toBeNull();
+    expect(screen.queryByText("المشاكل الشائعة")).toBeNull();
+    expect(screen.queryByText("سجل الصيانة")).toBeNull();
     // …and no empty tables/placeholders.
-    expect(screen.queryByText("Technician", { selector: "th" })).toBeNull();
+    expect(screen.queryByText("الفني", { selector: "th" })).toBeNull();
   });
 
   it("keeps date-only maintenance records but suppresses their empty headers (D-08)", () => {
@@ -101,8 +102,8 @@ describe("InternalReportPrintView empty-state suppression (plan 03-03)", () => {
     // The record card itself survives (date visible).
     expect(screen.getByText("2026-07-02")).toBeTruthy();
     // Empty derived sections still vanish.
-    expect(screen.queryByText("Visit Zone Fees")).toBeNull();
-    expect(screen.queryByText("Technician Performance")).toBeNull();
+    expect(screen.queryByText("رسوم مناطق الزيارة")).toBeNull();
+    expect(screen.queryByText("أداء الفنيين")).toBeNull();
     // Surviving empty cell uses the shared placeholder.
     expect(screen.getByText(NO_DATA_LABEL)).toBeTruthy();
   });
@@ -116,7 +117,7 @@ describe("InternalReportPrintView empty-state suppression (plan 03-03)", () => {
     render(<InternalReportPrintView data={data} />);
 
     // Branch comparison table exists (hasBranches)…
-    expect(screen.getByText("Branch Comparison")).toBeTruthy();
+    expect(screen.getByText("مقارنة الفروع")).toBeTruthy();
     // …and the logistics cell with no operations renders the shared placeholder.
     expect(screen.getAllByText(NO_DATA_LABEL).length).toBeGreaterThan(0);
   });

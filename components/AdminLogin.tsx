@@ -10,6 +10,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Button from "./ui/Button";
 import { formatEgyptianPhone } from "../utils/phone";
+import { useT } from "../utils/i18n";
 
 interface AdminLoginProps {
   isLoading?: boolean;
@@ -27,6 +28,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const t = useT();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,11 +45,11 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
 
     const normalizedEmail = email.trim().toLowerCase();
     if (!normalizedEmail) {
-      setError("يرجى إدخال بريدك الإلكتروني.");
+      setError(t.ui.adminAuth.emailEmptyError);
       return;
     }
     if (!validateEmail(normalizedEmail)) {
-      setError("يرجى إدخال بريد إلكتروني صحيح.");
+      setError(t.ui.adminAuth.invalidEmailError);
       return;
     }
 
@@ -63,7 +65,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
       if (resetError) {
         logger.error("Password reset error", resetError, "auth");
         setError(
-          "فشل إرسال رابط إعادة التعيين. يرجى المحاولة مرة أخرى."
+          t.ui.adminAuth.resetLinkSendFailed
         );
       } else {
         setIsSuccess(true);
@@ -71,7 +73,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
     } catch (submitError) {
       logger.error("Password reset exception", submitError, "auth");
       setError(
-        "حدث خطأ. يرجى المحاولة مرة أخرى."
+        t.ui.adminAuth.genericError
       );
     } finally {
       setIsSubmitting(false);
@@ -104,19 +106,19 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
               <CheckCircleIcon className="w-7 h-7 text-leaf-500" />
             </div>
             <h2 className="text-xl font-bold font-display text-text mb-2">
-              تحقق من بريدك الإلكتروني
+              {t.ui.adminAuth.checkYourEmailTitle}
             </h2>
             <p className="text-latte mb-2">
-              تحقق من بريدك الإلكتروني
+              {t.ui.adminAuth.checkYourEmailSubtitle}
             </p>
             <p className="text-sm text-latte mb-6">
-              لقد أرسلنا رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.
+              {t.ui.adminAuth.resetLinkSent}
             </p>
             <Button
               onClick={handleClose}
               className="w-full"
             >
-              العودة لتسجيل الدخول
+              {t.ui.adminAuth.backToLogin}
             </Button>
           </div>
         ) : (
@@ -127,15 +129,15 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                 <EnvelopeIcon className="w-7 h-7 text-text" />
               </div>
               <h2 className="text-xl font-bold font-display text-text mb-2">
-                إعادة تعيين كلمة المرور
+                {t.ui.adminAuth.forgotTitle}
               </h2>
               <p className="text-latte">
-                إعادة تعيين كلمة المرور
+                {t.ui.adminAuth.forgotSubtitle}
               </p>
             </div>
 
             <p className="text-sm text-latte text-center mb-4">
-              أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.
+              {t.ui.adminAuth.enterEmailHint}
             </p>
 
             {error && (
@@ -147,7 +149,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-text mb-2">
-                  البريد الإلكتروني
+                  {t.ui.adminAuth.emailLabel}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 end-0 pe-4 flex items-center pointer-events-none">
@@ -171,7 +173,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                 isLoading={isSubmitting}
                 className="w-full"
               >
-                إرسال رابط إعادة التعيين
+                {t.ui.adminAuth.sendResetLink}
               </Button>
             </form>
           </>
@@ -182,6 +184,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
 };
 
 const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
+  const t = useT();
   const [contactType, setContactType] = useState<ContactType>("email");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -209,11 +212,11 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
     if (contactType === "email") {
       const normalizedEmail = email.trim().toLowerCase();
       if (!normalizedEmail || !trimmedPassword) {
-        setError("يرجى إدخال البريد الإلكتروني وكلمة المرور.");
+        setError(t.ui.adminAuth.emailRequiredError);
         return;
       }
       if (!validateEmail(normalizedEmail)) {
-        setError("يرجى إدخال بريد إلكتروني صحيح.");
+        setError(t.ui.adminAuth.invalidEmailError);
         return;
       }
 
@@ -225,24 +228,24 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
           });
 
           if (signInError) {
-            setError("بيانات تسجيل الدخول غير صحيحة.");
+            setError(t.ui.adminAuth.invalidCredentialsError);
           } else {
             window.location.href = '/';
           }
         } catch (submitError) {
           logger.error("Admin login exception", submitError, "auth");
-        setError("فشل تسجيل الدخول، حاول مرة أخرى.");
+        setError(t.ui.adminAuth.loginFailedError);
       } finally {
         setIsSubmitting(false);
       }
     } else {
       const normalizedPhone = phone.trim();
       if (!normalizedPhone || !trimmedPassword) {
-        setError("يرجى إدخال رقم الهاتف وكلمة المرور.");
+        setError(t.ui.adminAuth.phoneRequiredError);
         return;
       }
       if (!validatePhone(normalizedPhone)) {
-        setError("يرجى إدخال رقم هاتف صحيح.");
+        setError(t.ui.adminAuth.invalidPhoneError);
         return;
       }
 
@@ -256,7 +259,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
 
         if (signInError) {
           logger.error("Phone sign in error", signInError, 'auth');
-          setError("بيانات تسجيل الدخول غير صحيحة.");
+          setError(t.ui.adminAuth.invalidCredentialsError);
         } else {
           logger.debug("Phone sign in successful", { 
             userId: data.user?.id, 
@@ -269,7 +272,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
         }
       } catch (submitError) {
         logger.error("Phone admin login exception", submitError, 'auth');
-        setError("فشل تسجيل الدخول، حاول مرة أخرى.");
+        setError(t.ui.adminAuth.loginFailedError);
       } finally {
         setIsSubmitting(false);
       }
@@ -289,9 +292,9 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
 
   const getLabel = () => {
     if (contactType === "email") {
-      return "البريد الإلكتروني";
+      return t.ui.adminAuth.emailLabel;
     }
-    return "الهاتف";
+    return t.ui.adminAuth.phoneLabel;
   };
 
   return (
@@ -307,10 +310,10 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
             )}
           </div>
           <h1 className="text-2xl font-bold font-display text-text mb-2">
-            تسجيل دخول الإدارة
+            {t.ui.adminAuth.adminLoginTitle}
           </h1>
           <p className="text-latte">
-            تسجيل دخول الإدارة
+            {t.ui.adminAuth.adminLoginSubtitle}
           </p>
         </div>
 
@@ -323,7 +326,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
         {/* Contact Type Toggle — segmented control on cream-2 track */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-text mb-2 text-center">
-            البريد أو الهاتف
+            {t.ui.adminAuth.emailOrPhone}
           </label>
           <div className="flex rounded-lg bg-cream-2 p-1">
             <button
@@ -336,7 +339,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
               }`}
             >
               <EnvelopeIcon className="w-4 h-4" />
-              <span>البريد الإلكتروني</span>
+              <span>{t.ui.adminAuth.emailLabel}</span>
             </button>
             <button
               type="button"
@@ -348,7 +351,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
               }`}
             >
               <PhoneIcon className="w-4 h-4" />
-              <span>الهاتف</span>
+              <span>{t.ui.adminAuth.phoneLabel}</span>
             </button>
           </div>
         </div>
@@ -388,7 +391,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
 
           <div>
             <label className="block text-sm font-medium text-text mb-2">
-              كلمة المرور
+              {t.ui.adminAuth.passwordLabel}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 end-0 pe-4 flex items-center pointer-events-none">
@@ -411,7 +414,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
             isLoading={isSubmitting || isLoading}
             className="btn-primary w-full"
           >
-            تسجيل الدخول
+            {t.ui.adminAuth.loginButton}
           </Button>
 
           {/* Forgot Password Link */}
@@ -422,7 +425,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isLoading = false }) => {
                 onClick={() => setShowForgotPassword(true)}
                 className="text-sm text-text hover:text-primary transition-colors min-h-[44px] px-2"
               >
-                نسيت كلمة المرور؟
+                {t.ui.adminAuth.forgotPassword}
               </button>
             </div>
           )}

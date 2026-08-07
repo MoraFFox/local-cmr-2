@@ -8,12 +8,14 @@ import {
   ArrowLeftIcon,
 } from "@heroicons/react/24/outline";
 import Button from "./ui/Button";
+import { useT } from "../utils/i18n";
 
 interface ResetPasswordProps {
   onBack?: () => void;
 }
 
 const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
+  const t = useT();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -68,19 +70,19 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
     setError("");
 
     if (!newPassword.trim()) {
-      setError("يرجى إدخال كلمة مرور جديدة.");
+      setError(t.ui.adminAuth.newPasswordEmptyError);
       return;
     }
 
     if (!validatePassword(newPassword)) {
       setError(
-        "يجب أن تكون كلمة المرور 8 أحرف على الأقل."
+        t.ui.adminAuth.passwordTooShortError
       );
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError("كلمات المرور غير متطابقة.");
+      setError(t.ui.adminAuth.passwordsMismatchError);
       return;
     }
 
@@ -93,7 +95,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
       if (updateError) {
         logger.error("Password update error", updateError, "auth");
         setError(
-          "فشل إعادة تعيين كلمة المرور. يرجى المحاولة مرة أخرى."
+          t.ui.adminAuth.resetFailedError
         );
       } else {
         setIsSuccess(true);
@@ -103,7 +105,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
     } catch (submitError) {
       logger.error("Password reset exception", submitError, "auth");
       setError(
-        "حدث خطأ. يرجى المحاولة مرة أخرى."
+        t.ui.adminAuth.genericError
       );
     } finally {
       setIsSubmitting(false);
@@ -125,7 +127,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
         <div className="text-center">
           <div className="mx-auto mb-4 h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
           <p className="text-primary font-medium">
-            جاري التحقق من الرابط...
+            {t.ui.adminAuth.checkingLink}
           </p>
         </div>
       </div>
@@ -142,16 +144,16 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
               <ExclamationCircleIcon className="w-8 h-8 text-ember-500" />
             </div>
             <h1 className="text-2xl font-bold text-primary mb-2">
-              رابط غير صالح أو منتهي الصلاحية
+              {t.ui.adminAuth.invalidOrExpiredLinkTitle}
             </h1>
             <p className="text-latte mb-6">
-              رابط إعادة تعيين كلمة المرور هذا غير صالح أو منتهي الصلاحية. يرجى طلب رابط جديد.
+              {t.ui.adminAuth.invalidOrExpiredLinkMessage}
             </p>
             <Button
               onClick={handleBackToLogin}
               className="w-full"
             >
-              العودة لتسجيل الدخول
+              {t.ui.adminAuth.backToLogin}
             </Button>
           </div>
         </div>
@@ -169,16 +171,16 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
               <CheckCircleIcon className="w-8 h-8 text-leaf-500" />
             </div>
             <h1 className="text-2xl font-bold text-primary mb-2">
-              تم إعادة تعيين كلمة المرور بنجاح!
+              {t.ui.adminAuth.passwordResetSuccessTitle}
             </h1>
             <p className="text-latte mb-6">
-              يرجى تسجيل الدخول بكلمة المرور الجديدة.
+              {t.ui.adminAuth.passwordResetSuccessMessage}
             </p>
             <Button
               onClick={handleBackToLogin}
               className="w-full"
             >
-              العودة لتسجيل الدخول
+              {t.ui.adminAuth.backToLogin}
             </Button>
           </div>
         </div>
@@ -197,7 +199,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
             className="mb-6 flex items-center gap-2 text-latte hover:text-primary transition-colors"
           >
             <ArrowLeftIcon className="w-5 h-5" />
-            <span>العودة لتسجيل الدخول</span>
+            <span>{t.ui.adminAuth.backToLogin}</span>
           </button>
         )}
 
@@ -207,7 +209,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
             <LockClosedIcon className="w-8 h-8 text-primary" />
           </div>
           <h1 className="text-2xl font-bold text-primary mb-2">
-            إعادة تعيين كلمة المرور
+            {t.ui.adminAuth.forgotTitle}
           </h1>
         </div>
 
@@ -220,7 +222,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-primary mb-2">
-              كلمة المرور الجديدة
+              {t.ui.adminAuth.newPasswordLabel}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
@@ -239,7 +241,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
 
           <div>
             <label className="block text-sm font-medium text-primary mb-2">
-              تأكيد كلمة المرور الجديدة
+              {t.ui.adminAuth.confirmNewPasswordLabel}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
@@ -261,7 +263,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onBack }) => {
             isLoading={isSubmitting}
             className="w-full py-3"
           >
-            إعادة تعيين كلمة المرور
+            {t.ui.adminAuth.resetPasswordButton}
           </Button>
         </form>
       </div>

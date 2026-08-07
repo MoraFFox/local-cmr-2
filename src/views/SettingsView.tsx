@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import CompanyMachinesSettings from './CompanyMachinesSettings';
 import CustomCatalogManager from '../../components/CustomCatalogManager';
 import WordExportTemplateSettings from '../../components/WordExportTemplateSettings';
+import { useT } from '../../utils/i18n';
 
 const SettingsView: React.FC = () => {
+  const t = useT();
   const [activeTab, setActiveTab] = useState<'machines' | 'catalog' | 'word'>('machines');
 
   return (
@@ -17,7 +19,7 @@ const SettingsView: React.FC = () => {
               : 'text-latte hover:text-text'
           }`}
         >
-          إدارة الماكينات
+          {t.ui.misc.machinesTab}
         </button>
         <button
           onClick={() => setActiveTab('catalog')}
@@ -27,7 +29,7 @@ const SettingsView: React.FC = () => {
               : 'text-latte hover:text-text'
           }`}
         >
-          الكتالوج المخصص
+          {t.ui.misc.catalogTab}
         </button>
         <button
           onClick={() => setActiveTab('word')}
@@ -37,7 +39,7 @@ const SettingsView: React.FC = () => {
               : 'text-latte hover:text-text'
           }`}
         >
-          قالب تصدير Word
+          {t.ui.misc.wordTab}
         </button>
       </div>
       {activeTab === 'machines' ? (

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { CheckIcon } from '@heroicons/react/24/solid';
+import { useT } from '../../utils/i18n';
 
 export interface StepperStep {
   id: number;
@@ -15,6 +16,7 @@ interface StepperProps {
 }
 
 const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, completedSteps = [], layout = 'vertical' }) => {
+  const t = useT();
   const [hoveredStep, setHoveredStep] = useState<number | null>(null);
   const scrollContainerRef = useRef<HTMLElement>(null);
 
@@ -144,11 +146,11 @@ const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onChange, complet
                   <p className={`text-sm font-semibold truncate transition-all duration-200 ${isCurrent ? 'text-primary' : isCompleted ? 'text-primary/90' : 'text-latte/70'}`}>{step.name}</p>
                   {isCurrent && (
                     <p className="text-[11px] text-primary/80 dark:text-primary/80 mt-0.5 font-medium flex items-center gap-1">
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />الخطوة الحالية
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />{t.ui.misc.currentStep}
                     </p>
                   )}
                   {isCompleted && (
-                    <p className="text-[11px] text-leaf-500/70 mt-0.5 font-medium">✓ تم الإكمال</p>
+                    <p className="text-[11px] text-leaf-500/70 mt-0.5 font-medium">✓ {t.ui.misc.completed}</p>
                   )}
                 </div>
                 {!isCurrent && !isCompleted && (

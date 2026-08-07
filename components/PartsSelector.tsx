@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { ar } from '../utils/arabicTranslations';
+import { useT } from '../utils/i18n';
 import { Part, PartRecord } from '../types';
 import { announce } from '../utils/ariaAnnouncer';
 import {
@@ -45,6 +45,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
   existingCategories = [],
 }) => {
   const { showToast } = useToast();
+  const t = useT();
 
   // Keep a live ref so the async add handler sees the latest selected values.
   const selectedValuesRef = useRef(selectedValues);
@@ -70,7 +71,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
   useEffect(() => {
     const count = selectedValues.length;
     if (count > 0) {
-      announce(`تم تحديد ${count} ${count === 1 ? 'قطعة' : 'قطع'}`);
+      announce(t.selectors.selectedPartsCount.replace('{{count}}', String(count)));
     }
     // Only announce on count changes, skip initial render (count === 0)
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -209,11 +210,11 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
         <div className={`px-4 py-3 ${headerBgColor} flex items-center justify-between border-b ${headerBorderColor}`}>
           <div className="flex items-center gap-2">
             <span className={`font-bold uppercase tracking-wider text-xs ${textColor}`}>
-              {isMidos ? ar.payerFirstUI.midosPays : ar.payerFirstUI.clientPays}
+              {isMidos ? t.payerFirstUI.midosPays : t.payerFirstUI.clientPays}
             </span>
           </div>
           <div className={`text-xs font-mono font-medium ${textColor}`}>
-            {summary.count} items / Qty: {summary.quantity}
+            {t.selectors.itemsQty.replace('{{count}}', String(summary.count)).replace('{{qty}}', String(summary.quantity))}
           </div>
         </div>
 
@@ -240,7 +241,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
             })
           ) : (
             <div className="text-center py-6 text-latte text-sm italic">
-              {ar.payerFirstUI.noSelectedItems}
+              {t.payerFirstUI.noSelectedItems}
             </div>
           )}
         </div>
@@ -260,7 +261,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
       <div className="flex gap-2">
         <div className="flex-grow" ref={searchInputRef}>
              <TechInput 
-                 placeholder={ar.selectors.searchParts}
+                 placeholder={t.selectors.searchParts}
                  value={searchTerm}
                  onChange={(e) => setSearchTerm(e.target.value)}
                  icon={<MagnifyingGlassIcon className="w-5 h-5 text-latte" />}
@@ -288,7 +289,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
           <div className="flex items-center gap-2 mb-4">
             <SparklesIcon className="w-4 h-4 text-primary dark:text-copper-300" />
             <h3 className="text-xs font-bold uppercase tracking-widest text-primary dark:text-copper-300">
-              Suggested for your issues
+              {t.selectors.suggestedForIssues}
             </h3>
             <span className="text-[10px] bg-primary/20 text-primary dark:text-copper-300 px-1.5 py-0.5 rounded-full font-bold">
               {availableSuggestions.length}
@@ -302,7 +303,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
 
       {/* Available Section */}
       <div className="bg-cream-2 border border-hairline rounded-2xl p-4 md:p-6">
-        <h3 className="text-xs font-bold uppercase tracking-widest text-latte mb-4">Replacements Inventory</h3>
+        <h3 className="text-xs font-bold uppercase tracking-widest text-latte mb-4">{t.selectors.replacementsInventory}</h3>
 
         {filteredOptions.length > 0 ? (
           <div className="space-y-8">
@@ -310,7 +311,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
             {frequentlyReplaced.length > 0 && (
                 <section>
                     <h4 className="text-sm font-semibold text-primary dark:text-copper-300 mb-3 border-b border-primary/10 pb-2">
-                        Common
+                        {t.selectors.common}
                     </h4>
                     <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'flex flex-col gap-2'}`}>
                         {frequentlyReplaced.map(renderAvailablePart)}
@@ -322,7 +323,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
             {regularParts.length > 0 && (
                 <section>
                     <h4 className="text-sm font-semibold text-latte mb-3 border-b border-hairline pb-2">
-                        All Parts
+                        {t.selectors.allParts}
                     </h4>
                     <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'flex flex-col gap-2'}`}>
                          {regularParts.map(renderAvailablePart)}
@@ -333,7 +334,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
           </div>
         ) : (
           <div className="text-center py-12 text-latte">
-             <p>{searchTerm ? ar.selectors.noPartsMatch : ar.payerFirstUI.noAvailableItems}</p>
+             <p>{searchTerm ? t.selectors.noPartsMatch : t.payerFirstUI.noAvailableItems}</p>
           </div>
         )}
       </div>
@@ -346,7 +347,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
               className="flex items-center gap-2 text-latte hover:text-text transition-colors py-2 group"
           >
               <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                  SELECTED PARTS
+                  {t.selectors.selectedParts}
                   {totalSelectedCount > 0 && <span className="bg-primary text-white px-1.5 py-0.5 rounded text-[10px]">{totalSelectedCount}</span>}
               </span>
               {isSelectedSectionExpanded ? <ChevronUpIcon className="w-4 h-4"/> : <ChevronDownIcon className="w-4 h-4"/>}
@@ -357,12 +358,12 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
             <div className="flex items-center gap-2">
               {/* Bulk quantity edit (audit issue #20) */}
               <div className="flex items-center gap-1 text-xs">
-                <span className="text-latte">Multiply all:</span>
+                <span className="text-latte">{t.selectors.multiplyAll}</span>
                 <button
                   type="button"
                   onClick={() => handleBulkQuantityMultiply(2)}
                   className="px-2 py-1 rounded-md font-bold bg-leaf-500/15 text-leaf-700 dark:text-leaf-400 border border-leaf-500/40 hover:bg-leaf-500/25 transition-colors"
-                  title="Double all quantities"
+                  title={t.selectors.doubleQuantities}
                 >
                   ×2
                 </button>
@@ -370,7 +371,7 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
                   type="button"
                   onClick={() => handleBulkQuantityMultiply(0.5)}
                   className="px-2 py-1 rounded-md font-bold bg-ember-500/15 text-ember-700 dark:text-ember-400 border border-ember-500/40 hover:bg-ember-500/25 transition-colors"
-                  title="Halve all quantities (min 1)"
+                  title={t.selectors.halveQuantities}
                 >
                   ÷2
                 </button>
@@ -378,20 +379,20 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
 
               {/* Bulk payer edit */}
               <div className="flex items-center gap-1 text-xs">
-                <span className="text-latte">Set all:</span>
+                <span className="text-latte">{t.selectors.setAll}</span>
                 <button
                   type="button"
                   onClick={() => handleBulkPayerChange(false)}
                   className="px-2 py-1 rounded-md font-bold bg-primary/15 text-primary dark:text-copper-300 border border-primary/40 hover:bg-primary/25 transition-colors"
                 >
-                  {ar.payerFirstUI.midosPays}
+                  {t.payerFirstUI.midosPays}
                 </button>
                 <button
                   type="button"
                   onClick={() => handleBulkPayerChange(true)}
                   className="px-2 py-1 rounded-md font-bold bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/40 hover:bg-amber-500/25 transition-colors"
                 >
-                  {ar.payerFirstUI.clientPays}
+                  {t.payerFirstUI.clientPays}
                 </button>
               </div>
 
@@ -400,16 +401,16 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
                 <button
                   onClick={() => setSelectedViewMode('cards')}
                   className={`p-1.5 rounded-md transition-all ${selectedViewMode === 'cards' ? 'bg-cream-3 text-text shadow-sm' : 'text-latte hover:text-text'}`}
-                  title="Card view (detailed)"
-                  aria-label="Switch to card view"
+                  title={t.selectors.cardView}
+                  aria-label={t.selectors.switchCardView}
                 >
                   <Squares2X2Icon className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setSelectedViewMode('chips')}
                   className={`p-1.5 rounded-md transition-all ${selectedViewMode === 'chips' ? 'bg-cream-3 text-text shadow-sm' : 'text-latte hover:text-text'}`}
-                  title="Chips view (compact)"
-                  aria-label="Switch to compact chips view"
+                  title={t.selectors.chipsView}
+                  aria-label={t.selectors.switchChipsView}
                 >
                   <SquaresPlusIcon className="h-4 w-4" />
                 </button>
@@ -443,8 +444,8 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
                         onChange(selectedValues.map((p, i) => i === idx ? { ...p, name: newName } : p));
                       }
                     }}
-                    midosLabel={ar.payerFirstUI.midosPays}
-                    clientLabel={ar.payerFirstUI.clientPays}
+                    midosLabel={t.payerFirstUI.midosPays}
+                    clientLabel={t.payerFirstUI.clientPays}
                   />
                 )}
 
@@ -461,14 +462,14 @@ const PartsSelector: React.FC<PartsSelectorProps> = ({
                     className="w-full py-3 border border-dashed border-hairline rounded-xl text-latte hover:text-primary hover:border-primary/50 hover:bg-cream-2 transition-all flex items-center justify-center gap-2 font-medium"
                 >
                     <PlusCircleIcon className="w-5 h-5" />
-                    {ar.selectors.addCustomPart}
+                    {t.selectors.addCustomPart}
                 </button>                <AddCustomCatalogItemDialog
                     isOpen={isAddCustomDialogOpen}
                     onClose={() => setIsAddCustomDialogOpen(false)}
                     onSubmit={async (item) => {
                       if (!onAddCustom) return;
                       const saved = await onAddCustom(item);
-                      showToast('تم حفظ قطعة الغيار في الكتالوج', 'success');
+                      showToast(t.selectors.partSavedToast, 'success');
                       const value = saved?.value ?? item.value;
                       const current = selectedValuesRef.current;
                       if (!current.some((p) => p.name === value)) {

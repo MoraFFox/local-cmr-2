@@ -6,8 +6,11 @@ import {
 import {
   DateRange,
   ARABIC_PRESET_LABELS,
+  ENGLISH_PRESET_LABELS,
   getDateRangePresets,
 } from "../utils/dateRangeFilter";
+import { useLanguage } from "../utils/LanguageContext";
+import { useT } from "../utils/i18n";
 
 interface DateRangeExportModalProps {
   isOpen: boolean;
@@ -23,9 +26,13 @@ const DateRangeExportModal: React.FC<DateRangeExportModalProps> = ({
   isOpen,
   onClose,
   onExport,
-  title = "تصدير التقرير",
+  title,
   isGenerating = false,
 }) => {
+  const { language } = useLanguage();
+  const t = useT();
+  const resolvedTitle = title ?? t.ui.dateRange.defaultTitle;
+  const presetLabels = language === 'ar' ? ARABIC_PRESET_LABELS : ENGLISH_PRESET_LABELS;
   const [selectedPreset, setSelectedPreset] = useState<string>("allTime");
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
@@ -76,7 +83,7 @@ const DateRangeExportModal: React.FC<DateRangeExportModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -92,12 +99,12 @@ const DateRangeExportModal: React.FC<DateRangeExportModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-hairline dark:border-hairline">
           <h2 className="text-lg font-bold text-primary dark:text-white">
-            {title}
+            {resolvedTitle}
           </h2>
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg text-latte hover:text-primary hover:bg-cream-2 dark:hover:bg-espresso-light transition-colors"
-            aria-label="إغلاق"
+            aria-label={t.ui.dateRange.close}
           >
             <XMarkIcon className="w-5 h-5" />
           </button>
@@ -108,7 +115,7 @@ const DateRangeExportModal: React.FC<DateRangeExportModalProps> = ({
           {/* Preset buttons */}
           <div>
             <h3 className="text-sm font-semibold text-primary dark:text-latte/70 mb-3">
-              المدة الزمنية
+              {t.ui.dateRange.timePeriod}
             </h3>
             <div className="grid grid-cols-3 gap-2">
               {PRESET_KEYS.map((key) => (
@@ -123,7 +130,7 @@ const DateRangeExportModal: React.FC<DateRangeExportModalProps> = ({
                   }`}
                 >
                   <CalendarIcon className="w-5 h-5" />
-                  <span>{ARABIC_PRESET_LABELS[key]}</span>
+                  <span>{presetLabels[key]}</span>
                 </button>
               ))}
             </div>
@@ -138,11 +145,11 @@ const DateRangeExportModal: React.FC<DateRangeExportModalProps> = ({
                   : "text-latte"
               }`}
             >
-              {ARABIC_PRESET_LABELS.custom}
+              {presetLabels.custom}
             </h3>
             <div className="flex items-center gap-2">
               <div className="flex-1">
-                <label htmlFor="date-range-start" className="block text-xs text-latte mb-1">من</label>
+                <label htmlFor="date-range-start" className="block text-xs text-latte mb-1">{t.ui.dateRange.from}</label>
                 <input
                   id="date-range-start"
                   type="date"
@@ -153,7 +160,7 @@ const DateRangeExportModal: React.FC<DateRangeExportModalProps> = ({
               </div>
               <span className="text-latte mt-5">—</span>
               <div className="flex-1">
-                <label htmlFor="date-range-end" className="block text-xs text-latte mb-1">إلى</label>
+                <label htmlFor="date-range-end" className="block text-xs text-latte mb-1">{t.ui.dateRange.to}</label>
                 <input
                   id="date-range-end"
                   type="date"
@@ -170,7 +177,7 @@ const DateRangeExportModal: React.FC<DateRangeExportModalProps> = ({
             <div className="p-3 bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-lg text-sm text-primary dark:text-primary-300 text-center font-medium">
               {(activeRange.startDate || activeRange.endDate)
                 ? `${activeRange.startDate || "..."} — ${activeRange.endDate || "..."}`
-                : ARABIC_PRESET_LABELS[activeRange.preset || "custom"]}
+                : presetLabels[activeRange.preset || "custom"]}
             </div>
           )}
         </div>
@@ -183,7 +190,7 @@ const DateRangeExportModal: React.FC<DateRangeExportModalProps> = ({
             disabled={isGenerating}
             className="px-4 py-2 text-sm font-medium text-latte hover:text-primary rounded-lg transition-colors disabled:opacity-50"
           >
-            إلغاء
+            {t.ui.dateRange.cancel}
           </button>
           <button
             type="button"
@@ -194,12 +201,12 @@ const DateRangeExportModal: React.FC<DateRangeExportModalProps> = ({
             {isGenerating ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                جاري التصدير...
+                {t.ui.dateRange.exporting}
               </>
             ) : (
               <>
                 <CalendarIcon className="w-4 h-4" />
-                تصدير
+                {t.ui.dateRange.export}
               </>
             )}
           </button>

@@ -23,6 +23,8 @@ import { getSuggestedServices, getSuggestedParts } from '../utils/problemSuggest
 import { getMaintenanceWorkSections, MAINTENANCE_SECTION_LABELS_AR } from '../utils/logisticsLabels';
 import LogisticsWorkOrder from './LogisticsWorkOrder';
 import type { LogisticsOperation, CompanyMachine, ServiceRecord, PartRecord } from '../types';
+import { useT } from '../utils/i18n';
+import type { Translations } from '../utils/i18n';
 
 interface MachineLogisticsSectionProps {
   customerId: number | null;
@@ -131,11 +133,12 @@ const MaintenanceCostAutoHint: React.FC<{
   servicesCatalog: Array<{ value: string; cost: number }>;
   partsCatalog: Array<{ value: string; cost: number }>;
 }> = ({ services, parts, servicesCatalog, partsCatalog }) => {
+  const t = useT();
   const hasItems = services.length > 0 || parts.length > 0;
   if (!hasItems) {
     return (
       <p className="text-xs text-latte mt-1">
-        تُحسب تلقائياً من الخدمات وقطع الغيار المختارة — ويمكنك تعديلها يدوياً.
+        {t.ui.logistics.autoCalcHint}
       </p>
     );
   }
@@ -150,8 +153,8 @@ const MaintenanceCostAutoHint: React.FC<{
   const total = Math.round((servicesCost + partsCost) * 100) / 100;
   return (
     <p className="text-xs text-latte mt-1">
-      محسوبة تلقائياً: الخدمات {servicesCost.toLocaleString()} + القطع{' '}
-      {partsCost.toLocaleString()} = {total.toLocaleString()} ج.م — يمكنك تعديلها يدوياً.
+      {t.ui.logistics.autoCalcServices} {servicesCost.toLocaleString()} {t.ui.logistics.autoCalcParts}{' '}
+      {partsCost.toLocaleString()} = {total.toLocaleString()} {t.ui.logistics.egp} {t.ui.logistics.autoCalcEdit}
     </p>
   );
 };
@@ -168,12 +171,13 @@ const MaintenanceWorkSections: React.FC<{
   parts?: PartRecord[];
   fallback?: string;
 }> = ({ issues, services, parts, fallback }) => {
+  const t = useT();
   const sections = getMaintenanceWorkSections(issues, services, parts);
 
   if (sections.length === 0) {
     if (!fallback) return null;
     return (
-      <p className="text-xs text-latte mt-1">الأعمال: {fallback}</p>
+      <p className="text-xs text-latte mt-1">{t.ui.logistics.workColon} {fallback}</p>
     );
   }
 
@@ -213,6 +217,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
   recordId,
   maintenanceDate,
 }) => {
+  const t = useT();
   const { showToast } = useToast();
   const { operations, isLoading, createOperation, closeOperation, updateOperation, deleteOperation, refresh } =
     useLogisticsOperations(customerId);
@@ -392,12 +397,12 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
         // Validate close-time data on closed-op edits (matches the close form)
         if (editingOp.status === 'closed') {
           if (formData.maintenance_cost !== '' && isNaN(Number(formData.maintenance_cost))) {
-            showToast('تكلفة الصيانة يجب أن تكون رقماً صحيحاً', 'error');
+            showToast(t.ui.logistics.costMustBeNumber, 'error');
             setIsSaving(false);
             return;
           }
           if (formData.maintenance_issues.length === 0) {
-            showToast('يجب اختيار مشكلة واحدة على الأقل', 'error');
+            showToast(t.ui.logistics.selectOneProblem, 'error');
             setIsSaving(false);
             return;
           }
@@ -417,15 +422,15 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
           maintenance_parts:
             editingOp.status === 'closed' ? formData.maintenance_parts : undefined,
         });
-        showToast('تم تحديث العملية اللوجستية بنجاح', 'success');
+        showToast(t.ui.logistics.operationUpdated, 'success');
       } else {
         await createOperation(base, recordId);
-        showToast('تم إنشاء العملية اللوجستية بنجاح', 'success');
+        showToast(t.ui.logistics.operationCreated, 'success');
       }
       resetForm();
       refresh();
     } catch (err) {
-      showToast(err instanceof Error ? err.message : 'فشل حفظ العملية', 'error');
+      showToast(err instanceof Error ? err.message : t.ui.logistics.saveFailed, 'error');
     } finally {
       setIsSaving(false);
     }
@@ -447,7 +452,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
   const handleClose = async (operationId: number) => {
     const cost = Number(closeForm.maintenance_cost);
     if (!closeForm.maintenance_cost || isNaN(cost) || cost < 0) {
-      showToast('يجب إدخال تكلفة الصيانة (رقم موجب)', 'error');
+      showToast(t.ui.logistics.maintenanceCostPositive, 'error');
       return;
     }
     if (closeForm.issues.length === 0) {
@@ -464,7 +469,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
         maintenance_services: closeForm.services,
         maintenance_parts: closeForm.parts,
       });
-      showToast('تم إغلاق العملية اللوجستية بنجاح', 'success');
+      showToast(t.ui.logistics.operationClosed, 'success');
       setShowCloseForm(null);
       setCloseForm({
         maintenance_cost: '',
@@ -476,7 +481,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
       });
       refresh();
     } catch (err) {
-      showToast(err instanceof Error ? err.message : 'فشل إغلاق العملية', 'error');
+      showToast(err instanceof Error ? err.message : t.ui.logistics.closeFailed, 'error');
     } finally {
       setIsSaving(false);
     }
@@ -486,11 +491,11 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
     setIsSaving(true);
     try {
       await deleteOperation(operationId);
-      showToast('تم حذف العملية اللوجستية', 'success');
+      showToast(t.ui.logistics.operationDeleted, 'success');
       setDeleteConfirmId(null);
       refresh();
     } catch (err) {
-      showToast(err instanceof Error ? err.message : 'فشل حذف العملية', 'error');
+      showToast(err instanceof Error ? err.message : t.ui.logistics.deleteFailed, 'error');
     } finally {
       setIsSaving(false);
     }
@@ -509,14 +514,14 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
       return (
         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
           <ReportIcon name="alert" className="w-3 h-3 me-1" />
-          مفتوحة
+          {t.ui.logistics.open}
         </span>
       );
     }
     return (
       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-leaf-50 text-leaf-700 dark:bg-leaf-500/10 dark:text-leaf-300">
         <ReportIcon name="check" className="w-3 h-3 me-1" />
-        مغلقة
+        {t.ui.logistics.closed}
       </span>
     );
   };
@@ -524,20 +529,20 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
   const renderMachineDetails = (op: LogisticsOperation) => (
     <div className="text-xs text-latte space-y-0.5">
       <div className="flex items-center gap-1.5">
-        <span className="font-medium text-primary dark:text-latte/70">ماكينة العميل:</span>
+        <span className="font-medium text-primary dark:text-latte/70">{t.ui.logistics.clientMachineColon}</span>
         <span>{op.machine_name ? `${op.machine_name} — ` : ''}{getCategoryLabel(op.machine_category)}</span>
         {op.machine_type && <span>· {getTypeLabel(op.machine_type)}</span>}
       </div>
       {(op.given_machine_category || op.given_machine_type || op.given_machine_name) && (
         <div className="flex items-center gap-1.5">
-          <span className="font-medium text-primary dark:text-latte/70">الماكينة المقدمة:</span>
+          <span className="font-medium text-primary dark:text-latte/70">{t.ui.logistics.providedMachineColon}</span>
           <span>{op.given_machine_name ? `${op.given_machine_name} — ` : ''}{getCategoryLabel(op.given_machine_category)}</span>
           {op.given_machine_type && <span>· {getTypeLabel(op.given_machine_type)}</span>}
         </div>
       )}
-      {op.company_machines && <div>البديلة (المخزن): {op.company_machines.name}</div>}
+      {op.company_machines && <div>{t.ui.logistics.warehouseReplacementColon} {op.company_machines.name}</div>}
       {op.monthly_rental_price != null && (
-        <div>الإيجار الشهري: {op.monthly_rental_price.toLocaleString()} ج.م</div>
+        <div>{t.ui.logistics.monthlyRentColon} {op.monthly_rental_price.toLocaleString()} {t.ui.logistics.egp}</div>
       )}
     </div>
   );
@@ -548,17 +553,17 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
     return (
     <div className="mt-3 p-3 bg-white dark:bg-espresso rounded-lg border border-hairline space-y-3">
       <p className="text-sm text-primary dark:text-latte/70">
-        سيتم إغلاق هذه العملية باستخدام تاريخ الزيارة الحالي ({maintenanceDate}).
+        {t.ui.logistics.closeUsesVisitDate}{maintenanceDate}).
         {op.monthly_rental_price != null && (
           <span className="block mt-1 text-xs">
-            الإيجار اليومي: {calculateDailyRentalPrice(op.monthly_rental_price).toLocaleString()} ج.م
+            {t.ui.logistics.dailyRentColon} {calculateDailyRentalPrice(op.monthly_rental_price).toLocaleString()} {t.ui.logistics.egp}
           </span>
         )}
       </p>
 
       <div>
         <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-          تكلفة الصيانة المنفذة على ماكينة العميل (ج.م) <span className="text-red-500">*</span>
+          {t.ui.logistics.clientMachineMaintenanceCost} <span className="text-red-500">*</span>
         </label>
         <input
           type="number"
@@ -580,9 +585,9 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
       {/* Issues — required */}
       <div className="p-3 rounded-lg border border-hairline dark:border-hairline">
         <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-          المشاكل المكتشفة على الماكينة <span className="text-red-500">*</span>
+          {t.ui.logistics.detectedMachineProblems} <span className="text-red-500">*</span>
         </label>
-        <p className="text-xs text-latte mb-2">اختر واحدة على الأقل من المشاكل التي تم اكتشافها</p>
+        <p className="text-xs text-latte mb-2">{t.ui.logistics.selectAtLeastOneProblem}</p>
         <CheckboxGroup
           categories={problemCategoriesWithCustoms}
           selectedValues={closeForm.issues}
@@ -601,7 +606,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
           className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-primary dark:text-latte/70 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
         >
           <span className="flex items-center gap-2">
-            الخدمات المنفذة
+            {t.ui.logistics.servicesPerformed}
             {closeForm.services.length > 0 && (
               <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary dark:text-copper-300">
                 {closeForm.services.length}
@@ -632,7 +637,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
           className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-primary dark:text-latte/70 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
         >
           <span className="flex items-center gap-2">
-            قطع الغيار المستبدلة
+            {t.ui.logistics.replacedSpareParts}
             {closeForm.parts.length > 0 && (
               <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary dark:text-copper-300">
                 {closeForm.parts.length}
@@ -662,7 +667,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
           disabled={isSaving}
           className="px-3 py-1.5 text-xs font-medium text-white bg-leaf-600 hover:bg-leaf-700 rounded-lg transition-colors disabled:opacity-50"
         >
-          {isSaving ? 'جاري...' : 'تأكيد الإغلاق'}
+          {isSaving ? t.ui.logistics.loading : t.ui.logistics.confirmClose}
         </button>
         <button
           type="button"
@@ -670,7 +675,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
           disabled={isSaving}
           className="px-3 py-1.5 text-xs font-medium text-latte hover:text-primary rounded-lg transition-colors"
         >
-          إلغاء
+          {t.ui.logistics.cancel}
         </button>
       </div>
     </div>
@@ -681,7 +686,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
     return (
       <div className="flex items-center justify-center py-8">
         <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        <span className="ms-2 text-sm text-latte">جاري التحميل...</span>
+        <span className="ms-2 text-sm text-latte">{t.ui.logistics.loading}</span>
       </div>
     );
   }
@@ -704,7 +709,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
       {openOps.length > 0 && (
         <div className="space-y-3">
           <h5 className="text-sm font-semibold text-primary dark:text-latte/70">
-            عمليات لوجستية مفتوحة ({openOps.length})
+            {t.ui.logistics.openOperationsCount}{openOps.length})
           </h5>
           {openOps.map((op) => (
             <div
@@ -730,7 +735,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                     onClick={() => openCloseForm(op.id)}
                     className="text-xs font-medium text-leaf-600 dark:text-leaf-400 hover:text-leaf-700 dark:hover:text-leaf-300 transition-colors"
                   >
-                    إغلاق هذه العملية
+                    {t.ui.logistics.closeOperation}
                   </button>
                   <button
                     type="button"
@@ -738,7 +743,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                     className="inline-flex items-center gap-1 text-xs font-medium text-latte hover:text-primary transition-colors"
                   >
                     <PrinterIcon className="w-3.5 h-3.5" />
-                    طباعة أمر العمل
+                    {t.ui.logistics.printWorkOrder}
                   </button>
                   <button
                     type="button"
@@ -746,25 +751,25 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                     className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
                   >
                     <PencilSquareIcon className="w-3.5 h-3.5" />
-                    تعديل
+                    {t.ui.logistics.edit}
                   </button>
                   {deleteConfirmId === op.id ? (
                     <span className="inline-flex items-center gap-2">
-                      <span className="text-xs text-latte">حذف هذه العملية؟</span>
+                      <span className="text-xs text-latte">{t.ui.logistics.deleteOperationConfirm}</span>
                       <button
                         type="button"
                         onClick={() => handleDelete(op.id)}
                         disabled={isSaving}
                         className="text-xs font-medium text-red-600 dark:text-red-400 hover:text-red-700 transition-colors disabled:opacity-50"
                       >
-                        تأكيد
+                        {t.ui.logistics.confirm}
                       </button>
                       <button
                         type="button"
                         onClick={() => setDeleteConfirmId(null)}
                         className="text-xs text-latte hover:text-primary transition-colors"
                       >
-                        إلغاء
+                        {t.ui.logistics.cancel}
                       </button>
                     </span>
                   ) : (
@@ -774,7 +779,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                       className="inline-flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
                     >
                       <TrashIcon className="w-3.5 h-3.5" />
-                      حذف
+                      {t.ui.logistics.delete}
                     </button>
                   )}
                 </div>
@@ -788,7 +793,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
       {closedOps.length > 0 && (
         <details className="group">
           <summary className="text-sm font-medium text-latte hover:text-primary cursor-pointer transition-colors">
-            عمليات مغلقة ({closedOps.length})
+            {t.ui.logistics.closedOperationsCount}{closedOps.length})
           </summary>
           <div className="mt-2 space-y-2">
             {closedOps.slice(0, 10).map((op) => (
@@ -806,7 +811,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                 {renderMachineDetails(op)}
                 {op.maintenance_cost != null && (
                   <div className="text-xs text-latte mt-1 space-y-0.5">
-                    <div>تكلفة الصيانة: {op.maintenance_cost.toLocaleString()} ج.م</div>
+                    <div>{t.ui.logistics.maintenanceCostColon} {op.maintenance_cost.toLocaleString()} {t.ui.logistics.egp}</div>
                     <MaintenanceWorkSections
                       issues={op.maintenance_issues}
                       services={op.maintenance_services}
@@ -817,7 +822,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                 )}
                 {op.total_logistics_cost != null && (
                   <div className="text-xs text-latte mt-1">
-                    التكلفة الإجمالية: {op.total_logistics_cost.toLocaleString()} ج.م
+                    {t.ui.logistics.totalCostColon} {op.total_logistics_cost.toLocaleString()} {t.ui.logistics.egp}
                   </div>
                 )}
                 <div className="mt-2 flex flex-wrap gap-3">
@@ -827,7 +832,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                     className="inline-flex items-center gap-1 text-xs font-medium text-latte hover:text-primary transition-colors"
                   >
                     <PrinterIcon className="w-3.5 h-3.5" />
-                    طباعة أمر العمل
+                    {t.ui.logistics.printWorkOrder}
                   </button>
                   <button
                     type="button"
@@ -835,25 +840,25 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                     className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
                   >
                     <PencilSquareIcon className="w-3.5 h-3.5" />
-                    تعديل
+                    {t.ui.logistics.edit}
                   </button>
                   {deleteConfirmId === op.id ? (
                     <span className="inline-flex items-center gap-2">
-                      <span className="text-xs text-latte">حذف هذه العملية؟</span>
+                      <span className="text-xs text-latte">{t.ui.logistics.deleteOperationConfirm}</span>
                       <button
                         type="button"
                         onClick={() => handleDelete(op.id)}
                         disabled={isSaving}
                         className="text-xs font-medium text-red-600 dark:text-red-400 hover:text-red-700 transition-colors disabled:opacity-50"
                       >
-                        تأكيد
+                        {t.ui.logistics.confirm}
                       </button>
                       <button
                         type="button"
                         onClick={() => setDeleteConfirmId(null)}
                         className="text-xs text-latte hover:text-primary transition-colors"
                       >
-                        إلغاء
+                        {t.ui.logistics.cancel}
                       </button>
                     </span>
                   ) : (
@@ -863,7 +868,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                       className="inline-flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
                     >
                       <TrashIcon className="w-3.5 h-3.5" />
-                      حذف
+                      {t.ui.logistics.delete}
                     </button>
                   )}
                 </div>
@@ -877,7 +882,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
       {!selectedAction && editingOpId == null && (
         <div>
           <h5 className="text-sm font-semibold text-primary dark:text-latte/70 mb-3">
-            إضافة عملية لوجستية جديدة
+            {t.ui.logistics.addNewOperation}
           </h5>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {LOGISTICS_ACTIONS.map((action) => (
@@ -908,7 +913,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
           <div className="flex items-center justify-between">
             <h5 className="font-semibold text-primary dark:text-white">
               {editingOp
-                ? `تعديل العملية — ${getOperationTypeLabel(editingOp.operation_type)}`
+                ? t.ui.logistics.editOperationTitle.replace('{{title}}', getOperationTypeLabel(editingOp.operation_type))
                 : LOGISTICS_ACTIONS.find((a) => a.type === selectedAction)?.title}
             </h5>
             <button
@@ -916,7 +921,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
               onClick={resetForm}
               className="text-xs text-latte hover:text-primary transition-colors"
             >
-              إلغاء
+              {t.ui.logistics.cancel}
             </button>
           </div>
 
@@ -1057,7 +1062,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
             {needsReplacementMachine && companyMachines.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-                  الماكينة البديلة (من المخزن)
+                  {t.ui.logistics.replacementMachine}
                 </label>
                 <select
                   value={formData.replacement_machine_id ?? ''}
@@ -1086,7 +1091,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                   }}
                   className={INPUT_CLASS}
                 >
-                  <option value="">اختر ماكينة...</option>
+                  <option value="">{t.ui.logistics.chooseMachine}</option>
                   {companyMachines
                     .filter((m) => m.status === 'available')
                     .map((m) => (
@@ -1101,7 +1106,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
             {needsRentalPrice && (
               <div>
                 <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-                  الإيجار الشهري (ج.م)
+                  {t.ui.logistics.monthlyRentEgp}
                 </label>
                 <input
                   type="number"
@@ -1114,16 +1119,15 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                 />
                 {formData.monthly_rental_price && (
                   <p className={SUBTITLE_CLASS + ' mt-1'}>
-                    الإيجار اليومي: {calculateDailyRentalPrice(Number(formData.monthly_rental_price)).toLocaleString()} ج.م
+                    {t.ui.logistics.dailyRentColon} {calculateDailyRentalPrice(Number(formData.monthly_rental_price)).toLocaleString()} {t.ui.logistics.egp}
                   </p>
                 )}
               </div>
             )}
 
-            <div>
-              <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-                تكلفة الاستلام (ج.م)
-              </label>
+            <div>                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
+                  {t.ui.logistics.pickupCostEgp}
+                </label>
               <input
                 type="number"
                 min="0"
@@ -1135,10 +1139,9 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-                تكلفة الإرجاع (ج.م)
-              </label>
+            <div>                <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
+                  {t.ui.logistics.returnCostEgp}
+                </label>
               <input
                 type="number"
                 min="0"
@@ -1153,10 +1156,10 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
 
           {editingOp && editingOp.status === 'closed' && (
             <div className="p-3 rounded-lg border border-hairline dark:border-hairline space-y-3">
-              <h6 className="text-xs font-semibold text-primary dark:text-latte/70">بيانات الإغلاق</h6>
+              <h6 className="text-xs font-semibold text-primary dark:text-latte/70">{t.ui.logistics.closingData}</h6>
               <div>
                 <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-                  تكلفة الصيانة (ج.م)
+                  {t.ui.logistics.maintenanceCostEgp}
                 </label>
                 <input
                   type="number"
@@ -1178,9 +1181,9 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
               {/* Issues — required */}
               <div className="p-3 rounded-lg border border-hairline dark:border-hairline">
                 <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-                  المشاكل المكتشفة على الماكينة <span className="text-red-500">*</span>
+                  {t.ui.logistics.detectedMachineProblems} <span className="text-red-500">*</span>
                 </label>
-                <p className="text-xs text-latte mb-2">اختر واحدة على الأقل من المشاكل التي تم اكتشافها</p>
+                <p className="text-xs text-latte mb-2">{t.ui.logistics.selectAtLeastOneProblem}</p>
                 <CheckboxGroup
                   categories={problemCategoriesWithCustoms}
                   selectedValues={formData.maintenance_issues}
@@ -1199,7 +1202,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                   className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-primary dark:text-latte/70 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
                 >
                   <span className="flex items-center gap-2">
-                    الخدمات المنفذة
+                    {t.ui.logistics.servicesPerformed}
                     {formData.maintenance_services.length > 0 && (
                       <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary dark:text-copper-300">
                         {formData.maintenance_services.length}
@@ -1230,7 +1233,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
                   className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-primary dark:text-latte/70 hover:bg-cream-2 dark:hover:bg-espresso-light/50 transition-colors"
                 >
                   <span className="flex items-center gap-2">
-                    قطع الغيار المستبدلة
+                    {t.ui.logistics.replacedSpareParts}
                     {formData.maintenance_parts.length > 0 && (
                       <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary dark:text-copper-300">
                         {formData.maintenance_parts.length}
@@ -1257,14 +1260,14 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
 
           <div>
             <label className="block text-sm font-medium text-primary dark:text-latte/70 mb-1">
-              ملاحظات داخلية
+              {t.ui.logistics.internalNotes}
             </label>
             <textarea
               value={formData.internal_notes}
               onChange={(e) => setFormData((f) => ({ ...f, internal_notes: e.target.value }))}
               rows={2}
               className={INPUT_CLASS + ' resize-none'}
-              placeholder="ملاحظات داخلية (غير مرئية للعميل)..."
+              placeholder={t.ui.logistics.internalNotesPlaceholder}
             />
           </div>
 
@@ -1275,10 +1278,10 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
             className="btn-primary px-4 py-2 text-sm font-medium rounded-lg disabled:opacity-50"
           >
             {isSaving
-              ? 'جاري الحفظ...'
+              ? t.ui.logistics.saving
               : editingOp
-              ? 'حفظ التعديلات'
-              : 'حفظ العملية اللوجستية'}
+              ? t.ui.logistics.saveEdit
+              : t.ui.logistics.saveOperation}
           </button>
         </div>
       )}
@@ -1288,7 +1291,7 @@ const MachineLogisticsSection: React.FC<MachineLogisticsSectionProps> = ({
         <EmptyState
           variant="inline"
           icon={<ReportIcon name="truck" className="w-6 h-6" />}
-          title="لا توجد عمليات لوجستية"
+          title={t.ui.logistics.noOperationsTitle}
           message="أضف عملية لوجستية جديدة لتتبع حركة الماكينات بين العميل والشركة"
         />
       )}

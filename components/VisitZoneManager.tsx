@@ -5,6 +5,7 @@ import { useVisitZones, VisitZone } from '../utils/visitZones';
 import { SafeModal } from './form-ui/SafeModal';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import { PlusCircleIcon, TrashIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { useT } from '../utils/i18n';
 
 interface VisitZoneManagerProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface VisitZoneManagerProps {
 }
 
 const VisitZoneManager: React.FC<VisitZoneManagerProps> = ({ isOpen, onClose }) => {
+  const t = useT();
   const { zones, add, remove, reset } = useVisitZones();
 
   const [newZoneKey, setNewZoneKey] = useState('');
@@ -38,18 +40,18 @@ const VisitZoneManager: React.FC<VisitZoneManagerProps> = ({ isOpen, onClose }) 
     <SafeModal
       isOpen={isOpen}
       onClose={onClose}
-      title="إدارة مناطق الزيارة"
+      title={t.ui.visitZones.title}
       size="md"
       ariaLabel="Manage visit zones"
     >
       <div className="space-y-6">
         <p className="text-sm text-latte">
-          أضف أو أزل مناطق الزيارة ورسومها. المناطق الافتراضية لا يمكن حذفها.
+          {t.ui.visitZones.hint}
         </p>
 
         {/* Existing zones */}
         <div className="space-y-2">
-          <h4 className="text-sm font-semibold text-primary">المناطق الحالية</h4>
+          <h4 className="text-sm font-semibold text-primary">{t.ui.visitZones.currentZones}</h4>
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {zones.map((zone) => (
               <div
@@ -61,7 +63,7 @@ const VisitZoneManager: React.FC<VisitZoneManagerProps> = ({ isOpen, onClose }) 
                   <div>
                     <div className="font-medium text-primary">{zone.label}</div>
                     <div className="text-xs text-latte">
-                      {zone.key} · {zone.fee.toLocaleString()} جم
+                      {zone.key} · {zone.fee.toLocaleString()} {t.ui.maintenanceEditor.zoneFeeSuffix}
                     </div>
                   </div>
                 </div>
@@ -83,37 +85,37 @@ const VisitZoneManager: React.FC<VisitZoneManagerProps> = ({ isOpen, onClose }) 
         <div className="p-4 bg-cream-2 rounded-xl border border-hairline space-y-4">
           <h4 className="text-sm font-semibold text-primary flex items-center gap-2">
             <PlusCircleIcon className="w-5 h-5 text-primary" />
-            إضافة منطقة جديدة
+            {t.ui.visitZones.addNewZone}
           </h4>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-medium text-latte mb-1">المفتاح (key)</label>
+              <label className="block text-xs font-medium text-latte mb-1">{t.ui.visitZones.keyLabel}</label>
               <input
                 type="text"
                 value={newZoneKey}
                 onChange={(e) => setNewZoneKey(e.target.value)}
-                placeholder="مثال: luxor"
+                placeholder={t.ui.visitZones.keyPlaceholder}
                 className="w-full px-3 py-2 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:ring-2 focus:ring-primary text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-latte mb-1">الاسم العربي</label>
+              <label className="block text-xs font-medium text-latte mb-1">{t.ui.visitZones.nameAr}</label>
               <input
                 type="text"
                 value={newZoneLabel}
                 onChange={(e) => setNewZoneLabel(e.target.value)}
-                placeholder="مثال: الأقصر"
+                placeholder={t.ui.visitZones.namePlaceholder}
                 className="w-full px-3 py-2 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:ring-2 focus:ring-primary text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-latte mb-1">الرسوم (جم)</label>
+              <label className="block text-xs font-medium text-latte mb-1">{t.ui.visitZones.fee}</label>
               <input
                 type="number"
                 value={newZoneFee}
                 onChange={(e) => setNewZoneFee(e.target.value)}
-                placeholder="مثال: 2000"
+                placeholder={t.ui.visitZones.feePlaceholder}
                 min="0"
                 className="w-full px-3 py-2 bg-cream text-primary rounded-lg border border-hairline focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                 onKeyDown={(e) => e.key === 'Enter' && canAdd && handleAdd()}
@@ -128,31 +130,31 @@ const VisitZoneManager: React.FC<VisitZoneManagerProps> = ({ isOpen, onClose }) 
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm"
           >
             <PlusCircleIcon className="w-5 h-5" />
-            إضافة
+            {t.common.add}
           </button>
         </div>
 
         {/* Reset to defaults */}
         <div className="pt-4 border-t border-hairline flex justify-between items-center">
           <span className="text-xs text-latte">
-            {zones.filter(z => z.isCustom).length} مناطق مخصصة
+            {t.ui.visitZones.customZonesCount.replace('{{count}}', String(zones.filter(z => z.isCustom).length))}
           </span>
           <button
             type="button"
             onClick={reset}
             className="text-sm text-ember-500 hover:text-ember-600 underline"
           >
-            إعادة تعيين للإعدادات الافتراضية
+            {t.ui.visitZones.resetDefaults}
           </button>
         </div>
       </div>
 
       <ConfirmDialog
         isOpen={deleteConfirm !== null}
-        title="حذف المنطقة"
-        message={`هل أنت متأكد من حذف منطقة "${zones.find(z => z.key === deleteConfirm)?.label || deleteConfirm}"؟`}
+        title={t.ui.visitZones.deleteZoneTitle}
+        message={t.ui.visitZones.deleteZoneMessage.replace('{{name}}', zones.find(z => z.key === deleteConfirm)?.label || deleteConfirm)}
         variant="danger"
-        confirmLabel="نعم، حذف"
+        confirmLabel={t.ui.visitZones.deleteConfirmLabel}
         onConfirm={() => {
           if (deleteConfirm) remove(deleteConfirm);
           setDeleteConfirm(null);

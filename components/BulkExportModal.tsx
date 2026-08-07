@@ -9,6 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { BatchExportItem } from "../utils/internalReportPdf";
 import { partsList, servicesList } from "../constants";
+import { useT } from "../utils/i18n";
 import { getRecordCostSummary, formatEnNumber } from "../utils/costAggregation";
 
 export type BulkExportMode = "client" | "cost" | "internal";
@@ -45,6 +46,7 @@ const BulkExportModal: React.FC<BulkExportModalProps> = ({
   onExportWord,
   title = "Bulk Export",
 }) => {
+  const t = useT();
   const [mode, setMode] = useState<BulkExportMode>("cost");
   const [grouped, setGrouped] = useState(true);
   const [includeSummary, setIncludeSummary] = useState(true);
@@ -69,7 +71,7 @@ const BulkExportModal: React.FC<BulkExportModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -88,7 +90,7 @@ const BulkExportModal: React.FC<BulkExportModalProps> = ({
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg text-latte hover:text-primary hover:bg-cream-2 dark:hover:bg-espresso-light transition-colors"
-            aria-label="Close"
+            aria-label={t.common.close}
           >
             <XMarkIcon className="w-5 h-5" />
           </button>

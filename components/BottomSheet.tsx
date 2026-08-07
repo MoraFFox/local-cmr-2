@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { ConfirmationDialog } from './form-ui/SafeModal';
-import { ar } from '../utils/arabicTranslations';
+import { useT } from '../utils/i18n';
 
 interface BottomSheetProps {
     isOpen: boolean;
@@ -26,6 +26,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     contentClassName,
     hasUnsavedChanges = false
 }) => {
+    const t = useT();
     const [showConfirm, setShowConfirm] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
@@ -88,7 +89,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     return createPortal(
         <div 
             data-testid="bottom-sheet"
-            className={`fixed inset-0 z-[9999] flex ltr:items-end rtl:items-start justify-center transition-opacity duration-300 ${
+            className={`fixed inset-0 z-50 flex ltr:items-end rtl:items-start justify-center transition-opacity duration-300 ${
                 isVisible ? 'opacity-100' : 'opacity-0'
             }`}
             onClick={handleBackdropClick}
@@ -127,7 +128,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                 {showConfirm && (
                     <div className="absolute inset-0 z-20 bg-espresso dark:bg-espresso rounded-t-3xl p-4 flex items-center justify-center">
                         <ConfirmationDialog
-                            message={ar.common.unsavedChangesMessage}
+                            message={t.common.unsavedChangesMessage}
                             onConfirm={() => {
                                 setShowConfirm(false);
                                 onClose();
@@ -145,7 +146,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                         </h3>
                         <button
                             onClick={requestClose}
-                            aria-label="إغلاق"
+                            aria-label={t.common.close}
                             className="p-2 -me-2 text-latte hover:text-cream dark:hover:text-cream rounded-full hover:bg-espresso-light dark:hover:bg-espresso-light transition-colors"
                         >
                             <XMarkIcon className="w-6 h-6" />

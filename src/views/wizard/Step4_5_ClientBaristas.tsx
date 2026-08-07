@@ -21,11 +21,11 @@ export const Step4_5_ClientBaristas: React.FC<WizardStepProps> = ({
   const t = useT();
 
   return (
-  <Card title="باريستا العميل (المكتب الرئيسي)">
+  <Card title={t.ui.wizard.clientBaristasTeamTitle}>
     <div className="flex justify-between items-center mb-6">
-      <h3 className="text-xl font-bold text-primary tracking-tight">باريستا العميل</h3>
+      <h3 className="text-xl font-bold text-primary tracking-tight">{t.ui.wizard.clientBaristasTitle}</h3>
       <Button onClick={() => actions.addBlankClientBarista(null)}>
-        <PlusCircleIcon className="w-5 h-5" /> إضافة باريستا عميل
+        <PlusCircleIcon className="w-5 h-5" /> {t.ui.wizard.addClientBarista}
       </Button>
     </div>
     <div className="space-y-4">
@@ -36,18 +36,18 @@ export const Step4_5_ClientBaristas: React.FC<WizardStepProps> = ({
             initiallyOpen={cb.id === newlyAddedId}
             onRemove={() => actions.removeClientBarista(null, index)}
             wizardKey={`company.clientBaristas.${index}`}
-            titleContent={<span className="font-semibold">{cb.name || "باريستا عميل جديد"}</span>}
+            titleContent={<span className="font-semibold">{cb.name || t.ui.wizard.newClientBarista}</span>}
           >
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <TextInput
-                  label="الاسم" name="name" value={cb.name}
+                  label={t.ui.wizard.nameLabel} name="name" value={cb.name}
                   data-field={`company.clientBaristas.${index}.name`}
                   onChange={(e) => actions.handleClientBaristaChange(e, null, index)}
                   icon={<UserIcon />}
                 />
                 <TextInput
-                  label="رقم الهاتف" name="phone" value={cb.phone}
+                  label={t.ui.wizard.phoneLabel} name="phone" value={cb.phone}
                   data-field={`company.clientBaristas.${index}.phone`}
                   onChange={(e) =>
                     actions.handleClientBaristaChange(
@@ -64,7 +64,7 @@ export const Step4_5_ClientBaristas: React.FC<WizardStepProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-primary mb-2">ملاحظات</label>
+                <label className="block text-sm font-medium text-primary mb-2">{t.ui.wizard.notesLabel}</label>
                 <textarea name="notes" value={cb.notes || ""}
                   onChange={(e) => actions.handleClientBaristaChange(e, null, index)}
                   rows={3} className={CLASSES.textArea}
@@ -75,11 +75,11 @@ export const Step4_5_ClientBaristas: React.FC<WizardStepProps> = ({
         ))
       ) : (
         <EmptyState variant="inline" icon={<UserGroupIcon />}
-          title="لا يوجد باريستا للعميل"
-          message="أضف باريستا شركة العميل الذين يعملون مع ماكيناتنا."
+          title={t.ui.wizard.noClientBaristasTitle}
+          message={t.ui.wizard.noClientBaristasMainMsg}
         >
           <Button variant="secondary" onClick={() => actions.addBlankClientBarista(null)}>
-            <PlusCircleIcon className="w-4 h-4" /> إضافة باريستا عميل
+            <PlusCircleIcon className="w-4 h-4" /> {t.ui.wizard.addClientBarista}
           </Button>
         </EmptyState>
       )}

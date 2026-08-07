@@ -120,14 +120,14 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
     const saved = autoSave.restore();
     if (saved && JSON.stringify(saved) !== JSON.stringify(selectedRecord)) {
       handleUpdateRecord({ ...selectedRecord, ...saved });
-      showToast('تم استعادة آخر نسخة محفوظة تلقائيًا', 'info');
+      showToast(t.ui.mobileMaintenanceEditor.restoredDraftToast, 'info');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedRecord?.id]);
 
   // Shared validation error handler — shows toast + auto-jumps to first error
   const showValidationErrors = useCallback((errors: Record<string, string>) => {
-    showToast('يرجى تصحيح الأخطاء قبل الحفظ', 'error');
+    showToast(t.ui.mobileMaintenanceEditor.validationErrorToast, 'error');
     const { field } = jumpToFirstError(errors);
     if (!field) validation.focusNextError();
   }, [showToast, jumpToFirstError, validation.focusNextError]);
@@ -163,7 +163,7 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
         onChange([...records, newRecord]);
         setSelectedRecordIndex(records.length);
         setCurrentStep(1);
-        showToast('تم الحفظ وإضافة سجل جديد', 'success');
+        showToast(t.ui.mobileMaintenanceEditor.savedAndAddedToast, 'success');
       },
       showValidationErrors
     )();
@@ -294,7 +294,7 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
                 </div>
               )}
               {currentStep === 2 && !selectedRecord.hadProblem && (
-                <div className="text-center py-8 text-slate-400 dark:text-slate-500 text-sm">لم يتم الإبلاغ عن أي مشاكل</div>
+                <div className="text-center py-8 text-slate-400 dark:text-slate-500 text-sm">{t.ui.mobileMaintenanceEditor.noProblemsReported}</div>
               )}
 
               {currentStep === 3 && (
@@ -348,24 +348,24 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
             <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-700">
               <button type="button" onClick={() => setCurrentStep(prev => Math.max(prev - 1, 1))} disabled={currentStep === 1}
                 className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${currentStep === 1 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:text-teal-600'}`}>
-                <ChevronRightIcon className="w-3.5 h-3.5" />السابق
+                <ChevronRightIcon className="w-3.5 h-3.5" />{t.common.back}
               </button>
               <span className="text-xs text-slate-400">{currentStep} / 4</span>
               {currentStep === 4 ? (
                 <div className="flex items-center gap-2">
                   <button type="button" onClick={handleSubmitAndAddAnother}
                     className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-teal-700 bg-teal-50 dark:bg-teal-900/20 border border-teal-300 dark:border-teal-700 hover:bg-teal-100 dark:hover:bg-teal-900/40 rounded-lg transition-colors">
-                    <PlusIcon className="w-3.5 h-3.5" />حفظ وإضافة
+                    <PlusIcon className="w-3.5 h-3.5" />{t.ui.mobileMaintenanceEditor.saveAndAdd}
                   </button>
                   <button type="button" onClick={handleSubmit}
                     className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors">
-                    <CheckCircleIcon className="w-4 h-4" />تم
+                    <CheckCircleIcon className="w-4 h-4" />{t.ui.mobileMaintenanceEditor.done}
                   </button>
                 </div>
               ) : (
                 <button type="button" onClick={() => setCurrentStep(prev => Math.min(prev + 1, 4))}
                   className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors text-slate-600 hover:text-teal-600">
-                  التالي<ChevronLeftIcon className="w-3.5 h-3.5" />
+                  {t.common.next}<ChevronLeftIcon className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
@@ -374,7 +374,7 @@ const MobileMaintenanceEditor: React.FC<MobileMaintenanceEditorProps> = ({
       </BottomSheet>
 
       {/* Template Selector */}
-      <BottomSheet isOpen={isTemplateSelectorOpen} onClose={() => setIsTemplateSelectorOpen(false)} title="اختر القالب">
+      <BottomSheet isOpen={isTemplateSelectorOpen} onClose={() => setIsTemplateSelectorOpen(false)} title={t.ui.mobileMaintenanceEditor.chooseTemplate}>
         <div className="p-4 space-y-3">
           {maintenanceTemplates.map((template) => (
             <button key={template.id} onClick={() => handleApplyTemplate(template.id)} className="w-full p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl text-start active:scale-[0.98] transition-transform">

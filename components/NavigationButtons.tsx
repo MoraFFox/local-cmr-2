@@ -1,5 +1,6 @@
 import React from 'react';
 import Button from './ui/Button';
+import { useT } from '../utils/i18n';
 
 interface NavigationButtonsProps {
   currentStep: number;
@@ -18,15 +19,16 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
   isLastStep,
   isLoading,
 }) => {
+  const t = useT();
   return (
     <div className={`flex items-center ${currentStep > 1 ? 'justify-between' : 'justify-end'}`}>
       {currentStep > 1 && (
         <Button variant="ghost" onClick={onPrev} disabled={isLoading}>
-          السابق
+          {t.common.back}
         </Button>
       )}
       <Button onClick={onNext} disabled={isNextDisabled || isLoading} isLoading={isLoading}>
-        {isLastStep ? 'إنشاء الشركة' : 'التالي'}
+        {isLastStep ? t.ui.wizard.createCompany : t.common.next}
       </Button>
     </div>
   );

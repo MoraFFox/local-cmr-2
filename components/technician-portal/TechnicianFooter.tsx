@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowLeftIcon, ArrowRightIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { ar } from '../../utils/arabicTranslations';
+import { useT } from '../../utils/i18n';
 import TechButton from './ui/TechButton';
 
 interface TechnicianFooterProps {
@@ -22,6 +22,7 @@ const TechnicianFooter: React.FC<TechnicianFooterProps> = ({
   onSubmit,
   validationError,
 }) => {
+  const t = useT();
   return (
     <div className="fixed bottom-0 start-0 end-0 z-50 p-4 bg-gradient-to-t from-espresso via-espresso/95 to-transparent pb-[env(safe-area-inset-bottom)]">
       <div className="max-w-2xl mx-auto space-y-3">
@@ -43,7 +44,7 @@ const TechnicianFooter: React.FC<TechnicianFooterProps> = ({
                     className="flex-1 max-w-[120px]"
                 >
                     <ArrowRightIcon className="w-5 h-5" />
-                    {ar.common.back}
+                    {t.common.back}
                 </TechButton>
             )}
 
@@ -54,7 +55,7 @@ const TechnicianFooter: React.FC<TechnicianFooterProps> = ({
                     disabled={!canProceed}
                     className="flex-1"
                 >
-                    {ar.common.next}
+                    {t.common.next}
                     <ArrowLeftIcon className="w-5 h-5" />
                 </TechButton>
             ) : (
@@ -67,12 +68,12 @@ const TechnicianFooter: React.FC<TechnicianFooterProps> = ({
                     {isSubmitting ? (
                          <div className="flex items-center gap-2">
                              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                             <span>{ar.step4.submitting}</span>
+                             <span>{t.step4.submitting}</span>
                          </div>
                     ) : (
                         <div className="flex items-center gap-2">
                             <CheckCircleIcon className="w-5 h-5" />
-                            <span>{ar.common.submit}</span>
+                            <span>{t.common.submit}</span>
                         </div>
                     )}
                 </TechButton>

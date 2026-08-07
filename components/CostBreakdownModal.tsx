@@ -4,6 +4,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import CollapsibleSection from './CollapsibleSection';
 import { SafeModal } from './form-ui/SafeModal';
 import { aggregateCosts, formatCurrency } from '../utils/costAggregation';
+import { useT } from '../utils/i18n';
 
 interface CostBreakdownModalProps {
     isOpen: boolean;
@@ -22,6 +23,7 @@ const CostDetail: React.FC<{ label: React.ReactNode; value: string | number; isS
 );
 
 const CostBreakdownModal: React.FC<CostBreakdownModalProps> = ({ isOpen, onClose, formData, partsList, servicesList }) => {
+    const t = useT();
     // Guard the (potentially expensive) cost aggregation so it only runs when
     // the modal is actually open. SafeModal handles the closed state internally,
     // so returning null here is safe and avoids unnecessary work every render.
@@ -43,7 +45,7 @@ const CostBreakdownModal: React.FC<CostBreakdownModalProps> = ({ isOpen, onClose
                     <button
                         onClick={handleClose}
                         className="p-2 rounded-full text-latte dark:text-latte hover:bg-cream dark:hover:bg-espresso-light/50 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                        aria-label="Close modal"
+                        aria-label={t.common.close}
                     >
                         <XMarkIcon className="h-6 w-6" />
                     </button>
@@ -69,13 +71,13 @@ const CostBreakdownModal: React.FC<CostBreakdownModalProps> = ({ isOpen, onClose
                     <>
                         {aggregatedData.totalVisitFees > 0 && (
                             <CollapsibleSection title={`رسوم الزيارات: ${formatCurrency(aggregatedData.totalVisitFees)}`}>
-                                <CostDetail label="إجمالي رسوم الزيارات" value={aggregatedData.totalVisitFees} />
+                                <CostDetail label={t.ui.misc.totalVisitFees} value={aggregatedData.totalVisitFees} />
                             </CollapsibleSection>
                         )}
 
                         {aggregatedData.totalLeaseRevenue > 0 && (
                             <CollapsibleSection title={`إيرادات تأجير الماكينات: ${formatCurrency(aggregatedData.totalLeaseRevenue)}`}>
-                                <CostDetail label="إجمالي إيرادات التأجير" value={aggregatedData.totalLeaseRevenue} />
+                                <CostDetail label={t.ui.misc.totalLeaseRevenue} value={aggregatedData.totalLeaseRevenue} />
                             </CollapsibleSection>
                         )}
 

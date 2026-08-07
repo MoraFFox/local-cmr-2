@@ -60,9 +60,9 @@ export const BranchCard: React.FC<BranchCardProps> = ({
       <div className="min-w-0 pe-1">
         <div className="marquee-container w-full">
           <div className="inline-flex items-center gap-x-2 md:truncate md:animate-none lg:hover:animate-none animate-marquee-rtl pe-8">
-            <span className="font-bold text-base whitespace-nowrap">{companyName || "الشركة"}</span>
+            <span className="font-bold text-base whitespace-nowrap">{companyName || t.ui.wizard.companyFallback}</span>
             <span className="text-latte shrink-0">-</span>
-            <span className="text-base whitespace-nowrap">{branch.branchName || "فرع جديد"}</span>
+            <span className="text-base whitespace-nowrap">{branch.branchName || t.ui.wizard.newBranch}</span>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-latte mt-1.5">
@@ -74,7 +74,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
           )}
           <span className="flex items-center gap-1">
             <UserGroupIcon className="w-3.5 h-3.5 shrink-0" />
-            {branch.baristas.length} باريستا
+            {t.ui.wizard.baristasCount.replace('{{count}}', String(branch.baristas.length))}
           </span>
         </div>
       </div>
@@ -82,55 +82,55 @@ export const BranchCard: React.FC<BranchCardProps> = ({
   >
     {/* Branch info fields */}
     <div className="space-y-4">
-      <TextInput label="اسم الفرع" name="branchName" value={branch.branchName || ""}
+      <TextInput label={t.ui.wizard.branchNameLabel} name="branchName" value={branch.branchName || ""}
         data-field={`branch.${index}.branchName`}
         onChange={(e) => actions.handleListItemChange(e, "branches", index)}
-        placeholder="مثال: المعادي" icon={<BuildingStorefrontIcon />}
+        placeholder={t.ui.wizard.branchNamePlaceholder} icon={<BuildingStorefrontIcon />}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <TextInput label="البريد الإلكتروني" name="email" value={branch.email}
+        <TextInput label={t.ui.wizard.emailLabel} name="email" value={branch.email}
           data-field={`branch.${index}.email`}
           onChange={(e) => actions.handleListItemChange(e, "branches", index)} icon={<EnvelopeIcon />}
         />
-        <TextInput label="الرقم الضريبي" name="taxNumber" value={branch.taxNumber || ""}
+        <TextInput label={t.ui.wizard.taxNumberLabel} name="taxNumber" value={branch.taxNumber || ""}
           data-field={`branch.${index}.taxNumber`}
           onChange={(e) => actions.handleListItemChange(e, "branches", index)} icon={<DocumentTextIcon />}
         />
-        <TextInput label="الموقع" name="location" value={branch.location}
+        <TextInput label={t.ui.wizard.location} name="location" value={branch.location}
           data-field={`branch.${index}.location`}
           onChange={(e) => actions.handleListItemChange(e, "branches", index)}
           className="md:col-span-2" icon={<MapPinIcon />}
         />
-        <TextInput label="استهلاك القهوة بالكيلو (كجم/شهر)" name="coffeeConsumptionKg" type="number"
+        <TextInput label={t.ui.wizard.coffeeConsumptionLabel} name="coffeeConsumptionKg" type="number"
           data-field={`branch.${index}.coffeeConsumptionKg`}
           value={branch.coffeeConsumptionKg || ""}
           onChange={(e) => actions.handleListItemChange(e, "branches", index)}
-          placeholder="مثال: 50" icon={<ScaleIcon />}
+          placeholder={t.ui.wizard.coffeeConsumptionPlaceholder} icon={<ScaleIcon />}
           helpText={t.tooltips.coffeeConsumption}
         />
         <div className="md:col-span-2 space-y-4">
           {/* NEW: mixed machine fleet toggle — asked BEFORE the single-machine status */}
-          <RadioGroup label="هل لدى العميل أكثر من ماكينة؟" name={`hasMultipleMachines-${branch.id}`}
+          <RadioGroup label={t.ui.wizard.hasMultipleMachinesLabel} name={`hasMultipleMachines-${branch.id}`}
             value={branch.hasMultipleMachines}
             onChange={(val) => actions.handleListItemChange(
               { target: { name: "hasMultipleMachines", value: val } } as React.ChangeEvent<HTMLInputElement>, "branches", index)}
-            options={[{ label: "نعم", value: true }, { label: "لا", value: false }]} inline
+            options={[{ label: t.common.yes, value: true }, { label: t.common.no, value: false }]} inline
           />
           {/* Single machine flow (including legacy records without hasMultipleMachines) */}
           {branch.hasMultipleMachines !== true && (
-            <RadioGroup label="هل يستخدمون ماكيناتنا؟" name={`usesOurMachines-${branch.id}`}
+            <RadioGroup label={t.ui.wizard.usesOurMachinesLabel} name={`usesOurMachines-${branch.id}`}
               value={branch.usesOurMachines}
               onChange={(val) => actions.handleListItemChange(
                 { target: { name: "usesOurMachines", value: val } } as React.ChangeEvent<HTMLInputElement>, "branches", index)}
-              options={[{ label: "مكينتنا", value: true }, { label: "مكينة العميل", value: false }]} inline
+              options={[{ label: t.ui.wizard.ourMachine, value: true }, { label: t.ui.wizard.clientMachine, value: false }]} inline
             />
           )}
           {(branch.hasMultipleMachines === true || branch.usesOurMachines === true) && (
             <div className="mt-4 space-y-4">
               <div className="flex justify-between items-center mb-4">
-                <h4 className="text-lg font-bold text-primary tracking-tight">الماكينات</h4>
+                <h4 className="text-lg font-bold text-primary tracking-tight">{t.ui.wizard.machinesTitle}</h4>
                 <Button onClick={() => actions.addNestedListItem(index, "machines")} variant="secondary">
-                  <PlusCircleIcon className="w-4 h-4" /> إضافة ماكينة
+                  <PlusCircleIcon className="w-4 h-4" /> {t.ui.wizard.addMachine}
                 </Button>
               </div>
 
@@ -141,60 +141,60 @@ export const BranchCard: React.FC<BranchCardProps> = ({
                     initiallyOpen={machine.id === newlyAddedId}
                     onRemove={() => actions.removeNestedListItem(index, "machines", idx)}
                     wizardKey={`branch.${index}.machines.${idx}`}
-                    titleContent={<span className="font-semibold">{machine.machineName || "ماكينة جديدة"}</span>}
+                    titleContent={<span className="font-semibold">{machine.machineName || t.ui.wizard.newMachine}</span>}
                   >
                     <div className="space-y-4">
                       {/* NEW: per-machine ownership status — only in mixed mode */}
                       {branch.hasMultipleMachines === true && (
-                        <RadioGroup label="حالة الماكينة" name={`machineOwner-${machine.id}`}
+                        <RadioGroup label={t.ui.wizard.machineStatusLabel} name={`machineOwner-${machine.id}`}
                           value={machine.machineOwner === "client" ? "client" : "ours"}
                           onChange={(val) => actions.handleNestedListItemChange(
                             { target: { name: "machineOwner", value: val } } as React.ChangeEvent<HTMLInputElement>, index, "machines", idx)}
-                          options={[{ label: "مكينة العميل", value: "client" }, { label: "مكينة ميدوز", value: "ours" }]} inline
+                          options={[{ label: t.ui.wizard.clientMachine, value: "client" }, { label: t.ui.wizard.midosMachine, value: "ours" }]} inline
                         />
                       )}
                       <TextInput
-                        label="اسم الماكينة (اختياري)"
+                        label={t.ui.wizard.machineNameLabel}
                         name="machineName"
                         data-field={`branch.${index}.machines.${idx}.machineName`}
                         value={machine.machineName || ""}
                         onChange={(e) => actions.handleNestedListItemChange(e, index, "machines", idx)}
-                        placeholder="مثال: La Marzocco"
+                        placeholder={t.ui.wizard.machineNamePlaceholder}
                         suggestions={allKnownMachineNames}
                         helpText={t.tooltips.machineName}
                       />
                       <TextInput
-                        label="نوع الماكينة (اختياري)"
+                        label={t.ui.wizard.machineTypeLabel}
                         name="machineType"
                         data-field={`branch.${index}.machines.${idx}.machineType`}
                         value={machine.machineType || ""}
                         onChange={(e) => actions.handleNestedListItemChange(e, index, "machines", idx)}
-                        placeholder="مثال: Linea Classic"
+                        placeholder={t.ui.wizard.machineTypePlaceholder}
                         suggestions={allKnownMachineTypes}
                         helpText={t.tooltips.machineType}
                       />
                       <TextInput
-                        label="نظام تشغيل الماكينة (اختياري)"
+                        label={t.ui.wizard.machineOptionLabel}
                         name="machineOption"
                         data-field={`branch.${index}.machines.${idx}.machineOption`}
                         value={machine.machineOption || ""}
                         onChange={(e) => actions.handleNestedListItemChange(e, index, "machines", idx)}
-                        placeholder="مثال: Manual, Automatic..."
+                        placeholder={t.ui.wizard.machineOptionPlaceholder}
                         suggestions={allKnownMachineOptions}
                         helpText={t.tooltips.machineOption}
                       />
                       {/* Rent options only appear for Mido's machines (single mode, or mixed-mode machineOwner === ours) */}
                       {(branch.hasMultipleMachines !== true || machine.machineOwner !== "client") && (
                         <div>
-                          <label className="block text-sm font-medium text-primary mb-2">كيف تم الحصول على الماكينة؟</label>
+                          <label className="block text-sm font-medium text-primary mb-2">{t.ui.wizard.machineAcquisitionLabel}</label>
                           <PortalSelect
                             name="machineOwnershipType"
                             dataField={`branch.${index}.machines.${idx}.machineOwnershipType`}
-                            ariaLabel="كيف تم الحصول على الماكينة؟"
+                            ariaLabel={t.ui.wizard.machineAcquisitionLabel}
                             value={machine.machineOwnershipType || "leased"}
                             options={[
-                              { value: "leased", label: "إيجار" },
-                              { value: "consumption", label: "مقابل الاستهلاك" },
+                              { value: "leased", label: t.ui.wizard.lease },
+                              { value: "consumption", label: t.ui.wizard.consumption },
                             ]}
                             onChange={(v) => actions.handleNestedListItemChange(
                               { target: { name: "machineOwnershipType", value: v } } as React.ChangeEvent<HTMLInputElement>, index, "machines", idx)}
@@ -204,7 +204,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
                       {(branch.hasMultipleMachines !== true || machine.machineOwner !== "client") &&
                         (machine.machineOwnershipType === "leased" || machine.machineOwnershipType === "consumption") && (
                         <TextInput
-                          label={machine.machineOwnershipType === "leased" ? "قيمة الإيجار اليومي (ج.م)" : "القيمة اليومية (ج.م)"}
+                          label={machine.machineOwnershipType === "leased" ? t.ui.wizard.dailyLeaseCostLabel : t.ui.wizard.dailyValueLabel}
                           name="dailyLeaseCost"
                           data-field={`branch.${index}.machines.${idx}.dailyLeaseCost`}
                           type="number"
@@ -222,11 +222,11 @@ export const BranchCard: React.FC<BranchCardProps> = ({
                 <EmptyState
                   variant="inline"
                   icon={<WrenchScrewdriverIcon />}
-                  title="لا توجد ماكينات"
-                  message="أضف الماكينات الموجودة في هذا الفرع."
+                  title={t.ui.wizard.noMachinesTitle}
+                  message={t.ui.wizard.noMachinesBranchMsg}
                 >
                   <Button variant="secondary" onClick={() => actions.addNestedListItem(index, "machines")}>
-                    <PlusCircleIcon className="w-4 h-4" /> إضافة ماكينة
+                    <PlusCircleIcon className="w-4 h-4" /> {t.ui.wizard.addMachine}
                   </Button>
                 </EmptyState>
               )}
@@ -239,9 +239,9 @@ export const BranchCard: React.FC<BranchCardProps> = ({
     {/* Branch Contacts */}
     <div className="mt-6 pt-6 border-t border-hairline">
       <div className="flex justify-between items-center mb-4">
-        <h4 className="text-lg font-bold text-primary tracking-tight">جهات الاتصال</h4>
+        <h4 className="text-lg font-bold text-primary tracking-tight">{t.ui.wizard.contactsTitle}</h4>
         <Button onClick={() => actions.addContact(`branch-${index}`)}>
-          <PlusCircleIcon className="w-4 h-4" /><span>إضافة جهة اتصال</span>
+          <PlusCircleIcon className="w-4 h-4" /><span>{t.ui.wizard.addContact}</span>
         </Button>
       </div>
       <ContactsSection path={`branch-${index}`} formData={formData} actions={actions} newlyAddedId={newlyAddedId} fieldPrefix={`branch.${index}.contacts`} />
@@ -260,9 +260,9 @@ export const BranchCard: React.FC<BranchCardProps> = ({
     {/* Branch Client Baristas */}
     <div className="mt-6 pt-6 border-t border-hairline">
       <div className="flex justify-between items-center mb-4">
-        <h4 className="text-lg font-bold text-primary tracking-tight">باريستا العميل</h4>
+        <h4 className="text-lg font-bold text-primary tracking-tight">{t.ui.wizard.clientBaristasTitle}</h4>
         <Button onClick={() => actions.addNestedListItem(index, "clientBaristas")}>
-          <PlusCircleIcon className="w-4 h-4" /> إضافة باريستا عميل
+          <PlusCircleIcon className="w-4 h-4" /> {t.ui.wizard.addClientBarista}
         </Button>
       </div>
       <div className="space-y-3">
@@ -272,15 +272,15 @@ export const BranchCard: React.FC<BranchCardProps> = ({
               initiallyOpen={cb.id === newlyAddedId}
               onRemove={() => actions.removeNestedListItem(index, "clientBaristas", cbi)}
               wizardKey={`branch.${index}.clientBaristas.${cbi}`}
-              titleContent={<span className="font-semibold">{cb.name || "باريستا عميل جديد"}</span>}
+              titleContent={<span className="font-semibold">{cb.name || t.ui.wizard.newClientBarista}</span>}
             >
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
-                  <TextInput label="الاسم" name="name" value={cb.name}
+                  <TextInput label={t.ui.wizard.nameLabel} name="name" value={cb.name}
                     data-field={`branch.${index}.clientBaristas.${cbi}.name`}
                     onChange={(e) => actions.handleNestedListItemChange(e, index, "clientBaristas", cbi)} icon={<UserIcon />}
                   />
-                  <TextInput label="رقم الهاتف" name="phone" value={cb.phone}
+                  <TextInput label={t.ui.wizard.phoneLabel} name="phone" value={cb.phone}
                     data-field={`branch.${index}.clientBaristas.${cbi}.phone`}
                     onChange={(e) =>
                       actions.handleNestedListItemChange(
@@ -297,7 +297,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-primary mb-2">ملاحظات</label>
+                  <label className="block text-sm font-medium text-primary mb-2">{t.ui.wizard.notesLabel}</label>
                   <textarea name="notes" value={cb.notes || ""}
                     onChange={(e) => actions.handleNestedListItemChange(e, index, "clientBaristas", cbi)}
                     rows={3} className={CLASSES.textArea}
@@ -308,8 +308,8 @@ export const BranchCard: React.FC<BranchCardProps> = ({
           ))
         ) : (
           <EmptyState icon={<UserGroupIcon className="w-8 h-8" />}
-            title="لا يوجد باريستا للعميل"
-            message="أضف باريستا شركة العميل الذين يعملون في هذا الفرع."
+            title={t.ui.wizard.noClientBaristasTitle}
+            message={t.ui.wizard.noClientBaristasBranchMsg}
           />
         )}
       </div>
@@ -318,9 +318,9 @@ export const BranchCard: React.FC<BranchCardProps> = ({
     {/* Branch Maintenance */}
     <div className="mt-6 pt-6 border-t border-hairline">
       <div className="flex justify-between items-center mb-4">
-        <h4 className="text-lg font-bold text-primary tracking-tight">سجل الصيانة</h4>
+        <h4 className="text-lg font-bold text-primary tracking-tight">{t.ui.wizard.maintenanceLogTitle}</h4>
         <Button onClick={() => actions.addNestedListItem(index, "maintenanceHistory")}>
-          <PlusCircleIcon className="w-4 h-4" /> إضافة سجل
+          <PlusCircleIcon className="w-4 h-4" /> {t.ui.wizard.addRecord}
         </Button>
       </div>
       <div className="space-y-3">
@@ -344,10 +344,10 @@ export const BranchCard: React.FC<BranchCardProps> = ({
           ))
         ) : (
           <EmptyState variant="inline" icon={<WrenchScrewdriverIcon />}
-            title="لا يوجد سجل صيانة" message="أضف سجلات الصيانة لهذا الفرع."
+            title={t.ui.wizard.noRecordsTitle} message={t.ui.wizard.noRecordsBranchMsg}
           >
             <Button variant="secondary" onClick={() => actions.addNestedListItem(index, "maintenanceHistory")}>
-              <PlusCircleIcon className="w-4 h-4" /> إضافة سجل
+              <PlusCircleIcon className="w-4 h-4" /> {t.ui.wizard.addRecord}
             </Button>
           </EmptyState>
         )}

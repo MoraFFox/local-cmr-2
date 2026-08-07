@@ -27,6 +27,7 @@ import {
 } from "../../utils/sharedConstants";
 import { generateUniqueId } from "../../utils/idGenerator";
 import { formatPhoneNumber } from "../../utils/mappers";
+import { useT, wizardStepName } from "../../utils/i18n";
 
 import { Step1_CompanyInfo } from "./wizard/Step1_CompanyInfo";
 import { Step2_Branches } from "./wizard/Step2_Branches";
@@ -70,6 +71,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
   drafts, setDrafts, discardCurrent, setView, refreshSubmissions, createSubmission,
   allKnownMachineNames = [], allKnownMachineTypes = [], allKnownMachineOptions = [],
 }) => {
+  const t = useT();
   const [newlyAddedId, setNewlyAddedId] = useState<number | string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -98,13 +100,13 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
     }
   }, [newlyAddedId]);
 
-  // ── Visible steps ──
-  const visibleSteps = useMemo(
-    () => formData.hasBranches
+  // ── Visible steps (localized names for stepper / progress bar) ──
+  const visibleSteps = useMemo(() => {
+    const base = formData.hasBranches
       ? steps.filter((s) => s.id !== 4 && s.id !== 5)
-      : steps.filter((s) => s.id !== 2),
-    [formData.hasBranches],
-  );
+      : steps.filter((s) => s.id !== 2);
+    return base.map((s) => ({ ...s, name: wizardStepName(t, s.id) }));
+  }, [formData.hasBranches, t]);
 
   // ── Navigation ──
   const handleNext = useCallback(() => {
@@ -729,7 +731,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
       case 4.5: return <Step4_5_ClientBaristas {...stepProps} />;
       case 5: return <Step5_MaintenanceHistory {...stepProps} />;
       case 6: return <Step6_Review {...stepProps} />;
-      default: return <div>Unknown Step</div>;
+      default: return <div>{t.ui.wizard.unknownStep}</div>;
     }
   };
 
@@ -749,7 +751,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
           <Stepper steps={visibleSteps} currentStep={currentStep} completedSteps={completedSteps} onChange={setCurrentStep} layout="horizontal" />
         </div>
         <div className={`flex-1 transition-all duration-300 w-full`}>
-          <section aria-label="تقدم النموذج">
+          <section aria-label={t.ui.formProgress.formProgress}>
             <FormProgress
               sections={formProgressSections}
               completedSections={completedSectionIds}
@@ -765,7 +767,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
           <div className="flex ltr:justify-end rtl:justify-start mb-4">
             <Button variant="secondary" onClick={() => setShowPreview(!showPreview)}>
               {showPreview ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
-              {showPreview ? "إخفاء المعاينة" : "معاينة حية"}
+              {showPreview ? t.ui.wizard.hidePreview : t.ui.wizard.livePreview}
             </Button>
           </div>
           <div key={currentStep} className="animate-step-in-right mb-8">{renderStepContent()}</div>
@@ -780,7 +782,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
               aria-valuemin={MIN_PREVIEW_WIDTH}
               aria-valuemax={Math.round(getMaxPreviewWidth(containerSize.width))}
               aria-valuenow={Math.round(previewWidth)}
-              aria-label="تغيير عرض المعاينة"
+              aria-label={t.ui.wizard.resizePreviewLabel}
               tabIndex={0}
               onMouseDown={() => setIsResizing(true)}
               onKeyDown={(e) => {
@@ -804,7 +806,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
               style={{ width: previewWidth, minWidth: MIN_PREVIEW_WIDTH, maxWidth: getMaxPreviewWidth(containerSize.width) }}
             >
               <div className="sticky top-0 bg-paper pt-2 pb-4 z-10 border-b border-hairline mb-4">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-latte flex items-center gap-2"><EyeIcon className="w-4 h-4" /> معاينة حية</h3>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-latte flex items-center gap-2"><EyeIcon className="w-4 h-4" /> {t.ui.wizard.livePreview}</h3>
               </div>
               <div className="pb-10"><ReviewStep formData={formData} partsList={partsList} servicesList={servicesList} embedded={true} /></div>
             </div>
@@ -813,7 +815,7 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
         {showPreview && (
           <div className="xl:hidden fixed inset-0 z-50 bg-paper overflow-y-auto animate-content-fade-in">
             <div className="sticky top-0 bg-cream p-4 border-b border-hairline flex justify-between items-center shadow-md">
-              <h3 className="text-lg font-bold text-primary flex items-center gap-2"><EyeIcon className="w-5 h-5 text-primary" /> معاينة حية</h3>
+              <h3 className="text-lg font-bold text-primary flex items-center gap-2"><EyeIcon className="w-5 h-5 text-primary" /> {t.ui.wizard.livePreview}</h3>
               <button onClick={() => setShowPreview(false)} className="p-2 bg-cream-2 rounded-full text-latte hover:text-primary transition-colors"><XMarkIcon className="w-6 h-6" /></button>
             </div>
             <div className="p-4 pb-20"><ReviewStep formData={formData} partsList={partsList} servicesList={servicesList} embedded={true} /></div>
@@ -835,12 +837,12 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
               type="button"
               onClick={() => setShowResetConfirm(true)}
               className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-latte hover:text-ember-600 dark:hover:text-ember-300 hover:bg-ember-50 dark:hover:bg-ember-500/10 rounded-lg transition-colors shrink-0"
-              title="إعادة تعيين النموذج"
+              title={t.ui.wizard.resetFormTitle}
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              <span className="hidden sm:inline">إعادة تعيين</span>
+              <span className="hidden sm:inline">{t.ui.wizard.resetForm}</span>
             </button>
           </div>
         </div>
@@ -851,9 +853,9 @@ const FormWizardView: React.FC<FormWizardViewProps> = ({
         isOpen={showResetConfirm}
         onClose={() => setShowResetConfirm(false)}
         onConfirm={handleResetForm}
-        title="إعادة تعيين النموذج"
-        message="هل أنت متأكد من رغبتك في إعادة تعيين النموذج؟ سيتم فقدان جميع البيانات المدخلة."
-        confirmLabel="نعم، إعادة تعيين"
+        title={t.ui.wizard.resetFormTitle}
+        message={t.ui.wizard.resetConfirmMessage}
+        confirmLabel={t.ui.wizard.resetConfirmLabel}
       />
     </div>
     </WizardJumpContext.Provider>

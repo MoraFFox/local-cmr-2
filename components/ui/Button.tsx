@@ -1,4 +1,5 @@
 import React from 'react';
+import { useT } from '../../utils/i18n';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
 
@@ -23,6 +24,7 @@ const Button: React.FC<ButtonProps> = ({
   className = '',
   ...props
 }) => {
+  const t = useT();
   return (
     <button
       disabled={disabled || isLoading}
@@ -32,7 +34,7 @@ const Button: React.FC<ButtonProps> = ({
       {isLoading ? (
         <>
           <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          جارٍ التحميل...
+          {t.common.loading}
         </>
       ) : (
         children

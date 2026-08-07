@@ -60,14 +60,14 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
             wizardKey={fieldPrefix ? `${fieldPrefix}.${contactIndex}` : undefined}
             titleContent={
               <span className="font-semibold text-primary">
-                {contact.name || "جهة اتصال جديدة"}
+                {contact.name || t.ui.wizard.newContact}
               </span>
             }
           >
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <TextInput
-                  label="الاسم"
+                  label={t.ui.wizard.nameLabel}
                   name="name"
                   data-field={fieldPrefix ? `${fieldPrefix}.${contactIndex}.name` : undefined}
                   value={contact.name}
@@ -77,7 +77,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                 <div>
                   <label className="flex items-center justify-between gap-1.5 text-sm font-medium text-primary mb-1.5">
                     <span className="flex items-center gap-1.5">
-                      المسمى الوظيفي
+                      {t.ui.wizard.positionLabel}
                       <HelpTooltip text={t.tooltips.contactPosition} />
                     </span>
                     <button
@@ -85,13 +85,13 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                       onClick={() => setIsPositionManagerOpen(true)}
                       className="text-xs text-primary hover:text-hover underline"
                     >
-                      إدارة المسميات
+                      {t.ui.wizard.managePositions}
                     </button>
                   </label>
                   <PortalSelect
                     name="position"
                     dataField={fieldPrefix ? `${fieldPrefix}.${contactIndex}.position` : undefined}
-                    ariaLabel="المسمى الوظيفي"
+                    ariaLabel={t.ui.wizard.positionLabel}
                     value={contact.position}
                     options={contactPositions.map((pos) => ({ value: pos.value, label: pos.label }))}
                     onChange={(v) =>
@@ -105,7 +105,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                 </div>
                 {contact.position === "custom" && (
                   <TextInput
-                    label="مسمى وظيفي مخصص"
+                    label={t.ui.wizard.customPositionLabel}
                     name="customPosition"
                     data-field={fieldPrefix ? `${fieldPrefix}.${contactIndex}.customPosition` : undefined}
                     value={contact.customPosition || ""}
@@ -116,7 +116,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                 )}
               </div>
               <div className="pt-4 border-t border-hairline dark:border-hairline">
-                <h5 className="text-sm font-semibold text-primary mb-2">أرقام الهواتف</h5>
+                <h5 className="text-sm font-semibold text-primary mb-2">{t.ui.wizard.phoneNumbersTitle}</h5>
                 <div className="space-y-2">
                   {contact.phoneNumbers.map((phone, phoneIndex) => (
                     <div key={phone.id} className="flex items-center gap-2">
@@ -132,14 +132,14 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                             actions.handlePhoneNumberChange(e, path, contactIndex, phoneIndex)
                           }
                           className="input-base ps-10"
-                          placeholder="مثال: 0100-123-4567"
+                          placeholder={t.ui.wizard.phonePlaceholder}
                           maxLength={20}
                         />
                       </div>
                       <button
                         onClick={() => actions.removePhoneNumber(path, contactIndex, phoneIndex)}
                         className="p-1.5 text-latte hover:text-ember-700 dark:hover:text-ember-300 rounded-full hover:bg-ember-500/10 dark:hover:bg-ember-500/20 transition-colors transform active:scale-95"
-                        aria-label="إزالة رقم الهاتف"
+                        aria-label={t.ui.wizard.removePhoneNumber}
                       >
                         <TrashIcon className="w-5 h-5" />
                       </button>
@@ -151,7 +151,7 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
                   className="mt-3 w-full justify-center flex items-center gap-1.5 text-sm font-semibold text-primary dark:text-primary-400 hover:bg-primary/10 dark:hover:bg-primary/10 rounded-md py-2 transition-colors transform active:scale-95"
                 >
                   <PlusCircleIcon className="w-5 h-5" />
-                  إضافة رقم هاتف
+                  {t.ui.wizard.addPhoneNumber}
                 </button>
               </div>
             </div>
@@ -161,11 +161,11 @@ export const ContactsSection: React.FC<ContactsSectionProps> = ({
         <EmptyState
           variant="inline"
           icon={<UserGroupIcon />}
-          title="لا توجد جهات اتصال"
-          message="أضف الأفراد الرئيسيين لهذا الموقع للتواصل معهم لاحقاً."
+          title={t.ui.wizard.noContactsTitle}
+          message={t.ui.wizard.noContactsMsg}
         >
           <Button variant="secondary" onClick={() => actions.addContact(path)}>
-            <PlusCircleIcon className="w-4 h-4" /> إضافة جهة اتصال
+            <PlusCircleIcon className="w-4 h-4" /> {t.ui.wizard.addContact}
           </Button>
         </EmptyState>
       )}

@@ -4,6 +4,7 @@ import { getMissingFields } from "../utils/missingDataPdf";
 import type { MissingField, MissingFieldsResult } from "../utils/missingDataPdf";
 import { useWizardJump } from "@/src/views/wizard/WizardJumpContext";
 import type { FormData } from "../types";
+import { useT } from "../utils/i18n";
 
 interface MissingFieldsPanelProps {
   formData: FormData;
@@ -22,6 +23,7 @@ export const MissingFieldsPanel: React.FC<MissingFieldsPanelProps> = ({
   title = "بيانات ناقصة",
   className,
 }) => {
+  const t = useT();
   const { jumpToField } = useWizardJump();
 
   const result = useMemo<MissingFieldsResult>(() => {
@@ -97,7 +99,7 @@ export const MissingFieldsPanel: React.FC<MissingFieldsPanelProps> = ({
         {branchEntries.map(({ index: branchIndex, fields }) => (
           <li key={branchIndex}>
             <div className="text-xs font-semibold text-ember-700/70 dark:text-ember-300/70 uppercase tracking-wider mt-3 mb-1">
-              فرع {branchIndex + 1}
+              {t.ui.misc.branchPrefix} {branchIndex + 1}
             </div>
             <ul className="space-y-1">
               {fields.map((field, fieldIndex) => (

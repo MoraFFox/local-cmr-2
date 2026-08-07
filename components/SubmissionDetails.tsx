@@ -177,18 +177,19 @@ const MachineList = ({
   };
   hideCosts?: boolean;
 }) => {
+  const t = useT();
   // Mixed machine fleet: each machine carries its own owner status.
   if (entity.hasMultipleMachines === true) {
     if (!entity.machines || entity.machines.length === 0) {
-      return <span>ماكينات مختلطة</span>;
+      return <span>{t.ui.records.mixedMachines}</span>;
     }
     return (
       <div className="space-y-2 mt-1 w-full">
         {entity.machines.map((m, idx) => {
           const isClientMachine = m.machineOwner === "client";
-          let typeStr = isClientMachine ? "مكينة العميل" : "مكينتنا";
+          let typeStr = isClientMachine ? t.ui.records.clientMachine : t.ui.records.ourMachine;
           if (!isClientMachine && m.machineOwnershipType) {
-            typeStr = `مكينتنا (${m.machineOwnershipType.charAt(0).toUpperCase() + m.machineOwnershipType.slice(1)})`;
+            typeStr = `${t.ui.records.ourMachine} (${m.machineOwnershipType.charAt(0).toUpperCase() + m.machineOwnershipType.slice(1)})`;
           }
 
           let costStr = "";
@@ -220,11 +221,11 @@ const MachineList = ({
     return <span>Not specified</span>;
   }
   if (entity.usesOurMachines === false) {
-    return <span>مكينة العميل</span>;
+    return <span>{t.ui.records.clientMachine}</span>;
   }
 
   if (!entity.machines || entity.machines.length === 0) {
-    return <span>مكينتنا (لا توجد ماكينات مضافة)</span>;
+    return <span>{t.ui.records.ourMachineNoMachines}</span>;
   }
 
   return (
@@ -368,6 +369,7 @@ const renderPhotoGroup = (
             <img
               src={photo.url}
               alt={`${label} photo ${i + 1}`}
+              loading="lazy"
               className="w-full h-20 object-cover rounded border border-hairline group-hover:ring-2 group-hover:ring-primary transition-all"
             />
           </a>
@@ -452,7 +454,7 @@ const MaintenanceRecordView: React.FC<{
             {record.dailyLeaseCost && (
               <span className='inline-flex items-center gap-1 rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-amber-500'>
                 <BanknotesIcon className="h-3.5 w-3.5" />
-                {record.dailyLeaseCost} ج.م.
+                {record.dailyLeaseCost} {t.ui.records.egp}
               </span>
             )}
           </div>
@@ -981,6 +983,7 @@ const BranchPrintableDocument: React.FC<{
   branch: Branch;
   hideCosts?: boolean;
 }> = ({ companyName, branch, hideCosts }) => {
+  const t = useT();
   // Logistics-only visits are excluded from every printed report.
   const reportHistory = getReportRecords(branch.maintenanceHistory || []);
   const stats = getBranchStats(reportHistory);
@@ -1042,7 +1045,7 @@ const BranchPrintableDocument: React.FC<{
                 Machine Ownership
               </span>
               <span className='font-medium text-text'>
-                {getMachineOwnershipStatus(branch, hideCosts)}
+                {getMachineOwnershipStatus(branch, hideCosts, t)}
               </span>
             </div>
             <div>
@@ -1197,7 +1200,7 @@ const PrintableDocument: React.FC<{
           {!data.hasBranches && (
             <PrintField
               label='Machines'
-              value={getMachineOwnershipStatus(data, hideCosts)}
+              value={getMachineOwnershipStatus(data, hideCosts, t)}
             />
           )}
         </div>
@@ -2214,7 +2217,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
                                 <InfoTile label={t.admin.recordDetails.location} value={branch.location || t.admin.recordDetails.notSpecified} icon={MapPinIcon} />
                                 <InfoTile label={t.admin.recordDetails.email} value={branch.email || t.admin.recordDetails.notSpecified} icon={EnvelopeIcon} />
                                 <InfoTile label={t.admin.recordDetails.taxNumber} value={branch.taxNumber || t.admin.recordDetails.notSpecified} icon={IdentificationIcon} />
-                                <InfoTile label={t.admin.recordDetails.machines} value={getMachineOwnershipStatus(branch)} icon={WrenchScrewdriverIcon} />
+                                <InfoTile label={t.admin.recordDetails.machines} value={getMachineOwnershipStatus(branch, false, t)} icon={WrenchScrewdriverIcon} />
                                 {branch.coffeeConsumptionKg ? (
                                   <InfoTile label={t.admin.recordDetails.coffeeConsumption} value={`${branch.coffeeConsumptionKg} kg/month`} icon={ScaleIcon} />
                                 ) : null}
@@ -2339,10 +2342,10 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({
         isOpen={pendingParsedData !== null}
         onClose={cancelApplyParsedData}
         onConfirm={confirmApplyParsedData}
-        title="استكمال البيانات"
-        message="سيتم استبدال البيانات الناقصة بالبيانات المستوردة من ملف PDF. هل تريد المتابعة؟"
-        confirmLabel="استيراد"
-        cancelLabel="إلغاء"
+        title={t.ui.records.completeDataTitle}
+        message={t.ui.records.completeDataMessage}
+        confirmLabel={t.ui.records.importLabel}
+        cancelLabel={t.common.cancel}
       />
 
     </div>

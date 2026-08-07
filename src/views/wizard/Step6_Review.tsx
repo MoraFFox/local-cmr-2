@@ -19,7 +19,7 @@ export const Step6_Review: React.FC<WizardStepProps> = ({ formData }) => {
         servicesList={servicesList}
         cardTitle={
           <span className="inline-flex items-center gap-2">
-            Review Your Submission
+            {t.ui.wizard.reviewYourSubmission}
             <HelpTooltip text={t.tooltips.reviewSubmission} />
           </span>
         }

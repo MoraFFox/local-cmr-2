@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { FormData, MaintenanceRecord } from '../types';
+import type { Translations } from '../utils/i18n';
+import { useT } from '../utils/i18n';
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -68,12 +70,12 @@ const formatDate = (dateString: string | undefined): string => {
   return `${day} ${month} ${year}`;
 };
 
-const getStatusBadge = (rec: MaintenanceRecord) => {
+const getStatusBadge = (rec: MaintenanceRecord, t: Translations) => {
   if (rec.problemSolved) {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-leaf-50 text-leaf-700 dark:bg-leaf-500/10 dark:text-leaf-300">
         <CheckCircleIcon className="w-3 h-3" />
-        Solved
+        {t.ui.records.solvedBadge}
       </span>
     );
   }
@@ -81,14 +83,14 @@ const getStatusBadge = (rec: MaintenanceRecord) => {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-ember-50 text-ember-700 dark:bg-ember-500/10 dark:text-ember-300">
         <ExclamationCircleIcon className="w-3 h-3" />
-        Problem
+        {t.ui.records.problemBadge}
       </span>
     );
   }
   return (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-cream text-primary dark:bg-espresso-light dark:text-latte/70">
       <WrenchIcon className="w-3 h-3" />
-      Routine
+      {t.ui.records.routineBadge}
     </span>
   );
 };
@@ -127,6 +129,7 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
   getTechnicianDisplayName,
   isLoading,
 }) => {
+  const t = useT();
   // ── Filter State ──
   const [searchTerm, setSearchTerm] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -161,8 +164,8 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
         result.push({
           record: rec,
           companyId: sub.id!,
-          companyName: sub.companyName || 'Unnamed Company',
-          branchName: 'Main Office',
+          companyName: sub.companyName || t.ui.records.unnamedCompany,
+          branchName: t.ui.records.mainOffice,
           branchId: -1,
           isMainOffice: true,
         });
@@ -173,8 +176,8 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
           result.push({
             record: rec,
             companyId: sub.id!,
-            companyName: sub.companyName || 'Unnamed Company',
-            branchName: branch.branchName || 'Unnamed Branch',
+            companyName: sub.companyName || t.ui.records.unnamedCompany,
+            branchName: branch.branchName || t.ui.records.unnamedBranch,
             branchId: branch.id,
             isMainOffice: false,
           });
@@ -182,14 +185,14 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
       });
     });
     return result;
-  }, [submissions]);
+  }, [submissions, t]);
 
   // ── Unique filter options ──
   const companyOptions = useMemo(() => {
     const seen = new Map<number | string, string>();
-    submissions.forEach((s) => { if (s.id) seen.set(s.id, s.companyName || 'Unnamed'); });
+    submissions.forEach((s) => { if (s.id) seen.set(s.id, s.companyName || t.ui.records.unnamed); });
     return Array.from(seen.entries()).map(([id, name]) => ({ id, name }));
-  }, [submissions]);
+  }, [submissions, t]);
 
   const technicianOptions = useMemo(() => {
     const set = new Set<string>();
@@ -527,9 +530,13 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
       {/* Header */}
       <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-text">All Records</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-text">{t.ui.records.allRecordsTitle}</h1>
           <p className="text-latte mt-1">
-            {filteredRecords.length === 0 ? 'No records' : `${filteredRecords.length} records across ${submissions.length} companies`}
+            {filteredRecords.length === 0
+              ? t.ui.records.noRecordsShort
+              : t.ui.records.summaryCount
+                  .replace('{{count}}', String(filteredRecords.length))
+                  .replace('{{companies}}', String(submissions.length))}
           </p>
         </div>
         <button
@@ -541,7 +548,7 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
           }`}
         >
           <SparklesIcon className="w-5 h-5" />
-          Smart Select
+          {t.ui.records.smartSelect}
         </button>
       </header>
 
@@ -551,48 +558,48 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <h2 className="text-sm font-bold text-primary dark:text-white flex items-center gap-1.5">
               <SparklesIcon className="w-4 h-4" />
-              Grab matching records
+              {t.ui.records.grabMatching}
             </h2>
             {selectedKeys.size > 0 && (
               <button
                 onClick={clearSelection}
                 className="text-xs font-medium text-latte hover:text-ember-600 underline transition-colors"
               >
-                Clear selection ({selectedKeys.size})
+                {t.ui.records.clearSelectionCount.replace('{{count}}', String(selectedKeys.size))}
               </button>
             )}
           </div>
 
           {/* Preset grab buttons */}
           <div className="flex flex-wrap gap-2 mb-4">
-            <PresetButton onClick={() => grabRecords((fr) => fr.record.type === 'requested')} label="Requested" />
-            <PresetButton onClick={() => grabRecords((fr) => fr.record.type === 'scheduled')} label="Scheduled" />
-            <PresetButton onClick={() => grabRecords((fr) => fr.record.hadProblem && fr.record.problemSolved)} label="Resolved" />
-            <PresetButton onClick={() => grabRecords((fr) => fr.record.hadProblem && !fr.record.problemSolved)} label="Unresolved" />
-            <PresetButton onClick={() => grabRecords((fr) => fr.record.visitRating != null && fr.record.visitRating > 0 && fr.record.visitRating <= 2)} label="Rated ≤ 2★" />
-            <PresetButton onClick={() => grabRecords((fr) => !fr.record.visitRating || fr.record.visitRating === 0)} label="Unrated" />
-            <PresetButton onClick={selectAllMatching} label={`Select all ${filteredRecords.length} matching`} accent />
+            <PresetButton onClick={() => grabRecords((fr) => fr.record.type === 'requested')} label={t.ui.records.presetRequested} />
+            <PresetButton onClick={() => grabRecords((fr) => fr.record.type === 'scheduled')} label={t.ui.records.presetScheduled} />
+            <PresetButton onClick={() => grabRecords((fr) => fr.record.hadProblem && fr.record.problemSolved)} label={t.ui.records.presetResolved} />
+            <PresetButton onClick={() => grabRecords((fr) => fr.record.hadProblem && !fr.record.problemSolved)} label={t.ui.records.presetUnresolved} />
+            <PresetButton onClick={() => grabRecords((fr) => fr.record.visitRating != null && fr.record.visitRating > 0 && fr.record.visitRating <= 2)} label={t.ui.records.presetLowRated} />
+            <PresetButton onClick={() => grabRecords((fr) => !fr.record.visitRating || fr.record.visitRating === 0)} label={t.ui.records.presetUnrated} />
+            <PresetButton onClick={selectAllMatching} label={t.ui.records.selectAllMatching.replace('{{count}}', String(filteredRecords.length))} accent />
           </div>
 
           {/* Cost range */}
           <div className="flex flex-wrap items-center gap-3 border-t border-hairline dark:border-hairline pt-4">
-            <span className="text-xs font-bold uppercase text-latte">Cost range</span>
+            <span className="text-xs font-bold uppercase text-latte">{t.ui.records.costRange}</span>
             <div className="flex items-center gap-2">
               <input
                 type="number"
                 min="0"
                 value={costMin}
                 onChange={(e) => setCostMin(e.target.value)}
-                placeholder="Min"
+                placeholder={t.ui.records.minLabel}
                 className="input-base w-24 px-3 py-1.5 text-sm"
               />
-              <span className="text-latte text-sm">to</span>
+              <span className="text-latte text-sm">{t.ui.records.to}</span>
               <input
                 type="number"
                 min="0"
                 value={costMax}
                 onChange={(e) => setCostMax(e.target.value)}
-                placeholder="Max"
+                placeholder={t.ui.records.maxLabel}
                 className="input-base w-24 px-3 py-1.5 text-sm"
               />
             </div>
@@ -607,7 +614,7 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
                       : 'bg-cream dark:bg-espresso text-latte hover:bg-surface-elevated'
                   }`}
                 >
-                  {b === 'total' ? 'Total cost' : 'Company cost'}
+                  {b === 'total' ? t.ui.records.totalCost : t.ui.records.companyCost}
                 </button>
               ))}
             </div>
@@ -615,20 +622,20 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
               onClick={grabByCostRange}
               className="px-4 py-1.5 rounded-lg text-xs font-bold bg-primary text-white hover:bg-hover transition-colors"
             >
-              Grab by cost
+              {t.ui.records.grabByCost}
             </button>
-            <span className="text-[11px] text-latte">Company cost = company-paid parts + services</span>
+            <span className="text-[11px] text-latte">{t.ui.records.costHint}</span>
           </div>
 
           {/* Technician batch */}
           <div className="flex flex-wrap items-center gap-3 border-t border-hairline dark:border-hairline pt-4 mt-4">
-            <span className="text-xs font-bold uppercase text-latte">Technician</span>
+            <span className="text-xs font-bold uppercase text-latte">{t.ui.records.filterTechnician}</span>
             <select
               value={presetTech}
               onChange={(e) => setPresetTech(e.target.value)}
               className="input-base px-3 py-1.5 text-sm max-w-[220px]"
             >
-              <option value="">Pick a technician…</option>
+              <option value="">{t.ui.records.pickTechnician}</option>
               {technicianOptions.map((t) => (
                 <option key={t} value={t}>{t}</option>
               ))}
@@ -638,7 +645,7 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
               disabled={!presetTech}
               className="px-4 py-1.5 rounded-lg text-xs font-bold bg-primary text-white hover:bg-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Grab tech's visits
+              {t.ui.records.grabTechVisits}
             </button>
           </div>
         </div>
@@ -650,8 +657,8 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
           {searchTerm && (
             <Chip icon={<MagnifyingGlassIcon className="w-3 h-3" />} label={searchTerm} onRemove={() => setSearchTerm('')} />
           )}
-          {startDate && <Chip icon={<CalendarIcon className="w-3 h-3" />} label={`From ${startDate}`} onRemove={() => setStartDate('')} />}
-          {endDate && <Chip icon={<CalendarIcon className="w-3 h-3" />} label={`To ${endDate}`} onRemove={() => setEndDate('')} />}
+          {startDate && <Chip icon={<CalendarIcon className="w-3 h-3" />} label={t.ui.records.fromDate.replace('{{date}}', startDate)} onRemove={() => setStartDate('')} />}
+          {endDate && <Chip icon={<CalendarIcon className="w-3 h-3" />} label={t.ui.records.toDate.replace('{{date}}', endDate)} onRemove={() => setEndDate('')} />}
           {technicianFilter && <Chip icon={<UserIcon className="w-3 h-3" />} label={technicianFilter} onRemove={() => setTechnicianFilter('')} />}
           {([...statusFilters] as StatusFilter[]).map((s) => (
             <Chip key={s} label={s.charAt(0).toUpperCase() + s.slice(1)} onRemove={() => toggleStatus(s)} kind="status" />
@@ -663,7 +670,7 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
             <Chip key={String(id)} label={companyOptions.find((c) => c.id === id)?.name || String(id)} onRemove={() => toggleCompany(id)} kind="company" />
           ))}
           <button onClick={clearFilters} className="text-xs font-medium text-latte hover:text-primary underline transition-colors">
-            Clear all
+            {t.ui.records.clearAll}
           </button>
         </div>
       )}
@@ -680,7 +687,7 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="input-base ps-10"
-                placeholder="Search company, branch, technician, notes..."
+                placeholder={t.ui.records.searchRecords}
               />
             </div>
           </div>
@@ -695,7 +702,7 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
             }`}
           >
             <FunnelIcon className="w-5 h-5" />
-            Filters
+            {t.ui.records.filters}
             {activeFilterCount > 0 && (
               <span className="bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                 {activeFilterCount}
@@ -708,14 +715,14 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
         {showFilters && (
           <div className="flex flex-wrap gap-4 pt-4 mt-4 border-t border-hairline dark:border-hairline animate-fade-in">
             {/* Date range */}
-            <FilterGroup label="Date Range">
-              <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="input-base w-full sm:w-[160px]" />
-              <span className="text-latte text-sm">to</span>
-              <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="input-base w-full sm:w-[160px]" />
+            <FilterGroup label={t.ui.records.filterDateRange}>
+              <input type="date" aria-label={t.ui.records.filterStartDate} value={startDate} onChange={(e) => setStartDate(e.target.value)} className="input-base w-full sm:w-[160px]" />
+              <span className="text-latte text-sm">{t.ui.records.to}</span>
+              <input type="date" aria-label={t.ui.records.filterEndDate} value={endDate} onChange={(e) => setEndDate(e.target.value)} className="input-base w-full sm:w-[160px]" />
             </FilterGroup>
 
             {/* Status */}
-            <FilterGroup label="Status">
+            <FilterGroup label={t.ui.records.filterStatus}>
               <div className="flex gap-1 flex-wrap">
                 {(['solved', 'problem', 'routine'] as StatusFilter[]).map((s) => (
                   <button
@@ -734,7 +741,7 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
             </FilterGroup>
 
             {/* Type */}
-            <FilterGroup label="Visit Type">
+            <FilterGroup label={t.ui.records.filterVisitType}>
               <div className="flex gap-1">
                 {['scheduled', 'requested'].map((t) => (
                   <button
@@ -753,18 +760,18 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
             </FilterGroup>
 
             {/* Technician */}
-            <FilterGroup label="Technician">
+            <FilterGroup label={t.ui.records.filterTechnician}>
               <input
                 type="text"
                 value={technicianFilter}
                 onChange={(e) => setTechnicianFilter(e.target.value)}
                 className="input-base w-full sm:w-[200px]"
-                placeholder="Filter by name..."
+                placeholder={t.ui.records.filterByName}
               />
             </FilterGroup>
 
             {/* Company multi-select */}
-            <FilterGroup label="Company">
+            <FilterGroup label={t.ui.records.filterCompany}>
               <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
                 {companyOptions.map((c) => (
                   <button
@@ -788,12 +795,12 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
       {/* Records Table */}
       <div className="bg-cream dark:bg-espresso rounded-xl border border-hairline dark:border-hairline overflow-hidden">
         {isLoading ? (
-          <div className="p-12 text-center text-latte">Loading records...</div>
+          <div className="p-12 text-center text-latte">{t.ui.records.loadingRecords}</div>
         ) : filteredRecords.length === 0 ? (
           <EmptyState
             icon={<WrenchScrewdriverIcon className="w-10 h-10" />}
-            title="No records found"
-            message="Try adjusting your search or filters."
+            title={t.ui.records.noRecordsFound}
+            message={t.ui.records.noRecordsFoundMsg}
           />
         ) : (
           <>
@@ -803,16 +810,16 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
                 <thead className="bg-cream dark:bg-espresso/50 border-b border-hairline dark:border-hairline">
                   <tr>
                     <th className="px-4 py-3 w-10">
-                      {renderCheckbox(allPageSelected, togglePageSelection, somePageSelected && !allPageSelected, 'Select all on page')}
+                      {renderCheckbox(allPageSelected, togglePageSelection, somePageSelected && !allPageSelected, t.ui.records.selectAllOnPage)}
                     </th>
-                    <SortableHeader field="date" label="Date" sortBy={sortBy} sortOrder={sortOrder} handleSort={handleSort} />
-                    <SortableHeader field="company" label="Company" sortBy={sortBy} sortOrder={sortOrder} handleSort={handleSort} />
-                    <SortableHeader field="branch" label="Branch" sortBy={sortBy} sortOrder={sortOrder} handleSort={handleSort} />
-                    <SortableHeader field="baristaName" label="Technician" sortBy={sortBy} sortOrder={sortOrder} handleSort={handleSort} />
-                    <SortableHeader field="status" label="Status" sortBy={sortBy} sortOrder={sortOrder} handleSort={handleSort} />
-                    <SortableHeader field="rating" label="Rating" sortBy={sortBy} sortOrder={sortOrder} handleSort={handleSort} />
-                    <SortableHeader field="serviceCount" label="Services" sortBy={sortBy} sortOrder={sortOrder} handleSort={handleSort} />
-                    <SortableHeader field="lastModified" label="Modified" sortBy={sortBy} sortOrder={sortOrder} handleSort={handleSort} />
+                    <SortableHeader field="date" label={t.ui.records.colDate} sortBy={sortBy} sortOrder={sortOrder} handleSort={handleSort} />
+                    <SortableHeader field="company" label={t.ui.records.colCompany} sortBy={sortBy} sortOrder={sortOrder} handleSort={handleSort} />
+                    <SortableHeader field="branch" label={t.ui.records.colBranch} sortBy={sortBy} sortOrder={sortOrder} handleSort={handleSort} />
+                    <SortableHeader field="baristaName" label={t.ui.records.colTechnician} sortBy={sortBy} sortOrder={sortOrder} handleSort={handleSort} />
+                    <SortableHeader field="status" label={t.ui.records.colStatus} sortBy={sortBy} sortOrder={sortOrder} handleSort={handleSort} />
+                    <SortableHeader field="rating" label={t.ui.records.colRating} sortBy={sortBy} sortOrder={sortOrder} handleSort={handleSort} />
+                    <SortableHeader field="serviceCount" label={t.ui.records.colServices} sortBy={sortBy} sortOrder={sortOrder} handleSort={handleSort} />
+                    <SortableHeader field="lastModified" label={t.ui.records.colModified} sortBy={sortBy} sortOrder={sortOrder} handleSort={handleSort} />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
@@ -830,7 +837,7 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
                         }`}
                       >
                         <td className="px-4 py-3 w-10">
-                          {renderCheckbox(isSelected, () => toggleSelection(key), false, `Select record ${formatDate(fr.record.maintenanceDate)}`)}
+                          {renderCheckbox(isSelected, () => toggleSelection(key), false, t.ui.records.selectRecord.replace('{{date}}', formatDate(fr.record.maintenanceDate)))}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           <div className="flex items-center gap-2">
@@ -860,13 +867,15 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
                             </span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap">{getStatusBadge(fr.record)}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">{getStatusBadge(fr.record, t)}</td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           {fr.record.visitRating ? <StarRatingDisplay value={fr.record.visitRating} size="xs" /> : <span className="text-latte text-sm">-</span>}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           <span className="text-sm text-primary dark:text-latte">
-                            {fr.record.servicesPerformed.length > 0 ? `${fr.record.servicesPerformed.length} svc` : '-'}
+                            {fr.record.servicesPerformed.length > 0
+                              ? t.ui.records.servicesShort.replace('{{count}}', String(fr.record.servicesPerformed.length))
+                              : '-'}
                           </span>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
@@ -899,11 +908,11 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        {renderCheckbox(isSelected, () => toggleSelection(key), false, `Select record ${formatDate(fr.record.maintenanceDate)}`)}
+                        {renderCheckbox(isSelected, () => toggleSelection(key), false, t.ui.records.selectRecord.replace('{{date}}', formatDate(fr.record.maintenanceDate)))}
                         <CalendarIcon className="w-4 h-4 text-latte shrink-0" />
                         <span className="text-sm font-medium text-primary dark:text-white">{formatDate(fr.record.maintenanceDate)}</span>
                       </div>
-                      {getStatusBadge(fr.record)}
+                      {getStatusBadge(fr.record, t)}
                     </div>
                     <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-latte">
                       <span className="flex items-center gap-1"><BuildingOfficeIcon className="w-3 h-3" />{fr.companyName}</span>
@@ -918,10 +927,10 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
                     <div className="mt-2 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         {fr.record.visitRating ? <StarRatingDisplay value={fr.record.visitRating} size="xs" /> : <span className="text-latte text-xs">-</span>}
-                        <span className="text-xs text-latte">{fr.record.servicesPerformed.length} svc</span>
+                        <span className="text-xs text-latte">{t.ui.records.servicesShort.replace('{{count}}', String(fr.record.servicesPerformed.length))}</span>
                       </div>
                       {fr.record.lastModified && (
-                        <span className="text-[10px] text-latte/70">Edited {formatDate(fr.record.lastModified)}</span>
+                        <span className="text-[10px] text-latte/70">{t.ui.records.editedPrefix.replace('{{date}}', formatDate(fr.record.lastModified))}</span>
                       )}
                     </div>
                   </div>
@@ -933,7 +942,10 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
             {totalPages > 1 && (
               <div className="px-6 py-4 border-t border-hairline dark:border-hairline bg-cream dark:bg-espresso/50 flex items-center justify-between">
                 <span className="text-sm text-latte">
-                  {startIndex + 1}–{Math.min(startIndex + ITEMS_PER_PAGE, filteredRecords.length)} of {filteredRecords.length}
+                  {t.ui.records.rangeCompact
+                    .replace('{{from}}', String(startIndex + 1))
+                    .replace('{{to}}', String(Math.min(startIndex + ITEMS_PER_PAGE, filteredRecords.length)))
+                    .replace('{{total}}', String(filteredRecords.length))}
                 </span>
                 <div className="flex items-center gap-2">
                   <button
@@ -977,10 +989,10 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
       {selectedKeys.size > 0 && (
         <div className="fixed bottom-5 inset-x-0 z-50 flex justify-center px-4 pointer-events-none">
           <div className="pointer-events-auto flex items-center gap-4 bg-primary text-white rounded-2xl shadow-2xl px-5 py-3 animate-fade-in max-w-full flex-wrap justify-center">
-            <span className="text-sm font-bold whitespace-nowrap">{selectedKeys.size} selected</span>
+            <span className="text-sm font-bold whitespace-nowrap">{t.ui.records.selectedCount.replace('{{count}}', String(selectedKeys.size))}</span>
             <span className="hidden sm:inline text-white/70">·</span>
             <span className="text-sm font-semibold whitespace-nowrap">
-              Total cost: <span className="font-bold">EGP {formatEnNumber(selectedTotalCost)}</span>
+              {t.ui.records.totalCostLabel} <span className="font-bold">EGP {formatEnNumber(selectedTotalCost)}</span>
             </span>
             <div className="flex items-center gap-2 ms-1">
               <button
@@ -988,12 +1000,12 @@ const GlobalRecordsPage: React.FC<GlobalRecordsPageProps> = ({
                 className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold text-primary bg-white hover:bg-cream transition-colors"
               >
                 <DocumentArrowDownIcon className="w-4 h-4" />
-                Export
+                {t.ui.records.export}
               </button>
               <button
                 onClick={clearSelection}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white/90 hover:bg-white/15 transition-colors"
-                aria-label="Clear selection"
+                aria-label={t.ui.records.clearSelection}
               >
                 <TrashIcon className="w-4 h-4" />
               </button>
